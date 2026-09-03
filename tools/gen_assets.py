@@ -162,7 +162,7 @@ def glow(img, color, radius, alpha=80):
 # STAGE 1 — HERO (8 aset)
 # =====================================================================
 
-def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False):
+def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False, lobes=0, receptors=False):
     img, d = canvas(size)
     S = size * SS
     cx = S * 0.5
@@ -173,6 +173,14 @@ def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False)
         img = glow(img, col, r * 1.15, 90)
         d = ImageDraw.Draw(img)
         r *= 1.03
+    # Makrofag: lobus pseudopodia ameba (siluet tidak simetris)
+    if lobes:
+        lobe_col = rgba(mix(col, (255, 255, 255), 0.12))
+        for ang_deg, lr in ((200, 0.42), (235, 0.30), (325, 0.36), (350, 0.26)):
+            a = math.radians(ang_deg + (6 if attack else 0))
+            lx = cx + math.cos(a) * r * 0.95
+            ly = cy + math.sin(a) * r * 0.95
+            d.ellipse([lx - S * lr * 0.32, ly - S * lr * 0.32, lx + S * lr * 0.32, ly + S * lr * 0.32], fill=lobe_col)
     # duri kecil bulat (NK)
     if spikes:
         for i in range(spikes):
@@ -187,6 +195,24 @@ def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False)
     stub_arms(d, cx, cy, r, col)
     soft_body(d, cx, cy, r, col)
     kawaii_face(d, cx, cy, r, col, mood=("determined" if attack else mood))
+    # Sel B: antena reseptor Y keluar dari atas kepala (tip DI LUAR tubuh)
+    if receptors:
+        ant_col = rgba(mix(col, (0, 0, 0), 0.30))
+        for k, ext in ((-1, 1.42), (1, 1.42), (0, 1.30)):
+            # titik pangkal pada tepi atas tubuh, arah radial miring
+            base_a = math.radians(-90 + k * 26)
+            basex = cx + math.cos(base_a) * r * 0.96
+            basey = cy + math.sin(base_a) * r * 0.96
+            tipx = cx + math.cos(base_a) * r * ext - (r * 0.1 if attack else 0)
+            tipy = cy + math.sin(base_a) * r * ext
+            # siku Y sedikit ke tengah
+            elbowx = (basex + tipx) / 2 + k * r * 0.1
+            elbowy = (basey + tipy) / 2
+            d.line([basex, basey, elbowx, elbowy, tipx, tipy], fill=ant_col,
+                   width=max(4, int(S * 0.035)), joint="curve")
+            pr = S * 0.05
+            d.ellipse([tipx - pr, tipy - pr, tipx + pr, tipy + pr], fill=rgba(mix(col, (255, 255, 255), 0.55)))
+            d.ellipse([tipx - pr, tipy - pr, tipx + pr, tipy + pr], outline=ant_col, width=max(2, int(S * 0.01)))
     if attack:
         motion_arcs(d, cx, cy, r, col)
     return done(img, size)
@@ -197,10 +223,10 @@ def gen_stage_heroes(out):
     return {
         "hero_sel_t_idle.png": hero("sel_t", "#35d0ba", mood="happy"),
         "hero_sel_t_attack.png": hero("sel_t", "#35d0ba", attack=True),
-        "hero_makrofag_idle.png": hero("makrofag", "#b07fd8", big=True),
-        "hero_makrofag_attack.png": hero("makrofag", "#b07fd8", big=True, attack=True),
-        "hero_sel_b_idle.png": hero("sel_b", "#5aa2ff"),
-        "hero_sel_b_attack.png": hero("sel_b", "#5aa2ff", attack=True),
+        "hero_makrofag_idle.png": hero("makrofag", "#b07fd8", big=True, lobes=1),
+        "hero_makrofag_attack.png": hero("makrofag", "#b07fd8", big=True, attack=True, lobes=1),
+        "hero_sel_b_idle.png": hero("sel_b", "#5aa2ff", receptors=True),
+        "hero_sel_b_attack.png": hero("sel_b", "#5aa2ff", attack=True, receptors=True),
         "hero_sel_nk_idle.png": hero("sel_nk", "#ff8c42", spikes=9),
         "hero_sel_nk_attack.png": hero("sel_nk", "#ff8c42", spikes=9, attack=True),
     }

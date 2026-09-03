@@ -53,6 +53,30 @@ await page.waitForSelector('#screen-dashboard.active', { timeout: 30000 });
 await sleep(900);
 await shot('02-dashboard');
 
+// --- layar navigasi (sebelum run): roster, shop, upgrade, arena ---
+await page.evaluate(() => {
+  const b = [...document.querySelectorAll('#screen-dashboard button, #screen-dashboard .nav-item, #screen-dashboard [role]')]
+    .find((x) => /roster|hero|tim/i.test(x.textContent || ''));
+  if (b) b.click();
+});
+await sleep(600);
+if ((await activeScreen()) === 'roster') {
+  await shot('03-roster');
+}
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('shop'));
+await sleep(600);
+await shot('04-shop');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('upgrade'));
+await sleep(600);
+await shot('05-upgrade');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(500);
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('arena'));
+await sleep(600);
+await shot('13-arena');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(400);
+
 // --- simulasi progres: hero evolusi epic (stage 3), arena paru, bagian terkumpul ---
 await page.evaluate(() => {
   const m = window.__IMUNVERSE.STATE.meta;
@@ -118,34 +142,15 @@ await sleep(400);
 await page.click('#btn-prep-start');
 await sleep(2200);
 await shot('07-gameplay-early');
-await page.evaluate(() => {
-  const b = [...document.querySelectorAll('#screen-dashboard button, #screen-dashboard .nav-item, #screen-dashboard [role]')]
-    .find((x) => /roster|hero|tim/i.test(x.textContent || ''));
-  if (b) b.click();
-});
-await sleep(600);
-if ((await activeScreen()) === 'roster') {
-  await shot('03-roster');
-}
-
-// --- shop & squad upgrade (navigasi langsung) ---
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('shop'));
-await sleep(600);
-await shot('04-shop');
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('upgrade'));
-await sleep(600);
-await shot('05-upgrade');
-
-// --- modal pilih arena (dari dashboard) ---
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
-await sleep(500);
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('arena'));
-await sleep(600);
-await shot('13-arena');
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
-await sleep(400);
 
 // joystick virtual: tahan & geser
+// (tutorial hanya muncul di run pertama — cek kondisi)
+const tutVisible = await page.evaluate(() => !document.getElementById('tutorial-layer').classList.contains('hidden'));
+if (tutVisible) {
+  await sleep(600);
+  await shot('21-tutorial');
+}
+
 await page.mouse.move(70, 700);
 await page.mouse.down();
 await page.mouse.move(140, 630, { steps: 8 });

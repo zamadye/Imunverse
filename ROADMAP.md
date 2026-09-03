@@ -139,6 +139,13 @@
 - [x] **Dev server baru `tools/server.py`**: menelan `ConnectionResetError [Errno 104]` (noise keep-alive mobile yang membanjiri log http.server) tanpa mengubah perilaku serving.
 - **Kriteria lulus:** screenshot alur baru — dashboard dengan MULAI besar (02), Battle Prep 3 langkah + ringkasan (20), Tas (19); 20/20 shot CLEAN; run tetap jalan dari alur prep (07).
 
+## Fase 6.2 — Bentuk Hero Variatif + Tutorial Onboarding ✅
+**Tujuan:** "bentuk hero harus ada bentuk lain selain lingkaran" + onboarding run pertama.
+- [x] **Siluet unik per hero**: Sel T = bulat klasik; Makrofag = **ameba berlobus pseudopodia** (siluet tidak simetris); Sel B = **antena reseptor-Y** keluar dari kepala; Sel NK = berduri. Generasi via parameter baru `lobes`/`receptors` di `tools/gen_assets.py`.
+- [x] **Tutorial 3 langkah run pertama** (`tutorial-system.js`, hanya `totalRuns === 0`): ① bergerak (akumulasi jarak ±2,5 dtk) → ② auto-attack (kill pertama) → ③ ambil nutrisi (pickup pertama) — bubble + jari animasi + tombol LEWATI; ditandai `meta.tutorialDone` di save; gameplay tidak dipause.
+- [x] **FIX input desktop**: joystick virtual kini juga mendengarkan **Pointer Events (mouse/pena)** — sebelumnya drag mouse TIDAK menggerakkan player di desktop (hanya touch/keyboard); hint HUD ditambah "tarik mouse".
+- **Kriteria lulus:** 4 hero punya siluet berbeda (sheet); tutorial terverifikasi maju 1→2→3 di browser asli (script terpisah); screenshot `21-tutorial` (bubble langkah + LEWATI); 20/20 shot CLEAN; perf tetap vsync 16,6 ms.
+
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
 - [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.

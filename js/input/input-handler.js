@@ -102,6 +102,42 @@ export class InputHandler {
     this.canvas.addEventListener('touchend', this._onTouchEnd, { passive: false });
     this.canvas.addEventListener('touchcancel', this._onTouchEnd, { passive: false });
 
+    // ---------- Pointer / mouse (drag = joystick, untuk desktop) ----------
+    // Pointer Events menyatukan mouse & pena; touch sudah ditangani di atas
+    // (pointerType 'touch' di-skip agar tidak dobel).
+    this._onPointerDown = (e) => {
+      if (e.pointerType === 'touch') return; // sudah via touch handlers
+      this.canvas.setPointerCapture?.(e.pointerId);
+      this.joystick.active = true;
+      this.joystick.touchId = 'pointer';
+      this.joystick.originX = e.clientX;
+      this.joystick.originY = e.clientY;
+      this.joystick.x = e.clientX;
+      this.joystick.y = e.clientY;
+      this._updateJoystickVector();
+    };
+    this._onPointerMove = (e) => {
+      if (e.pointerType === 'touch') return;
+      if (this.joystick.active && this.joystick.touchId === 'pointer') {
+        this.joystick.x = e.clientX;
+        this.joystick.y = e.clientY;
+        this._updateJoystickVector();
+      }
+    };
+    this._onPointerUp = (e) => {
+      if (e.pointerType === 'touch') return;
+      if (this.joystick.active && this.joystick.touchId === 'pointer') {
+        this.joystick.active = false;
+        this.joystick.touchId = null;
+        this.joystick.dx = 0;
+        this.joystick.dy = 0;
+      }
+    };
+    this.canvas.addEventListener('pointerdown', this._onPointerDown);
+    this.canvas.addEventListener('pointermove', this._onPointerMove);
+    this.canvas.addEventListener('pointerup', this._onPointerUp);
+    this.canvas.addEventListener('pointercancel', this._onPointerUp);
+
     // Cegah menu konteks klik-kanan / long-press
     this._onContext = (e) => e.preventDefault();
     this.canvas.addEventListener('contextmenu', this._onContext);
@@ -155,6 +191,10 @@ export class InputHandler {
     this.canvas.removeEventListener('touchmove', this._onTouchMove);
     this.canvas.removeEventListener('touchend', this._onTouchEnd);
     this.canvas.removeEventListener('touchcancel', this._onTouchEnd);
+    this.canvas.removeEventListener('pointerdown', this._onPointerDown);
+    this.canvas.removeEventListener('pointermove', this._onPointerMove);
+    this.canvas.removeEventListener('pointerup', this._onPointerUp);
+    this.canvas.removeEventListener('pointercancel', this._onPointerUp);
     this.canvas.removeEventListener('contextmenu', this._onContext);
   }
 }

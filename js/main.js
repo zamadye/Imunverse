@@ -33,6 +33,7 @@ import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import * as arenaScreen from './ui/screens/arena-screen.js';
 import * as prepScreen from './ui/screens/prep-screen.js';
+import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
@@ -82,6 +83,7 @@ function wireUiBridge() {
   on('runstart', () => {
     hudScreen.resetHUD();
     screenManager.show('hud');
+    tutorialOnRunStart(); // onboarding run pertama (3 langkah)
   });
 
   on('wave', ({ wave, isBoss }) => {

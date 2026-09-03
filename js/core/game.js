@@ -38,6 +38,7 @@ import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
 } from '../systems/body-system.js';
+import * as tutorial from '../systems/tutorial-system.js';
 
 import { Camera } from '../render/camera.js';
 import { drawBackground, setArenaPalette } from '../render/background.js';
@@ -330,6 +331,10 @@ export const game = {
     run.camera.follow(player.x, player.y, dt);
     run.camera.update(dt);
 
+    // Tutorial langkah "bergerak": akumulasi jarak pemain
+    const mv = this.input.getMoveVector();
+    if (mv.x || mv.y) tutorial.notifyMoved(Math.hypot(mv.x, mv.y) * player.stats.speed * dt, player.stats.speed);
+
     // 12. Bersihkan entity mati
     run.enemies = run.enemies.filter((e) => e.alive);
     run.projectiles = run.projectiles.filter((p) => p.alive);
@@ -367,6 +372,7 @@ export const game = {
   collectPickup(p) {
     const run = this.run;
     run.nutrientsCollected += 1;
+    tutorial.notifyCollected();
     run.effects.spawnCollect(p.x, p.y, p.def.color);
 
     switch (p.pickupType) {
@@ -628,6 +634,7 @@ export const game = {
   onEnemyKilled(enemy, source) {
     const run = this.run;
     run.kills += 1;
+    tutorial.notifyKill();
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? 26 : 8, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)

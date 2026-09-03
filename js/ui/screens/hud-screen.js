@@ -61,7 +61,7 @@ function controlHintText() {
   const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
   return isTouch
     ? 'Sentuh & tarik di mana saja untuk bergerak'
-    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / panah · Jeda: <span class="k">Esc</span>';
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / panah / tarik mouse · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */
