@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "nutrients": [
+    {
+      "id": "glukosa",
+      "name": "Glukosa",
+      "description": "Orb nutrisi dasar — sumber XP utama dari patogen yang hancur.",
+      "sprite": "assets/sprites/item_glukosa.png",
+      "color": "#ffd93d",
+      "pickupType": "xp",
+      "value": 1,
+      "radius": 9,
+      "magnetRadius": 95,
+      "lifetime": 30
+    },
+    {
+      "id": "amino",
+      "name": "Asam Amino",
+      "description": "Rantai protein padat — orb XP bernilai besar.",
+      "sprite": "assets/sprites/item_amino.png",
+      "color": "#7ae582",
+      "pickupType": "xp",
+      "value": 5,
+      "radius": 11,
+      "magnetRadius": 95,
+      "lifetime": 30
+    },
+    {
+      "id": "vitamin_c",
+      "name": "Vitamin C",
+      "description": "Memulihkan 20 HP membrane seketika.",
+      "sprite": "assets/sprites/item_vitamin_c.png",
+      "color": "#ff9f1c",
+      "pickupType": "heal",
+      "value": 20,
+      "radius": 11,
+      "magnetRadius": 95,
+      "lifetime": 25
+    },
+    {
+      "id": "antibodi",
+      "name": "Antibodi",
+      "description": "Mata uang permanen. Dipakai untuk unlock hero & upgrade squad.",
+      "sprite": "assets/sprites/item_antibodi.png",
+      "color": "#4cc9f0",
+      "pickupType": "currency",
+      "value": 2,
+      "radius": 10,
+      "magnetRadius": 105,
+      "lifetime": 25
+    },
+    {
+      "id": "sitokin",
+      "name": "Sinyal Sitokin",
+      "description": "Sinyal kimia yang menarik SEMUA nutrisi di medan menujumu.",
+      "sprite": "assets/sprites/item_sitokin.png",
+      "color": "#f72585",
+      "pickupType": "magnet",
+      "value": 1,
+      "radius": 11,
+      "magnetRadius": 105,
+      "lifetime": 20
+    }
+  ],
+  "bonusDropChance": 0.09,
+  "bonusWeights": { "vitamin_c": 45, "antibodi": 35, "sitokin": 20 },
+  "bossGuaranteedDrops": ["vitamin_c", "antibodi", "antibodi"]
+}

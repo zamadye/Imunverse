@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam aliran darah melawan gelombang patogen!" />
+  <title>Imunverse — Roguelike Survival Sel Imun</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Kanvas utama gameplay (selalu di belakang overlay UI) -->
+    <canvas id="game"></canvas>
+
+    <!-- Overlay kerusakan (flash merah saat player kena hit) -->
+    <div id="damage-vignette" aria-hidden="true"></div>
+
+    <!-- Layer semua screen UI (menu/dashboard = HTML/CSS overlay di atas canvas) -->
+    <div id="ui">
+
+      <!-- ============ LOADING SCREEN ============ -->
+      <section id="screen-loading" class="screen active" data-screen="loading">
+        <div class="loading-box">
+          <div class="logo-mark">🧬</div>
+          <h1 class="logo">IMUN<span>VERSE</span></h1>
+          <p class="tagline">Roguelike Survival Sel Imun</p>
+          <div class="progress-track"><div id="loading-bar" class="progress-fill"></div></div>
+          <p id="loading-label" class="loading-label">Menyiapkan organisme…</p>
+        </div>
+      </section>
+
+      <!-- ============ DASHBOARD UTAMA ============ -->
+      <section id="screen-dashboard" class="screen" data-screen="dashboard">
+        <header class="dash-top">
+          <div class="currency-chip" title="Antibodi (mata uang)">
+            <span class="currency-icon">🛡️</span>
+            <span id="dash-currency" class="currency-value">0</span>
+          </div>
+          <div class="dash-version">v1.0</div>
+        </header>
+
+        <div class="dash-hero">
+          <div class="logo-mark big">🧬</div>
+          <h1 class="logo">IMUN<span>VERSE</span></h1>
+          <p class="tagline">Kamu adalah sel imun terakhir. Bertahanlah.</p>
+        </div>
+
+        <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
+
+        <button id="btn-play" class="btn btn-primary btn-xl">▶ MULAI RUN</button>
+
+        <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
+
+        <div class="card missions-card">
+          <h3 class="card-title">🏅 Misi &amp; Prestasi</h3>
+          <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
+        </div>
+
+        <nav class="nav-row">
+          <button class="btn btn-nav" data-nav="roster">🦠 Roster</button>
+          <button class="btn btn-nav" data-nav="upgrade">⚡ Upgrade</button>
+          <button class="btn btn-nav" data-nav="shop">🛒 Toko</button>
+        </nav>
+
+        <footer class="dash-footer">
+          <button id="btn-reset-save" class="btn-link">Reset Save</button>
+          <span>·</span>
+          <span>Data tersimpan otomatis di perangkat ini (localStorage)</span>
+        </footer>
+      </section>
+
+      <!-- ============ ROSTER HERO ============ -->
+      <section id="screen-roster" class="screen" data-screen="roster">
+        <header class="screen-header">
+          <button class="btn btn-back" data-back="dashboard">‹</button>
+          <h2>Roster Hero</h2>
+          <div class="currency-chip small"><span class="currency-icon">🛡️</span><span id="roster-currency">0</span></div>
+        </header>
+        <p class="screen-subtitle">Pilih sel imun yang akan kamu kendalikan. Hero terkunci bisa dibuka lewat progres misi atau dibeli di Toko.</p>
+        <div id="roster-grid" class="roster-grid"><!-- diisi JS --></div>
+        <div class="screen-footer">
+          <button id="btn-start-run" class="btn btn-primary btn-xl" disabled>PILIH &amp; MULAI</button>
+        </div>
+      </section>
+
+      <!-- ============ UPGRADE SQUAD ============ -->
+      <section id="screen-upgrade" class="screen" data-screen="upgrade">
+        <header class="screen-header">
+          <button class="btn btn-back" data-back="dashboard">‹</button>
+          <h2>Upgrade Squad</h2>
+          <div class="currency-chip small"><span class="currency-icon">🛡️</span><span id="upgrade-currency">0</span></div>
+        </header>
+        <p class="screen-subtitle">Upgrade permanen yang berlaku untuk semua hero di setiap run. Beli dengan Antibodi.</p>
+        <div id="upgrade-list" class="upgrade-list"><!-- diisi JS --></div>
+      </section>
+
+      <!-- ============ TOKO ============ -->
+      <section id="screen-shop" class="screen" data-screen="shop">
+        <header class="screen-header">
+          <button class="btn btn-back" data-back="dashboard">‹</button>
+          <h2>Toko</h2>
+          <div class="currency-chip small"><span class="currency-icon">🛡️</span><span id="shop-currency">0</span></div>
+        </header>
+        <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
+      </section>
+
+      <!-- ============ GAMEPLAY HUD ============ -->
+      <section id="screen-hud" class="screen passive" data-screen="hud">
+        <div class="hud-top">
+          <div class="hud-xp-track"><div id="hud-xp-fill" class="hud-xp-fill"></div></div>
+          <div class="hud-row">
+            <div class="hud-left">
+              <img id="hud-portrait" class="hud-portrait" alt="hero" />
+              <div class="hud-hp-wrap">
+                <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
+                <span id="hud-hp-text" class="hud-hp-text">100/100</span>
+              </div>
+            </div>
+            <div class="hud-center">
+              <div id="hud-wave" class="hud-wave">GELOMBANG 1</div>
+              <div id="hud-timer" class="hud-timer">00:00</div>
+              <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
+                <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
+                <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
+              </div>
+            </div>
+            <div class="hud-right">
+              <div class="hud-kills">☠ <span id="hud-kills">0</span></div>
+              <div class="hud-currency-run">🛡️ <span id="hud-currency">0</span></div>
+              <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
+              <button id="btn-pause" class="btn btn-pause">⏸</button>
+            </div>
+          </div>
+        </div>
+        <div id="hud-announce" class="hud-announce hidden"></div>
+        <div class="hud-hint" id="hud-hint">WASD / Arrow untuk bergerak</div>
+      </section>
+
+      <!-- ============ LEVEL UP MODAL ============ -->
+      <section id="screen-levelup" class="screen modal" data-screen="levelup">
+        <div class="modal-box">
+          <div class="levelup-glow">⬆️</div>
+          <h2 class="levelup-title">LEVEL UP!</h2>
+          <p id="levelup-sub" class="levelup-sub">Level 2 — pilih satu peningkatan</p>
+          <div id="levelup-choices" class="choice-grid"><!-- diisi JS --></div>
+        </div>
+      </section>
+
+      <!-- ============ PAUSE MODAL ============ -->
+      <section id="screen-pause" class="screen modal" data-screen="pause">
+        <div class="modal-box">
+          <h2>Jeda</h2>
+          <div id="pause-summary" class="pause-summary"><!-- diisi JS --></div>
+          <button id="btn-resume" class="btn btn-primary">▶ Lanjutkan</button>
+          <button id="btn-quit-run" class="btn btn-danger">⚔ Akhiri Run</button>
+        </div>
+      </section>
+
+      <!-- ============ REVIVE (REWARED AD HOOK) MODAL ============ -->
+      <section id="screen-revive" class="screen modal" data-screen="revive">
+        <div class="modal-box">
+          <h2 class="revive-title">💔 KAMU TUMBANG!</h2>
+          <p class="revive-sub">Tonton video singkat untuk bangkit kembali dengan 50% HP dan membabikan patogen di sekitarmu.</p>
+          <div class="revive-count">Bangkit otomatis batal dalam <span id="revive-countdown">5</span>s</div>
+          <button id="btn-watch-ad-revive" class="btn btn-primary btn-xl">🎬 Tonton Iklan &amp; Bangkit</button>
+          <button id="btn-skip-revive" class="btn btn-danger">Tidak, Akhiri Run</button>
+        </div>
+      </section>
+
+      <!-- ============ GAME OVER / SUMMARY ============ -->
+      <section id="screen-gameover" class="screen modal" data-screen="gameover">
+        <div class="modal-box wide">
+          <h2 id="gameover-title" class="gameover-title">PERMAINAN SELESAI</h2>
+          <p id="gameover-sub" class="gameover-sub">Sistem imun mengingat pengorbananmu.</p>
+          <div id="gameover-summary" class="summary-grid"><!-- diisi JS --></div>
+          <div class="summary-reward">
+            <span>Antibodi didapat:</span>
+            <strong id="gameover-currency">0 🛡️</strong>
+          </div>
+          <button id="btn-double-currency" class="btn btn-ad">🎬 Tonton Iklan → 2x Antibodi</button>
+          <div class="btn-row">
+            <button id="btn-retry" class="btn btn-primary">🔁 Main Lagi</button>
+            <button id="btn-home" class="btn">🏠 Dashboard</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Toast notifikasi -->
+    <div id="toasts"></div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

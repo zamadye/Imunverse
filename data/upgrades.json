@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "xpCurve": { "base": 10, "exponent": 1.5 },
+  "levelUpChoices": 3,
+  "levelUpPool": [
+    { "id": "damage", "name": "Sitokin Padu", "icon": "⚔️", "desc": "+15% damage semua serangan", "stat": "damage", "mode": "percent", "amount": 0.15, "maxStacks": 99 },
+    { "id": "attackSpeed", "name": "Respons Imun", "icon": "⚡", "desc": "+12% kecepatan serangan", "stat": "attackSpeed", "mode": "percent", "amount": 0.12, "maxStacks": 99 },
+    { "id": "moveSpeed", "name": "Aliran Limfa", "icon": "💨", "desc": "+8% kecepatan gerak", "stat": "moveSpeed", "mode": "percent", "amount": 0.08, "maxStacks": 99 },
+    { "id": "maxHP", "name": "Regenerasi Membran", "icon": "❤️", "desc": "+20 HP maksimum & pulih 20 HP", "stat": "maxHP", "mode": "flat", "amount": 20, "maxStacks": 99 },
+    { "id": "attackRange", "name": "Reseptor Panjang", "icon": "🎯", "desc": "+12% jarak serangan", "stat": "attackRange", "mode": "percent", "amount": 0.12, "maxStacks": 99 },
+    { "id": "projectileCount", "name": "Multi-L Respons", "icon": "➕", "desc": "+1 proyektil / tebasan ekstra", "stat": "projectileCount", "mode": "flat", "amount": 1, "maxStacks": 4 }
+  ],
+  "squadUpgrades": [
+    { "id": "sq_damage", "name": "Kekuatan Squad", "icon": "⚔️", "desc": "+8% damage per level (permanen)", "perLevel": 0.08, "maxLevel": 10, "baseCost": 120, "costGrowth": 1.6 },
+    { "id": "sq_vitality", "name": "Vitalitas", "icon": "❤️", "desc": "+10% HP maksimum per level (permanen)", "perLevel": 0.10, "maxLevel": 10, "baseCost": 100, "costGrowth": 1.55 },
+    { "id": "sq_swift", "name": "Kecepatan", "icon": "💨", "desc": "+5% kecepatan gerak per level (permanen)", "perLevel": 0.05, "maxLevel": 8, "baseCost": 110, "costGrowth": 1.5 },
+    { "id": "sq_attack", "name": "Tempo Serang", "icon": "⚡", "desc": "+6% kecepatan serangan per level (permanen)", "perLevel": 0.06, "maxLevel": 10, "baseCost": 140, "costGrowth": 1.6 },
+    { "id": "sq_range", "name": "Jangkauan", "icon": "🎯", "desc": "+8% jarak serangan per level (permanen)", "perLevel": 0.08, "maxLevel": 8, "baseCost": 130, "costGrowth": 1.55 },
+    { "id": "sq_nutrition", "name": "Metabolisme", "icon": "🧬", "desc": "+10% XP yang didapat per level (permanen)", "perLevel": 0.10, "maxLevel": 8, "baseCost": 150, "costGrowth": 1.6 }
+  ],
+  "shopItems": [
+    { "id": "serum_awal", "name": "Serum Awal", "icon": "💉", "desc": "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)", "cost": 200, "type": "consumable" }
+  ],
+  "economy": {
+    "dailyReward": 120,
+    "waveBonusPerWave": 12,
+    "killBonusCurrency": 1
+  }
+}
