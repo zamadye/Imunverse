@@ -1545,6 +1545,22 @@ def badge_kritis(size):
     return done(img, size)
 
 
+
+def icon_bag(size):
+    """Ikon keranjang/tas inventory untuk dock."""
+    img, d = canvas(size)
+    S = size * SS
+    # tas
+    d.rounded_rectangle([S * 0.16, S * 0.36, S * 0.84, S * 0.9], radius=int(S * 0.12), fill=(242, 130, 92, 255))
+    d.rounded_rectangle([S * 0.16, S * 0.36, S * 0.84, S * 0.52], radius=int(S * 0.08), fill=(233, 106, 76, 255))
+    # handle
+    d.arc([S * 0.32, S * 0.12, S * 0.68, S * 0.52], start=180, end=360, fill=(18, 63, 58, 255), width=max(4, int(S * 0.055)))
+    # klip + kantong depan
+    d.rounded_rectangle([S * 0.42, S * 0.5, S * 0.58, S * 0.64], radius=int(S * 0.05), fill=(253, 246, 227, 255))
+    d.ellipse([S * 0.46, S * 0.62, S * 0.54, S * 0.7], fill=(245, 198, 79, 255))
+    return done(img, size)
+
+
 def gen_stage_body(out):
     print("STAGE 10 — Sistem tubuh (8 aset)")
     return {
@@ -1556,6 +1572,7 @@ def gen_stage_body(out):
         "meter_energi.png": meter_energi(112),
         "meter_racun.png": meter_racun(112),
         "badge_kritis.png": badge_kritis(128),
+        "icon_bag.png": icon_bag(128),
     }
 
 

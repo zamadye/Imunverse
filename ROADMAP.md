@@ -129,6 +129,16 @@
 - [x] **8 aset stage 10**: ikon 5 sistem, meter energi/racun, badge kritis (total 96 PNG).
 - **Kriteria lulus:** SELFTEST 17 langkah PASS (bodyRacunRegistered, bodyStatePersisted); screenshot: kartu kondisi tubuh, kondisi kritis, modal fokus, suplemen shop, dampak gameover; perf tetap vsync 16,6 ms/frame.
 
+## Fase 6.1 — Workflow UI: Battle Prep, Tas & CTA Primer ✅
+**Tujuan:** perbaiki workflow dashboard yang membingungkan (riset: 1 primary CTA, pre-run choices dalam 1 layar, bottom nav 3–5 item, bag terpisah).
+- [x] **CTA primer "MULAI" besar** tepat di bawah panggung (gradient teal, sub label hero·arena) — mengarah ke **Battle Prep**, bukan langsung run.
+- [x] **Battle Prep (Siap Tempur)**: satu layar alur linier — ① pilih hero (kartu horizontal, badge tier evolusi) → ② fokus run (chip) → ③ arena (chip, terkunci sesuai progres) → ringkasan loadout (hero+tier+ikon kemampuan terbuka+fokus+arena) → **tombol MULAI selalu terlihat** (pola Archero/Survivor.io).
+- [x] **Tas (Bag)** via dock: grid bagian evolusi (butuh berapa lagi, badge dashed bila kurang) + consumable + info evolusi berikutnya.
+- [x] **Dock 5 tombol**: Play · Heroes · Bag · Squad · Shop (ikon tas PNG baru — 97 aset).
+- [x] Kartu kondisi tubuh: tombol FOKUS kini mengarah ke Battle Prep (satu gerbang keputusan).
+- [x] **Dev server baru `tools/server.py`**: menelan `ConnectionResetError [Errno 104]` (noise keep-alive mobile yang membanjiri log http.server) tanpa mengubah perilaku serving.
+- **Kriteria lulus:** screenshot alur baru — dashboard dengan MULAI besar (02), Battle Prep 3 langkah + ringkasan (20), Tas (19); 20/20 shot CLEAN; run tetap jalan dari alur prep (07).
+
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
 - [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.

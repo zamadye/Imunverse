@@ -21,6 +21,8 @@ const APP_STATE_BY_SCREEN = {
   shop: 'shop',
   arena: 'dashboard', // modal di atas dashboard — state tetap dashboard
   focus: 'dashboard',
+  prep: 'dashboard',  // layar persiapan (bagian dari alur dashboard)
+  bag: 'dashboard',
   hud: 'gameplay',
   gameover: 'gameover',
 };

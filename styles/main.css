@@ -302,7 +302,7 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 /* Dock navigasi bawah ala mockup */
 .dock {
   width: 100%; max-width: 520px;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
   padding: 10px 4px calc(4px + env(safe-area-inset-bottom));
   margin-top: 6px;
 }
@@ -956,3 +956,103 @@ img.lock-badge {
 
 /* -- Dampak tubuh di game over -- */
 .go-body { font-size: 12.5px; }
+
+/* =====================================================================
+   WORKFLOW UI v2 — CTA primer + Battle Prep + Tas (riset: 1 primary CTA,
+   pre-run choices dalam 1 alur, bottom nav 3-5, bag terpisah)
+   ===================================================================== */
+
+/* -- Tombol MULAI besar di dashboard (CTA primer, selalu terlihat) -- */
+.btn-play-big {
+  width: 100%; max-width: 560px; margin: 12px 0 4px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 22px; border: none; border-radius: 24px; cursor: pointer;
+  background: linear-gradient(180deg, #37b3a2, #1f7a70);
+  box-shadow: 0 5px 0 #14584f, 0 10px 22px rgba(31, 122, 112, 0.4);
+  transition: transform 0.1s ease;
+}
+.btn-play-big:active { transform: translateY(3px); box-shadow: 0 2px 0 #14584f; }
+.btn-play-big img { width: 30px; height: 30px; }
+.btn-play-big span {
+  font-size: 22px; font-weight: 900; letter-spacing: 0.04em; color: var(--cream);
+}
+.btn-play-big small { margin-left: auto; font-size: 11px; font-weight: 800; color: #bfe3d8; }
+
+/* -- Battle prep -- */
+.prep-scroll { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; }
+.prep-step { display: flex; align-items: center; gap: 8px; margin: 10px 0 2px; font-size: 14px; color: var(--ink); }
+.prep-step b {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--teal); color: var(--cream);
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+.prep-hint { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+
+.prep-hero-row { display: flex; gap: 10px; }
+.prep-hero {
+  position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px 8px; border: 3px solid transparent; border-radius: 20px;
+  background: var(--card); box-shadow: var(--shadow-card); cursor: pointer;
+}
+.prep-hero.selected { border-color: #35e0c8; background: var(--teal-light); }
+.prep-hero.locked { opacity: 0.55; }
+.prep-hero.locked .ph-sprite { filter: grayscale(1); }
+.prep-hero .ph-sprite { width: 72%; aspect-ratio: 1; object-fit: contain; }
+.prep-hero .ph-name { font-size: 11px; font-weight: 900; color: var(--ink); }
+.prep-hero .ph-stage {
+  position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px;
+  border-radius: 11px; font-size: 10px; font-weight: 900; color: var(--cream);
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+.prep-hero .ph-lock {
+  position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+}
+
+.prep-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.prep-chip {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border: 3px solid transparent; border-radius: 18px; background: var(--card);
+  box-shadow: var(--shadow-card); cursor: pointer; font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.prep-chip.selected { border-color: var(--teal); background: var(--teal-light); }
+.prep-chip.locked { opacity: 0.5; }
+.prep-chip img { width: 26px; height: 26px; border-radius: 8px; }
+.prep-chip.arena img { width: 30px; height: 30px; }
+
+.prep-summary { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.prep-summary .ps-hero { width: 64px; height: 64px; object-fit: contain; }
+.prep-summary .ps-mid { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.prep-summary .ps-mid b { color: var(--ink); }
+.prep-summary .ps-tier { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+.prep-summary .ps-abilities { display: flex; gap: 5px; }
+.prep-summary .ps-abilities img { width: 24px; height: 24px; }
+.prep-summary .ps-noab { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+.prep-summary .ps-meta { display: flex; flex-direction: column; gap: 5px; }
+.prep-summary .ps-meta > div { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; color: var(--ink-soft); }
+.prep-summary .ps-meta img { width: 20px; height: 20px; border-radius: 6px; }
+.prep-start { width: 100%; max-width: 560px; margin: 12px auto 18px; font-size: 18px; letter-spacing: 0.05em; }
+
+/* -- Bag / inventory -- */
+.bag-scroll { width: 100%; max-width: 560px; }
+.bag-section-title { margin: 10px 0 8px; font-size: 13px; letter-spacing: 0.05em; color: var(--ink-soft); text-transform: uppercase; }
+.bag-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.bag-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px;
+  background: var(--card); border-radius: 18px; box-shadow: var(--shadow-card); text-align: center;
+}
+.bag-card.short { outline: 2px dashed var(--coral); }
+.bag-card.empty { opacity: 0.55; }
+.bag-card .bag-sprite { width: 44px; height: 44px; object-fit: contain; }
+.bag-card b { font-size: 11.5px; color: var(--ink); }
+.bag-card .bag-count { font-size: 15px; font-weight: 900; color: var(--ink); }
+.bag-card .bag-count.ok { color: var(--teal); }
+.bag-card small { font-size: 10px; color: var(--ink-soft); font-weight: 700; }
+.bag-hint { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.bag-evo-next { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.bag-evo-next b { color: var(--ink); }
+.bag-evo-next p { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin: 0; }
+.bag-evo-next .bag-ready { color: var(--teal); font-weight: 800; }
+
+.back-btn img { width: 20px; height: 20px; }
+
+/* -- Prep: judul tidak wrap -- */
+#screen-prep .screen-title { font-size: 22px; white-space: nowrap; }

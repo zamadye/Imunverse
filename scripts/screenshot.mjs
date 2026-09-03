@@ -93,7 +93,31 @@ await page.evaluate(() => {
 await sleep(400);
 await shot('18-shop-suplemen');
 
-// --- roster (via dock nav) ---
+// --- TAS / inventory (via dock) ---
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('bag'));
+await sleep(600);
+await shot('19-bag');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(400);
+
+// --- BATTLE PREP: MULAI besar → pilih hero/fokus/arena → MULAI RUN ---
+await page.click('#btn-play-big');
+await sleep(600);
+await shot('20-prep');
+await page.evaluate(() => {
+  // pilih fokus detoks & arena paru via klik nyata pada chip
+  const chips = [...document.querySelectorAll('#prep-focus-row .prep-chip')];
+  chips.find((c) => /Detoks/i.test(c.textContent))?.click();
+});
+await sleep(400);
+await page.evaluate(() => {
+  const chips = [...document.querySelectorAll('#prep-arena-row .prep-chip')];
+  chips.find((c) => /Paru/i.test(c.textContent))?.click();
+});
+await sleep(400);
+await page.click('#btn-prep-start');
+await sleep(2200);
+await shot('07-gameplay-early');
 await page.evaluate(() => {
   const b = [...document.querySelectorAll('#screen-dashboard button, #screen-dashboard .nav-item, #screen-dashboard [role]')]
     .find((x) => /roster|hero|tim/i.test(x.textContent || ''));
@@ -120,16 +144,6 @@ await sleep(600);
 await shot('13-arena');
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
 await sleep(400);
-
-// --- mulai run dari roster (hero evolusi epic: pedang+silia+kaki, arena paru) ---
-await page.evaluate(() => window.__IMUNVERSE.screenManager.show('roster'));
-await sleep(500);
-await page.click('#screen-roster .hero-card:not(.locked)');
-await sleep(400);
-await shot('06-roster-selected');
-await page.click('#btn-start-run');
-await sleep(2200);
-await shot('07-gameplay-early');
 
 // joystick virtual: tahan & geser
 await page.mouse.move(70, 700);

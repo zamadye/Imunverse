@@ -32,6 +32,8 @@ import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import * as arenaScreen from './ui/screens/arena-screen.js';
+import * as prepScreen from './ui/screens/prep-screen.js';
+import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 
@@ -149,6 +151,8 @@ async function boot() {
   screenManager.registerScreen('gameover', gameoverScreen);
   screenManager.registerScreen('arena', arenaScreen);
   screenManager.registerScreen('focus', focusScreen);
+  screenManager.registerScreen('prep', prepScreen);
+  screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   bosschestScreen.wire();
 
@@ -163,6 +167,10 @@ async function boot() {
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
+  document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('prep'));
+  document.querySelectorAll('[data-back]').forEach((btn) => {
+    btn.addEventListener('click', () => screenManager.show(btn.dataset.back));
+  });
 
   // Keyboard kemampuan aktif (j/k/l/o sesuai data/abilities.json + angka 1-4)
   window.addEventListener('keydown', (ev) => {

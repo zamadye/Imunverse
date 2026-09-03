@@ -63,6 +63,12 @@
             </div>
           </section>
 
+          <button id="btn-play-big" class="btn-play-big" aria-label="Mulai — persiapan pertempuran">
+            <img src="assets/sprites/icon_play.png" alt="" />
+            <span>MULAI</span>
+            <small id="play-big-sub">Sel T Killer · Limfe</small>
+          </button>
+
           <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
 
           <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
@@ -92,6 +98,12 @@
               <img src="assets/sprites/icon_heroes.png" alt="" />
             </span>
             <span>Heroes</span>
+          </button>
+          <button class="dock-btn" data-nav="bag" aria-label="Tas & inventaris">
+            <span class="dock-ico">
+              <img src="assets/sprites/icon_bag.png" alt="" />
+            </span>
+            <span>Bag</span>
           </button>
           <button class="dock-btn" data-nav="upgrade" aria-label="Upgrade squad">
             <span class="dock-ico">
@@ -148,6 +160,50 @@
           <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="shop-currency">0</span></div>
         </div>
         <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
+      </section>
+
+      <!-- ============ BATTLE PREP (satu layar keputusan sebelum run) ============ -->
+      <section id="screen-prep" class="screen" data-screen="prep">
+        <header class="topbar">
+          <button class="back-btn icon-btn" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="kembali" /></button>
+          <h1 class="screen-title">Siap Tempur</h1>
+          <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="prep-currency">0</span></div>
+        </header>
+
+        <div class="prep-scroll">
+          <!-- LANGKAH 1: pilih hero -->
+          <h3 class="prep-step"><b>1</b> Pilih Hero</h3>
+          <div id="prep-hero-row" class="prep-hero-row"><!-- diisi JS --></div>
+
+          <!-- LANGKAH 2: fokus run -->
+          <h3 class="prep-step"><b>2</b> Fokus Run <span class="prep-hint">(menentukan sistem tubuh yang dipulihkan)</span></h3>
+          <div id="prep-focus-row" class="prep-chip-row"><!-- diisi JS --></div>
+
+          <!-- LANGKAH 3: arena -->
+          <h3 class="prep-step"><b>3</b> Arena <span class="prep-hint">(terbuka sesuai progresmu)</span></h3>
+          <div id="prep-arena-row" class="prep-chip-row"><!-- diisi JS --></div>
+
+          <!-- RINGKASAN loadout -->
+          <div id="prep-summary" class="card prep-summary"><!-- diisi JS --></div>
+        </div>
+
+        <button id="btn-prep-start" class="btn btn-primary btn-xl prep-start">MULAI RUN</button>
+      </section>
+
+      <!-- ============ BAG / INVENTORY ============ -->
+      <section id="screen-bag" class="screen" data-screen="bag">
+        <header class="topbar">
+          <button class="back-btn icon-btn" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="kembali" /></button>
+          <h1 class="screen-title">Tas</h1>
+          <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="bag-currency">0</span></div>
+        </header>
+        <div class="bag-scroll">
+          <h3 class="bag-section-title">Bagian Evolusi</h3>
+          <div id="bag-parts" class="bag-grid"><!-- diisi JS --></div>
+          <h3 class="bag-section-title">Consumable</h3>
+          <div id="bag-items" class="bag-grid"><!-- diisi JS --></div>
+          <div id="bag-evo-next" class="card bag-evo-next"><!-- diisi JS --></div>
+        </div>
       </section>
 
       <!-- ============ GAMEPLAY HUD ============ -->

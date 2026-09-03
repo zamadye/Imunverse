@@ -117,7 +117,7 @@ function renderBodyCard(meta) {
       el('b', { class: 'body-title', text: `Kondisi Tubuh: ${narrative.label}` }),
       el('span', { class: 'body-sub', text: 'Jaga 5 sistem — tubuh adalah universe-nya.' }),
     ]),
-    el('button', { class: 'btn btn-primary btn-sm', text: 'FOKUS', onclick: () => screenManager.show('focus') }),
+    el('button', { class: 'btn btn-primary btn-sm', text: 'FOKUS', onclick: () => screenManager.show('prep') }),
   ]));
 
   // Bar 5 sistem
