@@ -26,7 +26,9 @@ export function show({ level, choices }) {
         }
       },
     }, [
-      el('div', { class: 'choice-icon', text: def.icon }),
+      def.icon.startsWith('assets/')
+        ? el('div', { class: 'choice-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:28px;height:28px;object-fit:contain;' })])
+        : el('div', { class: 'choice-icon', text: def.icon }),
       el('div', { class: 'choice-info' }, [
         el('b', { text: def.name }),
         el('p', { text: def.desc }),

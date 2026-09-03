@@ -27,6 +27,7 @@ export function collectSpritePaths(data) {
     record(h.sprite, h.color, h.name);
     record(h.spriteIdle, h.color, h.name);
     record(h.spriteAttack, h.color, h.name);
+    record(h.spritePortrait, h.color, h.name);
   }
   for (const e of data.enemies.enemies) {
     record(e.sprite, e.color, e.name);

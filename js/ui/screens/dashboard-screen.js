@@ -31,7 +31,10 @@ export function show() {
     document.getElementById('dash-hero-name').textContent = heroDef.name;
     document.getElementById('dash-hero-title').textContent = heroDef.title;
   }
-  document.getElementById('dash-best-badge').textContent = `🏆 Gel. ${meta.stats.bestWave}`;
+  const badge = document.getElementById('dash-best-badge');
+  badge.textContent = '';
+  badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
+  badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
 
   // ---- Strip statistik (3 sel) ----
   const stats = meta.stats;
@@ -47,8 +50,15 @@ export function show() {
   const livesAvailable = checkDailyLives(); // HOOK: ketersediaan "daily lives" dari SDK/backend
   const claimable = livesAvailable && canClaimDailyReward(meta);
   const info = el('div', { class: 'daily-info' }, [
-    el('b', { text: '🎁 Bonus Harian' }),
-    el('span', { text: claimable ? `${getData().upgrades.economy.dailyReward} 💠 menantimu — klaim sekarang!` : 'Sudah diklaim hari ini. Kembali besok.' }),
+    el('b', { class: 'ico-title' }, [
+      el('img', { class: 't-ico', src: 'assets/sprites/icon_star.png', alt: '' }),
+      el('span', { text: 'Bonus Harian' }),
+    ]),
+    el('span', { class: 'claim-line' }, claimable ? [
+      el('b', { text: `${getData().upgrades.economy.dailyReward}` }),
+      el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: 'antibodi' }),
+      el('span', { text: ' menantimu — klaim sekarang!' }),
+    ] : [el('span', { text: 'Sudah diklaim hari ini. Kembali besok.' })]),
   ]);
   const btn = el('button', {
     class: 'btn ' + (claimable ? 'btn-gold' : ''),
@@ -57,7 +67,7 @@ export function show() {
     onclick: () => {
       const amount = claimDailyReward(STATE.meta); // logic asli + auto-save
       if (amount > 0) {
-        emit('toast', { message: `🎁 Bonus harian +${amount} 💠!`, kind: 'gold' });
+        emit('toast', { message: `Bonus harian +${amount} !`, kind: 'gold' });
         show(); // refresh angka currency
       }
     },
@@ -76,7 +86,10 @@ export function show() {
     const item = el('div', { class: 'mission-item' + (m.done ? ' done' : '') }, [
       el('div', { class: 'm-row' }, [
         el('span', { class: 'm-name', text: m.def.name }),
-        el('span', { class: 'm-reward', text: `+${m.def.reward} 💠` }),
+        el('span', { class: 'm-reward' }, [
+        el('span', { text: `+${m.def.reward}` }),
+        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+      ]),
       ]),
       el('div', { class: 'm-row' }, [
         el('span', { class: 'mission-more', text: `${m.def.desc} — ${m.value.toLocaleString('id-ID')}/${m.target.toLocaleString('id-ID')}` }),

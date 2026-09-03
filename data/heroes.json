@@ -24,9 +24,14 @@
         "magnetRadius": 95,
         "pickupRadius": 26
       },
-      "patternParams": { "spreadAngle": 0.14 },
-      "unlock": { "type": "default" },
-      "shopCost": 0
+      "patternParams": {
+        "spreadAngle": 0.14
+      },
+      "unlock": {
+        "type": "default"
+      },
+      "shopCost": 0,
+      "spritePortrait": "assets/sprites/portrait_sel_t.png"
     },
     {
       "id": "makrofag",
@@ -52,9 +57,17 @@
         "magnetRadius": 105,
         "pickupRadius": 28
       },
-      "patternParams": { "arc": 2.4 },
-      "unlock": { "type": "stat", "stat": "totalKills", "value": 100, "label": "Kalahkan total 100 patogen" },
-      "shopCost": 800
+      "patternParams": {
+        "arc": 2.4
+      },
+      "unlock": {
+        "type": "stat",
+        "stat": "totalKills",
+        "value": 100,
+        "label": "Kalahkan total 100 patogen"
+      },
+      "shopCost": 800,
+      "spritePortrait": "assets/sprites/portrait_makrofag.png"
     },
     {
       "id": "sel_b",
@@ -79,9 +92,18 @@
         "magnetRadius": 115,
         "pickupRadius": 26
       },
-      "patternParams": { "turnRate": 4.2, "spreadAngle": 0.55 },
-      "unlock": { "type": "stat", "stat": "bestWave", "value": 10, "label": "Capai Gelombang 10 dalam satu run" },
-      "shopCost": 1500
+      "patternParams": {
+        "turnRate": 4.2,
+        "spreadAngle": 0.55
+      },
+      "unlock": {
+        "type": "stat",
+        "stat": "bestWave",
+        "value": 10,
+        "label": "Capai Gelombang 10 dalam satu run"
+      },
+      "shopCost": 1500,
+      "spritePortrait": "assets/sprites/portrait_sel_b.png"
     },
     {
       "id": "sel_nk",
@@ -107,9 +129,17 @@
         "magnetRadius": 95,
         "pickupRadius": 26
       },
-      "patternParams": { "arc": 1.9 },
-      "unlock": { "type": "stat", "stat": "bossKills", "value": 1, "label": "Kalahkan 1 Sel Kanker (Bos)" },
-      "shopCost": 2500
+      "patternParams": {
+        "arc": 1.9
+      },
+      "unlock": {
+        "type": "stat",
+        "stat": "bossKills",
+        "value": 1,
+        "label": "Kalahkan 1 Sel Kanker (Bos)"
+      },
+      "shopCost": 2500,
+      "spritePortrait": "assets/sprites/portrait_sel_nk.png"
     }
   ]
 }

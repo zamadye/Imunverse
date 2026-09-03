@@ -1,6 +1,6 @@
 /**
  * upgrade-screen.js — Upgrade Squad ala reference: baris kartu dengan
- * "slider" level (track + knob) dan tombol pill harga dengan ikon 💠.
+ * "slider" level (track + knob) dan tombol pill harga dengan ikon .
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -31,18 +31,22 @@ export function show() {
       ? el('div', { class: 'btn-buy maxed', text: 'MAX ✓' })
       : el('button', {
           class: 'btn btn-primary btn-buy',
-          text: `💠 ${cost.toLocaleString('id-ID')}`,
           disabled: meta.currency < cost,
           onclick: () => {
             const res = purchaseSquadUpgrade(STATE.meta, def.id); // logic + auto-save
             if (res.ok) show();
             else if (res.reason) console.warn('[upgrade]', res.reason);
           },
-        });
+        }, [
+          el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+          el('span', { text: cost.toLocaleString('id-ID') }),
+        ]);
 
     const row = el('div', { class: 'upg-row' }, [
       el('div', { class: 'upg-head' }, [
-        el('div', { class: 'upg-icon', text: def.icon }),
+        def.icon.startsWith('assets/')
+          ? el('div', { class: 'upg-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:26px;height:26px;object-fit:contain;' })])
+          : el('div', { class: 'upg-icon', text: def.icon }),
         el('div', { class: 'upg-info' }, [
           el('b', { text: def.name }),
           el('span', { class: 'upg-desc', text: def.desc }),

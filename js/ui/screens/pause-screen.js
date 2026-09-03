@@ -11,8 +11,8 @@ export function show() {
   const box = document.getElementById('pause-summary');
   box.textContent = '';
   if (s) {
-    box.appendChild(el('div', { text: `🧬 Level ${s.level} · Gelombang ${s.wave}` }));
-    box.appendChild(el('div', { text: `⏱ ${s.time} · ☠ ${s.kills} patogen` }));
+    box.appendChild(el('div', { text: `Level ${s.level} · Gelombang ${s.wave}` }));
+    box.appendChild(el('div', { text: `⏱ ${s.time} · ${s.kills} patogen` }));
     box.appendChild(el('div', { text: `🛡️ ${s.currency} antibodi terkumpul (dibawa pulang saat run diakhiri)` }));
   }
 }

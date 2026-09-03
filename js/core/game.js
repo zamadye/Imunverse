@@ -35,7 +35,7 @@ import { Camera } from '../render/camera.js';
 import { drawBackground } from '../render/background.js';
 import {
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
-  drawBlastRing, drawTelegraph, drawJoystick, drawMinimap,
+  drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
@@ -81,7 +81,7 @@ export const game = {
       meta.consumables.serum_awal -= 1;
       this.serumActive = true;
       writeSave(meta);
-      emit('toast', { message: '💉 Serum Awal aktif: +25% damage run ini!', kind: 'gold' });
+      emit('toast', { message: 'Serum Awal aktif: +25% damage run ini!', kind: 'gold' });
     }
 
     const startX = 0;
@@ -203,7 +203,7 @@ export const game = {
 
     if (events.bossSpawn) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: true });
-      emit('toast', { message: '☣️ SEL KANKER MUNCUL!', kind: 'danger' });
+      emit('toast', { message: 'SEL KANKER MUNCUL!', kind: 'danger' });
       run.camera.addShake(0.7);
     }
 
@@ -221,6 +221,7 @@ export const game = {
     // 6. Kollision proyektil vs musuh
     run.collision.handleProjectileHits(run.projectiles, (proj, enemy) => {
       const died = enemy.takeDamage(proj.damage);
+      this.spawnHitFeedback(enemy, proj.damage, died);
       if (died) this.onEnemyKilled(enemy, proj);
       return died;
     });
@@ -295,7 +296,7 @@ export const game = {
         break;
       case 'magnet': {
         for (const other of run.pickups) other.magnetized = true;
-        emit('toast', { message: '🧲 Sinyal sitokin! Semua nutrisi tertarik padamu.' });
+        emit('toast', { message: 'Sinyal sitokin! Semua nutrisi tertarik padamu.' });
         break;
       }
       default:
@@ -373,8 +374,18 @@ export const game = {
       while (diff < -Math.PI) diff += Math.PI * 2;
       if (Math.abs(diff) > half) return;
       const died = e.takeDamage(damage);
+      this.spawnHitFeedback(e, damage, died);
       if (died) this.onEnemyKilled(e, null);
     });
+  },
+
+  /**
+   * Feedback visual per hit: bintang aset fx_hit.png + angka damage mengambang.
+   */
+  spawnHitFeedback(enemy, damage, died) {
+    const run = this.run;
+    run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || enemy.isBoss);
+    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, died ? '#ffd93d' : '#ffffff');
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
@@ -453,7 +464,7 @@ export const game = {
       run.bossKills += 1;
       run.boss = null;
       run.camera.addShake(0.65);
-      emit('toast', { message: '🏆 Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
+      emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
     }
 
     // ---- Drop orb XP (nilai = xpPerKill musuh; skin sesuai nilai) ----
@@ -550,7 +561,7 @@ export const game = {
     run.camera.addShake(0.5);
     setPaused(false);
     emit('resume'); // tutup modal revive, kembali ke HUD
-    emit('toast', { message: '✨ Sel regenerasi — lanjutkan pertempuran!', kind: 'gold' });
+    emit('toast', { message: 'Sel regenerasi — lanjutkan pertempuran!', kind: 'gold' });
   },
 
   declineRevive() {
@@ -584,12 +595,12 @@ export const game = {
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);
     for (const m of completedMissions) {
-      emit('toast', { message: `🏅 Misi "${m.name}" selesai! +${m.reward} 🛡️`, kind: 'gold' });
+      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} 🛡️`, kind: 'gold' });
     }
     // Auto-unlock hero dari statistik
     const newlyUnlocked = checkAutoUnlocks(meta);
     for (const h of newlyUnlocked) {
-      emit('toast', { message: `🔓 Hero baru terbuka: ${h.name}!`, kind: 'gold' });
+      emit('toast', { message: `Hero baru terbuka: ${h.name}!`, kind: 'gold' });
     }
 
     writeSave(meta); // AUTO-SAVE akhir run
@@ -690,20 +701,25 @@ export const game = {
       if (p.alive) drawProjectile(ctx, p, time);
     }
 
-    // Efek (tebasan, blast) & partikel (shape dinamis)
+    // Efek (tebasan, blast, spark) & partikel & angka damage
+    const drawImageAt = (path, x, y, size, rotation = 0, opts = {}) => drawSprite(ctx, path, x, y, size, rotation, opts);
     for (const fx of run.effects.effects) {
       if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
+      else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
     }
     for (const pt of run.effects.particles) {
       drawParticle(ctx, pt);
+    }
+    for (const n of run.effects.numbers) {
+      drawDamageNumber(ctx, n, time);
     }
 
     ctx.restore();
 
     // ---- Screen-space overlays ----
     cam.drawBossIndicatorIfOffscreen(ctx, run.boss, w, h, time);
-    drawJoystick(ctx, this.input.joystick, this.input.maxRadius);
+    drawJoystick(ctx, this.input.joystick, this.input.maxRadius, drawImageAt);
 
     // ---- HUD DOM + minimap ----
     if (STATE.screen === 'gameplay' || STATE.screen === 'gameover') {

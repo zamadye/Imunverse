@@ -6,16 +6,19 @@
 
 const MAX_PARTICLES = 400;
 const MAX_EFFECTS = 80;
+const MAX_NUMBERS = 40;
 
 export class EffectsSystem {
   constructor() {
     this.particles = []; // {x,y,vx,vy,life,maxLife,size,color}
-    this.effects = [];   // {type:'swipe'|'blast'|'ring'|'collect', ...}
+    this.effects = [];   // {type:'swipe'|'blast'|'ring'|'collect'|'spark', ...}
+    this.numbers = [];   // angka damage mengambang {x,y,vy,life,maxLife,text,color,size}
   }
 
   clear() {
     this.particles.length = 0;
     this.effects.length = 0;
+    this.numbers.length = 0;
   }
 
   /** Burst partikel (mis. musuh meledak jadi sitoplasma). */
@@ -55,6 +58,30 @@ export class EffectsSystem {
     this.spawnBurst(x, y, color, 4, 90, 3);
   }
 
+  /** Bintang hit (aset fx_hit.png) saat musuh menerima damage. */
+  spawnSpark(x, y, big = false) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    this.effects.push({ type: 'spark', x, y, rot: Math.random() * Math.PI, big, life: 0.16, maxLife: 0.16 });
+  }
+
+  /**
+   * Angka damage mengambang (real, dipanggil dari setiap hit).
+   * @param {number} amount
+   */
+  spawnDamageNumber(x, y, amount, color = '#fff') {
+    if (this.numbers.length >= MAX_NUMBERS) this.numbers.shift();
+    this.numbers.push({
+      x: x + (Math.random() - 0.5) * 14,
+      y: y - 8,
+      vy: -55,
+      life: 0.65,
+      maxLife: 0.65,
+      text: String(Math.max(1, Math.round(amount))),
+      color,
+      size: 13,
+    });
+  }
+
   update(dt) {
     // Partikel
     const ps = this.particles;
@@ -80,6 +107,19 @@ export class EffectsSystem {
         es[i] = es[es.length - 1];
         es.pop();
       }
+    }
+    // Angka damage
+    const ns = this.numbers;
+    for (let i = ns.length - 1; i >= 0; i--) {
+      const n = ns[i];
+      n.life -= dt;
+      if (n.life <= 0) {
+        ns[i] = ns[ns.length - 1];
+        ns.pop();
+        continue;
+      }
+      n.y += n.vy * dt;
+      n.vy *= Math.max(0, 1 - 2.5 * dt);
     }
   }
 }

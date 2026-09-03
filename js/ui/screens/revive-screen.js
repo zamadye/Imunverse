@@ -16,7 +16,7 @@ export function show() {
   busy = false;
   const btn = document.getElementById('btn-watch-ad-revive');
   btn.disabled = false;
-  btn.textContent = '🎬 Tonton Iklan & Bangkit';
+  btn.textContent = 'Tonton Iklan & Bangkit';
   document.getElementById('btn-skip-revive').disabled = false;
 
   let left = 5;
@@ -44,7 +44,7 @@ export function wireButtons() {
     busy = true;
     const btn = document.getElementById('btn-watch-ad-revive');
     btn.disabled = true;
-    btn.textContent = '📺 Memutar iklan… (simulasi)';
+    btn.textContent = 'Memutar iklan… (simulasi)';
     clearInterval(countdown);
     game.requestRevive();
     // modal ditutup lewat event 'revived' (main.js) bila sukses;
@@ -53,7 +53,7 @@ export function wireButtons() {
       if (STATE.screen === 'gameplay' && !STATE.paused) return; // sudah revive
       busy = false;
       btn.disabled = false;
-      btn.textContent = '🎬 Coba lagi / Lewati';
+      btn.textContent = 'Coba lagi / Lewati';
     }, 3000);
   });
 

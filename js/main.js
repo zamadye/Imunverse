@@ -80,7 +80,7 @@ function wireUiBridge() {
   });
 
   on('wave', ({ wave, isBoss }) => {
-    hudScreen.showAnnounce(isBoss ? 'BOSS!' : `GELOMBANG ${wave}`, isBoss);
+    hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
   });
 
   on('levelup', (payload) => screenManager.show('levelup', payload));
@@ -176,10 +176,10 @@ async function boot() {
 
   // Helper global kecil (dipakai tombol "Dashboard" di gameover)
   window.__IMUNVERSE_goDashboard = () => screenManager.show('dashboard');
-  // Portrait HUD: sprite hero terpilih dari cache (dipakai hud-screen.resetHUD)
+  // Portrait HUD: pakai aset potret khusus hero (dipakai hud-screen.resetHUD)
   window.__IMUNVERSE_getHeroPortrait = () => {
     const heroDef = getHero(STATE.meta.selectedHero);
-    return spriteToDataURL(heroDef ? heroDef.spriteIdle : '');
+    return spriteToDataURL(heroDef ? (heroDef.spritePortrait || heroDef.spriteIdle) : '');
   };
 
   // Reset save (dashboard footer)

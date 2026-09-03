@@ -187,23 +187,14 @@ export function drawTelegraph(ctx, enemy, cfg) {
 }
 
 /**
- * Joystick virtual (digambar hanya saat aktif).
+ * Joystick virtual (digambar hanya saat aktif) — memakai aset PNG
+ * fx_joystick_base.png & fx_joystick_knob.png lewat drawSprite.
  */
-export function drawJoystick(ctx, joy, maxRadius) {
+export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
   if (!joy.active) return;
-  // base
-  ctx.globalAlpha = 0.35;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(joy.originX, joy.originY, maxRadius, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.globalAlpha = 0.12;
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(joy.originX, joy.originY, maxRadius, 0, Math.PI * 2);
-  ctx.fill();
-
+  const base = 'assets/sprites/fx_joystick_base.png';
+  const knob = 'assets/sprites/fx_joystick_knob.png';
+  drawImageFn(base, joy.originX, joy.originY, maxRadius * 2.3);
   // knob (dibatasi radius)
   let dx = joy.x - joy.originX;
   let dy = joy.y - joy.originY;
@@ -212,11 +203,36 @@ export function drawJoystick(ctx, joy, maxRadius) {
     dx = (dx / len) * maxRadius;
     dy = (dy / len) * maxRadius;
   }
-  ctx.globalAlpha = 0.6;
-  ctx.fillStyle = '#35d0ba';
-  ctx.beginPath();
-  ctx.arc(joy.originX + dx, joy.originY + dy, 22, 0, Math.PI * 2);
-  ctx.fill();
+  drawImageFn(knob, joy.originX + dx, joy.originY + dy, maxRadius * 0.85);
+}
+
+/**
+ * Angka damage mengambang (world-space).
+ */
+export function drawDamageNumber(ctx, n, time) {
+  const t = Math.max(0, n.life / n.maxLife);
+  const pop = 1 + (1 - t) * 0.25;
+  ctx.globalAlpha = Math.min(1, t * 1.6);
+  ctx.font = `900 ${Math.round(n.size * pop)}px Nunito, "Segoe UI", system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(18,63,58,0.85)';
+  ctx.strokeText(n.text, n.x, n.y);
+  ctx.fillStyle = n.color;
+  ctx.fillText(n.text, n.x, n.y);
+  ctx.globalAlpha = 1;
+}
+
+/**
+ * Bintang hit damage (aset fx_hit.png) — membesar & memudar.
+ */
+export function drawHitSpark(ctx, fx, drawImageFn) {
+  const t = 1 - fx.life / fx.maxLife; // 0..1
+  const alpha = fx.life / fx.maxLife;
+  const size = (fx.big ? 52 : 34) * (0.7 + t * 0.6);
+  ctx.globalAlpha = alpha;
+  drawImageFn('assets/sprites/fx_hit.png', fx.x, fx.y, size, fx.rot + t * 0.8);
   ctx.globalAlpha = 1;
 }
 

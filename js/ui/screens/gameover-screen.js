@@ -24,7 +24,7 @@ function countUp(node, target) {
   function tick(now) {
     const t = Math.min(1, (now - t0) / duration);
     const eased = 1 - Math.pow(1 - t, 3);
-    node.textContent = `${Math.round(target * eased).toLocaleString('id-ID')} 💠`;
+    node.textContent = Math.round(target * eased).toLocaleString('id-ID');
     if (t < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -40,12 +40,16 @@ export function show(summary) {
       ? 'Luar biasa! Sistem imun mengingat jasamu.'
       : 'Setiap run membuat squad semakin kuat. Coba lagi!';
 
-  // Bintang rating ala mockup victory
+  // Bintang rating ala mockup victory (aset PNG: empty → filled)
   const stars = starsFor(summary);
   document.querySelectorAll('#gameover-stars .star').forEach((s, i) => {
     s.classList.remove('on');
+    s.src = 'assets/sprites/icon_star_empty.png';
     if (i < stars) {
-      setTimeout(() => s.classList.add('on'), 250 + i * 260);
+      setTimeout(() => {
+        s.src = 'assets/sprites/icon_star.png';
+        s.classList.add('on');
+      }, 250 + i * 260);
     }
   });
 
@@ -66,13 +70,13 @@ export function show(summary) {
     ]));
   }
 
-  countUp(document.getElementById('gameover-currency'), summary.currencyEarned);
+  countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
 
   const dblBtn = document.getElementById('btn-double-currency');
   dblBtn.disabled = !game.canDoubleCurrency();
   dblBtn.textContent = game.canDoubleCurrency()
-    ? '🎬 Tonton Iklan → 2x Antibodi'
-    : `Total Antibodi: ${STATE.meta.currency.toLocaleString('id-ID')} 💠`;
+    ? 'Tonton Iklan → 2x Antibodi'
+    : `Total Antibodi: ${STATE.meta.currency.toLocaleString('id-ID')} `;
 }
 
 export function wireButtons() {
@@ -83,10 +87,10 @@ export function wireButtons() {
     const dblBtn = document.getElementById('btn-double-currency');
     if (!game.canDoubleCurrency()) return;
     dblBtn.disabled = true;
-    dblBtn.textContent = '📺 Memutar iklan… (simulasi)';
+    dblBtn.textContent = 'Memutar iklan… (simulasi)';
     triggerRewardedAdDoubleCurrency(() => {
       const total = game.applyDoubleCurrency(); // logic asli + auto-save
-      dblBtn.textContent = `✓ 2x! Total: ${total.toLocaleString('id-ID')} 💠`;
+      dblBtn.textContent = `✓ 2x! Total: ${total.toLocaleString('id-ID')} `;
     });
   });
 

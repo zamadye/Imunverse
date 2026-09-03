@@ -12,9 +12,9 @@ import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
 
 const PATTERN_LABEL = {
-  melee_swipe: '⚔️ Tebasan Area',
-  ranged_pierce: '🏹 Penembus',
-  ranged_homing: '🎯 Penjejak',
+  melee_swipe: 'Tebasan Area',
+  ranged_pierce: 'Penembus',
+  ranged_homing: 'Penjejak',
 };
 
 /** Ubah '#rrggbb' → 'rgba(r,g,b,a)'. */
@@ -38,7 +38,7 @@ export function show() {
       class: 'avatar-wrap',
       style: `background: ${hexAlpha(heroDef.color, status.unlocked ? 0.32 : 0.16)};`,
     }, [
-      el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }),
+      el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
     ]);
 
     const children = [avatar];
@@ -47,12 +47,16 @@ export function show() {
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'hero-pattern', text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }));
     } else {
-      // Badge gembok di lingkaran (ala mockup)
-      avatar.appendChild(el('div', { class: 'lock-badge', text: '🔒' }));
+      // Badge gembok aset PNG di lingkaran (ala mockup)
+      avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: status.conditionLabel }));
       if (status.shopCost > 0) {
-        children.push(el('div', { class: 'lock-buy-note', text: `atau beli ${status.shopCost} 💠 di Shop` }));
+        children.push(el('div', { class: 'lock-buy-note' }, [
+        el('span', { text: `atau beli ${status.shopCost}` }),
+        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+        el('span', { text: 'di Shop' }),
+      ]));
       }
     }
 

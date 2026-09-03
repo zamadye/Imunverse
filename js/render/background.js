@@ -1,9 +1,11 @@
 /**
  * background.js — Latar gameplay ala reference user:
- * "air tubuh" teal dengan arena heksagon cream di pusat dunia (player
- * memulai di tengah arena), siluet terumbu/sel organik parallax, dan
- * gelembung yang naik pelan. Semua prosedural (tanpa aset) & deterministik.
+ * "air tubuh" teal dengan arena heksagon cream di pusat dunia, siluet
+ * terumbu/rumput laut/sel (ASET PNG parallax: prop_reef, prop_weed,
+ * prop_cell, prop_dots) dan gelembung prosedural yang naik pelan.
  */
+
+import { drawSprite } from './sprite-loader.js';
 
 function hash2(ix, iy) {
   let h = ix * 374761393 + iy * 668265263;
@@ -47,9 +49,10 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
-  drawReefLayer(ctx, camX, camY, w, h, 0.22, 760, 'rgba(21,92,84,0.5)', time, 0);
+  drawCellLayer(ctx, camX, camY, w, h, time);
+  drawReefLayer(ctx, camX, camY, w, h, 0.22, 820, 'prop_reef.png', 210, time);
   drawBubbleLayer(ctx, camX, camY, w, h, time, 0.5, 190, 'rgba(255,255,255,0.10)', 5);
-  drawReefLayer(ctx, camX, camY, w, h, 0.4, 560, 'rgba(140,205,170,0.20)', time, 31);
+  drawReefLayer(ctx, camX, camY, w, h, 0.4, 620, 'prop_weed.png', 170, time);
   drawBubbleLayer(ctx, camX, camY, w, h, time, 0.72, 130, 'rgba(255,255,255,0.16)', 8);
 
   // ---- arena heksagon cream di pusat dunia ----
@@ -63,33 +66,50 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   ctx.fillRect(0, 0, w, h);
 }
 
-/** Siluet "terumbu"/sel organik besar sebagai bentuk blob tumpuk. */
-function drawReefLayer(ctx, camX, camY, w, h, parallax, spacing, color, time, seedShift) {
+/** Lapisan sel transparan (aset prop_cell) samar di kejauhan. */
+function drawCellLayer(ctx, camX, camY, w, h, time) {
+  const parallax = 0.14;
+  const spacing = 640;
   const ox = camX * parallax;
   const oy = camY * parallax;
   const x0 = Math.floor((ox - w / 2) / spacing) - 1;
   const x1 = Math.floor((ox + w / 2) / spacing) + 1;
   const y0 = Math.floor((oy - h / 2) / spacing) - 1;
   const y1 = Math.floor((oy + h / 2) / spacing) + 1;
-
-  ctx.fillStyle = color;
   for (let ix = x0; ix <= x1; ix++) {
     for (let iy = y0; iy <= y1; iy++) {
-      const r1 = hash2(ix * 3 + seedShift, iy * 5 - seedShift);
-      if (r1 < 0.3) continue; // tidak semua sel berisi
+      const r1 = hash2(ix * 5 + 3, iy * 7 - 11);
+      if (r1 < 0.35) continue;
+      const wx = ix * spacing + (r1 - 0.5) * 200 - ox + w / 2;
+      const wy = iy * spacing + (hash2(ix - 8, iy + 4) - 0.5) * 200 - oy + h / 2;
+      const size = 150 + r1 * 130;
+      const pulse = 0.8 + 0.2 * Math.sin(time * 0.7 + r1 * 12);
+      drawSprite(ctx, 'assets/sprites/prop_cell.png', wx, wy, size * pulse, r1 * Math.PI, { alpha: 0.35 + r1 * 0.2 });
+    }
+  }
+}
+
+/** Siluet terumbu/rumput laut (ASET PNG) tersebar parallax. */
+function drawReefLayer(ctx, camX, camY, w, h, parallax, spacing, asset, size, time) {
+  const ox = camX * parallax;
+  const oy = camY * parallax;
+  const x0 = Math.floor((ox - w / 2) / spacing) - 1;
+  const x1 = Math.floor((ox + w / 2) / spacing) + 1;
+  const y0 = Math.floor((oy - h / 2) / spacing) - 1;
+  const y1 = Math.floor((oy + h / 2) / spacing) + 1;
+  for (let ix = x0; ix <= x1; ix++) {
+    for (let iy = y0; iy <= y1; iy++) {
+      const r1 = hash2(ix * 3 + (asset.length), iy * 5 - 7);
+      if (r1 < 0.3) continue;
       const wx = ix * spacing + (r1 - 0.5) * spacing * 0.6 - ox + w / 2;
-      const wy = iy * spacing + (hash2(ix - seedShift, iy + 9) - 0.5) * spacing * 0.6 - oy + h / 2;
-      const R = spacing * (0.28 + r1 * 0.24);
-      // cluster 3 lingkaran = blob organik
-      ctx.beginPath();
-      ctx.arc(wx, wy, R, 0, Math.PI * 2);
-      ctx.arc(wx + R * 0.7, wy + R * 0.25, R * 0.72, 0, Math.PI * 2);
-      ctx.arc(wx - R * 0.55, wy + R * 0.5, R * 0.6, 0, Math.PI * 2);
-      ctx.fill();
-      // "korol" kecil di atasnya
-      ctx.beginPath();
-      ctx.arc(wx + R * 0.2, wy - R * 0.9, R * 0.3, 0, Math.PI * 2);
-      ctx.fill();
+      const wy = iy * spacing + (hash2(ix - 5, iy + 9) - 0.5) * spacing * 0.6 - oy + h / 2;
+      const sway = Math.sin(time * 0.9 + r1 * 9) * 0.04;
+      const flip = r1 > 0.65 ? -1 : 1;
+      ctx.save();
+      ctx.translate(wx, wy);
+      ctx.scale(flip, 1);
+      drawSprite(ctx, `assets/sprites/${asset}`, 0, 0, size * (0.8 + r1 * 0.5), sway);
+      ctx.restore();
     }
   }
 }
@@ -132,7 +152,7 @@ function drawBubbleLayer(ctx, camX, camY, w, h, time, parallax, spacing, color, 
 function drawArena(ctx, camX, camY, w, h, time) {
   const cx = -camX + w / 2;
   const cy = -camY + h / 2;
-  const R = 560;
+  const R = 270;
   // culling kasar: skip bila arena jauh di luar layar
   if (cx < -R - 200 || cx > w + R + 200 || cy < -R - 200 || cy > h + R + 200) return;
 

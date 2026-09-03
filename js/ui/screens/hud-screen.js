@@ -28,11 +28,11 @@ export function resetHUD() {
   setBar('hud-xp-fill', 0);
   document.getElementById('hud-kills').textContent = '0';
   document.getElementById('hud-currency').textContent = '0';
-  document.getElementById('hud-timer').textContent = '00:00';
+  document.getElementById('hud-timer-text').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
   document.getElementById('hp-pill').classList.remove('low');
 
-  // Portrait hero: main.js mendaftarkan getter ini setelah sprite termuat
+  // Portrait hero: pakai aset potret khusus (bukan sprite tubuh penuh)
   const portrait = document.getElementById('hud-portrait');
   const getter = window.__IMUNVERSE_getHeroPortrait;
   if (portrait && getter) portrait.src = getter();
@@ -52,8 +52,8 @@ export function updateHUD(data) {
   document.getElementById('hp-pill').classList.toggle('low', data.hpPct < 0.3);
   setBar('hud-xp-fill', Math.max(0, Math.min(1, data.xpPct)));
   document.getElementById('hud-level').textContent = `Lv ${data.level}`;
-  document.getElementById('hud-wave').textContent = `GELOMBANG ${data.wave}`;
-  document.getElementById('hud-timer').textContent = data.timerText;
+  document.getElementById('hud-wave').textContent = `WAVE ${data.wave}`;
+  document.getElementById('hud-timer-text').textContent = data.timerText;
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
 

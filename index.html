@@ -36,10 +36,10 @@
       <section id="screen-dashboard" class="screen" data-screen="dashboard">
         <header class="topbar">
           <div class="currency-chip" title="Antibodi (mata uang)">
-            <span class="coin">💠</span>
+            <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
             <span id="dash-currency">0</span>
           </div>
-          <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save">⚙</button>
+          <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
         </header>
 
         <div class="dash-scroll">
@@ -58,7 +58,7 @@
           <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
 
           <div class="card missions-card">
-            <h3 class="card-title">🏅 Misi &amp; Prestasi</h3>
+            <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
             <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
           </div>
         </div>
@@ -67,13 +67,13 @@
         <nav class="dock">
           <button class="dock-btn primary" id="btn-play" aria-label="Mulai run">
             <span class="dock-ico">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.6c0-1.2 1.3-1.9 2.3-1.3l8.6 5.4c1 .6 1 2 0 2.6l-8.6 5.4c-1 .6-2.3-.1-2.3-1.3V5.6z"/></svg>
+              <img src="assets/sprites/icon_play.png" alt="" />
             </span>
             <span>Play</span>
           </button>
           <button class="dock-btn" data-nav="roster" aria-label="Roster hero">
             <span class="dock-ico">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4.2 4.2 0 1 1 0 8.4A4.2 4.2 0 0 1 12 3zm0 10c4.4 0 8 2.2 8 5v2.4H4V18c0-2.8 3.6-5 8-5z"/></svg>
+              <img src="assets/sprites/icon_heroes.png" alt="" />
             </span>
             <span>Heroes</span>
           </button>
@@ -85,7 +85,7 @@
           </button>
           <button class="dock-btn" data-nav="shop" aria-label="Toko">
             <span class="dock-ico">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7V6a4.5 4.5 0 0 1 9 0v1H19a1.5 1.5 0 0 1 1.5 1.6l-.8 9.5A3 3 0 0 1 16.7 21H7.3a3 3 0 0 1-3-2.9l-.8-9.5A1.5 1.5 0 0 1 5 7h2.5zm2 0h5V6a2.5 2.5 0 0 0-5 0v1z"/></svg>
+              <img src="assets/sprites/icon_shop.png" alt="" />
             </span>
             <span>Shop</span>
           </button>
@@ -95,7 +95,7 @@
       <!-- ============ ROSTER HERO ============ -->
       <section id="screen-roster" class="screen" data-screen="roster">
         <header class="screen-header">
-          <button class="btn-back" data-back="dashboard" aria-label="Kembali">←</button>
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
           <h2>Heroes</h2>
           <span class="spacer"></span>
         </header>
@@ -109,13 +109,13 @@
       <!-- ============ UPGRADE SQUAD ============ -->
       <section id="screen-upgrade" class="screen" data-screen="upgrade">
         <header class="screen-header">
-          <button class="btn-back" data-back="dashboard" aria-label="Kembali">←</button>
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
           <h2>Squad Upgrade</h2>
           <span class="spacer"></span>
         </header>
-        <p class="screen-subtitle">Upgrade permanen untuk semua hero. Beli dengan Antibodi 💠.</p>
+        <p class="screen-subtitle">Upgrade permanen untuk semua hero. Beli dengan Antibodi.</p>
         <div class="topbar" style="justify-content:center">
-          <div class="currency-chip"><span class="coin">💠</span><span id="upgrade-currency">0</span></div>
+          <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="upgrade-currency">0</span></div>
         </div>
         <div id="upgrade-list" class="upgrade-list"><!-- diisi JS --></div>
       </section>
@@ -123,12 +123,12 @@
       <!-- ============ TOKO ============ -->
       <section id="screen-shop" class="screen" data-screen="shop">
         <header class="screen-header">
-          <button class="btn-back" data-back="dashboard" aria-label="Kembali">←</button>
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
           <h2>Shop</h2>
           <span class="spacer"></span>
         </header>
         <div class="topbar" style="justify-content:center;margin-bottom:14px">
-          <div class="currency-chip"><span class="coin">💠</span><span id="shop-currency">0</span></div>
+          <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="shop-currency">0</span></div>
         </div>
         <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
       </section>
@@ -143,26 +143,26 @@
           <div class="hud-row">
             <div class="hp-pill" id="hp-pill">
               <img id="hud-portrait" class="hud-portrait" alt="" />
-              <span class="heart">❤️</span>
+              <img class="heart" src="assets/sprites/icon_heart.png" alt="" />
               <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
               <span id="hud-hp-text" class="hud-hp-text">100</span>
             </div>
             <div class="hud-center">
-              <div id="hud-wave" class="wave-pill">GELOMBANG 1</div>
-              <div id="hud-timer" class="timer-chip">00:00</div>
+              <div id="hud-wave" class="wave-pill">WAVE 1</div>
+              <div id="hud-timer" class="timer-chip"><img src="assets/sprites/icon_timer.png" alt="" /><span id="hud-timer-text">00:00</span></div>
               <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
                 <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
                 <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
               </div>
             </div>
             <div class="hud-right">
-              <div class="hud-kills">☠ <span id="hud-kills">0</span></div>
-              <div class="hud-currency-run">💠 <span id="hud-currency">0</span></div>
-              <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
-              <button id="btn-pause" class="btn btn-pause" aria-label="Jeda">⏸</button>
+              <div class="hud-kills"><img src="assets/sprites/icon_skull.png" alt="" /><span id="hud-kills">0</span></div>
+              <div class="hud-currency-run"><img src="assets/sprites/icon_coin.png" alt="" /><span id="hud-currency">0</span></div>
+              <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
             </div>
           </div>
         </div>
+        <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
         <div id="hud-announce" class="hud-announce hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
       </section>
@@ -170,7 +170,7 @@
       <!-- ============ LEVEL UP MODAL ============ -->
       <section id="screen-levelup" class="screen modal" data-screen="levelup">
         <div class="modal-box">
-          <div class="lu-stars"><span>★</span><span>★</span><span>★</span></div>
+          <div class="lu-stars"><img src="assets/sprites/icon_star.png" alt="" /><img src="assets/sprites/icon_star.png" alt="" /><img src="assets/sprites/icon_star.png" alt="" /></div>
           <h2 class="levelup-title">Level Up!</h2>
           <p id="levelup-sub" class="levelup-sub">Level 2 — pilih satu peningkatan</p>
           <div id="levelup-choices" class="choice-grid"><!-- diisi JS --></div>
@@ -182,8 +182,8 @@
         <div class="modal-box">
           <h2>Jeda</h2>
           <div id="pause-summary" class="pause-summary"><!-- diisi JS --></div>
-          <button id="btn-resume" class="btn btn-primary btn-xl">▶ Lanjutkan</button>
-          <button id="btn-quit-run" class="btn btn-danger">⚔ Akhiri Run</button>
+          <button id="btn-resume" class="btn btn-primary btn-xl"><img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Lanjutkan</button>
+          <button id="btn-quit-run" class="btn btn-danger"><img class="btn-ico" src="assets/sprites/icon_skull.png" alt="" />Akhiri Run</button>
         </div>
       </section>
 
@@ -193,7 +193,7 @@
           <h2 class="revive-title">Tumbang!</h2>
           <p class="revive-sub">Tonton video singkat untuk bangkit dengan 50% HP dan membersihkan patogen di sekitarmu.</p>
           <div class="revive-count">Bangkit otomatis batal dalam <span id="revive-countdown">5</span>s</div>
-          <button id="btn-watch-ad-revive" class="btn btn-primary btn-xl">🎬 Tonton Iklan &amp; Bangkit</button>
+          <button id="btn-watch-ad-revive" class="btn btn-primary btn-xl">Tonton Iklan &amp; Bangkit</button>
           <button id="btn-skip-revive" class="btn btn-danger">Tidak, Akhiri Run</button>
         </div>
       </section>
@@ -202,19 +202,19 @@
       <section id="screen-gameover" class="screen modal" data-screen="gameover">
         <div class="modal-box wide">
           <div id="gameover-stars" class="go-stars">
-            <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+            <img class="star" src="assets/sprites/icon_star_empty.png" alt="" /><img class="star" src="assets/sprites/icon_star_empty.png" alt="" /><img class="star" src="assets/sprites/icon_star_empty.png" alt="" />
           </div>
           <h2 id="gameover-title" class="gameover-title">Run Selesai</h2>
           <p id="gameover-sub" class="gameover-sub">Sistem imun mengingat pengorbananmu.</p>
           <div id="gameover-summary" class="summary-grid"><!-- diisi JS --></div>
           <div class="summary-reward">
             <span>Antibodi didapat:</span>
-            <strong id="gameover-currency">0 💠</strong>
+            <strong id="gameover-currency"><img class="coin-sm" src="assets/sprites/icon_coin.png" alt="" /><span id="gameover-currency-num">0</span></strong>
           </div>
-          <button id="btn-double-currency" class="btn btn-gold">🎬 Tonton Iklan → 2x Antibodi</button>
+          <button id="btn-double-currency" class="btn btn-gold">Tonton Iklan → 2x Antibodi</button>
           <div class="btn-row">
-            <button id="btn-retry" class="btn btn-primary">🔁 Main Lagi</button>
-            <button id="btn-home" class="btn">🏠 Dashboard</button>
+            <button id="btn-retry" class="btn btn-primary"><img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Main Lagi</button>
+            <button id="btn-home" class="btn"><img class="btn-ico" src="assets/sprites/icon_home.png" alt="" />Dashboard</button>
           </div>
         </div>
       </section>

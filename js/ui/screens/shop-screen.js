@@ -19,7 +19,7 @@ export function show() {
   wrap.textContent = '';
 
   // ---------------- Section: buka hero ----------------
-  const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: '🦠 BUKA HERO' })]);
+  const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'BUKA HERO' })]);
   const heroGrid = el('div', { class: 'shop-grid' });
   const heroes = getData().heroes.heroes;
   heroes.forEach((heroDef, i) => {
@@ -27,7 +27,10 @@ export function show() {
     const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` });
     // Badge harga di pojok (untuk yang dijual & belum dimiliki)
     if (!unlocked && heroDef.shopCost > 0) {
-      card.appendChild(el('div', { class: 'price-tag', text: `💠${heroDef.shopCost}` }));
+      card.appendChild(el('div', { class: 'price-tag' }, [
+        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+        el('span', { text: String(heroDef.shopCost) }),
+      ]));
     }
     card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
     card.appendChild(el('b', { text: heroDef.name }));
@@ -37,7 +40,7 @@ export function show() {
       card.appendChild(el('div', { class: 's-owned', text: '✓ Dimiliki' }));
     } else if (!heroDef.shopCost) {
       card.appendChild(el('div', { class: 's-owned', text: 'Buka via misi' }));
-      card.appendChild(el('div', { class: 'lock-badge', text: '🔒' }));
+      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
     } else {
       card.appendChild(el('button', {
         class: 'btn btn-primary',
@@ -48,7 +51,7 @@ export function show() {
           if (res.ok) show();
         },
       }));
-      card.appendChild(el('div', { class: 'lock-badge', text: '🔒' }));
+      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
     }
     heroGrid.appendChild(card);
   });
@@ -56,14 +59,19 @@ export function show() {
   wrap.appendChild(heroSection);
 
   // ---------------- Section: item ----------------
-  const itemSection = el('div', { class: 'shop-section' }, [el('h3', { text: '💉 ITEM' })]);
+  const itemSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'ITEM' })]);
   const itemGrid = el('div', { class: 'shop-grid' });
   const items = getData().upgrades.shopItems;
   items.forEach((def, i) => {
     const owned = meta.consumables[def.id] || 0;
     const card = el('div', { class: `shop-card ${PASTEL[(i + 2) % PASTEL.length]}` }, [
-      el('div', { class: 'price-tag', text: `💠${def.cost}` }),
-      el('div', { class: 'icon-sprite', text: def.icon }),
+      el('div', { class: 'price-tag' }, [
+        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+        el('span', { text: String(def.cost) }),
+      ]),
+      def.icon.startsWith('assets/')
+        ? el('img', { class: 'shop-sprite', src: def.icon, alt: '' })
+        : el('div', { class: 'icon-sprite', text: def.icon }),
       el('b', { text: def.name }),
       el('div', { class: 's-desc', text: def.desc }),
       el('div', { class: 's-owned', text: `Dimiliki: ${owned}` }),
