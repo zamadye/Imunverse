@@ -11,6 +11,11 @@ import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-sys
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
+import {
+  getBodyState, getCriticalSystems, getMilestoneProgress, getNarrativeStage,
+  applyDailyDecay, recoverViaAd,
+} from '../../systems/body-system.js';
+import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
@@ -92,6 +97,85 @@ function renderEvoCard(meta) {
   }
 }
 
+/**
+ * Kartu KONDISI TUBUH: 5 sistem bar kesehatan + meter energi/racun + label
+ * naratif + progres milestone "Sehat Sempurna" + tombol fokus & pemulihan iklan.
+ */
+function renderBodyCard(meta) {
+  const card = document.getElementById('body-card');
+  card.textContent = '';
+  const cfg = getData().bodySystems;
+  const st = getBodyState(meta);
+  const narrative = getNarrativeStage(meta);
+  const criticals = getCriticalSystems(meta);
+  const milestone = getMilestoneProgress(meta);
+
+  // Header: label naratif + tombol fokus
+  const focusDef = cfg.focusRuns.find((f) => f.id === (meta.focusRun || 'seimbang'));
+  card.appendChild(el('div', { class: 'body-head' }, [
+    el('div', { class: 'body-title-wrap' }, [
+      el('b', { class: 'body-title', text: `Kondisi Tubuh: ${narrative.label}` }),
+      el('span', { class: 'body-sub', text: 'Jaga 5 sistem — tubuh adalah universe-nya.' }),
+    ]),
+    el('button', { class: 'btn btn-primary btn-sm', text: 'FOKUS', onclick: () => screenManager.show('focus') }),
+  ]));
+
+  // Bar 5 sistem
+  const rows = el('div', { class: 'body-rows' });
+  for (const sysDef of cfg.systems) {
+    const sys = st.systems[sysDef.id];
+    const crit = sys.health < cfg.criticalThreshold;
+    const row = el('div', { class: `body-row${crit ? ' critical' : ''}` });
+    row.appendChild(el('img', { class: 'body-ico', src: sysDef.icon, alt: sysDef.name }));
+    row.appendChild(el('span', { class: 'body-name', text: sysDef.name }));
+    row.appendChild(el('div', { class: 'body-track' }, [
+      el('div', {
+        class: 'body-fill',
+        style: `width:${sys.health}%;background:${sysDef.color}`,
+      }),
+      el('span', { class: 'body-val', text: String(sys.health) }),
+    ]));
+    if (crit) {
+      row.appendChild(el('img', { class: 'body-crit', src: 'assets/sprites/badge_kritis.png', alt: 'kritis', title: sysDef.critical.label }));
+    }
+    rows.appendChild(row);
+  }
+  card.appendChild(rows);
+
+  // Meter energi + racun
+  card.appendChild(el('div', { class: 'body-meters' }, [
+    el('div', { class: 'meter' }, [
+      el('img', { src: 'assets/sprites/meter_energi.png', alt: 'energi' }),
+      el('span', { text: `Energi ${st.energi}` }),
+    ]),
+    el('div', { class: `meter${st.racun >= 70 ? ' danger' : ''}` }, [
+      el('img', { src: 'assets/sprites/meter_racun.png', alt: 'racun' }),
+      el('span', { text: `Racun ${Math.round(st.racun)}` }),
+    ]),
+  ]));
+
+  // Milestone makro + pemulihan iklan
+  const foot = el('div', { class: 'body-foot' });
+  if (!milestone.done) {
+    foot.appendChild(el('span', { class: 'body-milestone', text: `🎯 Sehat Sempurna: semua ≥${cfg.perfectThreshold} selama ${cfg.perfectDays} hari — streak ${milestone.streak}/${cfg.perfectDays}` }));
+  } else {
+    foot.appendChild(el('span', { class: 'body-milestone done', text: '🏆 TUBUH SEHAT SEMPURNA tercapai!' }));
+  }
+  if (criticals.length > 0 && canWatchAd(meta)) {
+    const btn = el('button', { class: 'btn btn-gold btn-sm', text: `+ PEMULIHAN IKLAN (${criticals[0].def.name})` });
+    btn.addEventListener('click', () => {
+      triggerRewardedAdRecovery(() => {
+        trackAdWatch(meta);
+        const res = recoverViaAd(meta);
+        if (res) emit('toast', { message: `Sistem ${res.name} pulih +${res.gained}!`, kind: 'gold' });
+        renderBodyCard(meta);
+      });
+    });
+    foot.appendChild(btn);
+  }
+  card.appendChild(foot);
+}
+
 /** Kartu arena terpilih + tombol GANTI (buka modal pilih arena). */
 function renderArenaCard(meta) {
   const card = document.getElementById('arena-card');
@@ -154,6 +238,10 @@ export function show() {
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalKills.toLocaleString('id-ID') }), el('span', { text: 'Total Kill' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: fmtTime(stats.bestSurvivalTime) }), el('span', { text: 'Waktu Terbaik' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalRuns }), el('span', { text: 'Total Run' })]));
+
+  // ---- Decay harian + Kartu KONDISI TUBUH (meta-layer organisme) ----
+  applyDailyDecay(meta);
+  renderBodyCard(meta);
 
   // ---- Overlay evolusi di panggung (bentuk hero berubah sesuai tahap) ----
   renderStageEvoOverlay(meta);

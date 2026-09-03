@@ -65,6 +65,34 @@ await page.evaluate(() => {
 await sleep(900);
 await shot('02-dashboard');
 
+// --- kondisi tubuh: kartu default sudah terlihat; buat 1 sistem KRITIS ---
+await page.evaluate(() => {
+  const m = window.__IMUNVERSE.STATE.meta;
+  m.bodyState.systems.limfatik.health = 14; // < 20 → kondisi kritis
+  m.bodyState.racun = 74;
+  window.__IMUNVERSE.screenManager.show('dashboard');
+});
+await sleep(900);
+await shot('16-body-critical');
+
+// --- modal fokus run ---
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('focus'));
+await sleep(600);
+await shot('17-focus');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(400);
+
+// --- shop: section suplemen sistem tubuh ---
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('shop'));
+await sleep(500);
+// scroll halaman sampai section SUPLEMEN SISTEM TUBUH terlihat
+await page.evaluate(() => {
+  const h3 = [...document.querySelectorAll('#shop-sections h3')].find((x) => /SUPLEMEN/i.test(x.textContent));
+  h3?.scrollIntoView({ block: 'center' });
+});
+await sleep(400);
+await shot('18-shop-suplemen');
+
 // --- roster (via dock nav) ---
 await page.evaluate(() => {
   const b = [...document.querySelectorAll('#screen-dashboard button, #screen-dashboard .nav-item, #screen-dashboard [role]')]

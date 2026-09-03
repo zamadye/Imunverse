@@ -1426,11 +1426,146 @@ def gen_stage_evo(out):
 
 
 # =====================================================================
+# STAGE 10 — SISTEM TUBUH (8 aset): ikon 5 sistem + energi + racun + kritis
+# =====================================================================
+
+def _sys_base(size, tint):
+    """Basis ikon sistem: lingkaran soft tint + ring."""
+    img, d = canvas(size)
+    S = size * SS
+    d.ellipse([S * 0.08, S * 0.08, S * 0.92, S * 0.92], fill=tint)
+    hl = tuple(min(255, int(c * 1.25 + 45)) for c in tint[:3]) + (255,)
+    d.ellipse([S * 0.2, S * 0.14, S * 0.62, S * 0.42], fill=hl)
+    d.ellipse([S * 0.08, S * 0.08, S * 0.92, S * 0.92], outline=(18, 63, 58, 255), width=max(3, int(S * 0.035)))
+    return img, d, S
+
+
+def sys_sirkulasi(size):
+    """Ikon Sirkulasi: hati + lingkaran pembuluh."""
+    img, d, S = _sys_base(size, (242, 130, 92, 255))
+    # hati kecil
+    cx = S * 0.5
+    d.ellipse([cx - S * 0.26, S * 0.3, cx - S * 0.02, S * 0.52], fill=(253, 246, 227, 255))
+    d.ellipse([cx + S * 0.02, S * 0.3, cx + S * 0.26, S * 0.52], fill=(253, 246, 227, 255))
+    d.polygon([(cx - S * 0.235, S * 0.42), (cx + S * 0.235, S * 0.42), (cx, S * 0.72)], fill=(253, 246, 227, 255))
+    # lingkaran pembuluh (panah sirkulasi)
+    d.arc([S * 0.16, S * 0.52, S * 0.84, S * 1.0], start=200, end=340, fill=(233, 106, 76, 255), width=max(3, int(S * 0.05)))
+    d.polygon([(S * 0.78, S * 0.6), (S * 0.9, S * 0.66), (S * 0.76, S * 0.74)], fill=(233, 106, 76, 255))
+    return done(img, size)
+
+
+def sys_pencernaan(size):
+    """Ikon Pencernaan: lambung kawaii tersenyum."""
+    img, d, S = _sys_base(size, (245, 198, 79, 255))
+    # lambung (blob J)
+    d.ellipse([S * 0.26, S * 0.26, S * 0.74, S * 0.68], fill=(253, 246, 227, 255))
+    d.line([(S * 0.62, S * 0.62), (S * 0.62, S * 0.78), (S * 0.44, S * 0.78)], fill=(253, 246, 227, 255), width=max(5, int(S * 0.1)), joint="curve")
+    d.ellipse([S * 0.39, S * 0.38, S * 0.45, S * 0.44], fill=(18, 63, 58, 255))
+    d.ellipse([S * 0.55, S * 0.38, S * 0.61, S * 0.44], fill=(18, 63, 58, 255))
+    d.arc([S * 0.42, S * 0.42, S * 0.58, S * 0.54], start=25, end=155, fill=(18, 63, 58, 255), width=max(2, int(S * 0.025)))
+    # bintik nutrisi
+    for bx, by in ((0.32, 0.3), (0.68, 0.32), (0.3, 0.5)):
+        d.ellipse([S * bx - S * 0.03, S * by - S * 0.03, S * bx + S * 0.03, S * by + S * 0.03], fill=(169, 215, 149, 255))
+    return done(img, size)
+
+
+def sys_saraf(size):
+    """Ikon Saraf: otak sederhana + sinyal."""
+    img, d, S = _sys_base(size, (176, 122, 224, 255))
+    d.ellipse([S * 0.28, S * 0.24, S * 0.72, S * 0.64], fill=(253, 246, 227, 255))
+    # lipatan
+    d.arc([S * 0.34, S * 0.28, S * 0.56, S * 0.46], start=60, end=280, fill=(18, 63, 58, 255), width=max(2, int(S * 0.025)))
+    d.arc([S * 0.5, S * 0.36, S * 0.68, S * 0.58], start=200, end=360, fill=(18, 63, 58, 255), width=max(2, int(S * 0.025)))
+    # batang + sinyal
+    d.rounded_rectangle([S * 0.46, S * 0.6, S * 0.54, S * 0.7], radius=int(S * 0.03), fill=(253, 246, 227, 255))
+    for k, rr in enumerate((0.12, 0.2, 0.28)):
+        d.arc([S * 0.5 - S * rr, S * 0.5 - S * rr, S * 0.5 + S * rr, S * 0.5 + S * rr], start=-45, end=45, fill=(255, 224, 130, 255 - k * 60), width=max(2, int(S * 0.03)))
+    return done(img, size)
+
+
+def sys_imun(size):
+    """Ikon Imun: sel kepala perisai (hero)."""
+    img, d, S = _sys_base(size, (47, 156, 143, 255))
+    # perisai
+    pts = [(S * 0.5, S * 0.18), (S * 0.74, S * 0.28), (S * 0.72, S * 0.56), (S * 0.5, S * 0.78), (S * 0.28, S * 0.56), (S * 0.26, S * 0.28)]
+    d.polygon(pts, fill=(253, 246, 227, 255))
+    # wajah mini
+    d.ellipse([S * 0.42, S * 0.34, S * 0.47, S * 0.4], fill=(18, 63, 58, 255))
+    d.ellipse([S * 0.53, S * 0.34, S * 0.58, S * 0.4], fill=(18, 63, 58, 255))
+    d.arc([S * 0.43, S * 0.38, S * 0.57, S * 0.5], start=25, end=155, fill=(18, 63, 58, 255), width=max(2, int(S * 0.025)))
+    # kilau
+    d.line([(S * 0.62, S * 0.22), (S * 0.68, S * 0.28)], fill=(255, 255, 255, 230), width=max(2, int(S * 0.02)))
+    return done(img, size)
+
+
+def sys_limfatik(size):
+    """Ikon Limfatik: kelenjar tetesan + kincir filter."""
+    img, d, S = _sys_base(size, (127, 205, 236, 255))
+    # tetesan besar
+    d.polygon([(S * 0.5, S * 0.16), (S * 0.72, S * 0.5), (S * 0.5, S * 0.78), (S * 0.28, S * 0.5)], fill=(253, 246, 227, 255))
+    d.ellipse([S * 0.34, S * 0.4, S * 0.66, S * 0.7], fill=(253, 246, 227, 255))
+    # bintik racun yang disaring
+    for bx, by in ((0.42, 0.5), (0.56, 0.56), (0.5, 0.42)):
+        d.ellipse([S * bx - S * 0.035, S * by - S * 0.035, S * bx + S * 0.035, S * by + S * 0.035], fill=(127, 205, 236, 255))
+    d.ellipse([S * 0.44, S * 0.5, S * 0.5, S * 0.56], fill=(140, 96, 200, 255))
+    return done(img, size)
+
+
+def meter_energi(size):
+    """Meteran Energi: bolt teal menyala."""
+    img, d = canvas(size)
+    S = size * SS
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], fill=(223, 245, 226, 255))
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], outline=(47, 156, 143, 255), width=max(3, int(S * 0.04)))
+    d.polygon([(S * 0.56, S * 0.14), (S * 0.32, S * 0.54), (S * 0.48, S * 0.54), (S * 0.4, S * 0.86), (S * 0.68, S * 0.42), (S * 0.52, S * 0.42), (S * 0.64, S * 0.14)], fill=(47, 156, 143, 255))
+    return done(img, size)
+
+
+def meter_racun(size):
+    """Meteran Racun: tetesan ungu-gelap gelembung."""
+    img, d = canvas(size)
+    S = size * SS
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], fill=(237, 226, 250, 255))
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], outline=(140, 96, 200, 255), width=max(3, int(S * 0.04)))
+    d.polygon([(S * 0.5, S * 0.14), (S * 0.74, S * 0.5), (S * 0.5, S * 0.84), (S * 0.26, S * 0.5)], fill=(140, 96, 200, 255))
+    d.ellipse([S * 0.34, S * 0.44, S * 0.66, S * 0.76], fill=(140, 96, 200, 255))
+    for bx, by, rr in ((0.42, 0.56, 0.06), (0.58, 0.5, 0.05), (0.5, 0.66, 0.04)):
+        d.ellipse([S * bx - S * rr, S * by - S * rr, S * bx + S * rr, S * by + S * rr], fill=(214, 190, 240, 255))
+    return done(img, size)
+
+
+def badge_kritis(size):
+    """Badge kondisi kritis: segitiga peringatan coral."""
+    img, d = canvas(size)
+    S = size * SS
+    d.polygon([(S * 0.5, S * 0.08), (S * 0.94, S * 0.88), (S * 0.06, S * 0.88)], fill=(242, 130, 92, 255))
+    d.polygon([(S * 0.5, S * 0.08), (S * 0.94, S * 0.88), (S * 0.5, S * 0.88)], fill=(233, 106, 76, 255))
+    d.rounded_rectangle([S * 0.46, S * 0.34, S * 0.54, S * 0.62], radius=int(S * 0.04), fill=(253, 246, 227, 255))
+    d.ellipse([S * 0.45, S * 0.66, S * 0.55, S * 0.76], fill=(253, 246, 227, 255))
+    return done(img, size)
+
+
+def gen_stage_body(out):
+    print("STAGE 10 — Sistem tubuh (8 aset)")
+    return {
+        "icon_sirkulasi.png": sys_sirkulasi(128),
+        "icon_pencernaan.png": sys_pencernaan(128),
+        "icon_saraf.png": sys_saraf(128),
+        "icon_imun.png": sys_imun(128),
+        "icon_limfatik.png": sys_limfatik(128),
+        "meter_energi.png": meter_energi(112),
+        "meter_racun.png": meter_racun(112),
+        "badge_kritis.png": badge_kritis(128),
+    }
+
+
+# =====================================================================
 
 def main():
     os.makedirs(OUT, exist_ok=True)
     stages = [
         gen_stage_evo,
+        gen_stage_body,
         gen_stage_heroes,
         gen_stage_enemies,
         gen_stage_items,

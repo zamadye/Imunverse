@@ -20,6 +20,7 @@ const APP_STATE_BY_SCREEN = {
   upgrade: 'upgrade',
   shop: 'shop',
   arena: 'dashboard', // modal di atas dashboard — state tetap dashboard
+  focus: 'dashboard',
   hud: 'gameplay',
   gameover: 'gameover',
 };

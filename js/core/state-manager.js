@@ -42,6 +42,8 @@ export function createDefaultMeta() {
     evoStage: 0,
     evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
     adDaily: { date: null, count: 0 },
+    focusRun: 'seimbang',
+    bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
     squadUpgrades: {
       sq_damage: 0,
       sq_vitality: 0,

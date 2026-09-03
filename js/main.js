@@ -32,6 +32,7 @@ import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import * as arenaScreen from './ui/screens/arena-screen.js';
+import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 
 const canvas = document.getElementById('game');
@@ -147,6 +148,7 @@ async function boot() {
   screenManager.registerScreen('revive', reviveScreen);
   screenManager.registerScreen('gameover', gameoverScreen);
   screenManager.registerScreen('arena', arenaScreen);
+  screenManager.registerScreen('focus', focusScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   bosschestScreen.wire();
 
@@ -160,6 +162,7 @@ async function boot() {
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
+  document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
 
   // Keyboard kemampuan aktif (j/k/l/o sesuai data/abilities.json + angka 1-4)
   window.addEventListener('keydown', (ev) => {
@@ -271,6 +274,7 @@ async function runAutotest() {
     log('dashboardShown', true);
 
     STATE.meta.evoStage = 3; // Fagosit Elite → tebasan/siklon/petir terbuka
+    STATE.meta.focusRun = 'limfatik'; // fokus detoks → registerRunResult terukur
     game.startRun('sel_t');
     log('runStarted', STATE.screen === 'gameplay');
 
@@ -336,6 +340,12 @@ async function runAutotest() {
     log('saveWritten', !!STATE.meta.updatedAt);
     const metaParts = Object.values(STATE.meta.evoParts).reduce((a, b) => a + b, 0);
     log('evolutionPersisted', metaParts > 0);
+
+    // META-LAYER kondisi tubuh: run menghasilkan racun & fokus memulihkan
+    // sistem; state tubuh tersimpan di save.
+    const bodyBefore = STATE.meta.bodyState ? STATE.meta.bodyState.racun : null;
+    log('bodyRacunRegistered', bodyBefore !== null && bodyBefore > 0);
+    log('bodyStatePersisted', !!STATE.meta.bodyState && typeof STATE.meta.bodyState.energi === 'number');
 
     console.log('SELFTEST_PASS ' + JSON.stringify(results));
   } catch (err) {

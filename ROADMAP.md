@@ -115,6 +115,20 @@
 - [x] **Bugfix nyata**: `Pickup.isCollectedBy` NaN (`player.pickupRadius` tidak ada di Player) → nutrisi TIDAK PERNAH terambil; kini fallback `stats.pickupRadius` — nutrisi/bagian kembali terkumpul.
 - **Kriteria lulus:** 15/15 screenshot Chromium CLEAN (0 error/404); perf vsync 16,6 ms/frame @151 musuh dengan semua overlay evolusi aktif; SELFTEST_PASS 15 langkah.
 
+## Fase 6 — Body as a System: Tubuh = Organisme yang Dikelola ✅
+**Tujuan:** ubah tujuan game dari "bertahan selama mungkin" menjadi **"jaga universe-tubuh tetap sehat"** — roguelite manajemen organisme (in-run TIDAK berubah; murni meta-layer antar-run).
+- [x] **5 sistem saling terhubung** (`data/body-systems.json`): Sirkulasi, Pencernaan, Saraf, Imun, Limfatik — masing-masing 0-100, decay -1/hari bila tak dirawat (offline cap 7 hari).
+- [x] **Rumus interdependency sesuai desain**: `Sirkulasi_efektif = Sirkulasi_base × (Pencernaan/100)`; `racun += kills × 0.3 − limfatik × 0.02`; racun ≥70 meracuni Pencernaan (−2/run) → loop tertutup.
+- [x] **Energi**: dihasilkan Pencernaan tiap run (0,5–1,5× + wave), dipakai boost pemulihan sistem fokus (−25/boost).
+- [x] **Kondisi kritis < 20**: bukan game over — modifier run (Imun kritis → musuh +20% cepat; Saraf kritis → XP −25%; dst) + badge kritis berdenyut di dashboard.
+- [x] **Modifier run bertahap** dari kondisi tubuh: cooldownScale (Sirkulasi efektif), nutrientMult (Pencernaan — nilai nutrisi run), xpMult (Saraf), damageMult (Imun) — di-set via `applyBodyModifiers` di startRun.
+- [x] **Fokus Run** (modal 6 pilihan): "Run Detoksifikasi Limfatik" (saring racun ekstra), "Run Respons Cepat" (pulihkan Sirkulasi), dst — menang (wave ≥3) = +10 sistem fokus, gagal = +3.
+- [x] **Milestone makro**: "Tubuh Sehat Sempurna" = SEMUA sistem ≥80 selama 3 hari berturut-turut (streak tersimpan) + **arc naratif**: Terinfeksi Kronis → Tubuh Mulai Melawan → Zaman Pemulihan → Hampir Sehat → Sehat Sempurna.
+- [x] **Monetisasi natural**: rewarded ad "percepat pemulihan sistem kritis" (masuk kuota harian) + IAP simulasi "Suplemen Premium" (+20 semua sistem) + suplemen per-sistem 250 antibodi di shop.
+- [x] **Dampak run tampil di game over**: "+X racun · +Y energi · Sirkulasi +10 · racun meracuni Pencernaan −2".
+- [x] **8 aset stage 10**: ikon 5 sistem, meter energi/racun, badge kritis (total 96 PNG).
+- **Kriteria lulus:** SELFTEST 17 langkah PASS (bodyRacunRegistered, bodyStatePersisted); screenshot: kartu kondisi tubuh, kondisi kritis, modal fokus, suplemen shop, dampak gameover; perf tetap vsync 16,6 ms/frame.
+
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
 - [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.

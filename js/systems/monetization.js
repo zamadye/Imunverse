@@ -89,6 +89,33 @@ export function trackAdWatch(meta) {
 }
 
 /**
+ * HOOK: iklan reward untuk PERCEPAT PEMULIHAN sistem tubuh yang kritis
+ * (meta-layer kondisi tubuh). User menonton karena BUTUH menyelamatkan
+ * progres sistem — natural break di dashboard, selalu opsional, masuk
+ * kuota harian canWatchAd. Setelah sukses body-system.recoverViaAd()
+ * menaikkan sistem paling kritis — logic asli.
+ * @returns {boolean}
+ */
+export function triggerRewardedAdRecovery(onSuccess, onFail) {
+  console.info('[monetization] triggerRewardedAdRecovery() — simulasi iklan reward (pemulihan sistem)');
+  simulateAdPlayback(onSuccess, onFail);
+  return true;
+}
+
+/**
+ * HOOK: IAP "Suplemen Premium" (non-consumable style, simulasi).
+ * Kontrak integrasi SDK nantinya: onSuccess HANYA setelah pembelian nyata
+ * terverifikasi store. Setelah sukses caller menerapkan efek suplemen —
+ * alur di sekitarnya (efek +20 semua sistem, ditandai dirawat) logic asli.
+ * @returns {boolean}
+ */
+export function triggerIAPSuplementPremium(onSuccess, onFail) {
+  console.info('[monetization] triggerIAPSuplementPremium() — pembelian simulasi');
+  setTimeout(() => onSuccess(), SIMULATED_AD_DURATION_MS);
+  return true;
+}
+
+/**
  * HOOK: ketersediaan sistem "daily lives" / daily reward.
  * SDK/integrasi server nantinya bisa menentukan ketersediaan; saat ini
  * selalu tersedia, dan tanggal klaim terakhir divalidasi lokal oleh

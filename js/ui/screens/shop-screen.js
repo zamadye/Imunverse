@@ -5,7 +5,11 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { getData } from '../../core/data-store.js';
-import { purchaseHeroUnlock, purchaseShopItem } from '../../systems/economy-system.js';
+import { addCurrency } from '../../systems/economy-system.js';
+import { applySuplemen } from '../../systems/body-system.js';
+import { writeSave } from '../../save/save-manager.js';
+import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
+import { emit } from '../../core/ui-bridge.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 
@@ -92,6 +96,59 @@ export function show() {
   });
   itemSection.appendChild(itemGrid);
   wrap.appendChild(itemSection);
+
+  // ---------------- Section: SUPLEMEN SISTEM (meta-layer kondisi tubuh) ----------------
+  const bodyCfg = getData().bodySystems;
+  const supSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'SUPLEMEN SISTEM TUBUH' })]);
+  const supGrid = el('div', { class: 'shop-grid' });
+  bodyCfg.systems.forEach((sysDef, i) => {
+    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` }, [
+      el('div', { class: 'price-tag' }, [
+        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+        el('span', { text: String(bodyCfg.suplemenCost) }),
+      ]),
+      el('img', { class: 'shop-sprite', src: sysDef.icon, alt: sysDef.name }),
+      el('b', { text: `Suplemen ${sysDef.name}` }),
+      el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} kesehatan ${sysDef.name} — ${sysDef.role}.` }),
+      el('button', {
+        class: 'btn btn-primary',
+        text: 'BELI',
+        disabled: meta.currency < bodyCfg.suplemenCost,
+        onclick: () => {
+          if (meta.currency < bodyCfg.suplemenCost) return;
+          addCurrency(meta, -bodyCfg.suplemenCost); // sink currency (logic asli)
+          const res = applySuplemen(sysDef.id, meta);
+          if (res) emit('toast', { message: `Suplemen diminum: ${sysDef.name} +${res.gained}!`, kind: 'gold' });
+          show();
+        },
+      }),
+    ]);
+    supGrid.appendChild(card);
+  });
+
+  // Suplemen Premium via IAP simulasi (+20 SEMUA sistem, 1x/hari via kuota)
+  const premiumCard = el('div', { class: 'shop-card c-gold' }, [
+    el('img', { class: 'shop-sprite', src: 'assets/sprites/meter_energi.png', alt: '' }),
+    el('b', { text: 'Suplemen Premium' }),
+    el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} SEMUA sistem sekaligus (pembelian simulasi).` }),
+    el('button', {
+      class: 'btn btn-gold',
+      text: canWatchAd(meta) ? 'BELI (IAP SIMULASI)' : 'KUOTA HARIAN PENUH',
+      disabled: !canWatchAd(meta),
+      onclick: () => {
+        if (!canWatchAd(meta)) return;
+        triggerIAPSuplementPremium(() => {
+          trackAdWatch(meta);
+          for (const sysDef of bodyCfg.systems) applySuplemen(sysDef.id, meta);
+          emit('toast', { message: 'Suplemen Premium: semua sistem pulih!', kind: 'gold' });
+          show();
+        });
+      },
+    }),
+  ]);
+  supGrid.appendChild(premiumCard);
+  supSection.appendChild(supGrid);
+  wrap.appendChild(supSection);
 }
 
 export function hide() {}

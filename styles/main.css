@@ -893,3 +893,66 @@ img.lock-badge {
 
 .lock-line span { line-height: 14px; }
 .arena-item .ai-unlock.lock-line { display: flex; align-items: center; }
+
+/* =====================================================================
+   META-LAYER KONDISI TUBUH (Fase 6) — tubuh = organisme yang dikelola
+   ===================================================================== */
+
+/* -- Kartu kondisi tubuh di dashboard -- */
+.body-card { display: flex; flex-direction: column; gap: 10px; }
+.body-head { display: flex; align-items: center; gap: 10px; }
+.body-title-wrap { flex: 1; display: flex; flex-direction: column; }
+.body-title { color: var(--ink); font-size: 15px; }
+.body-sub { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+
+.body-rows { display: flex; flex-direction: column; gap: 7px; }
+.body-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 14px; background: var(--cream);
+}
+.body-row.critical { background: #fde4d8; animation: crit-pulse 1.4s ease-in-out infinite; }
+@keyframes crit-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 130, 92, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(242, 130, 92, 0.35); }
+}
+.body-ico { width: 26px; height: 26px; }
+.body-name { width: 84px; font-size: 12.5px; font-weight: 900; color: var(--ink); }
+.body-track {
+  position: relative; flex: 1; height: 14px; border-radius: 8px;
+  background: #e9dfc0; overflow: hidden;
+}
+.body-fill { height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+.body-val {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: var(--ink);
+}
+.body-crit { width: 22px; height: 22px; animation: floaty 2s ease-in-out infinite; }
+
+.body-meters { display: flex; gap: 8px; }
+.meter {
+  flex: 1; display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+  background: var(--cream); border-radius: 14px; font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.meter img { width: 22px; height: 22px; }
+.meter.danger { background: #fde4d8; color: var(--coral); }
+
+.body-foot { display: flex; flex-direction: column; gap: 8px; }
+.body-milestone { font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+.body-milestone.done { color: var(--gold-dark, #b98a20); }
+
+/* -- Modal fokus run -- */
+.focus-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+.focus-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: 18px; background: var(--cream); cursor: pointer;
+  border: 3px solid transparent; text-align: left; width: 100%;
+}
+.focus-item.selected { border-color: var(--teal); background: var(--teal-light); }
+.focus-item img { width: 40px; height: 40px; }
+.fi-mid { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fi-name { font-weight: 900; color: var(--ink); }
+.fi-desc { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+
+/* -- Dampak tubuh di game over -- */
+.go-body { font-size: 12.5px; }

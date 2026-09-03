@@ -15,6 +15,7 @@ const store = {
   evolutions: null, // data/evolutions.json
   abilities: null,  // data/abilities.json
   arenas: null,     // data/arenas.json
+  bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
 };
 
 /** Muat semua file JSON game secara paralel. */
@@ -29,6 +30,7 @@ export async function loadAllData() {
     evolutions: 'data/evolutions.json',
     abilities: 'data/abilities.json',
     arenas: 'data/arenas.json',
+    bodySystems: 'data/body-systems.json',
   };
 
   const entries = await Promise.all(

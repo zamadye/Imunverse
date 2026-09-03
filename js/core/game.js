@@ -35,6 +35,9 @@ import {
 import { AbilitySystem } from '../systems/ability-system.js';
 import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
 import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
+import {
+  applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
+} from '../systems/body-system.js';
 
 import { Camera } from '../render/camera.js';
 import { drawBackground, setArenaPalette } from '../render/background.js';
@@ -93,14 +96,24 @@ export const game = {
     const startX = 0;
     const startY = 0;
     const upgrades = {};
+    // Decay harian sistem tubuh (sekali per hari kalender) + modifier kondisi
+    const decayInfo = applyDailyDecay(meta);
+    const bodyMods = getBodyRunModifiers(meta);
+    this.lastBodyDecay = decayInfo;
+
     const stats = this.computePlayerStats(heroDef, upgrades);
     this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
+    this.applyBodyModifiers(stats, bodyMods); // kondisi tubuh (meta-layer)
 
     const player = new Player(heroDef, stats, startX, startY);
 
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
+
+    // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
+    const focusId = meta.focusRun || 'seimbang';
+    const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === focusId) || null;
 
     // Kemampuan aktif sesuai tahap evolusi hero (tombol kanan: pedang + 3 kekuatan)
     const evoStage = getEvoStageDef(meta);
@@ -137,6 +150,9 @@ export const game = {
       boss: null,
       arena,
       evoStage,
+      bodyMods,
+      focusId,
+      focusDef,
       abilities: new AbilitySystem(unlockedAbilityIds),
       parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
       partsCollectedTotal: 0,
@@ -170,6 +186,20 @@ export const game = {
     stats.maxHP = Math.round(stats.maxHP * evo.maxHPMult);
     stats.speed *= arena.bonus.speedMult || 1;
     stats.magnetRadius *= arena.bonus.magnetMult || 1;
+    return stats;
+  },
+
+  /**
+   * Terapkan kondisi tubuh ke stat run (meta-layer, gameplay inti sama):
+   * cooldownScale (Sirkulasi efektif), nutrientMult (Pencernaan), xpMult
+   * (Saraf), damageMult (Imun), enemySpeedMult kritis (musuh lebih cepat).
+   */
+  applyBodyModifiers(stats, mods) {
+    if (mods.cooldownScale !== undefined) stats.cooldown *= mods.cooldownScale;
+    if (mods.damageMult !== undefined) stats.damage *= mods.damageMult;
+    if (mods.xpMult !== undefined) stats.xpMult *= mods.xpMult;
+    stats.bodyNutrientMult = mods.nutrientMult !== undefined ? mods.nutrientMult : 1;
+    stats.bodyEnemySpeedMult = mods.enemySpeedMult !== undefined ? mods.enemySpeedMult : 1;
     return stats;
   },
 
@@ -512,6 +542,10 @@ export const game = {
     }
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    // Kondisi tubuh: sistem kritis bisa mempercepat musuh (mis. Imun < 20)
+    if (run.bodyMods && run.bodyMods.enemySpeedMult && run.bodyMods.enemySpeedMult !== 1) {
+      enemy.speed *= run.bodyMods.enemySpeedMult;
+    }
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
@@ -632,9 +666,11 @@ export const game = {
     }
 
     // ---- Drop orb XP (nilai = xpPerKill musuh; skin sesuai nilai) ----
+    // Nilai nutrisi dipengaruhi kondisi Pencernaan (meta-layer)
+    const nutrMult = run.bodyMods?.nutrientMult ?? 1;
     const nutrients = getData().nutrients;
     const xpSkin = enemy.xpPerKill >= 5 ? getNutrientDef('amino') : getNutrientDef('glukosa');
-    run.pickups.push(new Pickup(xpSkin, enemy.x, enemy.y, enemy.xpPerKill));
+    run.pickups.push(new Pickup(xpSkin, enemy.x, enemy.y, Math.round(enemy.xpPerKill * nutrMult * 10) / 10));
 
     // ---- Bonus drop (heal/currency/magnet) ----
     if (enemy.isBoss) {
@@ -759,6 +795,15 @@ export const game = {
       if (n > 0) meta.evoParts[partId] = (meta.evoParts[partId] || 0) + n;
     }
     addCurrency(meta, earned);
+
+    // META-LAYER kondisi tubuh: racun, energi, pemulihan sistem fokus,
+    // toxic seep, streak milestone — loop tertutup antar-run.
+    this.lastBodyImpact = registerRunResult(meta, {
+      kills: run.kills,
+      wave: run.spawnSys.wave,
+      focusId: run.focusId || 'seimbang',
+    });
+    emit('bodyimpact', this.lastBodyImpact);
 
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);

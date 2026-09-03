@@ -6,6 +6,7 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
+import { getData } from '../../core/data-store.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el } from '../screen-manager.js';
 
@@ -68,6 +69,20 @@ export function show(summary) {
       el('b', { text: String(value) }),
       el('span', { text: label }),
     ]));
+  }
+
+  // Dampak run ke KONDISI TUBUH (meta-layer organisme)
+  const impact = game.lastBodyImpact;
+  if (impact) {
+    const bits = [`+${impact.racunGained} racun`];
+    if (impact.energiGained) bits.push(`+${impact.energiGained} energi`);
+    for (const [sysId, gain] of Object.entries(impact.systemGains)) {
+      const name = getData().bodySystems.systems.find((x) => x.id === sysId)?.name || sysId;
+      bits.push(`${name} ${gain >= 0 ? '+' : ''}${gain}`);
+    }
+    if (impact.toxicSeep) bits.push(`racun meracuni Pencernaan -${impact.toxicSeep}`);
+    if (impact.detox) bits.push(`detoks -${impact.detox} racun`);
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-body', text: `Tubuh: ${bits.join(' · ')}` }));
   }
 
   // Bagian evolusi terkumpul run ini (feed meta-progression)
