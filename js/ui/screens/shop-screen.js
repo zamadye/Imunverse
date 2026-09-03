@@ -1,6 +1,6 @@
 /**
- * shop-screen.js — Toko: beli unlock hero (jalur alternatif kondisi misi)
- * dan item consumable (Serum Awal). Semua pembelian auto-save.
+ * shop-screen.js — Toko ala reference: grid kartu pastel 3 kolom, badge harga
+ * kuning di pojok kanan-atas, badge gembok di kanan-bawah untuk terkunci.
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -8,6 +8,8 @@ import { getData } from '../../core/data-store.js';
 import { purchaseHeroUnlock, purchaseShopItem } from '../../systems/economy-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
+
+const PASTEL = ['c-teal', 'c-green', 'c-coral'];
 
 export function show() {
   const meta = STATE.meta;
@@ -19,49 +21,55 @@ export function show() {
   // ---------------- Section: buka hero ----------------
   const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: '🦠 BUKA HERO' })]);
   const heroGrid = el('div', { class: 'shop-grid' });
-  for (const heroDef of getData().heroes.heroes) {
+  const heroes = getData().heroes.heroes;
+  heroes.forEach((heroDef, i) => {
     const unlocked = meta.unlockedHeroes.includes(heroDef.id);
-    const item = el('div', { class: 'shop-item' });
-    const img = el('img', { src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name, style: 'width:56px;height:56px;object-fit:contain;' + (unlocked ? '' : 'opacity:.35;filter:grayscale(.7);') });
-    item.appendChild(img);
-    item.appendChild(el('b', { text: heroDef.name }));
-    item.appendChild(el('div', { class: 's-desc', text: heroDef.description }));
+    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` });
+    // Badge harga di pojok (untuk yang dijual & belum dimiliki)
+    if (!unlocked && heroDef.shopCost > 0) {
+      card.appendChild(el('div', { class: 'price-tag', text: `💠${heroDef.shopCost}` }));
+    }
+    card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
+    card.appendChild(el('b', { text: heroDef.name }));
+    card.appendChild(el('div', { class: 's-desc', text: heroDef.description }));
 
     if (unlocked) {
-      item.appendChild(el('div', { class: 's-owned', text: '✓ Terbuka' }));
+      card.appendChild(el('div', { class: 's-owned', text: '✓ Dimiliki' }));
     } else if (!heroDef.shopCost) {
-      item.appendChild(el('div', { class: 's-owned', style: 'color:var(--text-dim)', text: 'Tidak dijual' }));
+      card.appendChild(el('div', { class: 's-owned', text: 'Buka via misi' }));
+      card.appendChild(el('div', { class: 'lock-badge', text: '🔒' }));
     } else {
-      item.appendChild(el('button', {
+      card.appendChild(el('button', {
         class: 'btn btn-primary',
-        style: 'width:100%;font-size:13px;',
-        text: `Beli ${heroDef.shopCost} 🛡️`,
+        text: 'BELI',
         disabled: meta.currency < heroDef.shopCost,
         onclick: () => {
           const res = purchaseHeroUnlock(STATE.meta, heroDef); // logic + auto-save
           if (res.ok) show();
         },
       }));
+      card.appendChild(el('div', { class: 'lock-badge', text: '🔒' }));
     }
-    heroGrid.appendChild(item);
-  }
+    heroGrid.appendChild(card);
+  });
   heroSection.appendChild(heroGrid);
   wrap.appendChild(heroSection);
 
   // ---------------- Section: item ----------------
   const itemSection = el('div', { class: 'shop-section' }, [el('h3', { text: '💉 ITEM' })]);
   const itemGrid = el('div', { class: 'shop-grid' });
-  for (const def of getData().upgrades.shopItems) {
+  const items = getData().upgrades.shopItems;
+  items.forEach((def, i) => {
     const owned = meta.consumables[def.id] || 0;
-    const item = el('div', { class: 'shop-item' }, [
-      el('div', { class: 's-icon', text: def.icon }),
+    const card = el('div', { class: `shop-card ${PASTEL[(i + 2) % PASTEL.length]}` }, [
+      el('div', { class: 'price-tag', text: `💠${def.cost}` }),
+      el('div', { class: 'icon-sprite', text: def.icon }),
       el('b', { text: def.name }),
       el('div', { class: 's-desc', text: def.desc }),
       el('div', { class: 's-owned', text: `Dimiliki: ${owned}` }),
       el('button', {
         class: 'btn btn-primary',
-        style: 'width:100%;font-size:13px;',
-        text: `Beli ${def.cost} 🛡️`,
+        text: 'BELI',
         disabled: meta.currency < def.cost,
         onclick: () => {
           const res = purchaseShopItem(STATE.meta, def.id); // logic + auto-save
@@ -69,8 +77,8 @@ export function show() {
         },
       }),
     ]);
-    itemGrid.appendChild(item);
-  }
+    itemGrid.appendChild(card);
+  });
   itemSection.appendChild(itemGrid);
   wrap.appendChild(itemSection);
 }

@@ -1,8 +1,7 @@
 /**
- * gameover-screen.js — Summary hasil run: wave, waktu, kill, XP, nutrisi,
- * antibodi didapat + tombol rewarded ad 2x currency (HOOK monetisasi,
- * alur setelahnya logic asli via game.applyDoubleCurrency()).
- * wireButtons() dipanggil SEKALI dari main.js saat boot.
+ * gameover-screen.js — Summary ala reference "Victory": bintang rating di atas
+ * kartu (1–3 berdasarkan wave), judul coral dengan garis hias, count-up
+ * currency, tombol rewarded ad 2x (HOOK — alurnya logic asli).
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -10,15 +9,45 @@ import { game } from '../../core/game.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el } from '../screen-manager.js';
 
+let wiringDone = false;
+
+function starsFor(summary) {
+  if (summary.wave >= 15) return 3;
+  if (summary.wave >= 7) return 2;
+  return 1;
+}
+
+/** Animasi angka count-up untuk currency. */
+function countUp(node, target) {
+  const duration = 900;
+  const t0 = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - t0) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    node.textContent = `${Math.round(target * eased).toLocaleString('id-ID')} 💠`;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 export function show(summary) {
   const title = document.getElementById('gameover-title');
-  title.textContent = summary.quit ? 'RUN DIAKHIRI' : 'PERMAINAN SELESAI';
+  title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
   title.className = 'gameover-title' + (summary.quit ? ' win' : '');
 
   document.getElementById('gameover-sub').textContent =
     summary.wave >= 10
-      ? 'Luar biasa! Sistem imun mengingat pengorbananmu.'
-      : 'Sistem imun mengingat pengorbananmu. Setiap run membuat squad semakin kuat.';
+      ? 'Luar biasa! Sistem imun mengingat jasamu.'
+      : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+
+  // Bintang rating ala mockup victory
+  const stars = starsFor(summary);
+  document.querySelectorAll('#gameover-stars .star').forEach((s, i) => {
+    s.classList.remove('on');
+    if (i < stars) {
+      setTimeout(() => s.classList.add('on'), 250 + i * 260);
+    }
+  });
 
   const grid = document.getElementById('gameover-summary');
   grid.textContent = '';
@@ -37,16 +66,19 @@ export function show(summary) {
     ]));
   }
 
-  document.getElementById('gameover-currency').textContent = `+${summary.currencyEarned} 🛡️`;
+  countUp(document.getElementById('gameover-currency'), summary.currencyEarned);
 
   const dblBtn = document.getElementById('btn-double-currency');
   dblBtn.disabled = !game.canDoubleCurrency();
   dblBtn.textContent = game.canDoubleCurrency()
     ? '🎬 Tonton Iklan → 2x Antibodi'
-    : `Total Antibodi: ${STATE.meta.currency} 🛡️`;
+    : `Total Antibodi: ${STATE.meta.currency.toLocaleString('id-ID')} 💠`;
 }
 
 export function wireButtons() {
+  if (wiringDone) return;
+  wiringDone = true;
+
   document.getElementById('btn-double-currency').addEventListener('click', () => {
     const dblBtn = document.getElementById('btn-double-currency');
     if (!game.canDoubleCurrency()) return;
@@ -54,7 +86,7 @@ export function wireButtons() {
     dblBtn.textContent = '📺 Memutar iklan… (simulasi)';
     triggerRewardedAdDoubleCurrency(() => {
       const total = game.applyDoubleCurrency(); // logic asli + auto-save
-      dblBtn.textContent = `✓ 2x! Total: ${total} 🛡️`;
+      dblBtn.textContent = `✓ 2x! Total: ${total.toLocaleString('id-ID')} 💠`;
     });
   });
 
@@ -63,7 +95,6 @@ export function wireButtons() {
   });
 
   document.getElementById('btn-home').addEventListener('click', () => {
-    // navigasi ditangani main.js lewat delegasi tombol data-nav
     window.__IMUNVERSE_goDashboard();
   });
 }

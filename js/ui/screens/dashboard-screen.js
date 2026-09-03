@@ -1,13 +1,15 @@
 /**
- * dashboard-screen.js — Dashboard utama: statistik global, daily reward
- * (lewat hook monetisasi checkDailyLives), progress misi & navigasi.
+ * dashboard-screen.js — Dashboard ala reference user:
+ * topbar currency + panggung hero pastel + strip statistik + daily +
+ * misi, dengan dock navigasi (Play/Heroes/Squad/Shop) di index.html.
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getHero } from '../../core/data-store.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
+import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
 
@@ -21,11 +23,20 @@ export function show() {
   const meta = STATE.meta;
   document.getElementById('dash-currency').textContent = meta.currency.toLocaleString('id-ID');
 
-  // ---- Strip statistik ----
+  // ---- Panggung hero: sprite + nama hero terpilih + badge gelombang terbaik ----
+  const heroDef = getHero(meta.selectedHero) || getData().heroes.heroes[0];
+  const img = document.getElementById('dash-hero-img');
+  if (heroDef) {
+    img.src = spriteToDataURL(heroDef.spriteIdle);
+    document.getElementById('dash-hero-name').textContent = heroDef.name;
+    document.getElementById('dash-hero-title').textContent = heroDef.title;
+  }
+  document.getElementById('dash-best-badge').textContent = `🏆 Gel. ${meta.stats.bestWave}`;
+
+  // ---- Strip statistik (3 sel) ----
   const stats = meta.stats;
   const strip = document.getElementById('dash-stats');
   strip.textContent = '';
-  strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.bestWave }), el('span', { text: 'Gelombang Terbaik' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalKills.toLocaleString('id-ID') }), el('span', { text: 'Total Kill' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: fmtTime(stats.bestSurvivalTime) }), el('span', { text: 'Waktu Terbaik' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalRuns }), el('span', { text: 'Total Run' })]));
@@ -37,16 +48,16 @@ export function show() {
   const claimable = livesAvailable && canClaimDailyReward(meta);
   const info = el('div', { class: 'daily-info' }, [
     el('b', { text: '🎁 Bonus Harian' }),
-    el('span', { text: claimable ? `${getData().upgrades.economy.dailyReward} 🛡️ menantimu — klaim sekarang!` : 'Sudah diklaim hari ini. Kembali besok.' }),
+    el('span', { text: claimable ? `${getData().upgrades.economy.dailyReward} 💠 menantimu — klaim sekarang!` : 'Sudah diklaim hari ini. Kembali besok.' }),
   ]);
   const btn = el('button', {
-    class: 'btn ' + (claimable ? 'btn-primary' : ''),
+    class: 'btn ' + (claimable ? 'btn-gold' : ''),
     text: claimable ? 'KLAIM' : '✓ DIKLAIM',
     disabled: !claimable,
     onclick: () => {
       const amount = claimDailyReward(STATE.meta); // logic asli + auto-save
       if (amount > 0) {
-        emit('toast', { message: `🎁 Bonus harian +${amount} 🛡️!`, kind: 'gold' });
+        emit('toast', { message: `🎁 Bonus harian +${amount} 💠!`, kind: 'gold' });
         show(); // refresh angka currency
       }
     },
@@ -54,7 +65,7 @@ export function show() {
   dailyCard.appendChild(info);
   dailyCard.appendChild(btn);
 
-  // ---- Misi (top 4 progres teratas yang belum klaim, sisanya selesai) ----
+  // ---- Misi (3 progres teratas yang belum selesai) ----
   const list = document.getElementById('dash-missions');
   list.textContent = '';
   const progress = getMissionProgressList(meta);
@@ -65,10 +76,10 @@ export function show() {
     const item = el('div', { class: 'mission-item' + (m.done ? ' done' : '') }, [
       el('div', { class: 'm-row' }, [
         el('span', { class: 'm-name', text: m.def.name }),
-        el('span', { class: 'm-reward', text: `+${m.def.reward} 🛡️` }),
+        el('span', { class: 'm-reward', text: `+${m.def.reward} 💠` }),
       ]),
       el('div', { class: 'm-row' }, [
-        el('span', { style: 'color:var(--text-dim);font-size:11px', text: `${m.def.desc} — ${m.value.toLocaleString('id-ID')}/${m.target.toLocaleString('id-ID')}` }),
+        el('span', { class: 'mission-more', text: `${m.def.desc} — ${m.value.toLocaleString('id-ID')}/${m.target.toLocaleString('id-ID')}` }),
       ]),
       el('div', { class: 'mission-track' }, [
         el('div', { class: 'mission-fill', style: `width:${pct}%` }),
@@ -77,9 +88,9 @@ export function show() {
     list.appendChild(item);
   }
   if (active.length === 0) {
-    list.appendChild(el('p', { style: 'color:var(--text-dim);font-size:12px', text: `Semua misi selesai! (${doneCount}/${progress.length}) 🎉` }));
+    list.appendChild(el('p', { class: 'mission-more', text: `Semua misi selesai! (${doneCount}/${progress.length}) 🎉` }));
   } else if (doneCount > 0) {
-    list.appendChild(el('p', { style: 'color:var(--text-dim);font-size:11px', text: `+${doneCount} misi lainnya sudah selesai ✓` }));
+    list.appendChild(el('p', { class: 'mission-more', text: `+${doneCount} misi lainnya sudah selesai ✓` }));
   }
 }
 

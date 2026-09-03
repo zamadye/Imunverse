@@ -1,17 +1,25 @@
 /**
- * hud-screen.js — Gameplay HUD (overlay pasif di atas canvas):
- * HP, XP bar, wave counter, timer, kill, currency run, boss bar, minimap.
- * Murni "view adapter" — tidak mengimpor core/game (dipakai oleh game.js).
- * Tombol pause di-wire oleh main.js agar modul ini bebas dependensi balik.
+ * hud-screen.js — Gameplay HUD ala reference: pill HP cream (portrait +
+ * heart + bar), wave pill teal gelap, timer chip, kill/currency chips,
+ * minimap bulat, XP bar dengan chip level. Murni "view adapter".
  */
 
 let minimapCtx = null;
 let announceTimer = null;
+let hintTimer = null;
 
 export function show() {}
 
 export function hide() {
   clearAnnounce();
+}
+
+/** Hint kontrol adaptif per perangkat (touch vs keyboard). */
+function controlHintText() {
+  const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
+  return isTouch
+    ? 'Sentuh & tarik di mana saja untuk bergerak'
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / panah · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */
@@ -22,19 +30,29 @@ export function resetHUD() {
   document.getElementById('hud-currency').textContent = '0';
   document.getElementById('hud-timer').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
+  document.getElementById('hp-pill').classList.remove('low');
 
   // Portrait hero: main.js mendaftarkan getter ini setelah sprite termuat
   const portrait = document.getElementById('hud-portrait');
   const getter = window.__IMUNVERSE_getHeroPortrait;
   if (portrait && getter) portrait.src = getter();
+
+  // Hint kontrol (hilang sendiri setelah 8 detik)
+  const hint = document.getElementById('hud-hint');
+  hint.innerHTML = controlHintText();
+  hint.style.display = '';
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => { hint.style.display = 'none'; }, 8000);
 }
 
 /** Update HUD tiap frame (dipanggil dari game.render). */
 export function updateHUD(data) {
   setBar('hud-hp-fill', data.hpPct);
   document.getElementById('hud-hp-text').textContent = data.hpText;
+  document.getElementById('hp-pill').classList.toggle('low', data.hpPct < 0.3);
   setBar('hud-xp-fill', Math.max(0, Math.min(1, data.xpPct)));
-  document.getElementById('hud-wave').textContent = `GELOMBANG ${data.wave} · LV ${data.level}`;
+  document.getElementById('hud-level').textContent = `Lv ${data.level}`;
+  document.getElementById('hud-wave').textContent = `GELOMBANG ${data.wave}`;
   document.getElementById('hud-timer').textContent = data.timerText;
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
@@ -54,7 +72,7 @@ function setBar(id, pct) {
   if (node) node.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
 }
 
-/** Banner pengumuman wave / boss. */
+/** Banner pengumuman wave / boss (pill besar ala mockup). */
 export function showAnnounce(text, isBoss = false) {
   const node = document.getElementById('hud-announce');
   if (!node) return;

@@ -533,6 +533,84 @@ def draw_sitokin(size):
 
 
 # ----------------------------------------------------------------------
+# UI EMBLEM (untuk loading screen & dekorasi)
+# ----------------------------------------------------------------------
+
+def draw_ui_shield(size):
+    """Perisai teal dua-tone + virus lucu di tengah + kuman kecil (ala reference)."""
+    img, d = new_canvas(size)
+    S = size * SS
+    teal = hex_rgb("#2F9C8F")
+    teal_deep = hex_rgb("#1F7A70")
+    teal_light = hex_rgb("#BFE3D8")
+    cream = hex_rgb("#FDF6E3")
+    coral = hex_rgb("#F2825C")
+    green = hex_rgb("#A9D795")
+
+    W = S * 0.60
+    left = (S - W) / 2
+    right = (S + W) / 2
+    top = S * 0.16
+    mid = S * 0.60
+    tip = S * 0.86
+
+    # mask perisai: rounded rect + segitiga bawah
+    mask = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(mask)
+    md.rounded_rectangle([left, top, right, mid], radius=int(S * 0.085), fill=255)
+    md.polygon([(left, mid - S * 0.04), (right, mid - S * 0.04), (S / 2, tip)], fill=255)
+
+    # body dua-tone (kiri terang, kanan gelap — seperti reference)
+    body = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(body)
+    bd.rectangle([left, top, S / 2, tip], fill=rgba(mix(teal, (255, 255, 255), 0.10)))
+    bd.rectangle([S / 2, top, right, tip], fill=rgba(teal_deep))
+    img.paste(body, (0, 0), mask)
+
+    d = ImageDraw.Draw(img)
+    # rim highlight atas
+    d.rounded_rectangle([left, top, right, mid], radius=int(S * 0.085),
+                        outline=rgba(mix(teal, (255, 255, 255), 0.45), 180), width=int(S * 0.014))
+
+    # --- virus lucu di tengah perisai ---
+    cx = cy = S * 0.46
+    R = S * 0.15
+    for i in range(8):
+        a = math.tau * i / 8
+        x1, y1 = cx + math.cos(a) * R * 0.92, cy + math.sin(a) * R * 0.92
+        x2, y2 = cx + math.cos(a) * R * 1.28, cy + math.sin(a) * R * 1.28
+        d.line([x1, y1, x2, y2], fill=rgba(cream), width=int(S * 0.022))
+        kr = S * 0.026
+        d.ellipse([x2 - kr, y2 - kr, x2 + kr, y2 + kr], fill=rgba(cream))
+    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=rgba(cream))
+    # muka virus: dua mata + senyum
+    er = S * 0.016
+    d.ellipse([cx - R * 0.42 - er, cy - R * 0.18 - er, cx - R * 0.42 + er, cy - R * 0.18 + er], fill=rgba(teal_deep))
+    d.ellipse([cx + R * 0.42 - er, cy - R * 0.18 - er, cx + R * 0.42 + er, cy + R * 0.18 + er], fill=rgba(teal_deep))
+    d.arc([cx - R * 0.34, cy - R * 0.05, cx + R * 0.34, cy + R * 0.42], 20, 160, fill=rgba(teal_deep), width=int(S * 0.014))
+
+    # --- kuman kecil di sekitar (siluet coral & green dengan mata) ---
+    def germ(gx, gy, gr, col):
+        pts = blob_polygon(gx, gy, gr, points=22, wobble=0.12, seed=int(gx + gy), lobes=5)
+        d.polygon(pts, fill=rgba(col))
+        er2 = gr * 0.16
+        d.ellipse([gx - gr * 0.35 - er2, gy - gr * 0.1 - er2, gx - gr * 0.35 + er2, gy - gr * 0.1 + er2], fill=rgba(cream))
+        d.ellipse([gx + gr * 0.35 - er2, gy - gr * 0.1 - er2, gx + gr * 0.35 + er2, gy - gr * 0.1 + er2], fill=rgba(cream))
+
+    germ(S * 0.84, S * 0.20, S * 0.085, coral)
+    germ(S * 0.13, S * 0.66, S * 0.075, mix(coral, (255, 255, 255), 0.15))
+    germ(S * 0.80, S * 0.80, S * 0.06, green)
+
+    # dot dekoratif
+    for (dx, dy, dr, dc) in ((S * 0.18, S * 0.24, 0.02, green), (S * 0.88, S * 0.52, 0.016, teal_light),
+                             (S * 0.10, S * 0.42, 0.014, coral)):
+        rr = S * dr
+        d.ellipse([dx - rr, dy - rr, dx + rr, dy + rr], fill=rgba(dc))
+
+    return finish(img, size)
+
+
+# ----------------------------------------------------------------------
 # Render semua
 # ----------------------------------------------------------------------
 
@@ -563,6 +641,8 @@ def main():
         "item_vitamin_c.png": draw_vitamin_c(96),
         "item_antibodi.png": draw_antibodi(96),
         "item_sitokin.png": draw_sitokin(96),
+        # ui emblem
+        "ui_shield_emblem.png": draw_ui_shield(256),
     }
 
     for name, img in sprites.items():

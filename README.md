@@ -41,7 +41,7 @@ Lalu buka **http://localhost:8000** — selesai. Tidak ada build step, tidak ada
 ```
 Imunverse/
 ├── index.html                  # Entry point + kerangka screen UI (overlay DOM)
-├── styles/main.css             # Styling semua screen (tema bioluminescent)
+├── styles/main.css             # Design system cream/teal/coral ala reference UI
 ├── data/                       # SEMUA data game (JSON, bukan hardcoded)
 │   ├── heroes.json             #   4 hero (stat, attack pattern, sprite path, unlock)
 │   ├── enemies.json            #   6 tipe musuh (behavior, HP, XP, splitter config, boss AOE)

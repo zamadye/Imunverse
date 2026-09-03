@@ -161,7 +161,17 @@ async function boot() {
   document.querySelectorAll('[data-back]').forEach((btn) => {
     btn.addEventListener('click', () => screenManager.show(btn.dataset.back));
   });
-  document.getElementById('btn-play').addEventListener('click', () => screenManager.show('roster'));
+  document.getElementById('btn-play').addEventListener('click', () => {
+    // Fast path: Play langsung memulai run dengan hero terpilih.
+    // Bila hero terpilih ternyata terkunci (save lama), buka roster.
+    const heroDef = getHero(STATE.meta.selectedHero);
+    const unlocked = heroDef && STATE.meta.unlockedHeroes.includes(heroDef.id);
+    if (heroDef && (heroDef.unlock?.type === 'default' || unlocked)) {
+      game.startRun(heroDef.id);
+    } else {
+      screenManager.show('roster');
+    }
+  });
   document.getElementById('btn-start-run').addEventListener('click', () => rosterScreen.startSelectedRun());
 
   // Helper global kecil (dipakai tombol "Dashboard" di gameover)
