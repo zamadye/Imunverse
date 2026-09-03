@@ -685,3 +685,92 @@ img.lock-badge {
 .hud-center { order: 3; width: 100%; flex-direction: row; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; }
 .hud-boss-wrap { width: min(36vw, 190px); margin-top: 0; }
 .wave-pill { max-width: none; font-size: 14px; padding: 8px 20px; }
+
+/* =====================================================================
+   COMPOSITION LAYER (stage 9) — aura, kuman melayang, dekor victory,
+   weed sudut, banner upgrade, chip musuh panggung. Ala mockup 12.
+   ===================================================================== */
+.deco { position: absolute; pointer-events: none; }
+
+/* -- Loading: kuman lucu melayang di sekitar emblem -- */
+.load-stage { position: relative; display: inline-block; }
+.load-stage .germ { width: 44px; opacity: 0.95; filter: drop-shadow(0 3px 0 rgba(31,74,68,0.12)); }
+.load-stage .germ.g1 { top: -30px; left: -52px; animation: floaty 3.4s ease-in-out infinite; }
+.load-stage .germ.g2 { bottom: -18px; left: -30px; width: 34px; animation: floaty 2.9s 0.5s ease-in-out infinite reverse; }
+.load-stage .germ.g3 { top: -14px; right: -48px; width: 38px; animation: floaty 3.8s 0.9s ease-in-out infinite; }
+.load-stage .dot { width: 54px; right: -40px; bottom: -26px; opacity: 0.8; animation: floaty 3.1s 0.3s ease-in-out infinite; }
+
+/* -- Dashboard: aura + chip musuh di gelembung (ala mockup stage) -- */
+.stage-aura {
+  position: absolute; left: 50%; bottom: 6%; width: 340px; max-width: 92%;
+  transform: translateX(-50%); pointer-events: none; opacity: 0.95;
+}
+.stage-enemies { position: absolute; inset: 0; pointer-events: none; }
+.stage-enemy { position: absolute; width: 64px; height: 64px; }
+.stage-enemy .se-bubble { position: absolute; inset: 0; width: 100%; }
+.stage-enemy .se-sprite { position: absolute; inset: 12%; width: 76%; height: 76%; object-fit: contain; animation: floaty 3s ease-in-out infinite; }
+.stage-enemy.se1 { left: 7%; top: 16%; animation: floaty 4.2s ease-in-out infinite; }
+.stage-enemy.se2 { right: 6%; top: 10%; width: 72px; height: 72px; animation: floaty 3.4s 0.6s ease-in-out infinite reverse; }
+.stage-enemy.se3 { left: 12%; bottom: 14%; width: 52px; height: 52px; animation: floaty 3.8s 1s ease-in-out infinite; }
+
+/* -- Game over: hiasan victory (koin, bintang, siluet monster) -- */
+.go-card { overflow: hidden; }
+.go-deco { position: absolute; pointer-events: none; }
+.go-deco.monster { width: 62px; opacity: 0.18; }
+.go-deco.monster.m1 { top: -10px; left: -14px; transform: rotate(-14deg); }
+.go-deco.monster.m2 { bottom: 74px; right: -16px; transform: rotate(12deg); }
+.go-deco.coin { width: 30px; filter: drop-shadow(0 2px 0 rgba(224,167,46,0.4)); }
+.go-deco.coin.c1 { top: 6px; right: 58px; animation: floaty 2.8s ease-in-out infinite; }
+.go-deco.coin.c2 { top: 34px; left: 20px; width: 22px; animation: floaty 3.2s 0.4s ease-in-out infinite reverse; }
+.go-deco.coin.c3 { bottom: 150px; right: 14px; width: 24px; animation: floaty 3.5s 0.8s ease-in-out infinite; }
+.go-deco.starpop { width: 34px; top: -6px; left: 42%; transform: translateX(-50%) rotate(-10deg); animation: floaty 3s 0.2s ease-in-out infinite; }
+.go-chest { width: 40px; margin-left: auto; animation: floaty 3.4s ease-in-out infinite; }
+
+/* -- Banner upgrade ala mockup: tile hero besar + mini musuh -- */
+.upg-banner { display: flex; gap: 10px; justify-content: center; align-items: stretch; margin-bottom: 14px; }
+.ub-tile { border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ub-tile.big { width: 128px; height: 118px; background: #bfe3d8; box-shadow: inset 0 -5px 0 rgba(20,88,79,0.18), 0 4px 0 rgba(31,74,68,0.15); }
+.ub-tile.big img { width: 86%; }
+.ub-side { display: flex; flex-direction: column; gap: 10px; }
+.ub-tile.mini { width: 66px; height: 54px; background: #f8c9b8; box-shadow: inset 0 -4px 0 rgba(233,106,76,0.25); }
+.ub-tile.mini.light { background: #fbdcd0; }
+.ub-tile.mini img { width: 74%; animation: floaty 3s ease-in-out infinite; }
+
+/* -- Shop: badge kategori pojok kiri-atas kartu -- */
+.corner-deco {
+  position: absolute; top: -10px; left: -10px; width: 34px; transform: rotate(-8deg);
+  filter: drop-shadow(0 2px 0 rgba(31,74,68,0.18)); pointer-events: none;
+}
+
+/* -- Pola kuman melayang di latar layar DOM (ala mockup dashboard).
+      Screen dijadikan stacking context (z-index:0) supaya ::before
+      ber-z-index -1 muncul DI ATAS bg cream tapi DI BAWAH konten. -- */
+#screen-dashboard, #screen-roster, #screen-shop, #screen-upgrade, #screen-gameover { z-index: 0; }
+#screen-dashboard::before, #screen-roster::before, #screen-shop::before,
+#screen-upgrade::before, #screen-gameover::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-image:
+    url('../assets/sprites/deco_germ_teal.png'),
+    url('../assets/sprites/deco_germ_coral.png'),
+    url('../assets/sprites/deco_germ_sage.png'),
+    url('../assets/sprites/deco_dots.png');
+  background-size: 64px, 46px, 52px, 58px;
+  background-repeat: no-repeat;
+  background-position: 6% 12%, 92% 20%, 10% 78%, 88% 84%;
+  opacity: 0.16;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+
+/* -- Pause: baris ringkasan dengan ikon PNG inline -- */
+.pause-line { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.pause-ico { width: 15px; height: 15px; object-fit: contain; }
+
+/* -- Roster: nafas lebih longgar antar kartu (ala mockup grid hero) -- */
+.roster-grid { gap: 30px 18px; padding: 24px 20px; }
+.hero-card { gap: 10px; }
+.avatar-wrap { width: min(34vw, 132px); }
+.hero-name { font-size: 15px; }

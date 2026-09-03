@@ -82,13 +82,18 @@
 - [x] Arena canvas: air teal + **arena heksagon cream** di pusat dunia + siluet terumbu & gelembung parallax — sesuai mockup battle.
 - **Kriteria lulus:** setiap screen dapat dipetakan langsung ke mockup reference-nya.
 
-## Fase 5 — UI/UX Pass 2: Penyesuaian Reference User ⬜
-**Tujuan:** menyamakan gaya visual dengan foto reference yang diunggah user.
-- [ ] ⚠️ **BLOKIR: menunggu user mengirim ulang foto reference (belum masuk di chat).**
-- [ ] Ekstraksi palet warna, bentuk kartu, tipografi, dan layout dari foto.
-- [ ] Revise tokens (Fase 4.1) + komponen ke arah reference.
-- [ ] Side-by-side check per screen.
-- **Kriteria lulus:** tiap screen bisa dibandingkan langsung dengan reference.
+## Fase 5.1 — Composition Fidelity Pass ✅
+**Tujuan:** menambal kritik "UI monoton" — menambah **lapisan dekorasi komposisi**
+(aset stage 8: 10 deco_*) yang ter-wire nyata, bukan pajangan:
+- [x] Preload: `EXTRA_PRELOAD` di sprite-loader (prop/fx/joystick/deco ikut loadAllSprites Promise) — tidak ada lagi placeholder senyap untuk path hardcode.
+- [x] Gameplay canvas: **aura putih gradasi** di belakang player, **shadow pipih** semua musuh, **rumput laut & terumbu siluet besar** menempel sudut bawah layar (screen-anchored, sway sin(time)).
+- [x] Dashboard: **chip patogen dalam gelembung** (virus/sel_kanker/bakteri) melayang di panggung + aura di belakang hero.
+- [x] Loading: **kuman lucu teal/coral/sage + dots** melayang mengelilingi emblem.
+- [x] Game over: **dekor victory** — koin melayang, bintang pop, peti di baris reward, siluet monster pojok kartu.
+- [x] Squad Upgrade: **banner tile hero besar + 2 tile musuh mini** (ala header mockup).
+- [x] Shop: **badge kategori bulat** di pojok kiri-atas tiap kartu.
+- [x] Pause: emoji ⏱/🛡 diganti ikon PNG (Chromium headless tanpa font emoji).
+- **Kriteria lulus:** 12 screenshot Chromium asli tanpa console error/404; elemen dekor terverifikasi di DOM (chipCount=3, aura 326px); perf tetap vsync 60 fps @150 musuh.
 
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.

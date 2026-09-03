@@ -6,11 +6,28 @@
 import { STATE } from '../../core/state-manager.js';
 import { getData } from '../../core/data-store.js';
 import { squadUpgradeCost, purchaseSquadUpgrade } from '../../systems/upgrade-system.js';
+import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 
 export function show() {
   const meta = STATE.meta;
   document.getElementById('upgrade-currency').textContent = meta.currency.toLocaleString('id-ID');
+
+  // Banner ala mockup: tile hero besar + 2 tile musuh kecil
+  const banner = document.getElementById('upg-banner');
+  banner.textContent = '';
+  const heroDefs = getData().heroes.heroes;
+  const selHero = heroDefs.find((h) => h.id === meta.selectedHero) || heroDefs[0];
+  const enemyDefs = getData().enemies.enemies;
+  const bossDef = enemyDefs.find((e) => e.isBoss) || enemyDefs[0];
+  const mobDef = enemyDefs.find((e) => e.id === 'virus') || enemyDefs[0];
+  banner.appendChild(el('div', { class: 'ub-tile big' }, [
+    el('img', { src: spriteToDataURL(selHero.spriteIdle), alt: selHero.name }),
+  ]));
+  banner.appendChild(el('div', { class: 'ub-side' }, [
+    el('div', { class: 'ub-tile mini coral' }, [el('img', { src: spriteToDataURL(bossDef.sprite), alt: bossDef.name })]),
+    el('div', { class: 'ub-tile mini coral light' }, [el('img', { src: spriteToDataURL(mobDef.sprite), alt: mobDef.name })]),
+  ]));
 
   const list = document.getElementById('upgrade-list');
   list.textContent = '';

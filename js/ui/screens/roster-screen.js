@@ -36,7 +36,7 @@ export function show() {
 
     const avatar = el('div', {
       class: 'avatar-wrap',
-      style: `background: ${hexAlpha(heroDef.color, status.unlocked ? 0.32 : 0.16)};`,
+      style: `background: ${hexAlpha(heroDef.color, status.unlocked ? 0.35 : 0.18)}; border-color: ${status.unlocked ? hexAlpha(heroDef.color, 0.85) : '#e4d9bf'};`,
     }, [
       el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
     ]);

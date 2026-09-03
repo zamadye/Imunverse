@@ -956,6 +956,191 @@ def gen_stage_props(out):
     }
 
 
+
+
+# =====================================================================
+# STAGE 8 — DEKORASI KOMPOSISI (10 aset)
+# =====================================================================
+
+def deco_germ(size, color, horns=False):
+    """Siluet kuman lucu dgn mata cream (penghias latar & pojok victory)."""
+    img, d = canvas(size)
+    S = size * SS
+    cx = cy = S * 0.5
+    col = hex_rgb(color)
+    r = S * 0.34
+    if horns:
+        for sx in (-1, 1):
+            a = -math.pi / 2 + sx * 0.5
+            x1, y1 = cx + math.cos(a) * r * 0.8, cy + math.sin(a) * r * 0.8
+            x2, y2 = cx + math.cos(a) * r * 1.25, cy + math.sin(a) * r * 1.25
+            w = r * 0.16
+            nx, ny = -math.sin(a), math.cos(a)
+            d.polygon([(x1 + nx * w, y1 + ny * w), (x1 - nx * w, y1 - ny * w), (x2, y2)], fill=rgba(col))
+    pts = blob_pts(cx, cy, r, 30, 0.1, seed=len(color), lobes=5)
+    d.polygon(pts, fill=rgba(col))
+    # kaki kecil
+    for sx in (-0.45, 0.0, 0.45):
+        lx = cx + sx * r
+        d.ellipse([lx - r * 0.13, cy + r * 0.75, lx + r * 0.13, cy + r * 1.05], fill=rgba(col))
+    # mata cream
+    er = r * 0.14
+    for sx in (-1, 1):
+        d.ellipse([cx + sx * r * 0.34 - er, cy - r * 0.05 - er, cx + sx * r * 0.34 + er, cy - r * 0.05 + er],
+                  fill=rgba(CREAM))
+    return done(img, size)
+
+
+def deco_aura(size):
+    """Lingkaran aura translusen di belakang karakter (ala mockup home)."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    steps = 26
+    for i in range(steps, 0, -1):
+        t = i / steps
+        rr = (S * 0.48) * t
+        alpha = int(185 * (1 - t) ** 1.35)
+        d.ellipse([S / 2 - rr, S / 2 - rr, S / 2 + rr, S / 2 + rr], fill=(255, 255, 255, alpha))
+    return done(img, size)
+
+
+def deco_bubble(size, tint):
+    """Gelembung translusen utk chip musuh melayang di panggung."""
+    img, d = canvas(size)
+    S = size * SS
+    r = S * 0.48
+    tint_rgb = hex_rgb(tint)
+    for i in range(16, 0, -1):
+        t = i / 16
+        d.ellipse([S / 2 - r * t, S / 2 - r * t, S / 2 + r * t, S / 2 + r * t], fill=rgba(tint_rgb, int(150 * t)))
+    d.ellipse([S / 2 - r, S / 2 - r, S / 2 + r, S / 2 + r], outline=rgba(CREAM, 200), width=int(S * 0.025))
+    d.ellipse([S * 0.26, S * 0.2, S * 0.4, S * 0.34], fill=(255, 255, 255, 130))
+    return done(img, size)
+
+
+def deco_coin(size):
+    img, d = canvas(size)
+    S = size * SS
+    cx = cy = S * 0.5
+    r = S * 0.42
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=rgba(GOLD))
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=rgba(GOLD_DEEP), width=int(S * 0.05))
+    d.ellipse([cx - r * 0.74, cy - r * 0.74, cx + r * 0.74, cy + r * 0.74], outline=rgba((255, 255, 255, 150)), width=int(S * 0.03))
+    pts = []
+    for i in range(10):
+        a = -math.pi / 2 + math.pi * i / 5
+        rr = r * 0.42 if i % 2 == 0 else r * 0.18
+        pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr))
+    d.polygon(pts, fill=rgba((255, 255, 255, 210)))
+    return done(img, size)
+
+
+def deco_chest(size):
+    img, d = canvas(size)
+    S = size * SS
+    d.rounded_rectangle([S * 0.16, S * 0.42, S * 0.84, S * 0.82], radius=int(S * 0.07), fill=rgba((176, 108, 62)))
+    d.rounded_rectangle([S * 0.16, S * 0.3, S * 0.84, S * 0.5], radius=int(S * 0.16), fill=rgba((200, 128, 74)))
+    d.rounded_rectangle([S * 0.16, S * 0.3, S * 0.84, S * 0.4], radius=int(S * 0.1), fill=rgba(GOLD))
+    d.rounded_rectangle([S * 0.44, S * 0.36, S * 0.56, S * 0.56], radius=int(S * 0.03), fill=rgba(GOLD))
+    d.ellipse([S * 0.465, S * 0.43, S * 0.535, S * 0.5], fill=rgba((110, 64, 28)))
+    d.rounded_rectangle([S * 0.16, S * 0.42, S * 0.84, S * 0.46], radius=int(S * 0.02), fill=rgba(GOLD_DEEP))
+    # inti berkilau keluar
+    d.ellipse([S * 0.38, S * 0.22, S * 0.48, S * 0.32], fill=rgba(SAGE))
+    d.ellipse([S * 0.52, S * 0.2, S * 0.62, S * 0.3], fill=rgba(TEAL_LIGHT))
+    return done(img, size)
+
+
+def deco_dots(size):
+    import random
+    img, d = canvas(size)
+    S = size * SS
+    rnd = random.Random(11)
+    cols = [TEAL_LIGHT, SAGE, CORAL_LIGHT]
+    for i in range(6):
+        x, y = rnd.uniform(S * 0.15, S * 0.85), rnd.uniform(S * 0.15, S * 0.85)
+        r = S * rnd.uniform(0.03, 0.08)
+        d.ellipse([x - r, y - r, x + r, y + r], fill=rgba(cols[i % 3], 90))
+    return done(img, size)
+
+
+def deco_weed_big(size):
+    """Rumput laut tebal utk sudut bawah gameplay (ala mockup battle).
+    Siluet ink-teal gelap + rim mint terang agar kontras di air maupun arena."""
+    img, d = canvas(size)
+    S = size * SS
+    dark = (11, 64, 57, 255)
+    mid = (16, 82, 74, 255)
+    rim = (110, 205, 188, 160)
+    for k, bx in enumerate((0.18, 0.4, 0.62, 0.84)):
+        hgt = S * (0.42 + 0.16 * (k % 2))
+        pts = []
+        for t in range(18):
+            tt = t / 17
+            pts.append((S * bx + math.sin(tt * 3.6 + k * 1.4) * S * 0.07 * tt, S * 1.02 - tt * hgt))
+        d.line(pts, fill=dark if k % 2 else mid, width=int(S * (0.085 - k * 0.012)), joint="curve")
+        # rim mint tipis di sisi kiri batang (kesan cahaya air)
+        d.line([(x - S * 0.018, y) for (x, y) in pts], fill=rim, width=max(2, int(S * 0.014)), joint="curve")
+        # daun bulat
+        for t in (0.35, 0.65, 0.9):
+            px = pts[int(t * 17)][0]
+            py = pts[int(t * 17)][1]
+            dr = S * 0.05
+            d.ellipse([px - dr, py - dr, px + dr, py + dr], fill=dark if k % 2 else mid)
+    return done(img, size)
+
+
+def deco_reef_big(size):
+    """Terumbu siluet besar utk sudut gameplay."""
+    img, d = canvas(size)
+    S = size * SS
+    col = (11, 64, 57, 255)
+    top = (24, 105, 95, 255)
+    d.ellipse([S * 0.1, S * 0.55, S * 0.75, S * 1.1], fill=col)
+    d.ellipse([S * 0.5, S * 0.35, S * 1.05, S * 0.95], fill=col)
+    d.rounded_rectangle([S * 0.68, S * 0.12, S * 0.86, S * 0.6], radius=int(S * 0.09), fill=col)
+    d.ellipse([S * 0.64, S * 0.06, S * 0.9, S * 0.24], fill=top)
+    d.ellipse([S * 0.74, S * 0.0, S * 0.82, S * 0.08], fill=(6, 40, 36, 255))
+    # rim mint pada lengkung kiri terumbu
+    d.arc([S * 0.1, S * 0.55, S * 0.75, S * 1.1], start=110, end=250, fill=(110, 205, 188, 150), width=max(3, int(S * 0.02)))
+    return done(img, size)
+
+
+def deco_star_pop(size):
+    """Bintang dekor dgn glow utk victory."""
+    img, d = canvas(size)
+    S = size * SS
+    cx = cy = S * 0.5
+    r = S * 0.46
+    pts = []
+    for i in range(10):
+        a = -math.pi / 2 + math.pi * i / 5
+        rr = r if i % 2 == 0 else r * 0.42
+        pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr))
+    d.polygon(pts, fill=(255, 255, 255, 235))
+    d.polygon([(p[0] * 0.72 + cx * 0.28, p[1] * 0.72 + cy * 0.28) for p in pts], fill=rgba(GOLD))
+    return done(img, size)
+
+
+def gen_stage_deco(out):
+    print("STAGE 8 — Dekorasi komposisi (10 aset)")
+    return {
+        "deco_germ_teal.png": deco_germ(128, "#2f9c8f"),
+        "deco_germ_coral.png": deco_germ(128, "#f2825c", horns=True),
+        "deco_germ_sage.png": deco_germ(96, "#a9d795"),
+        "deco_aura.png": deco_aura(256),
+        "deco_bubble_mint.png": deco_bubble(128, "#cfe9e2"),
+        "deco_bubble_coral.png": deco_bubble(128, "#f9d9c9"),
+        "deco_bubble_sage.png": deco_bubble(128, "#e3f0d3"),
+        "deco_coin.png": deco_coin(96),
+        "deco_chest.png": deco_chest(128),
+        "deco_weed_big.png": deco_weed_big(256),
+        "deco_reef_big.png": deco_reef_big(256),
+        "deco_star_pop.png": deco_star_pop(128),
+        "deco_dots.png": deco_dots(128),
+    }
+
+
 # =====================================================================
 
 def main():
@@ -968,6 +1153,7 @@ def main():
         gen_stage_icons,
         gen_stage_fx,
         gen_stage_props,
+        gen_stage_deco,
     ]
     total = 0
     for stage in stages:

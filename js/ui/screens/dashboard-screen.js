@@ -36,6 +36,22 @@ export function show() {
   badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
   badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
 
+  // ---- Chip musuh melayang di panggung (ala mockup: patogen dalam gelembung) ----
+  const stageEnemies = document.getElementById('stage-enemies');
+  stageEnemies.textContent = '';
+  const showcase = ['virus', 'sel_kanker', 'bakteri'];
+  const bubbles = ['assets/sprites/deco_bubble_mint.png', 'assets/sprites/deco_bubble_coral.png', 'assets/sprites/deco_bubble_sage.png'];
+  const enemyDefs = getData().enemies.enemies;
+  showcase.forEach((id, i) => {
+    const def = enemyDefs.find((e) => e.id === id);
+    if (!def) return;
+    const chip = el('div', { class: `stage-enemy se${i + 1}` }, [
+      el('img', { class: 'se-bubble', src: bubbles[i], alt: '' }),
+      el('img', { class: 'se-sprite', src: spriteToDataURL(def.spriteIdle || def.sprite), alt: def.name }),
+    ]);
+    stageEnemies.appendChild(chip);
+  });
+
   // ---- Strip statistik (3 sel) ----
   const stats = meta.stats;
   const strip = document.getElementById('dash-stats');

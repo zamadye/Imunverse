@@ -41,12 +41,29 @@ export function collectSpritePaths(data) {
 }
 
 /**
+ * Aset yang dirender lewat drawSprite() dengan path HARDCODE di kode
+ * (bukan dari data JSON) — wajib ikut di-preload supaya tidak jatuh ke
+ * placeholder dev. Daftar: properti background, efek, joystick, dekorasi.
+ */
+const EXTRA_PRELOAD = [
+  'assets/sprites/prop_cell.png',
+  'assets/sprites/prop_reef.png',
+  'assets/sprites/prop_weed.png',
+  'assets/sprites/fx_hit.png',
+  'assets/sprites/fx_joystick_base.png',
+  'assets/sprites/fx_joystick_knob.png',
+  'assets/sprites/deco_aura.png',
+  'assets/sprites/deco_weed_big.png',
+  'assets/sprites/deco_reef_big.png',
+];
+
+/**
  * Muat semua sprite. @returns {Promise<{loaded:number, fallback:number}>}
  * Resolve (bukan reject) bila sebagian gagal — yang gagal digantikan
  * placeholder development supaya game tetap bisa dites.
  */
 export function loadAllSprites(data, onProgress) {
-  const paths = collectSpritePaths(data);
+  const paths = [...new Set([...collectSpritePaths(data), ...EXTRA_PRELOAD])];
   let done = 0;
   let fallback = 0;
 

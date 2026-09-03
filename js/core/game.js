@@ -679,6 +679,13 @@ export const game = {
     for (const e of run.enemies) {
       if (!e.alive) continue;
       if (e.def.areaAttack) drawTelegraph(ctx, e, e.def.areaAttack);
+      // Shadow pipih ala mockup (bayangan lembut di bawah entitas)
+      ctx.globalAlpha = 0.10;
+      ctx.fillStyle = '#0a3530';
+      ctx.beginPath();
+      ctx.ellipse(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.radius * 0.34, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
       const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
       drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
         flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
@@ -691,6 +698,8 @@ export const game = {
       const blink = player.iframes > 0 && Math.floor(time * 12) % 2 === 0;
       if (!blink) {
         const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+        // Aura mockup: ring putih gradasi lembut di belakang karakter
+        drawSprite(ctx, 'assets/sprites/deco_aura.png', player.x, player.y, player.radius * 4.4, 0, { alpha: 0.8 });
         drawPulseGlow(ctx, player.x, player.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
         drawSprite(ctx, path, player.x, player.y, player.radius * 2.667, 0, {});
       }

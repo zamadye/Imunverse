@@ -58,6 +58,10 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   // ---- arena heksagon cream di pusat dunia ----
   drawArena(ctx, camX, camY, w, h, time);
 
+  // ---- dekor sudut ala mockup: rumput laut & karang BESAR menempel di sudut
+  //      bawah layar (screen-anchored, goyang pelan) ----
+  drawCornerDeco(ctx, w, h, time);
+
   // ---- vignette lembut tepi layar ----
   const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
   vg.addColorStop(0, 'rgba(16,64,58,0)');
@@ -189,4 +193,31 @@ function drawArena(ctx, camX, camY, w, h, time) {
   ctx.lineWidth = 3;
   roundHexPath(ctx, cx, cy, R - 10, 76);
   ctx.stroke();
+}
+
+
+// Dekor sudut ala mockup 12 (gameplay): weed/reef besar di sudut bawah,
+// separuh keluar layar, goyang pelan mengikuti waktu. Screen-anchored.
+function drawCornerDeco(ctx, w, h, time) {
+  const sway = Math.sin(time * 0.9) * 0.06;
+  const sway2 = Math.sin(time * 0.7 + 1.7) * 0.05;
+  const base = Math.min(w, h);
+  // Sprite di-anchor pada DASAR gambar (konten weed/reef ada di bagian bawah
+  // kanvas PNG) — dasar gambar dibuat sedikit di bawah tepi layar.
+  const sizeWeed = base * 0.7;
+  const sizeReef = base * 0.6;
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  // Pusat gambar = dasar layar − setengah tinggi + sedikit celah →
+  // konten (40% bawah kanvas PNG) tampak menempel dari tepi bawah.
+  ctx.translate(base * 0.14, h - sizeWeed * 0.5 + base * 0.04);
+  ctx.rotate(sway);
+  drawSprite(ctx, 'assets/sprites/deco_weed_big.png', 0, 0, sizeWeed, 0, {});
+  ctx.restore();
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  ctx.translate(w - base * 0.16, h - sizeReef * 0.5 + base * 0.03);
+  ctx.rotate(sway2);
+  drawSprite(ctx, 'assets/sprites/deco_reef_big.png', 0, 0, sizeReef, 0, {});
+  ctx.restore();
 }

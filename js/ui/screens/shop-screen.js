@@ -25,6 +25,9 @@ export function show() {
   heroes.forEach((heroDef, i) => {
     const unlocked = meta.unlockedHeroes.includes(heroDef.id);
     const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` });
+    // Badge kategori bulat kecil di pojok kiri-atas (ala mockup shop)
+    const decoIcons = ['assets/sprites/item_glukosa.png', 'assets/sprites/item_antibodi.png', 'assets/sprites/item_vitamin_c.png'];
+    card.appendChild(el('img', { class: 'corner-deco', src: decoIcons[i % decoIcons.length], alt: '' }));
     // Badge harga di pojok (untuk yang dijual & belum dimiliki)
     if (!unlocked && heroDef.shopCost > 0) {
       card.appendChild(el('div', { class: 'price-tag' }, [

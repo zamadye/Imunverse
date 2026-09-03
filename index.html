@@ -25,7 +25,13 @@
       <!-- ============ LOADING ============ -->
       <section id="screen-loading" class="screen active" data-screen="loading">
         <div class="load-box">
-          <img class="load-emblem" src="assets/sprites/ui_shield_emblem.png" alt="" />
+          <div class="load-stage">
+            <img class="deco germ g1" src="assets/sprites/deco_germ_teal.png" alt="" />
+            <img class="deco germ g2" src="assets/sprites/deco_germ_coral.png" alt="" />
+            <img class="deco germ g3" src="assets/sprites/deco_germ_sage.png" alt="" />
+            <img class="deco dot d1" src="assets/sprites/deco_dots.png" alt="" />
+            <img class="load-emblem" src="assets/sprites/ui_shield_emblem.png" alt="" />
+          </div>
           <div class="load-title">IMUN<span>VERSE</span></div>
           <div class="progress-track"><div id="loading-bar" class="progress-fill"></div></div>
           <p id="loading-label" class="loading-label">Menyiapkan organisme…</p>
@@ -45,6 +51,10 @@
         <div class="dash-scroll">
           <!-- Panggung hero ala mockup -->
           <section class="hero-stage" id="dash-stage">
+            <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
+            <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
+            <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
+            <div id="stage-enemies" class="stage-enemies"></div>
             <img id="dash-hero-img" class="stage-hero" alt="hero" />
             <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
             <div class="stage-info">
@@ -117,6 +127,7 @@
         <div class="topbar" style="justify-content:center">
           <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="upgrade-currency">0</span></div>
         </div>
+        <div id="upg-banner" class="upg-banner"><!-- diisi JS --></div>
         <div id="upgrade-list" class="upgrade-list"><!-- diisi JS --></div>
       </section>
 
@@ -200,7 +211,13 @@
 
       <!-- ============ GAME OVER / VICTORY SUMMARY ============ -->
       <section id="screen-gameover" class="screen modal" data-screen="gameover">
-        <div class="modal-box wide">
+        <div class="modal-box wide go-card">
+          <img class="go-deco monster m1" src="assets/sprites/deco_germ_coral.png" alt="" />
+          <img class="go-deco monster m2" src="assets/sprites/deco_germ_coral.png" alt="" />
+          <img class="go-deco coin c1" src="assets/sprites/deco_coin.png" alt="" />
+          <img class="go-deco coin c2" src="assets/sprites/deco_coin.png" alt="" />
+          <img class="go-deco coin c3" src="assets/sprites/deco_coin.png" alt="" />
+          <img class="go-deco starpop" src="assets/sprites/deco_star_pop.png" alt="" />
           <div id="gameover-stars" class="go-stars">
             <img class="star" src="assets/sprites/icon_star_empty.png" alt="" /><img class="star" src="assets/sprites/icon_star_empty.png" alt="" /><img class="star" src="assets/sprites/icon_star_empty.png" alt="" />
           </div>
@@ -210,6 +227,7 @@
           <div class="summary-reward">
             <span>Antibodi didapat:</span>
             <strong id="gameover-currency"><img class="coin-sm" src="assets/sprites/icon_coin.png" alt="" /><span id="gameover-currency-num">0</span></strong>
+            <img class="go-chest" src="assets/sprites/deco_chest.png" alt="" />
           </div>
           <button id="btn-double-currency" class="btn btn-gold">Tonton Iklan → 2x Antibodi</button>
           <div class="btn-row">
