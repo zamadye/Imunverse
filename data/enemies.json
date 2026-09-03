@@ -28,7 +28,13 @@
       "spriteAttack": "assets/sprites/enemy_virus.png",
       "color": "#9be15d",
       "behavior": "splitter",
-      "splitOnDeath": { "childId": "virion", "count": 2, "hpScale": 0.6, "radiusScale": 0.65, "speedScale": 1.2 },
+      "splitOnDeath": {
+        "childId": "virion",
+        "count": 2,
+        "hpScale": 0.6,
+        "radiusScale": 0.65,
+        "speedScale": 1.2
+      },
       "baseHP": 34,
       "speed": 54,
       "damage": 10,
@@ -54,7 +60,8 @@
       "xpPerKill": 1,
       "minWave": 2,
       "weight": 0,
-      "orientToMovement": true
+      "orientToMovement": true,
+      "elite": true
     },
     {
       "id": "parasit",
@@ -65,7 +72,10 @@
       "spriteAttack": "assets/sprites/enemy_parasit.png",
       "color": "#e15fd0",
       "behavior": "chase_weave",
-      "weaveParams": { "amplitudeDeg": 0.65, "frequency": 2.4 },
+      "weaveParams": {
+        "amplitudeDeg": 0.65,
+        "frequency": 2.4
+      },
       "baseHP": 16,
       "speed": 100,
       "damage": 7,
@@ -73,7 +83,8 @@
       "xpPerKill": 3,
       "minWave": 4,
       "weight": 22,
-      "orientToMovement": true
+      "orientToMovement": true,
+      "elite": true
     },
     {
       "id": "spora",

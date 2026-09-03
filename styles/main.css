@@ -774,3 +774,122 @@ img.lock-badge {
 .hero-card { gap: 10px; }
 .avatar-wrap { width: min(34vw, 132px); }
 .hero-name { font-size: 15px; }
+
+/* =====================================================================
+   FASE 5.2/5.3 — KEMAMPUAN AKTIF, EVOLUSI HERO, ARENA, PETI BOSS
+   ===================================================================== */
+
+/* -- Bar kemampuan aktif: 4 tombol bulat di kanan (1 senjata + 3 kekuatan) -- */
+.ability-bar {
+  position: absolute; right: 14px; bottom: 208px;
+  display: grid; grid-template-columns: repeat(2, 56px); gap: 10px;
+  z-index: 5;
+}
+.ability-btn {
+  position: relative; width: 56px; height: 56px; border-radius: 50%;
+  border: none; padding: 0; background: transparent; cursor: pointer;
+  filter: drop-shadow(0 3px 0 rgba(18, 63, 58, 0.35));
+  transition: transform 0.08s ease;
+}
+.ability-btn:active { transform: scale(0.92); }
+.ability-btn img { width: 100%; height: 100%; }
+.ability-btn .cd-fill {
+  position: absolute; left: 2px; right: 2px; bottom: 2px; height: 0%;
+  border-radius: 0 0 26px 26px; background: rgba(18, 63, 58, 0.55);
+  pointer-events: none;
+}
+.ability-btn.ready { animation: ability-pulse 1.6s ease-in-out infinite; }
+.ability-btn.locked { opacity: 0.35; filter: grayscale(1); }
+.ability-btn .slot-tag {
+  position: absolute; top: -4px; left: -4px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--ink); color: var(--cream);
+  font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+}
+.ability-btn .key-tag {
+  position: absolute; bottom: -4px; right: -4px; padding: 1px 5px;
+  border-radius: 8px; background: var(--cream); border: 2px solid var(--ink);
+  font-size: 9px; font-weight: 900; color: var(--ink); text-transform: uppercase;
+}
+@keyframes ability-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 198, 79, 0.55); border-radius: 50%; }
+  50% { box-shadow: 0 0 0 7px rgba(245, 198, 79, 0); border-radius: 50%; }
+}
+
+/* -- Kartu evolusi hero di dashboard (selalu ada yang dikejar) -- */
+.evo-card { display: flex; flex-direction: column; gap: 10px; }
+.evo-head { display: flex; align-items: center; gap: 10px; }
+.evo-stage-chip {
+  min-width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 13px; color: var(--cream); background: var(--teal);
+}
+.evo-title { display: flex; flex-direction: column; }
+.evo-title b { font-size: 15px; color: var(--ink); }
+.evo-tier { font-size: 11px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+.evo-parts { display: flex; gap: 8px; flex-wrap: wrap; }
+.evo-part {
+  display: flex; align-items: center; gap: 5px; padding: 5px 9px;
+  background: var(--cream-deep, #f6ecd4); border-radius: 14px;
+  font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.evo-part img { width: 22px; height: 22px; }
+.evo-part.need { outline: 2px dashed var(--coral); border-radius: 14px; }
+.evo-progress { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+
+/* -- Overlay evolusi di panggung hero dashboard -- */
+#stage-evo { position: absolute; left: 50%; bottom: 6%; width: 340px; max-width: 92%; aspect-ratio: 1; transform: translateX(-50%); pointer-events: none; }
+#stage-evo img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+#stage-evo .ov-silia { width: 34%; margin-top: -26%; animation: floaty 3s ease-in-out infinite; }
+#stage-evo .ov-pseudopodia { width: 30%; margin-top: 30%; }
+#stage-evo .ov-pedang { width: 38%; margin-left: 22%; rotate: 18deg; }
+#stage-evo .ov-inti { width: 72%; animation: floaty 4s ease-in-out infinite reverse; }
+
+/* -- Kartu arena dashboard + modal pilih arena -- */
+.arena-card { display: flex; align-items: center; gap: 12px; }
+.arena-card img.arena-thumb { width: 64px; height: 64px; border-radius: 16px; box-shadow: var(--shadow-card); }
+.arena-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.arena-info b { color: var(--ink); }
+.arena-info span { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.arena-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.arena-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px;
+  border-radius: 18px; background: var(--cream); cursor: pointer;
+  border: 3px solid transparent; text-align: left; width: 100%;
+}
+.arena-item.selected { border-color: var(--teal); background: var(--teal-light); }
+.arena-item.locked { opacity: 0.6; cursor: default; }
+.arena-item img { width: 56px; height: 56px; border-radius: 14px; }
+.arena-item .ai-name { font-weight: 900; color: var(--ink); }
+.arena-item .ai-bonus { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.arena-item .ai-unlock { font-size: 11px; color: var(--coral); font-weight: 800; }
+.arena-item .ai-check { margin-left: auto; font-weight: 900; color: var(--teal); font-size: 18px; }
+
+/* -- Modal peti boss -- */
+.chest-box { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.chest-img { width: 86px; animation: floaty 2.6s ease-in-out infinite; }
+.chest-loot { display: flex; gap: 10px; margin: 4px 0 8px; }
+.chest-loot .loot {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  background: var(--cream); border-radius: 16px; font-weight: 900; color: var(--ink);
+}
+.chest-loot .loot img { width: 24px; height: 24px; }
+.btn-gold {
+  background: linear-gradient(180deg, #f7d272, #e0a72e); color: #5c3d0e;
+  box-shadow: 0 4px 0 #b98a20, 0 8px 18px rgba(224, 167, 46, 0.35);
+}
+.btn-gold:disabled { opacity: 0.5; }
+.modal-title.coral { color: var(--coral); }
+
+/* -- Gameover: baris bagian evolusi -- */
+.go-parts { font-size: 13px; font-weight: 800; color: var(--teal-dark, #14584f); }
+
+/* -- Baris terkunci dengan ikon gembok PNG (bukan emoji) -- */
+.lock-line { display: inline-flex; align-items: center; gap: 4px; }
+.lock-ico { width: 13px; height: 13px; object-fit: contain; }
+
+/* -- Kolom teks item arena (nama + bonus + status unlock) -- */
+.ai-mid { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-unlock.lock-line { margin-top: 2px; }
+
+.lock-line span { line-height: 14px; }
+.arena-item .ai-unlock.lock-line { display: flex; align-items: center; }

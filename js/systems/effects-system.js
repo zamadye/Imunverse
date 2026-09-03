@@ -58,6 +58,18 @@ export class EffectsSystem {
     this.spawnBurst(x, y, color, 4, 90, 3);
   }
 
+  /**
+   * VFX kematian musuh sesuai tier evolusi hero (killFx):
+   * ring (common) | slash (uncommon) | wind (rare) | bolt (epic) |
+   * legend (legendary: petir + ring emas) | frost (beku fagosit).
+   * Digambar shape-renderer.drawKillFx.
+   */
+  spawnKillFx(kind, x, y, color, seed = 0) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    const life = kind === 'legend' ? 0.5 : kind === 'bolt' ? 0.3 : 0.4;
+    this.effects.push({ type: 'killfx', kind, x, y, color, seed, life, maxLife: life });
+  }
+
   /** Bintang hit (aset fx_hit.png) saat musuh menerima damage. */
   spawnSpark(x, y, big = false) {
     if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
@@ -79,6 +91,21 @@ export class EffectsSystem {
       text: String(Math.max(1, Math.round(amount))),
       color,
       size: 13,
+    });
+  }
+
+  /** Label bebas mengambang (mis. "Silia +1" saat drop bagian evolusi diambil). */
+  spawnLabel(x, y, text, color = '#ffe082') {
+    if (this.numbers.length >= MAX_NUMBERS) this.numbers.shift();
+    this.numbers.push({
+      x: x + (Math.random() - 0.5) * 10,
+      y: y - 12,
+      vy: -40,
+      life: 0.9,
+      maxLife: 0.9,
+      text,
+      color,
+      size: 12,
     });
   }
 

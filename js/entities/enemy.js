@@ -51,17 +51,50 @@ export class Enemy {
 
     // Result split (untuk enemy anak dari splitter)
     this.splitSource = splitOverrides ? true : false;
+
+    // Kontrol status (kemampuan aktif): beku total & pelankan (siklon)
+    this.frozen = 0;
+    this.slowT = 0;
+    this.slowMult = 1;
+    this.vx = 0; // dorongan (knockback siklon), meluruh tiap frame
+    this.vy = 0;
   }
 
-  /**
-   * @param {number} dt
-   * @param {{x:number,y:number}} playerPos
-   * @param {number} time      waktu game berjalan
-   * @param {object} game      context (untuk AOE boss & efek)
-   */
+  /** Beku total: musuh berhenti bergerak & menyerang sementara. */
+  applyFreeze(time) {
+    this.frozen = Math.max(this.frozen, time);
+  }
+
+  /** Pelankan gerakan (mis. tertiup siklon). */
+  applySlow(mult, time) {
+    this.slowMult = Math.min(this.slowMult === 1 || this.slowT <= 0 ? mult : this.slowMult, mult);
+    this.slowT = Math.max(this.slowT, time);
+  }
+
   update(dt, playerPos, time, game) {
     if (!this.alive) return;
     if (this.hitFlash > 0) this.hitFlash -= dt;
+
+    // Dorongan knockback meluruh (tetap jalan meski beku, tapi melemah)
+    if (Math.abs(this.vx) > 1 || Math.abs(this.vy) > 1) {
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+      const fric = Math.max(0, 1 - 6 * dt);
+      this.vx *= fric;
+      this.vy *= fric;
+    }
+
+    // Beku: skip seluruh perilaku (tidak bergerak/serang) sampai waktu habis
+    if (this.frozen > 0) {
+      this.frozen -= dt;
+      return;
+    }
+    // Perlambatan (siklon): dt gerak efektif dikali faktor
+    if (this.slowT > 0) {
+      this.slowT -= dt;
+      dt = dt * this.slowMult;
+      if (this.slowT <= 0) this.slowMult = 1;
+    }
 
     const dx = playerPos.x - this.x;
     const dy = playerPos.y - this.y;

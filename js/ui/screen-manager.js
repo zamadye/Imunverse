@@ -19,6 +19,7 @@ const APP_STATE_BY_SCREEN = {
   roster: 'roster',
   upgrade: 'upgrade',
   shop: 'shop',
+  arena: 'dashboard', // modal di atas dashboard — state tetap dashboard
   hud: 'gameplay',
   gameover: 'gameover',
 };
@@ -62,6 +63,10 @@ export function hideCurrent() {
 export function getCurrentId() {
   return currentId;
 }
+
+/** Nama modul dipakai langsung (import * as screenManager) — re-export diri. */
+const screenManager = { registerScreen, show, hideCurrent, getCurrentId };
+export { screenManager };
 
 /** Helper kecil membuat elemen (menghindari innerHTML untuk konten dinamis). */
 export function el(tag, attrs = {}, children = []) {

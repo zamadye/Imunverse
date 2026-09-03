@@ -14,6 +14,8 @@
  * systems/economy-system.js (claimDailyReward).
  */
 
+import { getData } from '../core/data-store.js';
+
 const SIMULATED_AD_DURATION_MS = 900;
 
 function simulateAdPlayback(onSuccess, onFail) {
@@ -46,6 +48,44 @@ export function triggerRewardedAdDoubleCurrency(onSuccess, onFail) {
   console.info('[monetization] triggerRewardedAdDoubleCurrency() — simulasi iklan reward (2x currency)');
   simulateAdPlayback(onSuccess, onFail);
   return true;
+}
+
+/**
+ * HOOK: iklan reward untuk menggandakan isi Peti Boss (muncul saat boss
+ * tumbang — titik istirahat alami, gameplay dipause). Sesuai riset penempatan
+ * iklan reward: tier booster, SELALU opsional, tidak mengganggu gameplay.
+ * Setelah sukses, game.js.#grantBossChest(true) menambahkan isi 2x — logic asli.
+ * @returns {boolean}
+ */
+export function triggerRewardedAdBossChest(onSuccess, onFail) {
+  console.info('[monetization] triggerRewardedAdBossChest() — simulasi iklan reward (peti boss 2x)');
+  simulateAdPlayback(onSuccess, onFail);
+  return true;
+}
+
+/**
+ * Kuota iklan reward harian (semua placement dihitung bersama) — mencegah
+ * reward inflation & ad fatigue (riset: cap konservatif, limit dari JSON).
+ * @returns {boolean} true bila masih ada kuota hari ini.
+ */
+export function canWatchAd(meta) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!meta.adDaily || meta.adDaily.date !== today) return true;
+  // Limit dari data/upgrades.json → economy.adDailyLimit (bukan hardcode)
+  let limit = 6;
+  try {
+    limit = getData().upgrades.economy.adDailyLimit ?? limit;
+  } catch { /* data-store belum siap — pakai limit konservatif */ }
+  return meta.adDaily.count < limit;
+}
+
+/** Catat 1 iklan selesai ditonton (dipanggil setelah onSuccess). */
+export function trackAdWatch(meta) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!meta.adDaily || meta.adDaily.date !== today) {
+    meta.adDaily = { date: today, count: 0 };
+  }
+  meta.adDaily.count += 1;
 }
 
 /**

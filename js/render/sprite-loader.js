@@ -37,6 +37,16 @@ export function collectSpritePaths(data) {
   for (const n of data.nutrients.nutrients) {
     record(n.sprite, n.color, n.name);
   }
+  if (data.evolutions) {
+    for (const p of data.evolutions.parts) {
+      record(p.sprite, '#b07ae0', p.name);
+    }
+  }
+  if (data.abilities) {
+    for (const a of data.abilities.abilities) {
+      record(a.icon, '#1f7a70', a.name);
+    }
+  }
   return [...paths];
 }
 
@@ -55,6 +65,11 @@ const EXTRA_PRELOAD = [
   'assets/sprites/deco_aura.png',
   'assets/sprites/deco_weed_big.png',
   'assets/sprites/deco_reef_big.png',
+  // Overlay evolusi hero (digambar via drawSprite, path hardcode di game.js)
+  'assets/sprites/ov_silia.png',
+  'assets/sprites/ov_pseudopodia.png',
+  'assets/sprites/ov_pedang.png',
+  'assets/sprites/ov_inti.png',
 ];
 
 /**

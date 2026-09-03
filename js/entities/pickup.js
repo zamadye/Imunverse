@@ -71,9 +71,12 @@ export class Pickup {
 
   /** Apakah sudah bisa diambil player. */
   isCollectedBy(player) {
+    // radius ambil dari stats (player.stats.pickupRadius); fallback properti
+    // langsung / default 60 — mencegah NaN yang membuat pickup tak terambil.
+    const pr = player.stats?.pickupRadius ?? player.pickupRadius ?? 60;
     const dx = player.x - this.x;
     const dy = player.y - this.y;
-    const rr = player.pickupRadius + this.radius;
+    const rr = pr + this.radius;
     return dx * dx + dy * dy < rr * rr;
   }
 }

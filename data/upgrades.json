@@ -142,6 +142,7 @@
   "economy": {
     "dailyReward": 120,
     "waveBonusPerWave": 12,
-    "killBonusCurrency": 1
+    "killBonusCurrency": 1,
+    "adDailyLimit": 6
   }
 }

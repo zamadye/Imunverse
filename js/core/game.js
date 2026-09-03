@@ -29,13 +29,19 @@ import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
-import { triggerRewardedAdRevive } from '../systems/monetization.js';
+import {
+  triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
+} from '../systems/monetization.js';
+import { AbilitySystem } from '../systems/ability-system.js';
+import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
+import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 
 import { Camera } from '../render/camera.js';
-import { drawBackground } from '../render/background.js';
+import { drawBackground, setArenaPalette } from '../render/background.js';
 import {
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
+  drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
@@ -88,8 +94,19 @@ export const game = {
     const startY = 0;
     const upgrades = {};
     const stats = this.computePlayerStats(heroDef, upgrades);
+    this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
 
     const player = new Player(heroDef, stats, startX, startY);
+
+    // Arena terpilih → palet latar + properti khas arena
+    const arena = this.getRunArena();
+    setArenaPalette(arena.palette);
+
+    // Kemampuan aktif sesuai tahap evolusi hero (tombol kanan: pedang + 3 kekuatan)
+    const evoStage = getEvoStageDef(meta);
+    const unlockedAbilityIds = getData().evolutions.stages
+      .filter((st) => st.stage <= evoStage.stage && st.ability)
+      .map((st) => st.ability);
 
     this.run = {
       heroDef,
@@ -118,6 +135,12 @@ export const game = {
       doubleCurrencyUsed: false,
       earned: 0, // total antibodi yang dibawa pulang (diisi di finishRun)
       boss: null,
+      arena,
+      evoStage,
+      abilities: new AbilitySystem(unlockedAbilityIds),
+      parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
+      partsCollectedTotal: 0,
+      bossChest: null,
       ended: false,
       stats: { shotsFired: 0 },
     };
@@ -135,6 +158,37 @@ export const game = {
   // =====================================================================
   // STATISTIK PLAYER (base JSON × squad permanen × upgrade run × serum)
   // =====================================================================
+  /**
+   * Kalikan stat dasar dengan multiplier META: tahap evolusi hero (damage/HP)
+   * + bonus arena terpilih (speed/magnet). Dipanggil di startRun.
+   */
+  applyMetaMultipliers(stats) {
+    const meta = STATE.meta;
+    const evo = getEvoStageDef(meta);
+    const arena = this.getRunArena();
+    stats.damage *= evo.damageMult;
+    stats.maxHP = Math.round(stats.maxHP * evo.maxHPMult);
+    stats.speed *= arena.bonus.speedMult || 1;
+    stats.magnetRadius *= arena.bonus.magnetMult || 1;
+    return stats;
+  },
+
+  /**
+   * Definisi arena run (dipilih di dashboard). Arena terkunci tidak bisa
+   * dipakai walau tersimpan di save — fallback ke arena terbuka pertama.
+   */
+  getRunArena() {
+    const meta = STATE.meta;
+    const list = getData().arenas.arenas;
+    const chosen = list.find((a) => a.id === meta.selectedArena);
+    if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
+    const fallback = list.find((a) => arenaUnlockStatus(a, meta).unlocked);
+    if (chosen || !fallback) {
+      meta.selectedArena = (fallback || list[0]).id;
+    }
+    return fallback || list[0];
+  },
+
   computePlayerStats(heroDef, runUpgrades) {
     const base = heroDef.baseStats;
     const squad = squadMultipliers(STATE.meta);
@@ -238,7 +292,8 @@ export const game = {
     // 9. Pickup (nutrisi)
     this.updatePickups(dt);
 
-    // 10. Efek & partikel
+    // 10. Efek & partikel (+ cooldown kemampuan aktif)
+    run.abilities.update(dt);
     run.effects.update(dt);
 
     // 11. Kamera follow + shake decay
@@ -285,6 +340,15 @@ export const game = {
     run.effects.spawnCollect(p.x, p.y, p.def.color);
 
     switch (p.pickupType) {
+      case 'part': {
+        // Bagian evolusi: untuk upgrade bentuk hero (tangan → kaki → pedang → elemen)
+        const partId = p.partId || p.def.id;
+        run.parts[partId] = (run.parts[partId] || 0) + 1;
+        run.partsCollectedTotal += 1;
+        run.effects.spawnLabel(p.x, p.y, `${p.def.name} +1`, '#ffe082');
+        run.effects.spawnKillFx('ring', p.x, p.y, run.evoStage.tierColor, Math.random() * 10);
+        break;
+      }
       case 'xp':
         this.addXP(p.value);
         break;
@@ -454,17 +518,117 @@ export const game = {
     }
   },
 
+  /**
+   * Peti boss muncul di momen istirahat alami (boss tumbang, gameplay dipause).
+   * Isi: antibodi + 1 bagian evolusi. Tawaran iklan opsional: 2x isi.
+   */
+  openBossChest(enemy) {
+    const run = this.run;
+    const economy = getData().upgrades.economy;
+    const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
+    const bonusPart = rollPartDrop('boss', 1) || 'silia';
+    run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
+    setPaused(true);
+    emit('bosschest', {
+      currency: bonusCurrency,
+      partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
+      partSprite: getData().evolutions.parts.find((p) => p.id === bonusPart)?.sprite || '',
+      adAvailable: canWatchAd(STATE.meta),
+    });
+  },
+
+  /** Ambil isi peti tanpa iklan → lanjut run. */
+  claimBossChestKeep() {
+    this._grantBossChest(false);
+  },
+
+  /** Iklan reward selesai → isi peti digandakan → lanjut run. Logic asli. */
+  claimBossChestDouble() {
+    const meta = STATE.meta;
+    if (!canWatchAd(meta)) { this._grantBossChest(false); return; }
+    triggerRewardedAdBossChest(() => {
+      trackAdWatch(meta);
+      this._grantBossChest(true);
+    }, () => this._grantBossChest(false));
+  },
+
+  _grantBossChest(doubled) {
+    const run = this.run;
+    const meta = STATE.meta;
+    const chest = run.bossChest;
+    if (!chest) return;
+    const currency = chest.currency * (doubled ? 2 : 1);
+    meta.currency += currency;
+    meta.evoParts[chest.partId] = (meta.evoParts[chest.partId] || 0) + (doubled ? 2 : 1);
+    writeSave(meta);
+    run.bossChest = null;
+    emit('toast', { message: `Peti boss: +${currency} antibodi${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    setPaused(false);
+    emit('resume');
+  },
+
+  /**
+   * Aktivasi kemampuan aktif via tombol HUD / keyboard (slot 1-4).
+   * @returns {boolean} true bila kemampuan terluncur.
+   */
+  useAbilityBySlot(slot) {
+    const run = this.run;
+    if (!run || run.ended || STATE.levelUpOpen) return false;
+    const player = run.player;
+    if (!player.alive) return false;
+    return run.abilities.triggerBySlot(slot, {
+      player,
+      enemies: run.enemies,
+      damage: player.stats.damage,
+      effects: run.effects,
+      camera: run.camera,
+      hitEnemy: (enemy, dmg) => {
+        const died = enemy.takeDamage(dmg);
+        this.spawnHitFeedback(enemy, dmg, died);
+        if (died) this.onEnemyKilled(enemy, null);
+      },
+    });
+  },
+
   /** Musuh mati: kill count, partikel, drop nutrisi, splitter, boss reward. */
   onEnemyKilled(enemy, source) {
     const run = this.run;
     run.kills += 1;
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? 26 : 8, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
+    // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
+    const killKind = run.evoStage.killFx || 'ring';
+    run.effects.spawnKillFx(killKind, enemy.x, enemy.y, run.evoStage.tierColor, Math.random() * 10);
+    if (killKind === 'legend' || enemy.isBoss) {
+      run.effects.spawnBurst(enemy.x, enemy.y, run.evoStage.tierColor, 10, 220, 4);
+    }
+
     if (enemy.isBoss) {
       run.bossKills += 1;
       run.boss = null;
       run.camera.addShake(0.65);
       emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
+      this.openBossChest(enemy);
+    }
+
+    // ---- Drop BAGIAN EVOLUSI (item upgrade hero, bukan sekadar poin) ----
+    const partMult = run.arena.bonus.partMult || 1;
+    const dropPart = (partId, ox = 0, oy = 0) => {
+      if (!partId) return;
+      const partDef = getData().evolutions.parts.find((p) => p.id === partId);
+      if (!partDef) return;
+      const pickup = new Pickup({ ...partDef, pickupType: 'part', color: partDef.sprite, radius: 13, lifetime: 25 }, enemy.x + ox, enemy.y + oy);
+      pickup.partId = partDef.id;
+      run.pickups.push(pickup);
+    };
+    if (enemy.isBoss) {
+      for (let i = 0; i < getData().evolutions.bossGuaranteedParts; i++) {
+        dropPart(rollPartDrop('boss', partMult), (Math.random() - 0.5) * 70, (Math.random() - 0.5) * 70);
+      }
+    } else if (enemy.def.elite) {
+      dropPart(rollPartDrop('elite', partMult));
+    } else {
+      dropPart(rollPartDrop('normal', partMult));
     }
 
     // ---- Drop orb XP (nilai = xpPerKill musuh; skin sesuai nilai) ----
@@ -590,12 +754,16 @@ export const game = {
     meta.stats.totalRuns += 1;
     meta.stats.totalNutrients += run.nutrientsCollected;
     meta.stats.totalXP += Math.floor(run.xpGained);
+    // Bagian evolusi yang dikumpulkan selama run → inventory meta
+    for (const [partId, n] of Object.entries(run.parts)) {
+      if (n > 0) meta.evoParts[partId] = (meta.evoParts[partId] || 0) + n;
+    }
     addCurrency(meta, earned);
 
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);
     for (const m of completedMissions) {
-      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} 🛡️`, kind: 'gold' });
+      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} antibodi`, kind: 'gold' });
     }
     // Auto-unlock hero dari statistik
     const newlyUnlocked = checkAutoUnlocks(meta);
@@ -615,6 +783,7 @@ export const game = {
       bossKills: run.bossKills,
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,
+      parts: run.partsCollectedTotal,
       level: run.level,
       currencyEarned: earned,
       newMissions: completedMissions.length,
@@ -701,7 +870,14 @@ export const game = {
         // Aura mockup: ring putih gradasi lembut di belakang karakter
         drawSprite(ctx, 'assets/sprites/deco_aura.png', player.x, player.y, player.radius * 4.4, 0, { alpha: 0.8 });
         drawPulseGlow(ctx, player.x, player.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
-        drawSprite(ctx, path, player.x, player.y, player.radius * 2.667, 0, {});
+        const bodySize = player.radius * 2.667;
+        const evo = run.evoStage;
+        // OVERLAY EVOLUSI — bentuk hero berubah sesuai tahap (terlihat jelas):
+        if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', player.x, player.y + bodySize * 0.34, bodySize * 0.62, 0, {});
+        if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', player.x, player.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
+        drawSprite(ctx, path, player.x, player.y, bodySize, 0, {});
+        if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', player.x, player.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
+        if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', player.x + bodySize * 0.3, player.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
       }
     }
 
@@ -716,6 +892,7 @@ export const game = {
       if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
+      else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
     }
     for (const pt of run.effects.particles) {
       drawParticle(ctx, pt);
@@ -737,6 +914,7 @@ export const game = {
         hpText: `${Math.ceil(player.hp)}/${player.maxHP}`,
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
+        abilities: run.abilities.getView(),
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,

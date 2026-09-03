@@ -332,3 +332,133 @@ export function colorWithAlpha(hex, alpha) {
   colorCache.set(key, out);
   return out;
 }
+
+/**
+ * VFX kematian musuh sesuai tier evolusi hero — terlihat jelas beda antar
+ * tier: ring pop (common), slash ganda (uncommon), spiral angin (rare),
+ * petir menyambar (epic), petir + ring emas (legendary), kristal beku.
+ */
+export function drawKillFx(ctx, fx, time) {
+  const t = 1 - fx.life / fx.maxLife; // 0..1 progress
+  const alpha = 1 - t;
+
+  if (fx.kind === 'ring' || fx.kind === 'legend') {
+    const r = (fx.kind === 'legend' ? 46 : 30) * (0.3 + t * 1.4);
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 5 * alpha + 1.5;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    // titik-titik keluar
+    for (let i = 0; i < 6; i++) {
+      const a = fx.seed + (Math.PI * 2 * i) / 6;
+      const rr = r * 1.25;
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.fillStyle = fx.color;
+      ctx.beginPath();
+      ctx.arc(fx.x + Math.cos(a) * rr, fx.y + Math.sin(a) * rr, 3.2 * alpha + 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  if (fx.kind === 'slash') {
+    const r = 40 * (0.5 + t * 1.1);
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 7 * alpha + 2;
+    ctx.lineCap = 'round';
+    for (const off of [0, Math.PI * 0.7]) {
+      ctx.beginPath();
+      ctx.arc(fx.x, fx.y, r * (0.8 + off * 0.12), fx.seed + off + t * 2.2, fx.seed + off + t * 2.2 + 1.4);
+      ctx.stroke();
+    }
+  }
+
+  if (fx.kind === 'wind') {
+    // 3 spiral angin memuai
+    ctx.globalAlpha = alpha * 0.8;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 5 * alpha + 1.5;
+    ctx.lineCap = 'round';
+    for (let arm = 0; arm < 3; arm++) {
+      ctx.beginPath();
+      for (let s = 0; s <= 12; s++) {
+        const tt = s / 12;
+        const a = fx.seed + (arm * Math.PI * 2) / 3 + tt * 2.6 + t * 3.4;
+        const rr = 12 + tt * 70 * (0.4 + t * 0.9);
+        const x = fx.x + Math.cos(a) * rr;
+        const y = fx.y + Math.sin(a) * rr;
+        if (s === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  if (fx.kind === 'bolt' || fx.kind === 'legend') {
+    // Petir: poliline zig-zag dari atas + flash
+    const boltH = 90;
+    const segs = 7;
+    const endY = fx.y + 6;
+    const startY = fx.y - boltH;
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = fx.kind === 'legend' ? '#ffe082' : fx.color;
+    ctx.lineWidth = 4.5 * alpha + 1;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(fx.x + Math.sin(fx.seed * 7.3) * 10, startY);
+    for (let i = 1; i <= segs; i++) {
+      const tt = i / segs;
+      const y = startY + (endY - startY) * tt;
+      const jitter = i === segs ? 0 : Math.sin(fx.seed * 3.1 + i * 9.7) * 13;
+      ctx.lineTo(fx.x + jitter, y);
+    }
+    ctx.stroke();
+    // flash lembut di titik sambar
+    ctx.globalAlpha = alpha * 0.35;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, 18 * (0.6 + t), 0, Math.PI * 2);
+    ctx.fill();
+    if (fx.kind === 'legend') {
+      ctx.globalAlpha = alpha * 0.5;
+      ctx.strokeStyle = '#f5c64f';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(fx.x, fx.y, 52 * (0.4 + t), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  if (fx.kind === 'frost') {
+    // Kristal es 6 arah mengembang
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 4 * alpha + 1.2;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+      const a = fx.seed + (Math.PI * i) / 3;
+      const r1 = 16 + t * 26;
+      const r2 = 34 + t * 96;
+      ctx.beginPath();
+      ctx.moveTo(fx.x + Math.cos(a) * r1, fx.y + Math.sin(a) * r1);
+      ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
+      // cabang kecil V
+      const bx = fx.x + Math.cos(a) * r2 * 0.72;
+      const by = fx.y + Math.sin(a) * r2 * 0.72;
+      for (const da of [-0.5, 0.5]) {
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx + Math.cos(a + da) * 14, by + Math.sin(a + da) * 14);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha * 0.18;
+    ctx.fillStyle = fx.color;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, 40 + t * 110, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+}

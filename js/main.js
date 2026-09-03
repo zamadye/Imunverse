@@ -11,7 +11,7 @@
 
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
-import { loadAllData } from './core/data-store.js';
+import { loadAllData, getData } from './core/data-store.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
 import { InputHandler } from './input/input-handler.js';
@@ -31,6 +31,8 @@ import * as levelupScreen from './ui/screens/levelup-screen.js';
 import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
+import * as arenaScreen from './ui/screens/arena-screen.js';
+import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -84,6 +86,7 @@ function wireUiBridge() {
   });
 
   on('levelup', (payload) => screenManager.show('levelup', payload));
+  on('bosschest', (payload) => screenManager.show('bosschest', payload));
   on('pause', () => screenManager.show('pause'));
   on('revive', () => screenManager.show('revive'));
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
@@ -143,6 +146,9 @@ async function boot() {
   screenManager.registerScreen('pause', pauseScreen);
   screenManager.registerScreen('revive', reviveScreen);
   screenManager.registerScreen('gameover', gameoverScreen);
+  screenManager.registerScreen('arena', arenaScreen);
+  screenManager.registerScreen('bosschest', bosschestScreen);
+  bosschestScreen.wire();
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
   screenManager.show('loading');
@@ -153,6 +159,23 @@ async function boot() {
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
+  document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
+
+  // Keyboard kemampuan aktif (j/k/l/o sesuai data/abilities.json + angka 1-4)
+  window.addEventListener('keydown', (ev) => {
+    if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
+    const target = ev.target;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+    const key = ev.key.toLowerCase();
+    const defs = getData().abilities.abilities;
+    const byKey = defs.find((a) => a.key === key);
+    const byNum = /^[1-4]$/.test(key) ? defs.find((a) => a.slot === Number(key)) : null;
+    const def = byKey || byNum;
+    if (def) {
+      ev.preventDefault();
+      game.useAbilityBySlot(def.slot);
+    }
+  });
 
   // Navigasi statis antar screen (atribut data-nav / data-back di index.html)
   document.querySelectorAll('[data-nav]').forEach((btn) => {
@@ -247,6 +270,7 @@ async function runAutotest() {
     await until(() => STATE.screen === 'dashboard');
     log('dashboardShown', true);
 
+    STATE.meta.evoStage = 3; // Fagosit Elite → tebasan/siklon/petir terbuka
     game.startRun('sel_t');
     log('runStarted', STATE.screen === 'gameplay');
 
@@ -276,6 +300,26 @@ async function runAutotest() {
     }
     log('upgradeApplied', Object.keys(game.run.upgrades).length >= 1 && !STATE.levelUpOpen);
 
+    // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
+    const fired = game.useAbilityBySlot(3);
+    log('abilityFired', fired && game.run.abilities.getBySlot(3).cdLeft > 0);
+
+    // Drop bagian evolusi: bunuh 30 musuh elite (30%/kill) → pasti dapat,
+    // lalu teleport semua pickup bagian ke player dan proses pengambilan.
+    for (let i = 0; i < 30; i++) game.spawnEnemy('parasit', false);
+    for (const e of game.run.enemies) {
+      if (e.def.elite && e.alive) {
+        const died = e.takeDamage(999999);
+        if (died) game.onEnemyKilled(e, null);
+      }
+    }
+    for (const p of game.run.pickups) {
+      if (p.pickupType === 'part') { p.x = game.run.player.x; p.y = game.run.player.y; }
+    }
+    game.updatePickups(0.02);
+    const partsTotal = Object.values(game.run.parts).reduce((a, b) => a + b, 0);
+    log('evolutionPartsDropped', partsTotal > 0);
+
     // Damage → kena vignette; mati → modal revive → tolak → game over
     game.run.player.iframes = 0; // reset i-frames (musuh mungkin baru saja memukul)
     game.damagePlayer(10);
@@ -290,6 +334,8 @@ async function runAutotest() {
     log('gameoverShown', true);
     log('currencyPersisted', STATE.meta.currency >= 0 && STATE.meta.stats.totalRuns >= 1);
     log('saveWritten', !!STATE.meta.updatedAt);
+    const metaParts = Object.values(STATE.meta.evoParts).reduce((a, b) => a + b, 0);
+    log('evolutionPersisted', metaParts > 0);
 
     console.log('SELFTEST_PASS ' + JSON.stringify(results));
   } catch (err) {

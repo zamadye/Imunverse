@@ -65,7 +65,11 @@
 
           <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
 
+          <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
+
           <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
+
+          <div id="arena-card" class="card arena-card"><!-- diisi JS --></div>
 
           <div class="card missions-card">
             <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
@@ -174,8 +178,30 @@
           </div>
         </div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
+        <div id="ability-bar" class="ability-bar" aria-label="Kemampuan aktif"><!-- diisi JS --></div>
         <div id="hud-announce" class="hud-announce hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
+      </section>
+
+      <!-- ============ PILIH ARENA (modal di atas dashboard) ============ -->
+      <section id="screen-arena" class="screen modal" data-screen="arena">
+        <div class="modal-box wide">
+          <h2 class="modal-title">Pilih Arena</h2>
+          <p class="modal-sub">Tiap arena punya bonus berbeda. Terbuka sesuai cara kamu bermain.</p>
+          <div id="arena-list" class="arena-list"><!-- diisi JS --></div>
+          <button id="btn-arena-close" class="btn btn-primary">Tutup</button>
+        </div>
+      </section>
+
+      <!-- ============ PETI BOSS (modal natural break) ============ -->
+      <section id="screen-bosschest" class="screen modal" data-screen="bosschest">
+        <div class="modal-box chest-box">
+          <img class="chest-img" src="assets/sprites/deco_chest.png" alt="Peti Boss" />
+          <h2 class="modal-title coral">Peti Boss!</h2>
+          <div id="chest-loot" class="chest-loot"><!-- diisi JS --></div>
+          <button id="btn-chest-ad" class="btn btn-gold btn-xl">TONTON IKLAN — 2X LOOT</button>
+          <button id="btn-chest-keep" class="btn btn-primary">Ambil Saja</button>
+        </div>
       </section>
 
       <!-- ============ LEVEL UP MODAL ============ -->

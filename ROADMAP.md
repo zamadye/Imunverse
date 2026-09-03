@@ -95,6 +95,26 @@
 - [x] Pause: emoji ⏱/🛡 diganti ikon PNG (Chromium headless tanpa font emoji).
 - **Kriteria lulus:** 12 screenshot Chromium asli tanpa console error/404; elemen dekor terverifikasi di DOM (chipCount=3, aura 326px); perf tetap vsync 60 fps @150 musuh.
 
+## Fase 5.2 — Kekuatan yang Terlihat: Evolusi, Kemampuan Aktif & Kill FX ✅
+**Tujuan:** hero terlihat makin kuat (bentuk berubah) + efek kalahkan musuh sesuai tier.
+- [x] **Drop bagian evolusi**: musuh normal 6%, elite (virion/parasit) 30%, boss dijamin 2 — dari `data/evolutions.json`.
+- [x] **5 tahap evolusi** Common→Legendary: Silia → +Pseudopodia (kaki) → +Mikropedang → +Inti Elemen; tiap tahap = mult damage/HP nyata di `computePlayerStats`.
+- [x] **Overlay bentuk di canvas & panggung**: silia berkibar, kaki, pedang, aura elemen berputar (`ov_*.png`) — hero Common benar-benar lingkaran, Legendary penuh kelengkapan.
+- [x] **Kill FX per tier**: ring (common), slash (uncommon), spiral angin (rare), petir menyambar (epic), petir+ring emas (legendary) — `spawnKillFx` + `drawKillFx`.
+- [x] **4 tombol kemampuan di kanan** (1 senjata: Tebasan Mitosis; 3 kekuatan: Siklon Silia, Petir Sitotoksik, Beku Fagosit) — cooldown ring, keyboard J/K/L/O & 1-4, terkunci merah-duplikat sampai evolusi cukup; damage/push/freeze nyata.
+- [x] Status musuh baru: `applyFreeze` (berhenti total) & `applySlow` (siklon) di enemy.js.
+- **Kriteria lulus:** SELFTEST `abilityFired`, `evolutionPartsDropped`, `evolutionPersisted` true; petir menyambar terlihat di screenshot `12-skill-petir.png`.
+
+## Fase 5.3 — Retensi & Monetisasi Etis: Arena, Peti Boss, Meta-Progress ✅
+**Tujuan:** sesuatu yang selalu dikejar + ads di titik istirahat alami (riset: revive > booster > bonus, selalu opsional, cap harian).
+- [x] **4 arena** (`data/arenas.json`) dengan palet/prop/bonus berbeda; **terkunci sesuai cara main**: Lambung (150 kill total), Paru (best wave 8), Saraf (2 boss kill) — progres unlock tampil di modal; `getRunArena` menolak arena terkunci dari save lama.
+- [x] **Peti Boss** = natural break: muncul saat boss tumbang (gameplay pause), isi antibodi + bagian; **iklan opsional 2x loot** (`triggerRewardedAdBossChest`) + **kuota iklan harian** `adDailyLimit` dari JSON (`canWatchAd`/`trackAdWatch`).
+- [x] **Kartu Evolusi di dashboard**: tahap, tier, bagian terkumpul vs kebutuhan, tombol BEREVOLUSI (bentuk panggung ikut berubah) — selalu ada target berikutnya.
+- [x] **Kartu arena + modal pilih arena** dengan syarat unlock berbasis statistik nyata.
+- [x] Emoji tersisa (🛡/🔒/⏱/🧬) diganti ikon PNG — Chromium headless tanpa font emoji.
+- [x] **Bugfix nyata**: `Pickup.isCollectedBy` NaN (`player.pickupRadius` tidak ada di Player) → nutrisi TIDAK PERNAH terambil; kini fallback `stats.pickupRadius` — nutrisi/bagian kembali terkumpul.
+- **Kriteria lulus:** 15/15 screenshot Chromium CLEAN (0 error/404); perf vsync 16,6 ms/frame @151 musuh dengan semua overlay evolusi aktif; SELFTEST_PASS 15 langkah.
+
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
 - [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.

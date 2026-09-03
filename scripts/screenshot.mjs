@@ -1,8 +1,9 @@
 /**
  * screenshot.mjs — bukti runtime browser Chromium asli (Imunverse).
  * Jalankan: cd /tmp/pw && LD_LIBRARY_PATH=/tmp/alibs/lib node /home/user/Imunverse/scripts/screenshot.mjs
- * Alur: loading → dashboard → roster → shop → upgrade → roster(mulai)
- *       → gameplay 12 dtk → gameover → retry → pause.
+ * Alur: loading → dashboard (evolusi+arena) → roster → shop → upgrade →
+ *       gameplay (ability bar + overlay evolusi) → skill petir → boss chest
+ *       → gameover → retry → pause.
  */
 let chromium;
 let c;
@@ -52,6 +53,18 @@ await page.waitForSelector('#screen-dashboard.active', { timeout: 30000 });
 await sleep(900);
 await shot('02-dashboard');
 
+// --- simulasi progres: hero evolusi epic (stage 3), arena paru, bagian terkumpul ---
+await page.evaluate(() => {
+  const m = window.__IMUNVERSE.STATE.meta;
+  m.evoStage = 3;
+  m.evoParts = { silia: 3, pseudopodia: 2, mikropedang: 1, inti_elemen: 0 };
+  m.selectedArena = 'paru';
+  m.currency = 850;
+  window.__IMUNVERSE.screenManager.show('dashboard');
+});
+await sleep(900);
+await shot('02-dashboard');
+
 // --- roster (via dock nav) ---
 await page.evaluate(() => {
   const b = [...document.querySelectorAll('#screen-dashboard button, #screen-dashboard .nav-item, #screen-dashboard [role]')]
@@ -71,7 +84,16 @@ await page.evaluate(() => window.__IMUNVERSE.screenManager.show('upgrade'));
 await sleep(600);
 await shot('05-upgrade');
 
-// --- mulai run dari roster ---
+// --- modal pilih arena (dari dashboard) ---
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(500);
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('arena'));
+await sleep(600);
+await shot('13-arena');
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(400);
+
+// --- mulai run dari roster (hero evolusi epic: pedang+silia+kaki, arena paru) ---
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('roster'));
 await sleep(500);
 await page.click('#screen-roster .hero-card:not(.locked)');
@@ -85,11 +107,50 @@ await shot('07-gameplay-early');
 await page.mouse.move(70, 700);
 await page.mouse.down();
 await page.mouse.move(140, 630, { steps: 8 });
-await sleep(4500);
+await sleep(2500);
 await shot('08-gameplay-mid');
-await sleep(5300);
+
+// --- kemampuan petir (slot 3) — VFX petir menyambar musuh ---
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  for (let i = 0; i < 5; i++) {
+    g.run.enemies.forEach?.(() => {});
+  }
+  // spawn beberapa musuh di sekitar player agar petir kena
+  for (let i = 0; i < 4; i++) g.spawnEnemy('bakteri', false);
+  g.run.enemies.slice(-4).forEach((e, i) => {
+    const a = (i / 4) * Math.PI * 2;
+    e.x = g.run.player.x + Math.cos(a) * 90;
+    e.y = g.run.player.y + Math.sin(a) * 90;
+  });
+});
+await page.evaluate(() => window.__IMUNVERSE.game.useAbilityBySlot(3)); // petir
+await sleep(350);
+await shot('12-skill-petir');
+await page.evaluate(() => window.__IMUNVERSE.game.useAbilityBySlot(1)); // tebasan
+await sleep(300);
+
+await sleep(2600);
 await page.mouse.up();
 await shot('09-gameplay-12s');
+
+// --- PETI BOSS: spawn boss lalu kalahkan → modal natural break ---
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  g.spawnEnemy('sel_kanker', true);
+  const boss = g.run.boss;
+  if (boss) {
+    boss.x = g.run.player.x + 150;
+    boss.y = g.run.player.y;
+    g.onEnemyKilled(boss, null); // alur asli: drop + peti boss + pause
+  }
+});
+await sleep(800);
+if ((await activeScreen()) === 'bosschest' || (await page.locator('#screen-bosschest').isVisible())) {
+  await shot('14-bosschest');
+  await page.click('#btn-chest-keep');
+  await sleep(600);
+}
 
 // --- modal level-up: paksa XP cukup untuk naik level ---
 await page.evaluate(() => { window.__IMUNVERSE.game.addXP(9999); });
@@ -119,7 +180,7 @@ await sleep(1600);
 await page.click('#btn-pause');
 await sleep(600);
 if ((await activeScreen()) === 'pause' || (await page.locator('#screen-pause').isVisible())) {
-  await shot('12-pause');
+  await shot('15-pause');
 }
 
 await browser.close();

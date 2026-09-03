@@ -40,19 +40,33 @@ function roundHexPath(ctx, cx, cy, R, round) {
 /**
  * Gambar latar (screen-space). camX/camY = posisi kamera; w/h = viewport.
  */
+// Palet arena aktif — diganti saat run dimulai lewat setArenaPalette()
+// (dari data/arenas.json). Semua key punya fallback agar aman.
+let PALETTE = {
+  top: '#2b9284', mid: '#23857a', bot: '#1d7268',
+  hex: '#fdf6e3', hexEdge: '#e9dfc0', vignette: 'rgba(16,64,58,0.28)',
+  props: ['prop_reef.png', 'prop_weed.png'],
+};
+
+/** Set palet arena (dipanggil game.js saat run dimulai). */
+export function setArenaPalette(p) {
+  PALETTE = { ...PALETTE, ...p };
+}
+
 export function drawBackground(ctx, camX, camY, w, h, time) {
-  // ---- dasar gradien air tubuh (teal) ----
+  // ---- dasar gradien air tubuh (warna per arena) ----
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, '#2b9284');
-  g.addColorStop(0.55, '#23857a');
-  g.addColorStop(1, '#1d7268');
+  g.addColorStop(0, PALETTE.top);
+  g.addColorStop(0.55, PALETTE.mid);
+  g.addColorStop(1, PALETTE.bot);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
   drawCellLayer(ctx, camX, camY, w, h, time);
-  drawReefLayer(ctx, camX, camY, w, h, 0.22, 820, 'prop_reef.png', 210, time);
+  const props = PALETTE.props && PALETTE.props.length ? PALETTE.props : ['prop_reef.png', 'prop_weed.png'];
+  drawReefLayer(ctx, camX, camY, w, h, 0.22, 820, props[0], 210, time);
   drawBubbleLayer(ctx, camX, camY, w, h, time, 0.5, 190, 'rgba(255,255,255,0.10)', 5);
-  drawReefLayer(ctx, camX, camY, w, h, 0.4, 620, 'prop_weed.png', 170, time);
+  drawReefLayer(ctx, camX, camY, w, h, 0.4, 620, props[1] || props[0], 170, time);
   drawBubbleLayer(ctx, camX, camY, w, h, time, 0.72, 130, 'rgba(255,255,255,0.16)', 8);
 
   // ---- arena heksagon cream di pusat dunia ----
@@ -65,7 +79,7 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   // ---- vignette lembut tepi layar ----
   const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
   vg.addColorStop(0, 'rgba(16,64,58,0)');
-  vg.addColorStop(1, 'rgba(16,64,58,0.28)');
+  vg.addColorStop(1, PALETTE.vignette);
   ctx.fillStyle = vg;
   ctx.fillRect(0, 0, w, h);
 }
@@ -168,8 +182,8 @@ function drawArena(ctx, camX, camY, w, h, time) {
   roundHexPath(ctx, cx, cy + 6, R + 16, 84);
   ctx.fill();
 
-  // lantai cream
-  ctx.fillStyle = '#faf1dc';
+  // lantai arena (warna per arena dari data/arenas.json)
+  ctx.fillStyle = PALETTE.hex || '#faf1dc';
   roundHexPath(ctx, cx, cy, R, 80);
   ctx.fill();
 

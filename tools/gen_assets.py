@@ -1142,10 +1142,295 @@ def gen_stage_deco(out):
 
 
 # =====================================================================
+# STAGE 9 — EVOLUSI HERO, KEMAMPUAN AKTIF & ARENA (18 aset)
+# =====================================================================
+
+def _part_canvas(size, tint):
+    """Basis kawaii: badan bulat tint + highlight + outline ink."""
+    img, d = canvas(size)
+    S = size * SS
+    d.ellipse([S * 0.14, S * 0.14, S * 0.86, S * 0.86], fill=tint)
+    hl = tuple(min(255, int(c * 1.28 + 40)) for c in tint[:3]) + (255,)
+    d.ellipse([S * 0.26, S * 0.2, S * 0.56, S * 0.44], fill=hl)
+    d.ellipse([S * 0.14, S * 0.14, S * 0.86, S * 0.86], outline=(18, 63, 58, 255), width=max(3, int(S * 0.035)))
+    return img, d, S
+
+
+def part_silia(size):
+    """Bagian evolusi: Silia (rambut cambuk lucu) — drop musuh."""
+    img, d, S = _part_canvas(size, (169, 215, 149, 255))
+    for k, ang in enumerate((-40, -15, 10, 35)):
+        pts = []
+        for t in range(10):
+            tt = t / 9
+            px = S * 0.5 + (tt - 0.5) * S * 0.06
+            py = S * 0.42 - tt * S * 0.3
+            pts.append((px + math.sin(tt * 4 + k) * S * 0.05, py))
+        d.line(pts, fill=(18, 63, 58, 255), width=max(3, int(S * 0.05)), joint="curve")
+        tipx, tipy = pts[-1]
+        d.ellipse([tipx - S * 0.035, tipy - S * 0.035, tipx + S * 0.035, tipy + S * 0.035], fill=(247, 205, 112, 255))
+    # mata senyum
+    d.ellipse([S * 0.38, S * 0.5, S * 0.45, S * 0.58], fill=(18, 63, 58, 255))
+    d.ellipse([S * 0.55, S * 0.5, S * 0.62, S * 0.58], fill=(18, 63, 58, 255))
+    return done(img, size)
+
+
+def part_pseudopodia(size):
+    """Bagian evolusi: Pseudopodia (kaki kaki membulat) — drop musuh."""
+    img, d, S = _part_canvas(size, (127, 205, 236, 255))
+    for k, bx in enumerate((0.3, 0.7)):
+        d.rounded_rectangle([S * bx - S * 0.09, S * 0.6, S * bx + S * 0.09, S * 0.88], radius=int(S * 0.09), fill=(18, 63, 58, 255))
+        d.rounded_rectangle([S * bx - S * 0.07, S * 0.6, S * bx + S * 0.07, S * 0.85], radius=int(S * 0.07), fill=(247, 205, 112, 255))
+    d.ellipse([S * 0.38, S * 0.32, S * 0.45, S * 0.4], fill=(18, 63, 58, 255))
+    d.ellipse([S * 0.55, S * 0.32, S * 0.62, S * 0.4], fill=(18, 63, 58, 255))
+    d.arc([S * 0.4, S * 0.36, S * 0.6, S * 0.5], start=20, end=160, fill=(18, 63, 58, 255), width=max(3, int(S * 0.03)))
+    return done(img, size)
+
+
+def part_pedang(size):
+    """Bagian evolusi: Mikropedang (senjata) — drop musuh."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    # bilah
+    d.polygon([(S * 0.5, S * 0.05), (S * 0.62, S * 0.2), (S * 0.58, S * 0.62), (S * 0.42, S * 0.62), (S * 0.38, S * 0.2)], fill=(226, 244, 240, 255))
+    d.polygon([(S * 0.5, S * 0.05), (S * 0.62, S * 0.2), (S * 0.58, S * 0.62), (S * 0.5, S * 0.62)], fill=(178, 216, 209, 255))
+    d.line([(S * 0.5, S * 0.08), (S * 0.5, S * 0.6)], fill=(255, 255, 255, 220), width=max(2, int(S * 0.025)))
+    # gagang + pelindung
+    d.rounded_rectangle([S * 0.32, S * 0.6, S * 0.68, S * 0.68], radius=int(S * 0.04), fill=(242, 130, 92, 255))
+    d.rounded_rectangle([S * 0.44, S * 0.68, S * 0.56, S * 0.92], radius=int(S * 0.05), fill=(18, 63, 58, 255))
+    d.ellipse([S * 0.44, S * 0.88, S * 0.56, S * 1.0], fill=(245, 198, 79, 255))
+    return done(img, size)
+
+
+def part_inti(size):
+    """Bagian evolusi: Inti Elemen (orb petir/angin) — drop musuh."""
+    img, d, S = _part_canvas(size, (176, 122, 224, 255))
+    # petir kuning kecil di tengah
+    d.polygon([(S * 0.52, S * 0.3), (S * 0.4, S * 0.54), (S * 0.49, S * 0.54), (S * 0.44, S * 0.74), (S * 0.6, S * 0.48), (S * 0.51, S * 0.48), (S * 0.58, S * 0.3)], fill=(255, 224, 130, 255))
+    # orbit titik
+    for ang in range(0, 360, 90):
+        a = math.radians(ang)
+        px = S * 0.5 + math.cos(a) * S * 0.36
+        py = S * 0.5 + math.sin(a) * S * 0.36
+        d.ellipse([px - S * 0.04, py - S * 0.04, px + S * 0.04, py + S * 0.04], fill=(255, 255, 255, 220))
+    return done(img, size)
+
+
+def _icon_round(size, ring, glyph_draw):
+    """Tombol kemampuan: lingkaran teal gelap + ring + glyph."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], fill=(31, 122, 112, 255))
+    d.ellipse([S * 0.06, S * 0.06, S * 0.94, S * 0.94], outline=ring, width=max(4, int(S * 0.05)))
+    glyph_draw(d, S)
+    return done(img, size)
+
+
+def icon_sword(size):
+    def g(d, S):
+        d.polygon([(S * 0.5, S * 0.16), (S * 0.6, S * 0.3), (S * 0.56, S * 0.6), (S * 0.44, S * 0.6), (S * 0.4, S * 0.3)], fill=(255, 255, 255, 255))
+        d.rounded_rectangle([S * 0.36, S * 0.6, S * 0.64, S * 0.66], radius=int(S * 0.03), fill=(242, 130, 92, 255))
+        d.rounded_rectangle([S * 0.46, S * 0.66, S * 0.54, S * 0.84], radius=int(S * 0.04), fill=(253, 246, 227, 255))
+    return _icon_round(size, (253, 246, 227, 255), g)
+
+
+def icon_wind(size):
+    def g(d, S):
+        for dy in (0.3, 0.45, 0.6):
+            d.arc([S * 0.2, S * dy - S * 0.08, S * 0.8, S * dy + S * 0.12], start=180, end=400, fill=(223, 245, 226, 255), width=max(3, int(S * 0.045)))
+            d.ellipse([S * 0.72, S * dy - S * 0.035, S * 0.8, S * dy + 0.045 * S], fill=(223, 245, 226, 255))
+    return _icon_round(size, (169, 215, 149, 255), g)
+
+
+def icon_bolt(size):
+    def g(d, S):
+        d.polygon([(S * 0.54, S * 0.16), (S * 0.36, S * 0.52), (S * 0.49, S * 0.52), (S * 0.42, S * 0.84), (S * 0.66, S * 0.44), (S * 0.52, S * 0.44), (S * 0.62, S * 0.16)], fill=(255, 224, 130, 255))
+    return _icon_round(size, (245, 198, 79, 255), g)
+
+
+def icon_frost(size):
+    def g(d, S):
+        c = (200, 236, 255, 255)
+        w = max(3, int(S * 0.045))
+        for ang in range(0, 360, 60):
+            a = math.radians(ang)
+            x1 = S * 0.5 - math.cos(a) * S * 0.26
+            y1 = S * 0.5 - math.sin(a) * S * 0.26
+            x2 = S * 0.5 + math.cos(a) * S * 0.26
+            y2 = S * 0.5 + math.sin(a) * S * 0.26
+            d.line([(x1, y1), (x2, y2)], fill=c, width=w)
+            for t in (0.55,):
+                px = S * 0.5 + math.cos(a) * S * 0.26 * (1 - t) - math.cos(a) * 0  # inner ticks
+            d.ellipse([S * 0.5 - S * 0.07, S * 0.5 - S * 0.07, S * 0.5 + S * 0.07, S * 0.5 + S * 0.07], fill=c)
+    return _icon_round(size, (200, 236, 255, 255), g)
+
+
+def _arena_thumb(size, top, mid, bot, hexcol, prop_draw):
+    """Thumbnail arena: gradasi air + heks cream + prop khas."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    for i in range(int(S)):
+        t = i / S
+        col = tuple(int(top[k] + (bot[k] - top[k]) * t) for k in range(3)) + (255,)
+        d.line([(0, i), (S, i)], fill=col)
+    # heks pusat
+    r = S * 0.42
+    cx, cy = S * 0.5, S * 0.52
+    pts = []
+    for k in range(6):
+        a = math.pi / 3 * k + math.pi / 6
+        pts.append((cx + math.cos(a) * r, cy + math.sin(a) * r * 0.92))
+    d.polygon(pts, fill=hexcol)
+    prop_draw(d, S, mid)
+    d.rounded_rectangle([0, 0, S - 1, S - 1], radius=int(S * 0.12), outline=(18, 63, 58, 255), width=max(3, int(S * 0.03)))
+    return done(img, size)
+
+
+def arena_limfe(size):
+    def p(d, S, mid):
+        for k in range(3):
+            px = S * (0.2 + 0.3 * k)
+            d.line([(px, S * 0.95), (px + S * 0.05, S * 0.6), (px - S * 0.03, S * 0.7)], fill=(16, 82, 74, 255), width=int(S * 0.05))
+    return _arena_thumb(size, (43, 146, 132, 255), (23, 96, 86, 255), (23, 96, 86, 255), (253, 246, 227, 255), p)
+
+
+def arena_lambung(size):
+    def p(d, S, mid):
+        for k, bx in enumerate((0.25, 0.72, 0.5)):
+            by = (0.3, 0.32, 0.75)[k]
+            rr = S * (0.1, 0.07, 0.09)[k]
+            d.ellipse([S * bx - rr, S * by - rr, S * bx + rr, S * by + rr], fill=(154, 208, 108, 255))
+            d.ellipse([S * bx - rr * 0.4, S * by - rr * 0.5, S * bx + rr * 0.2, S * by - rr * 0.05], fill=(214, 240, 178, 255))
+    return _arena_thumb(size, (216, 146, 96, 255), (150, 84, 60, 255), (150, 84, 60, 255), (253, 247, 222, 255), p)
+
+
+def arena_paru(size):
+    def p(d, S, mid):
+        for k, (bx, by) in enumerate(((0.3, 0.28), (0.7, 0.36), (0.5, 0.78))):
+            rr = S * (0.09, 0.12, 0.08)[k]
+            d.polygon([(bx * S, by * S - rr), (bx * S + rr * 0.7, by * S), (bx * S, by * S + rr), (bx * S - rr * 0.7, by * S)], fill=(214, 238, 246, 255))
+            d.polygon([(bx * S, by * S - rr * 0.5), (bx * S + rr * 0.3, by * S), (bx * S, by * S + rr * 0.5)], fill=(164, 214, 233, 255))
+    return _arena_thumb(size, (96, 176, 196, 255), (58, 126, 148, 255), (58, 126, 148, 255), (246, 252, 255, 255), p)
+
+
+def arena_saraf(size):
+    def p(d, S, mid):
+        pts = [(S * 0.25, S * 0.2), (S * 0.55, S * 0.35), (S * 0.35, S * 0.6), (S * 0.7, S * 0.75)]
+        d.line(pts, fill=(245, 198, 79, 255), width=int(S * 0.045), joint="curve")
+        for (px, py) in pts:
+            d.ellipse([px - S * 0.045, py - S * 0.045, px + S * 0.045, py + S * 0.045], fill=(245, 224, 158, 255))
+    return _arena_thumb(size, (94, 82, 158, 255), (52, 44, 110, 255), (52, 44, 110, 255), (252, 243, 214, 255), p)
+
+
+def ov_silia(size):
+    """Overlay evolusi: cambuk silia di atas kepala hero (stage 1+)."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    for k, bx in enumerate((0.3, 0.42, 0.58, 0.7)):
+        pts = []
+        for t in range(9):
+            tt = t / 8
+            pts.append((S * bx + math.sin(tt * 3 + k * 1.2) * S * 0.05 * tt, S * 0.5 - tt * S * 0.34))
+        d.line(pts, fill=(18, 63, 58, 255), width=max(3, int(S * 0.045)), joint="curve")
+        tipx, tipy = pts[-1]
+        d.ellipse([tipx - S * 0.03, tipy - S * 0.03, tipx + S * 0.03, tipy + S * 0.03], fill=(169, 215, 149, 255))
+    return done(img, size)
+
+
+def ov_pseudopodia(size):
+    """Overlay evolusi: kaki kecil di bawah hero (stage 2+)."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    for bx in (0.34, 0.66):
+        d.rounded_rectangle([S * bx - S * 0.07, S * 0.42, S * bx + S * 0.07, S * 0.9], radius=int(S * 0.07), fill=(18, 63, 58, 255))
+        d.ellipse([S * bx - S * 0.075, S * 0.8, S * bx + S * 0.075, S * 0.95], fill=(127, 205, 236, 255))
+        d.ellipse([S * bx - S * 0.075, S * 0.8, S * bx + S * 0.075, S * 0.95], outline=(18, 63, 58, 255), width=max(2, int(S * 0.02)))
+    return done(img, size)
+
+
+def ov_pedang(size):
+    """Overlay evolusi: mikropedang di tangan kanan hero (stage 3+)."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    d.polygon([(S * 0.56, S * 0.06), (S * 0.66, S * 0.2), (S * 0.62, S * 0.56), (S * 0.52, S * 0.56), (S * 0.5, S * 0.2)], fill=(226, 244, 240, 255))
+    d.line([(S * 0.58, S * 0.1), (S * 0.58, S * 0.52)], fill=(255, 255, 255, 230), width=max(2, int(S * 0.02)))
+    d.rounded_rectangle([S * 0.46, S * 0.54, S * 0.7, S * 0.6], radius=int(S * 0.03), fill=(242, 130, 92, 255))
+    d.ellipse([S * 0.52, S * 0.58, S * 0.64, S * 0.7], fill=(169, 215, 149, 255))
+    d.ellipse([S * 0.52, S * 0.58, S * 0.64, S * 0.7], outline=(18, 63, 58, 255), width=max(2, int(S * 0.02)))
+    return done(img, size)
+
+
+def ov_inti(size):
+    """Overlay evolusi: aura elemen berputar (stage 4) — petir + orbit."""
+    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    S = size * SS
+    d = ImageDraw.Draw(img)
+    for ang in range(0, 360, 45):
+        a = math.radians(ang)
+        px = S * 0.5 + math.cos(a) * S * 0.4
+        py = S * 0.5 + math.sin(a) * S * 0.4
+        rr = S * 0.045
+        d.ellipse([px - rr, py - rr, px + rr, py + rr], fill=(255, 224, 130, 235))
+    d.polygon([(S * 0.52, S * 0.34), (S * 0.42, S * 0.56), (S * 0.5, S * 0.56), (S * 0.45, S * 0.74), (S * 0.6, S * 0.5), (S * 0.51, S * 0.5), (S * 0.57, S * 0.34)], fill=(176, 122, 224, 255))
+    return done(img, size)
+
+
+def prop_kristal(size):
+    """Prop arena Paru Kristal: kristal biru muda."""
+    img, d = canvas(size)
+    S = size * SS
+    for k, (bx, by, rr) in enumerate(((0.3, 0.55, 0.16), (0.62, 0.45, 0.2), (0.78, 0.7, 0.12))):
+        d.polygon([(S * bx, S * by - S * rr * 1.6), (S * bx + S * rr * 0.8, S * by), (S * bx, S * by + S * rr * 1.2), (S * bx - S * rr * 0.8, S * by)], fill=(196, 232, 244, 255))
+        d.polygon([(S * bx, S * by - S * rr * 1.6), (S * bx, S * by + S * rr * 1.2), (S * bx - S * rr * 0.8, S * by)], fill=(158, 210, 230, 255))
+    return done(img, size)
+
+
+def prop_asam(size):
+    """Prop arena Lambung Asam: gelembung asam hijau."""
+    img, d = canvas(size)
+    S = size * SS
+    for k, (bx, by, rr) in enumerate(((0.32, 0.6, 0.2), (0.68, 0.5, 0.14), (0.55, 0.78, 0.1))):
+        d.ellipse([S * bx - S * rr, S * by - S * rr, S * bx + S * rr, S * by + S * rr], fill=(154, 208, 108, 235))
+        d.ellipse([S * bx - S * rr * 0.45, S * by - S * rr * 0.55, S * bx + S * rr * 0.1, S * by - S * rr * 0.1], fill=(214, 240, 178, 255))
+    return done(img, size)
+
+
+def gen_stage_evo(out):
+    print("STAGE 9 — Evolusi, kemampuan & arena (18 aset)")
+    return {
+        "part_silia.png": part_silia(112),
+        "part_pseudopodia.png": part_pseudopodia(112),
+        "part_pedang.png": part_pedang(112),
+        "part_inti.png": part_inti(112),
+        "icon_sword.png": icon_sword(128),
+        "icon_wind.png": icon_wind(128),
+        "icon_bolt.png": icon_bolt(128),
+        "icon_frost.png": icon_frost(128),
+        "arena_limfe.png": arena_limfe(160),
+        "arena_lambung.png": arena_lambung(160),
+        "arena_paru.png": arena_paru(160),
+        "arena_saraf.png": arena_saraf(160),
+        "ov_silia.png": ov_silia(160),
+        "ov_pseudopodia.png": ov_pseudopodia(160),
+        "ov_pedang.png": ov_pedang(160),
+        "ov_inti.png": ov_inti(160),
+        "prop_kristal.png": prop_kristal(160),
+        "prop_asam.png": prop_asam(160),
+    }
+
+
+# =====================================================================
 
 def main():
     os.makedirs(OUT, exist_ok=True)
     stages = [
+        gen_stage_evo,
         gen_stage_heroes,
         gen_stage_enemies,
         gen_stage_items,

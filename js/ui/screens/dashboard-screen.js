@@ -6,9 +6,13 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
+import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
+import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
+import { arenaUnlockStatus } from './arena-screen.js';
+import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
@@ -17,6 +21,97 @@ function fmtTime(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}m ${String(s).padStart(2, '0')}s`;
+}
+
+/** Overlay ov_* (silia/kaki/pedang/inti) di panggung sesuai tahap evolusi. */
+function renderStageEvoOverlay(meta) {
+  let box = document.getElementById('stage-evo');
+  if (!box) {
+    box = el('div', { id: 'stage-evo' });
+    document.getElementById('dash-stage').appendChild(box);
+  }
+  box.textContent = '';
+  const stage = meta.evoStage || 0;
+  const layers = [
+    ['assets/sprites/ov_inti.png', 'ov-inti', stage >= 4],
+    ['assets/sprites/ov_pseudopodia.png', 'ov-pseudopodia', stage >= 2],
+    ['assets/sprites/ov_silia.png', 'ov-silia', stage >= 1],
+    ['assets/sprites/ov_pedang.png', 'ov-pedang', stage >= 3],
+  ];
+  for (const [src, cls, on] of layers) {
+    if (on) box.appendChild(el('img', { class: cls, src, alt: '' }));
+  }
+}
+
+/** Kartu evolusi: tahap sekarang, bagian terkumpul, progres & tombol BEREVOLUSI. */
+function renderEvoCard(meta) {
+  const card = document.getElementById('evo-card');
+  card.textContent = '';
+  const stage = getEvoStageDef(meta);
+  const next = getNextEvoStageDef(meta);
+  const parts = getData().evolutions.parts;
+
+  const head = el('div', { class: 'evo-head' }, [
+    el('div', { class: 'evo-stage-chip', style: `background:${stage.tierColor}`, text: String(stage.stage + 1) }),
+    el('div', { class: 'evo-title' }, [
+      el('b', { text: stage.name }),
+      el('span', { class: 'evo-tier', style: `color:${stage.tierColor}`, text: `Tier ${stage.tier}` }),
+    ]),
+    el('span', { class: 'evo-progress', style: 'margin-left:auto', text: `+${Math.round((stage.damageMult - 1) * 100)}% dmg · +${Math.round((stage.maxHPMult - 1) * 100)}% HP` }),
+  ]);
+  card.appendChild(head);
+
+  // Tag bagian terkumpul + kebutuhan tahap berikutnya
+  const partRow = el('div', { class: 'evo-parts' });
+  for (const p of parts) {
+    const have = meta.evoParts[p.id] || 0;
+    const need = next ? (next.cost[p.id] || 0) : 0;
+    partRow.appendChild(el('div', { class: `evo-part${need > have ? ' need' : ''}`, title: p.name }, [
+      el('img', { src: p.sprite, alt: p.name }),
+      el('span', { text: `${have}${need ? `/${need}` : ''}` }),
+    ]));
+  }
+  card.appendChild(partRow);
+
+  if (next) {
+    const ready = canEvolve(meta);
+    card.appendChild(el('div', { class: 'evo-progress', text: `Berevolusi ke ${next.name} (${next.tier}) — buka kemampuan baru & bentuk baru!` }));
+    const btn = el('button', { class: 'btn btn-primary', text: ready ? `BEREVOLUSI → ${next.name.toUpperCase()}` : 'KUMPULKAN BAGIAN EVOLUSI' });
+    btn.disabled = !ready;
+    btn.addEventListener('click', () => {
+      const newStage = evolve(meta);
+      if (newStage) {
+        emit('toast', { message: `Hero berevolusi: ${newStage.name} (${newStage.tier})!`, kind: 'gold' });
+        renderEvoCard(meta);
+        renderStageEvoOverlay(meta);
+      }
+    });
+    card.appendChild(btn);
+  } else {
+    card.appendChild(el('div', { class: 'evo-progress', text: 'Evolusi maksimal — Imun Legenda sejati!' }));
+  }
+}
+
+/** Kartu arena terpilih + tombol GANTI (buka modal pilih arena). */
+function renderArenaCard(meta) {
+  const card = document.getElementById('arena-card');
+  card.textContent = '';
+  const arenaDef = getData().arenas.arenas.find((a) => a.id === meta.selectedArena) || getData().arenas.arenas[0];
+  const status = arenaUnlockStatus(arenaDef, meta);
+  card.appendChild(el('img', { class: 'arena-thumb', src: arenaDef.thumb, alt: arenaDef.name }));
+  card.appendChild(el('div', { class: 'arena-info' }, [
+    el('b', { text: `Arena: ${arenaDef.name}` }),
+    el('span', { text: arenaDef.bonus.desc }),
+    status.unlocked
+      ? el('span', { text: 'Terbuka ✓' })
+      : el('span', { class: 'lock-line' }, [
+          el('img', { class: 'lock-ico', src: 'assets/sprites/icon_lock.png', alt: '' }),
+          el('span', { text: ` ${status.text}` }),
+        ]),
+  ]));
+  const btn = el('button', { class: 'btn btn-primary', text: 'GANTI' });
+  btn.addEventListener('click', () => screenManager.show('arena'));
+  card.appendChild(btn);
 }
 
 export function show() {
@@ -59,6 +154,15 @@ export function show() {
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalKills.toLocaleString('id-ID') }), el('span', { text: 'Total Kill' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: fmtTime(stats.bestSurvivalTime) }), el('span', { text: 'Waktu Terbaik' })]));
   strip.appendChild(el('div', { class: 'stat-cell' }, [el('b', { text: stats.totalRuns }), el('span', { text: 'Total Run' })]));
+
+  // ---- Overlay evolusi di panggung (bentuk hero berubah sesuai tahap) ----
+  renderStageEvoOverlay(meta);
+
+  // ---- Kartu EVOLUSI HERO: sesuatu yang selalu dikejar user ----
+  renderEvoCard(meta);
+
+  // ---- Kartu ARENA terpilih + tombol ganti ----
+  renderArenaCard(meta);
 
   // ---- Daily reward (hook monetisasi + logic asli) ----
   const dailyCard = document.getElementById('daily-card');

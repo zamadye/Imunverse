@@ -12,6 +12,9 @@ const store = {
   waves: null,      // data/waves.json
   upgrades: null,   // data/upgrades.json
   missions: null,   // data/missions.json
+  evolutions: null, // data/evolutions.json
+  abilities: null,  // data/abilities.json
+  arenas: null,     // data/arenas.json
 };
 
 /** Muat semua file JSON game secara paralel. */
@@ -23,6 +26,9 @@ export async function loadAllData() {
     waves: 'data/waves.json',
     upgrades: 'data/upgrades.json',
     missions: 'data/missions.json',
+    evolutions: 'data/evolutions.json',
+    abilities: 'data/abilities.json',
+    arenas: 'data/arenas.json',
   };
 
   const entries = await Promise.all(

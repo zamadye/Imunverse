@@ -38,6 +38,10 @@ export function createDefaultMeta() {
     currency: 0,
     unlockedHeroes: ['sel_t'],
     selectedHero: 'sel_t',
+    selectedArena: 'limfe',
+    evoStage: 0,
+    evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
+    adDaily: { date: null, count: 0 },
     squadUpgrades: {
       sq_damage: 0,
       sq_vitality: 0,
