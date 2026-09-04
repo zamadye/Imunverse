@@ -521,6 +521,8 @@ export const game = {
       }
       case 'xp':
         this.addXP(p.value);
+        // XP TERASA: label melayang tiap orb (ramah anak)
+        run.effects.spawnLabel(p.x, p.y - 6, `+${Math.round(p.value * 10) / 10} XP`, '#8fe8d2');
         break;
       case 'heal':
         run.player.heal(p.value);

@@ -206,6 +206,15 @@
 - [x] Aset baru: ikon perisai (105 PNG); tutorial & hint HUD disinkron dengan serangan manual.
 - **Kriteria lulus:** e2e gameplay 6 langkah RESULT OK (idle=0 tembakan; manual fire → 2 tembakan + kill; jurus stage-0 fire + cd jalan; pasukan menembak; koin farm → currencyEarned naik; speed 186 + 3 layer baru ada); SELFTEST_PASS 17; 28/28 shot CLEAN (TEMBAK! terlihat di shot gameplay); perf 16,6 ms vsync @153 musuh.
 
+## Fase 7.8 — XP Terasa (feedback user: "naik level tiba-tiba, tidak ada indikator") ✅
+**Tujuan:** progres XP harus terlihat & dipahami anak-anak — bukan tiba-tiba naik level.
+- [x] **XP bar diperjelas**: ikon bintang di pangkal bar, gradasi teal→emas, efek shine mengalir (terbaca sebagai XP, bukan dekorasi).
+- [x] **Ghost trail**: saat banyak orb terambil sekaligus, trail kuning "mengejar" fill — lonjakan XP terasa; saat naik level trail menyusut dari 100%.
+- [x] **Label "+N XP" melayang** di setiap orb nutrisi yang terambil.
+- [x] **Chip level menyala** (emas, berdenyut) saat XP ≥80% — sinyal "hampir naik level!".
+- [x] **Ringkasan akhir run** menambah sel **"XP Didapat"**.
+- **Kriteria lulus:** e2e XP 5 langkah RESULT OK (bar 0% + elemen lengkap; orb → fill & ghost bergerak; ≥80% → chip `ready`; naik level → modal muncul; summary berisi XP Didapat); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,6 ms vsync.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

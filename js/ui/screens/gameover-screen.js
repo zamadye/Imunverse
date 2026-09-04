@@ -78,6 +78,7 @@ export function show(summary) {
     [formatTime(summary.time), 'Bertahan'],
     [summary.kills, 'Patogen Kalah'],
     [summary.level, 'Level'],
+    [summary.xpGained, 'XP Didapat'],
     [summary.bossKills, 'Boss Kalah'],
     [summary.nutrients, 'Nutrisi'],
   ];

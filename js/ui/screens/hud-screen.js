@@ -7,6 +7,8 @@
 let minimapCtx = null;
 let announceTimer = null;
 let hintTimer = null;
+let xpGhost = 0;      // trail putih yang "mengejar" fill XP (efek kejar)
+let lastXpPct = 0;
 
 import { getData } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
@@ -93,8 +95,16 @@ export function updateHUD(data) {
   setBar('hud-hp-fill', data.hpPct);
   document.getElementById('hud-hp-text').textContent = data.hpText;
   document.getElementById('hp-pill').classList.toggle('low', data.hpPct < 0.3);
-  setBar('hud-xp-fill', Math.max(0, Math.min(1, data.xpPct)));
-  document.getElementById('hud-level').textContent = `Lv ${data.level}`;
+  const pct = Math.max(0, Math.min(1, data.xpPct || 0));
+  // Ghost trail: kalau fill melonjak (banyak orb terambil), trail putih menyusul pelan
+  if (pct < lastXpPct - 0.05) xpGhost = 1;       // naik level → mulai penuh lalu menyusut
+  xpGhost = Math.max(pct, Math.min(1, xpGhost - 0.008));
+  lastXpPct = pct;
+  setBar('hud-xp-ghost', xpGhost);
+  setBar('hud-xp-fill', pct);
+  const chip = document.getElementById('hud-level');
+  chip.textContent = `Lv ${data.level}`;
+  chip.classList.toggle('ready', pct >= 0.8); // hampir naik level → chip menyala
   document.getElementById('hud-wave').textContent = `WAVE ${data.wave}`;
   document.getElementById('hud-timer-text').textContent = data.timerText;
   document.getElementById('hud-kills').textContent = data.kills;
