@@ -39,7 +39,12 @@ export function createDefaultMeta() {
     unlockedHeroes: ['sel_t'],
     selectedHero: 'sel_t',
     selectedArena: 'limfe',
-    selectedMode: 'normal',
+    selectedMode: 'kampanye',
+    selectedChapter: 'bab_mulut',
+    campaignCleared: {},
+    allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
+    coachDone: false,
+    cinematicsSeen: {},
     leaderboard: [],
     evoStage: 0,
     evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },

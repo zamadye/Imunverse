@@ -32,6 +32,9 @@ export async function loadAllData() {
     arenas: 'data/arenas.json',
     modes: 'data/modes.json',
     mutators: 'data/mutators.json',
+    campaign: 'data/campaign.json',
+    cinematics: 'data/cinematics.json',
+    coach: 'data/coach.json',
     bodySystems: 'data/body-systems.json',
   };
 

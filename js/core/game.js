@@ -40,6 +40,7 @@ import {
 } from '../systems/body-system.js';
 import * as tutorial from '../systems/tutorial-system.js';
 import { audio } from '../systems/audio-system.js';
+import { Ally } from '../entities/ally.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
 import { Camera } from '../render/camera.js';
@@ -104,9 +105,13 @@ export const game = {
     const bodyMods = getBodyRunModifiers(meta);
     this.lastBodyDecay = decayInfo;
 
-    // LIVEOPS: mode (Klasik/Endless) + mutator harian seeded (khusus Endless)
+    // LIVEOPS: mode (Kampanye/Endless) + mutator harian seeded (khusus Endless)
     const modes = (getData().modes && getData().modes.modes) || [];
-    const modeDef = modes.find((m) => m.id === (meta.selectedMode || 'normal')) || modes[0] || null;
+    const modeDef = modes.find((m) => m.id === (meta.selectedMode || 'kampanye')) || modes[0] || null;
+    // KAMPANYE: bab aktif dari Peta Tubuh (cerita organ sakit → bersihkan → boss)
+    const chapterDef = modeDef && modeDef.id === 'kampanye' && getData().campaign
+      ? getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0]
+      : null;
     let mutatorDef = null;
     let mutatorDate = null;
     if (modeDef && modeDef.id === 'endless' && getData().mutators) {
@@ -168,8 +173,13 @@ export const game = {
       evoStage,
       bodyMods,
       mode: modeDef,
+      chapter: chapterDef,
       mutator: mutatorDef,
       mutatorDate,
+      allies: [],
+      objective: chapterDef
+        ? { quota: chapterDef.killQuota, bossSpawned: false, bossDefeated: false }
+        : null,
       bonusCurrency: 0,
       victory: false,
       focusId,
@@ -185,6 +195,23 @@ export const game = {
     };
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
+    // PASUKAN IMUN (permanen): ikut bertarung sesuai meta.allies
+    this.run.allies = [];
+    const allyCount = Math.max(0, Math.min(6, meta.allies || 0));
+    for (let i = 0; i < allyCount; i++) this.run.allies.push(new Ally(i, player));
+    if (allyCount > 0) {
+      emit('toast', { message: `Pasukan imun: ${allyCount} sel ikut bertarung!`, kind: '' });
+    }
+    // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
+    for (let gi = 0; gi < 2; gi++) {
+      const ga = (gi / 2) * Math.PI * 2 + 0.7;
+      this.spawnEnemy('bakteri', false);
+      const ge = this.run.enemies[this.run.enemies.length - 1];
+      if (ge) {
+        ge.x = player.x + Math.cos(ga) * 250;
+        ge.y = player.y + Math.sin(ga) * 250;
+      }
+    }
     this.run.camera.reset(player.x, player.y);
     this.run.collision.rebuildEnemyGrid(this.run.enemies);
 
@@ -238,6 +265,12 @@ export const game = {
   getRunArena() {
     const meta = STATE.meta;
     const list = getData().arenas.arenas;
+    // Kampanye: organ bab menentukan arena (palet = jaringan tubuh bab)
+    if (meta.selectedMode === 'kampanye' && getData().campaign) {
+      const ch = getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0];
+      const chArena = list.find((a) => a.id === ch.arenaId);
+      if (chArena) return chArena;
+    }
     const chosen = list.find((a) => a.id === meta.selectedArena);
     if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
     const fallback = list.find((a) => arenaUnlockStatus(a, meta).unlocked);
@@ -307,6 +340,20 @@ export const game = {
     }
     run.time += dt;
 
+    // KAMPANYE: kuota bersih tercapai → boss organ muncul (sekali)
+    if (run.objective && !run.objective.bossSpawned && run.kills >= run.objective.quota) {
+      run.objective.bossSpawned = true;
+      const boss = run.chapter.boss;
+      if (boss) {
+        this.spawnChapterBoss(run.chapter);
+      } else {
+        // Bab tanpa boss → langsung bersih saat kuota tercapai
+        run.objective.bossDefeated = true;
+        this.winRun();
+        return;
+      }
+    }
+
     // Combo decay (2 dtk tanpa kill → reset)
     if (run.combo.timer > 0) {
       run.combo.timer -= dt;
@@ -314,6 +361,23 @@ export const game = {
     }
     // Squash-stretch decay
     if (player.squash > 0) player.squash -= dt;
+
+    // PASUKAN: follow + auto-tembak
+    for (const ally of run.allies) {
+      const shot = ally.update(dt, player, run.enemies, player.stats.damage);
+      if (shot) {
+        this.spawnProjectile({
+          pattern: 'pierce',
+          x: shot.x,
+          y: shot.y,
+          angle: shot.angle,
+          speed: shot.speed,
+          damage: shot.damage,
+          pierce: 1,
+          color: shot.color,
+        });
+      }
+    }
 
     // 1. Input & player (gerak + auto-attack)
     const move = this.input.getMoveVector();
@@ -599,6 +663,29 @@ export const game = {
   // =====================================================================
   // SPAWN MUSUH & DROP
   // =====================================================================
+  /** KAMPANYE: boss bab muncul saat kuota bersih tercapai. */
+  spawnChapterBoss(chapter) {
+    const run = this.run;
+    const bossCfg = chapter.boss;
+    const def = getEnemyDef(bossCfg.id);
+    if (!def) return;
+    const scalers = run.spawnSys.getScalers();
+    scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
+    const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    enemy.isBoss = true;
+    enemy.bossName = bossCfg.name || def.name;
+    enemy.maxHP = Math.round(enemy.maxHP);
+    enemy.hp = enemy.maxHP;
+    if (run.bodyMods && run.bodyMods.enemySpeedMult) enemy.speed *= run.bodyMods.enemySpeedMult;
+    run.enemies.push(enemy);
+    run.boss = enemy;
+    run.chapterBoss = enemy;
+    audio.bossSpawn();
+    emit('toast', { message: `${enemy.bossName} MUNCUL!`, kind: 'danger' });
+    run.camera.addShake(0.5);
+  },
+
   /**
    * Spawn musuh di luar area pandang (dipanggil SpawnSystem).
    */
@@ -688,6 +775,7 @@ export const game = {
     const player = run.player;
     if (!player.alive) return false;
     return run.abilities.triggerBySlot(slot, {
+      game: this,
       player,
       enemies: run.enemies,
       damage: player.stats.damage,
@@ -737,8 +825,15 @@ export const game = {
       run.boss = null;
       run.camera.addShake(0.65);
       audio.bossDie();
-      emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
-      this.openBossChest(enemy);
+      if (run.chapterBoss === enemy) {
+        // KAMPANYE: boss bab tumbang → ORGAN BERSIH → menang
+        run.objective.bossDefeated = true;
+        emit('toast', { message: `${enemy.bossName || 'Boss'} tumbang! Organ bersih!`, kind: 'gold' });
+        this.winRun();
+      } else {
+        emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
+        this.openBossChest(enemy);
+      }
     }
 
     // ---- Drop BAGIAN EVOLUSI (item upgrade hero, bukan sekadar poin) ----
@@ -867,11 +962,12 @@ export const game = {
   // =====================================================================
   // AKHIR RUN — ekonomi, statistik, misi, save
   // =====================================================================
-  /** MENANG mode Klasik (finalWave terlampaui) — alur sama dengan akhir run. */
+  /** MENANG: bab kampanye bersih / finalWave terlampaui — alur akhir run asli. */
   winRun() {
     const run = this.run;
     if (!run || run.ended) return;
     run.victory = true;
+    if (run.chapter) run.bonusCurrency = (run.bonusCurrency || 0) + (run.chapter.reward || 0);
     audio.evolve(); // fanfare kemenangan
     this.finishRun(false);
   },
@@ -889,6 +985,13 @@ export const game = {
 
     // Statistik permanen (wins → membuka mode Endless)
     if (victory) meta.stats.wins = (meta.stats.wins || 0) + 1;
+    // KAMPANYE: bab bersih → tandai + pasukan imun permanen bertambah (+1/bab, maks 6)
+    if (victory && run.chapter) {
+      meta.campaignCleared = meta.campaignCleared || {};
+      meta.campaignCleared[run.chapter.id] = true;
+      const clearedCount = Object.keys(meta.campaignCleared).length;
+      meta.allies = Math.min(6, Math.max(meta.allies || 1, 1 + clearedCount));
+    }
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
     meta.stats.bestWave = Math.max(meta.stats.bestWave, run.spawnSys.wave);
@@ -943,6 +1046,8 @@ export const game = {
       quit,
       victory,
       modeId: (run.mode && run.mode.id) || 'normal',
+      chapterId: run.chapter ? run.chapter.id : null,
+      chapterName: run.chapter ? run.chapter.organ : null,
       mutatorName: run.mutator ? run.mutator.name : null,
       isRecord: lbResult.isNewBest,
       wave: run.spawnSys.wave,
@@ -1030,6 +1135,34 @@ export const game = {
       drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
     }
 
+    // Pasukan imun (sekutu kecil dengan ring biru)
+    for (const ally of run.allies) ally.render(ctx);
+
+    // Indikator arah aim (stick kanan / mouse): chevron kecil di depan hero
+    {
+      const aim = this.input.getAimInfo(
+        player.x - cam.x + w / 2,
+        player.y - cam.y + h / 2
+      );
+      if (aim.active) {
+        const ax = player.x + Math.cos(aim.angle) * (player.radius + 22);
+        const ay = player.y + Math.sin(aim.angle) * (player.radius + 22);
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(aim.angle);
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(7, 0);
+        ctx.lineTo(-5, 6);
+        ctx.lineTo(-2, 0);
+        ctx.lineTo(-5, -6);
+        ctx.closePath();
+        ctx.fillStyle = run.heroDef.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
     // Player (blink saat i-frames, sprite attack saat baru menyerang)
     if (player.alive) {
       const blink = player.iframes > 0 && Math.floor(time * 12) % 2 === 0;
@@ -1084,6 +1217,9 @@ export const game = {
         wave: run.spawnSys.wave,
         abilities: run.abilities.getView(),
         combo: run.combo,
+        mission: run.objective
+          ? { quota: run.objective.quota, kills: run.kills, bossSpawned: run.objective.bossSpawned, bossName: run.chapter && run.chapter.boss ? run.chapter.boss.name : null }
+          : null,
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,

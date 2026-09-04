@@ -12,6 +12,7 @@ import { getHeroStatus } from '../../systems/unlock-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
+import { playOnce } from '../cinematic.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
@@ -187,7 +188,14 @@ export function show() {
       if (!heroDef) return;
       const status = getHeroStatus(meta, heroDef);
       if (!status.unlocked) return;
-      game.startRun(heroDef.id); // 'runstart' → HUD
+      // Kampanye: bab BARU diprakarsai sinematik briefing (story organ sakit)
+      const isCampaignNew = meta.selectedMode === 'kampanye'
+        && !(meta.cinematicsSeen || {})['brief_' + meta.selectedChapter];
+      if (isCampaignNew) {
+        playOnce('brief_' + meta.selectedChapter, () => game.startRun(heroDef.id));
+      } else {
+        game.startRun(heroDef.id); // 'runstart' → HUD
+      }
     });
   }
 }

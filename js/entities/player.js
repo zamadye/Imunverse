@@ -71,7 +71,22 @@ export class Player {
   performAttack(target, game) {
     const pattern = this.heroDef.attackPattern;
     this.attackFlash = 0.18; // swap spriteAttack sebentar
-    this.facing = Math.atan2(target.y - this.y, target.x - this.x);
+    // AIM: bila player mengarahkan (stick kanan / mouse), serangan ikut arah itu
+    let aimAngle = null;
+    if (game && game.input && game.run) {
+      const w = game.viewW || 390;
+      const h = game.viewH || 844;
+      const cam = game.run.camera;
+      const sx = this.x - cam.x + w / 2;
+      const sy = this.y - cam.y + h / 2;
+      const aim = game.input.getAimInfo(sx, sy);
+      if (aim.active) aimAngle = aim.angle;
+    }
+    this.facing = aimAngle !== null ? aimAngle : Math.atan2(target.y - this.y, target.x - this.x);
+    if (aimAngle !== null) {
+      // target fiktif searah aim (pattern melee/lempar pakai arah facing)
+      target = { x: this.x + Math.cos(aimAngle) * 100, y: this.y + Math.sin(aimAngle) * 100 };
+    }
 
     if (pattern === 'melee_swipe') {
       // Tebasan area: damage semua musuh dalam swipeRadius & sudut arc

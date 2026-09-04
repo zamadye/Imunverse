@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "steps": [
+    {
+      "target": "#btn-play-big",
+      "title": "MULAI PERANG",
+      "text": "Tombol ini membawamu ke Peta Tubuh — perjalanan membersihkan organ yang sakit, satu per satu."
+    },
+    {
+      "target": "#body-card",
+      "title": "KONDISI TUBUH",
+      "text": "5 sistem tubuh (Sirkulasi, Pencernaan, Saraf, Imun, Limfatik). Racun menurunkannya — menang run memulihkannya. Jaga agar tetap sehat!"
+    },
+    {
+      "target": "[data-nav='roster']",
+      "title": "HEROES",
+      "text": "Pasukanmu: pilih sel imun yang dimainkan. Setiap hero punya bentuk & gaya serangan berbeda."
+    },
+    {
+      "target": "[data-nav='bag']",
+      "title": "TAS",
+      "text": "Consumable & hasil perang disimpan di sini. Cek sebelum battle berikutnya."
+    },
+    {
+      "target": "[data-nav='shop']",
+      "title": "SHOP",
+      "text": "Tukar antibodi hasil battle jadi hero baru, upgrade permanen & suplemen."
+    }
+  ]
+}

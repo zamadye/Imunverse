@@ -165,6 +165,20 @@
         <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
       </section>
 
+      <!-- ============ PETA KAMPANYE (Perang Sang Tubuh) ============ -->
+      <section id="screen-campaign" class="screen" data-screen="campaign">
+        <header class="topbar">
+          <button class="back-btn icon-btn" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="kembali" /></button>
+          <h1 class="screen-title">Peta Tubuh</h1>
+          <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="campaign-currency">0</span></div>
+        </header>
+        <div class="campaign-scroll">
+          <p class="camp-intro">Sang Tubuh sedang sakit — bersihkan organ satu per satu bersama pasukan imun!</p>
+          <div id="campaign-path" class="campaign-path"><!-- diisi JS --></div>
+          <div id="campaign-brief" class="card camp-brief"><!-- diisi JS --></div>
+        </div>
+      </section>
+
       <!-- ============ BATTLE PREP (satu layar keputusan sebelum run) ============ -->
       <section id="screen-prep" class="screen" data-screen="prep">
         <header class="topbar">
@@ -245,6 +259,11 @@
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
         <div id="ability-bar" class="ability-bar" aria-label="Kemampuan aktif"><!-- diisi JS --></div>
         <div id="hud-announce" class="hud-announce hidden"></div>
+        <div id="hud-mission" class="hud-mission hidden">
+          <span id="hud-mission-text" class="hud-mission-text"></span>
+          <div class="hud-mission-bar"><div id="hud-mission-fill"></div></div>
+        </div>
+        <div id="ability-banner" class="ability-banner"></div>
         <div id="hud-combo" class="hud-combo hidden"></div>
         <div id="tutorial-layer" class="hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
@@ -341,6 +360,13 @@
         </div>
       </section>
 
+    </div>
+
+    <!-- Layer sinematik (cutscene cerita, canvas) -->
+    <div id="cinematic-layer" class="hidden">
+      <canvas id="cinematic-canvas"></canvas>
+      <div id="cine-text" class="cine-text"></div>
+      <button id="cine-skip" class="cine-skip">Lewati »</button>
     </div>
 
     <!-- Toast notifikasi -->

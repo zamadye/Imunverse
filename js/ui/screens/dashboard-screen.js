@@ -19,6 +19,7 @@ import {
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard } from '../../systems/liveops-system.js';
+import { currentChapterId } from './campaign-screen.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -243,6 +244,18 @@ export function show() {
   badge.textContent = '';
   badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
   badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
+
+  // CTA MULAI: bila kampanye → tunjuk bab aktif (tujuan jelas sejak dashboard)
+  const playSub = document.getElementById('play-big-sub');
+  if (playSub) {
+    if ((meta.selectedMode || 'kampanye') === 'kampanye' && getData().campaign) {
+      const ch = getData().campaign.chapters.find((c) => c.id === (meta.selectedChapter || currentChapterId(meta)))
+        || getData().campaign.chapters.find((c) => c.id === currentChapterId(meta));
+      if (ch) playSub.textContent = `Bab: ${ch.organ} — ${ch.title}`;
+    } else {
+      playSub.textContent = 'Mode Endless · Mutator Harian';
+    }
+  }
 
   // ---- Chip musuh melayang di panggung (ala mockup: patogen dalam gelembung) ----
   const stageEnemies = document.getElementById('stage-enemies');

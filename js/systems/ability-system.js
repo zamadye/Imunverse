@@ -8,6 +8,8 @@
  */
 
 import { getData } from '../core/data-store.js';
+import { audio } from './audio-system.js';
+import { emit } from '../core/ui-bridge.js';
 
 export class AbilitySystem {
   constructor(unlockedIds) {
@@ -57,6 +59,10 @@ export class AbilitySystem {
     if (!a || !a.unlocked || a.cdLeft > 0) return false;
     a.cdLeft = a.def.cooldown;
     this.#execute(a.def, ctx);
+    if (ctx.player) ctx.player.squash = 0.16; // JUICE: mantul saat cast
+    audio.ability(a.def.id);
+    if (ctx.game && ctx.game.hitStopRun) ctx.game.hitStopRun(0.03); // cast terasa
+    emit('abilityBanner', { name: a.def.name, color: a.def.fxColor || '#2f9c8f' });
     return true;
   }
 

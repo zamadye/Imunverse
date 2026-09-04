@@ -49,8 +49,25 @@ await shot('01-loading');
 await cdp.send('Network.emulateNetworkConditions', {
   offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1,
 });
+// Intro sinematik (kunjungan pertama) → tangkap 1 shot → lewati
+await page.waitForSelector('#cinematic-layer:not(.hidden), #screen-dashboard.active', { timeout: 30000 });
+const cineShown = await page.evaluate(() => !document.getElementById('cinematic-layer').classList.contains('hidden'));
+if (cineShown) {
+  await sleep(2800);
+  await shot('26-cinematic-intro');
+  await page.click('#cine-skip');
+}
 await page.waitForSelector('#screen-dashboard.active', { timeout: 30000 });
-await sleep(900);
+await sleep(700);
+// Coach onboarding (kunjungan pertama): spotlight + tooltip
+const coachShown = await page.evaluate(() => !!document.getElementById('coach-layer'));
+if (coachShown) {
+  await sleep(500);
+  await shot('24-coach');
+  await page.evaluate(() => document.getElementById('coach-skip')?.click());
+  await sleep(300);
+}
+await sleep(400);
 await shot('02-dashboard');
 
 // --- layar navigasi (sebelum run): roster, shop, upgrade, arena ---
@@ -83,6 +100,8 @@ await page.evaluate(() => {
   m.evoStage = 3;
   m.evoParts = { silia: 3, pseudopodia: 2, mikropedang: 1, inti_elemen: 0 };
   m.selectedArena = 'paru';
+  m.selectedMode = 'kampanye';
+  m.selectedChapter = 'bab_lambung'; // kuota 40 + boss → victory tidak dini
   m.currency = 850;
   window.__IMUNVERSE.screenManager.show('dashboard');
 });
@@ -124,8 +143,13 @@ await shot('19-bag');
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
 await sleep(400);
 
-// --- BATTLE PREP: MULAI besar → pilih hero/fokus/arena → MULAI RUN ---
+// --- MULAI → PETA TUBUH (kampanye) → brief bab → BATTLE PREP ---
 await page.click('#btn-play-big');
+await sleep(700);
+await shot('25-campaign');
+await page.evaluate(() => document.querySelector('.camp-node.current')?.click());
+await sleep(300);
+await page.click('#btn-campaign-go'); // SIAP TEMPUR → prep
 await sleep(600);
 await shot('20-prep');
 await page.evaluate(() => {
@@ -140,7 +164,15 @@ await page.evaluate(() => {
 });
 await sleep(400);
 await page.click('#btn-prep-start');
-await sleep(2200);
+await sleep(1300);
+// Sinematik briefing bab baru → tangkap → lewati → run mulai
+const briefShown = await page.evaluate(() => !document.getElementById('cinematic-layer').classList.contains('hidden'));
+if (briefShown) {
+  await sleep(700);
+  await shot('27-cinematic-brief');
+  await page.click('#cine-skip');
+}
+await sleep(1500);
 await shot('07-gameplay-early');
 
 // joystick virtual: tahan & geser

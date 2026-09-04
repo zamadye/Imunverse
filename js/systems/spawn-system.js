@@ -23,6 +23,8 @@ export class SpawnSystem {
     this.spawnTimer = 0.8;     // delay spawn pertama sedikit
     this.bossSpawnedForWave = 0; // wave terakhir yang sudah memunculkan boss
     this.mods = {};             // modifier run (kondisi tubuh + mutator liveops)
+    this.rampTimer = 0;         // HOOK: wave 1 mulai ramai (tidak sepi)
+    this.rampMult = 0.45;       // spawn interval dikali ini (naik ke 1 dalam ±15 dtk)
   }
 
   /**
@@ -32,6 +34,14 @@ export class SpawnSystem {
   update(dt, game) {
     const cfg = getWaveConfig();
     const events = { newWave: false, bossSpawn: false };
+
+    // HOOK: 15 detik pertama ramp-up — aksi terasa sejak awal, sulit merambat naik
+    if (this.wave === 1) {
+      this.rampTimer += dt;
+      if (this.rampTimer > 15) this.rampMult = Math.min(1, this.rampMult + dt * 0.055);
+    } else {
+      this.rampMult = 1;
+    }
 
     // ---- Ganti wave ----
     this.waveTimer += dt;
@@ -55,7 +65,7 @@ export class SpawnSystem {
     // ---- Spawn musuh reguler ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnTimer = getSpawnInterval(this.wave) / (this.mods.spawnMult || 1);
+      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult / (this.mods.spawnMult || 1);
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
         const enemyId = this.pickEnemyId(this.wave);
         if (enemyId) game.spawnEnemy(enemyId, false);

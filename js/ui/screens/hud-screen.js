@@ -122,6 +122,24 @@ export function updateHUD(data) {
     }
   }
 
+  // Mission tracker kampanye: kuota bersih → boss
+  const missionNode = document.getElementById('hud-mission');
+  if (missionNode) {
+    const m = data.mission;
+    if (m && !m.bossSpawned) {
+      missionNode.classList.remove('hidden');
+      const done = Math.min(m.quota, m.kills);
+      document.getElementById('hud-mission-text').textContent = `Misi: bersihkan ${m.quota} patogen (${done}/${m.quota})`;
+      document.getElementById('hud-mission-fill').style.width = `${(done / m.quota) * 100}%`;
+    } else if (m && m.bossSpawned) {
+      missionNode.classList.remove('hidden');
+      document.getElementById('hud-mission-text').textContent = `BOSS: Kalahkan ${m.bossName || 'Boss'}!`;
+      document.getElementById('hud-mission-fill').style.width = '100%';
+    } else {
+      missionNode.classList.add('hidden');
+    }
+  }
+
   const bossWrap = document.getElementById('hud-boss-bar-wrap');
   if (data.boss) {
     bossWrap.classList.remove('hidden');

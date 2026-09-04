@@ -1,22 +1,40 @@
 {
   "schemaVersion": 1,
   "waveDuration": 25,
-  "spawnIntervalBase": 1.8,
+  "spawnIntervalBase": 1.85,
   "spawnIntervalMin": 0.4,
-  "spawnIntervalWaveDecay": 0.08,
-  "enemyHPScalePerWave": 0.12,
+  "spawnIntervalWaveDecay": 0.068,
+  "enemyHPScalePerWave": 0.105,
   "enemySpeedScalePerWave": 0.015,
   "enemySpeedScaleMax": 1.6,
   "bossWaveEvery": 5,
   "bossHPBonusPerBossIndex": 0.35,
-  "maxAliveEnemies": 150,
+  "maxAliveEnemies": 130,
   "spawnPadding": 90,
   "waveMultipliers": [
-    { "wave": 1, "spawn": 1.0 },
-    { "wave": 5, "spawn": 1.15 },
-    { "wave": 10, "spawn": 1.3 },
-    { "wave": 15, "spawn": 1.5 },
-    { "wave": 20, "spawn": 1.75 },
-    { "wave": 30, "spawn": 2.0 }
+    {
+      "wave": 1,
+      "spawn": 0.85
+    },
+    {
+      "wave": 4,
+      "spawn": 1.0
+    },
+    {
+      "wave": 8,
+      "spawn": 1.2
+    },
+    {
+      "wave": 12,
+      "spawn": 1.4
+    },
+    {
+      "wave": 18,
+      "spawn": 1.6
+    },
+    {
+      "wave": 30,
+      "spawn": 1.9
+    }
   ]
 }

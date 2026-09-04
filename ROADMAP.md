@@ -14,6 +14,7 @@
 | 5 | UI/UX Pass 2 — Penyesuaian ke Reference User | ✅ | S–M |
 | 6 | Audio & Juice | ✅ | M |
 | 7 | Konten & Liveops | ✅ | M |
+| 7.5 | Deep Hooks & Story — "Perang Sang Tubuh" | ✅ | L |
 | 8 | Integrasi Monetisasi (SDK nyata) | 🟡 hook siap | M |
 | 9 | Optimasi, QA & Release | ⬜ | L |
 
@@ -167,6 +168,20 @@
 - [x] **Leaderboard lokal per mode** (top-10, urut wave→waktu→kill): kartu "Papan Rekor" di dashboard, badge REKOR BARU di gameover.
 - [x] Bonus liveops: milestone XP tiap kelipatan 10 wave; Endless bonus antibodi tiap 5 wave; 8 aset baru (hero ×2, protozoa, portrait, ikon infinity, granula) — total **104 PNG**.
 - **Kriteria lulus:** e2e 7 langkah RESULT OK (mutator deterministik same-date/beda-tanggal; Endless terkunci→menang→terbuka; run endless pakai mutator `mut_arus_panas`; leaderboard 2 bucket; persist); SELFTEST_PASS 17; 22/22 shot CLEAN; perf 16,5 ms vsync @151 musuh.
+
+## Fase 7.5 — Deep Hooks & Story: "Perang Sang Tubuh" ✅
+**Tujuan (arah user):** tunda SDK; benahi UI sampai benar-benar menarik dengan hook yang dalam & kuat; cari yang di game lain belum ada; alur harus terasa tujuannya; imun bertarung BERSAMA PASUKAN; ada cerita & video sinematik; level terus maju (eksplorasi), difficulty medium.
+- [x] **Hook 1 — paham semua tombol di kunjungan pertama**: sinematik intro (sekali) → **coach onboarding spotlight** (`data/coach.json`): tur 5 titik (MULAI, Kondisi Tubuh, Heroes, Tas, Shop) tap-untuk-lanjut, sekali saja (`meta.coachDone`).
+- [x] **Hook 2 — dampak terasa di detik pertama**: 2 patogen **pasti mendekat dalam ±3 dtk**; wave 1 ramp-up (interval ×0,45 → 1 dalam 15 dtk — ramai sejak awal); copy tutorial set ekspektasi ("Senjata menembak OTOMATIS").
+- [x] **Hook 3 — difficulty MEDIUM**: retuning `waves.json` (decay 0,08→0,068; HP scale 0,12→0,105; wave-1 ×0,85; maxAlive 130) — menantang tapi tidak menumpuk.
+- [x] **AIM — hero bisa diarahkan** (kritik user): aim stick zona kanan layar (touch/mouse drag) + **mouse hover aim** desktop; chevron penunjuk arah; auto-aim tetap jalan bila tidak mengarahkan.
+- [x] **Kemampuan terasa** (kritik user): banner nama kemampuan (animasi pop) + hit-stop 30 ms saat cast + squash + SFX (audio ability yang sempat tidak ter-patch kini terpasang).
+- [x] **KAMPANYE "Perang Sang Tubuh"** (`data/campaign.json` — konten = data): **Peta Tubuh** 6 organ (Rongga Mulut → Lambung → Usus Halus → Paru-paru → Kelenjar Limfe → Sumbu Kehidupan), node ✓/MISI/🔒, maju terus (eksplorasi, tidak mengulang); tiap bab = cerita organ sakit + kuota bersih + **boss bernama** (Raja Radang, Ibu Parasit, Ratu Sabit, Jenderal Kanker, Raja Kanker) + reward.
+- [x] **Misi terlihat jelas**: mission tracker HUD (kuota patogen live-progress → BOSS!) + objective di peta/briefing + sub CTA MULAI menunjuk bab aktif.
+- [x] **PASUKAN IMUN (permanen)** — `js/entities/ally.js`: sel imun kecil ikut bertarung (orbit + auto-tembak); dimulai 1, **+1 per bab bersih (maks 6)**, tersimpan di save — di bab mudah pasukan kecil, makin jalan makin besar.
+- [x] **MESIN SINEMATIK** (`js/ui/cinematic.js` + `data/cinematics.json`, tanpa file video): cutscene canvas 2D — aktor sprite tween, narasi, judul, skip; **intro** (virus menyusup → pasukan bangkit), **briefing** sebelum bab baru (cerita organ sakit), **clear** setelah menang (organ pulih) — diletakkan di natural breakpoint.
+- [x] **Siklus cerita lengkap**: tubuh sakit → imun datang → bersihkan patogen → boss tumbang → ORGAN BERSIH → organ berikutnya menunggu bantuan.
+- **Kriteria lulus:** e2e kampanye 7 langkah RESULT OK (intro→coach→peta 6 node/5 kunci→brief cine→run kuota→MENANG+pasukan+1→clear cine→bab berikutnya→boss bernama "Raja Radang"→peta progres); SELFTEST_PASS 17; 26/26 shot CLEAN; perf 16,6 ms vsync @151 musuh; check-imports ✔.
 
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).

@@ -8,7 +8,9 @@ import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
 import { getData } from '../../core/data-store.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
-import { el } from '../screen-manager.js';
+import { el, screenManager } from '../screen-manager.js';
+import { writeSave } from '../../save/save-manager.js';
+import { playOnce } from '../cinematic.js';
 
 let wiringDone = false;
 
@@ -32,6 +34,7 @@ function countUp(node, target) {
 }
 
 export function show(summary) {
+  STATE.lastGameoverSummary = { ...summary };
   const title = document.getElementById('gameover-title');
   if (summary.victory) title.textContent = 'MENANG!';
   else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
@@ -110,6 +113,17 @@ export function show(summary) {
 
   countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
 
+  // Kampanye MENANG: tombol berubah jadi alur cerita (bab berikutnya / peta)
+  const retryBtn = document.getElementById('btn-retry');
+  const homeBtn = document.getElementById('btn-home');
+  if (summary.victory && summary.modeId === 'kampanye') {
+    retryBtn.textContent = 'Bab Berikutnya ✓';
+    homeBtn.lastChild.textContent = 'Peta Tubuh';
+  } else {
+    retryBtn.innerHTML = '<img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Main Lagi';
+    homeBtn.lastChild.textContent = 'Dashboard';
+  }
+
   const dblBtn = document.getElementById('btn-double-currency');
   dblBtn.disabled = !game.canDoubleCurrency();
   dblBtn.textContent = game.canDoubleCurrency()
@@ -133,10 +147,31 @@ export function wireButtons() {
   });
 
   document.getElementById('btn-retry').addEventListener('click', () => {
-    game.startRun(STATE.meta.selectedHero); // 'runstart' → HUD tampil otomatis
+    const meta = STATE.meta;
+    // Menang kampanye → lanjut bab berikutnya (sinematik clear dulu bila baru)
+    const wonCampaign = STATE.lastGameoverSummary && STATE.lastGameoverSummary.victory
+      && STATE.lastGameoverSummary.modeId === 'kampanye';
+    if (wonCampaign) {
+      const chapters = getData().campaign.chapters;
+      const next = chapters.find((c) => !(meta.campaignCleared || {})[c.id]);
+      if (next) {
+        meta.selectedChapter = next.id;
+        writeSave(meta);
+        playOnce('clear_' + STATE.lastGameoverSummary.chapterId, () => screenManager.show('prep'));
+        return;
+      }
+      playOnce('clear_' + STATE.lastGameoverSummary.chapterId, () => screenManager.show('campaign'));
+      return;
+    }
+    game.startRun(meta.selectedHero); // 'runstart' → HUD tampil otomatis
   });
 
   document.getElementById('btn-home').addEventListener('click', () => {
+    const summary = STATE.lastGameoverSummary;
+    if (summary && summary.victory && summary.modeId === 'kampanye') {
+      playOnce('clear_' + summary.chapterId, () => window.__IMUNVERSE_goDashboard());
+      return;
+    }
     window.__IMUNVERSE_goDashboard();
   });
 }

@@ -34,6 +34,13 @@ export class InputHandler {
     };
     this.maxRadius = 56; // radius jangkauan joystick (px CSS)
 
+    // ---- AIM STICK (arahkan serangan) ----
+    // Touch/pointer di ZONA KANAN canvas = aim stick; zona kiri = gerak.
+    // Mouse tanpa tekan = arah ke posisi kursor (desktop, auto-aim override).
+    this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0 };
+    this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp
+    this.aimZone = 0.58;  // mulai zona aim di 58% lebar canvas
+
     this.onPauseKey = null; // callback opsional (Esc / P)
 
     this._bind();
@@ -65,7 +72,16 @@ export class InputHandler {
     this._onTouchStart = (e) => {
       e.preventDefault();
       for (const touch of e.changedTouches) {
-        if (!this.joystick.active) {
+        const rect = this.canvas.getBoundingClientRect();
+        const inAimZone = (touch.clientX - rect.left) > rect.width * this.aimZone;
+        if (inAimZone && !this.aimStick.active) {
+          this.aimStick.active = true;
+          this.aimStick.touchId = touch.identifier;
+          this.aimStick.ox = touch.clientX;
+          this.aimStick.oy = touch.clientY;
+          this.aimStick.dx = 0;
+          this.aimStick.dy = 0;
+        } else if (!this.joystick.active) {
           this.joystick.active = true;
           this.joystick.touchId = touch.identifier;
           this.joystick.originX = touch.clientX;
@@ -84,6 +100,16 @@ export class InputHandler {
           this.joystick.y = touch.clientY;
           this._updateJoystickVector();
         }
+        if (this.aimStick.active && touch.identifier === this.aimStick.touchId) {
+          const dx = touch.clientX - this.aimStick.ox;
+          const dy = touch.clientY - this.aimStick.oy;
+          const len = Math.hypot(dx, dy);
+          if (len > 8) {
+            this.aimStick.dx = dx / len;
+            this.aimStick.dy = dy / len;
+            this.aimStick.angle = Math.atan2(dy, dx);
+          }
+        }
       }
     };
     this._onTouchEnd = (e) => {
@@ -94,6 +120,10 @@ export class InputHandler {
           this.joystick.touchId = null;
           this.joystick.dx = 0;
           this.joystick.dy = 0;
+        }
+        if (this.aimStick.active && touch.identifier === this.aimStick.touchId) {
+          this.aimStick.active = false;
+          this.aimStick.touchId = null;
         }
       }
     };
@@ -107,6 +137,19 @@ export class InputHandler {
     // (pointerType 'touch' di-skip agar tidak dobel).
     this._onPointerDown = (e) => {
       if (e.pointerType === 'touch') return; // sudah via touch handlers
+      const rect = this.canvas.getBoundingClientRect();
+      const inAimZone = (e.clientX - rect.left) > rect.width * this.aimZone;
+      if (inAimZone) {
+        // Drag zona kanan (mouse) = aim stick
+        this.canvas.setPointerCapture?.(e.pointerId);
+        this.aimStick.active = true;
+        this.aimStick.touchId = 'pointer';
+        this.aimStick.ox = e.clientX;
+        this.aimStick.oy = e.clientY;
+        this.aimStick.dx = 0;
+        this.aimStick.dy = 0;
+        return;
+      }
       this.canvas.setPointerCapture?.(e.pointerId);
       this.joystick.active = true;
       this.joystick.touchId = 'pointer';
@@ -118,10 +161,27 @@ export class InputHandler {
     };
     this._onPointerMove = (e) => {
       if (e.pointerType === 'touch') return;
+      const rect = this.canvas.getBoundingClientRect();
+      // Mouse hover (tanpa tekan) = arah aim desktop
+      if (!this.joystick.active && !this.aimStick.active) {
+        this.aimPos.x = e.clientX - rect.left;
+        this.aimPos.y = e.clientY - rect.top;
+        this.aimPos.t = performance.now();
+      }
       if (this.joystick.active && this.joystick.touchId === 'pointer') {
         this.joystick.x = e.clientX;
         this.joystick.y = e.clientY;
         this._updateJoystickVector();
+      }
+      if (this.aimStick.active && this.aimStick.touchId === 'pointer') {
+        const dx = e.clientX - this.aimStick.ox;
+        const dy = e.clientY - this.aimStick.oy;
+        const len = Math.hypot(dx, dy);
+        if (len > 8) {
+          this.aimStick.dx = dx / len;
+          this.aimStick.dy = dy / len;
+          this.aimStick.angle = Math.atan2(dy, dx);
+        }
       }
     };
     this._onPointerUp = (e) => {
@@ -132,6 +192,10 @@ export class InputHandler {
         this.joystick.dx = 0;
         this.joystick.dy = 0;
       }
+      if (this.aimStick.active && this.aimStick.touchId === 'pointer') {
+        this.aimStick.active = false;
+        this.aimStick.touchId = null;
+      }
     };
     this.canvas.addEventListener('pointerdown', this._onPointerDown);
     this.canvas.addEventListener('pointermove', this._onPointerMove);
@@ -141,6 +205,26 @@ export class InputHandler {
     // Cegah menu konteks klik-kanan / long-press
     this._onContext = (e) => e.preventDefault();
     this.canvas.addEventListener('contextmenu', this._onContext);
+  }
+
+  /**
+   * Info arah aim (arahkan serangan):
+   *  1. aim stick aktif (touch/drag zona kanan) → sudut dari stick
+   *  2. mouse bergerak < 2.5 dtk lalu → sudut dari posisi kursor (px,py = player di layar)
+   *  3. tidak ada → { active:false } → auto-aim ke musuh terdekat
+   */
+  getAimInfo(px, py) {
+    if (this.aimStick.active && (this.aimStick.dx !== 0 || this.aimStick.dy !== 0)) {
+      return { active: true, angle: this.aimStick.angle, source: 'stick' };
+    }
+    if (performance.now() - this.aimPos.t < 2500) {
+      const dx = this.aimPos.x - px;
+      const dy = this.aimPos.y - py;
+      if (Math.hypot(dx, dy) > 12) {
+        return { active: true, angle: Math.atan2(dy, dx), source: 'mouse' };
+      }
+    }
+    return { active: false, angle: 0, source: null };
   }
 
   /** Hitung vektor joystick dari titik awal sentuh. */

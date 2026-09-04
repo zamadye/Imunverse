@@ -2,20 +2,25 @@
   "schemaVersion": 1,
   "modes": [
     {
-      "id": "normal",
-      "name": "Klasik",
+      "id": "kampanye",
+      "name": "Kampanye",
       "icon": "assets/sprites/icon_play.png",
-      "description": "Perjalanan 10 wave. Kalahkan Sel Kanker di wave 10 untuk MENANG dan membuka mode Endless.",
-      "finalWave": 10,
-      "unlock": { "type": "default" }
+      "description": "Ikuti cerita: bersihkan organ satu per satu bersama pasukan imun. Bab berikutnya terbuka setelah bab sebelumnya bersih.",
+      "finalWave": null,
+      "unlock": {
+        "type": "default"
+      }
     },
     {
       "id": "endless",
       "name": "Endless",
       "icon": "assets/sprites/icon_infinity.png",
-      "description": "Tanpa akhir. Wave terus memanjat — berapa lama kamu bertahan? Terbuka setelah menang Klasik.",
+      "description": "Tanpa akhir + mutator harian. Uji seberapa jauh pasukanmu bertahan.",
       "finalWave": null,
-      "unlock": { "type": "winNormal" }
+      "unlock": {
+        "type": "winNormal",
+        "label": "Bersihkan bab Kampanye pertama"
+      }
     }
   ]
 }
