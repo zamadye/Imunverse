@@ -64,6 +64,7 @@ export const game = {
   /** @type {object|null} state run aktif */
   run: null,
   serumActive: false,
+  runFlags: {},
 
   init({ canvas, input }) {
     this.canvas = canvas;
@@ -95,6 +96,29 @@ export const game = {
       this.serumActive = true;
       writeSave(meta);
       emit('toast', { message: 'Serum Awal aktif: +25% damage run ini!', kind: 'gold' });
+    }
+    // ITEM VARIASI (dipakai otomatis bila dimiliki):
+    this.runFlags = {};
+    meta.consumables = meta.consumables || {};
+    if ((meta.consumables.vaksin_awal || 0) > 0) {
+      meta.consumables.vaksin_awal -= 1;
+      this.runFlags.vaksin = true;
+      emit('toast', { message: 'Vaksin Awal: +30 HP run ini!', kind: 'gold' });
+    }
+    if ((meta.consumables.kopi_limfa || 0) > 0) {
+      meta.consumables.kopi_limfa -= 1;
+      this.runFlags.kopi = true;
+      emit('toast', { message: 'Kopi Limfa: +12% kecepatan!', kind: 'gold' });
+    }
+    if ((meta.consumables.pelindung_lendir || 0) > 0) {
+      meta.consumables.pelindung_lendir -= 1;
+      this.runFlags.pelindung = true;
+      emit('toast', { message: 'Pelindung Lendir: 1 serangan terserap!', kind: 'gold' });
+    }
+    if ((meta.consumables.koin_ganda || 0) > 0) {
+      meta.consumables.koin_ganda -= 1;
+      this.runFlags.ganda = true;
+      emit('toast', { message: 'Sinyal Ganda: +50% antibodi run ini!', kind: 'gold' });
     }
 
     const startX = 0;
@@ -201,10 +225,22 @@ export const game = {
     // PASUKAN IMUN (permanen): ikut bertarung sesuai meta.allies
     this.run.allies = [];
     const allyCount = Math.max(0, Math.min(6, meta.allies || 0));
-    for (let i = 0; i < allyCount; i++) this.run.allies.push(new Ally(i, player));
+    const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
+    for (let i = 0; i < allyCount; i++) this.run.allies.push(new Ally(i, player, allySpeedBonus));
     if (allyCount > 0) {
-      emit('toast', { message: `Pasukan imun: ${allyCount} sel ikut bertarung!`, kind: '' });
+      const lvlTxt = meta.allyLevel > 0 ? ` (Lv ${meta.allyLevel})` : '';
+      emit('toast', { message: `Pasukan imun: ${allyCount} sel ikut bertarung!${lvlTxt}`, kind: '' });
     }
+    // Item variasi: vaksin (+30 HP) & kopi (+12% speed)
+    const flags = this.runFlags || {};
+    if (flags.vaksin) {
+      player.maxHP += 30;
+      player.hp = Math.min(player.maxHP, player.hp + 30);
+    }
+    if (flags.kopi) {
+      player.stats.speed *= 1.12;
+    }
+
     // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
     for (let gi = 0; gi < 2; gi++) {
       const ga = (gi / 2) * Math.PI * 2 + 0.7;
@@ -286,15 +322,18 @@ export const game = {
   computePlayerStats(heroDef, runUpgrades) {
     const base = heroDef.baseStats;
     const squad = squadMultipliers(STATE.meta);
+    // LEVEL HERO (upgrade antibodi per hero): damage & HP tumbuh
+    const heroCfg = getData().upgrades.heroUpgrade;
+    const heroLvl = (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0;
     const up = runUpgrades;
     const serum = this.serumActive ? 1.25 : 1;
 
-    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum;
+    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl);
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed);
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * squad.maxHP + (up.maxHP || 0) * 20);
+    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20);
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
@@ -370,9 +409,11 @@ export const game = {
       player.tryFire(this);
     }
 
-    // PASUKAN: follow + auto-tembak
+    // PASUKAN: follow + auto-tembak (level pasukan memperkuat)
+    const allyCfg = getData().upgrades.allyUpgrade;
+    const allyLvl = STATE.meta.allyLevel || 0;
     for (const ally of run.allies) {
-      const shot = ally.update(dt, player, run.enemies, player.stats.damage);
+      const shot = ally.update(dt, player, run.enemies, player.stats.damage * (1 + allyCfg.dmgPerLevel * allyLvl));
       if (shot) {
         this.spawnProjectile({
           pattern: 'pierce',
@@ -649,6 +690,14 @@ export const game = {
   damagePlayer(amount) {
     const run = this.run;
     const player = run.player;
+    // PELINDUNG LENDIR (item): serap serangan pertama
+    if (this.runFlags && this.runFlags.pelindung) {
+      this.runFlags.pelindung = false;
+      run.effects.spawnLabel(player.x, player.y - 40, 'TERSERAP!', '#7fd8c8');
+      run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
+      audio.hit();
+      return;
+    }
     // PERTAHANAN (upgrade permanen): kurangi damage diterima
     amount = Math.max(1, Math.round(amount * (squadMultipliers(STATE.meta).armor || 1)));
     if (!player.takeDamage(amount)) return;
@@ -813,6 +862,32 @@ export const game = {
     const run = this.run;
     run.kills += 1;
     tutorial.notifyKill();
+
+    // EQUITY PER TIER: kecil jarang, MEDIUM sering (koin), HARD pasti koin x2 + nutrisi bonus
+    if (!enemy.isBoss) {
+      const tier = enemy.def.tier || 'medium';
+      const coinDef = getData().nutrients.nutrients.find((n) => n.pickupType === 'currency');
+      const dropCoin = (n) => {
+        if (!coinDef) return;
+        for (let ci = 0; ci < n; ci++) {
+          const ang = Math.random() * Math.PI * 2;
+          const dist = 18 + Math.random() * 26;
+          run.pickups.push(new Pickup(coinDef, enemy.x + Math.cos(ang) * dist, enemy.y + Math.sin(ang) * dist));
+        }
+      };
+      if (tier === 'kecil') {
+        if (Math.random() < 0.15) dropCoin(1);
+      } else if (tier === 'hard') {
+        dropCoin(2); // HARD: equity pasti, dobel
+        if (Math.random() < 0.6) {
+          const bonusId = Math.random() < 0.5 ? 'vitamin_c' : 'amino';
+          const bonusDef = getData().nutrients.nutrients.find((n) => n.id === bonusId);
+          if (bonusDef) run.pickups.push(new Pickup(bonusDef, enemy.x + 14, enemy.y - 10));
+        }
+      } else {
+        if (Math.random() < 0.45) dropCoin(1); // medium: sumber utama farm equity
+      }
+    }
 
     // ---- JUICE: combo counter + hit-stop + SFX kill ----
     run.combo.count += 1;
@@ -993,7 +1068,8 @@ export const game = {
 
     const meta = STATE.meta;
     const bonus = computeRunEndBonus(run);
-    const earned = run.currencyEarned + (run.bonusCurrency || 0) + bonus;
+    const doubleMult = (this.runFlags && this.runFlags.ganda) ? 1.5 : 1;
+    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0) + bonus) * doubleMult);
     run.earned = earned;
     const victory = !!run.victory;
 

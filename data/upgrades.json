@@ -167,6 +167,38 @@
       "desc": "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)",
       "cost": 200,
       "type": "consumable"
+    },
+    {
+      "id": "vaksin_awal",
+      "name": "Vaksin Awal",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+30 HP saat run dimulai (dipakai otomatis)",
+      "cost": 180,
+      "type": "consumable"
+    },
+    {
+      "id": "kopi_limfa",
+      "name": "Kopi Limfa",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+12% kecepatan gerak 1 run (dipakai otomatis)",
+      "cost": 160,
+      "type": "consumable"
+    },
+    {
+      "id": "pelindung_lendir",
+      "name": "Pelindung Lendir",
+      "icon": "assets/sprites/icon_shield.png",
+      "desc": "Serap 1 serangan patogen per run (dipakai otomatis)",
+      "cost": 250,
+      "type": "consumable"
+    },
+    {
+      "id": "koin_ganda",
+      "name": "Sinyal Ganda",
+      "icon": "assets/sprites/icon_coin.png",
+      "desc": "+50% antibodi dari run ini (dipakai otomatis)",
+      "cost": 300,
+      "type": "consumable"
     }
   ],
   "economy": {
@@ -175,5 +207,21 @@
     "killBonusCurrency": 1,
     "adDailyLimit": 6,
     "currencyDropChance": 0.3
+  },
+  "heroUpgrade": {
+    "baseCost": 150,
+    "costGrowth": 1.35,
+    "maxLevel": 20,
+    "dmgPerLevel": 0.06,
+    "hpPerLevel": 0.08,
+    "desc": "+6% damage & +8% HP per level (khusus hero ini)"
+  },
+  "allyUpgrade": {
+    "baseCost": 220,
+    "costGrowth": 1.4,
+    "maxLevel": 10,
+    "dmgPerLevel": 0.12,
+    "speedPerLevel": 0.04,
+    "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level"
   }
 }

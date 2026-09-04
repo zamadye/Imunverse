@@ -17,7 +17,8 @@
       "xpPerKill": 2,
       "minWave": 1,
       "weight": 60,
-      "orientToMovement": true
+      "orientToMovement": true,
+      "tier": "medium"
     },
     {
       "id": "virus",
@@ -42,7 +43,8 @@
       "xpPerKill": 4,
       "minWave": 2,
       "weight": 28,
-      "orientToMovement": false
+      "orientToMovement": false,
+      "tier": "medium"
     },
     {
       "id": "virion",
@@ -61,7 +63,8 @@
       "minWave": 2,
       "weight": 0,
       "orientToMovement": true,
-      "elite": true
+      "elite": true,
+      "tier": "kecil"
     },
     {
       "id": "parasit",
@@ -84,7 +87,8 @@
       "minWave": 4,
       "weight": 22,
       "orientToMovement": true,
-      "elite": true
+      "elite": true,
+      "tier": "hard"
     },
     {
       "id": "spora",
@@ -102,7 +106,8 @@
       "xpPerKill": 6,
       "minWave": 7,
       "weight": 16,
-      "orientToMovement": false
+      "orientToMovement": false,
+      "tier": "hard"
     },
     {
       "id": "sel_kanker",
@@ -150,7 +155,8 @@
       "xpPerKill": 6,
       "minWave": 4,
       "weight": 16,
-      "orientToMovement": true
+      "orientToMovement": true,
+      "tier": "medium"
     }
   ]
 }

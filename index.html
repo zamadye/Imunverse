@@ -148,12 +148,19 @@
           <h2>Squad Upgrade</h2>
           <span class="spacer"></span>
         </header>
-        <p class="screen-subtitle">Upgrade permanen untuk semua hero. Beli dengan Antibodi.</p>
+        <p class="screen-subtitle">Lab Pasukan — kuatkan hero & pasukanmu dengan Antibodi.</p>
         <div class="topbar" style="justify-content:center">
           <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="upgrade-currency">0</span></div>
         </div>
+        <div id="upg-tabs" class="upg-tabs">
+          <button class="upg-tab active" data-tab="hero">HERO</button>
+          <button class="upg-tab" data-tab="pasukan">PASUKAN</button>
+          <button class="upg-tab" data-tab="tim">TIM</button>
+        </div>
         <div id="upg-banner" class="upg-banner"><!-- diisi JS --></div>
-        <div id="upgrade-list" class="upgrade-list"><!-- diisi JS --></div>
+        <div id="upg-hero" class="upgrade-list"><!-- HERO satu per satu --></div>
+        <div id="upg-pasukan" class="upgrade-list hidden"><!-- level pasukan --></div>
+        <div id="upgrade-list" class="upgrade-list"><!-- TIM: squad upgrades --></div>
       </section>
 
       <!-- ============ TOKO ============ -->

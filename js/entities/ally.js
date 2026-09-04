@@ -20,7 +20,7 @@ const ALLY_SPRITES = [
 ];
 
 export class Ally {
-  constructor(slot, player) {
+  constructor(slot, player, speedBonus = 0) {
     this.slot = slot;
     this.sprite = ALLY_SPRITES[slot % ALLY_SPRITES.length];
     // Posisi awal mengelilingi player
@@ -30,7 +30,7 @@ export class Ally {
     this.y = player.y + Math.sin(ang) * 52;
     this.radius = 10;
     this.attackCd = 0.6 + slot * 0.15; // stagger tembakan biar organik
-    this.fireInterval = 0.95;
+    this.fireInterval = Math.max(0.55, 0.95 - speedBonus);
     this.range = 260;
     this.wobble = Math.random() * Math.PI * 2;
   }

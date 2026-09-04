@@ -65,6 +65,43 @@ export function computeRunEndBonus(run) {
 /**
  * Beli item toko (consumable). @returns {{ok:boolean, reason?:string}}
  */
+/** Biaya naik 1 level hero (level sekarang → cost). */
+export function heroLevelCost(cfg, level) {
+  return Math.round(cfg.baseCost * Math.pow(cfg.costGrowth, level));
+}
+
+/** Upgrade level hero (damage & HP khusus hero itu). */
+export function purchaseHeroLevel(meta, heroId) {
+  const cfg = getData().upgrades.heroUpgrade;
+  meta.heroLevels = meta.heroLevels || {};
+  const level = meta.heroLevels[heroId] || 0;
+  if (level >= cfg.maxLevel) return { ok: false, reason: 'max' };
+  const cost = heroLevelCost(cfg, level);
+  if (meta.currency < cost) return { ok: false, reason: 'currency' };
+  meta.currency -= cost;
+  meta.heroLevels[heroId] = level + 1;
+  writeSave(meta);
+  return { ok: true, level: level + 1, cost };
+}
+
+/** Biaya naik 1 level pasukan. */
+export function allyLevelCost(cfg, level) {
+  return Math.round(cfg.baseCost * Math.pow(cfg.costGrowth, level));
+}
+
+/** Upgrade level PASUKAN (semua ally jadi lebih sakit & gesit). */
+export function purchaseAllyLevel(meta) {
+  const cfg = getData().upgrades.allyUpgrade;
+  const level = meta.allyLevel || 0;
+  if (level >= cfg.maxLevel) return { ok: false, reason: 'max' };
+  const cost = allyLevelCost(cfg, level);
+  if (meta.currency < cost) return { ok: false, reason: 'currency' };
+  meta.currency -= cost;
+  meta.allyLevel = level + 1;
+  writeSave(meta);
+  return { ok: true, level: level + 1, cost };
+}
+
 export function purchaseShopItem(meta, itemId) {
   const def = getData().upgrades.shopItems.find((i) => i.id === itemId);
   if (!def) return { ok: false, reason: 'Item tidak ditemukan' };

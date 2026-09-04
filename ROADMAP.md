@@ -215,6 +215,16 @@
 - [x] **Ringkasan akhir run** menambah sel **"XP Didapat"**.
 - **Kriteria lulus:** e2e XP 5 langkah RESULT OK (bar 0% + elemen lengkap; orb → fill & ghost bergerak; ≥80% → chip `ready`; naik level → modal muncul; summary berisi XP Didapat); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,6 ms vsync.
 
+## Fase 8 — Ekonomi Dalam: Lab Upgrade, Equity Tier, Item Variasi, Premium & Gateway ✅
+**Urutan permintaan user:** (1) layer upgrade hero satu-per-satu + pasukan berlevel, (2) equity per tier musuh, (3) item variasi, (4) premium bundle + payment gateway + balancing.
+- [x] **LAB PASUKAN (tab HERO/PASUKAN/TIM)**: tab HERO menampilkan hero yang DIMILIKI **satu per satu** (carousel ‹ ›) — portrait, chip level, stats DMG/HP terkumpul, slider progress, tombol LEVEL UP (biaya naik ×1,35; maks Lv 20; efek nyata: +6% dmg & +8% HP/lvl khusus hero itu); tab PASUKAN: **level pasukan** (maks 10) — +12% damage & +4% tempo tembak/lvl, berlaku nyata di run; tab TIM: 9 squad upgrade lama.
+- [x] **EQUITY PER TIER MUSUH** (`tier` di enemies.json): kecil jarang (15%), **medium sering** (45% koin), **hard pasti koin ×2 + 60% nutrisi bonus** (vitamin_c/amino) — makin berat musuh makin berhadiah.
+- [x] **ITEM VARIASI**: 4 consumable pre-run baru — Vaksin Awal (+30 HP), Kopi Limfa (+12% speed), **Pelindung Lendir (serap 1 serangan, VFX "TERSERAP!")**, Sinyal Ganda (+50% antibodi run) — dipakai otomatis saat run dimulai.
+- [x] **PREMIUM BENERAN PREMIUM** (`data/premium.json`): 4 bundle — Pemula Rp15rb (HEMAT 40%), Imun Pro Rp45rb (PALING LARIS), Legenda Rp99rb (15 item + gelar eksklusif "Legenda Tubuh"), **Bebas Iklan Rp35rb** (sekali beli, `canWatchAd` jadi false — pengguna membayar = nol interupsi).
+- [x] **PAYMENT GATEWAY (persiapan SDK nyata)**: `payment-system.js` — katalog → order ID → pilih metode (QRIS/E-Wallet/Kartu) → bayar (simulasi ±700ms) → **receipt tersimpan di save (terikat uid akun)** → entitlement diberikan; riwayat pembelian di Shop. Backend nyata = ganti isi `payOrder()` dengan fetch ke PSP (Midtrans/Xendit/Play Billing) — satu modul.
+- [x] **Balancing premium** (catatan di JSON): 1 antibodi ±Rp10; nilai bundle 1,5–1,8× lipat vs satuan — hemat terasa, tidak mematahkan progres gratisan.
+- **Kriteria lulus:** e2e ekonomi 6 langkah RESULT OK (hero Lv 0→1 −150 antibodi; pasukan Lv 1; tier drops → currencyEarned naik & tier 'hard' terbaca; pelindung menyerap hit + vaksin maxHP 138; beli Paket Pemula via modal penuh → receipt terikat uid; Bebas Iklan → canWatchAd false); e2e kampanye & gameplay tetap OK; SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

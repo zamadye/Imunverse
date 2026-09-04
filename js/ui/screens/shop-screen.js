@@ -10,11 +10,65 @@ import { addCurrency, purchaseShopItem, purchaseHeroUnlock } from '../../systems
 import { applySuplemen } from '../../systems/body-system.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
+import { getCatalog, createOrder, setMethod, payOrder, getMethods, getReceipts } from '../../systems/payment-system.js';
 import { emit } from '../../core/ui-bridge.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 
 const PASTEL = ['c-teal', 'c-green', 'c-coral'];
+
+/** Modal pembayaran: ringkasan → pilih metode → bayar (simulasi) → receipt. */
+function openPayment(bundle) {
+  const orderRes = createOrder(bundle.id);
+  if (!orderRes.ok) return;
+  const order = orderRes.order;
+  const modal = el('div', { class: 'pay-modal' }, [
+    el('div', { class: 'pay-box' }, [
+      el('h3', { class: 'pay-title', text: bundle.name }),
+      el('span', { class: 'pay-note', text: 'Pembayaran SIMULASI — tidak ada tagihan nyata. Gateway siap disambungkan ke PSP.' }),
+      el('div', { class: 'pay-summary' }, [
+        el('span', { text: bundle.valueNote }),
+        el('b', { class: 'pay-price', text: bundle.priceLabel }),
+      ]),
+      el('div', { class: 'pay-methods' }),
+      el('button', { class: 'btn btn-primary pay-confirm', disabled: true, text: 'Pilih metode dulu' }),
+      el('button', { class: 'pay-cancel', text: 'Batal' }),
+    ]),
+  ]);
+  const methodsBox = modal.querySelector('.pay-methods');
+  const METHOD_LABEL = { qris: 'QRIS', ewallet: 'E-Wallet', kartu: 'Kartu' };
+  for (const m of getMethods()) {
+    const chip = el('button', { class: 'pay-method', 'data-m': m, text: METHOD_LABEL[m] || m });
+    chip.addEventListener('click', () => {
+      setMethod(order.orderId, m);
+      methodsBox.querySelectorAll('.pay-method').forEach((x) => x.classList.toggle('selected', x === chip));
+      const confirm = modal.querySelector('.pay-confirm');
+      confirm.disabled = false;
+      confirm.textContent = `Bayar ${bundle.priceLabel} — ${(METHOD_LABEL[m] || m).toUpperCase()}`;
+    });
+    methodsBox.appendChild(chip);
+  }
+  modal.querySelector('.pay-cancel').addEventListener('click', () => modal.remove());
+  modal.querySelector('.pay-confirm').addEventListener('click', async () => {
+    const confirm = modal.querySelector('.pay-confirm');
+    confirm.disabled = true;
+    confirm.textContent = 'Memproses…';
+    const res = await payOrder(order.orderId);
+    if (!res.ok) {
+      confirm.textContent = res.error;
+      confirm.disabled = false;
+      return;
+    }
+    const box = modal.querySelector('.pay-box');
+    box.textContent = '';
+    box.appendChild(el('img', { class: 'pay-ok-ico', src: 'assets/sprites/icon_star.png', alt: '' }));
+    box.appendChild(el('h3', { class: 'pay-title', text: 'Pembayaran Berhasil!' }));
+    box.appendChild(el('div', { class: 'pay-granted' }, res.granted.map((g) => el('span', { class: 'pg-item', text: g }))));
+    box.appendChild(el('div', { class: 'pay-receipt', text: `Struk: ${res.receipt.receiptId} · ${res.receipt.method.toUpperCase()} · ${res.receipt.date}` }));
+    box.appendChild(el('button', { class: 'btn btn-primary', text: 'Lanjut', onclick: () => { modal.remove(); show(); } }));
+  });
+  document.body.appendChild(modal);
+}
 
 export function show() {
   const meta = STATE.meta;
@@ -24,6 +78,40 @@ export function show() {
   wrap.textContent = '';
 
   // ---------------- Section: buka hero ----------------
+  // ---------------- Section: PAKET PREMIUM (bundle + gateway simulasi) ----------------
+  const premSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'PAKET PREMIUM' })]);
+  const premGrid = el('div', { class: 'premium-grid' });
+  for (const bundle of getCatalog()) {
+    const owned = bundle.contents.noAds && meta.noAds;
+    const card = el('div', { class: 'premium-card', style: `--pc:${bundle.color}` }, [
+      bundle.badge ? el('span', { class: 'prem-badge', style: `background:${bundle.color}`, text: bundle.badge }) : null,
+      el('b', { class: 'prem-name', text: bundle.name }),
+      el('span', { class: 'prem-value', text: bundle.valueNote }),
+      el('button', {
+        class: 'btn btn-prem',
+        text: owned ? '✓ DIMILIKI' : bundle.priceLabel,
+        disabled: !!owned,
+      }),
+    ]);
+    const buyBtn = card.querySelector('.btn-prem');
+    if (!owned) {
+      buyBtn.addEventListener('click', () => {
+        if (!requireAccount('shop')) return; // pembelian wajib akun
+        openPayment(bundle);
+      });
+    }
+    premGrid.appendChild(card);
+  }
+  premSection.appendChild(premGrid);
+  const receipts = getReceipts().slice(0, 3);
+  if (receipts.length) {
+    premSection.appendChild(el('div', { class: 'prem-receipts' }, [
+      el('span', { class: 'pr-title', text: 'Riwayat pembelian (simulasi):' }),
+      ...receipts.map((r) => el('span', { class: 'pr-row', text: `${r.date} · ${r.productName} · ${r.method.toUpperCase()} · ${r.receiptId}` })),
+    ]));
+  }
+  wrap.appendChild(premSection);
+
   const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'BUKA HERO' })]);
   const heroGrid = el('div', { class: 'shop-grid' });
   const heroes = getData().heroes.heroes;

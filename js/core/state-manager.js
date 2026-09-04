@@ -43,6 +43,8 @@ export function createDefaultMeta() {
     selectedChapter: 'bab_mulut',
     campaignCleared: {},
     allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
+    heroLevels: {},  // { heroId: level } — level per hero (upgrade antibodi)
+    allyLevel: 0,    // level pasukan (damage & gesit)
     coachDone: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     cinematicsSeen: {},

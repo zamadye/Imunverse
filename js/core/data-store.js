@@ -36,6 +36,7 @@ export async function loadAllData() {
     cinematics: 'data/cinematics.json',
     coach: 'data/coach.json',
     factions: 'data/factions.json',
+    premium: 'data/premium.json',
     bodySystems: 'data/body-systems.json',
   };
 

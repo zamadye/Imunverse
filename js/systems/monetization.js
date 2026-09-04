@@ -69,6 +69,7 @@ export function triggerRewardedAdBossChest(onSuccess, onFail) {
  * @returns {boolean} true bila masih ada kuota hari ini.
  */
 export function canWatchAd(meta) {
+  if (meta.noAds) return false; // IAP Bebas Iklan aktif — tidak ada interupsi
   const today = new Date().toISOString().slice(0, 10);
   if (!meta.adDaily || meta.adDaily.date !== today) return true;
   // Limit dari data/upgrades.json → economy.adDailyLimit (bukan hardcode)
