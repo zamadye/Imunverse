@@ -29,6 +29,10 @@ export class Player {
     this.attackFlash = 0;     // timer untuk swap sprite attack
     this.moving = false;
     this.alive = true;
+
+    // ---- Juice (Fase 6): squash & stretch ---- //
+    this.attackPulse = 0;     // 1 → 0: denyut kecil tiap menyerang
+    this.hitSquash = 0;       // 1 → 0: gepeng saat kena damage
   }
 
   /**
@@ -54,6 +58,8 @@ export class Player {
     // ---- Timers ----
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackFlash > 0) this.attackFlash -= dt;
+    if (this.attackPulse > 0) this.attackPulse = Math.max(0, this.attackPulse - dt * 7);
+    if (this.hitSquash > 0) this.hitSquash = Math.max(0, this.hitSquash - dt * 6);
     this.attackTimer -= dt;
 
     // ---- Auto-attack: cari musuh terdekat dalam range ----
@@ -70,7 +76,9 @@ export class Player {
   performAttack(target, game) {
     const pattern = this.heroDef.attackPattern;
     this.attackFlash = 0.18; // swap spriteAttack sebentar
+    this.attackPulse = 1;    // squash-stretch saat melempar tebasan
     this.facing = Math.atan2(target.y - this.y, target.x - this.x);
+    game.playSfx('shoot', { pitch: 0.9 + Math.random() * 0.3 });
 
     if (pattern === 'melee_swipe') {
       // Tebasan area: damage semua musuh dalam swipeRadius & sudut arc
@@ -131,6 +139,7 @@ export class Player {
     if (!this.alive || this.iframes > 0) return false;
     this.hp -= amount;
     this.iframes = 0.7;
+    this.hitSquash = 1; // juice: gepeng sesaat saat kena pukul
     if (this.hp <= 0) {
       this.hp = 0;
       this.alive = false;

@@ -34,6 +34,8 @@ Lalu buka **http://localhost:8000** — selesai. Tidak ada build step, tidak ada
 - **Boss Sel Kanker** muncul tiap 5 gelombang — awas ledakan sitotoksinnya (area merah = telegraph, kabur!).
 - Kumpulkan **nutrisi**: Glukosa/Amino (XP), Vitamin C (heal), Antibodi (mata uang), Sinyal Sitokin (magnet).
 - **Level up** → pilih 1 dari 3 upgrade acak.
+- **Combo**: kill beruntun dalam 3 detik menaikkan counter COMBO di layar (milestone = hit-stop + suara naik nada).
+- **Audio prosedural**: semua SFX & musik ambient disintesis WebAudio langsung — tidak ada file audio. Tombol 🔊 di dashboard / pause mematikan suara (tersimpan di save).
 - Antibodi dipakai untuk **Upgrade Squad permanen**, **unlock hero**, dan item di **Toko** — semua tersimpan otomatis di `localStorage`.
 
 ## 🏗️ Struktur Proyek
@@ -52,6 +54,8 @@ Imunverse/
 ├── assets/sprites/             # Sprite PNG transparan (generator: tools/gen_sprites.py)
 └── js/
     ├── main.js                 # Bootstrap: data → sprite preload → save → loop
+    ├── audio/
+    │   └── audio-system.js     # SFX & musik AMBIENT prosedural WebAudio (tanpa file aset)
     ├── core/
     │   ├── game-loop.js        # rAF + delta-time nyata (bukan asumsi 60fps)
     │   ├── state-manager.js    # State global + struktur meta default
@@ -98,7 +102,8 @@ Imunverse/
 - **XP curve**: `xpToNextLevel = ceil(10 × level^1.5)`; level-up mem-pause game dan menampilkan 3 pilihan acak.
 - **Collision**: circle-to-circle (perbandingan kuadrat jarak vs jumlah radius) via spatial hash grid sel 96 px — cek hanya antar sel bertetangga.
 - **Sprite**: semua karakter dirender `drawImage()` dari PNG transparan; path tersimpan di JSON (`sprite`/`spriteIdle`/`spriteAttack`). `loadAllSprites()` mengembalikan Promise dan game baru mulai setelah semua termuat. Generator placeholder (canvas offscreen) hanya fallback bila file PNG tidak ada.
-- **Save**: objek JSON murni di `localStorage` (`imunverse.save.v1`); auto-save setelah akhir run, pembelian, unlock, klaim harian.
+- **Save**: objek JSON murni di `localStorage` (`imunverse.save.v1`); auto-save setelah akhir run, pembelian, unlock, klaim harian; preferensi audio `{sfx,music}` ikut tersimpan.
+- **Audio & Juice** (`js/audio/audio-system.js`): SFX 100% prosedural (oscillator/noise + envelope), musik ambient sequencer lookahead 32-step dengan intensitas dinamis (dashboard → run → boss), hit-stop 45–90 ms pada kill besar, combo counter HUD dengan milestone, squash-stretch player & pop musuh — tanpa satu pun file audio.
 - **Monetisasi**: hook di `js/systems/monetization.js` (simulasi). Alur setelah iklan sukses — revive 50% HP + bersih-bersih musuh, 2× antibodi, daily reward — semuanya logic asli.
 
 ## 🛠️ Tooling (opsional, untuk pengembangan)

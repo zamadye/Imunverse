@@ -160,6 +160,12 @@ export const game = {
       bossChest: null,
       ended: false,
       stats: { shotsFired: 0 },
+      // ---- Juice (Fase 6): combo counter & hit-stop ----
+      combo: 0,
+      comboTimer: 0,
+      maxCombo: 0,
+      comboMilestone: 0,
+      hitStop: 0,
     };
 
     this.run.camera.reset(player.x, player.y);
@@ -170,6 +176,24 @@ export const game = {
     setLevelUpOpen(false);
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
+  },
+
+  // =====================================================================
+  // AUDIO & JUICE (Fase 6)
+  // =====================================================================
+  /**
+   * Kirim event SFX ke audio-system (di-wire main.js via ui-bridge).
+   * Gameplay tetap tidak tahu apa-apa soal WebAudio — konsisten dengan
+   * pola komunikasi event bus.
+   */
+  playSfx(name, opts = {}) {
+    emit('sfx', { name, ...opts });
+  },
+
+  /** Hit-stop: dunia hampir membeku sesaat (juice kill besar). */
+  addHitStop(seconds) {
+    const run = this.run;
+    if (run) run.hitStop = Math.max(run.hitStop, seconds);
   },
 
   // =====================================================================
@@ -273,7 +297,25 @@ export const game = {
     if (!run || run.ended) return;
     const player = run.player;
 
+    // ---- Juice: hit-stop. Setelah kill besar, dunia nyaris membeku
+    // (dt × 0.12) sementara timer hit-stop meluruh pakai dt nyata —
+    // partikel/kamera tetap halus, feel "pukulan berat" terasa.
+    const realDt = dt;
+    if (run.hitStop > 0) {
+      run.hitStop = Math.max(0, run.hitStop - realDt);
+      dt = realDt * 0.12;
+    }
+
     run.time += dt;
+
+    // ---- Combo: meluruh bila tak ada kill dalam COMBO_WINDOW detik
+    if (run.comboTimer > 0) {
+      run.comboTimer -= dt;
+      if (run.comboTimer <= 0) {
+        run.comboTimer = 0;
+        run.combo = 0;
+      }
+    }
 
     // 1. Input & player (gerak + auto-attack)
     const move = this.input.getMoveVector();
@@ -290,6 +332,7 @@ export const game = {
       emit('wave', { wave: run.spawnSys.wave, isBoss: true });
       emit('toast', { message: 'SEL KANKER MUNCUL!', kind: 'danger' });
       run.camera.addShake(0.7);
+      this.playSfx('boss_warning');
     }
 
     // 3. Update musuh (behavior + boss AOE)
@@ -383,19 +426,24 @@ export const game = {
         run.partsCollectedTotal += 1;
         run.effects.spawnLabel(p.x, p.y, `${p.def.name} +1`, '#ffe082');
         run.effects.spawnKillFx('ring', p.x, p.y, run.evoStage.tierColor, Math.random() * 10);
+        this.playSfx('chest');
         break;
       }
       case 'xp':
         this.addXP(p.value);
+        this.playSfx('pickup', { step: run.nutrientsCollected });
         break;
       case 'heal':
         run.player.heal(p.value);
+        this.playSfx('heal');
         break;
       case 'currency':
         run.currencyEarned += p.value;
+        this.playSfx('coin');
         break;
       case 'magnet': {
         for (const other of run.pickups) other.magnetized = true;
+        this.playSfx('combo', { tier: 2 });
         emit('toast', { message: 'Sinyal sitokin! Semua nutrisi tertarik padamu.' });
         break;
       }
@@ -425,6 +473,7 @@ export const game = {
     setLevelUpOpen(true);
     setPaused(true);
     emit('levelup', { level: run.level, choices: run.currentChoices });
+    this.playSfx('levelup');
   },
 
   /** Dipanggil dari modal level-up saat pemain memilih satu upgrade. */
@@ -486,6 +535,7 @@ export const game = {
     const run = this.run;
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || enemy.isBoss);
     run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, died ? '#ffd93d' : '#ffffff');
+    this.playSfx('hit');
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
@@ -498,6 +548,7 @@ export const game = {
     const run = this.run;
     run.effects.spawnBlast(enemy.x, enemy.y, cfg.radius, '#ff4059');
     run.camera.addShake(0.55);
+    this.playSfx('explosion');
     const player = run.player;
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
@@ -513,6 +564,7 @@ export const game = {
     const player = run.player;
     if (!player.takeDamage(amount)) return;
     emit('playerHit', { damage: amount });
+    this.playSfx('playerHit');
     // Screen shake saat kena damage besar (sesuai spek)
     run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
     if (!player.alive) {
@@ -569,6 +621,7 @@ export const game = {
     const bonusPart = rollPartDrop('boss', 1) || 'silia';
     run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
     setPaused(true);
+    this.playSfx('chest');
     emit('bosschest', {
       currency: bonusCurrency,
       partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
@@ -603,6 +656,7 @@ export const game = {
     writeSave(meta);
     run.bossChest = null;
     emit('toast', { message: `Peti boss: +${currency} antibodi${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    this.playSfx('chest');
     setPaused(false);
     emit('resume');
   },
@@ -616,7 +670,7 @@ export const game = {
     if (!run || run.ended || STATE.levelUpOpen) return false;
     const player = run.player;
     if (!player.alive) return false;
-    return run.abilities.triggerBySlot(slot, {
+    const fired = run.abilities.triggerBySlot(slot, {
       player,
       enemies: run.enemies,
       damage: player.stats.damage,
@@ -628,13 +682,40 @@ export const game = {
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
+    if (fired) {
+      // SFX kemampuan sesuai jenis (data/abilities.json kind)
+      const def = run.abilities.getBySlot(slot)?.def;
+      const sfxKind = { melee_arc: 'slash', push: 'wind', lightning: 'bolt', freeze: 'frost' }[def?.kind];
+      if (sfxKind) this.playSfx(sfxKind);
+    }
+    return fired;
   },
 
-  /** Musuh mati: kill count, partikel, drop nutrisi, splitter, boss reward. */
+  /** Musuh mati: kill count, combo, partikel, drop nutrisi, splitter, boss. */
   onEnemyKilled(enemy, source) {
     const run = this.run;
     run.kills += 1;
     tutorial.notifyKill();
+
+    // ---- Juice: combo counter (window 3 dtk) + milestone pop ----
+    run.combo += 1;
+    run.comboTimer = 3.0;
+    run.maxCombo = Math.max(run.maxCombo, run.combo);
+    const MILESTONES = [5, 10, 20, 35, 50, 75, 100];
+    if (MILESTONES.includes(run.combo)) {
+      run.comboMilestone = run.combo;
+      emit('combo', { combo: run.combo, max: run.maxCombo });
+      this.playSfx('combo', { tier: MILESTONES.indexOf(run.combo) + 1 });
+      this.addHitStop(0.05);
+    }
+
+    // ---- Juice: hit-stop pada kill besar (boss > elite > milestone)
+    if (enemy.isBoss) this.addHitStop(0.09);
+    else if (enemy.def.elite) this.addHitStop(0.045);
+
+    // ---- SFX kill (besar = boss/elite) ----
+    this.playSfx('kill', { big: enemy.isBoss || !!enemy.def.elite });
+
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? 26 : 8, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
@@ -729,12 +810,14 @@ export const game = {
     if (STATE.screen !== 'gameplay' || STATE.paused || STATE.levelUpOpen) return;
     setPaused(true);
     emit('pause', {});
+    this.playSfx('ui');
   },
 
   resume() {
     if (STATE.screen !== 'gameplay') return;
     setPaused(false);
     emit('resume'); // tutup modal pause, kembali ke HUD
+    this.playSfx('ui');
   },
 
   // =====================================================================
@@ -766,9 +849,12 @@ export const game = {
     }
     run.enemies = run.enemies.filter((e) => e.alive);
     run.camera.addShake(0.5);
+    run.combo = 0;   // combo direset setelah bangkit (momentum hilang)
+    run.comboTimer = 0;
     setPaused(false);
     emit('resume'); // tutup modal revive, kembali ke HUD
     emit('toast', { message: 'Sel regenerasi — lanjutkan pertempuran!', kind: 'gold' });
+    this.playSfx('revive');
   },
 
   declineRevive() {
@@ -825,6 +911,7 @@ export const game = {
 
     writeSave(meta); // AUTO-SAVE akhir run
 
+    this.playSfx('gameover');
     setPaused(false);
     setScreen('gameover');
     emit('gameover', {
@@ -839,6 +926,7 @@ export const game = {
       level: run.level,
       currencyEarned: earned,
       newMissions: completedMissions.length,
+      maxCombo: run.maxCombo,
     });
   },
 
@@ -908,8 +996,12 @@ export const game = {
       ctx.fill();
       ctx.globalAlpha = 1;
       const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+      // Juice: "pop" kecil (bengkak sesaat) saat musuh kena hit
+      const pop = e.hitFlash > 0 ? 1 + (e.hitFlash / 0.12) * 0.1 : 1;
       drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
         flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
+        scaleX: pop,
+        scaleY: pop,
       });
       drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
     }
@@ -922,14 +1014,29 @@ export const game = {
         // Aura mockup: ring putih gradasi lembut di belakang karakter
         drawSprite(ctx, 'assets/sprites/deco_aura.png', player.x, player.y, player.radius * 4.4, 0, { alpha: 0.8 });
         drawPulseGlow(ctx, player.x, player.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
+
+        // ---- Juice squash & stretch: bob saat bergerak, denyut saat
+        // menyerang, gepeng saat kena hit (skala sepanjang arah hadap).
+        const moveBob = player.moving ? Math.sin(time * 16) * 0.04 : 0;
+        const stretch = moveBob + player.attackPulse * 0.14 - player.hitSquash * 0.16;
+        const squashX = 1 + stretch;
+        const squashY = 1 - stretch * 0.75;
+
         const bodySize = player.radius * 2.667;
         const evo = run.evoStage;
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.rotate(player.facing);
+        ctx.scale(squashX, squashY);
+        ctx.rotate(-player.facing);
+        ctx.translate(-player.x, -player.y);
         // OVERLAY EVOLUSI — bentuk hero berubah sesuai tahap (terlihat jelas):
         if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', player.x, player.y + bodySize * 0.34, bodySize * 0.62, 0, {});
         if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', player.x, player.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
         drawSprite(ctx, path, player.x, player.y, bodySize, 0, {});
         if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', player.x, player.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
         if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', player.x + bodySize * 0.3, player.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
+        ctx.restore();
       }
     }
 
@@ -972,6 +1079,8 @@ export const game = {
         currency: run.currencyEarned,
         level: run.level,
         boss: run.boss && run.boss.alive ? { name: run.boss.def.name, pct: run.boss.hp / run.boss.maxHP } : null,
+        combo: run.combo,
+        maxCombo: run.maxCombo,
       });
       const mmCtx = getMinimapContext();
       if (mmCtx) {
@@ -996,6 +1105,7 @@ export const game = {
       kills: run.kills,
       level: run.level,
       currency: run.currencyEarned,
+      maxCombo: run.maxCombo,
     };
   },
 };

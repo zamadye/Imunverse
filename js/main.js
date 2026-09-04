@@ -19,6 +19,7 @@ import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
 import { loadSave, writeSave, clearSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
+import * as audioSystem from './audio/audio-system.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -55,6 +56,52 @@ function resize() {
   game.resize(w, h, dpr);
 }
 window.addEventListener('resize', resize);
+
+// ---------------------------------------------------------------------
+// Audio (Fase 6): SFX/musik prosedural + toggle tersimpan di save
+// ---------------------------------------------------------------------
+function syncSoundButtons() {
+  const { sfx, music } = audioSystem.getAudioSettings();
+  const on = sfx || music;
+  const dashBtn = document.getElementById('btn-sound');
+  if (dashBtn) dashBtn.classList.toggle('muted', !on);
+  const pauseBtn = document.getElementById('btn-sound-pause');
+  if (pauseBtn) {
+    pauseBtn.classList.toggle('muted', !on);
+    const label = document.getElementById('sound-pause-label');
+    if (label) label.textContent = on ? 'ON' : 'OFF';
+  }
+}
+
+function toggleSound() {
+  const s = audioSystem.toggleAll();
+  if (STATE.meta) {
+    STATE.meta.audio = s;
+    writeSave(STATE.meta);
+  }
+  syncSoundButtons();
+  audioSystem.play('ui');
+}
+
+function wireAudio() {
+  // SFX dari gameplay datang lewat event bus (game.js tidak tahu WebAudio)
+  on('sfx', (payload) => audioSystem.play(payload.name, payload));
+  on('combo', ({ combo }) => hudScreen.popCombo(combo));
+
+  // Intensitas musik: menu tenang, run naik, boss paling intens
+  on('runstart', () => audioSystem.setIntensity(0.62));
+  on('wave', ({ isBoss }) => audioSystem.setIntensity(isBoss ? 1 : 0.62));
+  on('gameover', () => audioSystem.setIntensity(0.35));
+
+  // Unlock AudioContext pada gesture pertama (kebijakan autoplay browser)
+  window.addEventListener('pointerdown', () => audioSystem.unlock(), { passive: true });
+  window.addEventListener('keydown', () => audioSystem.unlock(), { passive: true });
+
+  // Tombol toggle: dashboard (atas) & modal pause
+  document.getElementById('btn-sound')?.addEventListener('click', toggleSound);
+  document.getElementById('btn-sound-pause')?.addEventListener('click', toggleSound);
+  syncSoundButtons();
+}
 
 // ---------------------------------------------------------------------
 // Toast
@@ -137,9 +184,13 @@ async function boot() {
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
   if (!raw) writeSave(STATE.meta);
 
+  // Audio: ambil preferensi {sfx,music} dari save (default nyala)
+  audioSystem.initAudio(STATE.meta.audio || { sfx: true, music: true });
+
   // 4) Wiring UI
   game.init({ canvas, input });
   wireUiBridge();
+  wireAudio();
 
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);
@@ -224,6 +275,8 @@ async function boot() {
       clearSave();
       STATE.meta = createDefaultMeta();
       writeSave(STATE.meta);
+      audioSystem.initAudio(STATE.meta.audio);
+      syncSoundButtons();
       screenManager.show('dashboard');
       showToast({ message: 'Save direset. Organisme baru terbentuk. 🧬' });
     }
@@ -288,6 +341,18 @@ async function runAutotest() {
     game.startRun('sel_t');
     log('runStarted', STATE.screen === 'gameplay');
 
+    // FASE 6: preferensi audio ada di save; engine aman dipakai sebelum unlock
+    const audioPrefs = STATE.meta.audio || {};
+    log('audioSettingsDefault', typeof audioPrefs.sfx === 'boolean' && typeof audioPrefs.music === 'boolean');
+    let audioSafe = true;
+    try {
+      audioSystem.play('hit');
+      audioSystem.setIntensity(0.5);
+      audioSystem.toggleAll();
+      audioSystem.toggleAll();
+    } catch (e) { audioSafe = false; }
+    log('audioEngineSafe', audioSafe);
+
     // Tempatkan musuh dekat player agar auto-attack terjadi cepat
     for (let i = 0; i < 6; i++) game.spawnEnemy('bakteri', false);
     game.run.enemies.slice(-6).forEach((e, i) => {
@@ -300,6 +365,8 @@ async function runAutotest() {
     log('enemiesSpawned', game.run.enemies.length + game.run.kills > 0);
     log('shotsFired', game.run.stats.shotsFired > 0);
     log('killsCounted', game.run.kills);
+    // FASE 6 (juice): combo counter bertambah tiap kill
+    log('comboCounterWorks', game.run.combo >= 1 && game.run.maxCombo >= game.run.combo);
 
     // Level-up: beri XP besar → modal muncul → pilih upgrade sampai antrean habis
     const levelBefore = game.run.level;
@@ -333,11 +400,22 @@ async function runAutotest() {
     game.updatePickups(0.02);
     const partsTotal = Object.values(game.run.parts).reduce((a, b) => a + b, 0);
     log('evolutionPartsDropped', partsTotal > 0);
+    // FASE 6 (juice): hit-stop aktif setelah kill elite/boss besar
+    log('hitStopTriggered', game.run.hitStop > 0);
 
     // Damage → kena vignette; mati → modal revive → tolak → game over
     game.run.player.iframes = 0; // reset i-frames (musuh mungkin baru saja memukul)
     game.damagePlayer(10);
     log('tookDamage', game.run.player.hp < game.run.player.maxHP);
+    // FASE 6 (juice): squash-stretch player menyala saat kena hit
+    log('squashStretchWorks', game.run.player.hitSquash > 0);
+    log('audioTogglePersists', (() => {
+      const before = audioSystem.getAudioSettings();
+      audioSystem.toggleAll();
+      const after = audioSystem.getAudioSettings();
+      audioSystem.toggleAll();
+      return before.sfx !== after.sfx || before.music !== after.music;
+    })());
     game.run.player.iframes = 0;
     game.damagePlayer(999999);
     await sleep(100); // beri waktu emit 'revive' → modal tampil

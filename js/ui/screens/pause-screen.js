@@ -21,6 +21,12 @@ export function show() {
       el('img', { class: 'pause-ico', src: 'assets/sprites/icon_coin.png', alt: '' }),
       el('span', { text: ` ${s.currency} antibodi terkumpul (dibawa pulang saat run diakhiri)` }),
     ]));
+    if (s.maxCombo >= 2) {
+      box.appendChild(el('div', { class: 'pause-line' }, [
+        el('img', { class: 'pause-ico', src: 'assets/sprites/icon_star.png', alt: '' }),
+        el('span', { text: ` Combo terbaik: x${s.maxCombo}` }),
+      ]));
+    }
   }
 }
 

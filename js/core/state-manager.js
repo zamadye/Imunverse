@@ -44,6 +44,8 @@ export function createDefaultMeta() {
     adDaily: { date: null, count: 0 },
     focusRun: 'seimbang',
     tutorialDone: false,
+    /** Preferensi audio (Fase 6): toggle SFX & musik, dipersist di save. */
+    audio: { sfx: true, music: true },
     bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
     squadUpgrades: {
       sq_damage: 0,

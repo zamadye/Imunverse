@@ -185,6 +185,24 @@ h1, h2, h3 { letter-spacing: 0.2px; }
   box-shadow: var(--shadow-card); transition: transform 0.08s ease; pointer-events: auto;
 }
 .icon-btn:active { transform: scale(0.92); }
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn .ico-sound-off { display: none; }
+.icon-btn.muted .ico-sound-on { display: none; }
+.icon-btn.muted .ico-sound-off { display: block; }
+.icon-btn.muted { color: var(--coral-deep); }
+
+/* Tombol audio di modal pause */
+.btn-audio {
+  background: var(--mint-2); color: var(--ink); border: 1px solid var(--teal-light);
+  font-size: 13px; font-weight: 800; padding: 9px 22px; width: auto;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-audio .sound-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 0 3px rgba(124, 184, 106, 0.25);
+}
+.btn-audio.muted .sound-dot { background: var(--coral-deep); box-shadow: 0 0 0 3px rgba(233, 106, 76, 0.25); }
+.btn-audio b { color: var(--teal-deep); }
 
 /* ---------------- Topbar ---------------- */
 .topbar {
@@ -555,6 +573,37 @@ h1, h2, h3 { letter-spacing: 0.2px; }
   80% { opacity: 1; }
   100% { opacity: 0; transform: translateX(-50%) scale(1); }
 }
+
+/* ---------------- Combo counter (Fase 6 juice) ---------------- */
+.hud-combo {
+  position: absolute; top: 96px; left: 50%; transform: translateX(-50%);
+  display: inline-flex; align-items: baseline; gap: 6px;
+  pointer-events: none; z-index: 3;
+  color: var(--gold); text-shadow: 0 2px 0 rgba(20, 60, 54, 0.35);
+  font-weight: 900; letter-spacing: 1px;
+}
+.hud-combo #hud-combo-count {
+  font-size: clamp(30px, 9vw, 46px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.hud-combo .combo-label {
+  font-size: 12px; letter-spacing: 3px; color: #fff;
+  text-shadow: 0 1px 4px rgba(20, 60, 54, 0.5);
+}
+.hud-combo:not(.hidden) { animation: combo-in 0.18s ease-out; }
+.hud-combo.hot #hud-combo-count { color: var(--coral); }
+.hud-combo.blaze #hud-combo-count { color: var(--heart); }
+.hud-combo.pop #hud-combo-count { animation: combo-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes combo-in {
+  0% { opacity: 0; transform: translateX(-50%) scale(1.4); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@keyframes combo-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.55) rotate(-4deg); }
+  100% { transform: scale(1); }
+}
 .hud-hint {
   position: absolute; bottom: calc(16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
   color: #fff; font-size: 11.5px; font-weight: 800; pointer-events: none;
@@ -882,6 +931,7 @@ img.lock-badge {
 
 /* -- Gameover: baris bagian evolusi -- */
 .go-parts { font-size: 13px; font-weight: 800; color: var(--teal-dark, #14584f); }
+.go-combo { color: var(--gold-deep); }
 
 /* -- Baris terkunci dengan ikon gembok PNG (bukan emoji) -- */
 .lock-line { display: inline-flex; align-items: center; gap: 4px; }

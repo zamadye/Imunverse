@@ -45,6 +45,10 @@
             <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
             <span id="dash-currency">0</span>
           </div>
+          <button id="btn-sound" class="icon-btn" title="Suara nyala/mati" aria-label="Suara nyala/mati">
+            <svg class="ico-sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5v5h3.6l4.6 3.7V5.8L7.1 9.5H3.5z"/><path d="M15.5 9a4.4 4.4 0 0 1 0 6M17.8 6.6a8 8 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <svg class="ico-sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5v5h3.6l4.6 3.7V5.8L7.1 9.5H3.5z"/><path d="M15.5 9.5 20 14M20 9.5 15.5 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
           <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
         </header>
 
@@ -238,6 +242,9 @@
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
         <div id="ability-bar" class="ability-bar" aria-label="Kemampuan aktif"><!-- diisi JS --></div>
         <div id="hud-announce" class="hud-announce hidden"></div>
+        <div id="hud-combo" class="hud-combo hidden" aria-live="polite">
+          <span id="hud-combo-count">2</span><span class="combo-label">COMBO</span>
+        </div>
         <div id="tutorial-layer" class="hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
       </section>
@@ -288,6 +295,7 @@
         <div class="modal-box">
           <h2>Jeda</h2>
           <div id="pause-summary" class="pause-summary"><!-- diisi JS --></div>
+          <button id="btn-sound-pause" class="btn btn-audio"><span class="sound-dot"></span>Suara: <b id="sound-pause-label">ON</b></button>
           <button id="btn-resume" class="btn btn-primary btn-xl"><img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Lanjutkan</button>
           <button id="btn-quit-run" class="btn btn-danger"><img class="btn-ico" src="assets/sprites/icon_skull.png" alt="" />Akhiri Run</button>
         </div>

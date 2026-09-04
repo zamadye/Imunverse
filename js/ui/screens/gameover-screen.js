@@ -85,6 +85,12 @@ export function show(summary) {
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-body', text: `Tubuh: ${bits.join(' · ')}` }));
   }
 
+  // Juice (Fase 6): combo terbaik run ini
+  if (summary.maxCombo >= 2) {
+    grid.insertAdjacentElement('afterend',
+      el('div', { class: 'go-parts go-combo', text: `Combo terbaik: x${summary.maxCombo} — sistem imun menyala!` }));
+  }
+
   // Bagian evolusi terkumpul run ini (feed meta-progression)
   if (summary.parts > 0) {
     const partsLine = el('div', { class: 'go-parts' }, [

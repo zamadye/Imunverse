@@ -73,6 +73,8 @@ export function resetHUD() {
   document.getElementById('hud-timer-text').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
   document.getElementById('hp-pill').classList.remove('low');
+  const comboWrap = document.getElementById('hud-combo');
+  if (comboWrap) comboWrap.classList.add('hidden');
   buildAbilityBar();
 
   // Portrait hero: pakai aset potret khusus (bukan sprite tubuh penuh)
@@ -100,6 +102,7 @@ export function updateHUD(data) {
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
 
+  updateCombo(data.combo || 0);
   updateAbilityBar(data.abilities);
 
   const bossWrap = document.getElementById('hud-boss-bar-wrap');
@@ -115,6 +118,42 @@ export function updateHUD(data) {
 function setBar(id, pct) {
   const node = document.getElementById(id);
   if (node) node.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
+}
+
+// ---------------------------------------------------------------------
+// Combo counter (Fase 6 — juice). Muncul saat combo ≥ 2, tier warna naik
+// di 10+ / 20+, dan "pop" saat milestone (event 'combo' dari game.js).
+// ---------------------------------------------------------------------
+const COMBO_TIERS = [
+  { at: 20, className: 'blaze' },
+  { at: 10, className: 'hot' },
+];
+const comboNodeId = 'hud-combo';
+const comboCountId = 'hud-combo-count';
+
+export function updateCombo(count) {
+  const wrap = document.getElementById(comboNodeId);
+  if (!wrap) return;
+  if (count < 2) {
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  document.getElementById(comboCountId).textContent = String(count);
+  const tierCls = COMBO_TIERS.find((t) => count >= t.at)?.className || '';
+  wrap.classList.toggle('blaze', tierCls === 'blaze');
+  wrap.classList.toggle('hot', tierCls === 'hot');
+}
+
+/** Pop + sfx visual saat mencapai milestone combo (5/10/20/…). */
+export function popCombo(combo) {
+  const wrap = document.getElementById(comboNodeId);
+  if (!wrap) return;
+  wrap.style.animation = 'none';
+  void wrap.offsetWidth; // restart animasi
+  wrap.style.animation = '';
+  wrap.classList.add('pop');
+  setTimeout(() => wrap.classList.remove('pop'), 450);
 }
 
 /** Banner pengumuman wave / boss (pill besar ala mockup). */

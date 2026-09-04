@@ -12,8 +12,8 @@
 | 3 | Progresi Meta, Ekonomi & Save | ✅ | M |
 | 4 | UI/UX Pass 1 — Design System, Polish & Game Feel | ✅ | M |
 | 5 | UI/UX Pass 2 — Penyesuaian ke Reference User | ✅ | S–M |
-| 6 | Audio & Juice | ⬜ **← POSISI SEKARANG** | M |
-| 7 | Konten & Liveops | ⬜ | M |
+| 6 | Audio & Juice | ✅ | M |
+| 7 | Konten & Liveops | ⬜ **← POSISI SEKARANG** | M |
 | 8 | Integrasi Monetisasi (SDK nyata) | 🟡 hook siap | M |
 | 9 | Optimasi, QA & Release | ⬜ | L |
 
@@ -146,11 +146,16 @@
 - [x] **FIX input desktop**: joystick virtual kini juga mendengarkan **Pointer Events (mouse/pena)** — sebelumnya drag mouse TIDAK menggerakkan player di desktop (hanya touch/keyboard); hint HUD ditambah "tarik mouse".
 - **Kriteria lulus:** 4 hero punya siluet berbeda (sheet); tutorial terverifikasi maju 1→2→3 di browser asli (script terpisah); screenshot `21-tutorial` (bubble langkah + LEWATI); 20/20 shot CLEAN; perf tetap vsync 16,6 ms.
 
-## Fase 6 — Audio & Juice ⬜
-- [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
-- [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.
-- [ ] Juice: hit-stop 40 ms pada kill besar, combo counter, squash-stretch player.
-- **Kriteria:** semua event penting bersuara; opsi mute dijaga di save.
+## Fase 6 — Audio & Juice ✅
+**Tujuan:** setiap event penting terasa & bersuara — tanpa file aset audio (semua sintesis WebAudio).
+- [x] **SFX prosedural WebAudio** (`js/audio/audio-system.js`): tembakan, hit, kill (besar untuk elite/boss), pickup/heal/coin, combo, damage player, warning boss, ledakan AOE, keempat kemampuan (slash/wind/bolt/frost), peti boss, level-up, gameover, revive, klik UI — semua dari oscillator/noise + envelope, **tanpa file aset**. Throttle per jenis (anti banjir node saat 100+ musuh) + 3 bus gain (master/sfx/music).
+- [x] **Musik ambient loop prosedural**: sequencer lookahead 32 step (Dm–Bb–F–A) — pad chord lowpass, bass pulse, arpeggio pentatonik, click hat, echo; **intensitas dinamis** (dashboard 0.35 → run 0.62 → boss 1.0, arp + oktaf tinggi).
+- [x] **Mute toggle tersimpan**: tombol suara di topbar dashboard + tombol di modal pause; preferensi `{sfx,music}` di `meta.audio` → localStorage (save lama otomatis dapat default via deep-merge). AudioContext di-unlock pada gesture pertama (kebijakan autoplay) dan **no-op aman** bila WebAudio tak tersedia.
+- [x] **Hit-stop**: kill boss 90 ms, elite 45 ms, milestone combo 50 ms — dunia nyaris membeku (`dt × 0.12`) sementara partikel/kamera tetap halus; timer meluruh pakai dt nyata.
+- [x] **Combo counter**: kill berturut-turut dalam window 3 detik → badge HUD "COMBO xN" (milestone 5/10/20/35/50/75/100 → pop + suara naik nada, tier warna 10+/20+), maxCombo tampil di ringkasan game over & modal pause; combo direset saat revive.
+- [x] **Squash-stretch player**: bob saat bergerak, denyut saat menyerang, gepeng saat kena hit (skala sepanjang arah hadap via transform) + "pop" musuh saat kena damage (`scaleX/scaleY` baru di `drawSprite`).
+- [x] **Wiring arsitektur tetap bersih**: gameplay hanya `emit('sfx', …)` via event bus — game.js tidak tahu WebAudio; `main.js` dan audio-system tidak saling mengimpor UI.
+- **Kriteria lulus:** SELFTEST 23 langkah PASS (baru: `audioSettingsDefault`, `audioEngineSafe`, `comboCounterWorks`, `hitStopTriggered`, `squashStretchWorks`, `audioTogglePersists` — dijalankan via harness headless nyata melawan server lokal); `npm run check` lolos; `node --check` seluruh modul lolos.
 
 ## Fase 7 — Konten & Liveops ⬜
 - [ ] Hero baru & musuh baru **hanya dengan menambah JSON** (tanpa ubah logic).
