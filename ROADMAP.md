@@ -146,6 +146,16 @@
 - [x] **FIX input desktop**: joystick virtual kini juga mendengarkan **Pointer Events (mouse/pena)** — sebelumnya drag mouse TIDAK menggerakkan player di desktop (hanya touch/keyboard); hint HUD ditambah "tarik mouse".
 - **Kriteria lulus:** 4 hero punya siluet berbeda (sheet); tutorial terverifikasi maju 1→2→3 di browser asli (script terpisah); screenshot `21-tutorial` (bubble langkah + LEWATI); 20/20 shot CLEAN; perf tetap vsync 16,6 ms.
 
+## Fase 7 — Audio & Juice ✅
+**Tujuan:** semua event penting bersuara (SFX prosedural WebAudio — tanpa file audio) + game feel (juice).
+- [x] **audio-system.js**: 17 SFX disintesis oscillator+noise (tembak, hit, kill, pickup, playerHit, level-up, boss spawn/mati, 4 kemampuan, peti, evolusi, wave, combo, klik UI); throttle per-event anti-spam; **AudioContext di-unlock pada gesture pertama** (kebijakan autoplay); mute **tersimpan di save** (`meta.soundMuted`).
+- [x] **Mute toggle 2 tempat**: ikon speaker di topbar dashboard + tombol di modal pause (ikon berubah on/off, sinkron via event pause/resume).
+- [x] **Hit-stop**: 70 ms saat boss tumbang, 35 ms untuk musuh elite — update dibekukan sesaat, render tetap jalan (juice standar survivors-like).
+- [x] **Squash-stretch player**: badan memantul (sin 48 Hz) saat menerima hit & saat mengeluarkan kemampuan.
+- [x] **Combo counter**: kill beruntun (window 2 dtk) → pill "xN COMBO" dengan animasi pop; milestone tiap kelipatan 10 → bonus XP + toast.
+- [x] **2 aset baru**: ikon speaker on/off (total 99 PNG).
+- **Kriteria lulus:** ctxState=running & 17 SFX dipanggil tanpa error di Chromium asli; toggle mute persist (icon_sound_off.png saat mati); hitStop 0.035 terverifikasi; SELFTEST_PASS 17 langkah; perf tetap vsync 16,6 ms/frame @151 musuh; 21/21 shot CLEAN.
+
 ## Fase 6 — Audio & Juice ⬜
 - [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
 - [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.

@@ -39,6 +39,7 @@ import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
 } from '../systems/body-system.js';
 import * as tutorial from '../systems/tutorial-system.js';
+import { audio } from '../systems/audio-system.js';
 
 import { Camera } from '../render/camera.js';
 import { drawBackground, setArenaPalette } from '../render/background.js';
@@ -158,6 +159,8 @@ export const game = {
       parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
+      combo: { count: 0, timer: 0 },
+      hitStop: 0,
       ended: false,
       stats: { shotsFired: 0 },
     };
@@ -273,7 +276,20 @@ export const game = {
     if (!run || run.ended) return;
     const player = run.player;
 
+    // JUICE hit-stop: freeze singkat saat kill besar (render tetap jalan)
+    if (run.hitStop > 0) {
+      run.hitStop -= dt;
+      return;
+    }
     run.time += dt;
+
+    // Combo decay (2 dtk tanpa kill → reset)
+    if (run.combo.timer > 0) {
+      run.combo.timer -= dt;
+      if (run.combo.timer <= 0) run.combo.count = 0;
+    }
+    // Squash-stretch decay
+    if (player.squash > 0) player.squash -= dt;
 
     // 1. Input & player (gerak + auto-attack)
     const move = this.input.getMoveVector();
@@ -283,12 +299,12 @@ export const game = {
     const events = run.spawnSys.update(dt, this);
     if (events.newWave) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: false });
+      audio.wave();
       run.wave = run.spawnSys.wave;
     }
 
     if (events.bossSpawn) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: true });
-      emit('toast', { message: 'SEL KANKER MUNCUL!', kind: 'danger' });
       run.camera.addShake(0.7);
     }
 
@@ -308,6 +324,7 @@ export const game = {
       const died = enemy.takeDamage(proj.damage);
       this.spawnHitFeedback(enemy, proj.damage, died);
       if (died) this.onEnemyKilled(enemy, proj);
+      else audio.hit();
       return died;
     });
 
@@ -373,6 +390,7 @@ export const game = {
     const run = this.run;
     run.nutrientsCollected += 1;
     tutorial.notifyCollected();
+    audio.collect();
     run.effects.spawnCollect(p.x, p.y, p.def.color);
 
     switch (p.pickupType) {
@@ -424,6 +442,7 @@ export const game = {
     run.currentChoices = rollLevelUpChoices(run);
     setLevelUpOpen(true);
     setPaused(true);
+    audio.levelup();
     emit('levelup', { level: run.level, choices: run.currentChoices });
   },
 
@@ -515,6 +534,8 @@ export const game = {
     emit('playerHit', { damage: amount });
     // Screen shake saat kena damage besar (sesuai spek)
     run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
+    audio.playerHit();
+    player.squash = 0.28; // JUICE squash saat terkena hit
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -555,6 +576,8 @@ export const game = {
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
+      audio.bossSpawn();
+      emit('toast', { message: 'SEL KANKER MUNCUL!', kind: 'danger' });
     }
   },
 
@@ -569,6 +592,7 @@ export const game = {
     const bonusPart = rollPartDrop('boss', 1) || 'silia';
     run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
     setPaused(true);
+    audio.chest();
     emit('bosschest', {
       currency: bonusCurrency,
       partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
@@ -630,11 +654,28 @@ export const game = {
     });
   },
 
+  /** JUICE: hentikan update sesaat (dtk) — render tetap berjalan. */
+  hitStopRun(sec) {
+    if (this.run) this.run.hitStop = Math.max(this.run.hitStop, sec);
+  },
+
   /** Musuh mati: kill count, partikel, drop nutrisi, splitter, boss reward. */
   onEnemyKilled(enemy, source) {
     const run = this.run;
     run.kills += 1;
     tutorial.notifyKill();
+
+    // ---- JUICE: combo counter + hit-stop + SFX kill ----
+    run.combo.count += 1;
+    run.combo.timer = 2.0;
+    if (run.combo.count >= 3) audio.combo(run.combo.count);
+    if (run.combo.count > 0 && run.combo.count % 10 === 0) {
+      this.addXP(10 + run.combo.count); // bonus XP milestone combo
+      emit('toast', { message: `COMBO x${run.combo.count}! +${10 + run.combo.count} XP`, kind: 'gold' });
+    }
+    audio.kill();
+    if (enemy.isBoss) this.hitStopRun(0.07);      // hit-stop 70ms boss
+    else if (enemy.def.elite) this.hitStopRun(0.035); // 35ms elite
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? 26 : 8, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
@@ -648,6 +689,7 @@ export const game = {
       run.bossKills += 1;
       run.boss = null;
       run.camera.addShake(0.65);
+      audio.bossDie();
       emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
       this.openBossChest(enemy);
     }
@@ -922,7 +964,7 @@ export const game = {
         // Aura mockup: ring putih gradasi lembut di belakang karakter
         drawSprite(ctx, 'assets/sprites/deco_aura.png', player.x, player.y, player.radius * 4.4, 0, { alpha: 0.8 });
         drawPulseGlow(ctx, player.x, player.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
-        const bodySize = player.radius * 2.667;
+        const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
         const evo = run.evoStage;
         // OVERLAY EVOLUSI — bentuk hero berubah sesuai tahap (terlihat jelas):
         if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', player.x, player.y + bodySize * 0.34, bodySize * 0.62, 0, {});
@@ -967,6 +1009,7 @@ export const game = {
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
         abilities: run.abilities.getView(),
+        combo: run.combo,
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,

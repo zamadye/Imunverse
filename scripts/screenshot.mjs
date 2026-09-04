@@ -177,7 +177,20 @@ await shot('12-skill-petir');
 await page.evaluate(() => window.__IMUNVERSE.game.useAbilityBySlot(1)); // tebasan
 await sleep(300);
 
-await sleep(2600);
+await sleep(1200);
+
+// --- COMBO juice: paksa combo tinggi agar pill muncul ---
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  if (g.run) {
+    g.run.combo.count = 12;
+    g.run.combo.timer = 5;
+  }
+});
+await sleep(300);
+await shot('22-combo');
+
+await sleep(1400);
 await page.mouse.up();
 await shot('09-gameplay-12s');
 

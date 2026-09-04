@@ -21,6 +21,7 @@ export class Player {
     this.y = y;
     this.radius = heroDef.baseStats.radius;
     this.facing = 0;          // arah hadap (rad) — dipakai arah serangan & sprite
+    this.squash = 0;          // JUICE: timer squash-stretch (dtk)
     this.stats = stats;       // di-recompute oleh game.js saat upgrade
     this.maxHP = stats.maxHP;
     this.hp = stats.maxHP;

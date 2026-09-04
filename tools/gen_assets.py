@@ -1587,6 +1587,30 @@ def icon_bag(size):
     return done(img, size)
 
 
+
+def icon_sound_on(size):
+    """Ikon suara AKTIF: speaker + gelombang."""
+    img, d = canvas(size)
+    S = size * SS
+    # badan speaker
+    d.polygon([(S * 0.14, S * 0.38), (S * 0.34, S * 0.38), (S * 0.56, S * 0.18), (S * 0.56, S * 0.82), (S * 0.34, S * 0.62), (S * 0.14, S * 0.62)], fill=(31, 122, 112, 255))
+    # gelombang
+    for k, rr in ((0, 0.16), (1, 0.26)):
+        d.arc([S * 0.5 - S * rr, S * 0.5 - S * rr, S * 0.5 + S * rr, S * 0.5 + S * rr], start=-55, end=55, fill=(47, 156, 143, 255), width=max(3, int(S * 0.045)))
+    return done(img, size)
+
+
+def icon_sound_off(size):
+    """Ikon suara MATI: speaker + silang coral."""
+    img, d = canvas(size)
+    S = size * SS
+    d.polygon([(S * 0.14, S * 0.38), (S * 0.34, S * 0.38), (S * 0.56, S * 0.18), (S * 0.56, S * 0.82), (S * 0.34, S * 0.62), (S * 0.14, S * 0.62)], fill=(150, 138, 128, 255))
+    w = max(4, int(S * 0.055))
+    d.line([(S * 0.64, S * 0.36), (S * 0.88, S * 0.64)], fill=(242, 130, 92, 255), width=w)
+    d.line([(S * 0.88, S * 0.36), (S * 0.64, S * 0.64)], fill=(242, 130, 92, 255), width=w)
+    return done(img, size)
+
+
 def gen_stage_body(out):
     print("STAGE 10 — Sistem tubuh (8 aset)")
     return {
@@ -1599,6 +1623,8 @@ def gen_stage_body(out):
         "meter_racun.png": meter_racun(112),
         "badge_kritis.png": badge_kritis(128),
         "icon_bag.png": icon_bag(128),
+        "icon_sound_on.png": icon_sound_on(128),
+        "icon_sound_off.png": icon_sound_off(128),
     }
 
 

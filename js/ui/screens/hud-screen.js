@@ -102,6 +102,26 @@ export function updateHUD(data) {
 
   updateAbilityBar(data.abilities);
 
+  // Combo pill (juice): tampil saat >= 3 kill beruntun
+  const comboNode = document.getElementById('hud-combo');
+  if (comboNode) {
+    const count = data.combo?.count || 0;
+    if (count >= 3) {
+      comboNode.classList.remove('hidden');
+      comboNode.innerHTML = `x${count} <small>COMBO</small>`;
+      // restart animasi pop tiap kenaikan angka
+      if (comboNode.dataset.last !== String(count)) {
+        comboNode.dataset.last = String(count);
+        comboNode.style.animation = 'none';
+        void comboNode.offsetWidth;
+        comboNode.style.animation = '';
+      }
+    } else {
+      comboNode.classList.add('hidden');
+      comboNode.dataset.last = '0';
+    }
+  }
+
   const bossWrap = document.getElementById('hud-boss-bar-wrap');
   if (data.boss) {
     bossWrap.classList.remove('hidden');

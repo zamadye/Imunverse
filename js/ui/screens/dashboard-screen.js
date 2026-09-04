@@ -10,6 +10,7 @@ import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
+import { audio } from '../../systems/audio-system.js';
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
 import {
   getBodyState, getCriticalSystems, getMilestoneProgress, getNarrativeStage,
@@ -86,6 +87,7 @@ function renderEvoCard(meta) {
     btn.addEventListener('click', () => {
       const newStage = evolve(meta);
       if (newStage) {
+        audio.evolve();
         emit('toast', { message: `Hero berevolusi: ${newStage.name} (${newStage.tier})!`, kind: 'gold' });
         renderEvoCard(meta);
         renderStageEvoOverlay(meta);

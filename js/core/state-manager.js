@@ -44,6 +44,7 @@ export function createDefaultMeta() {
     adDaily: { date: null, count: 0 },
     focusRun: 'seimbang',
     tutorialDone: false,
+    soundMuted: false,
     bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
     squadUpgrades: {
       sq_damage: 0,

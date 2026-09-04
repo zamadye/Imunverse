@@ -34,6 +34,7 @@ import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import * as arenaScreen from './ui/screens/arena-screen.js';
 import * as prepScreen from './ui/screens/prep-screen.js';
 import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
+import { audio } from './systems/audio-system.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
@@ -170,6 +171,29 @@ async function boot() {
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('prep'));
+
+  // ---- AUDIO: unlock di gesture pertama (kebijakan autoplay browser) ----
+  const unlockAudio = () => audio.unlock();
+  window.addEventListener('pointerdown', unlockAudio, { once: true });
+  window.addEventListener('keydown', unlockAudio, { once: true });
+
+  // Toggle suara (dashboard + modal pause) — ikon & label sinkron
+  const soundIcon = () => document.getElementById('img-sound-icon');
+  const refreshSoundUI = () => {
+    if (soundIcon()) soundIcon().src = audio.muted ? 'assets/sprites/icon_sound_off.png' : 'assets/sprites/icon_sound_on.png';
+    const pauseBtn = document.getElementById('btn-sound-pause');
+    if (pauseBtn) pauseBtn.textContent = `Suara: ${audio.muted ? 'MATI' : 'AKTIF'}`;
+  };
+  document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+    audio.toggleMute();
+    refreshSoundUI();
+  });
+  document.getElementById('btn-sound-pause').addEventListener('click', () => {
+    audio.toggleMute();
+    refreshSoundUI();
+  });
+  on('pause', () => refreshSoundUI());
+  on('resume', () => refreshSoundUI());
   document.querySelectorAll('[data-back]').forEach((btn) => {
     btn.addEventListener('click', () => screenManager.show(btn.dataset.back));
   });
@@ -192,7 +216,10 @@ async function boot() {
 
   // Navigasi statis antar screen (atribut data-nav / data-back di index.html)
   document.querySelectorAll('[data-nav]').forEach((btn) => {
-    btn.addEventListener('click', () => screenManager.show(btn.dataset.nav));
+    btn.addEventListener('click', () => {
+      audio.ui();
+      screenManager.show(btn.dataset.nav);
+    });
   });
   document.querySelectorAll('[data-back]').forEach((btn) => {
     btn.addEventListener('click', () => screenManager.show(btn.dataset.back));
