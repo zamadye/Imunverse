@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "modes": [
+    {
+      "id": "normal",
+      "name": "Klasik",
+      "icon": "assets/sprites/icon_play.png",
+      "description": "Perjalanan 10 wave. Kalahkan Sel Kanker di wave 10 untuk MENANG dan membuka mode Endless.",
+      "finalWave": 10,
+      "unlock": { "type": "default" }
+    },
+    {
+      "id": "endless",
+      "name": "Endless",
+      "icon": "assets/sprites/icon_infinity.png",
+      "description": "Tanpa akhir. Wave terus memanjat — berapa lama kamu bertahan? Terbuka setelah menang Klasik.",
+      "finalWave": null,
+      "unlock": { "type": "winNormal" }
+    }
+  ]
+}

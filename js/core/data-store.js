@@ -30,6 +30,8 @@ export async function loadAllData() {
     evolutions: 'data/evolutions.json',
     abilities: 'data/abilities.json',
     arenas: 'data/arenas.json',
+    modes: 'data/modes.json',
+    mutators: 'data/mutators.json',
     bodySystems: 'data/body-systems.json',
   };
 

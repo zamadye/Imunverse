@@ -22,6 +22,7 @@ export class SpawnSystem {
     this.waveTimer = 0;        // waktu berjalan pada wave sekarang
     this.spawnTimer = 0.8;     // delay spawn pertama sedikit
     this.bossSpawnedForWave = 0; // wave terakhir yang sudah memunculkan boss
+    this.mods = {};             // modifier run (kondisi tubuh + mutator liveops)
   }
 
   /**
@@ -54,7 +55,7 @@ export class SpawnSystem {
     // ---- Spawn musuh reguler ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnTimer = getSpawnInterval(this.wave);
+      this.spawnTimer = getSpawnInterval(this.wave) / (this.mods.spawnMult || 1);
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
         const enemyId = this.pickEnemyId(this.wave);
         if (enemyId) game.spawnEnemy(enemyId, false);
@@ -99,7 +100,7 @@ export class SpawnSystem {
   /** Scaler statistik musuh untuk wave sekarang. */
   getScalers() {
     return {
-      hpScale: getEnemyHPScale(this.wave),
+      hpScale: getEnemyHPScale(this.wave) * (this.mods.enemyHPMult || 1),
       speedScale: getEnemySpeedScale(this.wave),
     };
   }

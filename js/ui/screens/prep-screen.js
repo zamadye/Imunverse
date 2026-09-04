@@ -11,6 +11,7 @@ import { writeSave } from '../../save/save-manager.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { arenaUnlockStatus } from './arena-screen.js';
+import { getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
@@ -29,6 +30,36 @@ function selectFocus(focusId) {
   meta.focusRun = focusId;
   writeSave(meta);
   renderAll();
+}
+
+function selectMode(modeId) {
+  const meta = STATE.meta;
+  meta.selectedMode = modeId;
+  writeSave(meta);
+  renderAll();
+}
+
+function renderModeRow(meta) {
+  const row = document.getElementById('prep-mode-row');
+  row.textContent = '';
+  const mutToday = getTodayMutator();
+  for (const modeDef of getData().modes.modes) {
+    const status = getModeUnlockStatus(modeDef, meta);
+    const selected = (meta.selectedMode || 'normal') === modeDef.id && status.unlocked;
+    const chip = el('button', {
+      class: `prep-chip mode${selected ? ' selected' : ''}${status.unlocked ? '' : ' locked'}`,
+      title: modeDef.description,
+    }, [
+      el('img', { src: modeDef.icon, alt: '' }),
+      el('span', { text: modeDef.name }),
+      modeDef.id === 'endless' && status.unlocked
+        ? el('small', { class: 'chip-sub', text: `Mutator: ${mutToday.def.name}` })
+        : null,
+      status.unlocked ? null : el('small', { class: 'chip-sub lock', text: status.label }),
+    ]);
+    if (status.unlocked && !selected) chip.addEventListener('click', () => selectMode(modeDef.id));
+    row.appendChild(chip);
+  }
 }
 
 function selectArena(arenaId) {
@@ -113,7 +144,12 @@ function renderSummary(meta) {
       : [el('span', { class: 'ps-noab', text: 'Kemampuan terbuka lewat evolusi' })]),
   ]);
   box.appendChild(mid);
+  const modeDef = (getData().modes.modes).find((m) => m.id === (meta.selectedMode || 'normal')) || getData().modes.modes[0];
   box.appendChild(el('div', { class: 'ps-meta' }, [
+    el('div', {}, [
+      el('img', { src: modeDef.icon, alt: '' }),
+      el('span', { text: modeDef.name }),
+    ]),
     el('div', {}, [
       el('img', { src: focusDef.icon, alt: '' }),
       el('span', { text: focusDef.name }),
@@ -129,6 +165,7 @@ function renderAll() {
   const meta = STATE.meta;
   document.getElementById('prep-currency').textContent = meta.currency.toLocaleString('id-ID');
   renderHeroRow(meta);
+  renderModeRow(meta);
   renderFocusRow(meta);
   renderArenaRow(meta);
   renderSummary(meta);

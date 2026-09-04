@@ -40,6 +40,7 @@ import {
 } from '../systems/body-system.js';
 import * as tutorial from '../systems/tutorial-system.js';
 import { audio } from '../systems/audio-system.js';
+import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
 import { Camera } from '../render/camera.js';
 import { drawBackground, setArenaPalette } from '../render/background.js';
@@ -103,6 +104,19 @@ export const game = {
     const bodyMods = getBodyRunModifiers(meta);
     this.lastBodyDecay = decayInfo;
 
+    // LIVEOPS: mode (Klasik/Endless) + mutator harian seeded (khusus Endless)
+    const modes = (getData().modes && getData().modes.modes) || [];
+    const modeDef = modes.find((m) => m.id === (meta.selectedMode || 'normal')) || modes[0] || null;
+    let mutatorDef = null;
+    let mutatorDate = null;
+    if (modeDef && modeDef.id === 'endless' && getData().mutators) {
+      const daily = getTodayMutator();
+      mutatorDef = daily.def;
+      mutatorDate = daily.date;
+      mergeMutatorMods(bodyMods, daily.def.mods);
+      emit('toast', { message: `Mutator hari ini: ${daily.def.name}`, kind: 'gold' });
+    }
+
     const stats = this.computePlayerStats(heroDef, upgrades);
     this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
     this.applyBodyModifiers(stats, bodyMods); // kondisi tubuh (meta-layer)
@@ -153,6 +167,11 @@ export const game = {
       arena,
       evoStage,
       bodyMods,
+      mode: modeDef,
+      mutator: mutatorDef,
+      mutatorDate,
+      bonusCurrency: 0,
+      victory: false,
       focusId,
       focusDef,
       abilities: new AbilitySystem(unlockedAbilityIds),
@@ -165,6 +184,7 @@ export const game = {
       stats: { shotsFired: 0 },
     };
 
+    this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     this.run.camera.reset(player.x, player.y);
     this.run.collision.rebuildEnemyGrid(this.run.enemies);
 
@@ -201,6 +221,10 @@ export const game = {
   applyBodyModifiers(stats, mods) {
     if (mods.cooldownScale !== undefined) stats.cooldown *= mods.cooldownScale;
     if (mods.damageMult !== undefined) stats.damage *= mods.damageMult;
+    if (mods.playerDamageMult !== undefined) stats.damage *= mods.playerDamageMult;
+    if (mods.playerHPMult !== undefined) stats.maxHP = Math.round(stats.maxHP * mods.playerHPMult);
+    if (mods.playerSpeedMult !== undefined) stats.speed *= mods.playerSpeedMult;
+    if (mods.magnetMult !== undefined) stats.magnetRadius *= mods.magnetMult;
     if (mods.xpMult !== undefined) stats.xpMult *= mods.xpMult;
     stats.bodyNutrientMult = mods.nutrientMult !== undefined ? mods.nutrientMult : 1;
     stats.bodyEnemySpeedMult = mods.enemySpeedMult !== undefined ? mods.enemySpeedMult : 1;
@@ -300,6 +324,25 @@ export const game = {
     if (events.newWave) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: false });
       audio.wave();
+      const w = run.spawnSys.wave;
+      // Milestone XP tiap kelipatan 10 wave
+      if (w % 10 === 0) {
+        const bonus = 20 + w * 3;
+        this.addXP(bonus);
+        emit('toast', { message: `Wave ${w}! +${bonus} XP`, kind: 'gold' });
+      }
+      // MENANG mode Klasik: wave melewati finalWave (boss wave 10 sudah tumbang)
+      if (run.mode && run.mode.finalWave && w > run.mode.finalWave) {
+        this.winRun();
+        return;
+      }
+      // Endless: bonus antibodi tiap 5 wave
+      if (run.mode && run.mode.id === 'endless' && w % 5 === 0) {
+        const bonus = w * 5;
+        run.bonusCurrency += bonus;
+        addCurrency(meta, bonus);
+        emit('toast', { message: `Endless wave ${w}! +${bonus} antibodi`, kind: 'gold' });
+      }
       run.wave = run.spawnSys.wave;
     }
 
@@ -573,6 +616,10 @@ export const game = {
     if (run.bodyMods && run.bodyMods.enemySpeedMult && run.bodyMods.enemySpeedMult !== 1) {
       enemy.speed *= run.bodyMods.enemySpeedMult;
     }
+    // Mutator liveops: damage kontak musuh
+    if (run.bodyMods && run.bodyMods.enemyDamageMult) {
+      enemy.damage = Math.round(enemy.damage * run.bodyMods.enemyDamageMult);
+    }
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
@@ -820,6 +867,15 @@ export const game = {
   // =====================================================================
   // AKHIR RUN — ekonomi, statistik, misi, save
   // =====================================================================
+  /** MENANG mode Klasik (finalWave terlampaui) — alur sama dengan akhir run. */
+  winRun() {
+    const run = this.run;
+    if (!run || run.ended) return;
+    run.victory = true;
+    audio.evolve(); // fanfare kemenangan
+    this.finishRun(false);
+  },
+
   finishRun(quit) {
     const run = this.run;
     if (!run || run.ended) return;
@@ -827,10 +883,12 @@ export const game = {
 
     const meta = STATE.meta;
     const bonus = computeRunEndBonus(run);
-    const earned = run.currencyEarned + bonus;
+    const earned = run.currencyEarned + (run.bonusCurrency || 0) + bonus;
     run.earned = earned;
+    const victory = !!run.victory;
 
-    // Statistik permanen
+    // Statistik permanen (wins → membuka mode Endless)
+    if (victory) meta.stats.wins = (meta.stats.wins || 0) + 1;
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
     meta.stats.bestWave = Math.max(meta.stats.bestWave, run.spawnSys.wave);
@@ -854,6 +912,18 @@ export const game = {
     });
     emit('bodyimpact', this.lastBodyImpact);
 
+    // LEADERBOARD lokal per mode (top-10, wave → waktu → kill)
+    const lbResult = recordLeaderboardEntry(meta, {
+      modeId: (run.mode && run.mode.id) || 'normal',
+      heroName: run.heroDef.name,
+      heroColor: run.heroDef.color,
+      wave: run.spawnSys.wave,
+      time: Math.floor(run.time),
+      kills: run.kills,
+      victory,
+      date: new Date().toISOString().slice(0, 10),
+    });
+
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);
     for (const m of completedMissions) {
@@ -871,6 +941,10 @@ export const game = {
     setScreen('gameover');
     emit('gameover', {
       quit,
+      victory,
+      modeId: (run.mode && run.mode.id) || 'normal',
+      mutatorName: run.mutator ? run.mutator.name : null,
+      isRecord: lbResult.isNewBest,
       wave: run.spawnSys.wave,
       time: Math.floor(run.time),
       kills: run.kills,

@@ -39,6 +39,8 @@ export function createDefaultMeta() {
     unlockedHeroes: ['sel_t'],
     selectedHero: 'sel_t',
     selectedArena: 'limfe',
+    selectedMode: 'normal',
+    leaderboard: [],
     evoStage: 0,
     evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
     adDaily: { date: null, count: 0 },
@@ -57,6 +59,7 @@ export function createDefaultMeta() {
     consumables: { serum_awal: 0 },
     missionsClaimed: [],
     stats: {
+      wins: 0,
       totalKills: 0,
       bossKills: 0,
       bestWave: 0,

@@ -129,6 +129,28 @@
       "minWave": 5,
       "weight": 0,
       "orientToMovement": false
+    },
+    {
+      "id": "protozoa",
+      "name": "Protozoa",
+      "description": "Protozoa bersilia yang bergerak zig-zag menyeleweng — sulit ditembak lurus.",
+      "sprite": "assets/sprites/enemy_protozoa.png",
+      "spriteIdle": "assets/sprites/enemy_protozoa.png",
+      "spriteAttack": "assets/sprites/enemy_protozoa.png",
+      "color": "#3ecfb2",
+      "behavior": "chase_weave",
+      "weaveParams": {
+        "amplitudeDeg": 0.95,
+        "frequency": 3.1
+      },
+      "baseHP": 42,
+      "speed": 72,
+      "damage": 12,
+      "radius": 16,
+      "xpPerKill": 6,
+      "minWave": 4,
+      "weight": 16,
+      "orientToMovement": true
     }
   ]
 }

@@ -12,8 +12,8 @@
 | 3 | Progresi Meta, Ekonomi & Save | ✅ | M |
 | 4 | UI/UX Pass 1 — Design System, Polish & Game Feel | ✅ | M |
 | 5 | UI/UX Pass 2 — Penyesuaian ke Reference User | ✅ | S–M |
-| 6 | Audio & Juice | ⬜ **← POSISI SEKARANG** | M |
-| 7 | Konten & Liveops | ⬜ | M |
+| 6 | Audio & Juice | ✅ | M |
+| 7 | Konten & Liveops | ✅ | M |
 | 8 | Integrasi Monetisasi (SDK nyata) | 🟡 hook siap | M |
 | 9 | Optimasi, QA & Release | ⬜ | L |
 
@@ -156,17 +156,17 @@
 - [x] **2 aset baru**: ikon speaker on/off (total 99 PNG).
 - **Kriteria lulus:** ctxState=running & 17 SFX dipanggil tanpa error di Chromium asli; toggle mute persist (icon_sound_off.png saat mati); hitStop 0.035 terverifikasi; SELFTEST_PASS 17 langkah; perf tetap vsync 16,6 ms/frame @151 musuh; 21/21 shot CLEAN.
 
-## Fase 6 — Audio & Juice ⬜
-- [ ] SFX prosedural WebAudio (tembak, hit, pickup, level-up, boss) — tanpa file aset.
-- [ ] Musik latar ambient loop prosedural + mute toggle tersimpan.
-- [ ] Juice: hit-stop 40 ms pada kill besar, combo counter, squash-stretch player.
-- **Kriteria:** semua event penting bersuara; opsi mute dijaga di save.
-
-## Fase 7 — Konten & Liveops ⬜
-- [ ] Hero baru & musuh baru **hanya dengan menambah JSON** (tanpa ubah logic).
-- [ ] Mode Endless + mutator harian (seeded RNG dari tanggal).
-- [ ] Leaderboard lokal (best run per hero).
-- **Kriteria:** konten baru = data baru, bukan kode baru.
+## Fase 7 — Konten & Liveops ✅
+**Tujuan:** konten baru = data baru, bukan kode baru; liveops tanpa server.
+- [x] **Konten via JSON murni** (logic sudah dispatch dari data):
+  - Hero baru **Eosinofil** (attackPattern `ranged_homing` yang sudah ada; 2 granula homing) — cukup entri `data/heroes.json` + aset generator.
+  - Musuh baru **Protozoa** (behavior `chase_weave` zig-zag, minWave 4) — cukup entri `data/enemies.json` + aset.
+  - Roster/Prep/Shop otomatis menampilkan konten baru tanpa kode.
+- [x] **Mode via `data/modes.json`**: Klasik = perjalanan 10 wave → **MENANG** (judul + stat `wins`); **Endless** = tanpa akhir, unlock `winNormal` (terkunci "Menangkan mode Klasik"); step Mode di Battle Prep.
+- [x] **Mutator harian seeded** (`data/mutators.json` × `liveops-system.js`): PRNG mulberry32 + hash tanggal → semua pemain di tanggal sama dapat mutator sama tanpa server; khusus Endless; mods digabung ke jalur modifier run (enemyHP/enemySpeed/spawn/damage/XP/magnet/nutrien/cooldown); toast pengumuman; ditampilkan di gameover.
+- [x] **Leaderboard lokal per mode** (top-10, urut wave→waktu→kill): kartu "Papan Rekor" di dashboard, badge REKOR BARU di gameover.
+- [x] Bonus liveops: milestone XP tiap kelipatan 10 wave; Endless bonus antibodi tiap 5 wave; 8 aset baru (hero ×2, protozoa, portrait, ikon infinity, granula) — total **104 PNG**.
+- **Kriteria lulus:** e2e 7 langkah RESULT OK (mutator deterministik same-date/beda-tanggal; Endless terkunci→menang→terbuka; run endless pakai mutator `mut_arus_panas`; leaderboard 2 bucket; persist); SELFTEST_PASS 17; 22/22 shot CLEAN; perf 16,5 ms vsync @151 musuh.
 
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).

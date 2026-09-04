@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "mutators": [
+    {
+      "id": "mut_patogen_ganas",
+      "name": "Patogen Ganas",
+      "tier": "major",
+      "description": "Musuh +20% HP, tapi nutrisi memberi +30% XP.",
+      "mods": { "enemyHPMult": 1.2, "xpMult": 1.3 }
+    },
+    {
+      "id": "mut_demam_tinggi",
+      "name": "Demam Tinggi",
+      "tier": "major",
+      "description": "Musuh +18% kecepatan, namun drop antibodi +40%.",
+      "mods": { "enemySpeedMult": 1.18, "currencyMult": 1.4 }
+    },
+    {
+      "id": "mut_badan_lemas",
+      "name": "Badan Lemas",
+      "tier": "major",
+      "description": "Player -15% kecepatan gerak, +25% jangkauan pungut nutrisi.",
+      "mods": { "playerSpeedMult": 0.85, "magnetMult": 1.25 }
+    },
+    {
+      "id": "mut_serangan_membara",
+      "name": "Serangan Membara",
+      "tier": "major",
+      "description": "Damage player +25%, tapi HP maksimal -12%.",
+      "mods": { "playerDamageMult": 1.25, "playerHPMult": 0.88 }
+    },
+    {
+      "id": "mut_hujan_nutrisi",
+      "name": "Hujan Nutrisi",
+      "tier": "minor",
+      "description": "Nutrisi jatuh +35% lebih banyak, musuh sedikit lebih tangguh.",
+      "mods": { "nutrientMult": 1.35, "enemyHPMult": 1.05 }
+    },
+    {
+      "id": "mut_arus_panas",
+      "name": "Arus Panas",
+      "tier": "minor",
+      "description": "Cooldown kemampuan -20%, musuh +8% kecepatan.",
+      "mods": { "cooldownScale": 0.8, "enemySpeedMult": 1.08 }
+    },
+    {
+      "id": "mut_kawanan_padat",
+      "name": "Kawanan Padat",
+      "tier": "minor",
+      "description": "Spawn musuh +25% rapat, XP +15%.",
+      "mods": { "spawnMult": 1.25, "xpMult": 1.15 }
+    },
+    {
+      "id": "mut_saluran_waspada",
+      "name": "Saluran Waspada",
+      "tier": "minor",
+      "description": "Damage kontak musuh +20%, pungut nutrisi +20%.",
+      "mods": { "enemyDamageMult": 1.2, "magnetMult": 1.2 }
+    }
+  ]
+}

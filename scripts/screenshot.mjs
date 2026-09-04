@@ -243,6 +243,13 @@ if ((await activeScreen()) === 'pause' || (await page.locator('#screen-pause').i
   await shot('15-pause');
 }
 
+// --- Papan rekor terisi (Fase 7 liveops) — kembali ke dashboard setelah run ---
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
+await sleep(500);
+await page.evaluate(() => document.getElementById('leaderboard-card').scrollIntoView({ block: 'center' }));
+await sleep(300);
+await shot('23-leaderboard');
+
 await browser.close();
 console.log(`SHOTS_OK ${errors.length === 0 ? 'CLEAN' : 'ERRORS:'}`);
 errors.slice(0, 20).forEach((e) => console.log('  !', e));

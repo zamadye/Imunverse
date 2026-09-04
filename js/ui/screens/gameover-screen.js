@@ -33,8 +33,22 @@ function countUp(node, target) {
 
 export function show(summary) {
   const title = document.getElementById('gameover-title');
-  title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
-  title.className = 'gameover-title' + (summary.quit ? ' win' : '');
+  if (summary.victory) title.textContent = 'MENANG!';
+  else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
+  title.className = 'gameover-title' + (summary.victory || summary.quit ? ' win' : '');
+  // Info mode + mutator + rekor (liveops)
+  const oldMeta = document.getElementById('go-mode-line');
+  if (oldMeta) oldMeta.remove();
+  if (summary.modeId || summary.mutatorName || summary.isRecord) {
+    const bits = [];
+    if (summary.modeId === 'endless') bits.push('Mode Endless');
+    if (summary.mutatorName) bits.push(`Mutator: ${summary.mutatorName}`);
+    if (summary.isRecord) bits.push('REKOR BARU!');
+    if (bits.length) {
+      document.getElementById('gameover-title').insertAdjacentElement('afterend',
+        el('div', { class: 'go-mode-line', id: 'go-mode-line', text: bits.join(' · ') }));
+    }
+  }
 
   document.getElementById('gameover-sub').textContent =
     summary.wave >= 10

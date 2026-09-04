@@ -140,6 +140,42 @@
       },
       "shopCost": 2500,
       "spritePortrait": "assets/sprites/portrait_sel_nk.png"
+    },
+    {
+      "id": "eosinofil",
+      "name": "Eosinofil",
+      "title": "Pemburu Parasit",
+      "description": "Spesialis anti-parasit. Meluncurkan granula toksik yang mengejar patogen secara otomatis sampai menghancurkannya.",
+      "sprite": "assets/sprites/hero_eosinofil_idle.png",
+      "spriteIdle": "assets/sprites/hero_eosinofil_idle.png",
+      "spriteAttack": "assets/sprites/hero_eosinofil_attack.png",
+      "color": "#ff7fa8",
+      "attackPattern": "ranged_homing",
+      "baseStats": {
+        "maxHP": 110,
+        "speed": 145,
+        "damage": 9,
+        "attackCooldown": 0.95,
+        "attackRange": 260,
+        "projectileSpeed": 320,
+        "projectileCount": 2,
+        "pierce": 1,
+        "radius": 16,
+        "magnetRadius": 100,
+        "pickupRadius": 26
+      },
+      "patternParams": {
+        "spreadAngle": 0.5,
+        "turnRate": 6.5
+      },
+      "unlock": {
+        "type": "stat",
+        "stat": "bossKills",
+        "value": 3,
+        "label": "Kalahkan 3 Sel Kanker"
+      },
+      "shopCost": 2200,
+      "spritePortrait": "assets/sprites/portrait_eosinofil.png"
     }
   ]
 }

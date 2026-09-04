@@ -18,6 +18,7 @@ import {
 } from '../../systems/body-system.js';
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { arenaUnlockStatus } from './arena-screen.js';
+import { getLeaderboard } from '../../systems/liveops-system.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -103,6 +104,32 @@ function renderEvoCard(meta) {
  * Kartu KONDISI TUBUH: 5 sistem bar kesehatan + meter energi/racun + label
  * naratif + progres milestone "Sehat Sempurna" + tombol fokus & pemulihan iklan.
  */
+/** Papan rekor lokal (top-3 ditampilkan) dari leaderboard per mode. */
+function renderLeaderboardCard(meta) {
+  const card = document.getElementById('leaderboard-card');
+  if (!card) return;
+  card.textContent = '';
+  const runs = getLeaderboard(meta, 'normal').slice(0, 3);
+  card.appendChild(el('h3', { class: 'card-title ico-title' }, [
+    el('img', { class: 't-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }),
+    el('span', { text: 'Papan Rekor — Klasik' }),
+  ]));
+  if (!runs.length) {
+    card.appendChild(el('p', { class: 'lb-empty', text: 'Belum ada rekor. Selesaikan run pertamamu!' }));
+    return;
+  }
+  const list = el('ol', { class: 'lb-list' });
+  runs.forEach((r, i) => {
+    list.appendChild(el('li', { class: `lb-row${i === 0 ? ' best' : ''}` }, [
+      el('b', { class: 'lb-rank', text: `#${i + 1}` }),
+      el('span', { class: 'lb-hero', text: r.heroName }),
+      el('span', { class: 'lb-wave', text: `Wave ${r.wave}` }),
+      el('span', { class: 'lb-time', text: `${Math.floor(r.time / 60)}m ${r.time % 60}s` }),
+    ]));
+  });
+  card.appendChild(list);
+}
+
 function renderBodyCard(meta) {
   const card = document.getElementById('body-card');
   card.textContent = '';
@@ -232,6 +259,8 @@ export function show() {
     ]);
     stageEnemies.appendChild(chip);
   });
+
+  renderLeaderboardCard(meta);
 
   // ---- Strip statistik (3 sel) ----
   const stats = meta.stats;

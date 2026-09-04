@@ -162,7 +162,7 @@ def glow(img, color, radius, alpha=80):
 # STAGE 1 — HERO (8 aset)
 # =====================================================================
 
-def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False, lobes=0, receptors=False):
+def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False, lobes=0, receptors=False, granules=False):
     img, d = canvas(size)
     S = size * SS
     cx = S * 0.5
@@ -194,6 +194,14 @@ def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False,
                       width=max(2, int(S * 0.008)))
     stub_arms(d, cx, cy, r, col)
     soft_body(d, cx, cy, r, col)
+    # Granula sitoplasmik (Eosinofil) — titik toksik di dalam tubuh
+    if granules:
+        gcol = tuple(int(c * 0.62) for c in col) + (235,)
+        for ga in range(0, 360, 51):
+            gr_ = r * (0.30 + ((ga * 37) % 23) / 90.0)
+            gx = cx + math.cos(math.radians(ga)) * gr_
+            gy = cy + math.sin(math.radians(ga)) * gr_
+            d.ellipse([gx - S * 0.034, gy - S * 0.034, gx + S * 0.034, gy + S * 0.034], fill=gcol)
     kawaii_face(d, cx, cy, r, col, mood=("determined" if attack else mood))
     # Sel B: antena reseptor Y keluar dari atas kepala (tip DI LUAR tubuh)
     if receptors:
@@ -229,6 +237,8 @@ def gen_stage_heroes(out):
         "hero_sel_b_attack.png": hero("sel_b", "#5aa2ff", attack=True, receptors=True),
         "hero_sel_nk_idle.png": hero("sel_nk", "#ff8c42", spikes=9),
         "hero_sel_nk_attack.png": hero("sel_nk", "#ff8c42", spikes=9, attack=True),
+        "hero_eosinofil_idle.png": hero("eosinofil", "#ff7fa8", lobes=1, granules=True),
+        "hero_eosinofil_attack.png": hero("eosinofil", "#ff7fa8", lobes=1, granules=True, attack=True),
     }
 
 
@@ -236,7 +246,7 @@ def gen_stage_heroes(out):
 # STAGE 2 — MUSUH (7 aset)
 # =====================================================================
 
-def enemy_capsule(size, color, attack=False):
+def enemy_capsule(size, color, attack=False, cilia=False):
     """Bakteri: kapsul merah dengan flagela + wajah marah."""
     img, d = canvas(size)
     S = size * SS
@@ -270,6 +280,23 @@ def enemy_capsule(size, color, attack=False):
     d.rounded_rectangle([cx - L, cy - W, cx + L, cy + W], radius=int(W), fill=rgba(col))
     d.ellipse([cL[0] - W, cL[1] - W, cL[0] + W, cL[1] + W], fill=rgba(col))
     d.ellipse([cR[0] - W, cR[1] - W, cR[0] + W, cR[1] + W], fill=rgba(col))
+    # Cilia protozoa: rambut pendek di siluet kapsul
+    if cilia:
+        cw = max(2, int(S * 0.02))
+        for t_ in [i / 10 for i in range(1, 10)]:
+            hx_ = cL[0] + (cR[0] - cL[0]) * t_
+            for sgn in (-1, 1):
+                hy_ = cy + sgn * W * 0.96
+                d.line([(hx_, hy_), (hx_ + S * 0.03, hy_ + sgn * S * 0.055)], fill=rgba(mix(col, (255, 255, 255), 0.35)), width=cw)
+        for ec_, sgn in ((cL, -1), (cL, 1), (cR, -1), (cR, 1)):
+            for aa in (200, 250, 290, 20, 70) if ec_ is cL else (110, 160, 20, 70, 340):
+                pass
+        for ec_, base_a in ((cL, 180), (cR, 0)):
+            for da in (-45, -15, 15, 45):
+                aa = math.radians(base_a + da)
+                hx_ = ec_[0] + math.cos(aa) * W
+                hy_ = ec_[1] + math.sin(aa) * W
+                d.line([(hx_, hy_), (hx_ + math.cos(aa) * S * 0.06, hy_ + math.sin(aa) * S * 0.06)], fill=rgba(mix(col, (255, 255, 255), 0.35)), width=cw)
     # wajah marah di pusat
     kawaii_face(d, cx, cy, W * 1.5, col, mood="angry")
     if attack:
@@ -381,6 +408,7 @@ def gen_stage_enemies(out):
         "enemy_virion.png": enemy_spikeball(96, "#c7f464", small=True),
         "enemy_parasit.png": enemy_worm(128, "#e15fd0"),
         "enemy_spora.png": enemy_puffball(128, "#f2c14e"),
+        "enemy_protozoa.png": enemy_capsule(128, "#3ecfb2", cilia=True),
         "enemy_sel_kanker.png": boss(256, "#f2825c"),
         "enemy_sel_kanker_attack.png": boss(256, "#f2825c", attack=True),
     }
@@ -518,6 +546,7 @@ def gen_stage_portraits(out):
         "portrait_sel_t.png": portrait(128, "#35d0ba"),
         "portrait_makrofag.png": portrait(128, "#b07fd8"),
         "portrait_sel_b.png": portrait(128, "#5aa2ff"),
+        "portrait_eosinofil.png": portrait(128, "#ff7fa8"),
         "portrait_sel_nk.png": portrait(128, "#ff8c42", spikes=8),
     }
 
@@ -1588,6 +1617,17 @@ def icon_bag(size):
 
 
 
+def icon_infinity(size):
+    """Ikon mode Endless: simbol infinity teal."""
+    img, d = canvas(size)
+    S = size * SS
+    w = max(5, int(S * 0.075))
+    rr = S * 0.155
+    for ecx in (S * 0.5 - rr * 1.08, S * 0.5 + rr * 1.08):
+        d.ellipse([ecx - rr, S * 0.5 - rr, ecx + rr, S * 0.5 + rr], outline=(47, 156, 143, 255), width=w)
+    return done(img, size)
+
+
 def icon_sound_on(size):
     """Ikon suara AKTIF: speaker + gelombang."""
     img, d = canvas(size)
@@ -1624,6 +1664,7 @@ def gen_stage_body(out):
         "badge_kritis.png": badge_kritis(128),
         "icon_bag.png": icon_bag(128),
         "icon_sound_on.png": icon_sound_on(128),
+        "icon_infinity.png": icon_infinity(128),
         "icon_sound_off.png": icon_sound_off(128),
     }
 
