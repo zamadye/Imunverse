@@ -225,6 +225,15 @@
 - [x] **Balancing premium** (catatan di JSON): 1 antibodi ±Rp10; nilai bundle 1,5–1,8× lipat vs satuan — hemat terasa, tidak mematahkan progres gratisan.
 - **Kriteria lulus:** e2e ekonomi 6 langkah RESULT OK (hero Lv 0→1 −150 antibodi; pasukan Lv 1; tier drops → currencyEarned naik & tier 'hard' terbaca; pelindung menyerap hit + vaksin maxHP 138; beli Paket Pemula via modal penuh → receipt terikat uid; Bebas Iklan → canWatchAd false); e2e kampanye & gameplay tetap OK; SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 8.1 — Level Terhubung ke Seluruh UI ✅
+**Tujuan:** hubungkan level hero & pasukan (dari Lab) ke semua titik UI, biar progres terasa di mana-mana.
+- [x] **Dashboard**: badge level di panggung — "Lv N · Pasukan Lv M · X sel" (klik → langsung buka Lab Pasukan); CTA MULAI membawa level hero ("Bab: Lambung — Perut Kram · Lv 3").
+- [x] **Roster**: chip level teal di kartu tiap hero.
+- [x] **Battle Prep**: chip hero picker gabungan evolusi+level ("T2 · Lv 3").
+- [x] **HUD in-run**: chip "Hero Lv N" + "Pasukan Lv M · X sel" di bawah HP pill — pemain tahu kekuatan yang dibawakan masuk run.
+- [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
+- **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

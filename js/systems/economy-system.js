@@ -65,6 +65,18 @@ export function computeRunEndBonus(run) {
 /**
  * Beli item toko (consumable). @returns {{ok:boolean, reason?:string}}
  */
+/** Teks chip level gabungan hero (antibodi + evolusi) utk UI: "Lv 3" / "Lv 0". */
+export function heroLevelBadge(meta, heroId) {
+  const lvl = (meta.heroLevels && meta.heroLevels[heroId]) || 0;
+  return `Lv ${lvl}`;
+}
+
+/** Chip level pasukan: "Lv 2 · 3 sel". */
+export function allyLevelBadge(meta) {
+  const lvl = meta.allyLevel || 0;
+  return `Lv ${lvl} · ${meta.allies || 1} sel`;
+}
+
 /** Biaya naik 1 level hero (level sekarang → cost). */
 export function heroLevelCost(cfg, level) {
   return Math.round(cfg.baseCost * Math.pow(cfg.costGrowth, level));

@@ -13,6 +13,7 @@ import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { playOnce } from '../cinematic.js';
+import { heroLevelBadge } from '../../systems/economy-system.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
@@ -85,7 +86,7 @@ function renderHeroRow(meta) {
       el('img', { class: 'ph-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }),
       el('span', { class: 'ph-name', text: heroDef.name.split(' ').slice(0, 2).join(' ') }),
       status.unlocked
-        ? el('span', { class: 'ph-stage', style: `background:${stageDef.tierColor}`, text: `T${stageDef.stage + 1}` })
+        ? el('span', { class: 'ph-stage', style: `background:${stageDef.tierColor}`, text: `T${stageDef.stage + 1} · ${heroLevelBadge(meta, heroDef.id)}` })
         : el('img', { class: 'ph-lock', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }),
     ]);
     if (status.unlocked) item.addEventListener('click', () => selectHero(heroDef.id));

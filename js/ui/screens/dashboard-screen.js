@@ -21,6 +21,7 @@ import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
 import { getSession, getFactionDef } from '../../systems/account-system.js';
+import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -263,13 +264,22 @@ export function show() {
   badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
   badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
 
+  // LEVEL HERO & PASUKAN terhubung: chip di panggung (klik → Lab)
+  const lvlBadge = document.getElementById('dash-level-badge');
+  if (lvlBadge) {
+    lvlBadge.textContent = '';
+    lvlBadge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_sword.png', alt: '' }));
+    lvlBadge.appendChild(el('span', { text: `${heroDef ? heroLevelBadge(meta, heroDef.id) : 'Lv 0'} · Pasukan ${allyLevelBadge(meta)}` }));
+    lvlBadge.onclick = () => { audio.ui(); screenManager.show('upgrade'); };
+  }
+
   // CTA MULAI: bila kampanye → tunjuk bab aktif (tujuan jelas sejak dashboard)
   const playSub = document.getElementById('play-big-sub');
   if (playSub) {
     if ((meta.selectedMode || 'kampanye') === 'kampanye' && getData().campaign) {
       const ch = getData().campaign.chapters.find((c) => c.id === (meta.selectedChapter || currentChapterId(meta)))
         || getData().campaign.chapters.find((c) => c.id === currentChapterId(meta));
-      if (ch) playSub.textContent = `Bab: ${ch.organ} — ${ch.title}`;
+      if (ch) playSub.textContent = `Bab: ${ch.organ} — ${ch.title} · ${heroDef ? heroLevelBadge(meta, heroDef.id) : ''}`;
     } else {
       playSub.textContent = 'Mode Endless · Mutator Harian';
     }

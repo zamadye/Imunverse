@@ -10,6 +10,7 @@ import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
+import { heroLevelBadge } from '../../systems/economy-system.js';
 
 const PATTERN_LABEL = {
   melee_swipe: 'Tebasan Area',
@@ -45,7 +46,10 @@ export function show() {
 
     if (status.unlocked) {
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
-      children.push(el('div', { class: 'hero-pattern', text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }));
+      children.push(el('div', { class: 'hero-pattern' }, [
+        el('span', { text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }),
+        el('span', { class: 'hero-lvl-chip', text: heroLevelBadge(meta, heroDef.id) }),
+      ]));
     } else {
       // Badge gembok aset PNG di lingkaran (ala mockup)
       avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
