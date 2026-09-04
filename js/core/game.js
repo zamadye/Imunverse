@@ -184,7 +184,10 @@ export const game = {
       victory: false,
       focusId,
       focusDef,
-      abilities: new AbilitySystem(unlockedAbilityIds),
+      abilities: new AbilitySystem(unlockedAbilityIds, {
+        cd: squadMultipliers(meta).jurusCd,
+        radius: squadMultipliers(meta).jurusRadius,
+      }),
       parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
@@ -286,7 +289,7 @@ export const game = {
     const up = runUpgrades;
     const serum = this.serumActive ? 1.25 : 1;
 
-    const damage = base.damage * squad.damage * (1 + (up.damage || 0) * 0.15) * serum;
+    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum;
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed);
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
@@ -362,6 +365,11 @@ export const game = {
     // Squash-stretch decay
     if (player.squash > 0) player.squash -= dt;
 
+    // TEMBAK MANUAL: hanya saat tombol TEMBAK ditekan/tahan
+    if (this.input.isFiring && this.input.isFiring()) {
+      player.tryFire(this);
+    }
+
     // PASUKAN: follow + auto-tembak
     for (const ally of run.allies) {
       const shot = ally.update(dt, player, run.enemies, player.stats.damage);
@@ -374,6 +382,7 @@ export const game = {
           speed: shot.speed,
           damage: shot.damage,
           pierce: 1,
+          radius: 7,
           color: shot.color,
         });
       }
@@ -518,6 +527,7 @@ export const game = {
         break;
       case 'currency':
         run.currencyEarned += p.value;
+        run.effects.spawnLabel(p.x, p.y - 8, `+${p.value}`, '#f5c64f'); // feedback farm
         break;
       case 'magnet': {
         for (const other of run.pickups) other.magnetized = true;
@@ -637,6 +647,8 @@ export const game = {
   damagePlayer(amount) {
     const run = this.run;
     const player = run.player;
+    // PERTAHANAN (upgrade permanen): kurangi damage diterima
+    amount = Math.max(1, Math.round(amount * (squadMultipliers(STATE.meta).armor || 1)));
     if (!player.takeDamage(amount)) return;
     emit('playerHit', { damage: amount });
     // Screen shake saat kena damage besar (sesuai spek)

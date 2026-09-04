@@ -195,6 +195,17 @@ async function boot() {
   // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
   document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('campaign'));
 
+  // Tombol TEMBAK (manual): tahan untuk menembak terus
+  const fireBtn = document.getElementById('btn-fire');
+  const stopFire = () => input.setFire(false);
+  fireBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    input.setFire(true);
+    audio.unlock();
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => fireBtn.addEventListener(ev, stopFire));
+  window.addEventListener('blur', stopFire);
+
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
   document.getElementById('account-chip').addEventListener('click', () => screenManager.show('auth'));
 
@@ -354,7 +365,8 @@ async function runAutotest() {
     game.startRun('sel_t');
     log('runStarted', STATE.screen === 'gameplay');
 
-    // Tempatkan musuh dekat player agar auto-attack terjadi cepat
+    // Tempatkan musuh dekat player; TEMBAK manual dinyalakan untuk self-test
+    game.input.setFire(true);
     for (let i = 0; i < 6; i++) game.spawnEnemy('bakteri', false);
     game.run.enemies.slice(-6).forEach((e, i) => {
       const a = (i / 6) * Math.PI * 2;

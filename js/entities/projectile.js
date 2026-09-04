@@ -20,7 +20,7 @@ export class Projectile {
     this.pierce = Math.max(1, opts.pierce || 1);
     this.turnRate = opts.turnRate || 0;  // rad/detik, untuk homing
     this.color = opts.color || '#ffffff';
-    this.radius = 6;
+    this.radius = opts.radius || 6;
     this.life = 2.2;                     // detik hidup maksimum
     this.alive = true;
     this.hitSet = new Set();             // uid musuh yang sudah kena

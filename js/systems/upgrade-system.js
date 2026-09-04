@@ -75,7 +75,7 @@ export function purchaseSquadUpgrade(meta, id) {
  * @returns {{damage:number, maxHP:number, speed:number, attackSpeed:number, attackRange:number, xpGain:number}}
  */
 export function squadMultipliers(meta) {
-  const out = { damage: 1, maxHP: 1, speed: 1, attackSpeed: 1, attackRange: 1, xpGain: 1 };
+  const out = { damage: 1, maxHP: 1, speed: 1, attackSpeed: 1, attackRange: 1, xpGain: 1, weapon: 1, jurusCd: 1, jurusRadius: 1, armor: 1 };
   for (const def of getData().upgrades.squadUpgrades) {
     const level = meta.squadUpgrades[def.id] || 0;
     if (level <= 0) continue;
@@ -83,6 +83,14 @@ export function squadMultipliers(meta) {
     switch (def.id) {
       case 'sq_damage': out.damage = bonus; break;
       case 'sq_vitality': out.maxHP = bonus; break;
+      case 'sq_weapon': out.weapon = bonus; break;        // SENJATA
+      case 'sq_jurus':                                    // JURUS
+        out.jurusCd = Math.max(0.5, 1 - def.perLevel * level);
+        out.jurusRadius = 1 + def.perLevel * 1.35 * level;
+        break;
+      case 'sq_armor':                                    // PERTAHANAN
+        out.armor = Math.max(0.55, 1 - def.perLevel * level);
+        break;
       case 'sq_swift': out.speed = bonus; break;
       case 'sq_attack': out.attackSpeed = bonus; break;
       case 'sq_range': out.attackRange = bonus; break;

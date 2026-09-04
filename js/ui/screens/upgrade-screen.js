@@ -44,6 +44,15 @@ export function show() {
       el('div', { class: 'upg-knob', style: `left:${pct}%` }),
     ]);
 
+    // Label LAYER upgrade (jelas kategori apa yang ditingkatkan)
+    const LAYER = {
+      sq_damage: 'SERANGAN', sq_weapon: 'SENJATA', sq_jurus: 'JURUS',
+      sq_armor: 'PERTAHANAN', sq_vitality: 'PERTAHANAN',
+      sq_swift: 'MOBILITAS', sq_attack: 'SERANGAN', sq_range: 'SENJATA',
+      sq_nutrition: 'UTILITAS',
+    };
+    const layerTag = el('span', { class: 'upg-layer', text: LAYER[def.id] || 'LAINNYA' });
+
     const buyBtn = maxed
       ? el('div', { class: 'btn-buy maxed', text: 'MAX ✓' })
       : el('button', {
@@ -65,7 +74,10 @@ export function show() {
           ? el('div', { class: 'upg-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:26px;height:26px;object-fit:contain;' })])
           : el('div', { class: 'upg-icon', text: def.icon }),
         el('div', { class: 'upg-info' }, [
-          el('b', { text: def.name }),
+          el('b', { class: 'upg-name-wrap' }, [
+            el('span', { text: def.name }),
+            layerTag,
+          ]),
           el('span', { class: 'upg-desc', text: def.desc }),
         ]),
       ]),

@@ -13,7 +13,7 @@
       "attackPattern": "ranged_pierce",
       "baseStats": {
         "maxHP": 100,
-        "speed": 150,
+        "speed": 186,
         "damage": 11,
         "attackCooldown": 0.85,
         "attackRange": 280,
@@ -45,7 +45,7 @@
       "attackPattern": "melee_swipe",
       "baseStats": {
         "maxHP": 165,
-        "speed": 132,
+        "speed": 162,
         "damage": 24,
         "attackCooldown": 0.8,
         "attackRange": 100,
@@ -81,7 +81,7 @@
       "attackPattern": "ranged_homing",
       "baseStats": {
         "maxHP": 90,
-        "speed": 146,
+        "speed": 178,
         "damage": 9,
         "attackCooldown": 1.0,
         "attackRange": 330,
@@ -117,7 +117,7 @@
       "attackPattern": "melee_swipe",
       "baseStats": {
         "maxHP": 115,
-        "speed": 168,
+        "speed": 200,
         "damage": 15,
         "attackCooldown": 0.45,
         "attackRange": 80,
@@ -153,7 +153,7 @@
       "attackPattern": "ranged_homing",
       "baseStats": {
         "maxHP": 110,
-        "speed": 145,
+        "speed": 176,
         "damage": 9,
         "attackCooldown": 0.95,
         "attackRange": 260,

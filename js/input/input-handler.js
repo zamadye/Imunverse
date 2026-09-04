@@ -13,6 +13,7 @@ const KEY_MAP = {
   KeyS: 'down', ArrowDown: 'down',
   KeyA: 'left', ArrowLeft: 'left',
   KeyD: 'right', ArrowRight: 'right',
+  Space: 'fire', KeyK: 'fire', // TEMBAK manual (desktop)
 };
 
 export class InputHandler {
@@ -40,6 +41,7 @@ export class InputHandler {
     this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0 };
     this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp
     this.aimZone = 0.58;  // mulai zona aim di 58% lebar canvas
+    this.fireButtonHeld = false; // tombol TEMBAK di HUD (touch/mouse)
 
     this.onPauseKey = null; // callback opsional (Esc / P)
 
@@ -54,6 +56,7 @@ export class InputHandler {
         this.keys.add(action);
         e.preventDefault();
       }
+      if (e.code === 'Space') e.preventDefault();
       if ((e.code === 'Escape' || e.code === 'KeyP') && this.onPauseKey) {
         this.onPauseKey();
       }
@@ -227,6 +230,16 @@ export class InputHandler {
     return { active: false, angle: 0, source: null };
   }
 
+  /** Dipanggil tombol TEMBAK HUD (pointerdown → true; up/cancel → false). */
+  setFire(v) {
+    this.fireButtonHeld = !!v;
+  }
+
+  /** Sedang menembak? (tombol HUD ATAU Space/K) */
+  isFiring() {
+    return this.fireButtonHeld || this.keys.has('fire');
+  }
+
   /** Hitung vektor joystick dari titik awal sentuh. */
   _updateJoystickVector() {
     const j = this.joystick;
@@ -238,8 +251,8 @@ export class InputHandler {
       j.dy = 0;
       return;
     }
-    // Normalisasi: magnitude penuh setelah melewati radius maksimum
-    const mag = Math.min(1, len / this.maxRadius);
+    // Normalisasi: kecepatan penuh lebih cepat tercapai (gesit, ramah anak)
+    const mag = Math.min(1, len / (this.maxRadius * 0.55));
     j.dx = (dx / len) * mag;
     j.dy = (dy / len) * mag;
   }

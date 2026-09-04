@@ -211,9 +211,9 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
  */
 export function drawDamageNumber(ctx, n, time) {
   const t = Math.max(0, n.life / n.maxLife);
-  const pop = 1 + (1 - t) * 0.25;
+  const pop = 1 + (1 - t) * 0.35;
   ctx.globalAlpha = Math.min(1, t * 1.6);
-  ctx.font = `900 ${Math.round(n.size * pop)}px Nunito, "Segoe UI", system-ui, sans-serif`;
+  ctx.font = `900 ${Math.round(n.size * pop * 1.3)}px Nunito, "Segoe UI", system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineWidth = 4;

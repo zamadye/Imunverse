@@ -63,6 +63,14 @@
     }
   ],
   "bonusDropChance": 0.09,
-  "bonusWeights": { "vitamin_c": 45, "antibodi": 35, "sitokin": 20 },
-  "bossGuaranteedDrops": ["vitamin_c", "antibodi", "antibodi"]
+  "bonusWeights": {
+    "vitamin_c": 45,
+    "antibodi": 35,
+    "sitokin": 20
+  },
+  "bossGuaranteedDrops": [
+    "vitamin_c",
+    "antibodi",
+    "antibodi"
+  ]
 }

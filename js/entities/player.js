@@ -57,14 +57,34 @@ export class Player {
     if (this.attackFlash > 0) this.attackFlash -= dt;
     this.attackTimer -= dt;
 
-    // ---- Auto-attack: cari musuh terdekat dalam range ----
-    if (this.attackTimer <= 0) {
-      const target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
-      if (target) {
-        this.performAttack(target, game);
-        this.attackTimer = this.stats.cooldown;
+    // (Serangan sekarang MANUAL — lewat tombol TEMBAK: game memanggil tryFire)
+  }
+
+  /**
+   * TEMBAK MANUAL (dipanggil game saat tombol TEMBAK ditekan/tahan).
+   * Arah: mengikuti aim player (mouse/stick) — kalau tidak mengarahkan,
+   * bantu anak-anak: bidik musuh terdekat dalam jangkauan (assist aim).
+   */
+  tryFire(game) {
+    if (this.attackTimer > 0 || !this.alive) return;
+    const aimActive = game.input && game.run && (() => {
+      try {
+        const w = game.viewW || 390;
+        const h = game.viewH || 844;
+        const cam = game.run.camera;
+        return game.input.getAimInfo(this.x - cam.x + w / 2, this.y - cam.y + h / 2).active;
+      } catch {
+        return false;
       }
+    })();
+    let target = null;
+    if (!aimActive) {
+      target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
+      if (!target) return; // tidak ada musuh — tembakan kosong tidak diboroskan
     }
+    if (!target) target = { x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 };
+    this.performAttack(target, game);
+    this.attackTimer = this.stats.cooldown;
   }
 
   /** Jalankan attack pattern sesuai data hero. */

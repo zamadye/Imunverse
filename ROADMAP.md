@@ -194,6 +194,18 @@
 - [x] **BUG KRITIS ditemukan & diperbaiki**: helper `el()` selalu set `disabled` (juga saat `false`) → **semua tombol BELI tidak pernah bisa diklik sejak awal**; kini atribut false/null dilewati.
 - **Kriteria lulus:** e2e auth 7 langkah RESULT OK (validasi form, daftar imun+chip, **beli tanpa akun → dialihkan auth**, login balik + beli sukses terikat akun, routing fraksi virus, leaderboard nama pemain, logout + daftar dobel terhalang); e2e kampanye tetap RESULT OK; SELFTEST_PASS 17; 28/28 shot CLEAN (incl. 00-auth, 00b-auth-filled); perf 16,6 ms vsync @150 musuh.
 
+## Fase 7.7 — Arsenal & Rasa Tempur (feedback imun fraksi) ✅
+**Tujuan (kritik user):** gameplay belum matang — tembak harus MANUAL pakai tombol & bisa diarahkan, control lemot, jurus tidak terasa/tak punya, pasukan tidak menembak, tidak ada yang di-farm saat bertempur, butuh layer upgrade (senjata/jurus/damage/pertahanan/serangan). Target user pertama: **anak-anak** — semudah & sejelas mungkin.
+- [x] **TEMBAK MANUAL**: tombol TEMBAK! besar (sensitif anak, ramah jempol) + tahan Space/K di desktop; **tanpa fire = tidak ada tembakan** (e2e: shots tetap 0 saat idle). Aim: mouse/stick → assist-aim otomatis ke musuh terdekat kalau anak belum bisa mengarahkan.
+- [x] **JURUS dari stage 0**: evolusi stage 0 kini bawa **tebasan** (anak langsung pegang jurus sejak run pertama); cast kini TERASA: ring blast + shake + squash + hit-stop 60 ms + banner nama + SFX.
+- [x] **Control gesit**: semua hero +30–40 kecepatan (Sel T 150→186 dll.); joystick full-speed lebih cepat tercapai (radius ×0,55).
+- [x] **Pasukan menembak beneran**: fireInterval 1,15→0,95, damage 35%→45%, proyektil lebih besar & cerah (e2e: cooldown ter-reset + proyektil muncul).
+- [x] **EQUITY yang di-farm**: koin ANTIBODI berjatuhan dari patogen (30%) dengan label "+1" emas — menambah currency run secara terasa.
+- [x] **Damage feedback**: angka damage 30% lebih besar (ramah anak).
+- [x] **Layer upgrade permanen (Squad Upgrade)**: 3 kategori baru — **SENJATA** (sq_weapon +10%/lvl dmg senjata), **JURUS** (sq_jurus cooldown −6% & area +8%/lvl — berlaku nyata ke cooldown & radius kemampuan), **PERTAHANAN** (sq_armor damage diterima −5%/lvl); total 9 upgrade dengan badge layer di tiap baris.
+- [x] Aset baru: ikon perisai (105 PNG); tutorial & hint HUD disinkron dengan serangan manual.
+- **Kriteria lulus:** e2e gameplay 6 langkah RESULT OK (idle=0 tembakan; manual fire → 2 tembakan + kill; jurus stage-0 fire + cd jalan; pasukan menembak; koin farm → currencyEarned naik; speed 186 + 3 layer baru ada); SELFTEST_PASS 17; 28/28 shot CLEAN (TEMBAK! terlihat di shot gameplay); perf 16,6 ms vsync @153 musuh.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

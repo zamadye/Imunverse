@@ -187,7 +187,9 @@ if (briefShown) {
   await shot('27-cinematic-brief');
   await page.click('#cine-skip');
 }
-await sleep(1500);
+await sleep(700);
+await page.keyboard.down('Space'); // TEMBAK manual ditahan → aksi terlihat
+await sleep(800);
 await shot('07-gameplay-early');
 
 // joystick virtual: tahan & geser
@@ -202,7 +204,7 @@ await page.mouse.move(70, 700);
 await page.mouse.down();
 await page.mouse.move(140, 630, { steps: 8 });
 await sleep(2500);
-await shot('08-gameplay-mid');
+await shot('08-gameplay-mid'); // TEMBAK masih ditahan (Space)
 
 // --- kemampuan petir (slot 3) — VFX petir menyambar musuh ---
 await page.evaluate(() => {

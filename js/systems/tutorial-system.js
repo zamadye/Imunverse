@@ -19,7 +19,7 @@ const steps = [
   },
   {
     id: 'attack',
-    text: 'Senjata menembak OTOMATIS — dekati patogen itu!',
+    text: 'Tekan tombol TEMBAK! untuk menyerang patogen!',
     hint: 'tut-attack',
   },
   {

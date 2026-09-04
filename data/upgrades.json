@@ -89,6 +89,36 @@
       "costGrowth": 1.55
     },
     {
+      "id": "sq_weapon",
+      "name": "Senjata Tajam",
+      "icon": "assets/sprites/icon_sword.png",
+      "desc": "+10% damage senjata per level (permanen)",
+      "perLevel": 0.1,
+      "maxLevel": 10,
+      "baseCost": 160,
+      "costGrowth": 1.6
+    },
+    {
+      "id": "sq_jurus",
+      "name": "Master Jurus",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "Jurus: cooldown -6% & area +8% per level (permanen)",
+      "perLevel": 0.06,
+      "maxLevel": 8,
+      "baseCost": 180,
+      "costGrowth": 1.65
+    },
+    {
+      "id": "sq_armor",
+      "name": "Membran Keras",
+      "icon": "assets/sprites/icon_shield.png",
+      "desc": "Damage diterima -5% per level (permanen)",
+      "perLevel": 0.05,
+      "maxLevel": 8,
+      "baseCost": 150,
+      "costGrowth": 1.6
+    },
+    {
       "id": "sq_swift",
       "name": "Kecepatan",
       "icon": "assets/sprites/icon_boot.png",
@@ -143,6 +173,7 @@
     "dailyReward": 120,
     "waveBonusPerWave": 12,
     "killBonusCurrency": 1,
-    "adDailyLimit": 6
+    "adDailyLimit": 6,
+    "currencyDropChance": 0.3
   }
 }

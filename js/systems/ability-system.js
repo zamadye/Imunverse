@@ -12,12 +12,21 @@ import { audio } from './audio-system.js';
 import { emit } from '../core/ui-bridge.js';
 
 export class AbilitySystem {
-  constructor(unlockedIds) {
-    this.abilities = getData().abilities.abilities.map((def) => ({
-      def,
-      unlocked: unlockedIds.includes(def.id),
-      cdLeft: 0,
-    }));
+  /**
+   * @param {string[]} unlockedIds
+   * @param {object} [mods] { cd, radius } — dari upgrade JURUS (permanen)
+   */
+  constructor(unlockedIds, mods = {}) {
+    this.abilities = getData().abilities.abilities.map((raw) => {
+      const def = { ...raw };
+      if (mods.cd && mods.cd !== 1) def.cooldown = Math.max(0.6, def.cooldown * mods.cd);
+      if (mods.radius && mods.radius !== 1 && def.radius) def.radius = def.radius * mods.radius;
+      return {
+        def,
+        unlocked: unlockedIds.includes(def.id),
+        cdLeft: 0,
+      };
+    });
   }
 
   /** @param {number} dt */
@@ -59,9 +68,14 @@ export class AbilitySystem {
     if (!a || !a.unlocked || a.cdLeft > 0) return false;
     a.cdLeft = a.def.cooldown;
     this.#execute(a.def, ctx);
-    if (ctx.player) ctx.player.squash = 0.16; // JUICE: mantul saat cast
+    // JUICE cast: ring ledakan + shake + squash + hit-stop — jurus TERASA keluar
+    if (ctx.player) {
+      ctx.player.squash = 0.16;
+      if (ctx.effects) ctx.effects.spawnBlast(ctx.player.x, ctx.player.y, a.def.radius || 80, a.def.fxColor || '#7fd8c8');
+      if (ctx.camera) ctx.camera.addShake(0.22);
+      if (ctx.game && ctx.game.hitStopRun) ctx.game.hitStopRun(0.06);
+    }
     audio.ability(a.def.id);
-    if (ctx.game && ctx.game.hitStopRun) ctx.game.hitStopRun(0.03); // cast terasa
     emit('abilityBanner', { name: a.def.name, color: a.def.fxColor || '#2f9c8f' });
     return true;
   }

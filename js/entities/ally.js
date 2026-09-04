@@ -28,10 +28,10 @@ export class Ally {
     this.orbitAngle = ang;
     this.x = player.x + Math.cos(ang) * 52;
     this.y = player.y + Math.sin(ang) * 52;
-    this.radius = 9;
-    this.attackCd = 0.8 + slot * 0.17; // stagger tembakan biar organik
-    this.fireInterval = 1.15;
-    this.range = 240;
+    this.radius = 10;
+    this.attackCd = 0.6 + slot * 0.15; // stagger tembakan biar organik
+    this.fireInterval = 0.95;
+    this.range = 260;
     this.wobble = Math.random() * Math.PI * 2;
   }
 
@@ -71,9 +71,9 @@ export class Ally {
       x: this.x,
       y: this.y,
       angle: Math.atan2(best.y - this.y, best.x - this.x),
-      damage: Math.max(2, Math.round(damage * 0.35)),
-      speed: 420,
-      color: '#7fd8c8',
+      damage: Math.max(2, Math.round(damage * 0.45)),
+      speed: 440,
+      color: '#4ae3c2',
     };
   }
 

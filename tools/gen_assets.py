@@ -1617,6 +1617,19 @@ def icon_bag(size):
 
 
 
+def icon_shield(size):
+    """Ikon pertahanan: perisai teal dengan aksen."""
+    img, d = canvas(size)
+    S = size * SS
+    # badan perisai
+    d.polygon([(S * 0.5 - S * 0.3, S * 0.2), (S * 0.5 + S * 0.3, S * 0.2), (S * 0.5 + S * 0.24, S * 0.55), (S * 0.5, S * 0.84), (S * 0.5 - S * 0.24, S * 0.55)], fill=(47, 156, 143, 255))
+    d.polygon([(S * 0.5 - S * 0.22, S * 0.26), (S * 0.5 + S * 0.22, S * 0.26), (S * 0.5 + S * 0.17, S * 0.53), (S * 0.5, S * 0.76), (S * 0.5 - S * 0.17, S * 0.53)], fill=(127, 216, 200, 255))
+    # tanda centang
+    d.line([(S * 0.4, S * 0.48), (S * 0.47, S * 0.58)], fill=(255, 255, 255, 255), width=max(5, int(S * 0.055)))
+    d.line([(S * 0.47, S * 0.58), (S * 0.63, S * 0.34)], fill=(255, 255, 255, 255), width=max(5, int(S * 0.055)))
+    return done(img, size)
+
+
 def icon_infinity(size):
     """Ikon mode Endless: simbol infinity teal."""
     img, d = canvas(size)
@@ -1665,6 +1678,7 @@ def gen_stage_body(out):
         "icon_bag.png": icon_bag(128),
         "icon_sound_on.png": icon_sound_on(128),
         "icon_infinity.png": icon_infinity(128),
+        "icon_shield.png": icon_shield(128),
         "icon_sound_off.png": icon_sound_off(128),
     }
 
