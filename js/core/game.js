@@ -1018,6 +1018,8 @@ export const game = {
     // LEADERBOARD lokal per mode (top-10, wave → waktu → kill)
     const lbResult = recordLeaderboardEntry(meta, {
       modeId: (run.mode && run.mode.id) || 'normal',
+      playerName: (meta.account && meta.account.username) || 'Tamu',
+      faction: (meta.account && meta.account.faction) || 'imun',
       heroName: run.heroDef.name,
       heroColor: run.heroDef.color,
       wave: run.spawnSys.wave,

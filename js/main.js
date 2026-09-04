@@ -37,6 +37,8 @@ import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
 import * as campaignScreen from './ui/screens/campaign-screen.js';
+import * as authScreen from './ui/screens/auth-screen.js';
+import { signUp, hasAccount } from './systems/account-system.js';
 import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
@@ -174,6 +176,7 @@ async function boot() {
   screenManager.registerScreen('focus', focusScreen);
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
+  screenManager.registerScreen('auth', authScreen);
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   bosschestScreen.wire();
@@ -191,6 +194,9 @@ async function boot() {
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
   // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
   document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('campaign'));
+
+  // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
+  document.getElementById('account-chip').addEventListener('click', () => screenManager.show('auth'));
 
   // ---- AUDIO: unlock di gesture pertama (kebijakan autoplay browser) ----
   const unlockAudio = () => audio.unlock();
@@ -272,6 +278,7 @@ async function boot() {
       STATE.meta = createDefaultMeta();
       writeSave(STATE.meta);
       showToast({ message: 'Save direset. Organisme baru terbentuk. 🧬' });
+      screenManager.show('auth');
     }
   });
 
@@ -301,13 +308,19 @@ async function boot() {
 
   const isAutotest = new URLSearchParams(location.search).get('autotest') === '1';
   if (isAutotest) {
+    // Headless: buat sesi akun otomatis agar alur self-test lengkap
+    if (!hasAccount()) signUp({ username: 'Tester', password: '1234', faction: 'imun' });
     screenManager.show('dashboard');
     runAutotest();
   } else {
-    // Sinematik pembuka (sekali) → dashboard → coach onboarding (sekali)
+    // Sinematik pembuka (sekali) → AKUN (daftar/masuk) → dashboard → coach
     playOnce('intro', () => {
-      screenManager.show('dashboard');
-      coach.startIfFirstTime();
+      if (hasAccount()) {
+        screenManager.show('dashboard');
+        coach.startIfFirstTime();
+      } else {
+        screenManager.show('auth'); // user baru: daftar + pilih fraksi dulu
+      }
     });
   }
 }

@@ -49,13 +49,28 @@ await shot('01-loading');
 await cdp.send('Network.emulateNetworkConditions', {
   offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1,
 });
+// AKUN: pengguna baru diarahkan ke layar DAFTAR (fondasi online)
+// ... setelah intro sinematik di-skip
 // Intro sinematik (kunjungan pertama) → tangkap 1 shot → lewati
-await page.waitForSelector('#cinematic-layer:not(.hidden), #screen-dashboard.active', { timeout: 30000 });
+await page.waitForSelector('#cinematic-layer:not(.hidden), #screen-auth.active, #screen-dashboard.active', { timeout: 30000 });
 const cineShown = await page.evaluate(() => !document.getElementById('cinematic-layer').classList.contains('hidden'));
 if (cineShown) {
   await sleep(2800);
   await shot('26-cinematic-intro');
   await page.click('#cine-skip');
+}
+// --- AUTH: pilih fraksi, isi form nyata, submit ---
+await page.waitForSelector('#screen-auth.active, #screen-dashboard.active', { timeout: 30000 });
+const authShown = await page.evaluate(() => document.querySelector('#screen-auth.active') !== null);
+if (authShown) {
+  await sleep(600);
+  await shot('00-auth');
+  await page.fill('#auth-username', 'PemainHebat');
+  await page.fill('#auth-password', '1234');
+  await page.evaluate(() => document.querySelector('.faction-card.imun')?.click());
+  await sleep(300);
+  await shot('00b-auth-filled');
+  await page.click('#auth-submit');
 }
 await page.waitForSelector('#screen-dashboard.active', { timeout: 30000 });
 await sleep(700);

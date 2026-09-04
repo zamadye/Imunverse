@@ -44,6 +44,7 @@ export function createDefaultMeta() {
     campaignCleared: {},
     allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
     coachDone: false,
+    account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     cinematicsSeen: {},
     leaderboard: [],
     evoStage: 0,

@@ -183,6 +183,17 @@
 - [x] **Siklus cerita lengkap**: tubuh sakit → imun datang → bersihkan patogen → boss tumbang → ORGAN BERSIH → organ berikutnya menunggu bantuan.
 - **Kriteria lulus:** e2e kampanye 7 langkah RESULT OK (intro→coach→peta 6 node/5 kunci→brief cine→run kuota→MENANG+pasukan+1→clear cine→bab berikutnya→boss bernama "Raja Radang"→peta progres); SELFTEST_PASS 17; 26/26 shot CLEAN; perf 16,6 ms vsync @151 musuh; check-imports ✔.
 
+## Fase 7.6 — Fondasi Akun & Fraksi (Imun vs Virus) ✅
+**Tujuan (arah user):** sebelum SDK — akun user wajib ada dulu (fondasi online): tanpa ID user, leaderboard/level hero/**pembelian** tidak bisa dikenali. Plus fondasi ide **dua fraksi**: Imun (biru/teal) vs Virus (merah/coral) — layout dashboard sama, hero/pasukan/tujuan beda; pilihan saat daftar yang men-trigger dashboard masing-masing.
+- [x] **account-system.js (SERVER-READY, 1 modul)**: `signUp` (validasi nama 3–16 [a-z0-9_], sandi ≥4, hash djb2 lokal — server nanti bcrypt/argon2), `login` (verifikasi hash), `logout`, sesi di `meta.account` {uid, username, faction, createdAt}; **registry akun perangkat** terpisah (`imunverse.accounts.v1`) → multi-akun, data & pembelian tidak hilang saat logout.
+- [x] **Screen auth** (MASUK/DAFTAR tab): form nama+sandi, error inline, tombol "Lanjutkan sebagai X" (akun terdaftar), **kartu pilih fraksi** — Imun **AKTIF**, Virus **SEGERA** (tap → toast "segera hadir"); boot baru: intro cine → **auth** (user baru) → dashboard → coach; chip akun di topbar dashboard (nama + tag fraksi warna fraksi, klik → ganti akun).
+- [x] **Pembelian wajib akun** (paling krusial): `requireAccount()` menjaga SEMUA tombol BELI (hero, item, suplemen) — tanpa sesi → toast + dialihkan ke auth; dengan akun → purchase jalan & terikat uid.
+- [x] **Leaderboard terikat nama pemain**: entry kini menyimpan `playerName` + `faction` dari akun.
+- [x] **data/factions.json**: definisi fraksi (nama, warna, status live/segera, goal, heroIds) — konten fraksi = data.
+- [x] **Routing fraksi**: dashboard membaca `meta.account.faction` → set `--faction-color` + tag; fondasi siap untuk dashboard virus (layout sama, konten beda) saat fraksi dibuka.
+- [x] **BUG KRITIS ditemukan & diperbaiki**: helper `el()` selalu set `disabled` (juga saat `false`) → **semua tombol BELI tidak pernah bisa diklik sejak awal**; kini atribut false/null dilewati.
+- **Kriteria lulus:** e2e auth 7 langkah RESULT OK (validasi form, daftar imun+chip, **beli tanpa akun → dialihkan auth**, login balik + beli sukses terikat akun, routing fraksi virus, leaderboard nama pemain, logout + daftar dobel terhalang); e2e kampanye tetap RESULT OK; SELFTEST_PASS 17; 28/28 shot CLEAN (incl. 00-auth, 00b-auth-filled); perf 16,6 ms vsync @150 musuh.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

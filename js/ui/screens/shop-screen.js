@@ -4,8 +4,9 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
+import { requireAccount } from '../../systems/account-system.js';
 import { getData } from '../../core/data-store.js';
-import { addCurrency } from '../../systems/economy-system.js';
+import { addCurrency, purchaseShopItem, purchaseHeroUnlock } from '../../systems/economy-system.js';
 import { applySuplemen } from '../../systems/body-system.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
@@ -54,6 +55,7 @@ export function show() {
         text: 'BELI',
         disabled: meta.currency < heroDef.shopCost,
         onclick: () => {
+          if (!requireAccount('shop')) return; // transaksi wajib akun
           const res = purchaseHeroUnlock(STATE.meta, heroDef); // logic + auto-save
           if (res.ok) show();
         },
@@ -87,6 +89,7 @@ export function show() {
         text: 'BELI',
         disabled: meta.currency < def.cost,
         onclick: () => {
+          if (!requireAccount('shop')) return; // transaksi wajib akun
           const res = purchaseShopItem(STATE.meta, def.id); // logic + auto-save
           if (res.ok) show();
         },

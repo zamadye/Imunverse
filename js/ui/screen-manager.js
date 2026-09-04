@@ -78,7 +78,8 @@ export function el(tag, attrs = {}, children = []) {
     if (k === 'class') node.className = v;
     else if (k === 'text') node.textContent = v;
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
-    else node.setAttribute(k, v);
+    else if (v === false || v === null || v === undefined) continue; // jangan set atribut palsu (mis. disabled=false)
+    else node.setAttribute(k, v === true ? '' : v);
   }
   for (const child of children) {
     if (child) node.appendChild(child);

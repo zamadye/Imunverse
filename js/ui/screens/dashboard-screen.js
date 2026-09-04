@@ -20,6 +20,7 @@ import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../syste
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
+import { getSession, getFactionDef } from '../../systems/account-system.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -231,6 +232,23 @@ function renderArenaCard(meta) {
 export function show() {
   const meta = STATE.meta;
   document.getElementById('dash-currency').textContent = meta.currency.toLocaleString('id-ID');
+
+  // AKUN + FRAKSI: routing konten per pasukan (layout sama, isi beda)
+  const session = getSession();
+  const faction = getFactionDef(session ? session.faction : 'imun');
+  document.documentElement.style.setProperty('--faction-color', faction.color);
+  const chip = document.getElementById('account-chip');
+  if (chip) {
+    chip.style.borderColor = faction.color;
+    if (session) {
+      chip.classList.remove('hidden');
+      chip.querySelector('#account-name').textContent = session.username;
+      chip.querySelector('#account-faction').textContent = faction.name.split(' ')[1] || faction.name;
+      chip.querySelector('#account-faction').style.background = faction.color;
+    } else {
+      chip.classList.add('hidden');
+    }
+  }
 
   // ---- Panggung hero: sprite + nama hero terpilih + badge gelombang terbaik ----
   const heroDef = getHero(meta.selectedHero) || getData().heroes.heroes[0];

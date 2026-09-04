@@ -1275,3 +1275,77 @@ img.lock-badge {
 .coach-skip { background: none; border: none; font-size: 11px; font-weight: 800; color: #a89e90; text-decoration: underline; cursor: pointer; }
 .coach-next { font-size: 12px; padding: 8px 14px; }
 @keyframes coach-tip-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =====================================================================
+   AKUN & FRAKSI — auth screen, chip akun, kartu fraksi
+   ===================================================================== */
+.auth-topbar { justify-content: center; }
+.auth-scroll { padding: 10px 18px 30px; overflow-y: auto; height: 100%; }
+.auth-lead { font-size: 12.5px; font-weight: 800; color: var(--ink-soft); text-align: center; line-height: 1.5; margin: 2px 0 14px; }
+.auth-tabs { display: flex; background: #efe7d8; border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 12px; }
+.auth-tab {
+  flex: 1; padding: 9px 0; border-radius: 11px; border: none;
+  font-weight: 900; font-size: 13px; color: #8b8175; background: transparent; cursor: pointer;
+}
+.auth-tab.active { background: var(--teal, #2f9c8f); color: #fff; box-shadow: 0 3px 10px rgba(47,156,143,0.35); }
+.auth-card { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.auth-label { font-size: 11px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.04em; margin-top: 6px; }
+.auth-input {
+  border: 2.5px solid #e0d6c4; border-radius: 12px; padding: 11px 14px;
+  font-size: 14px; font-weight: 800; background: #fffdf7; color: var(--ink, #3a342c);
+  outline: none; font-family: inherit;
+}
+.auth-input:focus { border-color: var(--teal, #2f9c8f); }
+.auth-error {
+  display: none; font-size: 11.5px; font-weight: 800; color: #c0392b;
+  background: #fdeae7; border: 2px solid #f5b7ae; border-radius: 10px; padding: 7px 10px;
+}
+.auth-error.show { display: block; animation: coach-tip-in 0.25s; }
+.auth-submit { margin-top: 12px; }
+.auth-resume { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.auth-resume-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: #e7f6ee; border: 2.5px solid #7fd8c8; border-radius: 12px;
+  padding: 10px 14px; cursor: pointer; text-align: left;
+}
+.auth-resume-btn b { display: block; font-size: 13px; color: #1f5f57; }
+.auth-resume-btn small { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+.auth-logout {
+  background: none; border: none; font-size: 11px; font-weight: 800;
+  color: #b0654a; text-decoration: underline; cursor: pointer; padding: 4px 0; text-align: left;
+}
+.auth-faction-title { font-size: 14px; margin: 16px 0 2px; }
+.auth-faction-hint { font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-bottom: 10px; }
+.auth-factions { display: flex; flex-direction: column; gap: 10px; }
+.faction-card {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--card, #fffdf7); border: 3px solid transparent; border-radius: 18px;
+  padding: 12px 14px; box-shadow: var(--shadow-card); cursor: pointer;
+}
+.faction-card.selected.imun { border-color: var(--teal, #2f9c8f); background: #f0faf6; }
+.faction-card.selected.virus { border-color: #f2825c; background: #fdf3ee; }
+.faction-card.locked { opacity: 0.75; }
+.fc-emblem {
+  width: 52px; height: 52px; border-radius: 16px; flex: 0 0 52px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.fc-emblem img { width: 40px; height: 40px; }
+.fc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.fc-body b { font-size: 14px; }
+.fc-tag { font-size: 11px; color: var(--ink-soft); font-weight: 700; line-height: 1.35; }
+.fc-goal { font-size: 10px; font-weight: 900; color: var(--teal, #2f9c8f); }
+.faction-card.virus .fc-goal { color: #c46a4a; }
+.fc-badge { font-size: 9px; font-weight: 900; padding: 3px 9px; border-radius: 8px; align-self: flex-start; }
+.fc-badge.live { background: #def3e9; color: #1f7a70; }
+.fc-badge.soon { background: #f5b7ae; color: #7a2e1d; }
+
+/* Chip akun di topbar dashboard */
+.account-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card, #fffdf7); border: 2.5px solid var(--teal, #2f9c8f);
+  border-radius: 999px; padding: 4px 6px 4px 12px; cursor: pointer;
+  box-shadow: var(--shadow-card); font-family: inherit;
+}
+.account-chip.hidden { display: none; }
+.account-chip #account-name { font-size: 11.5px; font-weight: 900; color: var(--ink, #3a342c); max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.faction-tag { font-size: 9px; font-weight: 900; color: #fff; border-radius: 8px; padding: 3px 8px; background: var(--teal, #2f9c8f); }

@@ -45,6 +45,10 @@
             <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
             <span id="dash-currency">0</span>
           </div>
+          <button id="account-chip" class="account-chip hidden" title="Ganti akun" aria-label="Akun">
+            <span id="account-name">—</span>
+            <span id="account-faction" class="faction-tag">Imun</span>
+          </button>
           <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
           <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
         </header>
@@ -163,6 +167,29 @@
           <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="shop-currency">0</span></div>
         </div>
         <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
+      </section>
+
+      <!-- ============ AKUN: MASUK / DAFTAR (fondasi online) ============ -->
+      <section id="screen-auth" class="screen" data-screen="auth">
+        <header class="topbar auth-topbar">
+          <h1 class="screen-title">Imunverse</h1>
+        </header>
+        <div class="auth-scroll">
+          <p class="auth-lead">Satu tubuh, dua pasukan. Buat akunmu — progres, level hero &amp; pembelianmu tersimpan aman dengan nama mu sendiri.</p>
+          <div id="auth-tabs" class="auth-tabs"></div>
+          <div class="card auth-card">
+            <label class="auth-label" for="auth-username">Nama Akun</label>
+            <input id="auth-username" class="auth-input" maxlength="16" autocomplete="username" placeholder="mis. SelHero99" />
+            <label class="auth-label" for="auth-password">Sandi</label>
+            <input id="auth-password" class="auth-input" type="password" autocomplete="current-password" placeholder="••••" />
+            <div id="auth-error" class="auth-error"></div>
+            <button id="auth-submit" class="btn btn-primary btn-xl auth-submit">BUAT AKUN &amp; MULAI</button>
+            <div id="auth-resume" class="auth-resume"></div>
+          </div>
+          <h3 class="auth-faction-title">Pilih Pasukanmu</h3>
+          <p class="auth-faction-hint">Fraksi menentukan dashboard, hero &amp; pasukanmu — layout sama, sisi berbeda.</p>
+          <div id="auth-factions" class="auth-factions"></div>
+        </div>
       </section>
 
       <!-- ============ PETA KAMPANYE (Perang Sang Tubuh) ============ -->

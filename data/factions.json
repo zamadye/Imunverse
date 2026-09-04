@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "factions": [
+    {
+      "id": "imun",
+      "name": "Pasukan Imun",
+      "color": "#2f9c8f",
+      "accent": "#35d0ba",
+      "status": "live",
+      "tagline": "Pelindung tubuh — basmi patogen, pulihkan organ.",
+      "goal": "Bersihkan organ dari patogen sampai SEHAT",
+      "heroIds": ["sel_t", "makrofag", "sel_b", "sel_nk", "eosinofil"]
+    },
+    {
+      "id": "virus",
+      "name": "Pasukan Virus",
+      "color": "#f2825c",
+      "accent": "#ff6b6b",
+      "status": "segera",
+      "tagline": "Balikkan permainan — lumpuhkan tubuh dari dalam.",
+      "goal": "Ganggu organ & lolos dari kejaran imun",
+      "heroIds": []
+    }
+  ]
+}
