@@ -234,6 +234,13 @@
 - [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
 - **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
+**Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
+- [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.
+- [x] **Fix**: opt-in `pointer-events: auto` untuk `.fire-btn`, `.ability-bar`/`.ability-btn`, `#btn-pause`; **posisi TEMBAK dipindah ke kanan-bawah (bottom 64px)** — tidak lagi menutupi ability-bar (terverifikasi bounding-box tak overlap).
+- [x] **Detail Hero (dari menu Heroes)**: klik kartu hero → layar **Detail & Upgrade Hero** — kartu hero (tier evolusi, chip Lv, portrait, **statistik senjata live** "Senjata 11 (+0.7/lvl) · HP 100 (+8/lvl)" dengan formula nyata, slider, UPGRADE antibodi) + **panel PASUKAN** (level pasukan, tempo/damage, upgrade) + pintasan Lab Tim. Ini jawaban "letak yang benar": upgrade per-hero tinggal di menu Heroes, bukan menumpuk di Squad Upgrade.
+- **Kriteria lulus:** e2e klik-riil 5 langkah RESULT OK (TEMBAK → shotsFired naik; jurus → cooldown jalan + banner muncul; fire & ability-bar TIDAK overlap; klik kartu roster → Detail Hero → UPGRADE −150 antibodi → level 1; klik pause → modal); SELFTEST_PASS 17; 29 shot CLEAN; perf 16,6 ms vsync.
+
 ## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
 - [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
 - [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).

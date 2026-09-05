@@ -11,6 +11,7 @@ import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
 import { heroLevelBadge } from '../../systems/economy-system.js';
+import { screenManager as sm } from '../screen-manager.js';
 
 const PATTERN_LABEL = {
   melee_swipe: 'Tebasan Area',
@@ -66,6 +67,8 @@ export function show() {
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
+      role: status.unlocked ? 'button' : undefined,
+      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
       role: 'button',
       tabindex: status.unlocked ? '0' : '-1',
       onclick: () => {
@@ -85,6 +88,7 @@ export function show() {
     });
 
     grid.appendChild(card);
+    if (status.unlocked) card.addEventListener('click', () => sm.show('herodetail', { heroId: heroDef.id }));
   }
 
   // Tombol mulai aktif hanya bila hero terpilih terbuka

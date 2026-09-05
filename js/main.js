@@ -38,6 +38,7 @@ import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
 import * as campaignScreen from './ui/screens/campaign-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
+import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
 import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
@@ -177,6 +178,7 @@ async function boot() {
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('auth', authScreen);
+  screenManager.registerScreen('herodetail', heroDetailScreen);
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   bosschestScreen.wire();

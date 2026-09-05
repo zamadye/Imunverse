@@ -23,6 +23,7 @@ const APP_STATE_BY_SCREEN = {
   focus: 'dashboard',
   prep: 'dashboard',  // layar persiapan (bagian dari alur dashboard)
   bag: 'dashboard',
+  herodetail: 'roster', // detail upgrade hero (bagian alur Heroes)
   hud: 'gameplay',
   gameover: 'gameover',
 };
