@@ -489,6 +489,5 @@ async function runAutotest() {
 
 boot().catch((err) => {
   console.error('[main] boot gagal:', err);
-  const label = document.getElementById('loading-label');
-  if (label) label.textContent = 'Gagal memuat: ' + err.message;
+  loadingScreen.showBootError(err && err.message ? err.message : String(err));
 });

@@ -1,3 +1,4 @@
+import { BUILD } from '../core/version.js';
 /**
  * sprite-loader.js — Preload & cache sprite PNG transparan.
  *
@@ -103,7 +104,7 @@ export function loadAllSprites(data, onProgress) {
           onProgress?.(done, paths.length, path, true);
           resolve();
         };
-        img.src = path;
+        img.src = `${path}?v=${BUILD}`; // cache-busting (kunci cache tetap path)
       })
   );
 

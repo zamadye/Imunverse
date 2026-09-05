@@ -21,6 +21,8 @@ const store = {
   bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
 };
 
+import { BUILD } from './version.js';
+
 /** Muat semua file JSON game secara paralel. */
 export async function loadAllData() {
   const files = {
@@ -47,8 +49,13 @@ export async function loadAllData() {
 
   const entries = await Promise.all(
     Object.entries(files).map(async ([key, path]) => {
-      const res = await fetch(path);
-      if (!res.ok) throw new Error(`Gagal memuat ${path}: HTTP ${res.status}`);
+      let res;
+      try {
+        res = await fetch(`${path}?v=${BUILD}`);
+      } catch {
+        res = await fetch(`${path}?v=${BUILD}&r=${Date.now()}`); // retry tanpa cache
+      }
+      if (!res.ok) throw new Error(`Gagal memuat ${path}: HTTP ${res.status} (update game belum penuh?)`);
       const json = await res.json();
       return [key, json];
     })

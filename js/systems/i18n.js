@@ -15,7 +15,8 @@ let DICT = null;
 
 /** Muat kamus dwibahasa. */
 export async function loadLang() {
-  const res = await fetch('data/lang.json');
+  const { BUILD } = await import('../core/version.js');
+  const res = await fetch(`data/lang.json?v=${BUILD}`);
   if (!res.ok) throw new Error(`Gagal memuat data/lang.json: HTTP ${res.status}`);
   DICT = await res.json();
 }
