@@ -1857,3 +1857,92 @@ img.lock-badge {
 /* Ikon sidebar aktif tetap terbaca untuk ikon sprite berwarna */
 .side-btn img { filter: saturate(0.25) opacity(0.75); }
 .side-btn.active img { filter: brightness(0) invert(1); opacity: 1; }
+
+/* =========================================================
+   FASE 13.2 — LANDSCAPE-ONLY (arahan pemilik: semua landscape)
+   Overlay putar-HP di portrait, dashboard 2 kolom di lanskap,
+   HUD gameplay menyebar ke samping, teks anti-tumpuk.
+   ========================================================= */
+
+/* --- Overlay wajib lanskap --- */
+#rotate-hud {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(165deg, #2b8a7b, #14584f);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 24px; color: #fff;
+}
+#rotate-hud b { font-size: 22px; font-weight: 900; letter-spacing: 0.04em; }
+#rotate-hud .rh-sub { font-size: 12.5px; font-weight: 700; opacity: 0.92; max-width: 300px; }
+#rotate-hud .rh-en { font-size: 10.5px; font-weight: 700; opacity: 0.6; }
+.rh-phone {
+  width: 46px; height: 78px; border: 4px solid rgba(255, 255, 255, 0.92);
+  border-radius: 12px; position: relative;
+  animation: rh-rotate 1.8s ease-in-out infinite;
+}
+.rh-phone span {
+  position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+  width: 14px; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.92);
+}
+@keyframes rh-rotate {
+  0%, 22% { transform: rotate(0deg); }
+  55%, 82% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+@media (orientation: portrait) {
+  #rotate-hud { display: flex; }
+}
+
+/* --- Dashboard lanskap: grid 2 kolom (banner+kampanye | menu+info) --- */
+@media (orientation: landscape) {
+  .screen { padding-left: 14px; padding-right: 14px; }
+  .dash-body { max-width: 1040px; gap: 12px; }
+  .dash-scroll {
+    display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+    align-items: start; gap: 10px;
+  }
+  #dash-banner { height: 200px; grid-column: 1; }
+  .banner-slide .hero-stage .stage-hero { width: min(24vh, 150px); }
+  #quick-row { grid-column: 2; }
+  #quick-row .qt-label { white-space: nowrap; }
+  .play-row { grid-column: 1; }
+  #dash-stats { grid-column: 2; }
+  #daily-card { grid-column: 1 / -1; } /* baris penuh — tanpa lubang grid */
+  #duo-evo { grid-column: 1; }
+  #duo-lb { grid-column: 2; }
+  /* Toast di luar-run lanskap: pojok kanan atas, kecil */
+  body:not(.in-run) #toasts {
+    top: 64px; bottom: auto; right: 12px; left: auto; transform: none;
+    width: min(30vw, 250px);
+  }
+  /* Dock ramping agar sisa tinggi untuk konten */
+  .dock { max-width: 640px; padding-top: 7px; gap: 6px; }
+  .dock-btn .dock-ico { width: 46px; height: 46px; border-radius: 15px; }
+  .dock-btn .dock-ico img { width: 24px; height: 24px; }
+  .dock-btn span { font-size: 11px; }
+  .screen-header h2, .screen-title { font-size: 17px; }
+  .duo-row { grid-template-columns: 1fr; }
+  /* Kartu-kartu tidak menumpuk teks di kolom lebar */
+  .evo-head .evo-progress, .cc-obj, .mc-body span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-id b { max-width: 130px; }
+  .stat-cell span { white-space: nowrap; }
+
+  /* Roster & shop memakai lebar lanskap */
+  .roster-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; width: 100%; }
+  .premium-grid, .shop-grid { max-width: 900px; margin-left: auto; margin-right: auto; width: 100%; }
+  .upg-list { max-width: 760px; margin: 0 auto; width: 100%; }
+
+  /* --- HUD gameplay lanskap: sebar ke samping, jangan tumpuk --- */
+  #screen-hud .hud-top { max-width: 780px; }
+  #screen-hud .hud-minimap { top: 10px; right: 10px; width: 74px; height: 74px; }
+  #screen-hud .hud-mission { top: 60px; width: 250px; }
+  body.in-run #toasts {
+    top: 96px; bottom: auto; right: 10px; left: auto; transform: none;
+    flex-direction: column; width: min(38vw, 300px);
+  }
+  .hud-hint { bottom: 108px; font-size: 10.5px; }
+  #screen-hud .hud-hero-status { left: 12px; bottom: 10px; }
+  #screen-hud .hud-controls { right: 12px; bottom: 10px; }
+  /* Modal pendek di lanskap: dua kolom pilihan level-up bila muat */
+  .choice-grid { max-height: 46vh; }
+}

@@ -26,7 +26,7 @@ const browser = await chromium.launch({
   executablePath: await c.executablePath(),
   args: [...c.args, '--no-sandbox', '--disable-gpu'],
 });
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const page = await browser.newPage({ viewport: { width: 844, height: 390 } });
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('response', (r) => { if (r.status() === 404) errors.push(`404 ${r.url()}`); });

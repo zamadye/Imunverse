@@ -13,7 +13,7 @@ const browser = await pw.launch({
   args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
   env: { ...process.env, LD_LIBRARY_PATH: '/tmp/alibs/lib' },
 });
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const page = await browser.newPage({ viewport: { width: 844, height: 390 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push('PAGEERR: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push('CONSOLE: ' + m.text()); });
@@ -90,9 +90,9 @@ try {
   // Gerak riil: sentuh & tarik → player.moving + walkPhase berjalan
   await page.touchscreen.tap(195, 400).catch(() => {});
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 195, y: 620, id: 1 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 220, y: 250, id: 1 }] });
   await page.waitForTimeout(120);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 195, y: 520, id: 1 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 220, y: 165, id: 1 }] });
   await page.waitForTimeout(500);
   const moveInfo = await page.evaluate(() => ({ moving: window.__IMUNVERSE.game.run.player.moving, phase: window.__IMUNVERSE.game.run.player.walkPhase }));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });

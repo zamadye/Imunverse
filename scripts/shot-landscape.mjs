@@ -14,13 +14,21 @@ await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.cl
 for (let k = 0; k < 6; k++) { if (!(await page.locator('#coach-skip').isVisible().catch(() => false))) break; await page.click('#coach-skip'); await page.waitForTimeout(300); }
 await page.waitForTimeout(800);
 await page.evaluate(() => { document.querySelector('.dash-scroll').scrollTop = 0; });
-await page.screenshot({ path: 'shots/48-dashboard13.png' });
-// slide 2 (bab) & slide 3 (endless) via dot
-await page.evaluate(() => document.querySelectorAll('#banner-dots .b-dot')[1].click());
-await page.waitForTimeout(700);
-await page.screenshot({ path: 'shots/49-dashboard13-bab.png' });
-await page.evaluate(() => document.querySelectorAll('#banner-dots .b-dot')[2].click());
-await page.waitForTimeout(700);
-await page.screenshot({ path: 'shots/50-dashboard13-endless.png' });
+await page.screenshot({ path: 'shots/55-landscape-dash.png' });
+// gameplay landscape
+await page.click('#btn-play-big'); await page.waitForTimeout(700);
+await page.locator('.camp-node:not(.locked)').first().click(); await page.waitForTimeout(400);
+await page.click('#btn-campaign-go'); await page.waitForTimeout(600);
+await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 8000 }).catch(() => {});
+await page.waitForTimeout(400);
+await page.click('#btn-prep-start', { timeout: 8000 });
+await page.waitForTimeout(1100);
+for (let k = 0; k < 4; k++) {
+  if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip');
+  await page.waitForTimeout(500);
+  if (await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'))) break;
+}
+await page.waitForTimeout(3500);
+await page.screenshot({ path: 'shots/56-landscape-hud.png' });
 console.log('done; errors:', errs.length ? errs.join(' | ') : 'none');
 await browser.close();

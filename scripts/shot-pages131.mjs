@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium: pw } = require('/tmp/pw/node_modules/playwright-core');
 const browser = await pw.launch({ executablePath: '/tmp/chromium', args: ['--no-sandbox','--disable-gpu','--disable-dev-shm-usage'], env: { ...process.env, LD_LIBRARY_PATH: '/tmp/alibs/lib' } });
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const page = await browser.newPage({ viewport: { width: 844, height: 390 } });
 const errs = [];
 page.on('pageerror', e => errs.push(e.message.slice(0, 150)));
 await page.goto('http://localhost:8000/', { waitUntil: 'domcontentloaded' });

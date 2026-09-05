@@ -288,6 +288,13 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
 - **Kriteria lulus 12c:** e2e **21 PASS** (termasuk asersi tap-responds), autotest 17/17, perf 16,65 ms @41 musuh; screenshot 37 (HUD terang) & 39 (Detail Hero baru).
 
+**Fase 13.2 — LANDSCAPE-ONLY + perapian tumpukan (arahan pemilik: semua landscape; teks/kartu & HUD XP tidak tertumpuk)**
+- [x] **Wajib lanskap**: overlay `#rotate-hud` (animasi telepon berputar + teks ID/EN) tampil saat portrait; semua layout dioptimalkan di `@media (orientation: landscape)`.
+- [x] **Dashboard lanskap = grid 2 kolom** (banner+kampanye | quick-menu+stats), Bonus Harian baris penuh (`1 / -1` — tanpa lubang grid), dock dirampingkan (46px), toast ke pojok kanan-atas kecil — tidak menutupi banner/kartu; teks panjang dipotong ellipsis (judul kartu, objektif, label quick).
+- [x] **HUD gameplay lanskap menyebar ke samping**: HP+XP penuh kiri-bawah (tanpa tumpukan), skill 2x2 + SERANG kanan-bawah, minimap & misi turun dari tepi atas, toast in-run pindah ke kolom kanan (top 96px) — pusat layar bersih untuk gameplay.
+- [x] Roster 4 kolom, premium/shop grid melebar di lanskap; harness e2e & seluruh skrip bukti diubah ke viewport **844×390**.
+- **Kriteria lulus 13.2:** e2e **21 asersi PASS** di lanskap (drag joystick disesuaikan), tanpa error; bukti `docs/screenshots/55-landscape-dash, 56-landscape-hud`.
+
 **Fase 13.1 — De-dup navigasi + konsistensi halaman lain (temuan pemilik: sidebar = duplikat dock bawah)**
 - [x] **Sidebar & dock tidak lagi duplikat** — tugas dipisah ala MLBB: **dock bawah = tab inti** (Play · Heroes · Bag · Squad · Shop), **sidebar kiri = pintas fitur** (Home · Kampanye/Peta Tubuh · Bio-Pedia · Rekor → scroll ke papan · Tubuh → scroll ke kondisi tubuh).
 - [x] **Roster**: chip progres koleksi **"1/11 Terbuka"** di subtitle; tombol MULAI kini **sticky footer** (selalu terlihat saat menggulung koleksi).

@@ -123,7 +123,7 @@
 
             <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
 
-            <div class="duo-row">
+            <div class="duo-row" id="duo-evo">
               <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
               <div class="card missions-card">
                 <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
@@ -131,7 +131,7 @@
               </div>
             </div>
 
-            <div class="duo-row">
+            <div class="duo-row" id="duo-lb">
               <div id="leaderboard-card" class="card lb-card"><!-- diisi JS --></div>
               <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
             </div>
@@ -503,5 +503,11 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <div id="rotate-hud" aria-hidden="true">
+    <div class="rh-phone"><span></span></div>
+    <b>Putar HP-mu</b>
+    <span class="rh-sub">Game ini dimainkan dalam mode lanskap — miringkan perangkatmu.</span>
+    <span class="rh-en">Rotate your device to landscape.</span>
+  </div>
 </body>
 </html>
