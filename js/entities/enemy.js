@@ -45,6 +45,7 @@ export class Enemy {
     this.convertT = def.convertInterval || 0;
     this.lastHitAbsorbed = false;
     this.markMult = 1; this.markT = 0; this.dotMult = 0; this.dotT = 0; this.dotSrc = 0; // Fase 12 skill state
+    this.attackHint = 0; // Fase 12d: timer animasi serangan (visual)
 
     // Visual
     this.rotation = Math.random() * Math.PI * 2;
@@ -83,6 +84,7 @@ export class Enemy {
   update(dt, playerPos, time, game) {
     if (!this.alive) return;
     if (this.hitFlash > 0) this.hitFlash -= dt;
+    if (this.attackHint > 0) this.attackHint -= dt;
 
     // Dorongan knockback meluruh (tetap jalan meski beku, tapi melemah)
     if (Math.abs(this.vx) > 1 || Math.abs(this.vy) > 1) {

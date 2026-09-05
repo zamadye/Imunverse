@@ -48,6 +48,7 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 
 import { Camera, PERSP } from '../render/camera.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
+import { drawFigure } from '../render/humanoid.js';
 import {
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
@@ -55,6 +56,21 @@ import {
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
+
+/** Fase 12d: warna aksen fallback dari warna utama hero. */
+function mixLookAccent(hex) {
+  const n = parseInt((hex || '#35d0ba').slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return `rgb(${Math.min(255, r + 70)},${Math.min(255, g + 60)},${Math.min(255, b + 40)})`;
+}
+
+/** Fase 12d: senjata bawaan per hero (visual di tangan). */
+const HERO_WEAPONS = {
+  eos: 'spear', helia: 'staff', bella: 'brush', nyx: 'dagger',
+};
+function defaultWeapon(heroId) {
+  return HERO_WEAPONS[heroId] || null;
+}
 
 export const game = {
   canvas: null,
@@ -573,7 +589,10 @@ export const game = {
     // 8. Kollision player vs musuh (contact damage)
     if (player.alive && player.iframes <= 0) {
       const hit = run.collision.checkPlayerCollision(player);
-      if (hit) this.damagePlayer(hit.damage);
+      if (hit) {
+        if (hit.enemy) hit.enemy.attackHint = 0.35; // Fase 12d: animasi pukul
+        this.damagePlayer(hit.damage);
+      }
     }
 
     // 9. Pickup (nutrisi)
@@ -1454,12 +1473,12 @@ export const game = {
       }
     }
     // Bayangan semua entitas (volume: badan "berdiri" di atas bayangan)
-    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.stealth && !e.stealthExposed ? 0.05 : 0.13);
-    for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.9, a.radius * 0.8, 0.11);
+    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.28, e.radius * 0.52, e.stealth && !e.stealthExposed ? 0.05 : 0.15);
+    for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.26, a.radius * 0.5, 0.13);
     if (player.alive) {
-      dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.16);
+      dropShadow(player.x, player.y + player.radius * 0.3, player.radius * 0.55, 0.18);
       // Ring tim ala MOBA di bawah hero (warna peran) + aura lembut
-      ground(player.x, player.y + player.radius * 0.92);
+      ground(player.x, player.y + player.radius * 0.3);
       ctx.strokeStyle = run.heroDef.roleColor || run.heroDef.color;
       ctx.lineWidth = 3;
       ctx.globalAlpha = 0.8;
@@ -1500,13 +1519,20 @@ export const game = {
       if (!e.alive) continue;
       draws.push({ y: e.y, fn: () => {
         const hidden = e.stealth && !e.stealthExposed;
-        const bob = Math.abs(Math.sin(time * 6.4 + e.weavePhase * 7)) * 2.4;
         const flip = player.x < e.x ? -1 : 1;
-        billboard(e.x, e.y, { lift: e.radius * 0.62 + bob, flip });
+        billboard(e.x, e.y, { lift: e.radius * 0.62, flip });
         if (hidden) ctx.globalAlpha = 0.14;
-        const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
-        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
+        // Fase 12d: figur humanoid monster (kaki+tangan+wajah) — animasi ayun kaki
+        drawFigure(ctx, {
+          x: e.x, y: e.y, r: e.radius * 0.85,
+          primary: e.def.color, accent: e.def.accent,
+          form: e.def.form || 'spike',
+          float: !!e.def.hazard_drift,
+          phase: time * (e.def.form === 'runner' ? 11 : 7) + e.weavePhase * 7,
+          moving: !e.def.hazard_drift,
+          attackT: e.attackHint > 0 ? e.attackHint / 0.35 : 0,
           flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
+          mood: 'angry', flip: 1, t: time,
         });
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
@@ -1527,18 +1553,44 @@ export const game = {
       draws.push({ y: player.y, fn: () => {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
-          const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
-          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
-          const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
           const evo = run.evoStage;
-          if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', pBody.x, pBody.y + bodySize * 0.34, bodySize * 0.62, 0, {});
-          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
-          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
-          if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', pBody.x, pBody.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
-          if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', pBody.x + bodySize * 0.3, pBody.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
+          const look = player.heroDef.look || {};
+          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob });
+          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.4, player.heroDef.color, time, 0, 0.55);
+          // Fase 12d: HERO HUMANOID — kaki/tangan/telanjang die Rig + aksesori per hero
+          drawFigure(ctx, {
+            x: pBody.x, y: pBody.y, r: player.radius * 0.95,
+            primary: player.heroDef.color,
+            accent: look.accent || mixLookAccent(player.heroDef.color),
+            build: look.build || 'medium',
+            trait: player.heroDef.id,
+            weapon: evo.stage >= 3 ? 'sword' : defaultWeapon(player.heroDef.id),
+            shieldFront: player.heroDef.id === 'mastcell' || player.heroDef.id === 'treg',
+            shieldBack: player.heroDef.id === 'neutron',
+            cape: ['helia', 'treg', 'nyx'].includes(player.heroDef.id)
+              ? (player.heroDef.look && player.heroDef.look.cape) || '#ffffff'
+              : null,
+            shoulderPads: evo.stage >= 2,
+            phase: player.walkPhase || 0,
+            moving: player.moving,
+            attackT: player.attackFlash > 0 ? player.attackFlash / 0.18 : 0,
+            swingT: player.swing > 0 ? player.swing / 0.22 : 0,
+            flash: 0,
+            mood: player.attackFlash > 0 || player.swing > 0 ? 'determined' : 'happy',
+            flip: 1, t: time,
+          });
+          // EVOLUSI tetap terlihat: silia (S1) kini Fun gewajib? no — lava lamp? silia glow
+          if (evo.stage >= 1) {
+            for (let i = 0; i < 3; i++) {
+              const a = time * 1.8 + (i * Math.PI * 2) / 3;
+              ctx.fillStyle = 'rgba(255,255,255,0.75)';
+              ctx.beginPath();
+              ctx.arc(pBody.x + Math.cos(a) * player.radius * 0.8, pBody.y - player.radius * 1.9 + Math.sin(a) * player.radius * 0.24, 1.8, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y - player.radius * 2.9, player.radius * 1.5, time * 1.1, { alpha: 0.9 });
           ctx.restore();
 
           // NAMEPLATE ala MOBA: nama hero + level di atas kepala

@@ -9,6 +9,7 @@
  */
 
 import { getSprite } from '../render/sprite-loader.js';
+import { drawFigure } from '../render/humanoid.js';
 
 const ALLY_SPRITES = [
   'assets/sprites/hero_bcell_idle.png',
@@ -17,6 +18,15 @@ const ALLY_SPRITES = [
   'assets/sprites/hero_eosinophil_idle.png',
   'assets/sprites/hero_tcd8_idle.png',
   'assets/sprites/hero_tcd4_idle.png',
+];
+// Fase 12d: pasukan = FIGUR HUMANOID kecil (warna sel masing-masing)
+const ALLY_SPECS = [
+  { primary: '#bb8fce', accent: '#ff5c8a' },  // Bella
+  { primary: '#4a235a', accent: '#b08cff' },  // Nyx
+  { primary: '#4a7c59', accent: '#f4d03f' },  // Mako
+  { primary: '#ff6b81', accent: '#ffb3ab' },  // Eos
+  { primary: '#00d2ff', accent: '#cfd8dc' },  // T-Bolt
+  { primary: '#f1c40f', accent: '#ffffff' },  // Helia
 ];
 
 export class Ally {
@@ -78,24 +88,21 @@ export class Ally {
   }
 
   render(ctx) {
-    const img = getSprite(this.sprite).image;
-    const bob = Math.sin(this.wobble * 2) * 1.5;
-    ctx.save();
-    ctx.translate(this.x, this.y + bob);
     // Ring tim (biru muda = sekutu)
     ctx.beginPath();
-    ctx.arc(0, 0, this.radius + 3, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.radius + 3, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(122, 215, 255, 0.75)';
     ctx.lineWidth = 2;
     ctx.stroke();
-    if (img && img.width) {
-      ctx.drawImage(img, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
-    } else {
-      ctx.beginPath();
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = '#7fd8c8';
-      ctx.fill();
-    }
-    ctx.restore();
+    // Fase 12d: figur humanoid mini (kaki+tangan+ekspresi), selalu tampak jalan
+    const spec = ALLY_SPECS[this.slot % ALLY_SPECS.length] || ALLY_SPECS[0];
+    drawFigure(ctx, {
+      x: this.x, y: this.y, r: this.radius * 0.8,
+      primary: spec.primary, accent: spec.accent,
+      build: 'medium',
+      phase: this.wobble * 2.2, moving: true,
+      attackT: 0, swingT: 0,
+      mood: 'happy', flip: 1,
+    });
   }
 }

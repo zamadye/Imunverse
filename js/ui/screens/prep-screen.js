@@ -83,7 +83,7 @@ function renderHeroRow(meta) {
       class: `prep-hero${selected ? ' selected' : ''}${status.unlocked ? '' : ' locked'}`,
       title: heroDef.name,
     }, [
-      el('img', { class: 'ph-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }),
+      el('img', { class: 'ph-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
       el('span', { class: 'ph-name', text: heroDef.name.split(' ').slice(0, 2).join(' ') }),
       status.unlocked
         ? el('span', { class: 'ph-stage', style: `background:${stageDef.tierColor}`, text: `T${stageDef.stage + 1} · ${heroLevelBadge(meta, heroDef.id)}` })
@@ -135,7 +135,7 @@ function renderSummary(meta) {
   // Fase 12: loadout = 3 skill aktif hero (S1/S2/Ult) dari data/skills.json
   const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((s) => s.id === id)).filter(Boolean);
 
-  box.appendChild(el('img', { class: 'ps-hero', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
+  box.appendChild(el('img', { class: 'ps-hero', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }));
   const mid = el('div', { class: 'ps-mid' }, [
     el('b', { text: heroDef.name }),
     el('span', { class: 'ps-tier', style: `color:${stageDef.tierColor}`, text: `${stageDef.name} · ${stageDef.tier}` }),
