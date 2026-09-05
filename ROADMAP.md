@@ -234,6 +234,13 @@
 - [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
 - **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 8.3 — Audit Nama Entitas Imunologi (dokumen desain pemilik) ✅
+Sumber: lampiran pemilik `konten-entitas-imunverse.md` (sistem/organ, 12 hero, 10 musuh, 9 nutrisi).
+- Laporan lengkap: `docs/audit-entitas-imunologi.md` — tabel pemetaan doc↔game + status per entitas.
+- Hasil ringkas: sistem/organ 6/6 selaras; hero 5/12 (6 belum ada; Sel T Killer vs "Sel T Pembunuh"); musuh 4/10 tanpa catatan (5 belum ada: Gram±, Toksin, Prion, Sel Abnormal stealth, Toksin Raksasa); nutrisi 1/9 nama (efek Vitamin C beda: heal vs +attack speed).
+- Temuan teknis: bonus anti-parasit Eosinofil & mekanik stealth/drain/area-burst baru teks rasa, belum di kode.
+- Keputusan 5 butir (rename, virion, nutrisi, fase konten, perilaku) menunggu arahan pemilik — tidak ada rename dieksekusi sebelum persetujuan.
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.
