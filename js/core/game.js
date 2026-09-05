@@ -172,6 +172,8 @@ export const game = {
       enemies: [],
       projectiles: [],
       pickups: [],
+      hazards: [], // Fase 9: genangan toksin (area damage statis)
+      nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 } },
       permBoost: { maxHP: 0, regen: 0, omega: 0 },
@@ -399,6 +401,42 @@ export const game = {
     }
     run.time += dt;
 
+    // Fase 9: genangan toksin — damage berkala saat player di dalamnya
+    for (let i = run.hazards.length - 1; i >= 0; i--) {
+      const hz = run.hazards[i];
+      hz.life -= dt;
+      if (hz.life <= 0) { run.hazards.splice(i, 1); continue; }
+      hz.tick = (hz.tick || 0) - dt;
+      if (player.alive && hz.tick <= 0 && Math.hypot(player.x - hz.x, player.y - hz.y) < hz.r + player.radius * 0.4) {
+        hz.tick = 0.8;
+        this.damagePlayer(hz.dps);
+      }
+    }
+
+    // Fase 9 — Toksin Raksasa: menumbuhkan genangan racun baru secara berkala
+    if (run.boss && run.boss.alive && run.boss.def.hazardDrop) {
+      const hd = run.boss.def.hazardDrop;
+      if (run.bossHazardT === undefined) run.bossHazardT = hd.interval * 0.5;
+      run.bossHazardT -= dt;
+      if (run.bossHazardT <= 0) {
+        run.bossHazardT = hd.interval;
+        const b = run.boss;
+        const a = Math.random() * Math.PI * 2;
+        run.hazards.push({ x: b.x + Math.cos(a) * hd.radius, y: b.y + Math.sin(a) * hd.radius, r: hd.radius * 0.8, dps: 5, life: 10 });
+        run.effects.spawnKillFx('ring', b.x, b.y, '#7ed957', Math.random() * 10);
+      }
+    }
+
+    // Fase 9 — Sel NK: sorot berkala mengungkap Sel Abnormal yang menyamar
+    run.nkPulseT -= dt;
+    if (run.nkPulseT <= 0) {
+      run.nkPulseT = 1.3;
+      if (run.heroDef.id === 'sel_nk') {
+        run.effects.spawnKillFx('ring', player.x, player.y, '#5ef2ff', Math.random() * 10);
+        for (const e of run.enemies) if (e.alive && e.stealth) e.nkRevealT = 1.6;
+      }
+    }
+
     // BUFF TEMPUR (Fase 8.4): hitung mundur buff sementara + regen permanen run
     if (run.tempBuffs) {
       let buffExpired = false;
@@ -514,7 +552,8 @@ export const game = {
         ? proj.damage * proj.antiParasitMult
         : proj.damage;
       const died = enemy.takeDamage(dmg);
-      this.spawnHitFeedback(enemy, dmg, died);
+      if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, 'TERLAPIS!', '#cfd8e3');
+      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
       return died;
@@ -729,7 +768,8 @@ export const game = {
       while (diff < -Math.PI) diff += Math.PI * 2;
       if (Math.abs(diff) > half) return;
       const died = e.takeDamage(damage);
-      this.spawnHitFeedback(e, damage, died);
+      if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, 'TERLAPIS!', '#cfd8e3');
+      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : damage, died);
       if (died) this.onEnemyKilled(e, null);
     });
   },
@@ -812,6 +852,7 @@ export const game = {
     scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    if (bossCfg.areaAttack) enemy.def = Object.assign({}, def, { areaAttack: bossCfg.areaAttack });
     enemy.isBoss = true;
     enemy.bossName = bossCfg.name || def.name;
     enemy.maxHP = Math.round(enemy.maxHP);
@@ -849,8 +890,9 @@ export const game = {
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
+      run.bossHazardT = undefined; // Fase 9: timer genangan di-reset per boss
       audio.bossSpawn();
-      emit('toast', { message: 'SEL KANKER MUNCUL!', kind: 'danger' });
+      emit('toast', { message: `${def.name.toUpperCase()} MUNCUL!`, kind: 'danger' });
     }
   },
 
@@ -921,11 +963,31 @@ export const game = {
       effects: run.effects,
       camera: run.camera,
       hitEnemy: (enemy, dmg) => {
-        const died = enemy.takeDamage(dmg);
+        // Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion)
+        const died = enemy.takeDamageRaw ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
         this.spawnHitFeedback(enemy, dmg, died);
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
+  },
+
+  /** Fase 9 — Prion: ubah musuh biasa di sekitar jadi versi kristal lebih kuat. */
+  convertNearbyEnemies(prion, radius) {
+    const run = this.run;
+    let count = 0;
+    for (const e of run.enemies) {
+      if (!e.alive || e === prion || e.isBoss || e.def.id === 'prion') continue;
+      if (Math.hypot(e.x - prion.x, e.y - prion.y) > radius) continue;
+      e.maxHP = Math.round(e.maxHP * 1.6);
+      e.hp = Math.min(e.maxHP, e.hp * 1.6);
+      e.damage = Math.round(e.damage * 1.3);
+      e.speed *= 1.15;
+      e.radius = Math.min(26, e.radius * 1.15);
+      e.def = Object.assign({}, e.def, { sprite: 'assets/sprites/enemy_prion.png', spriteIdle: 'assets/sprites/enemy_prion.png', spriteAttack: 'assets/sprites/enemy_prion.png' });
+      count++;
+      run.effects.spawnKillFx('ring', e.x, e.y, '#cfc6e6', Math.random() * 10);
+    }
+    if (count > 0) emit('toast', { message: `Prion mengkristalkan ${count} musuh!`, kind: 'danger' });
   },
 
   /** JUICE: hentikan update sesaat (dtk) — render tetap berjalan. */
@@ -1027,6 +1089,11 @@ export const game = {
     const nutrients = getData().nutrients;
     const xpSkin = enemy.xpPerKill >= 5 ? getNutrientDef('amino') : getNutrientDef('glukosa');
     run.pickups.push(new Pickup(xpSkin, enemy.x, enemy.y, Math.round(enemy.xpPerKill * nutrMult * 10) / 10));
+
+    // Fase 9: Toksin hancur → meninggalkan genangan racun (area hazard)
+    if (enemy.def.id === 'toksin' && !enemy.isBoss) {
+      run.hazards.push({ x: enemy.x, y: enemy.y, r: Math.max(34, enemy.radius * 2.1), dps: 5, life: 9 });
+    }
 
     // ---- Bonus drop (heal/currency/magnet) ----
     if (enemy.isBoss) {
@@ -1287,6 +1354,16 @@ export const game = {
     }
 
     // Musuh: telegraph boss di bawah, lalu sprite, lalu health bar
+    // Fase 9: genangan toksin (lapisan tanah, berdenyut)
+    for (const hz of run.hazards) {
+      ctx.globalAlpha = 0.16 + 0.06 * Math.sin(run.time * 3 + hz.x);
+      ctx.fillStyle = '#5aff5a';
+      ctx.beginPath();
+      ctx.arc(hz.x, hz.y, hz.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
     for (const e of run.enemies) {
       if (!e.alive) continue;
       if (e.def.areaAttack) drawTelegraph(ctx, e, e.def.areaAttack);
@@ -1297,11 +1374,14 @@ export const game = {
       ctx.ellipse(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.radius * 0.34, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 1;
+      const hidden = e.stealth && !e.stealthExposed; // Sel Abnormal menyamar
+      if (hidden) ctx.globalAlpha = 0.14;
       const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
       drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
         flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
       });
       drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
+      ctx.globalAlpha = 1;
     }
 
     // Pasukan imun (sekutu kecil dengan ring biru)

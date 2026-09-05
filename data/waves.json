@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "waveDuration": 25,
   "spawnIntervalBase": 1.85,
   "spawnIntervalMin": 0.4,
@@ -36,5 +36,9 @@
       "wave": 30,
       "spawn": 1.9
     }
+  ],
+  "bossRoster": [
+    "sel_kanker",
+    "toksin_raksasa"
   ]
 }

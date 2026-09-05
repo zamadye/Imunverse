@@ -234,6 +234,18 @@
 - [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
 - **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 9 — Musuh Dokumen Terlengkapi: Armor, Hazard, Stealth, Prion, Boss Kedua ✅
+Melengkapi 5 entitas musuh tersisa dari dokumen desain (total kini 13 musuh; hero 6/12).
+- [x] **Bakteri Gram Negatif** — `armorLayers:1`: membran luar MENYERAP satu tepukan (feedback "TERLAPIS!"), lalu HP rentan. Gram Positif (8.4) pakai mekanik sama (armor implisit via HP tebal tetap; GN eksplisit berlapis).
+- [x] **Toksin** — `hazard_drift`: hampir diam; saat hancur meninggalkan **genangan racun** (radius ~40, 5 dps, 9 dtk); player di dalam genangan terluka berkala; render layer hijau berdenyut.
+- [x] **Prion** — armor 3 lapis + **aura konversi** tiap 6 dtk: musuh biasa radius 150 jadi "kristal" (HP×1,6, damage×1,3, speed×1,15, sprite prion) + toast peringatan.
+- [x] **Sel Abnormal** — `stealth:true`: digambar alpha 0,14 (nyaris tak terlihat); **sorotan berkala Sel NK** (pulse tiap 1,3 dtk) mengungkapnya 1,6 dtk — selaras peran dokumen (detector).
+- [x] **Toksin Raksasa (Boss kedua)** — `boss_pattern_a` + ledakan area + **menumbuhkan genangan racun baru** tiap 8 dtk; masuk `bossRoster` waves.json (boss wave: sel_kanker → toksin_raksasa bergantian); boss bab: bab_usus=Ratu Racun (toksin_raksasa), bab_paru=Bayangan Alveolus (sel_abnormal+areaAttack), bab_limfe=Inti Pehit & bab_jantung=Mahakristal (prion+areaAttack).
+- [x] **Jurus menembus armor**: `takeDamageRaw` — jurus (Petir Sel NK dll.) mengabaikan lapisan armor, selaras peran penembus.
+- [x] **Aset**: +6 PNG (bakteri_gn, toksin, prion, sel_abnormal, toksin_raksasa idle/attack) via generator kanonik — total 123 sprite.
+- [x] **Fix kecil**: toast spawn boss kini pakai nama def (bukan hard-code "SEL KANKER"); timer genangan boss di-reset per boss.
+- **Kriteria lulus:** fase9-check e2e **9/9 RESULT OK** (13 musuh+roster+boss bab; run Sel NK; armor GN hit-1 diserap hit-2 merusak; Toksin→genangan→player terluka; Prion mengkristalkan (20→32 HP, sprite prion); stealth terungkap sorotan NK; Toksin Raksasa boss+genangan; wave 10 → toksin_raksasa; jurus tembus armor); regresi fase84-check **7/7**; regen-check **6/6** (autotest 17, jurus klik-riil, tak overlap, pause, perf 16,6 ms); node --check & check-imports ✔.
+
 ## Fase 8.4 — Eksekusi Keputusan Audit: Entitas & Nutrisi Baru ✅
 Keputusan pemilik (post-audit 8.3): (1) "Sel T Killer" TETAP; (2) induk virus → **Virus Replikasi**, pecahan tetap Virion; (3) 9 nutrisi dokumen → **pickup saat bertempur**; (4) paralel: poles kecil + entitas prioritas.
 - [x] **Nama**: `virus` → tampil **"Virus Replikasi"** (deskripsi baru; perilaku splitOnDeath sudah persis dokumen).

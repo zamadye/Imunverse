@@ -414,6 +414,13 @@ def gen_stage_enemies(out):
         "enemy_protozoa.png": enemy_capsule(128, "#3ecfb2", cilia=True),
         # Bakteri Gram Positif: dinding tebal satu lapis, ungu tua (dokumen entitas)
         "enemy_bakteri_gp.png": enemy_capsule(128, "#8d5fb3"),
+        # Fase 9 (dokumen entitas): 5 musuh baru
+        "enemy_bakteri_gn.png": enemy_capsule_gn(128, "#b39ddb"),
+        "enemy_toksin.png": enemy_puddle(128, "#6ef06e"),
+        "enemy_prion.png": enemy_crystal(128, "#9b8fae"),
+        "enemy_sel_abnormal.png": enemy_mimic(128, "#2fb89f"),
+        "enemy_toksin_raksasa.png": boss_toxin(256, "#7ed957"),
+        "enemy_toksin_raksasa_attack.png": boss_toxin(256, "#7ed957", attack=True),
         "enemy_sel_kanker.png": boss(256, "#f2825c"),
         "enemy_sel_kanker_attack.png": boss(256, "#f2825c", attack=True),
     }
@@ -510,6 +517,100 @@ def item_signal(size, color):
         d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=rgba(col, 235 - k * 65), width=int(S * (0.035 - k * 0.007)))
     soft_body(d, cx, cy, S * 0.11, col)
     kawaii_face(d, cx, cy, S * 0.11 * 1.5, col, mood="happy")
+    return done(img, size)
+
+
+def enemy_capsule_gn(size, color):
+    """Bakteri Gram Negatif — kapsul + membran luar ganda transparan."""
+    inner = enemy_capsule(size, color)
+    img, d = canvas(size)
+    S = size * SS
+    cx, cy = S * 0.5, S * 0.52
+    rx, ry = S * 0.46, S * 0.36
+    d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+              fill=rgba(mix(hex_rgb(color), (255, 255, 255), 0.55), 80),
+              outline=rgba(mix(hex_rgb(color), (255, 255, 255), 0.75), 160),
+              width=max(4, int(S * 0.03)))
+    img = done(img, size)
+    return Image.alpha_composite(img, inner)
+
+
+def enemy_puddle(size, color):
+    """Toksin — genangan racun statis neon dengan gelembung."""
+    img, d = canvas(size)
+    S = size * SS
+    cx, cy = S * 0.52, S * 0.62
+    col = hex_rgb(color)
+    pts = blob_pts(cx, cy, S * 0.36, n=26, wobble=0.16, seed=7, lobes=3)
+    d.polygon(pts, fill=rgba(col), outline=rgba(mix(col, (0, 0, 0), 0.28)),
+              width=max(3, int(S * 0.018)))
+    d.ellipse([cx - S * 0.30, cy - S * 0.12, cx + S * 0.30, cy + S * 0.16],
+              fill=rgba(mix(col, (255, 255, 255), 0.22)))
+    for bx, by, br in ((-0.16, -0.16, 0.05), (0.14, -0.22, 0.04), (0.24, -0.05, 0.035)):
+        d.ellipse([cx + S * bx - S * br, cy + S * by - S * br,
+                   cx + S * bx + S * br, cy + S * by + S * br],
+                  fill=rgba(mix(col, (255, 255, 255), 0.5)))
+    kawaii_face(d, cx, cy - S * 0.02, S * 0.20, col, mood="angry")
+    return done(img, size)
+
+
+def enemy_crystal(size, color):
+    """Prion — kristal terdistorsi abu keunguan."""
+    img, d = canvas(size)
+    S = size * SS
+    cx, cy = S * 0.5, S * 0.52
+    col = hex_rgb(color)
+    n = 9
+    pts = []
+    for i in range(n):
+        a = math.tau * i / n + 0.3
+        r = S * (0.40 if i % 2 == 0 else 0.24) * (1 + 0.09 * ((i * 13) % 5) / 5)
+        pts.append((cx + math.cos(a) * r, cy + math.sin(a) * r * 0.94))
+    d.polygon(pts, fill=rgba(col), outline=rgba(mix(col, (0, 0, 0), 0.35)),
+              width=max(3, int(S * 0.02)))
+    # faset internal
+    for i in range(0, n, 2):
+        d.line([cx, cy, pts[i][0], pts[i][1]],
+               fill=rgba(mix(col, (255, 255, 255), 0.35)), width=max(2, int(S * 0.012)))
+    d.ellipse([cx - S * 0.13, cy - S * 0.22, cx - S * 0.02, cy - S * 0.10],
+              fill=rgba(mix(col, (255, 255, 255), 0.55)))
+    kawaii_face(d, cx, cy, S * 0.21, col, mood="angry")
+    return done(img, size)
+
+
+def enemy_mimic(size, color):
+    """Sel Abnormal — menyerupai hero (distorsi glitch halus)."""
+    img = hero("mimic", color, mood="angry")
+    S = size * SS
+    # glitch: geser 3 pita horizontal secara halus
+    for (y0, y1, dx) in ((0.30, 0.38, 5), (0.52, 0.58, -4), (0.70, 0.76, 3)):
+        band = img.crop((0, int(S * y0), size, int(S * y1)))
+        img.paste(band, (dx, int(S * y0)), band)
+    d = ImageDraw.Draw(img)
+    d.line([S * 0.32, S * 0.44, S * 0.68, S * 0.44], fill=rgba((255, 255, 255, 70)), width=2)
+    return done(img, size)
+
+
+def boss_toxin(size, color, attack=False):
+    """Toksin Raksasa — boss kedua: raksasa berduri + tetesan racun."""
+    img = boss(size, color, attack)
+    S = size * SS
+    cx, cy = S * 0.5, S * 0.5
+    col = hex_rgb(color)
+    d = ImageDraw.Draw(img)
+    r = S * 0.40
+    for i in range(12):
+        a = math.tau * i / 12 + (0.18 if attack else 0)
+        x1, y1 = cx + math.cos(a) * r * 0.98, cy + math.sin(a) * r * 0.98
+        x2, y2 = cx + math.cos(a) * r * 1.14, cy + math.sin(a) * r * 1.14
+        d.line([x1, y1, x2, y2], fill=rgba(mix(col, (0, 0, 0), 0.3)),
+               width=max(4, int(S * 0.03)))
+        hr = S * 0.04
+        d.ellipse([x2 - hr, y2 - hr, x2 + hr, y2 + hr], fill=rgba(mix(col, (255, 255, 255), 0.4)))
+    for dx in (-0.22, 0.0, 0.2):
+        ty = cy + r * 0.92
+        d.ellipse([cx + S * dx - S * 0.035, ty - S * 0.05, cx + S * dx + S * 0.035, ty + S * 0.05],
+                  fill=rgba(mix(col, (255, 255, 255), 0.35)))
     return done(img, size)
 
 

@@ -58,7 +58,10 @@ export class SpawnSystem {
       this.waveTimer < cfg.waveDuration // bukan saat frame ganti wave ganda
     ) {
       this.bossSpawnedForWave = this.wave;
-      game.spawnEnemy('sel_kanker', true);
+      // Fase 9: boss bergantian sesuai roster (sel_kanker → toksin_raksasa → …)
+      const roster = (cfg.bossRoster && cfg.bossRoster.length) ? cfg.bossRoster : ['sel_kanker'];
+      const bossNo = Math.max(0, this.wave / cfg.bossWaveEvery - 1);
+      game.spawnEnemy(roster[Math.floor(bossNo) % roster.length], true);
       events.bossSpawn = true;
     }
 

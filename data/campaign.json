@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "chapters": [
     {
       "id": "bab_mulut",
@@ -19,7 +19,11 @@
       "title": "Perut Kram",
       "arenaId": "lambung",
       "killQuota": 40,
-      "boss": { "id": "sel_kanker", "name": "Raja Radang", "hpMult": 1.0 },
+      "boss": {
+        "id": "sel_kanker",
+        "name": "Raja Radang",
+        "hpMult": 1.0
+      },
       "reward": 90,
       "story": "Tiba-tiba perutmu kram — sesuatu yang busuk masuk lewat makanan! Virus meradang di Lambung. Sang imun segera datang dengan pasukannya untuk membasmi sampai bersih.",
       "objective": "Bersihkan 40 patogen, lalu kalahkan Raja Radang"
@@ -30,7 +34,11 @@
       "title": "Lorong Berliku",
       "arenaId": "lambung",
       "killQuota": 55,
-      "boss": { "id": "sel_kanker", "name": "Ibu Parasit", "hpMult": 1.3 },
+      "boss": {
+        "id": "toksin_raksasa",
+        "name": "Ratu Racun",
+        "hpMult": 1.3
+      },
       "reward": 120,
       "story": "Para parasit menyusup ke Lorong Berliku Usus Halus dan menumpang makan nutrisi. Badan lemas — tapi pasukan imun makin besar dan takut hilang.",
       "objective": "Bersihkan 55 patogen, lalu kalahkan Ibu Parasit"
@@ -41,7 +49,18 @@
       "title": "Sabit Angin",
       "arenaId": "paru",
       "killQuota": 70,
-      "boss": { "id": "sel_kanker", "name": "Ratu Sabit", "hpMult": 1.65 },
+      "boss": {
+        "id": "sel_abnormal",
+        "name": "Bayangan Alveolus",
+        "hpMult": 1.65,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
       "reward": 160,
       "story": "Angin kotor masuk — Paru-paru dipenuhi virus bersabit yang bikin sesak. Di balik kabut udara, pasukan imun berbaris membersihkan kabut itu satu per satu.",
       "objective": "Bersihkan 70 patogen, lalu kalahkan Ratu Sabit"
@@ -52,7 +71,18 @@
       "title": "Sarang Patogen",
       "arenaId": "limfe",
       "killQuota": 90,
-      "boss": { "id": "sel_kanker", "name": "Jenderal Kanker", "hpMult": 2.1 },
+      "boss": {
+        "id": "prion",
+        "name": "Inti Pehit",
+        "hpMult": 2.1,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
       "reward": 220,
       "story": "Kelenjar Limfe — markas besar pasukan imun — ternyata disusupi! Patogen bersarang di rumah sendiri. Serangan terbesar dimulai dari sini: bersihkan markas!",
       "objective": "Bersihkan 90 patogen, lalu kalahkan Jenderal Kanker"
@@ -63,7 +93,18 @@
       "title": "Pertahanan Terakhir",
       "arenaId": "saraf",
       "killQuota": 120,
-      "boss": { "id": "sel_kanker", "name": "Raja Kanker", "hpMult": 2.8 },
+      "boss": {
+        "id": "prion",
+        "name": "Mahakristal",
+        "hpMult": 2.8,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
       "reward": 350,
       "story": "Di pusat tubuh, Raja Kanker mencoba menguasai Sumbu Kehidupan. Kalau jatuh, semuanya tamat. Seluruh pasukan imun — semua sel, satu tujuan: TUBUH BERSIH!",
       "objective": "Bersihkan 120 patogen, lalu kalahkan Raja Kanker"

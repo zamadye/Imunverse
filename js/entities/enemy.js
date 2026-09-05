@@ -37,6 +37,14 @@ export class Enemy {
     this.damage = def.damage;
     this.xpPerKill = def.xpPerKill;
 
+    // Fase 9 (dokumen entitas): armor Gram±/Prion, stealth Sel Abnormal, timer konversi Prion
+    this.armorLayers = def.armorLayers || 0;
+    this.stealth = !!def.stealth;
+    this.stealthExposed = false;
+    this.nkRevealT = 0;
+    this.convertT = def.convertInterval || 0;
+    this.lastHitAbsorbed = false;
+
     // Visual
     this.rotation = Math.random() * Math.PI * 2;
     this.hitFlash = 0;
@@ -117,6 +125,21 @@ export class Enemy {
         this.y += Math.sin(angle) * this.speed * dt;
         break;
       }
+      case 'hazard_drift': {
+        // Fase 9: Toksin/Prion/Sel Abnormal — hanyut pelan + aura konversi Prion
+        this.x += (dx / dist) * this.speed * dt;
+        this.y += (dy / dist) * this.speed * dt;
+        if (this.def.convertRadius) {
+          this.convertT -= dt;
+          if (this.convertT <= 0) {
+            this.convertT = this.def.convertInterval;
+            game.convertNearbyEnemies(this, this.def.convertRadius);
+          }
+        }
+        if (this.nkRevealT > 0) this.nkRevealT -= dt;
+        this.stealthExposed = this.nkRevealT > 0;
+        break;
+      }
       case 'boss_pattern_a': {
         // Bergerak lebih lambat + serangan area berkala
         const stopDist = this.radius + 24;
@@ -167,6 +190,31 @@ export class Enemy {
    */
   takeDamage(amount) {
     if (!this.alive) return false;
+    // ARMOR (Gram Positif/Negatif/Prion): lapisan luar menyerap satu tepukan
+    if (this.armorLayers > 0) {
+      this.armorLayers -= 1;
+      this.hitFlash = 0.12;
+      this.lastHitAbsorbed = true;
+      return false;
+    }
+    this.lastHitAbsorbed = false;
+    this.hp -= amount;
+    this.hitFlash = 0.12;
+    if (this.hp <= 0) {
+      this.hp = 0;
+      this.alive = false;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Damage yang selalu mengurangi HP (mengabaikan armor) — dipakai jurus
+   * Petir Sel NK, selaras peran "penembus lapisan".
+   */
+  takeDamageRaw(amount) {
+    if (!this.alive) return false;
+    this.lastHitAbsorbed = false;
     this.hp -= amount;
     this.hitFlash = 0.12;
     if (this.hp <= 0) {
