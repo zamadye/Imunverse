@@ -582,7 +582,22 @@
   "Kalahkan total 850 patogen": "Defeat 850 pathogens in total",
   "Kalahkan total 1000 patogen": "Defeat 1000 pathogens in total",
   "Kalahkan 1 Bos": "Defeat 1 Boss",
-  "Kalahkan 3 Bos": "Defeat 3 Bosses"
+  "Kalahkan 3 Bos": "Defeat 3 Bosses",
+  "LANJUT BAB": "NEXT CHAPTER",
+  "MULAI BAB": "START CHAPTER",
+  "ANCAMAN HARI INI": "TODAY'S THREAT",
+  "TANTANG": "CHALLENGE",
+  "KAMPANYE": "CAMPAIGN",
+  "MAIN": "PLAY",
+  "UPGRADE": "UPGRADE",
+  "Lab Pasukan": "Squad Lab",
+  "Misi": "Quests",
+  "Toko": "Shop",
+  "Home": "Home",
+  "Heroes": "Heroes",
+  "Squad": "Squad",
+  "Shop": "Shop",
+  "Bio": "Bio"
  },
  "rules": [
   {

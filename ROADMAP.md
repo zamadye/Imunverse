@@ -288,6 +288,13 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
 - **Kriteria lulus 12c:** e2e **21 PASS** (termasuk asersi tap-responds), autotest 17/17, perf 16,65 ms @41 musuh; screenshot 37 (HUD terang) & 39 (Detail Hero baru).
 
+**Fase 13 — Dashboard ala MLBB (layout referensi pemilik; palet pastel dipertahankan; karakter blob asli)**
+- [x] **Struktur layout meniru referensi MLBB** (tanpa konten stub — semua modul memakai fitur asli game): **sidebar kiri** (Home/Heroes/Squad/Shop/Bag/Bio), **banner carousel 3 slide** (panggung hero · bab kampanye berikutnya · ancaman Endless + mutator harian) dengan dot navigasi + auto-rotate 5,2s, **quick-menu 5 tile** (Bonus Harian/Misi/Toko/Tas/Bio-Pedia, badge notifikasi saat bonus bisa diklaim), **baris PLAY**: kartu KAMPANYE besar (ikon organ, bab 1/6, objektif, CTA MULAI) + kolom mode (Endless dengan status unlock & mutator asli, Arena, Lab Pasukan).
+- [x] **Topbar ala profil pemain**: chip akun = avatar + nama + fraksi (selaras referensi "ShadowHunter Lv32"); currency tetap pill emas.
+- [x] **Grid duo di bawah**: evolusi + misi, papan rekor + kondisi tubuh — semua kartu existing dipertahankan & diikat ke sel grid.
+- [x] **Detail teknis**: `#btn-play-big` dirender ulang tiap show() → binding dipindah ke event delegation; banner `flex: 0 0 auto` (slide absolut tidak boleh menyusut di flex-column scroll); toast keluar-run dipindah ke atas dock (tidak menutupi topbar); ikon `icon_paru.png` baru (ikon limfa diperbaiki ke `icon_limfatik.png`); 15 string i18n baru (LANJUT BAB/TANTANG/TERKUNCI/dll).
+- **Kriteria lulus 13:** e2e **21 asersi PASS** (alur klik-riil utuh termasuk MULAI→Kampanye), autotest **17/17**, 404 audit bersih; bukti `docs/screenshots/48-dashboard13, 49-dashboard13-bab, 50-dashboard13-endless`.
+
 - **Kriteria lulus 12b:** mlbb-check e2e diperluas **21 asersi PASS** (near>far 1,32/1,04 → 1,55/1,02 setelah K dinaikkan; squash-Y 0,62; sentuh-&-tarik benar-benar MEMINDAHKAN karakter + walkPhase berjalan); autotest 17/17; perf 16,84 ms avg @41 musuh; roster 11 siluet unik terdokumentasi.
 - **Kriteria lulus:** mlbb-check e2e **19/19 PASS klik-riil** (HUD glass 3 panel; potret roster baru; 3 tombol skill + ult; klik 3 skill → cooldown berjalan; SERANG klik-riil; auto-attack membunuh tanpa input; level-up modal 3 pilihan + pilih; shield menyerap damage; pause → toggle EN → nama skill & UI berubah; resume); autotest **SELFTEST_PASS 17/17**; roster-check (11 kartu, label unlock, klik kartu→detail, potret baru; kodex 43 kartu + kartu hero T-Bolt terbuka); perf **16,65 ms avg / 17,6 p95** @39 musuh; node --check & check-imports ✔.
 

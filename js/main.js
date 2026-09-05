@@ -209,7 +209,15 @@ async function boot() {
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
   // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
-  document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('campaign'));
+  // Fase 13: tombol dirender ulang saat dashboard tampil → pakai delegasi
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#btn-play-big')) screenManager.show('campaign');
+  });
+  // Sidebar HOME: kembali ke atas beranda
+  const sideHome = document.getElementById('side-home');
+  if (sideHome) sideHome.addEventListener('click', () => {
+    document.querySelector('.dash-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons
   const fireBtn = document.getElementById('btn-fire');

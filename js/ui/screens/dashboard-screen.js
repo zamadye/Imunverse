@@ -19,7 +19,7 @@ import {
 } from '../../systems/body-system.js';
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { arenaUnlockStatus } from './arena-screen.js';
-import { getLeaderboard } from '../../systems/liveops-system.js';
+import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
 import { getSession, getFactionDef } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
@@ -27,6 +27,168 @@ import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
+
+/** Fase 13: ikon organ per arena (untuk kartu & banner kampanye). */
+const ORGAN_ICONS = {
+  limfe: 'assets/sprites/icon_limfatik.png',
+  lambung: 'assets/sprites/icon_pencernaan.png',
+  paru: 'assets/sprites/icon_paru.png',
+  saraf: 'assets/sprites/icon_saraf.png',
+};
+
+let bannerTimer = null;
+let bannerIdx = 0;
+
+function setBannerSlide(i) {
+  const slides = document.querySelectorAll('#dash-banner .banner-slide');
+  const dots = document.querySelectorAll('#banner-dots .b-dot');
+  if (!slides.length) return;
+  bannerIdx = i % slides.length;
+  slides.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
+  dots.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
+}
+
+function stopBannerTimer() {
+  if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
+}
+
+/** Fase 13: banner carousel 3 slide — panggung hero, bab berikutnya, ancaman/endless. */
+function renderBanner(meta) {
+  const dots = document.getElementById('banner-dots');
+  dots.textContent = '';
+  document.querySelectorAll('#dash-banner .banner-slide').forEach((_, k) => {
+    dots.appendChild(el('button', { class: `b-dot${k === 0 ? ' on' : ''}`, 'aria-label': `Slide ${k + 1}` }));
+  });
+  [...dots.children].forEach((d, k) => d.addEventListener('click', () => { stopBannerTimer(); setBannerSlide(k); }));
+
+  // Slide 2: bab kampanye berikutnya
+  const chapters = getData().campaign.chapters;
+  const ch = chapters.find((c) => !STATE.meta.campaignCleared?.[c.id]) || chapters[chapters.length - 1];
+  const chIdx = chapters.indexOf(ch);
+  const doneCount = chapters.filter((c) => STATE.meta.campaignCleared?.[c.id]).length;
+  const sl2 = document.getElementById('banner-chapter');
+  sl2.textContent = '';
+  sl2.appendChild(el('img', { class: 'bn-organ', src: ORGAN_ICONS[ch.arenaId] || 'assets/sprites/deco_star_pop.png', alt: '' }));
+  sl2.appendChild(el('div', { class: 'bn-tag', text: `BAB ${chIdx + 1}/${chapters.length}` }));
+  sl2.appendChild(el('b', { class: 'bn-title', text: ch.organ }));
+  sl2.appendChild(el('span', { class: 'bn-sub', text: `${ch.title} · ${ch.objective}` }));
+  sl2.appendChild(el('button', {
+    class: 'btn btn-primary bn-cta',
+    text: doneCount ? 'LANJUT BAB' : 'MULAI BAB',
+    onclick: () => screenManager.show('campaign'),
+  }));
+
+  // Slide 3: ancaman / mode endless
+  const endless = getData().modes.modes.find((m) => m.id === 'endless');
+  const status = getModeUnlockStatus(endless, meta);
+  const mut = getTodayMutator();
+  const bossDef = getData().enemies.enemies.find((e) => e.id === 'sel_kanker') || getData().enemies.enemies[0];
+  const sl3 = document.getElementById('banner-endless');
+  sl3.classList.add('bn-danger');
+  sl3.textContent = '';
+  sl3.appendChild(el('img', { class: 'bn-organ', src: spriteToDataURL(bossDef.spriteIdle || bossDef.sprite), alt: bossDef.name }));
+  sl3.appendChild(el('div', { class: 'bn-tag', text: 'ANCAMAN HARI INI' }));
+  sl3.appendChild(el('b', { class: 'bn-title', text: 'Mode Endless' }));
+  sl3.appendChild(el('span', { class: 'bn-sub', text: status.unlocked ? `Mutator: ${mut.def.name}` : status.label }));
+  sl3.appendChild(el('button', {
+    class: 'btn ' + (status.unlocked ? 'btn-gold bn-cta' : 'btn bn-cta'),
+    text: status.unlocked ? 'TANTANG' : 'TERKUNCI',
+    onclick: () => {
+      if (!status.unlocked) { screenManager.show('campaign'); return; }
+      STATE.meta.selectedMode = 'endless';
+      writeSave(STATE.meta);
+      screenManager.show('prep');
+    },
+  }));
+
+  setBannerSlide(0);
+  stopBannerTimer();
+  bannerTimer = setInterval(() => setBannerSlide(bannerIdx + 1), 5200);
+}
+
+/** Fase 13: baris quick-menu 5 tile (semua menuju fitur nyata). */
+function renderQuickRow(meta) {
+  const row = document.getElementById('quick-row');
+  row.textContent = '';
+  const claimable = checkDailyLives() && canClaimDailyReward(meta);
+  const tiles = [
+    { ico: 'assets/sprites/icon_star.png', label: 'Bonus Harian', badge: claimable ? '1' : '', act: () => document.getElementById('daily-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+    { ico: 'assets/sprites/icon_trophy.png', label: 'Misi', badge: '', act: () => document.querySelector('.missions-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+    { ico: 'assets/sprites/icon_shop.png', label: 'Toko', badge: '', act: () => screenManager.show('shop') },
+    { ico: 'assets/sprites/icon_bag.png', label: 'Tas', badge: '', act: () => screenManager.show('bag') },
+    { ico: 'assets/sprites/icon_scope.png', label: 'Bio-Pedia', badge: '', act: () => screenManager.show('codex') },
+  ];
+  for (const tl of tiles) {
+    const t = el('button', { class: 'quick-tile', title: tl.label }, [
+      tl.badge ? el('span', { class: 'qt-badge', text: tl.badge }) : null,
+      el('img', { src: tl.ico, alt: '' }),
+      el('span', { class: 'qt-label', text: tl.label }),
+    ]);
+    t.addEventListener('click', tl.act);
+    row.appendChild(t);
+  }
+}
+
+/** Fase 13: kartu KAMPANYE besar (bab aktif + tombol MULAI #btn-play-big). */
+function renderCampaignCard(meta) {
+  const card = document.getElementById('campaign-card');
+  const chapters = getData().campaign.chapters;
+  const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[chapters.length - 1];
+  const chIdx = chapters.indexOf(ch);
+  card.textContent = '';
+  card.appendChild(el('div', { class: 'cc-head' }, [
+    el('h3', { class: 'card-title', text: 'KAMPANYE' }),
+    el('span', { class: 'cc-count', text: `${chIdx + 1}/${chapters.length}` }),
+  ]));
+  card.appendChild(el('img', { class: 'cc-organ', src: ORGAN_ICONS[ch.arenaId] || 'assets/sprites/deco_star_pop.png', alt: ch.organ }));
+  card.appendChild(el('b', { class: 'cc-name', text: ch.organ }));
+  card.appendChild(el('span', { class: 'cc-title', text: ch.title }));
+  card.appendChild(el('span', { class: 'cc-obj', text: ch.objective }));
+  const play = el('button', { id: 'btn-play-big', class: 'btn-play-big', 'aria-label': 'Mulai — persiapan pertempuran' }, [
+    el('img', { src: 'assets/sprites/icon_play.png', alt: '' }),
+    el('span', { text: 'MULAI' }),
+    el('small', { id: 'play-big-sub', text: ch.organ }),
+  ]);
+  card.appendChild(play);
+}
+
+/** Fase 13: kolom mode — Endless (status asli), Arena (kartu lama), Lab Pasukan. */
+function renderModeStack(meta) {
+  const endless = getData().modes.modes.find((m) => m.id === 'endless');
+  const status = getModeUnlockStatus(endless, meta);
+  const mut = getTodayMutator();
+  const card = document.getElementById('mode-endless');
+  card.textContent = '';
+  card.classList.toggle('locked', !status.unlocked);
+  card.appendChild(el('img', { class: 'mc-ico', src: endless.icon, alt: '' }));
+  card.appendChild(el('div', { class: 'mc-body' }, [
+    el('b', { text: 'Endless' }),
+    el('span', { text: status.unlocked ? `Mutator: ${mut.def.name}` : status.label }),
+  ]));
+  card.appendChild(el('button', {
+    class: 'btn ' + (status.unlocked ? 'btn-primary mc-btn' : 'btn mc-btn'),
+    text: status.unlocked ? 'MAIN' : 'TERKUNCI',
+    disabled: !status.unlocked,
+    onclick: () => {
+      STATE.meta.selectedMode = 'endless';
+      writeSave(STATE.meta);
+      screenManager.show('prep');
+    },
+  }));
+
+  const lab = document.getElementById('mode-lab');
+  lab.textContent = '';
+  lab.appendChild(el('img', { class: 'mc-ico', src: 'assets/sprites/icon_squad.png', alt: '' }));
+  lab.appendChild(el('div', { class: 'mc-body' }, [
+    el('b', { text: 'Lab Pasukan' }),
+    el('span', { text: allyLevelBadge(meta) }),
+  ]));
+  lab.appendChild(el('button', {
+    class: 'btn btn-primary mc-btn',
+    text: 'UPGRADE',
+    onclick: () => screenManager.show('upgrade'),
+  }));
+}
 
 function fmtTime(sec) {
   const m = Math.floor(sec / 60);
@@ -305,6 +467,13 @@ export function show() {
   });
 
   renderLeaderboardCard(meta);
+  renderBanner(meta); // Fase 13: banner carousel
+  renderQuickRow(meta); // Fase 13: quick menu
+  renderCampaignCard(meta); // Fase 13: kartu kampanye besar
+  renderModeStack(meta); // Fase 13: kolom mode
+  // Fase 13: avatar profil di topbar
+  const avatarImg = document.getElementById('dash-avatar');
+  if (avatarImg && heroDef) avatarImg.src = spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle);
 
   // ---- Strip statistik (3 sel) ----
   const stats = meta.stats;
@@ -390,4 +559,4 @@ export function show() {
   }
 }
 
-export function hide() {}
+export function hide() { stopBannerTimer(); }

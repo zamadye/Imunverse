@@ -89,7 +89,7 @@ html, body {
 }
 /* Di luar pertempuran: toast kecil di ATAS layar (bukan menutup konten tengah) */
 body:not(.in-run) #toasts {
-  top: calc(8px + env(safe-area-inset-top)); bottom: auto; flex-direction: column;
+  top: auto; bottom: 122px; flex-direction: column; /* di atas dock — tidak menutupi topbar */
   width: min(72vw, 320px);
 }
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
@@ -1668,3 +1668,167 @@ img.lock-badge {
 .hl-ally-cell{display:flex;flex-direction:column;align-items:center;gap:3px}
 .hl-ally-tag{font-size:9px;font-weight:900;color:#16558f;background:#e7f3ff;border-radius:8px;padding:1px 8px;border:1px solid #c5e0fa}
 .hl-ally-cell .hl-ally{width:58px;height:58px;background:#eef7fb;border-radius:50%;border:2px solid #d8ecf7;padding:6px}
+
+/* =========================================================
+   FASE 13 — DASHBOARD ALA MLBB (layout referensi pemilik)
+   Sidebar kiri + banner carousel + quick menu + baris PLAY
+   (kartu bab besar + kolom mode) + grid duo. Palet pastel.
+   ========================================================= */
+
+/* --- Kerangka: sidebar + konten --- */
+.dash-body {
+  width: 100%; max-width: 560px; flex: 1; min-height: 0;
+  display: flex; gap: 10px;
+}
+.side-nav {
+  flex: 0 0 62px; display: flex; flex-direction: column; gap: 6px;
+  background: var(--card); border-radius: 20px; padding: 8px 6px;
+  box-shadow: var(--shadow-card); align-self: flex-start;
+  position: sticky; top: 0;
+}
+.side-btn {
+  appearance: none; border: none; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 2px; border-radius: 14px; font-family: var(--font);
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+.side-btn img { width: 24px; height: 24px; object-fit: contain; opacity: 0.75; }
+.side-btn span { font-size: 8.5px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.02em; }
+.side-btn:active { transform: scale(0.94); }
+.side-btn.active { background: var(--teal); box-shadow: 0 4px 10px rgba(31, 122, 112, 0.35); }
+.side-btn.active img { filter: brightness(0) invert(1); opacity: 1; }
+.side-btn.active span { color: #fff; }
+
+.dash-scroll { flex: 1; min-width: 0; max-width: none; display: flex; flex-direction: column; gap: 10px; }
+
+/* --- Topbar: identitas pemain (avatar + nama) --- */
+.account-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--card); border: none; border-radius: var(--pill);
+  padding: 4px 12px 4px 5px; cursor: pointer; box-shadow: var(--shadow-card);
+  font-family: var(--font);
+}
+.dash-avatar {
+  width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+  background: var(--mint); border: 2px solid var(--teal-light);
+}
+.acct-id { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.acct-id b { font-size: 11.5px; color: var(--ink); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acct-id small { font-size: 9px; color: var(--ink-soft); font-weight: 800; }
+
+/* --- Banner carousel --- */
+.banner-carousel {
+  position: relative; height: 285px; border-radius: 26px; overflow: hidden;
+  box-shadow: var(--shadow-card);
+  flex: 0 0 auto; /* jangan menyusut di flex-column yang scroll (isi slide absolut) */
+}
+.banner-track, .banner-slide { position: absolute; inset: 0; }
+.banner-slide { opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
+.banner-slide.on { opacity: 1; pointer-events: auto; }
+.banner-slide .hero-stage { height: 100%; min-height: 0; border-radius: 0; }
+.banner-slide:nth-child(2) {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(169, 215, 149, 0.5) 0 44px, transparent 45px),
+    radial-gradient(circle at 12% 72%, rgba(191, 227, 216, 0.7) 0 40px, transparent 41px),
+    linear-gradient(160deg, #eaf4dd, #cfe9df);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; text-align: center; padding: 16px;
+}
+.banner-slide.bn-danger {
+  background:
+    radial-gradient(circle at 82% 24%, rgba(242, 130, 92, 0.35) 0 46px, transparent 47px),
+    radial-gradient(circle at 14% 70%, rgba(248, 178, 154, 0.45) 0 34px, transparent 35px),
+    linear-gradient(160deg, #fdeadd, #f9d7c4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; text-align: center; padding: 16px;
+}
+.bn-organ { width: 92px; height: 92px; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(31, 74, 66, 0.25)); animation: bob 3.4s ease-in-out infinite; }
+.bn-tag { font-size: 9.5px; font-weight: 900; letter-spacing: 0.14em; color: var(--teal-deep); background: rgba(255, 253, 244, 0.8); border-radius: var(--pill); padding: 3px 10px; }
+.bn-danger .bn-tag { color: #b3542f; }
+.bn-title { font-size: 21px; font-weight: 900; color: var(--teal-dark); }
+.bn-danger .bn-title { color: #7c3a1d; }
+.bn-sub { font-size: 11px; font-weight: 700; color: var(--ink-soft); max-width: 250px; }
+.bn-cta { margin-top: 5px; min-width: 150px; }
+.banner-dots {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 3;
+}
+.b-dot {
+  width: 7px; height: 7px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(18, 63, 58, 0.25); padding: 0;
+}
+.b-dot.on { background: var(--gold-deep); width: 16px; border-radius: 6px; }
+
+/* --- Quick menu 5 tile --- */
+.quick-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.quick-tile {
+  position: relative; appearance: none; border: none; cursor: pointer; font-family: var(--font);
+  background: var(--card); border-radius: 17px; padding: 9px 3px 7px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  box-shadow: var(--shadow-card); transition: transform 0.08s ease;
+}
+.quick-tile:active { transform: scale(0.93); }
+.quick-tile img { width: 27px; height: 27px; object-fit: contain; }
+.qt-label { font-size: 8.6px; font-weight: 900; color: var(--ink); text-align: center; line-height: 1.05; }
+.qt-badge {
+  position: absolute; top: -4px; right: -2px; min-width: 16px; height: 16px;
+  background: var(--coral); color: #fff; border-radius: 9px; font-size: 9px;
+  font-weight: 900; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--cream); padding: 0 3px;
+}
+
+/* --- Baris PLAY: kartu bab + kolom mode --- */
+.play-row { display: grid; grid-template-columns: 1.12fr 1fr; gap: 10px; align-items: stretch; }
+.campaign-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  background:
+    radial-gradient(circle at 84% 14%, rgba(169, 215, 149, 0.45) 0 34px, transparent 35px),
+    radial-gradient(circle at 10% 84%, rgba(191, 227, 216, 0.6) 0 30px, transparent 31px),
+    linear-gradient(165deg, #f2f8e8, #dcefe6);
+  padding: 13px 13px 15px;
+}
+.cc-head { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.cc-count { font-size: 10px; font-weight: 900; color: var(--teal-deep); background: rgba(255, 253, 244, 0.85); padding: 2px 9px; border-radius: var(--pill); }
+.cc-organ { width: 74px; height: 74px; object-fit: contain; margin-top: 2px; filter: drop-shadow(0 8px 10px rgba(31, 74, 66, 0.22)); }
+.cc-name { font-size: 16.5px; font-weight: 900; color: var(--teal-dark); }
+.cc-title { font-size: 11px; font-weight: 800; color: var(--ink-soft); }
+.cc-obj { font-size: 10px; font-weight: 700; color: var(--ink-soft); opacity: 0.85; }
+.campaign-card .btn-play-big {
+  width: 100%; margin: 8px 0 0; padding: 11px 16px;
+}
+.campaign-card .btn-play-big span { font-size: 17px; }
+.campaign-card .btn-play-big small { font-size: 9.5px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mode-stack { display: flex; flex-direction: column; gap: 10px; }
+.mode-card {
+  display: flex; align-items: center; gap: 9px; padding: 10px 11px;
+  background: var(--card); flex: 1;
+}
+.mode-card.locked { opacity: 0.75; }
+.mc-ico { width: 34px; height: 34px; object-fit: contain; flex: 0 0 auto; }
+.mc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.mc-body b { font-size: 12.5px; color: var(--ink); }
+.mc-body span { font-size: 9.3px; font-weight: 700; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-btn { font-size: 10.5px; padding: 8px 12px; min-height: 0; flex: 0 0 auto; }
+
+/* --- Duo grid: evolusi+misi, rekor+tubuh --- */
+.duo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.duo-row .card { margin: 0; }
+.duo-row .daily-card, .duo-row .arena-card { display: flex; }
+.duo-row .lb-list { font-size: 10px; }
+.duo-row .body-card .bar-track { height: 8px; }
+
+/* Stat strip lebih ramping */
+.stat-strip { gap: 8px; }
+.stat-cell { padding: 8px 4px; border-radius: 15px; }
+.stat-cell b { font-size: 15px; }
+
+/* Arena card dalam kolom mode: ramping */
+#arena-card { padding: 10px 11px; display: flex; align-items: center; gap: 8px; flex: 1; }
+#arena-card .card-title { margin-bottom: 0; font-size: 11px; }
+
+@media (max-width: 355px) {
+  .side-nav { flex-basis: 54px; }
+  .play-row { grid-template-columns: 1fr; }
+  .duo-row { grid-template-columns: 1fr; }
+}

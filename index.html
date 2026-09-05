@@ -41,61 +41,107 @@
       <!-- ============ DASHBOARD ============ -->
       <section id="screen-dashboard" class="screen" data-screen="dashboard">
         <header class="topbar">
+          <button id="account-chip" class="account-chip hidden" title="Ganti akun" aria-label="Akun">
+            <img id="dash-avatar" class="dash-avatar" src="assets/sprites/portrait_tcd8.png" alt="" />
+            <span class="acct-id">
+              <b id="account-name">—</b>
+              <small><span id="account-faction" class="faction-tag">Imun</span></small>
+            </span>
+          </button>
           <div class="currency-chip" title="Antibodi (mata uang)">
             <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
             <span id="dash-currency">0</span>
           </div>
-          <button id="account-chip" class="account-chip hidden" title="Ganti akun" aria-label="Akun">
-            <span id="account-name">—</span>
-            <span id="account-faction" class="faction-tag">Imun</span>
-          </button>
           <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
           <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
           <button id="btn-codex" class="icon-btn" title="Bio-Pedia" aria-label="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="Bio-Pedia" /></button>
         </header>
 
-        <div class="dash-scroll">
-          <!-- Panggung hero ala mockup -->
-          <section class="hero-stage" id="dash-stage">
-            <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
-            <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
-            <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
-            <div id="stage-enemies" class="stage-enemies"></div>
-            <img id="dash-hero-img" class="stage-hero" alt="hero" />
-            <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
-            <div class="stage-badge lvl" id="dash-level-badge" role="button" aria-label="Buka Lab Pasukan"></div>
-            <div class="stage-info">
-              <b id="dash-hero-name">—</b>
-              <span id="dash-hero-title">—</span>
+        <div class="dash-body">
+          <!-- ===== SIDEBAR NAV (kiri, ala MLBB) ===== -->
+          <nav class="side-nav" aria-label="Navigasi utama">
+            <button class="side-btn active" id="side-home" title="Beranda">
+              <img src="assets/sprites/icon_home.png" alt="" /><span>Home</span>
+            </button>
+            <button class="side-btn" data-nav="roster" title="Heroes">
+              <img src="assets/sprites/icon_heroes.png" alt="" /><span>Heroes</span>
+            </button>
+            <button class="side-btn" data-nav="upgrade" title="Squad">
+              <img src="assets/sprites/icon_squad.png" alt="" /><span>Squad</span>
+            </button>
+            <button class="side-btn" data-nav="shop" title="Toko">
+              <img src="assets/sprites/icon_shop.png" alt="" /><span>Shop</span>
+            </button>
+            <button class="side-btn" data-nav="bag" title="Tas">
+              <img src="assets/sprites/icon_bag.png" alt="" /><span>Bag</span>
+            </button>
+            <button class="side-btn" data-nav="codex" title="Bio-Pedia">
+              <img src="assets/sprites/icon_scope.png" alt="" /><span>Bio</span>
+            </button>
+          </nav>
+
+          <div class="dash-scroll">
+            <!-- ===== BANNER CAROUSEL ===== -->
+            <section id="dash-banner" class="banner-carousel" aria-label="Sorotan">
+              <div class="banner-track">
+                <!-- Slide 1: panggung hero (elemen asli dipertahankan) -->
+                <div class="banner-slide on" data-slide="0">
+                  <section class="hero-stage" id="dash-stage">
+                    <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
+                    <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
+                    <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
+                    <div id="stage-enemies" class="stage-enemies"></div>
+                    <img id="dash-hero-img" class="stage-hero" alt="hero" />
+                    <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
+                    <div class="stage-badge lvl" id="dash-level-badge" role="button" aria-label="Buka Lab Pasukan"></div>
+                    <div class="stage-info">
+                      <b id="dash-hero-name">—</b>
+                      <span id="dash-hero-title">—</span>
+                    </div>
+                  </section>
+                </div>
+                <!-- Slide 2: bab kampanye berikutnya (diisi JS) -->
+                <div class="banner-slide" data-slide="1" id="banner-chapter"></div>
+                <!-- Slide 3: mode endless / ancaman (diisi JS) -->
+                <div class="banner-slide" data-slide="2" id="banner-endless"></div>
+              </div>
+              <div class="banner-dots" id="banner-dots"></div>
+            </section>
+
+            <!-- ===== QUICK MENU ===== -->
+            <div id="quick-row" class="quick-row"><!-- diisi JS --></div>
+
+            <!-- ===== BARIS PLAY: kartu bab besar + kolom mode ===== -->
+            <div class="play-row">
+              <section class="card campaign-card" id="campaign-card"><!-- diisi JS --></section>
+              <div class="mode-stack">
+                <section class="card mode-card" id="mode-endless"><!-- diisi JS --></section>
+                <section id="arena-card" class="card arena-card"><!-- diisi JS --></section>
+                <section class="card mode-card" id="mode-lab"><!-- diisi JS --></section>
+              </div>
             </div>
-          </section>
 
-          <button id="btn-play-big" class="btn-play-big" aria-label="Mulai — persiapan pertempuran">
-            <img src="assets/sprites/icon_play.png" alt="" />
-            <span>MULAI</span>
-            <small id="play-big-sub">Sel T Killer · Limfe</small>
-          </button>
+            <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
 
-          <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
+            <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
 
-          <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
+            <div class="duo-row">
+              <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
+              <div class="card missions-card">
+                <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
+                <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
+              </div>
+            </div>
 
-          <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
-
-          <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
-
-          <div id="arena-card" class="card arena-card"><!-- diisi JS --></div>
-
-          <div id="leaderboard-card" class="card lb-card"><!-- diisi JS: papan rekor --></div>
-
-          <div class="card missions-card">
-            <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
-            <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
+            <div class="duo-row">
+              <div id="leaderboard-card" class="card lb-card"><!-- diisi JS --></div>
+              <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
+            </div>
           </div>
         </div>
 
-        <!-- Dock navigasi ala mockup: Play · Heroes · Squad · Shop -->
+        <!-- Dock navigasi bawah (tetap) -->
         <nav class="dock">
           <button class="dock-btn primary" id="btn-play" aria-label="Mulai run">
             <span class="dock-ico">
