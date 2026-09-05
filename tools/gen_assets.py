@@ -162,7 +162,42 @@ def glow(img, color, radius, alpha=80):
 # STAGE 1 — HERO (8 aset)
 # =====================================================================
 
-def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False, lobes=0, receptors=False, granules=False):
+def body_radius(kind, th, R):
+    """Fase 12b: siluet tubuh per hero — r(theta) supaya tiap hero BEDA BENTUK."""
+    if kind == 'ameba':      return R * (1 + 0.10 * math.sin(3 * th + 1.2) + 0.05 * math.sin(5 * th))
+    if kind == 'dendrite':   return R * (0.66 + 0.42 * max(0.0, math.sin(4 * th + 0.6)) ** 3)   # 4 lengan dendrit runcing
+    if kind == 'lobed3':     return R * (0.80 + 0.26 * max(0.0, math.cos(3 * th)) ** 1.1)       # 3 lobus (polimorfonuklear)
+    if kind == 'teardrop':   return R * (0.74 + 0.30 * ((0.5 + 0.5 * math.sin(th)) ** 0.7))     # lebar bawah, sempit atas
+    if kind == 'burst':      return R * (0.60 + 0.46 * abs(math.sin(3.5 * th)) ** 0.55)         # 7 duri tajam
+    if kind == 'zigzag':     return R * (0.80 + 0.20 * (1.0 if math.cos(6 * th) > 0 else 0.0))  # gerigi petir
+    if kind == 'sunray':     return R * (0.80 + 0.24 * max(0.0, math.cos(12 * th)) ** 2)        # 12 sinar
+    if kind == 'bean':       return R * (0.90 + 0.14 * math.cos(th - 2.4))                      # asimetris
+    if kind == 'mast':       return R * (0.88 + 0.12 * max(0.0, math.cos(6 * th)) ** 0.8)       # 6 tonjolan granula
+    if kind == 'oval':       return R * (0.88 + 0.14 * abs(math.cos(th)) ** 3)                  # buah samping
+    return R
+
+
+def poly_body(d, cx, cy, R, color, kind, outline_k=0.45, ry=1.0):
+    """Tubuh poligon bergradien radial (varian soft_body utk bentuk non-bulat)."""
+    hi = mix(color, (255, 255, 255), 0.45)
+    lo = mix(color, (0, 0, 0), 0.18)
+    steps = 18
+    N = 160
+    def poly(t):
+        pts = []
+        for k in range(N):
+            th = math.tau * k / N
+            rr = body_radius(kind, th, R) * t
+            pts.append((cx + math.cos(th) * rr, cy + math.sin(th) * rr * ry))
+        pts.append(pts[0])
+        return pts
+    for i in range(steps, 0, -1):
+        d.polygon(poly(i / steps), fill=rgba(mix(hi, lo, 1 - i / steps)))
+    out = rgba(mix(color, (0, 0, 0), outline_k))
+    d.line(poly(1.0), fill=out, width=max(3, int(R * 0.07)), joint="curve")
+
+
+def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False, lobes=0, receptors=False, granules=False, body=None):
     img, d = canvas(size)
     S = size * SS
     cx = S * 0.5
@@ -193,7 +228,14 @@ def hero(name, color, size=128, mood="happy", attack=False, spikes=0, big=False,
             d.ellipse([x2 - hr, y2 - hr, x2 + hr, y2 + hr], outline=rgba(mix(col, (0, 0, 0), 0.3)),
                       width=max(2, int(S * 0.008)))
     stub_arms(d, cx, cy, r, col)
-    soft_body(d, cx, cy, r, col)
+    if body:
+        poly_body(d, cx, cy, r, col, body, ry=0.94 if body in ('teardrop', 'mast', 'oval') else 1.0)
+        if body == 'doublering':
+            # Treg: ring ganda tebal (peacekeeper)
+            ring = rgba(mix(col, (0, 0, 0), 0.30))
+            d.ellipse([cx - r * 0.72, cy - r * 0.72, cx + r * 0.72, cy + r * 0.72], outline=ring, width=max(4, int(r * 0.10)))
+    else:
+        soft_body(d, cx, cy, r, col)
     # Granula sitoplasmik (Eosinofil) — titik toksik di dalam tubuh
     if granules:
         gcol = tuple(int(c * 0.62) for c in col) + (235,)
@@ -248,18 +290,18 @@ def gen_stage_heroes(out):
 def gen_stage_heroes_v2(out):
     print("STAGE 1b — 11 Hero MLBB (22 aset + 11 potret)")
     heroes = {
-        # id: (warna, params hero(), warna portrait)
-        "macrophage": ("#4a7c59", dict(big=True, lobes=1, granules=True)),   # Mako — Tank
-        "dendritic":  ("#ff8c00", dict(spikes=14, granules=True)),           # Dendri — Support
-        "neutrophil": ("#1a5276", dict(granules=True)),                      # Neutron — Damage
-        "eosinophil": ("#ff6b81", dict(granules=True, lobes=1)),             # Eos — Damage
-        "basophil":   ("#8e44ad", dict(granules=True, spikes=7)),            # Baso — Support
-        "mastcell":   ("#a03328", dict(big=True, granules=True)),            # Mastia — Tank
-        "tcd8":       ("#00d2ff", dict(spikes=4)),                           # T-Bolt — Damage
-        "tcd4":       ("#f1c40f", dict(receptors=True)),                     # Helia — Support
-        "treg":       ("#2ecc71", dict(receptors=True, lobes=1)),            # Treg — Support
-        "bcell":      ("#bb8fce", dict(receptors=True, granules=True)),      # Bella — Damage
-        "nkcell":     ("#4a235a", dict(spikes=9)),                           # Nyx — Damage
+        # id: (warna, params hero()) — Fase 12b: SILUET UNIK per hero
+        "macrophage": ("#4a7c59", dict(big=True, body="ameba", granules=True)),      # Mako — ameba raksasa
+        "dendritic":  ("#ff8c00", dict(body="dendrite", granules=True)),             # Dendri — bintang dendrit
+        "neutrophil": ("#1a5276", dict(body="lobed3", granules=True)),               # Neutron — 3 lobus
+        "eosinophil": ("#ff6b81", dict(body="oval", granules=True, spikes=2)),       # Eos — oval pemburu
+        "basophil":   ("#8e44ad", dict(body="teardrop", granules=True)),             # Baso — tetes granula
+        "mastcell":   ("#a03328", dict(big=True, body="mast", granules=True)),       # Mastia — benteng granula
+        "tcd8":       ("#00d2ff", dict(body="zigzag")),                              # T-Bolt — gerigi petir
+        "tcd4":       ("#f1c40f", dict(body="sunray", receptors=True)),              # Helia — matahari komando
+        "treg":       ("#2ecc71", dict(body="doublering", lobes=1)),                 # Treg — ring ganda
+        "bcell":      ("#bb8fce", dict(body="bean", receptors=True, granules=True)), # Bella — kacang + antena Y
+        "nkcell":     ("#4a235a", dict(body="burst")),                               # Nyx — ledakan duri
     }
     outp = {}
     for hid, (col, params) in heroes.items():
@@ -269,14 +311,14 @@ def gen_stage_heroes_v2(out):
 
 
 def gen_stage_portraits_v2(out):
-    print("STAGE 4b — Potret 11 Hero MLBB")
+    print("STAGE 4b — Potret 11 Hero MLBB (siluet unik)")
     cols = {
-        "macrophage": ("#4a7c59", 0), "dendritic": ("#ff8c00", 14), "neutrophil": ("#1a5276", 0),
-        "eosinophil": ("#ff6b81", 0), "basophil": ("#8e44ad", 7), "mastcell": ("#a03328", 0),
-        "tcd8": ("#00d2ff", 4), "tcd4": ("#f1c40f", 0), "treg": ("#2ecc71", 0),
-        "bcell": ("#bb8fce", 0), "nkcell": ("#4a235a", 9),
+        "macrophage": ("#4a7c59", "ameba"), "dendritic": ("#ff8c00", "dendrite"), "neutrophil": ("#1a5276", "lobed3"),
+        "eosinophil": ("#ff6b81", "oval"), "basophil": ("#8e44ad", "teardrop"), "mastcell": ("#a03328", "mast"),
+        "tcd8": ("#00d2ff", "zigzag"), "tcd4": ("#f1c40f", "sunray"), "treg": ("#2ecc71", "doublering"),
+        "bcell": ("#bb8fce", "bean"), "nkcell": ("#4a235a", "burst"),
     }
-    return {f"portrait_{hid}.png": portrait(128, col, spikes=sp) for hid, (col, sp) in cols.items()}
+    return {f"portrait_{hid}.png": portrait(128, col, body=bd) for hid, (col, bd) in cols.items()}
 
 
 # =====================================================================
@@ -690,7 +732,7 @@ def gen_stage_items(out):
 # STAGE 4 — POTRET HERO (4 aset)
 # =====================================================================
 
-def portrait(size, color, spikes=0):
+def portrait(size, color, spikes=0, body=None):
     img, d = canvas(size)
     S = size * SS
     cx, cy = S * 0.5, S * 0.52
@@ -702,7 +744,13 @@ def portrait(size, color, spikes=0):
             x2, y2 = cx + math.cos(a) * r * 1.18, cy + math.sin(a) * r * 1.18
             hr = S * 0.05
             d.ellipse([x2 - hr, y2 - hr, x2 + hr, y2 + hr], fill=rgba(mix(col, (255, 255, 255), 0.3)))
-    soft_body(d, cx, cy, r, col)
+    if body:
+        poly_body(d, cx, cy, r, col, body, ry=0.94 if body in ('teardrop', 'mast', 'oval') else 1.0)
+        if body == 'doublering':
+            ring = rgba(mix(col, (0, 0, 0), 0.30))
+            d.ellipse([cx - r * 0.72, cy - r * 0.72, cx + r * 0.72, cy + r * 0.72], outline=ring, width=max(4, int(r * 0.10)))
+    else:
+        soft_body(d, cx, cy, r, col)
     kawaii_face(d, cx, cy, r, col, mood="happy")
     return done(img, size)
 

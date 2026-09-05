@@ -46,8 +46,8 @@ import { audio } from '../systems/audio-system.js';
 import { Ally } from '../entities/ally.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
-import { Camera } from '../render/camera.js';
-import { drawBackground, setArenaPalette } from '../render/background.js';
+import { Camera, PERSP } from '../render/camera.js';
+import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
 import {
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
@@ -1398,116 +1398,215 @@ export const game = {
     // Latar prosedural (screen-space, parallax internal)
     drawBackground(ctx, cam.x, cam.y, w, h, time);
 
-    // ---- Dunia (relatif kamera) ----
-    ctx.save();
-    cam.apply(ctx, w, h);
+    // ---- DUNIA PSEUDO-3D (Fase 12b): kamera miring, yang jauh lebih kecil ----
+    const P = cam.makeProjector(w, h);
+    cam.setPlayerScreen(P.project(player.x, player.y));
+    drawArena3D(ctx, P, time);
 
-    // Pickup nutrisi (sprite + glow pulse lembut)
-    for (const p of run.pickups) {
-      drawPulseGlow(ctx, p.x, p.y, p.radius * 1.4, p.def.color, time, p.uid * 0.13, 0.7);
-      const fade = p.lifetime - p.age < 4 ? (Math.sin(time * 8) * 0.25 + 0.65) : 1; // kedip menjelang hilang
-      drawSprite(ctx, p.def.sprite, p.x, p.y, p.radius * 2.4, 0, { alpha: fade });
-    }
+    /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
+    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0 } = {}) => {
+      const q = P.project(x, y);
+      ctx.save();
+      ctx.translate(q.x, q.y - lift * q.s);
+      if (tilt) ctx.rotate(tilt);
+      ctx.scale(q.s * flip, q.s);
+      ctx.translate(-x, -y);
+      return q;
+    };
+    /** Ground: bentukan di lantai — dimampetkan (kamera miring). */
+    const ground = (x, y) => {
+      const q = P.project(x, y);
+      ctx.save();
+      ctx.translate(q.x, q.y);
+      ctx.scale(q.s, q.s * PERSP.YS);
+      ctx.translate(-x, -y);
+      return q;
+    };
+    const dropShadow = (x, y, r, alpha = 0.12) => {
+      ground(x, y);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#0a3530';
+      ctx.beginPath();
+      ctx.ellipse(x, y, r, r, 0, 0, Math.PI * 2); // squash Y via transform ground
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    };
 
-    // Musuh: telegraph boss di bawah, lalu sprite, lalu health bar
-    // Fase 9: genangan toksin (lapisan tanah, berdenyut)
+    // ===== LAPISAN TANAH =====
+    // Genangan toksin (berdenyut)
     for (const hz of run.hazards) {
+      ground(hz.x, hz.y);
       ctx.globalAlpha = 0.16 + 0.06 * Math.sin(run.time * 3 + hz.x);
       ctx.fillStyle = '#5aff5a';
       ctx.beginPath();
       ctx.arc(hz.x, hz.y, hz.r, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 1;
+      ctx.restore();
     }
-
+    // Telegraph area attack musuh
     for (const e of run.enemies) {
-      if (!e.alive) continue;
-      if (e.def.areaAttack) drawTelegraph(ctx, e, e.def.areaAttack);
-      // Shadow pipih ala mockup (bayangan lembut di bawah entitas)
-      ctx.globalAlpha = 0.10;
-      ctx.fillStyle = '#0a3530';
-      ctx.beginPath();
-      ctx.ellipse(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.radius * 0.34, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      const hidden = e.stealth && !e.stealthExposed; // Sel Abnormal menyamar
-      if (hidden) ctx.globalAlpha = 0.14;
-      const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
-      drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
-        flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
-      });
-      drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
-      ctx.globalAlpha = 1;
-    }
-
-    // Pasukan imun (sekutu kecil dengan ring biru)
-    for (const ally of run.allies) ally.render(ctx);
-
-    // Indikator arah aim (stick kanan / mouse): chevron kecil di depan hero
-    {
-      const aim = this.input.getAimInfo(
-        player.x - cam.x + w / 2,
-        player.y - cam.y + h / 2
-      );
-      if (aim.active) {
-        const ax = player.x + Math.cos(aim.angle) * (player.radius + 22);
-        const ay = player.y + Math.sin(aim.angle) * (player.radius + 22);
-        ctx.save();
-        ctx.translate(ax, ay);
-        ctx.rotate(aim.angle);
-        ctx.globalAlpha = 0.85;
-        ctx.beginPath();
-        ctx.moveTo(7, 0);
-        ctx.lineTo(-5, 6);
-        ctx.lineTo(-2, 0);
-        ctx.lineTo(-5, -6);
-        ctx.closePath();
-        ctx.fillStyle = run.heroDef.color;
-        ctx.fill();
+      if (e.alive && e.def.areaAttack) {
+        ground(e.x, e.y);
+        drawTelegraph(ctx, e, e.def.areaAttack);
         ctx.restore();
       }
     }
-
-    // Player (blink saat i-frames, sprite attack saat baru menyerang)
+    // Bayangan semua entitas (volume: badan "berdiri" di atas bayangan)
+    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.stealth && !e.stealthExposed ? 0.05 : 0.13);
+    for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.9, a.radius * 0.8, 0.11);
     if (player.alive) {
-      const blink = player.iframes > 0 && Math.floor(time * 12) % 2 === 0;
-      if (!blink) {
-        const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-        // Aura mockup: ring putih gradasi lembut di belakang karakter
-        drawSprite(ctx, 'assets/sprites/deco_aura.png', player.x, player.y, player.radius * 4.4, 0, { alpha: 0.8 });
-        drawPulseGlow(ctx, player.x, player.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
-        const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
-        const evo = run.evoStage;
-        // OVERLAY EVOLUSI — bentuk hero berubah sesuai tahap (terlihat jelas):
-        if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', player.x, player.y + bodySize * 0.34, bodySize * 0.62, 0, {});
-        if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', player.x, player.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
-        drawSprite(ctx, path, player.x, player.y, bodySize, 0, {});
-        if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', player.x, player.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
-        if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', player.x + bodySize * 0.3, player.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
-      }
+      dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.16);
+      // Ring tim ala MOBA di bawah hero (warna peran) + aura lembut
+      ground(player.x, player.y + player.radius * 0.92);
+      ctx.strokeStyle = run.heroDef.roleColor || run.heroDef.color;
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.ellipse(player.x, player.y, player.radius * 1.25, player.radius * 1.25, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.restore();
     }
 
-    // Proyektil (shape dinamis)
-    for (const p of run.projectiles) {
-      if (p.alive) drawProjectile(ctx, p, time);
+    // Glow pickup = lingkaran lantai
+    for (const p of run.pickups) {
+      ground(p.x, p.y);
+      drawPulseGlow(ctx, p.x, p.y, p.radius * 1.4, p.def.color, time, p.uid * 0.13, 0.7);
+      ctx.restore();
     }
 
-    // Efek (tebasan, blast, spark) & partikel & angka damage
+    // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
+    const bobOf = { player: 0 };
+    const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
+    const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : 0;
+    const pBody = {
+      x: player.x + (player.alive ? Math.cos(player.facing) * pLunge : 0),
+      y: player.y + (player.alive ? Math.sin(player.facing) * pLunge * PERSP.YS : 0),
+    };
+
+    const draws = [];
+    for (const p of run.pickups) {
+      const fade = p.lifetime - p.age < 4 ? (Math.sin(time * 8) * 0.25 + 0.65) : 1;
+      draws.push({ y: p.y, fn: () => {
+        billboard(p.x, p.y, { lift: p.radius * 0.5 + Math.sin(time * 3 + p.uid) * 1.6 });
+        drawSprite(ctx, p.def.sprite, p.x, p.y, p.radius * 2.4, 0, { alpha: fade });
+        ctx.restore();
+      } });
+    }
+    for (const e of run.enemies) {
+      if (!e.alive) continue;
+      draws.push({ y: e.y, fn: () => {
+        const hidden = e.stealth && !e.stealthExposed;
+        const bob = Math.abs(Math.sin(time * 6.4 + e.weavePhase * 7)) * 2.4;
+        const flip = player.x < e.x ? -1 : 1;
+        billboard(e.x, e.y, { lift: e.radius * 0.62 + bob, flip });
+        if (hidden) ctx.globalAlpha = 0.14;
+        const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
+          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
+        });
+        ctx.globalAlpha = 1;
+        // HP bar mini di atas kepala (tanpa bob — anchor stabil)
+        ctx.restore();
+        billboard(e.x, e.y, { lift: e.radius * 0.62 });
+        drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
+        ctx.restore();
+      } });
+    }
+    for (const a of run.allies) {
+      draws.push({ y: a.y, fn: () => {
+        billboard(a.x, a.y, { lift: a.radius * 0.55 });
+        a.render(ctx);
+        ctx.restore();
+      } });
+    }
+    if (player.alive) {
+      draws.push({ y: player.y, fn: () => {
+        const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
+        if (!blink) {
+          const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          const tilt = player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0;
+          const flip = Math.cos(player.facing) < 0 ? -1 : 1;
+          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
+          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
+          const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
+          const evo = run.evoStage;
+          if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', pBody.x, pBody.y + bodySize * 0.34, bodySize * 0.62, 0, {});
+          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
+          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+          if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', pBody.x, pBody.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
+          if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', pBody.x + bodySize * 0.3, pBody.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
+          ctx.restore();
+
+          // NAMEPLATE ala MOBA: nama hero + level di atas kepala
+          billboard(player.x, player.y, { lift: player.radius * 0.62 });
+          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius - 30;
+          ctx.fillStyle = 'rgba(2,8,14,0.58)';
+          ctx.strokeStyle = player.heroDef.color;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(nx, ny, nw, nh, 8);
+          else ctx.rect(nx, ny, nw, nh);
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fff';
+          ctx.font = '900 9.5px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${player.heroDef.name} · Lv ${run.level}`, player.x, ny + nh / 2 + 0.5);
+          ctx.restore();
+
+          // Indikator arah aim (chevron) — sudut dunia sudah dikompensasi squash
+          const aim = this.input.getAimInfo(cam.getPlayerScreen()?.x ?? w / 2, cam.getPlayerScreen()?.y ?? h / 2);
+          if (aim.active) {
+            const wa = Math.atan2(Math.sin(aim.angle) / PERSP.YS, Math.cos(aim.angle));
+            billboard(player.x, player.y, { lift: player.radius * 0.62 });
+            ctx.save();
+            ctx.translate(player.x + Math.cos(wa) * (player.radius + 22), player.y + Math.sin(wa) * (player.radius + 22) * PERSP.YS);
+            ctx.rotate(wa);
+            ctx.globalAlpha = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(7, 0); ctx.lineTo(-5, 6); ctx.lineTo(-2, 0); ctx.lineTo(-5, -6);
+            ctx.closePath();
+            ctx.fillStyle = run.heroDef.color;
+            ctx.fill();
+            ctx.restore();
+            ctx.restore();
+          }
+        }
+      } });
+    }
+    for (const pr of run.projectiles) {
+      if (pr.alive) draws.push({ y: pr.y, fn: () => {
+        billboard(pr.x, pr.y, { lift: 6 });
+        drawProjectile(ctx, pr, time);
+        ctx.restore();
+      } });
+    }
+    draws.sort((A, B) => A.y - B.y);
+    for (const d of draws) d.fn();
+
+    // ===== LAPISAN EFEK (billboard ringan, mengikuti kedalaman) =====
     const drawImageAt = (path, x, y, size, rotation = 0, opts = {}) => drawSprite(ctx, path, x, y, size, rotation, opts);
     for (const fx of run.effects.effects) {
+      billboard(fx.x, fx.y, { lift: 4 });
       if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
       else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
+      ctx.restore();
     }
     for (const pt of run.effects.particles) {
+      billboard(pt.x, pt.y, { lift: 2 });
       drawParticle(ctx, pt);
+      ctx.restore();
     }
     for (const n of run.effects.numbers) {
+      billboard(n.x, n.y, { lift: 10 });
       drawDamageNumber(ctx, n, time);
+      ctx.restore();
     }
-
-    ctx.restore();
 
     // ---- Screen-space overlays ----
     cam.drawBossIndicatorIfOffscreen(ctx, run.boss, w, h, time);

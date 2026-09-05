@@ -47,6 +47,8 @@ export function show(id, params) {
   if (currentId && currentId !== id) {
     hideCurrent();
   }
+  // Fase 12b: toast di bawah saat pertempuran (tidak menutup wave/timer), atas saat menu
+  document.body.classList.toggle('in-run', id === 'hud');
   const el = elFor(id);
   if (el) el.classList.add('active');
   currentId = id;

@@ -6,6 +6,14 @@
 
 import { drawBossIndicator } from './shape-renderer.js';
 
+/**
+ * PERSP — parameter proyeksi pseudo-3D ala MOBA (Fase 12b):
+ * - YS  : squash vertikal ground-plane (kamera miring dari atas)
+ * - F/K : perspektif kedalaman — entitas di bawah layar (dekat) lebih besar,
+ *         di atas layar (jauh) lebih kecil → peta punya kedalaman.
+ */
+export const PERSP = { F: 1700, K: 1.35, YS: 0.58, MIN: 0.66, MAX: 1.85 };
+
 export class Camera {
   constructor() {
     this.x = 0;
@@ -62,18 +70,45 @@ export class Camera {
 
   /** Terapkan transform kamera ke ctx (w/h = ukuran viewport CSS px). */
   apply(ctx, w, h) {
-    // Fase 12: zoom di sekitar pusat layar — semua entitas dunia ikut membesar
+    // Fallback transform rata (dipakai layar non-gameplay); gameplay memakai makeProjector().
     ctx.translate(Math.round(w / 2 + this.shakeX), Math.round(h / 2 + this.shakeY));
     ctx.scale(this.zoom, this.zoom);
     ctx.translate(-this.x, -this.y);
   }
 
+  /**
+   * Fase 12b — Projector pseudo-3D: world (x,y) → layar.
+   *   scale(dy) = F/(F − dy·K)   → makin dekat kamera (bawah) makin besar
+   *   screenY   = tengah + dy·scale·YS → ground dimampetkan (kamera miring)
+   * Billboard (sprite karakter) TIDAK disquash — mereka "berdiri" di ground.
+   */
+  makeProjector(w, h) {
+    const cam = this;
+    return {
+      w, h,
+      project(wx, wy) {
+        const dx = wx - cam.x + cam.shakeX;
+        const dy = wy - cam.y + cam.shakeY;
+        let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
+        persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
+        const s = persp * cam.zoom;
+        return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS, s, persp };
+      },
+    };
+  }
+
+  /** Simpan posisi layar player terproyeksi (untuk aim di player.js). */
+  setPlayerScreen(p) { this.playerScreen = p; }
+  getPlayerScreen() { return this.playerScreen || null; }
+
   /** Konversi koordinat dunia → layar (dipakai elemen screen-space). */
   worldToScreen(wx, wy, w, h) {
-    return {
-      x: (wx - this.x) * this.zoom + w / 2,
-      y: (wy - this.y) * this.zoom + h / 2,
-    };
+    const dx = wx - this.x + this.shakeX;
+    const dy = wy - this.y + this.shakeY;
+    let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
+    persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
+    const s = persp * this.zoom;
+    return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS };
   }
 
   /**

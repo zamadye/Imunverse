@@ -69,8 +69,7 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   drawReefLayer(ctx, camX, camY, w, h, 0.4, 620, props[1] || props[0], 170, time);
   drawBubbleLayer(ctx, camX, camY, w, h, time, 0.72, 130, 'rgba(255,255,255,0.16)', 8);
 
-  // ---- arena heksagon cream di pusat dunia ----
-  drawArena(ctx, camX, camY, w, h, time);
+  // ---- arena heksagon: kini digambar TERPROYEKSI (drawArena3D) dari game.js ----
 
   // ---- dekor sudut ala mockup: rumput laut & karang BESAR menempel di sudut
   //      bawah layar (screen-anchored, goyang pelan) ----
@@ -167,45 +166,108 @@ function drawBubbleLayer(ctx, camX, camY, w, h, time, parallax, spacing, color, 
 }
 
 /** Arena heksagon cream tempat pertempuran dimulai (pusat dunia = 0,0). */
-function drawArena(ctx, camX, camY, w, h, time) {
-  const cx = -camX + w / 2;
-  const cy = -camY + h / 2;
-  const R = 270;
-  // culling kasar: skip bila arena jauh di luar layar
-  if (cx < -R - 200 || cx > w + R + 200 || cy < -R - 200 || cy > h + R + 200) return;
+/** Sampel titik heksagon SUDUT TAJAM (rounding kecil ala mockup) untuk proyeksi. */
+function roundedHexPoints(R, perEdge = 16, round = 0.06) {
+  const v = [];
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + (Math.PI / 3) * i;
+    v.push([Math.cos(a) * R, Math.sin(a) * R]);
+  }
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const p0 = v[i], p1 = v[(i + 1) % 6], p2 = v[(i + 2) % 6];
+    // masuk sedikit dari dua sisi di sekitar sudut p1 → sudut terlihat TAJAM
+    const a0 = [p0[0] + (p1[0] - p0[0]) * (1 - round), p0[1] + (p1[1] - p0[1]) * (1 - round)];
+    const a1 = [p1[0] + (p2[0] - p1[0]) * round, p1[1] + (p2[1] - p1[1]) * round];
+    for (let t = 0; t < perEdge; t++) {
+      const u = t / perEdge, iu = 1 - u;
+      pts.push([
+        iu * iu * a0[0] + 2 * iu * u * p1[0] + u * u * a1[0],
+        iu * iu * a0[1] + 2 * iu * u * p1[1] + u * u * a1[1],
+      ]);
+    }
+  }
+  return pts;
+}
 
-  // bayangan/bibir arena (ring teal muda di bawah)
-  ctx.fillStyle = 'rgba(190,228,214,0.85)';
-  roundHexPath(ctx, cx, cy + 14, R + 34, 90);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(154,208,186,0.9)';
-  roundHexPath(ctx, cx, cy + 6, R + 16, 84);
-  ctx.fill();
+/** Trace path heksagon dunia (cx,cy,R) melewati proyektor P. */
+function traceHex3D(ctx, P, cx, cy, R, perEdge = 16) {
+  const pts = roundedHexPoints(R, perEdge);
+  ctx.beginPath();
+  for (let i = 0; i < pts.length; i++) {
+    const q = P.project(cx + pts[i][0], cy + pts[i][1]);
+    if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+  }
+  ctx.closePath();
+}
 
-  // lantai arena (warna per arena dari data/arenas.json)
+/**
+ * Fase 12b — Arena pseudo-3D terproyeksi: heksagon punya kedalaman (sisi jauh
+ * lebih kecil & sempit), plus grid lantai perspektif sebagai penunjuk kedalaman.
+ * Dipanggil dari game.render SEBELUM entitas, SETELAH latar air.
+ */
+export function drawArena3D(ctx, P, time) {
+  const w = P.w, h = P.h;
+  const c = P.project(0, 0);
+  // culling kasar
+  if (c.x < -700 || c.x > w + 700 || c.y < -700 || c.y > h + 900) return;
+
+  // ---- bibir arena (dua ring di bawah → kesan tebal/berdiri) ----
+  ctx.fillStyle = 'rgba(122,186,164,0.9)';
+  traceHex3D(ctx, P, 0, 18, 304, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(154,208,186,0.92)';
+  traceHex3D(ctx, P, 0, 8, 286, 4); ctx.fill();
+
+  // ---- lantai arena (warna per arena) ----
   ctx.fillStyle = PALETTE.hex || '#faf1dc';
-  roundHexPath(ctx, cx, cy, R, 80);
-  ctx.fill();
+  traceHex3D(ctx, P, 0, 0, 270, 4); ctx.fill();
 
-  // bercak organik lembut deterministik di lantai arena
+  // ---- grid lantai perspektif — SETELAH lantai, ter-clip di dalam arena ----
+  ctx.save();
+  traceHex3D(ctx, P, 0, 0, 270, 4);
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(31,122,112,0.10)';
+  ctx.lineWidth = 1;
+  const STEP = 90, SPAN = 1020;
+  ctx.beginPath();
+  for (let gy = -SPAN; gy <= SPAN; gy += STEP) {
+    for (let k = 0; k < 12; k++) {
+      const x0 = -SPAN + (k * 2 * SPAN) / 12, x1 = -SPAN + ((k + 1) * 2 * SPAN) / 12;
+      const a = P.project(x0, gy), b = P.project(x1, gy);
+      if ((a.y < -40 && b.y < -40) || (a.y > h + 40 && b.y > h + 40)) continue;
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+    }
+  }
+  for (let gx = -SPAN; gx <= SPAN; gx += STEP) {
+    for (let k = 0; k < 12; k++) {
+      const y0 = -SPAN + (k * 2 * SPAN) / 12, y1 = -SPAN + ((k + 1) * 2 * SPAN) / 12;
+      const a = P.project(gx, y0), b = P.project(gx, y1);
+      if ((a.y < -40 && b.y < -40) || (a.y > h + 40 && b.y > h + 40)) continue;
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+    }
+  }
+  ctx.stroke();
+  ctx.restore();
+
+  // ---- bercak organik lembut (terproyeksi, dimampetkan di ground) ----
   const spots = 26;
   for (let i = 0; i < spots; i++) {
     const a = hash2(i * 7 + 1, i * 3 + 2) * Math.PI * 2;
-    const rr = hash2(i * 11 + 5, i * 13 + 7) * (R * 0.82);
-    const sx = cx + Math.cos(a) * rr;
-    const sy = cy + Math.sin(a) * rr;
+    const rr = hash2(i * 11 + 5, i * 13 + 7) * (270 * 0.82);
+    const wx = Math.cos(a) * rr, wy = Math.sin(a) * rr;
+    const q = P.project(wx, wy);
     const srad = 18 + hash2(i + 40, i + 41) * 46;
     const pulse = 0.75 + 0.25 * Math.sin(time * 0.8 + i * 1.7);
     ctx.fillStyle = i % 3 === 0 ? `rgba(169,215,149,${0.16 * pulse})` : `rgba(191,227,216,${0.22 * pulse})`;
     ctx.beginPath();
-    ctx.ellipse(sx, sy, srad * pulse, srad * 0.8 * pulse, a, 0, Math.PI * 2);
+    ctx.ellipse(q.x, q.y, srad * q.s * pulse, srad * q.s * pulse * 0.58, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // garis tepi dalam tipis
+  // ---- garis tepi dalam tipis ----
   ctx.strokeStyle = 'rgba(31,122,112,0.18)';
   ctx.lineWidth = 3;
-  roundHexPath(ctx, cx, cy, R - 10, 76);
+  traceHex3D(ctx, P, 0, 0, 258, 4);
   ctx.stroke();
 }
 

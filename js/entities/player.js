@@ -5,6 +5,8 @@
  * Attack otomatis ke musuh terdekat dalam range — pattern sesuai data hero.
  */
 
+import { PERSP } from '../render/camera.js';
+
 let nextPlayerId = 1;
 
 export class Player {
@@ -29,6 +31,8 @@ export class Player {
     this.iframes = 0;         // masa kebal setelah kena hit (detik)
     this.attackFlash = 0;     // timer untuk swap sprite attack
     this.moving = false;
+    this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
+    this.stepT = 0;     // jeda antar langkah (debu kaki)
     this.alive = true;
   }
 
@@ -48,6 +52,13 @@ export class Player {
       this.y += move.y * speed * dt;
       this.facing = Math.atan2(move.y, move.x);
       this.moving = true;
+      // Fase 12b: animasi jalan — bobbing + debu langkah kecil
+      this.walkPhase += dt * (this.stats.speed / 16);
+      this.stepT -= dt;
+      if (this.stepT <= 0 && game && game.run) {
+        this.stepT = 0.24;
+        game.run.effects.spawnBurst(this.x, this.y + this.radius * 0.75, 'rgba(224,244,236,0.85)', 1, 30, 2.2);
+      }
     } else {
       this.moving = false;
     }
@@ -77,10 +88,9 @@ export class Player {
     if (this.attackTimer > 0 || !this.alive) return;
     const aimActive = game.input && game.run && (() => {
       try {
-        const w = game.viewW || 390;
-        const h = game.viewH || 844;
         const cam = game.run.camera;
-        return game.input.getAimInfo(this.x - cam.x + w / 2, this.y - cam.y + h / 2).active;
+        const sp = cam.getPlayerScreen();
+        return game.input.getAimInfo(sp ? sp.x : this.x - cam.x, sp ? sp.y : this.y - cam.y).active;
       } catch {
         return false;
       }
@@ -102,13 +112,15 @@ export class Player {
     // AIM: bila player mengarahkan (stick kanan / mouse), serangan ikut arah itu
     let aimAngle = null;
     if (game && game.input && game.run) {
-      const w = game.viewW || 390;
-      const h = game.viewH || 844;
       const cam = game.run.camera;
-      const sx = (this.x - cam.x) * (cam.zoom || 1) + w / 2;
-      const sy = (this.y - cam.y) * (cam.zoom || 1) + h / 2;
+      const sp = cam.getPlayerScreen();
+      const sx = sp ? sp.x : this.x - cam.x;
+      const sy = sp ? sp.y : this.y - cam.y;
       const aim = game.input.getAimInfo(sx, sy);
-      if (aim.active) aimAngle = aim.angle;
+      if (aim.active) {
+        // Fase 12b: sudut layar → sudut dunia (kompensasi squash kamera miring)
+        aimAngle = Math.atan2(Math.sin(aim.angle) / PERSP.YS, Math.cos(aim.angle));
+      }
     }
     this.facing = aimAngle !== null ? aimAngle : Math.atan2(target.y - this.y, target.x - this.x);
     if (aimAngle !== null) {
