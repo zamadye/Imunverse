@@ -1,0 +1,71 @@
+{
+  "growthVersion": 1,
+  "doc": "Fase 12e — Tangga Pertumbuhan hero SAAT RUN (visual + kekuatan). Pacing: anggota tubuh (kaki/tangan) didapat cepat (beberapa menit pertama); zirah/skin dan LEGENDA = grind panjang. damageMult & maxHPMult berlaku kumulatif sebagai pengali statistik run.",
+  "tiers": [
+    {
+      "stage": 0,
+      "id": "bulir",
+      "name": "Sel Bulir",
+      "atLevel": 1,
+      "limbs": false,
+      "arms": false,
+      "armor": 0,
+      "legend": false,
+      "damageMult": 1.0,
+      "maxHPMult": 1.0,
+      "cheer": "Sel Bulir siap tempur!"
+    },
+    {
+      "stage": 1,
+      "id": "berkaki",
+      "name": "Berkaki",
+      "atLevel": 3,
+      "limbs": true,
+      "arms": false,
+      "armor": 0,
+      "legend": false,
+      "damageMult": 1.06,
+      "maxHPMult": 1.05,
+      "cheer": "KAKI TUMBUH! Gerak makin lincah (+6% serangan, +5% HP)!"
+    },
+    {
+      "stage": 2,
+      "id": "humanoid",
+      "name": "Humanoid",
+      "atLevel": 5,
+      "limbs": true,
+      "arms": true,
+      "armor": 0,
+      "legend": false,
+      "damageMult": 1.12,
+      "maxHPMult": 1.1,
+      "cheer": "TANGAN MUNCUL! Senjata bertangan (+12% serangan, +10% HP)!"
+    },
+    {
+      "stage": 3,
+      "id": "berzirah",
+      "name": "Berzirah",
+      "atLevel": 8,
+      "limbs": true,
+      "arms": true,
+      "armor": 1,
+      "legend": false,
+      "damageMult": 1.22,
+      "maxHPMult": 1.2,
+      "cheer": "ZIRAH TERPASANG! Pelat dada & pelana (+22% serangan, +20% HP)!"
+    },
+    {
+      "stage": 4,
+      "id": "legenda",
+      "name": "LEGENDA",
+      "atLevel": 12,
+      "limbs": true,
+      "arms": true,
+      "armor": 2,
+      "legend": true,
+      "damageMult": 1.4,
+      "maxHPMult": 1.32,
+      "cheer": "★ LEGENDA ★ Mahkota, jubah & kekuatan penuh (+40% serangan, +32% HP)!"
+    }
+  ]
+}

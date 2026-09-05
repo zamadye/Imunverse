@@ -442,9 +442,10 @@ export function drawFigure(ctx, o) {
   const bob = moving ? Math.abs(Math.cos(phase)) * r * 0.12 : Math.sin(t * 2.1) * r * 0.05;
   const lean = moving ? 0.05 : Math.sin(t * 1.4) * 0.02;
 
-  const legH = B.legH * r;
+  const noLimbs = o.legs === false && o.arms === false; // Fase 12e: bentuk awal = bulir tanpa anggota
+  const legH = noLimbs ? r * 0.1 : B.legH * r;
   const th = B.bodyW === undefined ? 1.2 * r : 1.18 * r;
-  const bw = B.bodyW * r;
+  const bw = (noLimbs ? B.bodyW * 1.18 : B.bodyW) * r;
   const headR = B.headR * r;
   const hipY = -legH - bob;           // dalam koordinat lokal (0 = tanah)
   const by = hipY - th / 2;           // pusat torso
@@ -470,7 +471,7 @@ export function drawFigure(ctx, o) {
   // ---- KAKI (2) — musuh melayang (float) tidak punya kaki ----
   const swing = moving ? Math.sin(phase) * 0.55 : Math.sin(t * 1.7) * 0.05;
   const legW = B.legW * r;
-  if (!o.float) {
+  if (o.legs !== false && !o.float) {
   for (const s of [-1, 1]) {
     const a = swing * s;
     const hx0 = s * bw * 0.22;
@@ -505,8 +506,36 @@ export function drawFigure(ctx, o) {
     }
   }
 
+  // ---- Fase 12e: ZIRAH (tumbuh di stage Berzirah/Legenda) ----
+  if ((o.armor >= 1 || o.legend) && o.arms !== false) {
+    // pelat dada
+    ctx.fillStyle = o.legend ? '#f3cf5f' : mixc(P.accent, '#ffffff', 0.08);
+    ctx.strokeStyle = P.dark;
+    ctx.lineWidth = Math.max(1.2, r * 0.07);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-bw * 0.3, by - th * 0.3, bw * 0.6, th * 0.6, r * 0.12);
+    else ctx.rect(-bw * 0.3, by - th * 0.3, bw * 0.6, th * 0.6);
+    ctx.fill(); ctx.stroke();
+    if (o.armor >= 2 && !o.legend) {
+      // pelana tambahan (armor penuh pra-legenda)
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-bw * 0.52, by - th * 0.44, bw * 0.24, th * 0.3, r * 0.08);
+      else ctx.rect(-bw * 0.52, by - th * 0.44, bw * 0.24, th * 0.3);
+      ctx.fill();
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(bw * 0.28, by - th * 0.44, bw * 0.24, th * 0.3, r * 0.08);
+      else ctx.rect(bw * 0.28, by - th * 0.44, bw * 0.24, th * 0.3);
+      ctx.fill(); ctx.stroke();
+    }
+    // ikat pinggang
+    ctx.fillStyle = '#4a3b2a';
+    ctx.fillRect(-bw * 0.36, hipY - r * 0.18, bw * 0.72, r * 0.17);
+    if (o.legend) { ctx.fillStyle = '#ffd700'; ctx.fillRect(-r * 0.1, hipY - r * 0.2, r * 0.2, r * 0.21); }
+  }
+
   // ---- TANGAN (2): belakang lalu depan ----
   const shY = by - th * 0.34;
+  if (o.arms !== false) {
   const armW = B.armW * r;
   const armL = B.armL * r;
   const armSwing = moving ? -Math.sin(phase) * 0.5 : Math.sin(t * 1.7 + 1) * 0.06;
@@ -573,11 +602,15 @@ export function drawFigure(ctx, o) {
     ctx.fillStyle = P.primary;
     ctx.beginPath(); ctx.arc(bw * 0.34 + r * 0.31, shY + r * 0.4, r * 0.18, 0, Math.PI * 2); ctx.fill();
   }
+  } // akhir arms
 
   // ---- KEPALA ----
   if (P.faceAt) {
     // bentuk musuh yang wajahnya di badan (spike/splitter)
     face(ctx, P.faceAt.x, P.faceAt.y, P.faceAt.r, o.mood || 'angry', P.dimEyes || P.accent, Math.sin(t * 3 + phase) > 0.94 ? 1 : 0);
+  } else if (noLimbs) {
+    // Fase 12e: bulir — wajah langsung di badan (sel murni, belum berevolusi)
+    face(ctx, 0, by, Math.min(bw, th) * 0.4, o.mood || 'happy', P.accent, Math.sin(t * 2.6) > 0.96 ? 1 : 0);
   } else if (!o.form || o.form === 'runner' || o.form === 'tank' || o.form === 'boss') {
     ball(ctx, 0, headY, headR, P.primary, {});
     P.faceAt = null;
@@ -586,8 +619,51 @@ export function drawFigure(ctx, o) {
     else face(ctx, 0, headY, headR, mood, P.accent, Math.sin(t * 2.6 + phase * 0.3) > 0.96 ? 1 : 0);
   }
 
-  // ---- TRAIT aksesori (di atas kepala/badan) ----
-  if (o.trait && TRAITS[o.trait]) TRAITS[o.trait](ctx, P);
+  // ---- TRAIT aksesori (di atas kepala/badan; tidak saat bulir) ----
+  if (!noLimbs && o.trait && TRAITS[o.trait]) TRAITS[o.trait](ctx, P);
+
+  // ---- Fase 12e: SET LEGENDA — celana, aura, mahkota, kilau ----
+  if (o.legend) {
+    // celana (lapisan kaki atas)
+    if (o.legs !== false && !o.float) {
+      const pants = mixc('#3d4d70', P.dark, 0.2);
+      for (const s of [-1, 1]) {
+        const hx0 = s * bw * 0.22;
+        capsule(ctx, hx0, hipY + r * 0.02, hx0 + Math.sin(swing * s) * legH * 0.3, hipY + legH * 0.55, legW * 1.1, pants, P.dark);
+      }
+    }
+    // aura keemasan
+    const ag = ctx.createRadialGradient(0, by, r * 0.4, 0, by, r * 2.3);
+    ag.addColorStop(0, 'rgba(255, 215, 100, 0.18)');
+    ag.addColorStop(1, 'rgba(255, 215, 100, 0)');
+    ctx.fillStyle = ag;
+    ctx.beginPath(); ctx.arc(0, by, r * 2.3, 0, Math.PI * 2); ctx.fill();
+    // mahkota (hero selain Helia yang sudah ber-mahkota)
+    if (o.trait !== 'helia') {
+      const cy2 = headY - headR * 0.82;
+      ctx.fillStyle = '#ffd23f';
+      ctx.strokeStyle = '#8a5a00';
+      ctx.lineWidth = Math.max(1, r * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(-headR * 0.55, cy2 + headR * 0.16);
+      ctx.lineTo(-headR * 0.55, cy2 - headR * 0.3);
+      ctx.lineTo(-headR * 0.24, cy2 - headR * 0.06);
+      ctx.lineTo(0, cy2 - headR * 0.38);
+      ctx.lineTo(headR * 0.24, cy2 - headR * 0.06);
+      ctx.lineTo(headR * 0.55, cy2 - headR * 0.3);
+      ctx.lineTo(headR * 0.55, cy2 + headR * 0.16);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ball(ctx, 0, cy2 - headR * 0.46, headR * 0.09, '#ff4d6d', {});
+    }
+    // kilau bintang kecil
+    for (let i = 0; i < 2; i++) {
+      const a2 = t * 1.3 + i * Math.PI;
+      const sx2 = Math.cos(a2) * bw * 0.95;
+      const sy2 = by - th * 0.4 + Math.sin(a2 * 2) * r * 0.5;
+      ctx.fillStyle = 'rgba(255, 235, 150, 0.9)';
+      ctx.beginPath(); ctx.arc(sx2, sy2, r * 0.06 + Math.sin(t * 5 + i) * r * 0.02, 0, Math.PI * 2); ctx.fill();
+    }
+  }
 
   ctx.restore();
 }

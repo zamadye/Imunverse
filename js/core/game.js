@@ -72,6 +72,14 @@ function defaultWeapon(heroId) {
   return HERO_WEAPONS[heroId] || null;
 }
 
+/** Fase 12e: tangga pertumbuhan in-run — bulir → kaki → tangan → zirah → LEGENDA. */
+function growthStageFor(level) {
+  const tiers = getData().growth.tiers;
+  let cur = tiers[0];
+  for (const tr of tiers) if (level >= tr.atLevel) cur = tr;
+  return cur;
+}
+
 export const game = {
   canvas: null,
   ctx: null,
@@ -210,6 +218,8 @@ export const game = {
       xp: 0,
       xpGained: 0,
       level: 1,
+      growStage: 0,
+      growStageDef: growthStageFor(1), // Fase 12e: bentuk awal = Sel Bulir
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
@@ -362,12 +372,13 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const grow = (this.run && this.run.growStageDef) || null; // Fase 12e
+    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * (grow ? grow.damageMult : 1);
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
+    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) * (grow ? grow.maxHPMult : 1) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
     const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
@@ -750,6 +761,15 @@ export const game = {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
+      // Fase 12e: pertumbuhan bentuk mengikuti level — kaki/tangan/zirah/LEGENDA
+      const g = growthStageFor(run.level);
+      if (g.stage > run.growStage) {
+        run.growStage = g.stage;
+        run.growStageDef = g;
+        this.recomputePlayerStats(); // kekuatan ikut meningkat
+        if (g.cheer) emit('toast', { message: g.cheer, kind: 'gold' });
+        run.effects.spawnKillFx('ring', run.player.x, run.player.y, '#ffd23f', 0);
+      }
     }
   },
 
@@ -1538,7 +1558,8 @@ export const game = {
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
         ctx.restore();
         billboard(e.x, e.y, { lift: e.radius * 0.62 });
-        drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
+        // Fase 12e: bar HP di atas puncak kepala figur monster
+        drawHealthBar(ctx, e.x, e.y - e.radius * (e.isBoss ? 4.2 : 3.5) - 8, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
         ctx.restore();
       } });
     }
@@ -1554,24 +1575,30 @@ export const game = {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          const evo = run.evoStage;
+          const evo = run.evoStage; // meta-evolusi (part drop) — tetap berpengaruh ke efek/stat
+          const grow = run.growStageDef || growthStageFor(run.level); // Fase 12e: bentuk in-run
           const look = player.heroDef.look || {};
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob });
           drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.4, player.heroDef.color, time, 0, 0.55);
-          // Fase 12d: HERO HUMANOID — kaki/tangan/telanjang die Rig + aksesori per hero
+          // Fase 12e: HERO TUMBUH BERURUTAN — bulir → kaki → tangan+senjata → zirah → LEGENDA
+          const hasArms = !!grow.arms;
           drawFigure(ctx, {
             x: pBody.x, y: pBody.y, r: player.radius * 0.95,
             primary: player.heroDef.color,
             accent: look.accent || mixLookAccent(player.heroDef.color),
             build: look.build || 'medium',
             trait: player.heroDef.id,
-            weapon: evo.stage >= 3 ? 'sword' : defaultWeapon(player.heroDef.id),
-            shieldFront: player.heroDef.id === 'mastcell' || player.heroDef.id === 'treg',
-            shieldBack: player.heroDef.id === 'neutron',
-            cape: ['helia', 'treg', 'nyx'].includes(player.heroDef.id)
-              ? (player.heroDef.look && player.heroDef.look.cape) || '#ffffff'
+            weapon: hasArms ? defaultWeapon(player.heroDef.id) : null,
+            shieldFront: hasArms && (player.heroDef.id === 'mastcell' || player.heroDef.id === 'treg'),
+            shieldBack: hasArms && player.heroDef.id === 'neutron',
+            cape: grow.legend || ['helia', 'treg', 'nyx'].includes(player.heroDef.id)
+              ? (player.heroDef.look && player.heroDef.look.cape) || '#ffd23f'
               : null,
-            shoulderPads: evo.stage >= 2,
+            shoulderPads: (grow.armor >= 1 && hasArms) || grow.legend,
+            legs: grow.limbs !== false,
+            arms: hasArms,
+            armor: grow.armor || 0,
+            legend: !!grow.legend,
             phase: player.walkPhase || 0,
             moving: player.moving,
             attackT: player.attackFlash > 0 ? player.attackFlash / 0.18 : 0,
@@ -1580,22 +1607,14 @@ export const game = {
             mood: player.attackFlash > 0 || player.swing > 0 ? 'determined' : 'happy',
             flip: 1, t: time,
           });
-          // EVOLUSI tetap terlihat: silia (S1) kini Fun gewajib? no — lava lamp? silia glow
-          if (evo.stage >= 1) {
-            for (let i = 0; i < 3; i++) {
-              const a = time * 1.8 + (i * Math.PI * 2) / 3;
-              ctx.fillStyle = 'rgba(255,255,255,0.75)';
-              ctx.beginPath();
-              ctx.arc(pBody.x + Math.cos(a) * player.radius * 0.8, pBody.y - player.radius * 1.9 + Math.sin(a) * player.radius * 0.24, 1.8, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          }
+          // Meta-evolusi LEGENDARY (part drop): inti elemen melayang di atas kepala
           if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y - player.radius * 2.9, player.radius * 1.5, time * 1.1, { alpha: 0.9 });
           ctx.restore();
 
           // NAMEPLATE ala MOBA: nama hero + level di atas kepala
           billboard(player.x, player.y, { lift: player.radius * 0.62 });
-          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius - 30;
+          // Fase 12e: piringan nama dinaikkan ke atas puncak kepala (figur humanoid lebih tinggi)
+          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius * 3.55 - 12;
           ctx.fillStyle = 'rgba(2,8,14,0.58)';
           ctx.strokeStyle = player.heroDef.color;
           ctx.lineWidth = 1.6;

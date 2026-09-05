@@ -286,6 +286,15 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Detail Hero di-polish ala referensi** (AFK-Arena/Archero-style): panggung karakter besar dengan gradasi warna hero, kolom chip skill 1/2/ULT (emas) di samping sprite, **stat chips** berwarna (damage merah, HP hijau, tempo biru) dengan nilai +bonus per level; panel Pasukan: sel dengan siluet unik (Bella/Nyx/Mako) + tag nama + chips bonus.
 - [x] **Pasukan di run memakai sprite roster baru** (sebelumnya sprite lama lingkaran teal) — sel pasukan kini siluet unik di medan tempur.
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
+**Fase 12e — Pertumbuhan Berurutan In-Run (arahan pemilik: awal tanpa tangan/kaki → tumbuh → aksesoris → LEGENDA; pacing: anggota tubuh cepat, skin lama)**
+- [x] **`data/growth.json`** (sumber data): 5 tahap mengikuti level run — **Lv1 Sel Bulir** (bulat, TANPA tangan/kaki, wajah di badan) → **Lv3 Berkaki** (+6% serangan, +5% HP) → **Lv5 Humanoid** (tangan + senjata khas hero; +12%/+10%) → **Lv8 Berzirah** (pelat dada + ikat pinggang; +22%/+20%) → **Lv12 LEGENDA** (mahkota + celana + jubah + aura emas + kilau; +40%/+32%).
+- [x] **Renderer**: `drawFigure` mendukung `legs/arms/armor/legend` — bulir = badan menggembung berwajah; zirah = pelat dada + pelana; LEGENDA = celana lapis kaki, aura radial keemasan, mahkota 3 puncak berpermata, kilau bintang. Aksen/trait hero tetap terbaca sejak tahap Humanoid.
+- [x] **Kekuatan ikut naik**: `growthStageFor(level)` dipakai di `addXP` (deteksi naik tahap → toast sorak + efek ring emas + recompute stats) dan `computePlayerStats` (damageMult/maxHPMult). Level-up pilihan (modal) TIDAK berubah.
+- [x] **Pacing sesuai arahan**: kaki di menit pertama (~Lv3), tangan menyusul, zirah & LEGENDA = grind panjang (level tinggi). Meta-evolusi part-drop (Common→Legendary) tetap ada sebagai lapisan terpisah.
+- [x] **Nameplate hero & HP bar musuh** dinaikkan ke atas puncak kepala figur — tidak lagi menutupi karakter (temuan pemilik).
+- [x] Harness bukti: `scripts/shot-growth.mjs` (level dipaksa deterministik, screenshot 5 tahap).
+- **Kriteria lulus 12e:** e2e **21 asersi PASS**, autotest **17/17**, perf **16,63 ms avg / 16,80 p95 @44 musuh**; bukti visual `docs/screenshots/42e-bulir → 42a-berkaki → 42b-humanoid → 42c-berzirah → 42d-legenda`.
+
 **Fase 12d — Karakter Humanoid (arahan pemilik: ganti bentuk abstrak → humanoid bertema sel imun)**
 - [x] **Renderer humanoid prosedural** (`js/render/humanoid.js`, Canvas 2D murni tanpa dependensi — Three.js tidak dipakai agar konsisten aturan vanilla): figur chibi lengkap — **kepala besar + badan kapsul + 2 tangan + 2 kaki + sepatu**, gradasi radial untuk volume 3D, wajah bermata/alis/mutu (happy/determined/angry/dim), kelip mata acak.
 - [x] **Animasi**: kaki berayun `sin(phase)` saat jalan + langkah terangkat, badan bobbing & condong, tangan berayun berlawanan kaki, **lengan mencetak ke depan saat attackT/swingT** (serangan), idle nafas halus; seluruh figur flip mengikuti arah hadap; hit flash memutihkan tubuh.
