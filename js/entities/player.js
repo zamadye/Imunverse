@@ -56,6 +56,14 @@ export class Player {
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackFlash > 0) this.attackFlash -= dt;
     this.attackTimer -= dt;
+    // Fase 12: ATTACK OTOMATIS — bila cooldown siap & ada musuh dalam jangkauan
+    if (this.attackTimer <= 0 && this.alive) {
+      const target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
+      if (target) {
+        this.performAttack(target, game);
+        this.attackTimer = this.stats.cooldown;
+      }
+    }
 
     // (Serangan sekarang MANUAL — lewat tombol TEMBAK: game memanggil tryFire)
   }
@@ -97,8 +105,8 @@ export class Player {
       const w = game.viewW || 390;
       const h = game.viewH || 844;
       const cam = game.run.camera;
-      const sx = this.x - cam.x + w / 2;
-      const sy = this.y - cam.y + h / 2;
+      const sx = (this.x - cam.x) * (cam.zoom || 1) + w / 2;
+      const sy = (this.y - cam.y) * (cam.zoom || 1) + h / 2;
       const aim = game.input.getAimInfo(sx, sy);
       if (aim.active) aimAngle = aim.angle;
     }

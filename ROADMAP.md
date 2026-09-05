@@ -253,7 +253,29 @@ Lapis 1 dari workflow edukasi (desain docs/edu-workflow.md): koleksi kartu sains
 - [x] **Misi pengikat ekonomi**: "Peneliti Muda — Temukan 10 kartu Bio-Pedia" (+150 antibodi) via stats.codexCards; dipindah ke urutan ke-2 agar selalu tampak di top-3 dashboard.
 - **Kriteria lulus:** codex-check e2e **5/5 RESULT OK** (klik teleskop→43 kartu; 12 penemuan tercatat dari alur main nyata [hero, imun, 5 sistem, organ, 2 musuh, 2 nutrisi]; klik kartu virus→detail kid+sains+realName; EN: "Found 12/43"+konten Inggris; misi terbaca); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
 
-## Rencana Fase 11–13 — Workflow Edukasi "Tubuh Sebagai Universe"
+## Fase 12 — UI Gameplay Ala MLBB + Roster 11 Hero Bernama + 33 Skill Aktif ✅
+Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legends (glassmorphism biru gelap + emas, rounded, overlay HTML/CSS di atas canvas — karakter tetap jelas terlihat), (B) roster hero dokumen 11 sel imun bernama, masing-masing 3 skill aktif (2 skill + ultimate) persis tabel pemilik.
+
+**A. HUD MLBB (overlay DOM, container passive + tombol `pointer-events:auto`)**
+- [x] **Top HUD**: kiri = kill count + chip Level Hero/Pasukan; tengah (glass) = nomor wave + timer MM:SS + boss bar; kanan (glass) = antibodi run + jeda. Semua panel `glass` (blur + border emas).
+- [x] **Bottom-left panel status hero**: avatar bulat potret + badge `Lv N`, HP bar hijau berteks `curr/max`, XP bar biru (di bawah HP) — persis layout referensi.
+- [x] **Bottom-right kontrol**: grid skill 2×2 — S1, S2 (60px) + ULTIMATE (lebar, border emas); tiap tombol: ikon PNG sesuai jenis efek, nama skill, overlay cooldown (gelap + angka sisa detik), label tombol 1/2/3; tombol **SERANG** besar bundar (88px) di sisi kanan; efek press `scale(.92)`, glow saat siap.
+- [x] **Kamera zoom 1.16** (karakter & arena lebih besar/jelas); `worldToScreen` + aim player ikut skala; minimap bertahan kanan-atas.
+- [x] Banner nama skill saat cast (ID/EN mengikuti bahasa aktif).
+
+**B. Roster 11 Hero (data/heroes.json = sumber kebenaran; angka persis tabel pemilik)**
+- [x] **11 hero**: Mako (Makrofag, Tank), Dendri (Dendritik, Support), Neutron (Neutrofil, Damage), Eos (Eosinofil, Damage), Baso (Basofil, Support), Mastia (Sel Mast, Tank), T-Bolt (Sel T CD8, Damage — gratis awal), Helia (Sel T CD4, Support), Treg (Regulasi, Support), Bella (Sel B, Damage), Nyx (Sel NK, Damage) — masing-masing baseStats/attackPattern/patternParams/unlock/harga toko sesuai tabel; sprite idle+attack+potret baru (generator `gen_stage_heroes_v2`/`gen_stage_portraits_v2`; total 156 PNG).
+- [x] **33 skill aktif** (`data/skills.json`, data-driven penuh): executor primitif (strike/area/heal/shield/protect/buff/mark/dash/summon/instant-hits/execute/annihilate/pull/dot/slow/stun) di `js/systems/skill-system.js` — TIDAK ada logika hero yang di-hardcode; ultimate = slot ke-3.
+- [x] **Lapisan pertahanan baru di damagePlayer**: SHIELD (serap) → EVADE (hindari 1 serangan) → PROTECT (×mult) → armor upgrade (urutan eksplisit, label "TERSERAP!"/"Evade!").
+- [x] **Attack otomatis** ke musuh terdekat dalam range (wave-loop ala survivors) + tombol SERANG/tombol 4 = serangan manual (assist aim tetap).
+- [x] **Level-up**: pool 7 pilihan (+ Life Steal 5%/stack), XP `10·level^1.5` (kurva data tetap); modal 3 pilihan acak (mekanik lama dipertahankan).
+- [x] **Ekonomi**: bonus akhir run `floor(wave×8 + kills×0,5 + boss×50)` (spek pemilik) ditumpang di atas pickup antibodi in-run; wave pacing decay 0,08 & HP scale 0,12/wave.
+- [x] **Migrasi save**: id hero lama (sel_t/makrofag/neutrofil/sel_b/sel_nk/eosinofil) → id roster baru otomatis di `mergeMetaDefaults` (unlockedHeroes/selectedHero/heroLevels/codexSeen); default hero = T-Bolt; kodex hero diremap (43 kartu utuh); fraksi imun = 11 hero.
+- [x] **i18n**: +97 string EN (nama/deskripsi 33 skill, 11 judul hero, label unlock, HUD SERANG/TERSERAP); skill banner & tombol mengikuti bahasa aktif.
+- [x] **FIX dari e2e**: tombol "Lanjutkan/Akhiri Run" layar Jeda kini ter-wire (sebelumnya tanpa handler); keyframes pulse lama memaksa radius 50% dihapus.
+- **Kriteria lulus:** mlbb-check e2e **19/19 PASS klik-riil** (HUD glass 3 panel; potret roster baru; 3 tombol skill + ult; klik 3 skill → cooldown berjalan; SERANG klik-riil; auto-attack membunuh tanpa input; level-up modal 3 pilihan + pilih; shield menyerap damage; pause → toggle EN → nama skill & UI berubah; resume); autotest **SELFTEST_PASS 17/17**; roster-check (11 kartu, label unlock, klik kartu→detail, potret baru; kodex 43 kartu + kartu hero T-Bolt terbuka); perf **16,65 ms avg / 17,6 p95** @39 musuh; node --check & check-imports ✔.
+
+## Rencana Fase 13–14 — Workflow Edukasi "Tubuh Sebagai Universe"
 Desain lengkap: `docs/edu-workflow.md`. Ringkas: **Kodex Sel** (kartu sains terbuka via bertemu entitas, dua kedalaman: anak/dewasa muda, dwibahasa otomatis) → **Kuis Gerbang** pra-bos (benar = buff, salah = tetap main) → **Mode Belajar** (panel narasi sains di pause/gameover, tanpa fail-state keras) + **lencana Biolog Muda** per sistem tubuh. Prinsip: setiap mekanik yang SUDAH ada adalah metafora sainsnya (armor Gram± = membran luar; stealth Sel Abnormal = sel tapiuan; buff nutrisi = pesan gizi nyata) — edukasi dibungkus gameplay, bukan ditempel.
 
 ## Fase 9 — Musuh Dokumen Terlengkapi: Armor, Hazard, Stealth, Prion, Boss Kedua ✅

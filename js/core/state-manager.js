@@ -38,8 +38,8 @@ export function createDefaultMeta() {
     lang: 'id', // bahasa UI ('id' | 'en') — dipakai sistem i18n
     codexSeen: {}, // Kodex Sel (Bio-Pedia): id entitas yang pernah ditemui
     currency: 0,
-    unlockedHeroes: ['sel_t'],
-    selectedHero: 'sel_t',
+    unlockedHeroes: ['tcd8'],
+    selectedHero: 'tcd8',
     selectedArena: 'limfe',
     selectedMode: 'kampanye',
     selectedChapter: 'bab_mulut',
@@ -92,6 +92,24 @@ export function createDefaultMeta() {
  */
 export function mergeMetaDefaults(meta) {
   const base = createDefaultMeta();
+  // MIGRASI Fase 12: id hero lama → roster 11 hero baru (save pemain lama aman)
+  const HERO_MAP = {
+    sel_t: 'tcd8', makrofag: 'macrophage', neutrofil: 'neutrophil',
+    sel_b: 'bcell', sel_nk: 'nkcell', eosinofil: 'eosinophil',
+  };
+  const mapId = (id) => HERO_MAP[id] || id;
+  if (Array.isArray(meta.unlockedHeroes)) meta.unlockedHeroes = [...new Set(meta.unlockedHeroes.map(mapId))];
+  if (meta.selectedHero) meta.selectedHero = mapId(meta.selectedHero);
+  if (meta.heroLevels && typeof meta.heroLevels === 'object') {
+    const mapped = {};
+    for (const [k, v] of Object.entries(meta.heroLevels)) mapped[mapId(k)] = v;
+    meta.heroLevels = mapped;
+  }
+  if (meta.codexSeen && typeof meta.codexSeen === 'object') {
+    const mapped = {};
+    for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapId(k)] = v;
+    meta.codexSeen = mapped;
+  }
   const merged = deepMerge(base, meta || {});
   return merged;
 }

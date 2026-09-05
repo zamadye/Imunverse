@@ -1,227 +1,237 @@
 {
-  "schemaVersion": 1,
-  "xpCurve": {
-    "base": 10,
-    "exponent": 1.5
+ "schemaVersion": 3,
+ "xpCurve": {
+  "base": 10,
+  "exponent": 1.5
+ },
+ "levelUpChoices": 3,
+ "levelUpPool": [
+  {
+   "id": "damage",
+   "name": "Sitokin Padu",
+   "icon": "assets/sprites/fx_spark.png",
+   "desc": "+15% damage semua serangan",
+   "stat": "damage",
+   "mode": "percent",
+   "amount": 0.15,
+   "maxStacks": 99
   },
-  "levelUpChoices": 3,
-  "levelUpPool": [
-    {
-      "id": "damage",
-      "name": "Sitokin Padu",
-      "icon": "assets/sprites/fx_spark.png",
-      "desc": "+15% damage semua serangan",
-      "stat": "damage",
-      "mode": "percent",
-      "amount": 0.15,
-      "maxStacks": 99
-    },
-    {
-      "id": "attackSpeed",
-      "name": "Respons Imun",
-      "icon": "assets/sprites/icon_bolt.png",
-      "desc": "+12% kecepatan serangan",
-      "stat": "attackSpeed",
-      "mode": "percent",
-      "amount": 0.12,
-      "maxStacks": 99
-    },
-    {
-      "id": "moveSpeed",
-      "name": "Aliran Limfa",
-      "icon": "assets/sprites/icon_boot.png",
-      "desc": "+8% kecepatan gerak",
-      "stat": "moveSpeed",
-      "mode": "percent",
-      "amount": 0.08,
-      "maxStacks": 99
-    },
-    {
-      "id": "maxHP",
-      "name": "Regenerasi Membran",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "+20 HP maksimum & pulih 20 HP",
-      "stat": "maxHP",
-      "mode": "flat",
-      "amount": 20,
-      "maxStacks": 99
-    },
-    {
-      "id": "attackRange",
-      "name": "Reseptor Panjang",
-      "icon": "assets/sprites/icon_scope.png",
-      "desc": "+12% jarak serangan",
-      "stat": "attackRange",
-      "mode": "percent",
-      "amount": 0.12,
-      "maxStacks": 99
-    },
-    {
-      "id": "projectileCount",
-      "name": "Multi-L Respons",
-      "icon": "assets/sprites/icon_multi.png",
-      "desc": "+1 proyektil / tebasan ekstra",
-      "stat": "projectileCount",
-      "mode": "flat",
-      "amount": 1,
-      "maxStacks": 4
-    }
-  ],
-  "squadUpgrades": [
-    {
-      "id": "sq_damage",
-      "name": "Kekuatan Squad",
-      "icon": "assets/sprites/fx_spark.png",
-      "desc": "+8% damage per level (permanen)",
-      "perLevel": 0.08,
-      "maxLevel": 10,
-      "baseCost": 120,
-      "costGrowth": 1.6
-    },
-    {
-      "id": "sq_vitality",
-      "name": "Vitalitas",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "+10% HP maksimum per level (permanen)",
-      "perLevel": 0.1,
-      "maxLevel": 10,
-      "baseCost": 100,
-      "costGrowth": 1.55
-    },
-    {
-      "id": "sq_weapon",
-      "name": "Senjata Tajam",
-      "icon": "assets/sprites/icon_sword.png",
-      "desc": "+10% damage senjata per level (permanen)",
-      "perLevel": 0.1,
-      "maxLevel": 10,
-      "baseCost": 160,
-      "costGrowth": 1.6
-    },
-    {
-      "id": "sq_jurus",
-      "name": "Master Jurus",
-      "icon": "assets/sprites/icon_bolt.png",
-      "desc": "Jurus: cooldown -6% & area +8% per level (permanen)",
-      "perLevel": 0.06,
-      "maxLevel": 8,
-      "baseCost": 180,
-      "costGrowth": 1.65
-    },
-    {
-      "id": "sq_armor",
-      "name": "Membran Keras",
-      "icon": "assets/sprites/icon_shield.png",
-      "desc": "Damage diterima -5% per level (permanen)",
-      "perLevel": 0.05,
-      "maxLevel": 8,
-      "baseCost": 150,
-      "costGrowth": 1.6
-    },
-    {
-      "id": "sq_swift",
-      "name": "Kecepatan",
-      "icon": "assets/sprites/icon_boot.png",
-      "desc": "+5% kecepatan gerak per level (permanen)",
-      "perLevel": 0.05,
-      "maxLevel": 8,
-      "baseCost": 110,
-      "costGrowth": 1.5
-    },
-    {
-      "id": "sq_attack",
-      "name": "Tempo Serang",
-      "icon": "assets/sprites/icon_bolt.png",
-      "desc": "+6% kecepatan serangan per level (permanen)",
-      "perLevel": 0.06,
-      "maxLevel": 10,
-      "baseCost": 140,
-      "costGrowth": 1.6
-    },
-    {
-      "id": "sq_range",
-      "name": "Jangkauan",
-      "icon": "assets/sprites/icon_scope.png",
-      "desc": "+8% jarak serangan per level (permanen)",
-      "perLevel": 0.08,
-      "maxLevel": 8,
-      "baseCost": 130,
-      "costGrowth": 1.55
-    },
-    {
-      "id": "sq_nutrition",
-      "name": "Metabolisme",
-      "icon": "assets/sprites/item_glukosa.png",
-      "desc": "+10% XP yang didapat per level (permanen)",
-      "perLevel": 0.1,
-      "maxLevel": 8,
-      "baseCost": 150,
-      "costGrowth": 1.6
-    }
-  ],
-  "shopItems": [
-    {
-      "id": "serum_awal",
-      "name": "Serum Awal",
-      "icon": "assets/sprites/icon_syringe.png",
-      "desc": "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)",
-      "cost": 200,
-      "type": "consumable"
-    },
-    {
-      "id": "vaksin_awal",
-      "name": "Vaksin Awal",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "+30 HP saat run dimulai (dipakai otomatis)",
-      "cost": 180,
-      "type": "consumable"
-    },
-    {
-      "id": "kopi_limfa",
-      "name": "Kopi Limfa",
-      "icon": "assets/sprites/icon_boot.png",
-      "desc": "+12% kecepatan gerak 1 run (dipakai otomatis)",
-      "cost": 160,
-      "type": "consumable"
-    },
-    {
-      "id": "pelindung_lendir",
-      "name": "Pelindung Lendir",
-      "icon": "assets/sprites/icon_shield.png",
-      "desc": "Serap 1 serangan patogen per run (dipakai otomatis)",
-      "cost": 250,
-      "type": "consumable"
-    },
-    {
-      "id": "koin_ganda",
-      "name": "Sinyal Ganda",
-      "icon": "assets/sprites/icon_coin.png",
-      "desc": "+50% antibodi dari run ini (dipakai otomatis)",
-      "cost": 300,
-      "type": "consumable"
-    }
-  ],
-  "economy": {
-    "dailyReward": 120,
-    "waveBonusPerWave": 12,
-    "killBonusCurrency": 1,
-    "adDailyLimit": 6,
-    "currencyDropChance": 0.3
+  {
+   "id": "attackSpeed",
+   "name": "Respons Imun",
+   "icon": "assets/sprites/icon_bolt.png",
+   "desc": "+12% kecepatan serangan",
+   "stat": "attackSpeed",
+   "mode": "percent",
+   "amount": 0.12,
+   "maxStacks": 99
   },
-  "heroUpgrade": {
-    "baseCost": 150,
-    "costGrowth": 1.35,
-    "maxLevel": 20,
-    "dmgPerLevel": 0.06,
-    "hpPerLevel": 0.08,
-    "desc": "+6% damage & +8% HP per level (khusus hero ini)"
+  {
+   "id": "moveSpeed",
+   "name": "Aliran Limfa",
+   "icon": "assets/sprites/icon_boot.png",
+   "desc": "+8% kecepatan gerak",
+   "stat": "moveSpeed",
+   "mode": "percent",
+   "amount": 0.08,
+   "maxStacks": 99
   },
-  "allyUpgrade": {
-    "baseCost": 220,
-    "costGrowth": 1.4,
-    "maxLevel": 10,
-    "dmgPerLevel": 0.12,
-    "speedPerLevel": 0.04,
-    "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level"
+  {
+   "id": "maxHP",
+   "name": "Regenerasi Membran",
+   "icon": "assets/sprites/icon_heart.png",
+   "desc": "+20 HP maksimum & pulih 20 HP",
+   "stat": "maxHP",
+   "mode": "flat",
+   "amount": 20,
+   "maxStacks": 99
+  },
+  {
+   "id": "attackRange",
+   "name": "Reseptor Panjang",
+   "icon": "assets/sprites/icon_scope.png",
+   "desc": "+12% jarak serangan",
+   "stat": "attackRange",
+   "mode": "percent",
+   "amount": 0.12,
+   "maxStacks": 99
+  },
+  {
+   "id": "projectileCount",
+   "name": "Multi-L Respons",
+   "icon": "assets/sprites/icon_multi.png",
+   "desc": "+1 proyektil / tebasan ekstra",
+   "stat": "projectileCount",
+   "mode": "flat",
+   "amount": 1,
+   "maxStacks": 4
+  },
+  {
+   "id": "lifeSteal",
+   "name": "Fagositosis Vital",
+   "icon": "assets/sprites/icon_heart.png",
+   "desc": "Life Steal +5% — pulihkan HP dari damage musuh",
+   "stat": "lifeSteal",
+   "mode": "flat",
+   "amount": 1,
+   "maxStacks": 4
   }
+ ],
+ "squadUpgrades": [
+  {
+   "id": "sq_damage",
+   "name": "Kekuatan Squad",
+   "icon": "assets/sprites/fx_spark.png",
+   "desc": "+8% damage per level (permanen)",
+   "perLevel": 0.08,
+   "maxLevel": 10,
+   "baseCost": 120,
+   "costGrowth": 1.6
+  },
+  {
+   "id": "sq_vitality",
+   "name": "Vitalitas",
+   "icon": "assets/sprites/icon_heart.png",
+   "desc": "+10% HP maksimum per level (permanen)",
+   "perLevel": 0.1,
+   "maxLevel": 10,
+   "baseCost": 100,
+   "costGrowth": 1.55
+  },
+  {
+   "id": "sq_weapon",
+   "name": "Senjata Tajam",
+   "icon": "assets/sprites/icon_sword.png",
+   "desc": "+10% damage senjata per level (permanen)",
+   "perLevel": 0.1,
+   "maxLevel": 10,
+   "baseCost": 160,
+   "costGrowth": 1.6
+  },
+  {
+   "id": "sq_jurus",
+   "name": "Master Jurus",
+   "icon": "assets/sprites/icon_bolt.png",
+   "desc": "Jurus: cooldown -6% & area +8% per level (permanen)",
+   "perLevel": 0.06,
+   "maxLevel": 8,
+   "baseCost": 180,
+   "costGrowth": 1.65
+  },
+  {
+   "id": "sq_armor",
+   "name": "Membran Keras",
+   "icon": "assets/sprites/icon_shield.png",
+   "desc": "Damage diterima -5% per level (permanen)",
+   "perLevel": 0.05,
+   "maxLevel": 8,
+   "baseCost": 150,
+   "costGrowth": 1.6
+  },
+  {
+   "id": "sq_swift",
+   "name": "Kecepatan",
+   "icon": "assets/sprites/icon_boot.png",
+   "desc": "+5% kecepatan gerak per level (permanen)",
+   "perLevel": 0.05,
+   "maxLevel": 8,
+   "baseCost": 110,
+   "costGrowth": 1.5
+  },
+  {
+   "id": "sq_attack",
+   "name": "Tempo Serang",
+   "icon": "assets/sprites/icon_bolt.png",
+   "desc": "+6% kecepatan serangan per level (permanen)",
+   "perLevel": 0.06,
+   "maxLevel": 10,
+   "baseCost": 140,
+   "costGrowth": 1.6
+  },
+  {
+   "id": "sq_range",
+   "name": "Jangkauan",
+   "icon": "assets/sprites/icon_scope.png",
+   "desc": "+8% jarak serangan per level (permanen)",
+   "perLevel": 0.08,
+   "maxLevel": 8,
+   "baseCost": 130,
+   "costGrowth": 1.55
+  },
+  {
+   "id": "sq_nutrition",
+   "name": "Metabolisme",
+   "icon": "assets/sprites/item_glukosa.png",
+   "desc": "+10% XP yang didapat per level (permanen)",
+   "perLevel": 0.1,
+   "maxLevel": 8,
+   "baseCost": 150,
+   "costGrowth": 1.6
+  }
+ ],
+ "shopItems": [
+  {
+   "id": "serum_awal",
+   "name": "Serum Awal",
+   "icon": "assets/sprites/icon_syringe.png",
+   "desc": "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)",
+   "cost": 200,
+   "type": "consumable"
+  },
+  {
+   "id": "vaksin_awal",
+   "name": "Vaksin Awal",
+   "icon": "assets/sprites/icon_heart.png",
+   "desc": "+30 HP saat run dimulai (dipakai otomatis)",
+   "cost": 180,
+   "type": "consumable"
+  },
+  {
+   "id": "kopi_limfa",
+   "name": "Kopi Limfa",
+   "icon": "assets/sprites/icon_boot.png",
+   "desc": "+12% kecepatan gerak 1 run (dipakai otomatis)",
+   "cost": 160,
+   "type": "consumable"
+  },
+  {
+   "id": "pelindung_lendir",
+   "name": "Pelindung Lendir",
+   "icon": "assets/sprites/icon_shield.png",
+   "desc": "Serap 1 serangan patogen per run (dipakai otomatis)",
+   "cost": 250,
+   "type": "consumable"
+  },
+  {
+   "id": "koin_ganda",
+   "name": "Sinyal Ganda",
+   "icon": "assets/sprites/icon_coin.png",
+   "desc": "+50% antibodi dari run ini (dipakai otomatis)",
+   "cost": 300,
+   "type": "consumable"
+  }
+ ],
+ "economy": {
+  "dailyReward": 120,
+  "waveBonusPerWave": 12,
+  "killBonusCurrency": 1,
+  "adDailyLimit": 6,
+  "currencyDropChance": 0.3
+ },
+ "heroUpgrade": {
+  "baseCost": 150,
+  "costGrowth": 1.35,
+  "maxLevel": 20,
+  "dmgPerLevel": 0.06,
+  "hpPerLevel": 0.08,
+  "desc": "+6% damage & +8% HP per level (khusus hero ini)"
+ },
+ "allyUpgrade": {
+  "baseCost": 220,
+  "costGrowth": 1.4,
+  "maxLevel": 10,
+  "dmgPerLevel": 0.12,
+  "speedPerLevel": 0.04,
+  "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level"
+ }
 }

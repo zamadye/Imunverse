@@ -132,17 +132,19 @@ function renderSummary(meta) {
   const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === (meta.focusRun || 'seimbang'));
   const arenaDef = getData().arenas.arenas.find((a) => a.id === meta.selectedArena) || getData().arenas.arenas[0];
 
-  const abilityIds = getData().evolutions.stages
-    .filter((st) => st.stage <= stageDef.stage && st.ability)
-    .map((st) => st.ability);
-  const abilityDefs = getData().abilities.abilities.filter((a) => abilityIds.includes(a.id));
+  // Fase 12: loadout = 3 skill aktif hero (S1/S2/Ult) dari data/skills.json
+  const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((s) => s.id === id)).filter(Boolean);
 
   box.appendChild(el('img', { class: 'ps-hero', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
   const mid = el('div', { class: 'ps-mid' }, [
     el('b', { text: heroDef.name }),
     el('span', { class: 'ps-tier', style: `color:${stageDef.tierColor}`, text: `${stageDef.name} · ${stageDef.tier}` }),
-    el('span', { class: 'ps-abilities' }, abilityDefs.length
-      ? abilityDefs.map((a) => el('img', { src: a.icon, alt: a.name, title: `${a.name} (${a.key.toUpperCase()})` }))
+    el('span', { class: 'ps-abilities' }, skillDefs.length
+      ? skillDefs.map((s, i) => el('span', {
+          class: `ps-skill-dot${i === 2 ? ' ult' : ''}`,
+          style: `background:${s.color}`,
+          title: `${s.name} (tombol ${i + 1})`,
+        }))
       : [el('span', { class: 'ps-noab', text: 'Kemampuan terbuka lewat evolusi' })]),
   ]);
   box.appendChild(mid);

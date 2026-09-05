@@ -44,6 +44,7 @@ export class Enemy {
     this.nkRevealT = 0;
     this.convertT = def.convertInterval || 0;
     this.lastHitAbsorbed = false;
+    this.markMult = 1; this.markT = 0; this.dotMult = 0; this.dotT = 0; this.dotSrc = 0; // Fase 12 skill state
 
     // Visual
     this.rotation = Math.random() * Math.PI * 2;

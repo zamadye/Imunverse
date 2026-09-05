@@ -25,6 +25,7 @@ const store = {
 export async function loadAllData() {
   const files = {
     heroes: 'data/heroes.json',
+    skills: 'data/skills.json',
     enemies: 'data/enemies.json',
     nutrients: 'data/nutrients.json',
     waves: 'data/waves.json',

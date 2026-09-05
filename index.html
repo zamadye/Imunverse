@@ -290,55 +290,68 @@
 
       <!-- ============ GAMEPLAY HUD ============ -->
       <section id="screen-hud" class="screen passive" data-screen="hud">
-        <div id="hud-buffs" class="hud-buffs"></div>
+        <!-- TOP MLBB: kiri kill stat | tengah wave+timer | kanan currency -->
         <div class="hud-top">
-          <div class="hud-xp-track">
-            <div id="hud-xp-ghost" class="hud-xp-ghost"></div>
-            <div id="hud-xp-fill" class="hud-xp-fill"></div>
-            <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
-            <span id="hud-level" class="hud-level-chip">Lv 1</span>
-          </div>
-          <div class="hud-row">
-            <div class="hp-pill" id="hp-pill">
-              <img id="hud-portrait" class="hud-portrait" alt="" />
-              <img class="heart" src="assets/sprites/icon_heart.png" alt="" />
-              <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
-              <span id="hud-hp-text" class="hud-hp-text">100</span>
-            </div>
+          <div class="hud-stat-left glass">
+            <div class="hud-kills"><img src="assets/sprites/icon_skull.png" alt="" /><span id="hud-kills">0</span></div>
             <div class="hud-lvls" id="hud-lvls">
               <span id="hud-hero-lvl" class="hud-lvl-chip hero"></span>
               <span id="hud-ally-lvl" class="hud-lvl-chip ally"></span>
             </div>
-            <div class="hud-center">
-              <div id="hud-wave" class="wave-pill">WAVE 1</div>
-              <div id="hud-timer" class="timer-chip"><img src="assets/sprites/icon_timer.png" alt="" /><span id="hud-timer-text">00:00</span></div>
-              <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
-                <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
-                <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
-              </div>
-            </div>
-            <div class="hud-right">
-              <div class="hud-kills"><img src="assets/sprites/icon_skull.png" alt="" /><span id="hud-kills">0</span></div>
-              <div class="hud-currency-run"><img src="assets/sprites/icon_coin.png" alt="" /><span id="hud-currency">0</span></div>
-              <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
+          </div>
+          <div class="hud-center glass">
+            <div id="hud-wave" class="wave-pill">WAVE 1</div>
+            <div id="hud-timer" class="timer-chip"><img src="assets/sprites/icon_timer.png" alt="" /><span id="hud-timer-text">00:00</span></div>
+            <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
+              <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
+              <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
             </div>
           </div>
+          <div class="hud-stat-right glass">
+            <div class="hud-currency-run"><img src="assets/sprites/icon_coin.png" alt="" /><span id="hud-currency">0</span></div>
+            <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
+          </div>
         </div>
+        <div id="hud-buffs" class="hud-buffs"></div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
-        <div id="ability-bar" class="ability-bar" aria-label="Kemampuan aktif"><!-- diisi JS --></div>
         <div id="hud-announce" class="hud-announce hidden"></div>
         <div id="hud-mission" class="hud-mission hidden">
           <span id="hud-mission-text" class="hud-mission-text"></span>
           <div class="hud-mission-bar"><div id="hud-mission-fill"></div></div>
         </div>
         <div id="ability-banner" class="ability-banner"></div>
-        <button id="btn-fire" class="fire-btn" aria-label="Tembak">
-          <img src="assets/sprites/icon_sword.png" alt="" />
-          <span>TEMBAK!</span>
-        </button>
         <div id="hud-combo" class="hud-combo hidden"></div>
         <div id="tutorial-layer" class="hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
+        <!-- BOTTOM LEFT: status hero ala MLBB (avatar + HP + XP) -->
+        <div class="hud-hero-status glass" id="hp-pill">
+          <div class="avatar-wrap">
+            <img id="hud-portrait" class="hud-portrait" alt="" />
+            <span id="hud-level" class="level-badge">Lv 1</span>
+          </div>
+          <div class="status-bars">
+            <div class="hp-row">
+              <img class="heart" src="assets/sprites/icon_heart.png" alt="" />
+              <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
+              <span id="hud-hp-text" class="hud-hp-text">100</span>
+            </div>
+            <div class="xp-row">
+              <div class="hud-xp-track">
+                <div id="hud-xp-ghost" class="hud-xp-ghost"></div>
+                <div id="hud-xp-fill" class="hud-xp-fill"></div>
+              </div>
+              <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
+            </div>
+          </div>
+        </div>
+        <!-- BOTTOM RIGHT: grid skill 2x2 + tombol SERANG besar -->
+        <div class="hud-controls">
+          <div id="ability-bar" class="ability-bar" aria-label="Skill aktif"><!-- diisi JS --></div>
+          <button id="btn-fire" class="fire-btn" aria-label="Serang">
+            <img src="assets/sprites/icon_sword.png" alt="" />
+            <span>SERANG</span>
+          </button>
+        </div>
       </section>
 
       <!-- ============ PILIH FOKUS RUN (meta-layer kondisi tubuh) ============ -->

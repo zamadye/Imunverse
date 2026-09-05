@@ -14,6 +14,7 @@ export class Camera {
     this.shakeX = 0;
     this.shakeY = 0;
     this._follows = false;
+    this.zoom = 1.16; // Fase 12: karakter lebih besar & jelas di layar
   }
 
   reset(tx, ty) {
@@ -61,14 +62,17 @@ export class Camera {
 
   /** Terapkan transform kamera ke ctx (w/h = ukuran viewport CSS px). */
   apply(ctx, w, h) {
-    ctx.translate(Math.round(w / 2 - this.x + this.shakeX), Math.round(h / 2 - this.y + this.shakeY));
+    // Fase 12: zoom di sekitar pusat layar — semua entitas dunia ikut membesar
+    ctx.translate(Math.round(w / 2 + this.shakeX), Math.round(h / 2 + this.shakeY));
+    ctx.scale(this.zoom, this.zoom);
+    ctx.translate(-this.x, -this.y);
   }
 
   /** Konversi koordinat dunia → layar (dipakai elemen screen-space). */
   worldToScreen(wx, wy, w, h) {
     return {
-      x: wx - this.x + w / 2,
-      y: wy - this.y + h / 2,
+      x: (wx - this.x) * this.zoom + w / 2,
+      y: (wy - this.y) * this.zoom + h / 2,
     };
   }
 

@@ -15,6 +15,7 @@ import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { squadMultipliers } from '../../systems/upgrade-system.js';
+import { t as tr } from '../../systems/i18n.js';
 
 let heroId = null;
 
@@ -46,7 +47,7 @@ function selectHero() {
     ]),
     el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
     el('b', { class: 'hl-name', text: heroDef.name }),
-    el('span', { class: 'hl-title', text: heroDef.title }),
+    el('span', { class: 'hl-title', text: tr(heroDef.title) }),
     el('div', { class: 'hl-stats' }, [
       el('span', { text: `Senjata ${Math.round(nowDamage)} (+${Math.round((nextDamage - nowDamage) * 10) / 10}/lvl)` }),
       el('span', { text: `HP ${nowHP} (+${nextHP - nowHP}/lvl)` }),

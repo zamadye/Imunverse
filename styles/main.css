@@ -780,41 +780,8 @@ img.lock-badge {
    ===================================================================== */
 
 /* -- Bar kemampuan aktif: 4 tombol bulat di kanan (1 senjata + 3 kekuatan) -- */
-.ability-bar {
-  position: absolute; right: 14px; bottom: 190px;
-  display: grid; grid-template-columns: repeat(2, 56px); gap: 10px;
-  z-index: 5;
-  pointer-events: auto; /* klik jurus */
-}
-.ability-btn {
-  position: relative; width: 56px; height: 56px; border-radius: 50%;
-  border: none; padding: 0; background: transparent; cursor: pointer;
-  filter: drop-shadow(0 3px 0 rgba(18, 63, 58, 0.35));
-  transition: transform 0.08s ease;
-}
-.ability-btn:active { transform: scale(0.92); }
-.ability-btn img { width: 100%; height: 100%; }
-.ability-btn .cd-fill {
-  position: absolute; left: 2px; right: 2px; bottom: 2px; height: 0%;
-  border-radius: 0 0 26px 26px; background: rgba(18, 63, 58, 0.55);
-  pointer-events: none;
-}
-.ability-btn.ready { animation: ability-pulse 1.6s ease-in-out infinite; }
-.ability-btn.locked { opacity: 0.35; filter: grayscale(1); }
-.ability-btn .slot-tag {
-  position: absolute; top: -4px; left: -4px; width: 18px; height: 18px;
-  border-radius: 50%; background: var(--ink); color: var(--cream);
-  font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;
-}
-.ability-btn .key-tag {
-  position: absolute; bottom: -4px; right: -4px; padding: 1px 5px;
-  border-radius: 8px; background: var(--cream); border: 2px solid var(--ink);
-  font-size: 9px; font-weight: 900; color: var(--ink); text-transform: uppercase;
-}
-@keyframes ability-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 198, 79, 0.55); border-radius: 50%; }
-  50% { box-shadow: 0 0 0 7px rgba(245, 198, 79, 0); border-radius: 50%; }
-}
+/* Fase 12: bar skill kini digaya khusus MLBB (lihat blok #screen-hud di bawah) */
+
 
 /* -- Kartu evolusi hero di dashboard (selalu ada yang dikejar) -- */
 .evo-card { display: flex; flex-direction: column; gap: 10px; }
@@ -1579,3 +1546,78 @@ img.lock-badge {
 .cxd-kicker{font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#35d0ba;margin-top:8px}
 .cxd-kid{font-size:14px;font-weight:600;color:#2f5a52;margin:4px 0 0}
 .cxd-fact{font-size:13px;color:#41625b;margin:4px 0 0}
+
+/* =====================================================================
+   FASE 12 — HUD GAMEPLAY ALA MLBB (glassmorphism biru gelap + emas)
+   ===================================================================== */
+#screen-hud .glass{background:linear-gradient(165deg,rgba(12,28,44,.78),rgba(6,14,24,.82));border:1.5px solid rgba(245,198,79,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:14px;box-shadow:0 4px 14px rgba(2,8,16,.4)}
+#screen-hud .hud-top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;z-index:5;pointer-events:none}
+#screen-hud .hud-stat-left,#screen-hud .hud-stat-right{display:flex;align-items:center;gap:8px;padding:6px 10px}
+#screen-hud .hud-stat-right{pointer-events:auto}
+#screen-hud .hud-center{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 16px;min-width:128px}
+#screen-hud .hud-center .wave-pill{background:none;border:none;font-weight:900;letter-spacing:.08em;color:#f5c64f;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#screen-hud .hud-center .timer-chip{background:none;border:none;gap:4px;color:#eaf4ff;font-weight:800}
+#screen-hud .hud-kills{display:flex;align-items:center;gap:4px;font-weight:900;color:#ff8a93;font-size:14px}
+#screen-hud .hud-kills img{width:15px;height:15px}
+#screen-hud .hud-currency-run{display:flex;align-items:center;gap:4px;font-weight:900;color:#f5c64f;font-size:14px}
+#screen-hud .hud-currency-run img{width:15px;height:15px}
+#screen-hud .btn-pause{background:rgba(245,198,79,.12);border:1.5px solid rgba(245,198,79,.55);width:36px;height:36px;min-height:36px;border-radius:10px}
+#screen-hud .hud-minimap{top:96px;right:12px;border-color:rgba(245,198,79,.55);width:84px;height:84px}
+#screen-hud .hud-buffs{top:84px}
+#screen-hud .hud-lvls{flex-direction:column;gap:2px;align-items:flex-start}
+#screen-hud .hud-lvl-chip{background:rgba(2,10,18,.5);border:1px solid rgba(255,255,255,.18);font-size:9px;padding:1px 7px}
+
+/* BOTTOM LEFT — status hero (avatar + HP + XP) */
+#screen-hud .hud-hero-status{position:absolute;left:10px;bottom:12px;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 9px;z-index:6;pointer-events:none}
+#screen-hud .avatar-wrap{position:relative;width:58px;height:58px;flex:0 0 58px}
+#screen-hud .hud-portrait{width:58px;height:58px;border-radius:50%;border:3px solid #f5c64f;background:rgba(4,12,20,.8);box-shadow:0 0 0 2px rgba(2,8,14,.6),0 0 14px rgba(245,198,79,.25);object-fit:cover}
+#screen-hud .level-badge{position:absolute;bottom:-5px;right:-8px;background:linear-gradient(180deg,#ffe28a,#f5c64f);color:#3a2a05;font-size:9px;font-weight:900;padding:2px 7px;border-radius:10px;border:1.5px solid #fff8ea;white-space:nowrap}
+#screen-hud .status-bars{width:170px;display:flex;flex-direction:column;gap:5px}
+#screen-hud .hp-row{display:flex;align-items:center;gap:6px}
+#screen-hud .hp-row .heart{width:14px;height:14px}
+#screen-hud .hud-hp-track{flex:1;height:14px;background:rgba(2,8,14,.72);border:1px solid rgba(255,255,255,.22);border-radius:8px;overflow:hidden}
+#screen-hud .hud-hp-fill{height:100%;width:100%;background:linear-gradient(180deg,#43e08d,#23a15c);border-radius:8px;transition:width .18s ease}
+#screen-hud .hp-pill.low .hud-hp-fill{background:linear-gradient(180deg,#ff7a8a,#d63a4e)}
+#screen-hud .hud-hp-text{font-size:10px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);min-width:44px;text-align:right}
+#screen-hud .xp-row{display:flex;align-items:center;gap:6px}
+#screen-hud .hud-xp-track{flex:1;height:7px;background:rgba(2,8,14,.72);border:1px solid rgba(255,255,255,.16);border-radius:5px;overflow:hidden;position:static}
+#screen-hud .hud-xp-fill{height:100%;width:0%;background:linear-gradient(90deg,#58c7f3,#2e9bd6);border-radius:5px}
+#screen-hud .hud-xp-ghost{background:rgba(255,255,255,.5)}
+#screen-hud .hud-xp-ico{width:12px;height:12px}
+
+/* BOTTOM RIGHT — grid skill 2x2 + SERANG */
+#screen-hud .hud-controls{position:absolute;right:10px;bottom:12px;display:flex;align-items:flex-end;gap:10px;z-index:6}
+#screen-hud .ability-bar{position:static;display:grid;grid-template-columns:repeat(2,60px);gap:8px;background:none;border:none;box-shadow:none;padding:0;bottom:auto;right:auto}
+#screen-hud .ability-btn{pointer-events:auto;position:relative;width:60px;height:60px;border-radius:16px;border:2px solid var(--sk,#35d0ba);background:linear-gradient(165deg,rgba(16,42,66,.92),rgba(6,16,28,.94));display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:transform .08s ease,box-shadow .15s ease;padding:0}
+#screen-hud .ability-btn:active{transform:scale(.92)}
+#screen-hud .ability-btn.ready{box-shadow:0 0 12px color-mix(in srgb,var(--sk,#35d0ba) 55%,transparent)}
+#screen-hud .ability-btn .sk-name{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:7.5px;font-weight:900;letter-spacing:.02em;color:#fff;text-transform:uppercase;text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:2;padding:0 2px}
+#screen-hud .ability-btn .cd-fill{position:absolute;left:0;right:0;bottom:0;height:0%;background:rgba(2,8,14,.74);z-index:1}
+#screen-hud .ability-btn .cd-num{position:absolute;inset:0;display:grid;place-items:center;font-size:21px;font-weight:900;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.9);z-index:3}
+#screen-hud .ability-btn .key-tag{position:absolute;top:3px;left:5px;font-size:8px;font-weight:900;color:#f5c64f;z-index:3;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+#screen-hud .ability-btn.ult{grid-column:span 2;width:100%;height:48px;border-color:#f5c64f}
+#screen-hud .ability-btn.ult .sk-name{font-size:10px;bottom:5px}
+#screen-hud .fire-btn{position:static;width:88px;height:88px;min-height:88px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 32% 28%,#20507e,#0a1c2e 72%);border:3px solid #f5c64f;color:#f5c64f;font-weight:900;font-size:12px;letter-spacing:.05em;box-shadow:0 6px 18px rgba(2,8,16,.5),inset 0 0 18px rgba(245,198,79,.12);cursor:pointer;pointer-events:auto;transition:transform .08s ease}
+#screen-hud .fire-btn:active{transform:scale(.93)}
+#screen-hud .fire-btn img{width:26px;height:26px}
+@media (max-width:390px){
+  #screen-hud .ability-btn{width:54px;height:54px}
+  #screen-hud .ability-bar{grid-template-columns:repeat(2,54px)}
+  #screen-hud .fire-btn{width:78px;height:78px;min-height:78px}
+  #screen-hud .status-bars{width:150px}
+  #screen-hud .hud-minimap{width:72px;height:72px}
+}
+
+/* Fase 12: chip skill hero di ringkasan prep */
+.ps-abilities{display:flex;gap:5px;align-items:center}
+.ps-skill-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,253,244,.85);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.ps-skill-dot.ult{width:20px;height:20px;border-color:#f5c64f}
+/* Fase 12 v2: ikon skill + keyframes rounded (yang lama memaksa radius 50%) */
+@keyframes hudSkillPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,198,79,.55); }
+  50% { box-shadow: 0 0 0 7px rgba(245,198,79,0); }
+}
+#screen-hud .ability-btn.ready{animation:hudSkillPulse 1.6s ease-in-out infinite}
+#screen-hud .ability-btn .sk-ico{width:26px;height:26px;object-fit:contain;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+#screen-hud .ability-btn.ult .sk-ico{width:30px;height:30px}
+#screen-hud .ability-btn .sk-name{bottom:4px}

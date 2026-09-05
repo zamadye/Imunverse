@@ -245,6 +245,40 @@ def gen_stage_heroes(out):
     }
 
 
+def gen_stage_heroes_v2(out):
+    print("STAGE 1b — 11 Hero MLBB (22 aset + 11 potret)")
+    heroes = {
+        # id: (warna, params hero(), warna portrait)
+        "macrophage": ("#4a7c59", dict(big=True, lobes=1, granules=True)),   # Mako — Tank
+        "dendritic":  ("#ff8c00", dict(spikes=14, granules=True)),           # Dendri — Support
+        "neutrophil": ("#1a5276", dict(granules=True)),                      # Neutron — Damage
+        "eosinophil": ("#ff6b81", dict(granules=True, lobes=1)),             # Eos — Damage
+        "basophil":   ("#8e44ad", dict(granules=True, spikes=7)),            # Baso — Support
+        "mastcell":   ("#a03328", dict(big=True, granules=True)),            # Mastia — Tank
+        "tcd8":       ("#00d2ff", dict(spikes=4)),                           # T-Bolt — Damage
+        "tcd4":       ("#f1c40f", dict(receptors=True)),                     # Helia — Support
+        "treg":       ("#2ecc71", dict(receptors=True, lobes=1)),            # Treg — Support
+        "bcell":      ("#bb8fce", dict(receptors=True, granules=True)),      # Bella — Damage
+        "nkcell":     ("#4a235a", dict(spikes=9)),                           # Nyx — Damage
+    }
+    outp = {}
+    for hid, (col, params) in heroes.items():
+        outp[f"hero_{hid}_idle.png"] = hero(hid, col, **params)
+        outp[f"hero_{hid}_attack.png"] = hero(hid, col, attack=True, **params)
+    return outp
+
+
+def gen_stage_portraits_v2(out):
+    print("STAGE 4b — Potret 11 Hero MLBB")
+    cols = {
+        "macrophage": ("#4a7c59", 0), "dendritic": ("#ff8c00", 14), "neutrophil": ("#1a5276", 0),
+        "eosinophil": ("#ff6b81", 0), "basophil": ("#8e44ad", 7), "mastcell": ("#a03328", 0),
+        "tcd8": ("#00d2ff", 4), "tcd4": ("#f1c40f", 0), "treg": ("#2ecc71", 0),
+        "bcell": ("#bb8fce", 0), "nkcell": ("#4a235a", 9),
+    }
+    return {f"portrait_{hid}.png": portrait(128, col, spikes=sp) for hid, (col, sp) in cols.items()}
+
+
 # =====================================================================
 # STAGE 2 — MUSUH (7 aset)
 # =====================================================================
@@ -1824,6 +1858,8 @@ def main():
     stages = [
         gen_stage_evo,
         gen_stage_body,
+        gen_stage_heroes_v2,
+        gen_stage_portraits_v2,
         gen_stage_heroes,
         gen_stage_enemies,
         gen_stage_items,

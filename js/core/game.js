@@ -18,6 +18,7 @@ import { emit } from './ui-bridge.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
+import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
 import { Enemy } from '../entities/enemy.js';
@@ -179,7 +180,7 @@ export const game = {
       hazards: [], // Fase 9: genangan toksin (area damage statis)
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
-      tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 } },
+      tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
       permBoost: { maxHP: 0, regen: 0, omega: 0 },
       bodyMods, // modifier kondisi tubuh run ini — dipakai ulang saat recompute
       effects: new EffectsSystem(),
@@ -218,10 +219,10 @@ export const game = {
       victory: false,
       focusId,
       focusDef,
-      abilities: new AbilitySystem(unlockedAbilityIds, {
-        cd: squadMultipliers(meta).jurusCd,
-        radius: squadMultipliers(meta).jurusRadius,
-      }),
+      // Fase 12: 3 skill aktif hero (S1/S2/Ult) ala MLBB — data-driven skills.json
+      skills: new SkillSystem(heroDef, { cdMult: squadMultipliers(meta).jurusCd }),
+      // lapisan pertahanan Fase 12: shield → protect → evade
+      shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
       parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
@@ -347,11 +348,12 @@ export const game = {
 
     const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
-    const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08);
+    const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
+    const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
 
@@ -368,6 +370,7 @@ export const game = {
       magnetRadius: base.magnetRadius,
       pickupRadius: base.pickupRadius,
       xpMult: squad.xpGain * buffXP,
+      lifeSteal,
       regen: perm.regen || 0,
       omegaCleanse: perm.omega || 0,
       // jarak cari target: melee pakai radius tebasan, ranged pakai attackRange
@@ -444,7 +447,7 @@ export const game = {
     // BUFF TEMPUR (Fase 8.4): hitung mundur buff sementara + regen permanen run
     if (run.tempBuffs) {
       let buffExpired = false;
-      for (const k of ['damage', 'cooldown', 'xp']) {
+      for (const k of ['damage', 'cooldown', 'xp', 'speed']) {
         const b = run.tempBuffs[k];
         if (b.t > 0) {
           b.t -= dt;
@@ -558,6 +561,7 @@ export const game = {
       const died = enemy.takeDamage(dmg);
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died);
+      if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
       return died;
@@ -576,7 +580,20 @@ export const game = {
     this.updatePickups(dt);
 
     // 10. Efek & partikel (+ cooldown kemampuan aktif)
-    run.abilities.update(dt);
+    run.skills.update(dt);
+    if (run.protectT > 0) {
+      run.protectT -= dt;
+      if (run.protectT <= 0) run.protectMult = 1;
+    }
+    // DOT tick (racun skill Eos)
+    for (const e of run.enemies) {
+      if (!e.alive || !e.dotT) continue;
+      e.dotT -= dt;
+      const dmg = (e.dotSrc || 0) * (e.dotMult || 0) * dt;
+      const died = e.takeDamage(dmg);
+      if (died) this.onEnemyKilled(e, null);
+      if (e.dotT <= 0) e.dotMult = 0;
+    }
     run.effects.update(dt);
 
     // 11. Kamera follow + shake decay
@@ -775,6 +792,7 @@ export const game = {
       const died = e.takeDamage(damage);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : damage, died);
+      if (!e.lastHitAbsorbed) this.onDamageDealt(damage);
       if (died) this.onEnemyKilled(e, null);
     });
   },
@@ -819,6 +837,22 @@ export const game = {
       audio.hit();
       return;
     }
+    // Fase 12 — SHIELD skill: serap damage dulu
+    if (run.shield > 0) {
+      const absorbed = Math.min(run.shield, amount);
+      run.shield -= absorbed;
+      amount -= absorbed;
+      run.effects.spawnLabel(player.x, player.y - 44, tr('TERSERAP!'), '#7fd8c8');
+      if (amount <= 0) return;
+    }
+    // EVADE (skill Eos): hindari 1 serangan
+    if (run.evadeCharges > 0) {
+      run.evadeCharges -= 1;
+      run.effects.spawnLabel(player.x, player.y - 44, tr('Evade!'), '#ff8a80');
+      return;
+    }
+    // PROTECT (skill defensif): damage × mult
+    if (run.protectMult < 1) amount = Math.max(1, Math.round(amount * run.protectMult));
     // PERTAHANAN (upgrade permanen): kurangi damage diterima
     amount = Math.max(1, Math.round(amount * (squadMultipliers(STATE.meta).armor || 1)));
     if (!player.takeDamage(amount)) return;
@@ -957,12 +991,19 @@ export const game = {
    * Aktivasi kemampuan aktif via tombol HUD / keyboard (slot 1-4).
    * @returns {boolean} true bila kemampuan terluncur.
    */
+  /** Fase 12: SERANG manual sekali (tombol SERANG / tombol 4). */
+  triggerAttack() {
+    if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
+    this.run.player.tryFire(this);
+    return true;
+  },
+
   useAbilityBySlot(slot) {
     const run = this.run;
     if (!run || run.ended || STATE.levelUpOpen) return false;
     const player = run.player;
     if (!player.alive) return false;
-    return run.abilities.triggerBySlot(slot, {
+    return run.skills.trigger(slot, {
       game: this,
       player,
       enemies: run.enemies,
@@ -976,6 +1017,12 @@ export const game = {
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
+  },
+
+  /** Fase 12: Life Steal — pulihkan HP dari damage yang diberikan. */
+  onDamageDealt(amount) {
+    const ls = this.run && this.run.player.stats.lifeSteal;
+    if (ls > 0 && this.run.player.alive) this.run.player.heal(amount * ls);
   },
 
   /** Fase 9 — Prion: ubah musuh biasa di sekitar jadi versi kristal lebih kuat. */
@@ -1219,7 +1266,9 @@ export const game = {
     const meta = STATE.meta;
     const bonus = computeRunEndBonus(run);
     const doubleMult = (this.runFlags && this.runFlags.ganda) ? 1.5 : 1;
-    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0) + bonus) * doubleMult);
+    // Fase 12 (spek pemilik): bonus akhir run floor(wave×8 + kills×0.5 + boss×50)
+    const waveBonus = Math.floor((run.spawnSys ? run.spawnSys.wave : run.wave || 1) * 8 + run.kills * 0.5 + (run.bossKills || 0) * 50);
+    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0) + bonus + waveBonus) * doubleMult);
     run.earned = earned;
     const victory = !!run.victory;
 
@@ -1471,7 +1520,7 @@ export const game = {
         hpText: `${Math.ceil(player.hp)}/${player.maxHP}`,
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
-        abilities: run.abilities.getView(),
+        abilities: run.skills.getView(),
         combo: run.combo,
         mission: run.objective
           ? { quota: run.objective.quota, kills: run.kills, bossSpawned: run.objective.bossSpawned, bossName: run.chapter && run.chapter.boss ? run.chapter.boss.name : null }

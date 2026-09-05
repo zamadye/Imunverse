@@ -1,218 +1,484 @@
 {
-  "schemaVersion": 2,
-  "heroes": [
-    {
-      "id": "sel_t",
-      "name": "Sel T Killer",
-      "title": "Penembak Sitokin",
-      "description": "Sel T sitotoksik standar garda depan. Menembakkan butiran sitokin yang menembus deretan patogen.",
-      "sprite": "assets/sprites/hero_sel_t_idle.png",
-      "spriteIdle": "assets/sprites/hero_sel_t_idle.png",
-      "spriteAttack": "assets/sprites/hero_sel_t_attack.png",
-      "color": "#35d0ba",
-      "attackPattern": "ranged_pierce",
-      "baseStats": {
-        "maxHP": 100,
-        "speed": 186,
-        "damage": 11,
-        "attackCooldown": 0.85,
-        "attackRange": 280,
-        "projectileSpeed": 460,
-        "projectileCount": 1,
-        "pierce": 2,
-        "radius": 15,
-        "magnetRadius": 95,
-        "pickupRadius": 26
-      },
-      "patternParams": {
-        "spreadAngle": 0.14
-      },
-      "unlock": {
-        "type": "default"
-      },
-      "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_sel_t.png"
-    },
-    {
-      "id": "makrofag",
-      "name": "Makrofag",
-      "title": "Pelahap Raksasa",
-      "description": "Sel fagosit raksasa. Mencabik semua patogen di sekitarnya dengan sapuan pseudopodia selebar 137°.",
-      "sprite": "assets/sprites/hero_makrofag_idle.png",
-      "spriteIdle": "assets/sprites/hero_makrofag_idle.png",
-      "spriteAttack": "assets/sprites/hero_makrofag_attack.png",
-      "color": "#b07fd8",
-      "attackPattern": "melee_swipe",
-      "baseStats": {
-        "maxHP": 165,
-        "speed": 162,
-        "damage": 24,
-        "attackCooldown": 0.8,
-        "attackRange": 100,
-        "swipeRadius": 95,
-        "projectileSpeed": 0,
-        "projectileCount": 1,
-        "pierce": 0,
-        "radius": 20,
-        "magnetRadius": 105,
-        "pickupRadius": 28
-      },
-      "patternParams": {
-        "arc": 2.4
-      },
-      "unlock": {
-        "type": "stat",
-        "stat": "totalKills",
-        "value": 100,
-        "label": "Kalahkan total 100 patogen"
-      },
-      "shopCost": 800,
-      "spritePortrait": "assets/sprites/portrait_makrofag.png"
-    },
-    {
-      "id": "neutrofil",
-      "name": "Neutrofil",
-      "title": "Responder Tercepat",
-      "description": "Neutrophil — penjaga pertama yang paling sigap. Tebasan cepat beruntun; lemah satu-satu, haus jumlah.",
-      "sprite": "assets/sprites/hero_neutrofil_idle.png",
-      "spriteIdle": "assets/sprites/hero_neutrofil_idle.png",
-      "spriteAttack": "assets/sprites/hero_neutrofil_attack.png",
-      "color": "#ffd166",
-      "attackPattern": "melee_swipe",
-      "baseStats": {
-        "maxHP": 85,
-        "speed": 225,
-        "damage": 6,
-        "attackCooldown": 0.22,
-        "attackRange": 66,
-        "swipeRadius": 58,
-        "projectileSpeed": 0,
-        "projectileCount": 1,
-        "pierce": 0,
-        "radius": 13,
-        "magnetRadius": 95,
-        "pickupRadius": 26
-      },
-      "patternParams": {
-        "arc": 1.6
-      },
-      "unlock": {
-        "type": "stat",
-        "stat": "totalKills",
-        "value": 300,
-        "label": "Kalahkan total 300 patogen"
-      },
-      "shopCost": 1800,
-      "spritePortrait": "assets/sprites/portrait_neutrofil.png"
-    },
-    {
-      "id": "sel_b",
-      "name": "Sel B",
-      "title": "Penembak Antibodi",
-      "description": "Memproduksi antibodi penanda yang secara otomatis mengejar patogen terdekat di mana pun ia berlindung.",
-      "sprite": "assets/sprites/hero_sel_b_idle.png",
-      "spriteIdle": "assets/sprites/hero_sel_b_idle.png",
-      "spriteAttack": "assets/sprites/hero_sel_b_attack.png",
-      "color": "#5aa2ff",
-      "attackPattern": "ranged_homing",
-      "baseStats": {
-        "maxHP": 90,
-        "speed": 178,
-        "damage": 9,
-        "attackCooldown": 1.0,
-        "attackRange": 330,
-        "projectileSpeed": 300,
-        "projectileCount": 2,
-        "pierce": 1,
-        "radius": 14,
-        "magnetRadius": 115,
-        "pickupRadius": 26
-      },
-      "patternParams": {
-        "turnRate": 4.2,
-        "spreadAngle": 0.55
-      },
-      "unlock": {
-        "type": "stat",
-        "stat": "bestWave",
-        "value": 10,
-        "label": "Capai Gelombang 10 dalam satu run"
-      },
-      "shopCost": 1500,
-      "spritePortrait": "assets/sprites/portrait_sel_b.png"
-    },
-    {
-      "id": "sel_nk",
-      "name": "Sel NK",
-      "title": "Pembunuh Alami",
-      "description": "Natural Killer cell hiperagresif. Tebasan toksik berkecepatan tinggi dengan jangkauan sempit dan HP tipis.",
-      "sprite": "assets/sprites/hero_sel_nk_idle.png",
-      "spriteIdle": "assets/sprites/hero_sel_nk_idle.png",
-      "spriteAttack": "assets/sprites/hero_sel_nk_attack.png",
-      "color": "#ff8c42",
-      "attackPattern": "melee_swipe",
-      "baseStats": {
-        "maxHP": 115,
-        "speed": 200,
-        "damage": 15,
-        "attackCooldown": 0.45,
-        "attackRange": 80,
-        "swipeRadius": 72,
-        "projectileSpeed": 0,
-        "projectileCount": 1,
-        "pierce": 0,
-        "radius": 15,
-        "magnetRadius": 95,
-        "pickupRadius": 26
-      },
-      "patternParams": {
-        "arc": 1.9
-      },
-      "unlock": {
-        "type": "stat",
-        "stat": "bossKills",
-        "value": 1,
-        "label": "Kalahkan 1 Sel Kanker (Bos)"
-      },
-      "shopCost": 2500,
-      "spritePortrait": "assets/sprites/portrait_sel_nk.png"
-    },
-    {
-      "id": "eosinofil",
-      "name": "Eosinofil",
-      "title": "Pemburu Parasit",
-      "description": "Spesialis anti-parasit. Meluncurkan granula toksik yang mengejar patogen otomatis — damage 1,5× ke Parasit.",
-      "sprite": "assets/sprites/hero_eosinofil_idle.png",
-      "spriteIdle": "assets/sprites/hero_eosinofil_idle.png",
-      "spriteAttack": "assets/sprites/hero_eosinofil_attack.png",
-      "color": "#ff7fa8",
-      "attackPattern": "ranged_homing",
-      "baseStats": {
-        "maxHP": 110,
-        "speed": 176,
-        "damage": 9,
-        "attackCooldown": 0.95,
-        "attackRange": 260,
-        "projectileSpeed": 320,
-        "projectileCount": 2,
-        "pierce": 1,
-        "radius": 16,
-        "magnetRadius": 100,
-        "pickupRadius": 26
-      },
-      "patternParams": {
-        "spreadAngle": 0.5,
-        "turnRate": 6.5,
-        "antiParasitMult": 1.5
-      },
-      "unlock": {
-        "type": "stat",
-        "stat": "bossKills",
-        "value": 3,
-        "label": "Kalahkan 3 Sel Kanker"
-      },
-      "shopCost": 2200,
-      "spritePortrait": "assets/sprites/portrait_eosinofil.png"
-    }
-  ]
+ "schemaVersion": 3,
+ "heroes": [
+  {
+   "id": "macrophage",
+   "name": "Mako",
+   "title": "Vanguard Rakus",
+   "role": "Tank",
+   "description": "Mako — Vanguard Rakus. Peran Tank.",
+   "sprite": "assets/sprites/hero_macrophage_idle.png",
+   "spriteIdle": "assets/sprites/hero_macrophage_idle.png",
+   "spriteAttack": "assets/sprites/hero_macrophage_attack.png",
+   "color": "#4a7c59",
+   "roleColor": "#2ecc71",
+   "attackPattern": "melee_swipe",
+   "baseStats": {
+    "maxHP": 120,
+    "speed": 130,
+    "damage": 10,
+    "attackCooldown": 1.0,
+    "attackRange": 64,
+    "swipeRadius": 64,
+    "projectileSpeed": 0,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "arc": 1.9
+   },
+   "skills": [
+    "taunt",
+    "defensive_stance",
+    "devour"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 100,
+    "label": "Kalahkan total 100 patogen"
+   },
+   "shopCost": 800,
+   "spritePortrait": "assets/sprites/portrait_macrophage.png"
+  },
+  {
+   "id": "dendritic",
+   "name": "Dendri",
+   "title": "Sang Strategist",
+   "role": "Support",
+   "description": "Dendri — Sang Strategist. Peran Support.",
+   "sprite": "assets/sprites/hero_dendritic_idle.png",
+   "spriteIdle": "assets/sprites/hero_dendritic_idle.png",
+   "spriteAttack": "assets/sprites/hero_dendritic_attack.png",
+   "color": "#ff8c00",
+   "roleColor": "#3498db",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 80,
+    "speed": 150,
+    "damage": 8,
+    "attackCooldown": 1.2,
+    "attackRange": 120,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "mark_target",
+    "heal_pulse",
+    "overcharge"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 400,
+    "label": "Kalahkan total 400 patogen"
+   },
+   "shopCost": 1800,
+   "spritePortrait": "assets/sprites/portrait_dendritic.png"
+  },
+  {
+   "id": "neutrophil",
+   "name": "Neutron",
+   "title": "Responder Pertama",
+   "role": "Damage",
+   "description": "Neutron — Responder Pertama. Peran Damage.",
+   "sprite": "assets/sprites/hero_neutrophil_idle.png",
+   "spriteIdle": "assets/sprites/hero_neutrophil_idle.png",
+   "spriteAttack": "assets/sprites/hero_neutrophil_attack.png",
+   "color": "#1a5276",
+   "roleColor": "#e74c3c",
+   "attackPattern": "ranged_pierce",
+   "baseStats": {
+    "maxHP": 90,
+    "speed": 160,
+    "damage": 15,
+    "attackCooldown": 0.9,
+    "attackRange": 90,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "grenade",
+    "adrenaline",
+    "blitz"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 250,
+    "label": "Kalahkan total 250 patogen"
+   },
+   "shopCost": 1200,
+   "spritePortrait": "assets/sprites/portrait_neutrophil.png"
+  },
+  {
+   "id": "eosinophil",
+   "name": "Eos",
+   "title": "Pemburu Parasit",
+   "role": "Damage",
+   "description": "Eos — Pemburu Parasit. Peran Damage.",
+   "sprite": "assets/sprites/hero_eosinophil_idle.png",
+   "spriteIdle": "assets/sprites/hero_eosinophil_idle.png",
+   "spriteAttack": "assets/sprites/hero_eosinophil_attack.png",
+   "color": "#ff6b81",
+   "roleColor": "#e74c3c",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 75,
+    "speed": 170,
+    "damage": 18,
+    "attackCooldown": 0.8,
+    "attackRange": 100,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.4,
+    "turnRate": 6.5,
+    "antiParasitMult": 1.5
+   },
+   "skills": [
+    "poison_dart",
+    "evade",
+    "parasite_strike"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "bossKills",
+    "value": 3,
+    "label": "Kalahkan 3 Bos"
+   },
+   "shopCost": 3000,
+   "spritePortrait": "assets/sprites/portrait_eosinophil.png"
+  },
+  {
+   "id": "basophil",
+   "name": "Baso",
+   "title": "Pejuang Kimia",
+   "role": "Support",
+   "description": "Baso — Pejuang Kimia. Peran Support.",
+   "sprite": "assets/sprites/hero_basophil_idle.png",
+   "spriteIdle": "assets/sprites/hero_basophil_idle.png",
+   "spriteAttack": "assets/sprites/hero_basophil_attack.png",
+   "color": "#8e44ad",
+   "roleColor": "#3498db",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 70,
+    "speed": 140,
+    "damage": 6,
+    "attackCooldown": 1.5,
+    "attackRange": 150,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "histamine",
+    "allergy",
+    "chemical_storm"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 550,
+    "label": "Kalahkan total 550 patogen"
+   },
+   "shopCost": 2000,
+   "spritePortrait": "assets/sprites/portrait_basophil.png"
+  },
+  {
+   "id": "mastcell",
+   "name": "Mastia",
+   "title": "Penjaga Gerbang",
+   "role": "Tank",
+   "description": "Mastia — Penjaga Gerbang. Peran Tank.",
+   "sprite": "assets/sprites/hero_mastcell_idle.png",
+   "spriteIdle": "assets/sprites/hero_mastcell_idle.png",
+   "spriteAttack": "assets/sprites/hero_mastcell_attack.png",
+   "color": "#a03328",
+   "roleColor": "#2ecc71",
+   "attackPattern": "melee_swipe",
+   "baseStats": {
+    "maxHP": 130,
+    "speed": 110,
+    "damage": 8,
+    "attackCooldown": 1.0,
+    "attackRange": 56,
+    "swipeRadius": 56,
+    "projectileSpeed": 0,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "arc": 1.9
+   },
+   "skills": [
+    "barrier",
+    "sting",
+    "anaphylaxis"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 700,
+    "label": "Kalahkan total 700 patogen"
+   },
+   "shopCost": 2200,
+   "spritePortrait": "assets/sprites/portrait_mastcell.png"
+  },
+  {
+   "id": "tcd8",
+   "name": "T-Bolt",
+   "title": "Avenger Adaptif",
+   "role": "Damage",
+   "description": "T-Bolt — Avenger Adaptif. Peran Damage.",
+   "sprite": "assets/sprites/hero_tcd8_idle.png",
+   "spriteIdle": "assets/sprites/hero_tcd8_idle.png",
+   "spriteAttack": "assets/sprites/hero_tcd8_attack.png",
+   "color": "#00d2ff",
+   "roleColor": "#e74c3c",
+   "attackPattern": "ranged_pierce",
+   "baseStats": {
+    "maxHP": 85,
+    "speed": 165,
+    "damage": 20,
+    "attackCooldown": 0.7,
+    "attackRange": 160,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 2,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "precision_shot",
+    "lock_on",
+    "execute"
+   ],
+   "unlock": {
+    "type": "default"
+   },
+   "shopCost": 0,
+   "spritePortrait": "assets/sprites/portrait_tcd8.png"
+  },
+  {
+   "id": "tcd4",
+   "name": "Helia",
+   "title": "Sang Komandan",
+   "role": "Support",
+   "description": "Helia — Sang Komandan. Peran Support.",
+   "sprite": "assets/sprites/hero_tcd4_idle.png",
+   "spriteIdle": "assets/sprites/hero_tcd4_idle.png",
+   "spriteAttack": "assets/sprites/hero_tcd4_attack.png",
+   "color": "#f1c40f",
+   "roleColor": "#3498db",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 80,
+    "speed": 155,
+    "damage": 7,
+    "attackCooldown": 1.3,
+    "attackRange": 130,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "rally",
+    "command",
+    "battle_cry"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 850,
+    "label": "Kalahkan total 850 patogen"
+   },
+   "shopCost": 2600,
+   "spritePortrait": "assets/sprites/portrait_tcd4.png"
+  },
+  {
+   "id": "treg",
+   "name": "Treg",
+   "title": "Peacekeeper",
+   "role": "Support",
+   "description": "Treg — Peacekeeper. Peran Support.",
+   "sprite": "assets/sprites/hero_treg_idle.png",
+   "spriteIdle": "assets/sprites/hero_treg_idle.png",
+   "spriteAttack": "assets/sprites/hero_treg_attack.png",
+   "color": "#2ecc71",
+   "roleColor": "#3498db",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 85,
+    "speed": 145,
+    "damage": 6,
+    "attackCooldown": 1.2,
+    "attackRange": 110,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "pacify",
+    "shield_ally",
+    "truce"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "totalKills",
+    "value": 1000,
+    "label": "Kalahkan total 1000 patogen"
+   },
+   "shopCost": 3200,
+   "spritePortrait": "assets/sprites/portrait_treg.png"
+  },
+  {
+   "id": "bcell",
+   "name": "Bella",
+   "title": "Seniman Antibodi",
+   "role": "Damage",
+   "description": "Bella — Seniman Antibodi. Peran Damage.",
+   "sprite": "assets/sprites/hero_bcell_idle.png",
+   "spriteIdle": "assets/sprites/hero_bcell_idle.png",
+   "spriteAttack": "assets/sprites/hero_bcell_attack.png",
+   "color": "#bb8fce",
+   "roleColor": "#e74c3c",
+   "attackPattern": "ranged_homing",
+   "baseStats": {
+    "maxHP": 70,
+    "speed": 135,
+    "damage": 14,
+    "attackCooldown": 1.1,
+    "attackRange": 140,
+    "swipeRadius": 64,
+    "projectileSpeed": 300,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "spreadAngle": 0.35,
+    "turnRate": 5.5
+   },
+   "skills": [
+    "antibody_burst",
+    "empower",
+    "plasma_rain"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "bestWave",
+    "value": 10,
+    "label": "Capai Gelombang 10 dalam satu run"
+   },
+   "shopCost": 1500,
+   "spritePortrait": "assets/sprites/portrait_bcell.png"
+  },
+  {
+   "id": "nkcell",
+   "name": "Nyx",
+   "title": "Sentinel Sunyi",
+   "role": "Damage",
+   "description": "Nyx — Sentinel Sunyi. Peran Damage.",
+   "sprite": "assets/sprites/hero_nkcell_idle.png",
+   "spriteIdle": "assets/sprites/hero_nkcell_idle.png",
+   "spriteAttack": "assets/sprites/hero_nkcell_attack.png",
+   "color": "#4a235a",
+   "roleColor": "#e74c3c",
+   "attackPattern": "melee_swipe",
+   "baseStats": {
+    "maxHP": 80,
+    "speed": 180,
+    "damage": 22,
+    "attackCooldown": 0.6,
+    "attackRange": 120,
+    "swipeRadius": 120,
+    "projectileSpeed": 0,
+    "projectileCount": 1,
+    "pierce": 0,
+    "radius": 15,
+    "magnetRadius": 95,
+    "pickupRadius": 26
+   },
+   "patternParams": {
+    "arc": 2.0
+   },
+   "skills": [
+    "backstab",
+    "shadowstep",
+    "annihilate"
+   ],
+   "unlock": {
+    "type": "stat",
+    "stat": "bossKills",
+    "value": 1,
+    "label": "Kalahkan 1 Bos"
+   },
+   "shopCost": 2500,
+   "spritePortrait": "assets/sprites/portrait_nkcell.png"
+  }
+ ]
 }

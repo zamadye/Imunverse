@@ -240,6 +240,12 @@ async function boot() {
     audio.toggleMute();
     refreshSoundUI();
   });
+  // Fase 12: layar Jeda — Lanjutkan / Akhiri Run (dua tombol nyata, logic asli)
+  document.getElementById('btn-resume').addEventListener('click', () => game.resume());
+  document.getElementById('btn-quit-run').addEventListener('click', () => {
+    audio.ui();
+    game.finishRun(true);
+  });
   on('pause', () => refreshSoundUI());
   on('resume', () => refreshSoundUI());
   document.querySelectorAll('[data-back]').forEach((btn) => {
@@ -251,14 +257,16 @@ async function boot() {
     if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const target = ev.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
-    const key = ev.key.toLowerCase();
-    const defs = getData().abilities.abilities;
-    const byKey = defs.find((a) => a.key === key);
-    const byNum = /^[1-4]$/.test(key) ? defs.find((a) => a.slot === Number(key)) : null;
-    const def = byKey || byNum;
-    if (def) {
+    const key = ev.key;
+    // Fase 12: 1/2/3 = skill hero (slot 3 = ultimate), 4 = SERANG manual
+    if (key === '1' || key === '2' || key === '3') {
       ev.preventDefault();
-      game.useAbilityBySlot(def.slot);
+      game.useAbilityBySlot(Number(key) - 1);
+      return;
+    }
+    if (key === '4' || key.toLowerCase() === 't' || key === ' ') {
+      ev.preventDefault();
+      game.triggerAttack();
     }
   });
 
@@ -400,7 +408,7 @@ async function runAutotest() {
 
     STATE.meta.evoStage = 3; // Fagosit Elite → tebasan/siklon/petir terbuka
     STATE.meta.focusRun = 'limfatik'; // fokus detoks → registerRunResult terukur
-    game.startRun('sel_t');
+    game.startRun('tcd8');
     log('runStarted', STATE.screen === 'gameplay');
 
     // Tempatkan musuh dekat player; TEMBAK manual dinyalakan untuk self-test
@@ -431,8 +439,8 @@ async function runAutotest() {
     log('upgradeApplied', Object.keys(game.run.upgrades).length >= 1 && !STATE.levelUpOpen);
 
     // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
-    const fired = game.useAbilityBySlot(3);
-    log('abilityFired', fired && game.run.abilities.getBySlot(3).cdLeft > 0);
+    const fired = game.useAbilityBySlot(2);
+    log('abilityFired', fired && game.run.skills.slots[2].cdLeft > 0);
 
     // Drop bagian evolusi: bunuh 30 musuh elite (30%/kill) → pasti dapat,
     // lalu teleport semua pickup bagian ke player dan proses pengambilan.

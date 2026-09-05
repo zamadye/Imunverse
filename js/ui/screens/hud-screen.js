@@ -33,42 +33,56 @@ export function hide() {
 }
 
 /**
- * Bangun 4 tombol kemampuan (1 senjata + 3 kekuatan) dari data/abilities.json.
- * Slot terkunci (belum terbuka via evolusi) tetap tampil redup — jadi user
- * selalu melihat ada yang harus dikejar.
+ * Fase 12 — grid skill ala MLBB: S1, S2 (atas) + ULTIMATE (bawah, lebar).
+ * Data dari run.skills (data/skills.json) — setiap tombol punya overlay
+ * cooldown (gelap + angka sisa detik) & label tombol keyboard 1/2/3.
  */
+const KIND_ICON = {
+  strike: 'icon_bolt', area: 'icon_frost', heal: 'icon_heart', shield_self: 'icon_shield',
+  protect_self: 'icon_shield', buff_self: 'icon_sword', buff_allies: 'icon_squad',
+  mark: 'icon_scope', execute: 'icon_skull', annihilate: 'icon_skull', summon_homing: 'icon_multi',
+  instant_hits: 'icon_sword', dash: 'icon_wind', pull: 'icon_magnet',
+};
+
 export function buildAbilityBar() {
   const bar = document.getElementById('ability-bar');
   if (!bar) return;
   bar.textContent = '';
-  for (const def of getData().abilities.abilities) {
+  const run = game.run;
+  const views = run && run.skills ? run.skills.getView() : [];
+  views.forEach((view, i) => {
+    const def = getData().skills.skills.find((s) => s.id === view.id);
+    const iconKind = def && def.effects[0] ? def.effects[0].kind : 'strike';
+    const icon = `assets/sprites/${KIND_ICON[iconKind] || 'icon_bolt'}.png`;
     const btn = document.createElement('button');
-    btn.className = 'ability-btn';
-    btn.id = `ability-${def.id}`;
-    btn.setAttribute('aria-label', def.name);
-    btn.innerHTML = `<span class="slot-tag">${def.slot}</span>` +
-      `<img src="${def.icon}" alt="${def.name}" />` +
+    btn.className = `ability-btn${view.ult ? ' ult' : ''}`;
+    btn.id = `ability-${view.id}`;
+    btn.style.setProperty('--sk', view.color || '#35d0ba');
+    btn.setAttribute('aria-label', view.name);
+    btn.innerHTML =
+      `<img class="sk-ico" src="${icon}" alt="" />` +
+      `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
-      `<span class="key-tag">${def.key}</span>`;
-    btn.addEventListener('click', () => game.useAbilityBySlot(def.slot));
+      `<span class="cd-num"></span>` +
+      `<span class="key-tag">${i + 1}</span>`;
+    btn.addEventListener('click', () => game.useAbilityBySlot(i));
     bar.appendChild(btn);
-  }
+  });
 }
 
-/** Sinkronkan tampilan tombol kemampuan tiap frame (cooldown/lock/ready). */
+/** Sinkronkan tombol skill tiap frame: overlay cooldown + angka sisa detik. */
 export function updateAbilityBar(abilities) {
   if (!abilities) return;
-  for (const view of abilities) {
+  abilities.forEach((view, i) => {
     const node = document.getElementById(`ability-${view.id}`);
-    if (!node) continue;
-    node.classList.toggle('locked', !view.unlocked);
+    if (!node) return;
     node.classList.toggle('ready', view.ready);
+    node.classList.toggle('ult', !!view.ult);
     const fill = node.querySelector('.cd-fill');
-    if (fill) {
-      const pct = view.unlocked && view.cdLeft > 0 ? view.cdLeft / view.cdTotal : 0;
-      fill.style.height = `${pct * 100}%`;
-    }
-  }
+    const num = node.querySelector('.cd-num');
+    if (fill) fill.style.height = `${view.ready ? 0 : (view.cdLeft / view.cdTotal) * 100}%`;
+    if (num) num.textContent = view.ready ? '' : Math.ceil(view.cdLeft);
+  });
 }
 
 /** Hint kontrol adaptif per perangkat (touch vs keyboard). */
