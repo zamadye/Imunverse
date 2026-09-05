@@ -14,6 +14,7 @@ let currentId = null;
 // Pemetaan id screen UI → nilai STATE.screen aplikasi.
 // Modal (levelup/pause/revive) tampil di atas gameplay — state tidak berubah.
 const APP_STATE_BY_SCREEN = {
+  codex: 'dashboard',
   loading: 'loading',
   dashboard: 'dashboard',
   roster: 'roster',

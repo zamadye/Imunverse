@@ -244,7 +244,16 @@ Permintaan pemilik: 1 fungsi/tombol yang mengubah SELURUH UI & konten ke bahasa 
 - [x] **Fix dev-server**: `tools/server.py` kini `Cache-Control: no-store` — iterasi JS/JSON selalu segar.
 - **Kriteria lulus:** i18n-audit **3/3 OK** (10 layar 0 residu; run 0 residu; modal EN); mekanik-check 3/4 OK (Zinc 11,63→12,32; armor GN; split virion — 1 asersi salah arah: label canvas bukan DOM); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
 
-## PROPOSAL Fase 11–13 — Workflow Edukasi "Tubuh Sebagai Universe" (menunggu persetujuan)
+## Fase 11 — Kodex Sel (Bio-Pedia) ✅
+Lapis 1 dari workflow edukasi (desain docs/edu-workflow.md): koleksi kartu sains yang terbuka karena BERMAIN, bukan lewat menu.
+- [x] **Data `data/codex.json`**: 43 entitas (6 hero, 13 musuh, 13 nutrisi, 5 sistem tubuh, 6 organ) × 2 kedalaman — `funKid` (bahasa anak) & `fact` (istilah ilmiah ringan: perforin-granzim, LPS/endotoksin, GALT 70% imun di usus, ±480 juta alveolus, dst.) + `realName`.
+- [x] **`js/systems/codex-system.js`**: `markSeen(id)` — idempotent, cermin ke `meta.stats.codexCards`, toast saat kartu baru; dipanggil dari: spawn musuh & boss, pickup nutrisi (non-part), hero dimainkan + sistem imun (startRun), peta 5 sistem (dashboard dibuka), organ dipilih (kampanye), target fokus dipilih.
+- [x] **`js/ui/screens/codex-screen.js` + section `#screen-codex`**: grid per kategori; kartu terkunci = siluet "?" ("Belum ditemukan"); kartu terbuka = sprite + nama (resolusi nama/gambar dari data sumber — TANPA duplikasi); klik kartu terbuka → detail modal: "Untuk kamu" (anak) + "Tahukah kamu?" (dewasa muda) + nama ilmiah. Tombol teleskop di dashboard; APP_STATE codex→dashboard.
+- [x] **Dwibahasa otomatis (Fase 10)**: semua funKid/fact/UI terdaftar di lang.json (481 string, 78 rules) — kartu & detail penuh EN via toggle yang sudah ada.
+- [x] **Misi pengikat ekonomi**: "Peneliti Muda — Temukan 10 kartu Bio-Pedia" (+150 antibodi) via stats.codexCards; dipindah ke urutan ke-2 agar selalu tampak di top-3 dashboard.
+- **Kriteria lulus:** codex-check e2e **5/5 RESULT OK** (klik teleskop→43 kartu; 12 penemuan tercatat dari alur main nyata [hero, imun, 5 sistem, organ, 2 musuh, 2 nutrisi]; klik kartu virus→detail kid+sains+realName; EN: "Found 12/43"+konten Inggris; misi terbaca); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
+
+## Rencana Fase 11–13 — Workflow Edukasi "Tubuh Sebagai Universe"
 Desain lengkap: `docs/edu-workflow.md`. Ringkas: **Kodex Sel** (kartu sains terbuka via bertemu entitas, dua kedalaman: anak/dewasa muda, dwibahasa otomatis) → **Kuis Gerbang** pra-bos (benar = buff, salah = tetap main) → **Mode Belajar** (panel narasi sains di pause/gameover, tanpa fail-state keras) + **lencana Biolog Muda** per sistem tubuh. Prinsip: setiap mekanik yang SUDAH ada adalah metafora sainsnya (armor Gram± = membran luar; stealth Sel Abnormal = sel tapiuan; buff nutrisi = pesan gizi nyata) — edukasi dibungkus gameplay, bukan ditempel.
 
 ## Fase 9 — Musuh Dokumen Terlengkapi: Armor, Hazard, Stealth, Prion, Boss Kedua ✅

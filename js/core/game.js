@@ -17,6 +17,7 @@ import {
 import { emit } from './ui-bridge.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
+import { markSeen } from '../systems/codex-system.js';
 
 import { Player } from '../entities/player.js';
 import { Enemy } from '../entities/enemy.js';
@@ -150,6 +151,8 @@ export const game = {
     const stats = this.computePlayerStats(heroDef, upgrades);
     this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
     this.applyBodyModifiers(stats, bodyMods); // kondisi tubuh (meta-layer)
+    markSeen(heroDef.id); // Bio-Pedia: hero yang dimainkan
+    markSeen('imun'); // Bio-Pedia: sistem imun (pasukan pemain)
 
     const player = new Player(heroDef, stats, startX, startY);
 
@@ -621,6 +624,7 @@ export const game = {
   collectPickup(p) {
     const run = this.run;
     run.nutrientsCollected += 1;
+    if (p.pickupType !== 'part') markSeen(p.def.id); // Bio-Pedia: nutrisi ditemui
     tutorial.notifyCollected();
     audio.collect();
     run.effects.spawnCollect(p.x, p.y, p.def.color);
@@ -853,6 +857,7 @@ export const game = {
     scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    markSeen(bossCfg.id); // Bio-Pedia: boss ditemui
     if (bossCfg.areaAttack) enemy.def = Object.assign({}, def, { areaAttack: bossCfg.areaAttack });
     enemy.isBoss = true;
     enemy.bossName = bossCfg.name || def.name;
@@ -880,6 +885,7 @@ export const game = {
     }
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    markSeen(enemyId); // Bio-Pedia: musuh ditemui
     // Kondisi tubuh: sistem kritis bisa mempercepat musuh (mis. Imun < 20)
     if (run.bodyMods && run.bodyMods.enemySpeedMult && run.bodyMods.enemySpeedMult !== 1) {
       enemy.speed *= run.bodyMods.enemySpeedMult;

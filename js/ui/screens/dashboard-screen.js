@@ -11,6 +11,7 @@ import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-sys
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
+import { markSeen } from '../../systems/codex-system.js';
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
 import {
   getBodyState, getCriticalSystems, getMilestoneProgress, getNarrativeStage,
@@ -231,6 +232,8 @@ function renderArenaCard(meta) {
 }
 
 export function show() {
+  // Bio-Pedia: peta 5 sistem tubuh selalu tampil di dashboard = 'bertemu' sistem
+  for (const sid of ['sirkulasi', 'pencernaan', 'saraf', 'imun', 'limfatik']) markSeen(sid);
   const meta = STATE.meta;
   document.getElementById('dash-currency').textContent = meta.currency.toLocaleString('id-ID');
 

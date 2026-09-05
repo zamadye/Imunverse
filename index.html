@@ -52,6 +52,7 @@
           <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
           <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
+          <button id="btn-codex" class="icon-btn" title="Bio-Pedia" aria-label="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="Bio-Pedia" /></button>
         </header>
 
         <div class="dash-scroll">
@@ -166,6 +167,20 @@
       </section>
 
       <!-- ============ DETAIL & UPGRADE HERO (dari menu Heroes) ============ -->
+      <section id="screen-codex" class="screen" data-screen="codex">
+        <header class="topbar">
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
+          <h1>Bio-Pedia</h1>
+          <span id="codex-progress" class="codex-progress">Ditemukan 0 / 0</span>
+        </header>
+        <div class="codex-body">
+          <div id="codex-grid" class="codex-grid"><!-- kartu dirender JS --></div>
+        </div>
+        <div id="codex-detail" class="codex-detail hidden">
+          <div class="codex-detail-box" id="codex-detail-box"><!-- detail --></div>
+          <button id="codex-detail-close" class="btn btn-ghost">Tutup</button>
+        </div>
+      </section>
       <section id="screen-herodetail" class="screen" data-screen="herodetail">
         <header class="topbar">
           <button class="back-btn icon-btn" data-back="roster" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="kembali" /></button>

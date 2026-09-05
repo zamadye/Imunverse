@@ -12,6 +12,7 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
+import { markSeen } from '../../systems/codex-system.js';
 import { getData } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el } from '../screen-manager.js';
@@ -36,6 +37,7 @@ function statusOf(ch, meta) {
 function selectChapter(chId) {
   const meta = STATE.meta;
   meta.selectedChapter = chId;
+  markSeen(chId); // Bio-Pedia: organ ditemui di Peta Tubuh
   writeSave(meta);
   renderAll();
 }

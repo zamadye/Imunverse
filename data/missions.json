@@ -1,17 +1,109 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "missions": [
-    { "id": "first_blood", "name": "Deteksi Dini", "desc": "Kalahkan 10 patogen (total)", "stat": "totalKills", "target": 10, "reward": 50 },
-    { "id": "slayer_100", "name": "Fagosit Sejati", "desc": "Kalahkan 100 patogen (total)", "stat": "totalKills", "target": 100, "reward": 150 },
-    { "id": "slayer_1000", "name": "Pembersih Sistem", "desc": "Kalahkan 1000 patogen (total)", "stat": "totalKills", "target": 1000, "reward": 600 },
-    { "id": "wave_5", "name": "Gelombang Pertama", "desc": "Capai Gelombang 5", "stat": "bestWave", "target": 5, "reward": 100 },
-    { "id": "wave_10", "name": "Bertahan di Oase", "desc": "Capai Gelombang 10", "stat": "bestWave", "target": 10, "reward": 300 },
-    { "id": "wave_20", "name": "Benteng Imun", "desc": "Capai Gelombang 20", "stat": "bestWave", "target": 20, "reward": 800 },
-    { "id": "boss_1", "name": "Operasi Tumor", "desc": "Kalahkan 1 Sel Kanker", "stat": "bossKills", "target": 1, "reward": 200 },
-    { "id": "boss_5", "name": "Onkolog Handal", "desc": "Kalahkan 5 Sel Kanker", "stat": "bossKills", "target": 5, "reward": 700 },
-    { "id": "survive_300", "name": "Tugas Malam", "desc": "Bertahan total 5 menit", "stat": "totalSurviveSeconds", "target": 300, "reward": 150 },
-    { "id": "nutri_250", "name": "Penyerap Nutrisi", "desc": "Kumpulkan 250 nutrisi (total)", "stat": "totalNutrients", "target": 250, "reward": 200 },
-    { "id": "runs_10", "name": "Patroli Rutin", "desc": "Selesaikan 10 run", "stat": "totalRuns", "target": 10, "reward": 250 },
-    { "id": "rich_2000", "name": "Cadangan Antibodi", "desc": "Kumpulkan 2000 antibodi (total)", "stat": "totalCurrencyEarned", "target": 2000, "reward": 400 }
+    {
+      "id": "first_blood",
+      "name": "Deteksi Dini",
+      "desc": "Kalahkan 10 patogen (total)",
+      "stat": "totalKills",
+      "target": 10,
+      "reward": 50
+    },
+    {
+      "id": "codex_10",
+      "name": "Peneliti Muda",
+      "desc": "Temukan 10 kartu Bio-Pedia",
+      "stat": "codexCards",
+      "target": 10,
+      "reward": 150
+    },
+    {
+      "id": "slayer_100",
+      "name": "Fagosit Sejati",
+      "desc": "Kalahkan 100 patogen (total)",
+      "stat": "totalKills",
+      "target": 100,
+      "reward": 150
+    },
+    {
+      "id": "slayer_1000",
+      "name": "Pembersih Sistem",
+      "desc": "Kalahkan 1000 patogen (total)",
+      "stat": "totalKills",
+      "target": 1000,
+      "reward": 600
+    },
+    {
+      "id": "wave_5",
+      "name": "Gelombang Pertama",
+      "desc": "Capai Gelombang 5",
+      "stat": "bestWave",
+      "target": 5,
+      "reward": 100
+    },
+    {
+      "id": "wave_10",
+      "name": "Bertahan di Oase",
+      "desc": "Capai Gelombang 10",
+      "stat": "bestWave",
+      "target": 10,
+      "reward": 300
+    },
+    {
+      "id": "wave_20",
+      "name": "Benteng Imun",
+      "desc": "Capai Gelombang 20",
+      "stat": "bestWave",
+      "target": 20,
+      "reward": 800
+    },
+    {
+      "id": "boss_1",
+      "name": "Operasi Tumor",
+      "desc": "Kalahkan 1 Sel Kanker",
+      "stat": "bossKills",
+      "target": 1,
+      "reward": 200
+    },
+    {
+      "id": "boss_5",
+      "name": "Onkolog Handal",
+      "desc": "Kalahkan 5 Sel Kanker",
+      "stat": "bossKills",
+      "target": 5,
+      "reward": 700
+    },
+    {
+      "id": "survive_300",
+      "name": "Tugas Malam",
+      "desc": "Bertahan total 5 menit",
+      "stat": "totalSurviveSeconds",
+      "target": 300,
+      "reward": 150
+    },
+    {
+      "id": "nutri_250",
+      "name": "Penyerap Nutrisi",
+      "desc": "Kumpulkan 250 nutrisi (total)",
+      "stat": "totalNutrients",
+      "target": 250,
+      "reward": 200
+    },
+    {
+      "id": "runs_10",
+      "name": "Patroli Rutin",
+      "desc": "Selesaikan 10 run",
+      "stat": "totalRuns",
+      "target": 10,
+      "reward": 250
+    },
+    {
+      "id": "rich_2000",
+      "name": "Cadangan Antibodi",
+      "desc": "Kumpulkan 2000 antibodi (total)",
+      "stat": "totalCurrencyEarned",
+      "target": 2000,
+      "reward": 400
+    }
   ]
 }

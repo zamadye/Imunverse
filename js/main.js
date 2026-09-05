@@ -39,6 +39,7 @@ import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
 import * as campaignScreen from './ui/screens/campaign-screen.js';
+import * as codexScreen from './ui/screens/codex-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
@@ -184,6 +185,7 @@ async function boot() {
   screenManager.registerScreen('focus', focusScreen);
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
+  screenManager.registerScreen('codex', codexScreen);
   screenManager.registerScreen('auth', authScreen);
   screenManager.registerScreen('herodetail', heroDetailScreen);
   screenManager.registerScreen('bag', bagScreen);
@@ -312,7 +314,10 @@ async function boot() {
     (dt, time) => game.render(dt, time)
   );
 
-  // Toggle bahasa ID/EN satu-klik (seluruh UI + data, tanpa reload)
+    // Bio-Pedia: tombol dashboard -> layar kodex
+  document.getElementById('btn-codex')?.addEventListener('click', () => screenManager.show('codex'));
+
+// Toggle bahasa ID/EN satu-klik (seluruh UI + data, tanpa reload)
   const updateLangButtons = () => {
     const lang = STATE.meta.lang || 'id';
     document.querySelectorAll('.lang-pill').forEach((b) => { b.textContent = lang === 'id' ? 'EN' : 'ID'; });

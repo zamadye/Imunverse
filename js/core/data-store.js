@@ -41,6 +41,7 @@ export async function loadAllData() {
     factions: 'data/factions.json',
     premium: 'data/premium.json',
     bodySystems: 'data/body-systems.json',
+    codex: 'data/codex.json',
   };
 
   const entries = await Promise.all(
@@ -64,7 +65,7 @@ export async function loadAllData() {
 const TRANSLATE_FIELDS = new Set([
   'name', 'description', 'desc', 'label', 'title', 'organ', 'story',
   'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
-  'question', 'answer', 'text', 'goal', 'tagline',
+  'question', 'answer', 'text', 'goal', 'tagline', 'funKid', 'fact',
 ]);
 
 function cloneMaybeTranslate(v, force) {

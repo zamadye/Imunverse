@@ -10,6 +10,7 @@ import { STATE } from '../../core/state-manager.js';
 import { getData } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { emit } from '../../core/ui-bridge.js';
+import { markSeen } from '../../systems/codex-system.js';
 import { el, screenManager } from '../screen-manager.js';
 
 export function show() {
@@ -30,6 +31,7 @@ export function show() {
     if (!selected) {
       item.addEventListener('click', () => {
         meta.focusRun = focusDef.id;
+        if (focusDef.target) markSeen(focusDef.target); // Bio-Pedia: sistem fokus
         writeSave(meta);
         emit('toast', { message: `Fokus run: ${focusDef.name}` });
         screenManager.show('dashboard');
