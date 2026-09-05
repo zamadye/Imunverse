@@ -286,6 +286,16 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Detail Hero di-polish ala referensi** (AFK-Arena/Archero-style): panggung karakter besar dengan gradasi warna hero, kolom chip skill 1/2/ULT (emas) di samping sprite, **stat chips** berwarna (damage merah, HP hijau, tempo biru) dengan nilai +bonus per level; panel Pasukan: sel dengan siluet unik (Bella/Nyx/Mako) + tag nama + chips bonus.
 - [x] **Pasukan di run memakai sprite roster baru** (sebelumnya sprite lama lingkaran teal) — sel pasukan kini siluet unik di medan tempur.
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
+**Fase 12f — Redesign "Game-Look" UI keluar-run (temuan pemilik: home terasa aplikasi kasir/tools, bukan game)**
+- [x] **Dunia di dalam tubuh**: latar teal-dalam berlapis (semua layar keluar-run; HUD in-run tidak disentuh) + dua lapis blob organik melayang lambat (drift 26s/32s) — nuansa dunia, bukan aplikasi.
+- [x] **Bahasa komponen game**: kartu ivory berbingkai chunky (border putih + drop 5px + inner light), tombol chunky 3D dengan tekanan turun, judul layar uppercase ber-shadow papan judul, topbar resource jadi pill EMAS, dock = nampan kaca dengan ikon chunky & ikon Play emas ber-bob.
+- [x] **CTA MULAI emas berkilau**: gradient emas, border krem, denyut ring 2.4s, kilau menyapu (::after skew) — satu-satunya CTA paling menonjol di home (referensi 1-primary-CTA).
+- [x] **Panggung hero = diorama spotlight**: gradient dalam + vignette bawah + bayangan tanah, panel nama kaca gelap, badge emas; menampilkan **chibi humanoid** potret hero (bukan blob lama).
+- [x] **Roster**: kartu membawa aura warna hero masing-masing (`--hc`), kartu terpilih bingkai emas ber-glow; teks kembali gelap agar terbaca di kartu terang (regresi kontras ditemukan di screenshot → diperbaiki); potret chibi diregenerasi lebih besar/memenuhi lingkaran.
+- [x] **Shop**: kartu premium diisi ilustrasi peti hadiah (menghapus area kosong putih), CTA harga berwarna per-bundle (biru/teal/emas/ungu) ber-shadow chunky; kartu beli-hero memakai chibi humanoid.
+- [x] **Toast keluar-run** dipindah ke atas dock (tidak lagi menutupi topbar/judul).
+- **Kriteria lulus 12f:** e2e **21 asersi PASS** (alur klik-riil tak berubah), autotest **17/17**, tanpa error halaman; bukti `docs/screenshots/43-dashboard-game, 44-roster-game, 45-shop-game`.
+
 **Fase 12e — Pertumbuhan Berurutan In-Run (arahan pemilik: awal tanpa tangan/kaki → tumbuh → aksesoris → LEGENDA; pacing: anggota tubuh cepat, skin lama)**
 - [x] **`data/growth.json`** (sumber data): 5 tahap mengikuti level run — **Lv1 Sel Bulir** (bulat, TANPA tangan/kaki, wajah di badan) → **Lv3 Berkaki** (+6% serangan, +5% HP) → **Lv5 Humanoid** (tangan + senjata khas hero; +12%/+10%) → **Lv8 Berzirah** (pelat dada + ikat pinggang; +22%/+20%) → **Lv12 LEGENDA** (mahkota + celana + jubah + aura emas + kilau; +40%/+32%).
 - [x] **Renderer**: `drawFigure` mendukung `legs/arms/armor/legend` — bulir = badan menggembung berwajah; zirah = pelat dada + pelana; LEGENDA = celana lapis kaki, aura radial keemasan, mahkota 3 puncak berpermata, kilau bintang. Aksen/trait hero tetap terbaca sejak tahap Humanoid.

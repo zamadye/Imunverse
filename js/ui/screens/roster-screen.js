@@ -67,9 +67,9 @@ export function show() {
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
-      role: status.unlocked ? 'button' : undefined,
-      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
+      style: `--hc:${heroDef.color};`,
       role: 'button',
+      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
       tabindex: status.unlocked ? '0' : '-1',
       onclick: () => {
         if (!status.unlocked) return;

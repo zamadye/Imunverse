@@ -315,10 +315,10 @@ def chibi_portrait(size, primary, accent, body="medium", trait=None):
     img, d = canvas(size)
     S = size * SS
     cx = S * 0.5
-    ground = S * 0.9
+    ground = S * 0.97
     col = hex_rgb(primary)
     acc = hex_rgb(accent)
-    scale = S * 0.0032
+    scale = S * 0.0044  # Fase 12f: figur memenuhi avatar (chibi besar)
     if body == "big":
         bw, bh, hd = 46 * scale * 0.9, 40 * scale * 0.9, 26 * scale * 0.98
     elif body == "slim":
