@@ -4,8 +4,11 @@
  * di-hardcode di file logic — semuanya dibaca dari JSON ini.
  */
 
+import { t } from '../systems/i18n.js';
+
 const store = {
   loaded: false,
+  raw: {}, // salinan mentah semua JSON — sumber toggle bahasa
   heroes: null,     // data/heroes.json
   enemies: null,    // data/enemies.json
   nutrients: null,  // data/nutrients.json
@@ -49,9 +52,44 @@ export async function loadAllData() {
     })
   );
 
-  for (const [key, json] of entries) store[key] = json;
+  for (const [key, json] of entries) {
+    store.raw[key] = json;
+    store[key] = json;
+  }
   store.loaded = true;
   return store;
+}
+
+// Field data yang tampil ke pemain (diterjemahkan saat bahasa EN aktif).
+const TRANSLATE_FIELDS = new Set([
+  'name', 'description', 'desc', 'label', 'title', 'organ', 'story',
+  'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
+  'question', 'answer', 'text', 'goal', 'tagline',
+]);
+
+function cloneMaybeTranslate(v, force) {
+  if (typeof v === 'string') return v;
+  if (Array.isArray(v)) return v.map((x) => cloneMaybeTranslate(x, force));
+  if (v && typeof v === 'object') {
+    const o = {};
+    for (const k of Object.keys(v)) {
+      const val = v[k];
+      o[k] = (force && TRANSLATE_FIELDS.has(k) && typeof val === 'string') ? t(val) : cloneMaybeTranslate(val, force);
+    }
+    return o;
+  }
+  return v;
+}
+
+/**
+ * Terapkan bahasa ke SELURUH data game dari salinan mentah.
+ * 'id' → apa adanya; 'en' → field tampilan diterjemahkan via kamus i18n.
+ */
+export function applyDataLanguage(lang) {
+  if (!store.loaded) return;
+  for (const key of Object.keys(store.raw)) {
+    store[key] = cloneMaybeTranslate(store.raw[key], lang === 'en');
+  }
 }
 
 export function getData() {

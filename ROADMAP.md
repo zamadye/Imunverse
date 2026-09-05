@@ -234,6 +234,19 @@
 - [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
 - **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 10 — Dwibahasa Satu-Klik (ID/EN) Tanpa Edit Manual ✅
+Permintaan pemilik: 1 fungsi/tombol yang mengubah SELURUH UI & konten ke bahasa lain tanpa edit manual satu-persatu, tanpa bug bahasa. Riset dulu (i18next best-practices, dom-i18n, lokalise) → pola diadopsi, lib eksternal TIDAK (constraint vanilla).
+- [x] **Mesin `js/systems/i18n.js`** (~120 baris, vanilla): `t()` kamus berkunci teks-asli + 76 aturan regex utk string ber-angka, rekursi tangkapan (angka & nama dalam kalimat ikut diterjemahkan), normalisasi whitespace multi-baris, guard meta-null, fallback aman (kunci tak dikenal → teks asli).
+- [x] **Kamus `data/lang.json`**: 386 string ID→EN + 76 aturan, dibangun dari PEMINDAIAN otomatis seluruh repo (modul layar, toasts, index.html, semua field tampilan di 17 file data JSON) — bukan dari daftar manual.
+- [x] **NOL atribut manual**: sapuan DOM otomatis (`translateTree` DFS) + **MutationObserver** — setiap elemen yang baru dirender layar mana pun langsung diterjemahkan; data JSON diterjemahkan saat load/toggle dari salinan raw (`applyDataLanguage`, field tampilan saja).
+- [x] **Toggle 1-klik**: pil EN/ID di Dashboard & modal Pause — UI + data + canvas-label berganti serentak tanpa reload; pilihan tersimpan di save (persisten).
+- [x] **Audit residu otomatis (e2e)**: sapu 10 layar + run + modal level-up dalam mode EN dengan daftar penanda bahasa Indonesia → **0 residu**; bug yang ditemukan & diperbaiki: kunci salah ketik (Penembak/Pelahap), konkatenasi toast, `String.replace` substitusi $n native (bentuk fungsi), rule spesifik vs umum (urutan), field `goal`/`tagline`, cache stale dev-server (Cache-Control no-store).
+- [x] **Fix dev-server**: `tools/server.py` kini `Cache-Control: no-store` — iterasi JS/JSON selalu segar.
+- **Kriteria lulus:** i18n-audit **3/3 OK** (10 layar 0 residu; run 0 residu; modal EN); mekanik-check 3/4 OK (Zinc 11,63→12,32; armor GN; split virion — 1 asersi salah arah: label canvas bukan DOM); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
+
+## PROPOSAL Fase 11–13 — Workflow Edukasi "Tubuh Sebagai Universe" (menunggu persetujuan)
+Desain lengkap: `docs/edu-workflow.md`. Ringkas: **Kodex Sel** (kartu sains terbuka via bertemu entitas, dua kedalaman: anak/dewasa muda, dwibahasa otomatis) → **Kuis Gerbang** pra-bos (benar = buff, salah = tetap main) → **Mode Belajar** (panel narasi sains di pause/gameover, tanpa fail-state keras) + **lencana Biolog Muda** per sistem tubuh. Prinsip: setiap mekanik yang SUDAH ada adalah metafora sainsnya (armor Gram± = membran luar; stealth Sel Abnormal = sel tapiuan; buff nutrisi = pesan gizi nyata) — edukasi dibungkus gameplay, bukan ditempel.
+
 ## Fase 9 — Musuh Dokumen Terlengkapi: Armor, Hazard, Stealth, Prion, Boss Kedua ✅
 Melengkapi 5 entitas musuh tersisa dari dokumen desain (total kini 13 musuh; hero 6/12).
 - [x] **Bakteri Gram Negatif** — `armorLayers:1`: membran luar MENYERAP satu tepukan (feedback "TERLAPIS!"), lalu HP rentan. Gram Positif (8.4) pakai mekanik sama (armor implisit via HP tebal tetap; GN eksplisit berlapis).

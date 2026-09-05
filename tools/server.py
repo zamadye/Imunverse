@@ -19,6 +19,14 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+    """Dev server: matikan cache agar iterasi JS/JSON selalu segar."""
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, must-revalidate")
+        super().end_headers()
+
+
 class QuietHTTPServer(http.server.ThreadingHTTPServer):
     allow_reuse_address = True
 
@@ -31,7 +39,7 @@ class QuietHTTPServer(http.server.ThreadingHTTPServer):
 
 
 def main():
-    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=ROOT)
+    handler = functools.partial(NoCacheHandler, directory=ROOT)
     with QuietHTTPServer(("0.0.0.0", PORT), handler) as httpd:
         print(f"Imunverse dev server: http://localhost:{PORT}  (root: {ROOT})")
         try:

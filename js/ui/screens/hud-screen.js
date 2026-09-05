@@ -13,6 +13,7 @@ let lastXpPct = 0;
 import { getData } from '../../core/data-store.js';
 import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
+import { t } from '../../systems/i18n.js';
 
 export function show() {
   // Level hero & pasukan (terhubung ke Lab) — diisi sekali saat run tampil
@@ -226,9 +227,9 @@ function updateBuffChips() {
     return;
   }
   const defs = {
-    damage: ['item_zat_besi', 'DMG'],
-    cooldown: ['item_probiotik', 'CEPAT'],
-    xp: ['item_serat', 'XP'],
+    damage: ['item_zat_besi', t('DMG')],
+    cooldown: ['item_probiotik', t('CEPAT')],
+    xp: ['item_serat', t('XP')],
   };
   let html = '';
   for (const k of Object.keys(defs)) {

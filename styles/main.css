@@ -1550,3 +1550,8 @@ img.lock-badge {
 .hud-buffs{position:absolute;top:124px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:6}
 .hud-buff-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(18,42,40,.82);color:#fff8ea;border:2px solid #35d0ba;border-radius:999px;padding:2px 9px 2px 3px;font-size:11px;font-weight:800;letter-spacing:.02em;box-shadow:0 2px 6px rgba(20,40,38,.25)}
 .hud-buff-chip img{width:18px;height:18px;border-radius:50%;background:#fff8ea}
+
+/* ==== i18n: pil toggle bahasa ==== */
+.lang-pill{border:2px solid #35d0ba;background:#fff8ea;color:#0f4c46;border-radius:999px;font-weight:800;font-size:12px;padding:5px 11px;cursor:pointer;font-family:inherit}
+.lang-pill:active{transform:scale(.96)}
+.lang-pill-pause{align-self:center;margin-top:6px}

@@ -1,0 +1,701 @@
+{
+ "schemaVersion": 1,
+ "languages": [
+  "id",
+  "en"
+ ],
+ "strings": {
+  "Menyiapkan organisme…": "Preparing organism…",
+  "Jaga 5 sistem — tubuh adalah universe-nya.": "Care for 5 systems — the body is your universe.",
+  "GANTI": "SWITCH",
+  "FOKUS": "FOCUS",
+  "IMUN": "IMMUNE",
+  "Bonus Harian": "Daily Bonus",
+  "Sudah diklaim hari ini. Kembali besok.": "Already claimed today. Back tomorrow.",
+  "menantimu — klaim sekarang!": "waiting for you — claim now!",
+  "Belum ada rekor. Selesaikan run pertamamu!": "No records yet. Finish your first run!",
+  "Papan Rekor — Klasik": "Leaderboard — Classic",
+  "Total Kill": "Total Kills",
+  "Total Run": "Total Runs",
+  "Waktu Terbaik": "Best Time",
+  "Terbuka ✓": "Unlocked ✓",
+  "🏆 TUBUH SEHAT SEMPURNA tercapai!": "🏆 PERFECTLY HEALTHY BODY achieved!",
+  "Akhiri Run": "End Run",
+  "Ambil Saja": "Just Take It",
+  "Antibodi didapat:": "Antibodies earned:",
+  "Bagian Evolusi": "Evolution Parts",
+  "Bangkit otomatis batal dalam": "Auto-revive cancels in",
+  "Detail Hero": "Hero Detail",
+  "Fokus Run": "Run Focus",
+  "Fraksi menentukan dashboard, hero & pasukanmu — layout sama, sisi berbeda.": "Factions decide your dashboard, heroes & squad — same layout, different side.",
+  "Jeda": "Pause",
+  "Lanjutkan": "Continue",
+  "Level 2 — pilih satu peningkatan": "Level 2 — choose one upgrade",
+  "Lewati »": "Skip »",
+  "Main Lagi": "Play Again",
+  "MULAI": "START",
+  "MULAI RUN": "START RUN",
+  "Misi & Prestasi": "Missions & Achievements",
+  "Nama Akun": "Account Name",
+  "Peta Tubuh": "Body Map",
+  "Peti Boss!": "Boss Chest!",
+  "Pilih Arena": "Choose Arena",
+  "Pilih Hero": "Choose Hero",
+  "Pilih Pasukanmu": "Choose Your Squad",
+  "Pilih sel imun-mu. Yang terkunci bisa dibuka lewat progres misi atau dibeli di Toko.": "Pick your immune cell. Locked ones open via mission progress or buy in the Shop.",
+  "Run Selesai": "Run Complete",
+  "Sandi": "Password",
+  "Sang Tubuh sedang sakit — bersihkan organ satu per satu bersama pasukan imun!": "The Body is sick — cleanse the organs one by one with your immune squad!",
+  "Sel T Killer · Limfe": "Sel T Killer · Lymph",
+  "SEL KANKER": "CANCER CELL",
+  "Siap Tempur": "Battle Ready",
+  "Sistem imun mengingat pengorbananmu.": "The immune system remembers your sacrifice.",
+  "Suara: AKTIF": "Sound: ON",
+  "Tas": "Bag",
+  "TEMBAK!": "FIRE!",
+  "Tidak, Akhiri Run": "No, End Run",
+  "TIM": "TEAM",
+  "TONTON IKLAN — 2X LOOT": "WATCH AD — 2X LOOT",
+  "Tonton Iklan → 2x Antibodi": "Watch Ad → 2x Antibodies",
+  "Tonton video singkat untuk bangkit dengan 50% HP dan membersihkan patogen di sekitarmu.": "Watch a short video to revive with 50% HP and clear nearby pathogens.",
+  "Tubuh ini butuh dijaga. Pilih sistem yang ingin dipulihkan run ini — gameplay tetap sama, hasilnya berbeda.": "This body needs care. Pick the system to restore this run — gameplay stays the same, results differ.",
+  "Tumbang!": "Down!",
+  "Tutup": "Close",
+  "Tiap arena punya bonus berbeda. Terbuka sesuai cara kamu bermain.": "Each arena has a different bonus. Unlocked by how you play.",
+  "BUAT AKUN & MULAI": "CREATE ACCOUNT & START",
+  "Lab Pasukan — kuatkan hero & pasukanmu dengan Antibodi.": "Squad Lab — empower heroes & squad with Antibodies.",
+  "Laboratorium Tim (senjata, jurus, pertahanan) →": "Team Lab (weapons, abilities, defense) →",
+  "(Endless = mutator harian)": "(Endless = daily mutator)",
+  "(menentukan sistem tubuh yang dipulihkan)": "(chooses which body system to restore)",
+  "(terbuka sesuai progresmu)": "(unlocked as you progress)",
+  "Batal": "Cancel",
+  "BELI": "BUY",
+  "BUKA HERO": "UNLOCK HERO",
+  "Buka via misi": "Unlock via missions",
+  "Lanjut": "Next",
+  "PAKET PREMIUM": "PREMIUM BUNDLES",
+  "Pembayaran Berhasil!": "Payment Successful!",
+  "Pembayaran SIMULASI — tidak ada tagihan nyata. Gateway siap disambungkan ke PSP.": "SIMULATED payment — no real charge. Gateway ready to hook up to a PSP.",
+  "Pilih metode dulu": "Pick a method first",
+  "Suplemen Premium": "Premium Supplement",
+  "Suplemen Premium: semua sistem pulih!": "Premium Supplement: all systems restored!",
+  "SUPLEMEN SISTEM TUBUH": "BODY SYSTEM SUPPLEMENTS",
+  "✓ Dimiliki": "✓ Owned",
+  "AKTIF": "ACTIVE",
+  "SEGERA": "SOON",
+  "akun terdaftar di perangkat ini": "account registered on this device",
+  "Terbuka lewat progres": "Unlocked via progress",
+  "Terbuka sejak awal": "Open from the start",
+  "Bagian lengkap! Buka Dashboard → kartu Evolusi → BEREVOLUSI.": "Full set! Open Dashboard → Evolution card → EVOLVE.",
+  "Belum punya consumable — Serum Awal tersedia di Shop.": "No consumables yet — Starter Serum is available in the Shop.",
+  "Kalahkan patogen untuk mengumpulkan bagian — musuh elite (Virion & Parasit) drop 5x lebih sering, boss selalu drop.": "Defeat pathogens to collect parts — elite enemies (Virions & Parasites) drop 5x more often, bosses always drop.",
+  "Evolusi maksimal — Imun Legenda sejati!": "Max evolution — a true Immune Legend!",
+  "Jumlah pasukan bertambah tiap bab kampanye yang dibersihkan (maks 6 sel)": "Squad grows with each campaign chapter cleared (max 6 cells)",
+  "Ikut bertarung otomatis — menembak patogen": "Fights automatically — shoots pathogens",
+  "MISI": "MISSION",
+  "MISI AKTIF": "ACTIVE MISSION",
+  "TERKUNCI": "LOCKED",
+  "✓ BERSIH": "✓ CLEAN",
+  "Kemampuan terbuka lewat evolusi": "Abilities unlock through evolution",
+  "Terinfeksi Kronis": "Chronically Infected",
+  "Sehat Sempurna": "Perfectly Healthy",
+  "Hampir Sehat": "Nearly Healthy",
+  "Zaman Pemulihan": "Recovery Era",
+  "Tubuh Mulai Melawan": "Body Fights Back",
+  "Kopi Limfa: +12% kecepatan!": "Lymph Coffee: +12% speed!",
+  "Pelindung Lendir: 1 serangan terserap!": "Mucus Shield: 1 attack absorbed!",
+  "Serum Awal aktif: +25% damage run ini!": "Starter Serum active: +25% damage this run!",
+  "Sinyal Ganda: +50% antibodi run ini!": "Double Signal: +50% antibodies this run!",
+  "Vaksin Awal: +30 HP run ini!": "Starter Vaccine: +30 HP this run!",
+  "Sel regenerasi — lanjutkan pertempuran!": "Cells regenerating — back to battle!",
+  "Sinyal sitokin! Semua nutrisi tertarik padamu.": "Cytokine signal! Every nutrient is pulled toward you.",
+  "TERLAPIS!": "PEELED!",
+  "TERSERAP!": "ABSORBED!",
+  "Regenerasi aktif": "Regen active",
+  "Serangan makin cepat!": "Attacks speed up!",
+  "Racun sisa dibersihkan": "Leftover toxin cleansed",
+  "Daftar/masuk dulu agar pembelian & rekor tersimpan ke akunmu": "Sign up / log in first so purchases & records are saved to your account",
+  "Menangkan mode Klasik": "Win Classic mode",
+  "Terkunci": "Locked",
+  "Save direset. Organisme baru terbentuk. 🧬": "Save reset. A new organism forms. 🧬",
+  "Tarik di layar (atau W A S D) untuk bergerak!": "Drag on screen (or W A S D) to move!",
+  "Tekan tombol TEMBAK! untuk menyerang patogen!": "Press the FIRE! button to attack pathogens!",
+  "Ambil nutrisi yang jatuh: itu XP & item evolusi!": "Grab falling nutrients: that's XP & evolution parts!",
+  "KONDISI TUBUH": "BODY CONDITION",
+  "MULAI PERANG": "START BATTLE",
+  "TAS": "BAG",
+  "ORGAN BERSIH!": "ORGAN CLEAN!",
+  "Sel T sitotoksik standar garda depan. Menembakkan butiran sitokin yang menembus deretan patogen.": "Standard cytotoxic T cell on the front line. Fires cytokine granules that pierce rows of pathogens.",
+  "Makrofag": "Macrophage",
+  "Sel fagosit raksasa. Mencabik semua patogen di sekitarnya dengan sapuan pseudopodia selebar 137°.": "Giant phagocyte. Shreds every nearby pathogen with sweeping 137° pseudopods.",
+  "Neutrofil": "Neutrophil",
+  "Responder Tercepat": "Fastest Responder",
+  "Neutrophil — penjaga pertama yang paling sigap. Tebasan cepat beruntun; lemah satu-satu, haus jumlah.": "Neutrophil — the fastest first responder. Rapid consecutive slashes; weak alone, hungry in numbers.",
+  "Sel B": "B Cell",
+  "Penembak Antibodi": "Antibody Shooter",
+  "Memproduksi antibodi penanda yang secara otomatis mengejar patogen terdekat di mana pun ia berlindung.": "Produces marker antibodies that automatically chase the nearest pathogen wherever it hides.",
+  "Sel NK": "NK Cell",
+  "Pembunuh Alami": "Natural Born Killer",
+  "Natural Killer cell hiperagresif. Tebasan toksik berkecepatan tinggi dengan jangkauan sempit dan HP tipis.": "Hyperaggressive Natural Killer cell. High-speed toxic slashes with narrow reach and thin HP.",
+  "Eosinofil": "Eosinophil",
+  "Pemburu Parasit": "Parasite Hunter",
+  "Spesialis anti-parasit. Meluncurkan granula toksik yang mengejar patogen otomatis — damage 1,5× ke Parasit.": "Anti-parasite specialist. Fires toxic granules that chase pathogens automatically — 1.5× damage to Parasites.",
+  "Kalahkan total 100 patogen": "Defeat 100 pathogens in total",
+  "Capai Gelombang 10 dalam satu run": "Reach Wave 10 in one run",
+  "Kalahkan 1 Sel Kanker (Bos)": "Defeat 1 Cancer Cell (Boss)",
+  "Kalahkan 3 Sel Kanker": "Defeat 3 Cancer Cells",
+  "Kalahkan total 300 patogen": "Defeat 300 pathogens in total",
+  "Bakteri": "Bacterium",
+  "Patogen dasar pengejar. Bergerak lurus menuju sel imun terdekat.": "Basic chasing pathogen. Moves straight for the nearest immune cell.",
+  "Bakteri Gram Positif": "Gram-Positive Bacterium",
+  "Dinding sel tebal satu lapis — butuh tepukan lebih banyak untuk runtuh. Berjalan pelan dan tak kenal menyerah.": "A thick single-layer cell wall — it takes extra hits to crumble. Walks slow and never gives up.",
+  "Virus Replikasi": "Replicating Virus",
+  "Virus berduri yang menginfeksi lalu pecah — membelah diri jadi 2 virion kecil saat hancur.": "A spiky virus that infects then bursts — splits into 2 tiny virions when destroyed.",
+  "Partikel virus kecil hasil pembelahan. Cepat dan rapuh.": "A tiny virus particle born from splitting. Fast and fragile.",
+  "Parasit": "Parasite",
+  "Parasit berumbai yang bergerak zig-zag menyeberangi aliran darah.": "A fringed parasite zig-zagging across the bloodstream.",
+  "Spora Jamur": "Fungal Spore",
+  "Spora tebal berlapis kitin. Lambat tapi sangat tahan tepuk.": "A chitin-armored spore. Slow but very tough.",
+  "Sel Kanker": "Cancer Cell",
+  "BOS. Sel mutan raksasa yang lambat namun nyaris abadi, meledakkan sitotoksin secara berkala di area sekitarnya.": "BOSS. A giant mutant cell — slow yet nearly unkillable, periodically detonating cytotoxins around it.",
+  "Protozoa": "Protozoan",
+  "Protozoa bersilia yang bergerak zig-zag menyeleweng — sulit ditembak lurus.": "A ciliated protozoan that weaves side to side — hard to hit in a straight line.",
+  "Bakteri Gram Negatif": "Gram-Negative Bacterium",
+  "Berlapis membran ganda — lapisan luarnya menyerap tepukan. Pecahkan dulu tempalannya!": "Wrapped in a double membrane — the outer layer absorbs one hit. Peel the patch first!",
+  "Toksin": "Toxin",
+  "Genangan racun yang diam di tempat — melukai siapa pun yang berani lewat. Hancurkan dari jarak jauh!": "A still poison pool — it hurts anyone who dares cross. Destroy it from a distance!",
+  "Kristal salah lipat yang nyaris kebal tepukan — dan perlahan mengubah musuh lain jadi versi kristal!": "A misfolded crystal nearly immune to hits — slowly turning other enemies into crystal copies!",
+  "Sel Abnormal": "Abnormal Cell",
+  "Penyamar licin — nyaris tak terlihat kecuali tersorot Sel NK. Berbahaya bila sampai mendekat!": "A slick mimic — nearly invisible unless spotlighted by NK Cells. Dangerous up close!",
+  "Toksin Raksasa": "Giant Toxin",
+  "BOS. Akumulasi racun sistemik yang menjelma raksasa berduri — membanjiri arena dengan genangan racun.": "BOSS. Systemic poison buildup embodied as a giant spiky brute — flooding the arena with toxic pools.",
+  "Glukosa": "Glucose",
+  "Orb nutrisi dasar — sumber XP utama dari patogen yang hancur.": "Basic nutrient orb — the main XP source from destroyed pathogens.",
+  "Asam Amino": "Amino Acid",
+  "Rantai protein padat — orb XP bernilai besar.": "A dense protein chain — a high-value XP orb.",
+  "Memulihkan 20 HP membrane seketika.": "Restores 20 membrane HP instantly.",
+  "Antibodi": "Antibody",
+  "Mata uang permanen. Dipakai untuk unlock hero & upgrade squad.": "Permanent currency. Used to unlock heroes & squad upgrades.",
+  "Sinyal Sitokin": "Cytokine Signal",
+  "Sinyal kimia yang menarik SEMUA nutrisi di medan menujumu.": "A chemical signal that pulls EVERY nutrient on the field toward you.",
+  "Kacang & biji-bijian. +6% damage selama 30 detik.": "Nuts & seeds. +6% damage for 30 seconds.",
+  "Telur, daging, ikan. +20 HP maksimum sampai akhir run.": "Eggs, meat, fish. +20 max HP until the run ends.",
+  "Sinar matahari & ikan berlemak. Pulihkan 1,5 HP/detik sepanjang run.": "Sunlight & fatty fish. Restores 1.5 HP per second all run long.",
+  "Ikan laut dalam. Racun sisa combat berkurang 6 per run (meta).": "Deep-sea fish. Clears 6 leftover combat toxin per run (meta).",
+  "Zat Besi": "Iron",
+  "Bayam & daging merah. +10% damage selama 20 detik — lebih kuat dari Zinc.": "Spinach & red meat. +10% damage for 20 seconds — stronger than Zinc.",
+  "Probiotik": "Probiotic",
+  "Yogurt & makanan fermentasi. Cooldown serangan -15% selama 25 detik.": "Yogurt & fermented food. Attack cooldown -15% for 25 seconds.",
+  "Serat": "Fiber",
+  "Sayur & buah berserat. Pencernaan lancar: +25% XP selama 30 detik.": "Leafy greens & fibrous fruit. Smooth digestion: +25% XP for 30 seconds.",
+  "Air": "Water",
+  "Air putih. Pulihkan 0,8 HP/detik sepanjang run — regen kecil merata.": "Plain water. Restores 0.8 HP per second all run — small, even regen.",
+  "Kekuatan Squad": "Squad Power",
+  "Vitalitas": "Vitality",
+  "Senjata Tajam": "Sharp Weapon",
+  "Tempo Serang": "Attack Tempo",
+  "Kecepatan": "Speed",
+  "Jangkauan": "Reach",
+  "Master Jurus": "Ability Master",
+  "Membran Keras": "Tough Membrane",
+  "Aliran Limfa": "Lymph Flow",
+  "Metabolisme": "Metabolism",
+  "Multi-L Respons": "Multi-L Response",
+  "Sitokin Padu": "United Cytokines",
+  "Reseptor Panjang": "Long Receptors",
+  "Regenerasi Membran": "Membrane Regeneration",
+  "Serum Awal": "Starter Serum",
+  "Vaksin Awal": "Starter Vaccine",
+  "Kopi Limfa": "Lymph Coffee",
+  "Pelindung Lendir": "Mucus Shield",
+  "Sinyal Ganda": "Double Signal",
+  "+15% damage semua serangan": "+15% damage on all attacks",
+  "+12% kecepatan serangan": "+12% attack speed",
+  "+8% kecepatan gerak": "+8% move speed",
+  "+20 HP maksimum & pulih 20 HP": "+20 max HP & heal 20 HP",
+  "+12% jarak serangan": "+12% attack range",
+  "+1 proyektil / tebasan ekstra": "+1 projectile / extra slash",
+  "+8% damage per level (permanen)": "+8% damage per level (permanent)",
+  "+10% HP maksimum per level (permanen)": "+10% max HP per level (permanent)",
+  "+10% damage senjata per level (permanen)": "+10% weapon damage per level (permanent)",
+  "Jurus: cooldown -6% & area +8% per level (permanen)": "Abilities: cooldown -6% & area +8% per level (permanent)",
+  "Damage diterima -5% per level (permanen)": "Damage taken -5% per level (permanent)",
+  "+5% kecepatan gerak per level (permanen)": "+5% move speed per level (permanent)",
+  "+6% kecepatan serangan per level (permanen)": "+6% attack speed per level (permanent)",
+  "+8% jarak serangan per level (permanen)": "+8% attack range per level (permanent)",
+  "+10% XP yang didapat per level (permanen)": "+10% XP gained per level (permanent)",
+  "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)": "+25% damage for the next run (auto-used when the run starts)",
+  "+30 HP saat run dimulai (dipakai otomatis)": "+30 HP when the run starts (auto-used)",
+  "+12% kecepatan gerak 1 run (dipakai otomatis)": "+12% move speed for 1 run (auto-used)",
+  "Serap 1 serangan patogen per run (dipakai otomatis)": "Absorb 1 pathogen attack per run (auto-used)",
+  "+50% antibodi dari run ini (dipakai otomatis)": "+50% antibodies from this run (auto-used)",
+  "+6% damage & +8% HP per level (khusus hero ini)": "+6% damage & +8% HP per level (this hero only)",
+  "Pasukan menembak +12% lebih sakit & +4% gesit per level": "Squad shoots +12% harder & moves +4% nimbler per level",
+  "Tebasan Mitosis": "Mitosis Slash",
+  "Siklon Silia": "Cilia Cyclone",
+  "Petir Sitotoksik": "Cytotoxic Bolt",
+  "Beku Fagosit": "Phagocyte Freeze",
+  "Saluran Limfe": "Lymph Vessel",
+  "Lambung Asam": "Acid Stomach",
+  "Paru Kristal": "Crystal Lung",
+  "Sumbu Saraf": "Nerve Cord",
+  "Arena dasar — seimbang": "Base arena — balanced",
+  "Nutrisi bernilai +15%": "Nutrients worth +15%",
+  "Gerak +8%, magnet +20%": "Move +8%, magnet +20%",
+  "Drop bagian evolusi +50%": "Evolution part drops +50%",
+  "Sirkulasi": "Circulation",
+  "Pencernaan": "Digestion",
+  "Saraf": "Nervous",
+  "Imun": "Immune",
+  "Limfatik": "Lymphatic",
+  "Distribusi energi & kecepatan respons imun": "Energy distribution & immune response speed",
+  "Sumber energi & nilai nutrisi": "Source of energy & nutrient value",
+  "Deteksi dini ancaman (radar wave)": "Early threat detection (wave radar)",
+  "Garis pertahanan aktif (kekuatan hero)": "Active defense line (hero strength)",
+  "Pembersih racun sisa pertarungan": "Cleanses leftover combat toxin",
+  "Respons imun lambat": "Sluggish immune response",
+  "Deteksi lambat — XP turun": "Slow detection — XP down",
+  "Nutrisi berkurang": "Reduced nutrients",
+  "Patogen makin agresif": "Pathogens turn aggressive",
+  "Racun menumpuk cepat": "Toxin builds up fast",
+  "Respons serangan cepat": "Faster attacks",
+  "Nilai nutrisi naik": "Higher nutrient value",
+  "Deteksi dini: XP naik": "Early detection: more XP",
+  "Damage hero naik": "Hero damage up",
+  "Racun lebih cepat bersih": "Toxin clears faster",
+  "Run Seimbang": "Balanced Run",
+  "Run Nutrisi": "Nutrient Run",
+  "Run Detoksifikasi": "Detox Run",
+  "Run Radar": "Radar Run",
+  "Run Respons Cepat": "Quick Response Run",
+  "Run Pertahanan": "Defense Run",
+  "Tanpa fokus khusus — semua sistem +1 saat menang": "No special focus — all systems +1 on a win",
+  "Fokus pulihkan Sirkulasi": "Focus restores Circulation",
+  "Fokus pulihkan Pencernaan": "Focus restores Digestion",
+  "Fokus pulihkan Saraf": "Focus restores Nervous",
+  "Fokus pulihkan Imun": "Focus restores Immune",
+  "Racun dibersihkan ekstra — selamatkan Limfatik": "Extra toxin cleanse — save the Lymphatic",
+  "Rongga Mulut": "Mouth Cavity",
+  "Gerbang Masuk": "Gateway",
+  "Sarang Patogen": "Pathogen Nest",
+  "Lambung": "Stomach",
+  "Perut Kram": "Cramping Belly",
+  "Usus Halus": "Small Intestine",
+  "Lorong Berliku": "Winding Passage",
+  "Paru-paru": "Lungs",
+  "Sabit Angin": "Sickle Wind",
+  "Kelenjar Limfe": "Lymph Node",
+  "Pertahanan Terakhir": "Last Defense",
+  "Sumbu Kehidupan": "Life Axis",
+  "Raja Radang": "Inflammation King",
+  "Ibu Parasit": "Parasite Mother",
+  "Ratu Sabit": "Sickle Queen",
+  "Jenderal Kanker": "Cancer General",
+  "Raja Kanker": "Cancer King",
+  "Ratu Racun": "Toxin Queen",
+  "Bayangan Alveolus": "Alveolus Shadow",
+  "Inti Pehit": "Misfold Core",
+  "Mahakristal": "Megacrystal",
+  "Bersihkan 25 patogen": "Clear 25 pathogens",
+  "Bersihkan 40 patogen, lalu kalahkan Raja Radang": "Clear 40 pathogens, then defeat the Inflammation King",
+  "Bersihkan 55 patogen, lalu kalahkan Ibu Parasit": "Clear 55 pathogens, then defeat the Parasite Mother",
+  "Bersihkan 70 patogen, lalu kalahkan Ratu Sabit": "Clear 70 pathogens, then defeat the Sickle Queen",
+  "Bersihkan 90 patogen, lalu kalahkan Jenderal Kanker": "Clear 90 pathogens, then defeat the Cancer General",
+  "Bersihkan 120 patogen, lalu kalahkan Raja Kanker": "Clear 120 pathogens, then defeat the Cancer King",
+  "Sisa permen yang tak berkehendak mengundang Bakteri Plak menari di gigi. Alarm biologinya berbunyi — pasukan imun pertama turun ke Rongga Mulut!": "Stray candy invites plaque bacteria to dance on the teeth. The biological alarm rings — the first immune squad marches into the Mouth Cavity!",
+  "Tiba-tiba perutmu kram — sesuatu yang busuk masuk lewat makanan! Virus meradang di Lambung. Sang imun segera datang dengan pasukannya untuk membasmi sampai bersih.": "Your belly suddenly cramps — something rotten came in with the food! Viruses rage in the Stomach. The immune one rushes in with the squad to wipe them out.",
+  "Para parasit menyusup ke Lorong Berliku Usus Halus dan menumpang makan nutrisi. Badan lemas — tapi pasukan imun makin besar dan takut hilang.": "Parasites sneak into the Winding Passage of the Small Intestine and feast on nutrients. The body weakens — but the immune squad keeps growing.",
+  "Angin kotor masuk — Paru-paru dipenuhi virus bersabit yang bikin sesak. Di balik kabut udara, pasukan imun berbaris membersihkan kabut itu satu per satu.": "Dirty air pours in — the Lungs fill with sickle viruses that choke every breath. Behind the haze, the immune squad lines up to clear it, one by one.",
+  "Kelenjar Limfe — markas besar pasukan imun — ternyata disusupi! Patogen bersarang di rumah sendiri. Serangan terbesar dimulai dari sini: bersihkan markas!": "The Lymph Nodes — the immune squad's own headquarters — have been infiltrated! Pathogens nest at home. The biggest battle starts here: cleanse the base!",
+  "Di pusat tubuh, Raja Kanker mencoba menguasai Sumbu Kehidupan. Kalau jatuh, semuanya tamat. Seluruh pasukan imun — semua sel, satu tujuan: TUBUH BERSIH!": "At the body's core, the Cancer King tries to seize the Life Axis. If it falls, everything ends. The entire immune squad — every cell, one goal: A CLEAN BODY!",
+  "Kampanye": "Campaign",
+  "Ikuti cerita: bersihkan organ satu per satu bersama pasukan imun. Bab berikutnya terbuka setelah bab sebelumnya bersih.": "Follow the story: cleanse organs one by one with your immune squad. Each chapter opens when the previous one is clear.",
+  "Bersihkan bab Kampanye pertama": "Clear the first Campaign chapter",
+  "Tanpa akhir + mutator harian. Uji seberapa jauh pasukanmu bertahan.": "Endless waves + daily mutators. See how long your squad lasts.",
+  "Arus Panas": "Heat Surge",
+  "Badan Lemas": "Weary Body",
+  "Demam Tinggi": "High Fever",
+  "Hujan Nutrisi": "Nutrient Rain",
+  "Kawanan Padat": "Dense Swarm",
+  "Patogen Ganas": "Fierce Pathogens",
+  "Saluran Waspada": "Wary Vessels",
+  "Serangan Membara": "Burning Assault",
+  "Cooldown kemampuan -20%, musuh +8% kecepatan.": "Ability cooldown -20%, enemies +8% speed.",
+  "Damage kontak musuh +20%, pungut nutrisi +20%.": "Enemy contact damage +20%, nutrient pickup +20%.",
+  "Damage player +25%, tapi HP maksimal -12%.": "Player damage +25%, but max HP -12%.",
+  "Nutrisi jatuh +35% lebih banyak, musuh sedikit lebih tangguh.": "Nutrient drops +35%, enemies a bit tougher.",
+  "Musuh +18% kecepatan, namun drop antibodi +40%.": "Enemies +18% speed, but antibody drops +40%.",
+  "Musuh +20% HP, tapi nutrisi memberi +30% XP.": "Enemies +20% HP, but nutrients give +30% XP.",
+  "Player -15% kecepatan gerak, +25% jangkauan pungut nutrisi.": "Player -15% move speed, +25% nutrient pickup range.",
+  "Spawn musuh +25% rapat, XP +15%.": "Enemies spawn +25% denser, XP +15%.",
+  "Benteng Imun": "Immune Bastion",
+  "Bertahan di Oase": "Oasis Stand",
+  "Cadangan Antibodi": "Antibody Reserve",
+  "Deteksi Dini": "Early Detection",
+  "Fagosit Sejati": "True Phagocyte",
+  "Gelombang Pertama": "First Wave",
+  "Onkolog Handal": "Trusted Oncologist",
+  "Operasi Tumor": "Tumor Operation",
+  "Pembersih Sistem": "System Cleanser",
+  "Patroli Rutin": "Routine Patrol",
+  "Penyerap Nutrisi": "Nutrient Absorber",
+  "Tugas Malam": "Night Shift",
+  "Kalahkan 10 patogen (total)": "Defeat 10 pathogens (total)",
+  "Kalahkan 100 patogen (total)": "Defeat 100 pathogens (total)",
+  "Kalahkan 1000 patogen (total)": "Defeat 1000 pathogens (total)",
+  "Capai Gelombang 5": "Reach Wave 5",
+  "Capai Gelombang 10": "Reach Wave 10",
+  "Capai Gelombang 20": "Reach Wave 20",
+  "Kalahkan 1 Sel Kanker": "Defeat 1 Cancer Cell",
+  "Kalahkan 5 Sel Kanker": "Defeat 5 Cancer Cells",
+  "Bertahan total 5 menit": "Survive 5 minutes in total",
+  "Kumpulkan 250 nutrisi (total)": "Collect 250 nutrients (total)",
+  "Selesaikan 10 run": "Complete 10 runs",
+  "Kumpulkan 2000 antibodi (total)": "Collect 2000 antibodies (total)",
+  "Sel Bulir": "Bud Cell",
+  "Sel Bersilia": "Ciliated Cell",
+  "Fagosit Muda": "Young Phagocyte",
+  "Fagosit Elite": "Elite Phagocyte",
+  "Imun Legenda": "Immune Legend",
+  "Mikropedang": "Microblade",
+  "Inti Elemen": "Element Core",
+  "Pasukan Imun": "Immune Squad",
+  "Pasukan Virus": "Virus Squad",
+  "Paket Pemula": "Starter Pack",
+  "Paket Imun Pro": "Immune Pro Pack",
+  "Paket Legenda": "Legend Pack",
+  "Bebas Iklan": "Ad-Free",
+  "Legenda Tubuh": "Body Legend",
+  "CEPAT": "FAST",
+  "Penembak Sitokin": "Cytokine Sharpshooter",
+  "Pelahap Raksasa": "The Devourer",
+  "di Shop": "in Shop",
+  "Di dalam tubuh... sesuatu yang asing menyusup lewat makanan.": "Inside the body... something alien slipped in with the food.",
+  "Virus dan bakteri berkeliaran — tubuh mulai sakit.": "Viruses and bacteria roam free — the body starts to ache.",
+  "Tapi tubuh tidak sendirian. Pasukan imun bangkit — saatnya perang!": "But the body is not alone. The immune squad rises — time for battle!",
+  "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...": "The journey isn't over — other organs are still waiting for help...",
+  "Tombol ini membawamu ke Peta Tubuh — perjalanan membersihkan organ yang sakit, satu per satu.": "This button opens the Body Map — a journey to cleanse sick organs, one by one.",
+  "Pasukanmu: pilih sel imun yang dimainkan. Setiap hero punya bentuk & gaya serangan berbeda.": "Your squad: pick the immune cell you play. Every hero has a different shape & attack style.",
+  "Tukar antibodi hasil battle jadi hero baru, upgrade permanen & suplemen.": "Trade battle antibodies for new heroes, permanent upgrades & supplements.",
+  "Consumable & hasil perang disimpan di sini. Cek sebelum battle berikutnya.": "Consumables & battle loot are stored here. Check it before the next battle.",
+  "5 sistem tubuh (Sirkulasi, Pencernaan, Saraf, Imun, Limfatik). Racun menurunkannya — menang run memulihkannya. Jaga agar tetap sehat!": "5 body systems (Circulation, Digestion, Nervous, Immune, Lymphatic). Toxin wears them down — winning runs restores them. Keep them healthy!",
+  "Satu tubuh, dua pasukan. Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan nama mu sendiri.": "One body, two squads. Create your account — progress, hero levels & purchases stay safe under your name.",
+  "Riwayat pembelian (simulasi):": "Purchase history (simulated):",
+  "Tonton Iklan & Bangkit": "Watch Ad & Revive",
+  "Balikkan permainan — lumpuhkan tubuh dari dalam.": "Flip the game — paralyze the body from within.",
+  "Bersihkan organ dari patogen sampai SEHAT": "Cleanse organs of pathogens back to HEALTH",
+  "Ganggu organ & lolos dari kejaran imun": "Disrupt organs & escape the immune chase",
+  "Pelindung tubuh — basmi patogen, pulihkan organ.": "Body shield — crush pathogens, restore organs.",
+  "KUMPULKAN BAGIAN EVOLUSI": "COLLECT EVOLUTION PARTS",
+  "beli di Shop": "buy in Shop",
+  "dipakai otomatis saat run": "auto-used when the run starts",
+  "MULAI PERANG PERTAMA": "START YOUR FIRST BATTLE",
+  "Respons Imun": "Immune Response"
+ },
+ "rules": [
+  {
+   "pattern": "^Misi: bersihkan (\\d+) patogen \\((\\d+)/(\\d+)\\)$",
+   "replace": "Mission: clear $1 pathogens ($2/$3)"
+  },
+  {
+   "pattern": "^Senjata ([\\d.,]+) \\(\\+([\\d.,]+)/lvl\\)$",
+   "replace": "Weapon $1 (+$2/lvl)"
+  },
+  {
+   "pattern": "^HP ([\\d.,]+) \\(\\+([\\d.,]+)/lvl\\)$",
+   "replace": "HP $1 (+$2/lvl)"
+  },
+  {
+   "pattern": "^DMG \\+(\\d+)%$",
+   "replace": "DMG +$1%"
+  },
+  {
+   "pattern": "^HP \\+(\\d+)%$",
+   "replace": "HP +$1%"
+  },
+  {
+   "pattern": "^Tempo \\+(\\d+)%$",
+   "replace": "Tempo +$1%"
+  },
+  {
+   "pattern": "^Damage pasukan \\+(\\d+)%$",
+   "replace": "Squad damage +$1%"
+  },
+  {
+   "pattern": "^Lv (\\d+)/(\\d+)$",
+   "replace": "Lv $1/$2"
+  },
+  {
+   "pattern": "^(\\d+) hero dimiliki$",
+   "replace": "$1 heroes owned"
+  },
+  {
+   "pattern": "^(\\d+) sel aktif$",
+   "replace": "$1 cells active"
+  },
+  {
+   "pattern": "^(\\d+) sel ikut bertarung$",
+   "replace": "$1 cells fight alongside"
+  },
+  {
+   "pattern": "^(\\d+) bagian evolusi dibawa pulang — cek Dashboard!$",
+   "replace": "$1 evolution parts brought home — check the Dashboard!"
+  },
+  {
+   "pattern": "^Level (\\d+) · Gelombang (\\d+)$",
+   "replace": "Level $1 · Wave $2"
+  },
+  {
+   "pattern": "^([\\d.,]+) antibodi terkumpul \\(dibawa pulang saat run diakhiri\\)$",
+   "replace": "$1 antibodies collected (brought home when the run ends)"
+  },
+  {
+   "pattern": "^(\\d{1,2}:\\d{2}) · (\\d+) patogen$",
+   "replace": "$1 · $2 pathogens"
+  },
+  {
+   "pattern": "^Tubuh: (.+)$",
+   "replace": "Body: $1"
+  },
+  {
+   "pattern": "^\\+(\\d+) misi lainnya sudah selesai ✓$",
+   "replace": "+$1 more missions completed ✓"
+  },
+  {
+   "pattern": "^Semua misi selesai! \\((\\d+)/(\\d+)\\) 🎉$",
+   "replace": "All missions done! ($1/$2) 🎉"
+  },
+  {
+   "pattern": "^🎯 Sehat Sempurna: semua ≥(\\d+) selama (\\d+) hari — streak (\\d+)/(\\d+)$",
+   "replace": "🎯 Perfect Health: all ≥$1 for $2 days — streak $3/$4"
+  },
+  {
+   "pattern": "^(.+?) sistem pulih \\+([\\d.,]+)!$",
+   "replace": "$1 system restored +$2!"
+  },
+  {
+   "pattern": "^Pasukan ikut: (\\d+) sel imun$",
+   "replace": "Squad: $1 immune cells"
+  },
+  {
+   "pattern": "^Tujuan: (.+)$",
+   "replace": "Goal: $1"
+  },
+  {
+   "pattern": "^Reward: \\+([\\d.,]+) antibodi$",
+   "replace": "Reward: +$1 antibodies"
+  },
+  {
+   "pattern": "^Mutator: (.+)$",
+   "replace": "Mutator: $1"
+  },
+  {
+   "pattern": "^Mutator hari ini: (.+)$",
+   "replace": "Today's mutator: $1"
+  },
+  {
+   "pattern": "^Fokus run: (.+)$",
+   "replace": "Run focus: $1"
+  },
+  {
+   "pattern": "^Arena: (.+)$",
+   "replace": "Arena: $1"
+  },
+  {
+   "pattern": "^Capai gelombang (\\d+) — terbaik: (\\d+)$",
+   "replace": "Reach wave $1 — best: $2"
+  },
+  {
+   "pattern": "^Kalahkan (\\d+) patogen — (\\d+)/(\\d+)$",
+   "replace": "Defeat $1 pathogens — $2/$3"
+  },
+  {
+   "pattern": "^Kalahkan (\\d+) Sel Kanker — (\\d+)/(\\d+)$",
+   "replace": "Defeat $1 Cancer Cells — $2/$3"
+  },
+  {
+   "pattern": "^atau beli ([\\d.,]+)$",
+   "replace": "or buy $1"
+  },
+  {
+   "pattern": "^Lanjutkan sebagai (.+)$",
+   "replace": "Continue as $1"
+  },
+  {
+   "pattern": "^Keluar dari akun \"(.+)\" \\(data tetap tersimpan\\)$",
+   "replace": "Log out of \"$1\" (data stays saved)"
+  },
+  {
+   "pattern": "^(.+?) SEGERA hadir — mulai dulu dengan (.+?)!$",
+   "replace": "$1 is coming SOON — start with $2!"
+  },
+  {
+   "pattern": "^Berikutnya: (.+?) \\((.+)\\)$",
+   "replace": "Next: $1 ($2)"
+  },
+  {
+   "pattern": "^Berevolusi ke (.+?) \\((.+)\\) — buka kemampuan baru & bentuk baru!$",
+   "replace": "Evolve to $1 ($2) — unlock new abilities & forms!"
+  },
+  {
+   "pattern": "^Hero berevolusi: (.+?) \\((.+)\\)!$",
+   "replace": "Hero evolved: $1 ($2)!"
+  },
+  {
+   "pattern": "^Tier (.+)$",
+   "replace": "Tier $1"
+  },
+  {
+   "pattern": "^\\+(\\d+)% dmg · \\+(\\d+)% HP$",
+   "replace": "+$1% dmg · +$2% HP"
+  },
+  {
+   "pattern": "^\\+ PEMULIHAN IKLAN \\((.+)\\)$",
+   "replace": "+ AD RECOVERY ($1)"
+  },
+  {
+   "pattern": "^Energi (\\d+)$",
+   "replace": "Energy $1"
+  },
+  {
+   "pattern": "^Racun (\\d+)$",
+   "replace": "Toxin $1"
+  },
+  {
+   "pattern": "^Gel\\. (\\d+)$",
+   "replace": "Wave $1"
+  },
+  {
+   "pattern": "^🏆 Gel\\. (\\d+)$",
+   "replace": "🏆 Wave $1"
+  },
+  {
+   "pattern": "^Kondisi Tubuh: (.+)$",
+   "replace": "Body Condition: $1"
+  },
+  {
+   "pattern": "^(.+?) MUNCUL!$",
+   "replace": "$1 APPEARS!"
+  },
+  {
+   "pattern": "^(.+?) tumbang! Organ bersih!$",
+   "replace": "$1 down! Organ cleansed!"
+  },
+  {
+   "pattern": "^Wave (\\d+)! \\+([\\d.,]+) XP$",
+   "replace": "Wave $1! +$2 XP"
+  },
+  {
+   "pattern": "^Endless wave (\\d+)! \\+([\\d.,]+) antibodi$",
+   "replace": "Endless wave $1! +$2 antibodies"
+  },
+  {
+   "pattern": "^Hero baru terbuka: (.+?)!$",
+   "replace": "New hero unlocked: $1!"
+  },
+  {
+   "pattern": "^Misi \"(.+?)\" selesai! \\+([\\d.,]+) antibodi$",
+   "replace": "Mission \"$1\" complete! +$2 antibodies"
+  },
+  {
+   "pattern": "^Peti boss: \\+([\\d.,]+) antibodi( \\(2x!\\))? $",
+   "replace": "Boss chest: +$1 antibodies$2"
+  },
+  {
+   "pattern": "^Sel Kanker dikalahkan! \\+([\\d.,]+)$",
+   "replace": "Cancer Cell defeated! +$1"
+  },
+  {
+   "pattern": "^Prion mengkristalkan (\\d+) musuh!$",
+   "replace": "Prion crystallized $1 enemies!"
+  },
+  {
+   "pattern": "^Pasukan imun: (\\d+) sel ikut bertarung!(.*)$",
+   "replace": "Immune squad: $1 cells join the fight!$2"
+  },
+  {
+   "pattern": "^Pembayaran berhasil: (.+?)!$",
+   "replace": "Payment successful: $1!"
+  },
+  {
+   "pattern": "^\\+([\\d.,]+) kesehatan (.+?) — (.+?)\\.$",
+   "replace": "+$1 $2 health — $3."
+  },
+  {
+   "pattern": "^\\+([\\d.,]+) SEMUA sistem sekaligus \\(pembelian simulasi\\)\\.$",
+   "replace": "+$1 ALL systems at once (simulated purchase)."
+  },
+  {
+   "pattern": "^Suplemen (.+)$",
+   "replace": "$1 Supplement"
+  },
+  {
+   "pattern": "^Suplemen diminum: (.+?) \\+([\\d.,]+)!$",
+   "replace": "Supplement drunk: $1 +$2!"
+  },
+  {
+   "pattern": "^Struk: (.+)$",
+   "replace": "Receipt: $1"
+  },
+  {
+   "pattern": "^Dimiliki: (.+)$",
+   "replace": "Owned: $1"
+  },
+  {
+   "pattern": "^\\+([\\d.,]+) XP$",
+   "replace": "+$1 XP"
+  },
+  {
+   "pattern": "^\\+(\\d+)% Damage!$",
+   "replace": "+$1% Damage!"
+  },
+  {
+   "pattern": "^\\+(\\d+) HP Maks!$",
+   "replace": "+$1 Max HP!"
+  },
+  {
+   "pattern": "^\\+(\\d+)% XP!$",
+   "replace": "+$1% XP!"
+  },
+  {
+   "pattern": "^Pasukan Lv (\\d+) · (\\d+) sel$",
+   "replace": "Squad Lv $1 · $2 cells"
+  },
+  {
+   "pattern": "^COMBO x(\\d+)! \\+(\\d+) XP$",
+   "replace": "COMBO x$1! +$2 XP"
+  },
+  {
+   "pattern": "^Misi: (.+)$",
+   "replace": "Mission: $1"
+  },
+  {
+   "pattern": "^Pasukan imun tiba\\. Bersihkan (.+?) sampai tuntas!$",
+   "replace": "The immune squad arrives. Cleanse the $1 completely!"
+  },
+  {
+   "pattern": "^(.+?) pulih kembali\\. Terima kasih, sang imun!$",
+   "replace": "$1 restored. Thank you, immune one!"
+  },
+  {
+   "pattern": "^Peti boss: \\+([\\d.,]+) antibodi( \\(2x!\\))?$",
+   "replace": "Boss chest: +$1 antibodies$2"
+  },
+  {
+   "pattern": "^Sel Kanker dikalahkan! \\+([\\d.,]+) XP$",
+   "replace": "Cancer Cell defeated! +$1 XP"
+  },
+  {
+   "pattern": "^(.+?) \\((\\d+)/(\\d+)\\)$",
+   "replace": "$1 ($2/$3)"
+  },
+  {
+   "pattern": "^(.+?) — ([\\d.,]+)/([\\d.,]+)$",
+   "replace": "$1 — $2/$3"
+  },
+  {
+   "pattern": "^Level (\\d+) — pilih satu peningkatan$",
+   "replace": "Level $1 — choose one upgrade"
+  }
+ ]
+}

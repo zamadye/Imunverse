@@ -11,7 +11,8 @@
 
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
-import { loadAllData, getData } from './core/data-store.js';
+import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
+import { loadLang, initSweep, sweepAll } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
@@ -148,6 +149,10 @@ async function boot() {
   const data = await loadAllData();
   loadingScreen.setProgress(12, 'Data patogen dimuat…');
 
+  // 1b) Dwibahasa: muat kamus + pasang observer DOM (bahasa diterapkan setelah save dimuat)
+  await loadLang();
+  initSweep();
+
   // 2) Sprite preload (jangan drawImage sebelum selesai)
   await loadAllSprites(data, (done, total, path, isFallback) => {
     const pct = 12 + Math.round((done / total) * 84);
@@ -159,6 +164,7 @@ async function boot() {
   const raw = loadSave();
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
   if (!raw) writeSave(STATE.meta);
+  applyDataLanguage(STATE.meta.lang || 'id'); // dwibahasa: data sesuai bahasa tersimpan
 
   // 4) Wiring UI
   game.init({ canvas, input });
@@ -305,6 +311,21 @@ async function boot() {
     },
     (dt, time) => game.render(dt, time)
   );
+
+  // Toggle bahasa ID/EN satu-klik (seluruh UI + data, tanpa reload)
+  const updateLangButtons = () => {
+    const lang = STATE.meta.lang || 'id';
+    document.querySelectorAll('.lang-pill').forEach((b) => { b.textContent = lang === 'id' ? 'EN' : 'ID'; });
+  };
+  document.querySelectorAll('.lang-pill').forEach((b) => b.addEventListener('click', () => {
+    const lang = (STATE.meta.lang || 'id') === 'id' ? 'en' : 'id';
+    STATE.meta.lang = lang;
+    writeSave(STATE.meta);
+    applyDataLanguage(lang);
+    sweepAll();
+    updateLangButtons();
+  }));
+  updateLangButtons();
 
   // Auto-pause saat tab disembunyikan
   document.addEventListener('visibilitychange', () => {

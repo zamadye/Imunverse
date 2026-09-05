@@ -35,6 +35,7 @@ export function setLevelUpOpen(v) {
 export function createDefaultMeta() {
   return {
     version: 1,
+    lang: 'id', // bahasa UI ('id' | 'en') — dipakai sistem i18n
     currency: 0,
     unlockedHeroes: ['sel_t'],
     selectedHero: 'sel_t',

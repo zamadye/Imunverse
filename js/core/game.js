@@ -15,6 +15,7 @@ import {
   xpToNextLevel,
 } from './data-store.js';
 import { emit } from './ui-bridge.js';
+import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 
 import { Player } from '../entities/player.js';
@@ -552,7 +553,7 @@ export const game = {
         ? proj.damage * proj.antiParasitMult
         : proj.damage;
       const died = enemy.takeDamage(dmg);
-      if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, 'TERLAPIS!', '#cfd8e3');
+      if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
@@ -637,7 +638,7 @@ export const game = {
       case 'xp':
         this.addXP(p.value);
         // XP TERASA: label melayang tiap orb (ramah anak)
-        run.effects.spawnLabel(p.x, p.y - 6, `+${Math.round(p.value * 10) / 10} XP`, '#8fe8d2');
+        run.effects.spawnLabel(p.x, p.y - 6, tr(`+${Math.round(p.value * 10) / 10} XP`), '#8fe8d2');
         break;
       case 'heal':
         run.player.heal(p.value);
@@ -669,29 +670,29 @@ export const game = {
     if (t === 'buff_damage') {
       B.damage.mult *= 1 + v / 100;
       B.damage.t = Math.max(B.damage.t, dur);
-      run.effects.spawnLabel(p.x, p.y - 10, `+${v}% Damage!`, '#f2825c');
+      run.effects.spawnLabel(p.x, p.y - 10, tr(`+${v}% Damage!`), '#f2825c');
       this.recomputePlayerStats();
     } else if (t === 'buff_cooldown') {
       B.cooldown.mult *= Math.max(0.5, 1 - v / 100);
       B.cooldown.t = Math.max(B.cooldown.t, dur);
-      run.effects.spawnLabel(p.x, p.y - 10, 'Serangan makin cepat!', '#7bdff2');
+      run.effects.spawnLabel(p.x, p.y - 10, tr('Serangan makin cepat!'), '#7bdff2');
       this.recomputePlayerStats();
     } else if (t === 'buff_xp') {
       B.xp.mult *= 1 + v;
       B.xp.t = Math.max(B.xp.t, dur);
-      run.effects.spawnLabel(p.x, p.y - 10, `+${Math.round(v * 100)}% XP!`, '#8fe8d2');
+      run.effects.spawnLabel(p.x, p.y - 10, tr(`+${Math.round(v * 100)}% XP!`), '#8fe8d2');
     } else if (t === 'buff_maxhp') {
       run.permBoost.maxHP += v;
       this.recomputePlayerStats();
-      run.effects.spawnLabel(p.x, p.y - 10, `+${v} HP Maks!`, '#7ae582');
+      run.effects.spawnLabel(p.x, p.y - 10, tr(`+${v} HP Maks!`), '#7ae582');
     } else if (t === 'buff_regen') {
       run.permBoost.regen += v;
       this.recomputePlayerStats();
-      run.effects.spawnLabel(p.x, p.y - 10, 'Regenerasi aktif', '#5bc8ff');
+      run.effects.spawnLabel(p.x, p.y - 10, tr('Regenerasi aktif'), '#5bc8ff');
     } else if (t === 'buff_omega') {
       run.permBoost.omega += v;
       this.recomputePlayerStats();
-      run.effects.spawnLabel(p.x, p.y - 10, 'Racun sisa dibersihkan', '#7bdff2');
+      run.effects.spawnLabel(p.x, p.y - 10, tr('Racun sisa dibersihkan'), '#7bdff2');
     } else {
       console.warn('[game] buffType tidak dikenal:', t);
     }
@@ -768,7 +769,7 @@ export const game = {
       while (diff < -Math.PI) diff += Math.PI * 2;
       if (Math.abs(diff) > half) return;
       const died = e.takeDamage(damage);
-      if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, 'TERLAPIS!', '#cfd8e3');
+      if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : damage, died);
       if (died) this.onEnemyKilled(e, null);
     });
@@ -809,7 +810,7 @@ export const game = {
     // PELINDUNG LENDIR (item): serap serangan pertama
     if (this.runFlags && this.runFlags.pelindung) {
       this.runFlags.pelindung = false;
-      run.effects.spawnLabel(player.x, player.y - 40, 'TERSERAP!', '#7fd8c8');
+      run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
       run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
       audio.hit();
       return;
@@ -1058,7 +1059,7 @@ export const game = {
         emit('toast', { message: `${enemy.bossName || 'Boss'} tumbang! Organ bersih!`, kind: 'gold' });
         this.winRun();
       } else {
-        emit('toast', { message: 'Sel Kanker dikalahkan! +' + enemy.xpPerKill + ' XP', kind: 'gold' });
+        emit('toast', { message: tr(`Sel Kanker dikalahkan! +${enemy.xpPerKill} XP`), kind: 'gold' });
         this.openBossChest(enemy);
       }
     }
