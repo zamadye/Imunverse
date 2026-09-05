@@ -153,6 +153,7 @@ export class Player {
           damage: this.stats.damage,
           pierce: this.stats.pierce,
           turnRate,
+          antiParasitMult: this.heroDef.patternParams.antiParasitMult || 0,
           color: this.heroDef.color,
         });
       }

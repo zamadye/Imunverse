@@ -239,6 +239,9 @@ def gen_stage_heroes(out):
         "hero_sel_nk_attack.png": hero("sel_nk", "#ff8c42", spikes=9, attack=True),
         "hero_eosinofil_idle.png": hero("eosinofil", "#ff7fa8", lobes=1, granules=True),
         "hero_eosinofil_attack.png": hero("eosinofil", "#ff7fa8", lobes=1, granules=True, attack=True),
+        # Neutrofil: responder tercepat, inti berlobus, granula kecil (dokumen entitas)
+        "hero_neutrofil_idle.png": hero("neutrofil", "#ffd166", lobes=1, granules=True),
+        "hero_neutrofil_attack.png": hero("neutrofil", "#ffd166", lobes=1, granules=True, attack=True),
     }
 
 
@@ -409,6 +412,8 @@ def gen_stage_enemies(out):
         "enemy_parasit.png": enemy_worm(128, "#e15fd0"),
         "enemy_spora.png": enemy_puffball(128, "#f2c14e"),
         "enemy_protozoa.png": enemy_capsule(128, "#3ecfb2", cilia=True),
+        # Bakteri Gram Positif: dinding tebal satu lapis, ungu tua (dokumen entitas)
+        "enemy_bakteri_gp.png": enemy_capsule(128, "#8d5fb3"),
         "enemy_sel_kanker.png": boss(256, "#f2825c"),
         "enemy_sel_kanker_attack.png": boss(256, "#f2825c", attack=True),
     }
@@ -508,14 +513,41 @@ def item_signal(size, color):
     return done(img, size)
 
 
+def item_drop(size, color):
+    """Tetes air — nutrisi Air/Hidrasi (regen kecil merata)."""
+    img, d = canvas(size)
+    S = size * SS
+    cx, cy = S * 0.5, S * 0.56
+    r = S * 0.28
+    col = hex_rgb(color)
+    path = []
+    for a_deg in range(-55, 241, 12):
+        a = math.radians(a_deg)
+        path.append((cx + math.cos(a) * r, cy + math.sin(a) * r))
+    d.polygon(path + [(cx, cy - r * 1.8)], fill=rgba(col),
+              outline=rgba(mix(col, (0, 0, 0), 0.3)), width=max(3, int(S * 0.02)))
+    d.ellipse([cx - r * 0.45, cy - r * 0.30, cx - r * 0.08, cy + r * 0.08],
+              fill=rgba(mix(col, (255, 255, 255), 0.55)))
+    return done(img, size)
+
+
 def gen_stage_items(out):
-    print("STAGE 3 — Nutrisi kawaii (5 aset)")
+    print("STAGE 3 — Nutrisi kawaii (13 aset)")
     return {
         "item_glukosa.png": item_candy_hex(96, "#f5c64f"),
         "item_amino.png": item_chain(96, "#7cb86a"),
         "item_vitamin_c.png": item_capsule(96, "#ff9f1c"),
         "item_antibodi.png": item_y(96, "#4cc9f0"),
         "item_sitokin.png": item_signal(96, "#f2825c"),
+        # Dokumen entitas: 8 nutrisi buff tempur
+        "item_zinc.png": item_candy_hex(96, "#a9b7f0"),
+        "item_protein.png": item_chain(96, "#e0795f"),
+        "item_vitamin_d.png": item_capsule(96, "#f4d35e"),
+        "item_omega3.png": item_capsule(96, "#7bdff2"),
+        "item_zat_besi.png": item_candy_hex(96, "#c25b3f"),
+        "item_probiotik.png": item_candy_hex(96, "#9bd77e"),
+        "item_serat.png": item_chain(96, "#c9a86a"),
+        "item_air.png": item_drop(96, "#5bc8ff"),
     }
 
 
@@ -548,6 +580,7 @@ def gen_stage_portraits(out):
         "portrait_sel_b.png": portrait(128, "#5aa2ff"),
         "portrait_eosinofil.png": portrait(128, "#ff7fa8"),
         "portrait_sel_nk.png": portrait(128, "#ff8c42", spikes=8),
+        "portrait_neutrofil.png": portrait(128, "#ffd166"),
     }
 
 

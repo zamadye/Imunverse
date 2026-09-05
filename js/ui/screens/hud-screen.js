@@ -123,6 +123,7 @@ export function updateHUD(data) {
   document.getElementById('hud-currency').textContent = data.currency;
 
   updateAbilityBar(data.abilities);
+  updateBuffChips();
 
   // Combo pill (juice): tampil saat >= 3 kill beruntun
   const comboNode = document.getElementById('hud-combo');
@@ -210,4 +211,37 @@ export function getMinimapContext() {
     minimapCtx = canvas.getContext('2d');
   }
   return minimapCtx;
+}
+
+/**
+ * Fase 8.4 (dokumen entitas): chip buff tempur aktif di bawah bar atas —
+ * zinc/zat besi (damage), probiotik (cooldown), serat (XP), regen (air/vit D).
+ */
+function updateBuffChips() {
+  const el = document.getElementById('hud-buffs');
+  if (!el) return;
+  const run = game.run;
+  if (!run || !run.tempBuffs) {
+    if (el.dataset.html) { el.innerHTML = ''; el.dataset.html = ''; }
+    return;
+  }
+  const defs = {
+    damage: ['item_zat_besi', 'DMG'],
+    cooldown: ['item_probiotik', 'CEPAT'],
+    xp: ['item_serat', 'XP'],
+  };
+  let html = '';
+  for (const k of Object.keys(defs)) {
+    const b = run.tempBuffs[k];
+    if (b && b.t > 0) {
+      html += `<span class="hud-buff-chip"><img src="assets/sprites/${defs[k][0]}.png" alt="" />${defs[k][1]} ${Math.ceil(b.t)}s</span>`;
+    }
+  }
+  if (run.permBoost && run.permBoost.regen > 0) {
+    html += '<span class="hud-buff-chip"><img src="assets/sprites/item_air.png" alt="" />REGEN</span>';
+  }
+  if (el.dataset.html !== html) {
+    el.innerHTML = html;
+    el.dataset.html = html;
+  }
 }

@@ -19,6 +19,7 @@ export class Projectile {
     this.damage = opts.damage;
     this.pierce = Math.max(1, opts.pierce || 1);
     this.turnRate = opts.turnRate || 0;  // rad/detik, untuk homing
+    this.antiParasitMult = opts.antiParasitMult || 0; // bonus Eosinofil vs Parasit
     this.color = opts.color || '#ffffff';
     this.radius = opts.radius || 6;
     this.life = 2.2;                     // detik hidup maksimum

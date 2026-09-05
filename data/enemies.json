@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "enemies": [
     {
       "id": "bakteri",
@@ -21,9 +21,28 @@
       "tier": "medium"
     },
     {
+      "id": "bakteri_gp",
+      "name": "Bakteri Gram Positif",
+      "description": "Dinding sel tebal satu lapis — butuh tepukan lebih banyak untuk runtuh. Berjalan pelan dan tak kenal menyerah.",
+      "sprite": "assets/sprites/enemy_bakteri_gp.png",
+      "spriteIdle": "assets/sprites/enemy_bakteri_gp.png",
+      "spriteAttack": "assets/sprites/enemy_bakteri_gp.png",
+      "color": "#8d5fb3",
+      "behavior": "chase_direct",
+      "baseHP": 44,
+      "speed": 46,
+      "damage": 11,
+      "radius": 17,
+      "xpPerKill": 5,
+      "minWave": 4,
+      "weight": 22,
+      "orientToMovement": true,
+      "tier": "hard"
+    },
+    {
       "id": "virus",
-      "name": "Virus",
-      "description": "Virus berduri yang memecah diri menjadi 2 virion kecil saat hancur.",
+      "name": "Virus Replikasi",
+      "description": "Virus berduri yang menginfeksi lalu pecah — membelah diri jadi 2 virion kecil saat hancur.",
       "sprite": "assets/sprites/enemy_virus.png",
       "spriteIdle": "assets/sprites/enemy_virus.png",
       "spriteAttack": "assets/sprites/enemy_virus.png",

@@ -234,6 +234,18 @@
 - [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
 - **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
 
+## Fase 8.4 — Eksekusi Keputusan Audit: Entitas & Nutrisi Baru ✅
+Keputusan pemilik (post-audit 8.3): (1) "Sel T Killer" TETAP; (2) induk virus → **Virus Replikasi**, pecahan tetap Virion; (3) 9 nutrisi dokumen → **pickup saat bertempur**; (4) paralel: poles kecil + entitas prioritas.
+- [x] **Nama**: `virus` → tampil **"Virus Replikasi"** (deskripsi baru; perilaku splitOnDeath sudah persis dokumen).
+- [x] **Hero baru — Neutrofil** (hero ke-6): responder tercepat — melee_swipe cepat beruntun (cd 0,22 dtk, damage kecil), unlock **Kalahkan total 300 patogen** atau beli 1.800 antibodi; sprite idle/attack + potret baru.
+- [x] **Musuh baru — Bakteri Gram Positif**: dinding tebal (HP 44 vs 20 bakteri), lambat, tier hard, minWave 4, XP 5.
+- [x] **8 nutrisi buff tempur** (data-driven, pickupType 'buff'): *sementara* — Zinc +6% dmg 30 dtk, Zat Besi +10% dmg 20 dtk, Probiotik -15% cd 25 dtk, Serat +25% XP 30 dtk; *permanen se-run* — Protein +20 HP maks, Vitamin D +1,5 HP/dtk, Air +0,8 HP/dtk, Omega-3 bersihkan 6 racun meta. Bobot drop bonus diperluas, bonusDropChance 0,09→0,16.
+- [x] **Bonus Eosinofil nyata**: antiParasitMult 1,5× mengalir Player→Projectile→damage vs `parasit` (pipeline asli, bukan mock).
+- [x] **HUD**: chip buff aktif (`#hud-buffs`, ikon + sisa detik; REGEN permanen) — pointer-events none, tidak mengganggu input.
+- [x] **FIX bug lama (terbuka e2e baru)**: `recomputePlayerStats()` kehilangan pengali evolusi/arena/kondisi-tubuh setiap upgrade in-run — kini diterapkan ulang konsisten dengan startRun (bodyMods disimpan di run).
+- [x] **Aset**: +12 PNG via `tools/gen_assets.py` (generator kanonik diperbarui: item_drop baru; hero/enemy/item/portrait stage) — total 117 sprite; TIDAK menimpa PNG lama.
+- **Kriteria lulus:** fase84-check e2e **8/8 RESULT OK** (roster 6 kartu + label unlock; klik kartu→Detail Hero; Zinc damage 11,63→12,32 (+6%) + chip DMG; Protein HP 100→120; Air regen 0,8 + chip; Eosinofil 1,5× vs parasit via proyektil asli; Virus Replikasi pecah 2 virion; TEMBAK klik-riil); regen-check **6/6** (autotest SELFTEST_PASS 17; jurus klik-riil cd 4,77; fire/bar tak overlap; pause; perf 16,5 ms); check-imports ✔; node --check ✔.
+
 ## Fase 8.3 — Audit Nama Entitas Imunologi (dokumen desain pemilik) ✅
 Sumber: lampiran pemilik `konten-entitas-imunverse.md` (sistem/organ, 12 hero, 10 musuh, 9 nutrisi).
 - Laporan lengkap: `docs/audit-entitas-imunologi.md` — tabel pemetaan doc↔game + status per entitas.

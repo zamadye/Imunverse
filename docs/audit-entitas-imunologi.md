@@ -95,6 +95,15 @@ Fungsi sistem berbeda dari dokumen: di dokumen nutrisi = **buff item**; di game 
 
 ---
 
+## 4b. Eksekusi Keputusan (Fase 8.4 — SELESAI)
+
+Keputusan pemilik & hasil eksekusinya (commit Fase 8.4):
+
+1. **"Sel T Killer" TETAP** — tidak di-rename (dianggap adaptasi ramah anak).
+2. **Virus**: induk tampil → **"Virus Replikasi"**; pecahan tetap **Virion**. ✅
+3. **Nutrisi → pickup tempur**: 8 item dipasang sebagai drop bertempur — Zinc (+6% dmg), Zat Besi (+10% dmg), Probiotik (-15% cd), Serat (+25% XP) berdurasi; Protein (+20 HP maks), Vitamin D (regen 1,5/s), Air (regen 0,8/s), Omega-3 (bersih 6 racun meta) permanen se-run. Vitamin C tetap heal (pilihan desain dipertahankan). ✅
+4. **Paralel**: Neutrofil (hero ke-6) + Bakteri Gram Positif (musuh tank) + bonus Eosinofil 1,5× vs Parasit sudah main; sisanya (Sel-T Pembantu, Sel-T DP, Sel Dendritik, Sel Memori, Trombosit; Gram Negatif, Toksin, Prion, Sel Abnormal stealth, Toksin Raksasa) masuk antrean fase konten berikutnya.
+
 ## 5. Daftar Keputusan yang Dibutuhkan
 
 1. **Nama hero utama** — "Sel T Killer" → **"Sel T Pembunuh"**? (satu string di `data/heroes.json` + tes).

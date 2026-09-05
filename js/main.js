@@ -14,6 +14,7 @@ import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData } from './core/data-store.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
+import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
 import { loadSave, writeSave, clearSave } from './save/save-manager.js';
@@ -313,6 +314,15 @@ async function boot() {
   });
 
   // expose untuk debugging & self-test headless
+  // Helper e2e (Fase 8.4): uji pickup buff TANPA menunggu drop acak
+  window.__IMUNVERSE_testGiveBuff = (id) => {
+    if (!game.run) return false;
+    const def = getData().nutrients.nutrients.find((n) => n.id === id);
+    if (!def) return false;
+    const pl = game.run.player;
+    game.collectPickup(new Pickup(def, pl.x + 12, pl.y));
+    return true;
+  };
   window.__IMUNVERSE = { game, STATE, screenManager, input };
 
   loop.start();

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "heroes": [
     {
       "id": "sel_t",
@@ -68,6 +68,42 @@
       },
       "shopCost": 800,
       "spritePortrait": "assets/sprites/portrait_makrofag.png"
+    },
+    {
+      "id": "neutrofil",
+      "name": "Neutrofil",
+      "title": "Responder Tercepat",
+      "description": "Neutrophil — penjaga pertama yang paling sigap. Tebasan cepat beruntun; lemah satu-satu, haus jumlah.",
+      "sprite": "assets/sprites/hero_neutrofil_idle.png",
+      "spriteIdle": "assets/sprites/hero_neutrofil_idle.png",
+      "spriteAttack": "assets/sprites/hero_neutrofil_attack.png",
+      "color": "#ffd166",
+      "attackPattern": "melee_swipe",
+      "baseStats": {
+        "maxHP": 85,
+        "speed": 225,
+        "damage": 6,
+        "attackCooldown": 0.22,
+        "attackRange": 66,
+        "swipeRadius": 58,
+        "projectileSpeed": 0,
+        "projectileCount": 1,
+        "pierce": 0,
+        "radius": 13,
+        "magnetRadius": 95,
+        "pickupRadius": 26
+      },
+      "patternParams": {
+        "arc": 1.6
+      },
+      "unlock": {
+        "type": "stat",
+        "stat": "totalKills",
+        "value": 300,
+        "label": "Kalahkan total 300 patogen"
+      },
+      "shopCost": 1800,
+      "spritePortrait": "assets/sprites/portrait_neutrofil.png"
     },
     {
       "id": "sel_b",
@@ -145,7 +181,7 @@
       "id": "eosinofil",
       "name": "Eosinofil",
       "title": "Pemburu Parasit",
-      "description": "Spesialis anti-parasit. Meluncurkan granula toksik yang mengejar patogen secara otomatis sampai menghancurkannya.",
+      "description": "Spesialis anti-parasit. Meluncurkan granula toksik yang mengejar patogen otomatis — damage 1,5× ke Parasit.",
       "sprite": "assets/sprites/hero_eosinofil_idle.png",
       "spriteIdle": "assets/sprites/hero_eosinofil_idle.png",
       "spriteAttack": "assets/sprites/hero_eosinofil_attack.png",
@@ -166,7 +202,8 @@
       },
       "patternParams": {
         "spreadAngle": 0.5,
-        "turnRate": 6.5
+        "turnRate": 6.5,
+        "antiParasitMult": 1.5
       },
       "unlock": {
         "type": "stat",

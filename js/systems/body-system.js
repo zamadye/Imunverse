@@ -196,7 +196,7 @@ export function getMilestoneProgress(meta = STATE.meta) {
  *  - Milestone harian: semua sehat → streak++, else reset.
  * @returns {object} ringkasan dampak (untuk UI gameover/toast)
  */
-export function registerRunResult(meta, { kills, wave, focusId }) {
+export function registerRunResult(meta, { kills, wave, focusId, omegaCleanse }) {
   const cfg = getData().bodySystems;
   const st = getBodyState(meta);
   const today = todayStr();
@@ -206,6 +206,8 @@ export function registerRunResult(meta, { kills, wave, focusId }) {
   const limfatik = st.systems.limfatik.health;
   let racunGained = kills * cfg.racunPerKill - limfatik * cfg.racunCleansePerLimfatik;
   racunGained = Math.max(0, racunGained);
+  // Omega-3 (nutrisi buff tempur): membersihkan racun sisa combat
+  if (omegaCleanse > 0) racunGained = Math.max(0, racunGained - omegaCleanse);
   // fokus detoks: saring ekstra
   const focusDef = cfg.focusRuns.find((f) => f.id === focusId);
   if (focusDef && focusDef.target === 'limfatik') {

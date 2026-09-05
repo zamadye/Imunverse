@@ -172,6 +172,10 @@ export const game = {
       enemies: [],
       projectiles: [],
       pickups: [],
+      // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
+      tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 } },
+      permBoost: { maxHP: 0, regen: 0, omega: 0 },
+      bodyMods, // modifier kondisi tubuh run ini — dipakai ulang saat recompute
       effects: new EffectsSystem(),
       spawnSys: new SpawnSystem(),
       collision: new CollisionSystem(96),
@@ -328,12 +332,19 @@ export const game = {
     const up = runUpgrades;
     const serum = this.serumActive ? 1.25 : 1;
 
-    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl);
-    const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed);
+    // BUFF TEMPUR: nutrisi (zinc, zat besi, probiotik, serat) — nyata di statistik
+    const tb = (this.run && this.run.tempBuffs) || null;
+    const buffDamage = tb ? tb.damage.mult : 1;
+    const buffCooldown = tb ? tb.cooldown.mult : 1;
+    const buffXP = tb ? tb.xp.mult : 1;
+    const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
+
+    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20);
+    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
@@ -350,7 +361,9 @@ export const game = {
       projectileSpeed: base.projectileSpeed,
       magnetRadius: base.magnetRadius,
       pickupRadius: base.pickupRadius,
-      xpMult: squad.xpGain,
+      xpMult: squad.xpGain * buffXP,
+      regen: perm.regen || 0,
+      omegaCleanse: perm.omega || 0,
       // jarak cari target: melee pakai radius tebasan, ranged pakai attackRange
       effectiveAttackRange: isMelee ? swipeRadius + 26 : attackRange,
     };
@@ -361,6 +374,10 @@ export const game = {
     const run = this.run;
     const oldMax = run.player.maxHP;
     const stats = this.computePlayerStats(run.heroDef, run.upgrades);
+    // FIX (terbuka oleh e2e Fase 8.4): recompute dulu kehilangan pengali
+    // evolusi/arena/kondisi tubuh — sekarang diterapkan ulang konsisten startRun.
+    this.applyMetaMultipliers(stats);
+    this.applyBodyModifiers(stats, run.bodyMods || getBodyRunModifiers(STATE.meta));
     run.player.stats = stats;
     run.player.maxHP = stats.maxHP;
     // pertahankan HP absolut; penambahan maxHP dari upgrade menaikkan selisih
@@ -381,6 +398,20 @@ export const game = {
       return;
     }
     run.time += dt;
+
+    // BUFF TEMPUR (Fase 8.4): hitung mundur buff sementara + regen permanen run
+    if (run.tempBuffs) {
+      let buffExpired = false;
+      for (const k of ['damage', 'cooldown', 'xp']) {
+        const b = run.tempBuffs[k];
+        if (b.t > 0) {
+          b.t -= dt;
+          if (b.t <= 0) { b.t = 0; b.mult = 1; buffExpired = true; }
+        }
+      }
+      if (buffExpired) this.recomputePlayerStats();
+      if (run.permBoost.regen > 0 && player.alive) player.heal(run.permBoost.regen * dt);
+    }
 
     // KAMPANYE: kuota bersih tercapai → boss organ muncul (sekali)
     if (run.objective && !run.objective.bossSpawned && run.kills >= run.objective.quota) {
@@ -478,8 +509,12 @@ export const game = {
 
     // 6. Kollision proyektil vs musuh
     run.collision.handleProjectileHits(run.projectiles, (proj, enemy) => {
-      const died = enemy.takeDamage(proj.damage);
-      this.spawnHitFeedback(enemy, proj.damage, died);
+      // Eosinofil: granula toksik 1,5x damage ke Parasit (dokumen entitas, nyata)
+      const dmg = (proj.antiParasitMult && enemy.def && enemy.def.id === 'parasit')
+        ? proj.damage * proj.antiParasitMult
+        : proj.damage;
+      const died = enemy.takeDamage(dmg);
+      this.spawnHitFeedback(enemy, dmg, died);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
       return died;
@@ -577,8 +612,49 @@ export const game = {
         emit('toast', { message: 'Sinyal sitokin! Semua nutrisi tertarik padamu.' });
         break;
       }
+      case 'buff':
+        this.applyCombatBuff(p);
+        break;
       default:
         console.warn('[game] pickupType tidak dikenal:', p.pickupType);
+    }
+  },
+
+  /** Fase 8.4 (dokumen entitas): terapkan nutrisi buff tempur. */
+  applyCombatBuff(p) {
+    const run = this.run;
+    const t = p.def.buffType;
+    const v = p.value;
+    const dur = p.def.buffDuration || 20;
+    const B = run.tempBuffs;
+    if (t === 'buff_damage') {
+      B.damage.mult *= 1 + v / 100;
+      B.damage.t = Math.max(B.damage.t, dur);
+      run.effects.spawnLabel(p.x, p.y - 10, `+${v}% Damage!`, '#f2825c');
+      this.recomputePlayerStats();
+    } else if (t === 'buff_cooldown') {
+      B.cooldown.mult *= Math.max(0.5, 1 - v / 100);
+      B.cooldown.t = Math.max(B.cooldown.t, dur);
+      run.effects.spawnLabel(p.x, p.y - 10, 'Serangan makin cepat!', '#7bdff2');
+      this.recomputePlayerStats();
+    } else if (t === 'buff_xp') {
+      B.xp.mult *= 1 + v;
+      B.xp.t = Math.max(B.xp.t, dur);
+      run.effects.spawnLabel(p.x, p.y - 10, `+${Math.round(v * 100)}% XP!`, '#8fe8d2');
+    } else if (t === 'buff_maxhp') {
+      run.permBoost.maxHP += v;
+      this.recomputePlayerStats();
+      run.effects.spawnLabel(p.x, p.y - 10, `+${v} HP Maks!`, '#7ae582');
+    } else if (t === 'buff_regen') {
+      run.permBoost.regen += v;
+      this.recomputePlayerStats();
+      run.effects.spawnLabel(p.x, p.y - 10, 'Regenerasi aktif', '#5bc8ff');
+    } else if (t === 'buff_omega') {
+      run.permBoost.omega += v;
+      this.recomputePlayerStats();
+      run.effects.spawnLabel(p.x, p.y - 10, 'Racun sisa dibersihkan', '#7bdff2');
+    } else {
+      console.warn('[game] buffType tidak dikenal:', t);
     }
   },
 
@@ -1102,6 +1178,7 @@ export const game = {
       kills: run.kills,
       wave: run.spawnSys.wave,
       focusId: run.focusId || 'seimbang',
+      omegaCleanse: run.permBoost ? run.permBoost.omega : 0,
     });
     emit('bodyimpact', this.lastBodyImpact);
 
