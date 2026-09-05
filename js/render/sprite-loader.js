@@ -156,6 +156,35 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   ctx.restore();
 }
 
+/** Fase 14: cache tint skin — {src|color} → canvas. */
+const tintCache = new Map();
+
+/**
+ * Sprite berwarna SKIN (kosmetik): gambar asli di-overlay warna alpha.
+ * Membuat Image baru bila perlu; hasilnya canvas (aman drawImage kapan pun
+ * karena dipanggil SETELAH loadAllSprites() resolve).
+ */
+export function getTintedSprite(path, color) {
+  const key = `${path}|${color}`;
+  if (tintCache.has(key)) return tintCache.get(key);
+  const entry = getSprite(path);
+  const c = document.createElement('canvas');
+  c.width = entry.width;
+  c.height = entry.height;
+  const g = c.getContext('2d');
+  g.drawImage(entry.image, 0, 0);
+  g.globalCompositeOperation = 'source-atop';
+  g.globalAlpha = 0.5;
+  g.fillStyle = color;
+  g.fillRect(0, 0, c.width, c.height);
+  g.globalCompositeOperation = 'soft-light';
+  g.globalAlpha = 0.45;
+  g.fillStyle = color;
+  g.fillRect(0, 0, c.width, c.height);
+  tintCache.set(key, c);
+  return c;
+}
+
 /** DataURL untuk <img> di UI (roster portrait, HUD, dsb). */
 export function spriteToDataURL(path) {
   const entry = getSprite(path);

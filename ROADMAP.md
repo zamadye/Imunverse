@@ -288,6 +288,15 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
 - **Kriteria lulus 12c:** e2e **21 PASS** (termasuk asersi tap-responds), autotest 17/17, perf 16,65 ms @41 musuh; screenshot 37 (HUD terang) & 39 (Detail Hero baru).
 
+**Fase 14 — EKONOMI PREMIUM "IMUN COIN" (5 pilar strategi pemilik: earn-from-play → beli item premium)**
+- [x] **Pilar 1 — Ekonomi ganda**: Antibodi = soft currency (tetap); **Imun Coin (IMU)** = premium (skin, Pass premium, bundle). Chip IMU di dashboard/shop/BP (ikon permata teal baru `icon_imu.png`); beta: hasil run dikonversi `floor(earned/400)` (maks 15/run).
+- [x] **Pilar 2 — Battle Pass** (`data/battlepass.json` + layar `#screen-bp` + `battlepass-system.js`): 30 level × 2 jalur; XP dari bermain (level×40 + wave×15 + kills); klaim manual klik-riil; jalur premium **500 IMU**; **twist self-sustaining**: total IMU premium (525) > harga pass; ring XP + dua baris scroll horizontal; sidebar "Pass" + tile quick-menu.
+- [x] **Pilar 3 — Monetisasi tanpa P2W**: **kosmetik visual saja** (`data/cosmetics.json`): 5 skin tint (`getTintedSprite` — warna pada karakter in-game & preview) + mahkota/aura; beli & pasang via Shop "SKIN & GAYA"; **Welcome Bundle Rp 15rb** (1.500 antibodi + 300 IMU + Skin Pendiri + item), Pass bundle, top-up IMU di bundle — alur pembayaran simulasi existing (receipt) tetap dipakai.
+- [x] **Pilar 4 — Offerwall non-paying**: section "DAPATKAN IMUN GRATIS" (video sponsor +8 IMU wajib-tonton 5 detik simulasi, survei +15 IMU 1×/hari, referral +50 IMU dengan kode `IMUN-XXXXX` — guard kode salah/sendiri/duplikat); hook `triggerRewardedAdOfferwall` siap SDK.
+- [x] **Pilar 5 — Early beta**: hadiah **"Pendiri Imunverse"** otomatis per akun (gelar + Skin Pendiri terbatas + 300 IMU); kode referral per-uid; bundle pra-rilis di katalog.
+- [x] Ringkasan akhir run menampilkan `+N Imun Coin · Battle Pass Lv X → Y`; toast keluar-run lanskap pindah ke pojok kanan-bawah (tidak menutupi tile).
+- **Kriteria lulus 14:** **e2e-eco 14/14 PASS** (founder reward, klaim BP gratis, guard premium saat saldo kurang, beli premium, klaim skin premium, offerwall +8, beli+pasang skin, tolak referral salah) + **e2e inti 20 asersi PASS**; bukti `docs/screenshots/57-eco-dash, 58-eco-battlepass, 59-eco-shop-imun, 60-eco-gameover`.
+
 **Fase 13.2 — LANDSCAPE-ONLY + perapian tumpukan (arahan pemilik: semua landscape; teks/kartu & HUD XP tidak tertumpuk)**
 - [x] **Wajib lanskap**: overlay `#rotate-hud` (animasi telepon berputar + teks ID/EN) tampil saat portrait; semua layout dioptimalkan di `@media (orientation: landscape)`.
 - [x] **Dashboard lanskap = grid 2 kolom** (banner+kampanye | quick-menu+stats), Bonus Harian baris penuh (`1 / -1` — tanpa lubang grid), dock dirampingkan (46px), toast ke pojok kanan-atas kecil — tidak menutupi banner/kartu; teks panjang dipotong ellipsis (judul kartu, objektif, label quick).

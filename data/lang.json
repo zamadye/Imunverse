@@ -602,7 +602,21 @@
   "Tubuh": "Body",
   "Terbuka": "Unlocked",
   "item": "items",
-  "Beranda": "Home"
+  "Beranda": "Home",
+  "Battle Pass": "Battle Pass",
+  "Pass": "Pass",
+  "DAPATKAN IMUN GRATIS": "GET FREE IMUN",
+  "Tonton Video Sponsor": "Watch Sponsor Video",
+  "Ajak Teman": "Invite Friends",
+  "Survei Sponsor": "Sponsor Survey",
+  "SKIN & GAYA": "SKINS & STYLE",
+  "DIPAKAI": "EQUIPPED",
+  "PAKAI": "EQUIP",
+  "LEPAS": "REMOVE",
+  "ISI": "FILL",
+  "SELESAI": "DONE",
+  "TONTON": "WATCH",
+  "kode kamu": "your code"
  },
  "rules": [
   {

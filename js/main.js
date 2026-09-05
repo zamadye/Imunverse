@@ -40,6 +40,7 @@ import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
 import * as campaignScreen from './ui/screens/campaign-screen.js';
 import * as codexScreen from './ui/screens/codex-screen.js';
+import * as battlepassScreen from './ui/screens/battlepass-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
@@ -191,6 +192,7 @@ async function boot() {
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('codex', codexScreen);
+  screenManager.registerScreen('bp', battlepassScreen);
   screenManager.registerScreen('auth', authScreen);
   screenManager.registerScreen('herodetail', heroDetailScreen);
   screenManager.registerScreen('bag', bagScreen);
@@ -220,6 +222,7 @@ async function boot() {
   });
   document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
   document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
+  document.getElementById('side-bp')?.addEventListener('click', () => screenManager.show('bp'));
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 

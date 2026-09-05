@@ -11,11 +11,41 @@ import { applySuplemen } from '../../systems/body-system.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { getCatalog, createOrder, setMethod, payOrder, getMethods, getReceipts } from '../../systems/payment-system.js';
+import { audio } from '../../systems/audio-system.js';
+import { addImun, buyCosmetic, ownsCosmetic, equipSkin, equipAcc, applyReferralCode, ensureReferral, canSurveyToday, markSurveyDone } from '../../systems/imun-economy.js';
+import { triggerRewardedAdOfferwall } from '../../systems/monetization.js';
+import { getTintedSprite } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 
 const PASTEL = ['c-teal', 'c-green', 'c-coral'];
+
+/**
+ * Fase 14: modal sponsor simulasi — countdown 5 detik lalu grant.
+ * Saat SDK ads nyata tersedia, ganti isi modal ini dengan pemutar iklan SDK.
+ */
+function openAdModal(onReward, title = 'VIDEO SPONSOR (SIMULASI)') {
+  const modal = el('div', { class: 'pay-modal admodal' }, [
+    el('div', { class: 'pay-box ad-box' }, [
+      el('h3', { class: 'pay-title', text: title }),
+      el('span', { class: 'pay-note', text: 'Durasi sponsor berjalan — hadiah otomatis masuk setelah selesai.' }),
+      el('div', { class: 'ad-count', text: '5' }),
+      el('button', { class: 'pay-cancel', text: 'Tutup (hadiah batal)' }),
+    ]),
+  ]);
+  document.body.appendChild(modal);
+  let left = 5;
+  const countEl = modal.querySelector('.ad-count');
+  const done = () => { modal.remove(); onReward(); };
+  const cancel = modal.querySelector('.pay-cancel');
+  cancel.addEventListener('click', () => modal.remove());
+  const iv = setInterval(() => {
+    left -= 1;
+    if (left <= 0) { clearInterval(iv); done(); return; }
+    countEl.textContent = String(left);
+  }, 1000);
+}
 
 /** Modal pembayaran: ringkasan → pilih metode → bayar (simulasi) → receipt. */
 function openPayment(bundle) {
@@ -73,6 +103,7 @@ function openPayment(bundle) {
 export function show() {
   const meta = STATE.meta;
   document.getElementById('shop-currency').textContent = meta.currency.toLocaleString('id-ID');
+  document.getElementById('shop-imun').textContent = (meta.imun || 0).toLocaleString('id-ID'); // Fase 14
 
   const wrap = document.getElementById('shop-sections');
   wrap.textContent = '';
@@ -111,6 +142,144 @@ export function show() {
     ]));
   }
   wrap.appendChild(premSection);
+
+  // ============ FASE 14: IMUN COIN GRATIS (offerwall untuk non-paying) ============
+  const offers = getData().battlepass.offers;
+  const freeSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'DAPATKAN IMUN GRATIS' })]);
+  const freeGrid = el('div', { class: 'free-grid' });
+
+  const adTile = el('div', { class: 'free-tile' }, [
+    el('b', { text: 'Tonton Video Sponsor' }),
+    el('span', { text: `+${offers.adImun} Imun per tontonan (simulasi iklan reward)` }),
+  ]);
+  const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
+  adBtn.addEventListener('click', () => {
+    if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
+    openAdModal(() => {
+      trackAdWatch(meta);
+      addImun(meta, offers.adImun);
+      writeSave(meta);
+      audio.collect();
+      emit('toast', { message: `+${offers.adImun} Imun Coin!`, kind: 'gold' });
+      show();
+    });
+  });
+  adTile.appendChild(adBtn);
+
+  const svTile = el('div', { class: 'free-tile' }, [
+    el('b', { text: 'Survei Sponsor' }),
+    el('span', { text: `+${offers.surveyImun} Imun, 1× per hari (simulasi offerwall)` }),
+  ]);
+  const svBtn = el('button', { class: 'btn btn-primary ft-btn', text: canSurveyToday(meta) ? 'ISI' : '✓ SELESAI' });
+  svBtn.disabled = !canSurveyToday(meta);
+  svBtn.addEventListener('click', () => {
+    openAdModal(() => {
+      markSurveyDone(meta);
+      addImun(meta, offers.surveyImun);
+      writeSave(meta);
+      audio.collect();
+      emit('toast', { message: `Survei selesai: +${offers.surveyImun} Imun Coin!`, kind: 'gold' });
+      show();
+    }, 'SURVEI SPONSOR (SIMULASI)');
+  });
+  svTile.appendChild(svBtn);
+
+  const ref = ensureReferral(meta);
+  const rfTile = el('div', { class: 'free-tile wide' }, [
+    el('b', { text: 'Ajak Teman' }),
+    el('span', {}, [
+      el('span', { text: `Kode kamu: ` }),
+      el('b', { class: 'rf-code', text: ref.code }),
+    ]),
+    el('span', { text: `Teman memakai kodemu → kamu +${offers.referralImun} Imun. Masukkan kode teman:` }),
+  ]);
+  const rfRow = el('div', { class: 'rf-row' });
+  const rfInput = el('input', { class: 'rf-input', placeholder: 'IMUN-XXXXX', maxlength: 12, 'aria-label': 'Kode referral teman' });
+  const rfBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'PAKAI' });
+  rfBtn.addEventListener('click', () => {
+    const res = applyReferralCode(meta, rfInput.value);
+    if (res.ok) {
+      audio.collect();
+      emit('toast', { message: `Referral sukses: +${res.reward} Imun Coin!`, kind: 'gold' });
+      show();
+    } else {
+      emit('toast', { message: res.error, kind: 'coral' });
+    }
+  });
+  rfRow.appendChild(rfInput);
+  rfRow.appendChild(rfBtn);
+  rfTile.appendChild(rfRow);
+
+  freeGrid.appendChild(adTile);
+  freeGrid.appendChild(svTile);
+  freeGrid.appendChild(rfTile);
+  freeSection.appendChild(freeGrid);
+  wrap.insertBefore(freeSection, wrap.firstChild);
+
+  // ============ FASE 14: SKIN & GAYA (kosmetik Imun — tanpa pay-to-win) ============
+  const cosCfg = getData().cosmetics;
+  const skinSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'SKIN & GAYA' })]);
+  const skinGrid = el('div', { class: 'skin-grid' });
+  const heroFor = (id) => getData().heroes.heroes.find((h) => h.id === id) || getData().heroes.heroes[0];
+  for (const sk of cosCfg.skins) {
+    const owned = ownsCosmetic(meta, sk.id);
+    const equipped = meta.cosmetics?.skin?.[sk.hero] === sk.id;
+    const preview = getTintedSprite(heroFor(sk.hero === 'semua' ? meta.selectedHero : sk.hero).spritePortrait || heroFor(meta.selectedHero).spriteIdle, sk.color);
+    const card = el('div', { class: `skin-card${equipped ? ' on' : ''}` }, [
+      el('img', { class: 'skin-preview', src: preview.toDataURL(), alt: sk.name }),
+      el('b', { text: sk.name }),
+      el('span', { class: 'skin-desc', text: sk.desc }),
+      el('button', {
+        class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn',
+        text: equipped ? '✓ DIPAKAI' : owned ? 'PAKAI' : `${sk.priceImun} IMU`,
+        disabled: equipped,
+      }),
+    ]);
+    card.querySelector('button').addEventListener('click', () => {
+      if (!owned) {
+        const res = buyCosmetic(meta, sk.id);
+        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
+        equipSkin(meta, sk.id, sk.hero);
+        audio.collect();
+        emit('toast', { message: `Skin "${sk.name}" dibeli & dipakai!`, kind: 'gold' });
+      } else {
+        equipSkin(meta, sk.id, sk.hero);
+        audio.click();
+        emit('toast', { message: `Skin "${sk.name}" dipakai.`, kind: 'gold' });
+      }
+      show();
+    });
+    skinGrid.appendChild(card);
+  }
+  for (const ac of cosCfg.accs) {
+    const owned = ownsCosmetic(meta, ac.id);
+    const equipped = ac.kind === 'crown' ? meta.cosmetics?.crown === ac.id : meta.cosmetics?.aura === ac.id;
+    const card = el('div', { class: `skin-card${equipped ? ' on' : ''}` }, [
+      el('img', { class: 'skin-preview acc', src: ac.kind === 'crown' ? 'assets/sprites/deco_chest.png' : 'assets/sprites/deco_aura.png', alt: ac.name }),
+      el('b', { text: ac.name }),
+      el('span', { class: 'skin-desc', text: ac.desc }),
+      el('button', {
+        class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn',
+        text: equipped ? '✓ LEPAS' : owned ? 'PAKAI' : `${ac.priceImun} IMU`,
+      }),
+    ]);
+    card.querySelector('button').addEventListener('click', () => {
+      if (!owned) {
+        const res = buyCosmetic(meta, ac.id);
+        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
+        equipAcc(meta, ac.id);
+        audio.collect();
+        emit('toast', { message: `${ac.name} dibeli & dipakai!`, kind: 'gold' });
+      } else {
+        equipAcc(meta, ac.id);
+        audio.click();
+      }
+      show();
+    });
+    skinGrid.appendChild(card);
+  }
+  skinSection.appendChild(skinGrid);
+  wrap.insertBefore(skinSection, wrap.children[1] || null);
 
   const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'BUKA HERO' })]);
   const heroGrid = el('div', { class: 'shop-grid' });

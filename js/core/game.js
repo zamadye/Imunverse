@@ -15,6 +15,7 @@ import {
   xpToNextLevel,
 } from './data-store.js';
 import { emit } from './ui-bridge.js';
+import { getTintedSprite } from '../render/sprite-loader.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
@@ -30,6 +31,8 @@ import { CollisionSystem } from '../systems/collision-system.js';
 import { rollLevelUpChoices, applyLevelUp, squadMultipliers } from '../systems/upgrade-system.js';
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
+import { addBpXP } from '../systems/battlepass-system.js';
+import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
 import {
@@ -1295,6 +1298,16 @@ export const game = {
     }
     addCurrency(meta, earned);
 
+    // FASE 14 — EKONOMI PREMIUM: hasil run mengalir ke Battle Pass & Imun Coin
+    const bpRes = addBpXP(meta, run.level * 40 + run.spawnSys.wave * 15 + run.kills);
+    run.bpGain = bpRes; // ringkasan akhir run
+    const imuFromRun = Math.min(15, Math.floor(earned / 400)); // beta: 400 antibodi = 1 Imun (maks 15/run)
+    if (imuFromRun > 0) {
+      addImun(meta, imuFromRun);
+      run.imuEarned = imuFromRun;
+      emit('toast', { message: `+${imuFromRun} Imun Coin dari hasil run!`, kind: 'gold' });
+    }
+
     // META-LAYER kondisi tubuh: racun, energi, pemulihan sistem fokus,
     // toxic seep, streak milestone — loop tertutup antar-run.
     this.lastBodyImpact = registerRunResult(meta, {
@@ -1351,6 +1364,9 @@ export const game = {
       parts: run.partsCollectedTotal,
       level: run.level,
       currencyEarned: earned,
+      imuEarned: run.imuEarned || 0,
+      bpFrom: run.bpGain ? run.bpGain.from : null,
+      bpTo: run.bpGain ? run.bpGain.to : null,
       newMissions: completedMissions.length,
     });
   },
@@ -1527,16 +1543,44 @@ export const game = {
       draws.push({ y: player.y, fn: () => {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
-          const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
+          let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
           const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
-          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
+          const auraAcc = STATE.meta.cosmetics?.aura
+            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
+          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc ? auraAcc.color : player.heroDef.color, time, 0, 0.8);
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
           const evo = run.evoStage;
           if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', pBody.x, pBody.y + bodySize * 0.34, bodySize * 0.62, 0, {});
           if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
-          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+          if (skin) {
+            const tinted = getTintedSprite(path, skin.color);
+            const scale = bodySize / Math.max(tinted.width, tinted.height);
+            ctx.drawImage(tinted, pBody.x - (tinted.width * scale) / 2, pBody.y - (tinted.height * scale) / 2, tinted.width * scale, tinted.height * scale);
+          } else {
+            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+          }
+          // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
+          const crownAcc = STATE.meta.cosmetics?.crown
+            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
+          if (crownAcc) {
+            const cy = pBody.y - bodySize * 0.62 + Math.sin(time * 2.4) * 1.5;
+            const cw = bodySize * 0.3, ch = bodySize * 0.14;
+            ctx.fillStyle = crownAcc.color;
+            ctx.strokeStyle = 'rgba(122,73,4,0.8)';
+            ctx.lineWidth = Math.max(1, bodySize * 0.012);
+            ctx.beginPath();
+            ctx.moveTo(pBody.x - cw / 2, cy + ch / 2);
+            ctx.lineTo(pBody.x - cw / 2, cy - ch / 2);
+            ctx.lineTo(pBody.x - cw / 6, cy - ch * 0.1);
+            ctx.lineTo(pBody.x, cy - ch * 0.75);
+            ctx.lineTo(pBody.x + cw / 6, cy - ch * 0.1);
+            ctx.lineTo(pBody.x + cw / 2, cy - ch / 2);
+            ctx.lineTo(pBody.x + cw / 2, cy + ch / 2);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
           if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', pBody.x, pBody.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
           if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', pBody.x + bodySize * 0.3, pBody.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
           ctx.restore();

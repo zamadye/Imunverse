@@ -1,47 +1,76 @@
 {
-  "schemaVersion": 1,
-  "note": "Harga simulasi. Balancing: 1 antibodi dasar ± Rp 10; bundle memberi nilai 1.5-1.8x lipat vs beli satuan (hemat terasa, tetap adil).",
-  "bundles": [
-    {
-      "id": "bundle_pemula",
-      "name": "Paket Pemula",
-      "priceRp": 15000,
-      "priceLabel": "Rp 15rb",
-      "badge": "HEMAT 40%",
-      "color": "#4aa3e0",
-      "contents": { "currency": 1500, "consumables": { "serum_awal": 2, "vaksin_awal": 1 } },
-      "valueNote": "1.500 antibodi + 2 Serum Awal + 1 Vaksin"
-    },
-    {
-      "id": "bundle_imun_pro",
-      "name": "Paket Imun Pro",
-      "priceRp": 45000,
-      "priceLabel": "Rp 45rb",
-      "badge": "PALING LARIS",
-      "color": "#2f9c8f",
-      "contents": { "currency": 5000, "consumables": { "koin_ganda": 2, "pelindung_lendir": 2, "kopi_limfa": 2 } },
-      "valueNote": "5.000 antibodi + 6 item tempur premium"
-    },
-    {
-      "id": "bundle_legenda",
-      "name": "Paket Legenda",
-      "priceRp": 99000,
-      "priceLabel": "Rp 99rb",
-      "badge": "TERBAIK",
-      "color": "#f5c64f",
-      "contents": { "currency": 15000, "consumables": { "serum_awal": 3, "vaksin_awal": 3, "pelindung_lendir": 3, "kopi_limfa": 3, "koin_ganda": 3 }, "title": "Legenda Tubuh" },
-      "valueNote": "15.000 antibodi + 15 item + gelar eksklusif"
-    },
-    {
-      "id": "iap_bebas_iklan",
-      "name": "Bebas Iklan",
-      "priceRp": 35000,
-      "priceLabel": "Rp 35rb",
-      "badge": "SEKALI BELI",
-      "color": "#b07ae0",
-      "contents": { "noAds": true },
-      "valueNote": "Tanpa interupsi iklan selamanya — dukung pengembang"
+ "schemaVersion": 1,
+ "note": "Harga simulasi. Balancing: 1 antibodi dasar ± Rp 10; bundle memberi nilai 1.5-1.8x lipat vs beli satuan (hemat terasa, tetap adil).",
+ "bundles": [
+  {
+   "id": "bundle_welcome",
+   "name": "Welcome Bundle",
+   "priceRp": 15000,
+   "priceLabel": "Rp 15rb",
+   "badge": "HEMAT 72%",
+   "color": "#4aa3e0",
+   "contents": {
+    "currency": 1500,
+    "imun": 300,
+    "skin": "skin_pendiri",
+    "consumables": {
+     "serum_awal": 2,
+     "vaksin_awal": 1
     }
-  ],
-  "methods": ["qris", "ewallet", "kartu"]
+   },
+   "valueNote": "1.500 antibodi + 300 Imun + Skin Pendiri + 3 item — paket awal terbaik"
+  },
+  {
+   "id": "bundle_pass_m1",
+   "name": "Pass Premium + 15 Lv",
+   "priceRp": 35000,
+   "priceLabel": "Rp 35rb",
+   "badge": "PALING LARIS",
+   "color": "#2f9c8f",
+   "contents": {
+    "currency": 800,
+    "imun": 500,
+    "consumables": {
+     "kopi_limfa": 2
+    }
+   },
+   "valueNote": "500 Imun (buka Pass Premium) + 800 antibodi + 2 Kopi Limfa"
+  },
+  {
+   "id": "bundle_imun_pro",
+   "name": "Paket Imun Pro",
+   "priceRp": 45000,
+   "priceLabel": "Rp 45rb",
+   "badge": "TERBAIK",
+   "color": "#f5c64f",
+   "contents": {
+    "currency": 5000,
+    "imun": 150,
+    "consumables": {
+     "koin_ganda": 2,
+     "pelindung_lendir": 2,
+     "kopi_limfa": 2
+    }
+   },
+   "valueNote": "5.000 antibodi + 150 Imun + 6 item tempur premium"
+  },
+  {
+   "id": "bundle_noads",
+   "name": "Bebas Iklan",
+   "priceRp": 35000,
+   "priceLabel": "Rp 35rb",
+   "badge": "SEKALI BELI",
+   "color": "#9b6fd0",
+   "contents": {
+    "noAds": true,
+    "imun": 100
+   },
+   "valueNote": "Tanpa interupsi iklan selamanya + 100 Imun — dukung pengembang"
+  }
+ ],
+ "methods": [
+  "qris",
+  "ewallet",
+  "kartu"
+ ]
 }

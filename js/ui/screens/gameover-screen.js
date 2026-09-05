@@ -114,6 +114,18 @@ export function show(summary) {
 
   countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
 
+  // FASE 14: hasil premium — Imun Coin dari run + kemajuan Battle Pass
+  if (summary.imuEarned > 0 || summary.bpFrom !== null) {
+    const bits = [];
+    if (summary.imuEarned > 0) bits.push(`+${summary.imuEarned} Imun Coin`);
+    if (summary.bpFrom !== null && summary.bpTo > summary.bpFrom) bits.push(`Battle Pass Lv ${summary.bpFrom} → ${summary.bpTo}`);
+    else if (summary.bpFrom !== null) bits.push(`Battle Pass Lv ${summary.bpTo}`);
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-imu' }, [
+      el('img', { src: 'assets/sprites/icon_imu.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
+      el('span', { text: ` ${bits.join(' · ')}` }),
+    ]));
+  }
+
   // Kampanye MENANG: tombol berubah jadi alur cerita (bab berikutnya / peta)
   const retryBtn = document.getElementById('btn-retry');
   const homeBtn = document.getElementById('btn-home');

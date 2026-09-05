@@ -103,6 +103,13 @@ export function triggerRewardedAdRecovery(onSuccess, onFail) {
   return true;
 }
 
+/** Fase 14: offerwall — video/survei sponsor yang memberi Imun Coin. */
+export function triggerRewardedAdOfferwall(onSuccess, onFail) {
+  console.info('[monetization] triggerRewardedAdOfferwall() — simulasi offerwall sponsor');
+  simulateAdPlayback(onSuccess, onFail);
+  return true;
+}
+
 /**
  * HOOK: IAP "Suplemen Premium" (non-consumable style, simulasi).
  * Kontrak integrasi SDK nantinya: onSuccess HANYA setelah pembelian nyata

@@ -1909,10 +1909,10 @@ img.lock-badge {
   #daily-card { grid-column: 1 / -1; } /* baris penuh — tanpa lubang grid */
   #duo-evo { grid-column: 1; }
   #duo-lb { grid-column: 2; }
-  /* Toast di luar-run lanskap: pojok kanan atas, kecil */
+  /* Toast di luar-run lanskap: pojok kanan BAWAH (bebas elemen), kecil */
   body:not(.in-run) #toasts {
-    top: 64px; bottom: auto; right: 12px; left: auto; transform: none;
-    width: min(30vw, 250px);
+    top: auto; bottom: 14px; right: 12px; left: auto; transform: none;
+    width: min(28vw, 240px);
   }
   /* Dock ramping agar sisa tinggi untuk konten */
   .dock { max-width: 640px; padding-top: 7px; gap: 6px; }
@@ -1945,4 +1945,104 @@ img.lock-badge {
   #screen-hud .hud-controls { right: 12px; bottom: 10px; }
   /* Modal pendek di lanskap: dua kolom pilihan level-up bila muat */
   .choice-grid { max-height: 46vh; }
+}
+
+/* =========================================================
+   FASE 14 — IMUN COIN, BATTLE PASS, OFFERWALL, KOSMETIK
+   ========================================================= */
+
+/* Chip Imun (permata teal) */
+.imu-chip { background: linear-gradient(180deg, #d9f6f1, #bfeae2); }
+.imu-chip .coin { filter: none; }
+
+/* --- Layar Battle Pass --- */
+.bp-body { width: 100%; max-width: 1020px; display: flex; flex-direction: column; gap: 8px; }
+.bp-head { display: flex; align-items: center; gap: 14px; padding: 10px 16px; }
+.bp-level-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.bp-level-ring {
+  width: 54px; height: 54px; border-radius: 50%; flex: 0 0 auto;
+  background: linear-gradient(180deg, #ffe28a, #f2b93e);
+  border: 3px solid #fff; box-shadow: 0 3px 0 #a86f14;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.bp-level-ring b { font-size: 20px; color: #4a2f05; line-height: 1; }
+.bp-level-ring small { font-size: 7.5px; font-weight: 900; color: #7a4d09; }
+.bp-xp-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bp-xp-wrap b { font-size: 13.5px; color: var(--teal-dark); }
+.bp-xp-track { height: 12px; border-radius: var(--pill); background: #efe3c8; overflow: hidden; box-shadow: inset 0 2px 3px rgba(31, 74, 66, 0.12); }
+.bp-xp-fill { height: 100%; width: 0%; border-radius: var(--pill); background: linear-gradient(90deg, #4adbc0, #f5c64f); transition: width 0.3s ease; }
+.bp-xp-text { font-size: 10px; font-weight: 900; color: var(--ink-soft); }
+.bp-hint { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); text-align: center; }
+.bp-track-title { font-size: 11px; font-weight: 900; letter-spacing: 0.1em; color: var(--ink-soft); margin: 2px 4px; }
+.bp-track-title.gold { color: #a97a10; }
+.bp-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px;
+  scroll-snap-type: x proximity;
+}
+.bp-cell {
+  position: relative; scroll-snap-align: start; cursor: pointer;
+  flex: 0 0 128px; min-height: 64px; border: 2px solid #e3dcc6; border-radius: 14px;
+  background: var(--card); font-family: var(--font); text-align: left;
+  padding: 6px 9px 6px 30px; box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  transition: transform 0.08s ease;
+}
+.bp-cell:active { transform: scale(0.95); }
+.bp-lv {
+  position: absolute; left: 7px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; font-weight: 900; color: var(--teal-deep); min-width: 20px;
+}
+.bp-reward { font-size: 9.6px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+.bp-cell.prem .bp-lv, #bp-prem .bp-lv { color: #a97a10; }
+#bp-prem .bp-cell { border-color: #f0d79a; background: linear-gradient(180deg, #fffaf0, #fdf2d2); }
+.bp-cell.claimable { border-color: var(--teal); box-shadow: 0 0 0 2.5px rgba(47, 156, 143, 0.35), var(--shadow-card); animation: bpPulse 1.6s ease-in-out infinite; }
+@keyframes bpPulse { 50% { box-shadow: 0 0 0 6px rgba(47, 156, 143, 0), var(--shadow-card); } }
+.bp-cell.claimed { opacity: 0.6; }
+.bp-cell.claimed .bp-reward { text-decoration: line-through; }
+.bp-cell.locked { opacity: 0.55; }
+.bp-state { position: absolute; right: 7px; top: 6px; width: 15px; height: 15px; object-fit: contain; }
+.bp-state.lock { width: 12px; height: 12px; }
+
+/* --- Offerwall & kosmetik (shop) --- */
+.free-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.free-tile {
+  background: var(--card); border: 2px solid #d9f6f1; border-radius: 16px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 5px;
+  box-shadow: var(--shadow-card);
+}
+.free-tile.wide { grid-column: span 3; }
+.free-tile b { font-size: 12px; color: var(--teal-dark); }
+.free-tile span { font-size: 10px; font-weight: 700; color: var(--ink-soft); }
+.ft-btn { font-size: 11px; min-height: 34px; padding: 6px 14px; align-self: flex-start; }
+.rf-code { color: var(--teal-deep); letter-spacing: 0.06em; }
+.rf-row { display: flex; gap: 7px; }
+.rf-input {
+  flex: 1; min-width: 0; border: 2px solid var(--teal-light); border-radius: 12px;
+  padding: 7px 11px; font-family: var(--font); font-weight: 900; font-size: 11.5px;
+  color: var(--ink); background: #fff; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.rf-input:focus { outline: 2px solid var(--teal); }
+.ad-count { font-size: 34px; font-weight: 900; color: var(--teal-dark); }
+
+.skin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+.skin-card {
+  background: var(--card); border: 2px solid #e3dcc6; border-radius: 16px;
+  padding: 9px 10px; display: flex; flex-direction: column; align-items: center;
+  gap: 3px; text-align: center; box-shadow: var(--shadow-card);
+}
+.skin-card.on { border-color: var(--teal); box-shadow: 0 0 0 2.5px rgba(47, 156, 143, 0.3), var(--shadow-card); }
+.skin-preview { width: 52px; height: 52px; object-fit: contain; }
+.skin-preview.acc { filter: drop-shadow(0 0 6px rgba(122, 215, 255, 0.8)); }
+.skin-card b { font-size: 11px; color: var(--teal-dark); }
+.skin-desc { font-size: 8.8px; font-weight: 700; color: var(--ink-soft); line-height: 1.25; min-height: 22px; }
+.skin-card .ft-btn { align-self: center; font-size: 10px; min-height: 30px; padding: 5px 12px; }
+
+/* Baris Imun di ringkasan run */
+.go-imu { color: #0e7a6a; font-weight: 900; font-size: 12px; }
+
+@media (orientation: landscape) {
+  .free-grid { max-width: 900px; margin: 0 auto; width: 100%; }
+  .free-tile.wide { grid-column: span 3; }
+  .skin-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; width: 100%; }
+  .bp-body { max-width: 1000px; margin: 0 auto; }
 }

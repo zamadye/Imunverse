@@ -23,6 +23,7 @@ import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../syst
 import { currentChapterId } from './campaign-screen.js';
 import { getSession, getFactionDef } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
+import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -117,6 +118,7 @@ function renderQuickRow(meta) {
     { ico: 'assets/sprites/icon_shop.png', label: 'Toko', badge: '', act: () => screenManager.show('shop') },
     { ico: 'assets/sprites/icon_bag.png', label: 'Tas', badge: '', act: () => screenManager.show('bag') },
     { ico: 'assets/sprites/icon_scope.png', label: 'Bio-Pedia', badge: '', act: () => screenManager.show('codex') },
+    { ico: 'assets/sprites/icon_bolt.png', label: 'Battle Pass', badge: '', act: () => screenManager.show('bp') },
   ];
   for (const tl of tiles) {
     const t = el('button', { class: 'quick-tile', title: tl.label }, [
@@ -398,6 +400,10 @@ export function show() {
   for (const sid of ['sirkulasi', 'pencernaan', 'saraf', 'imun', 'limfatik']) markSeen(sid);
   const meta = STATE.meta;
   document.getElementById('dash-currency').textContent = meta.currency.toLocaleString('id-ID');
+  // Fase 14: saldo Imun Coin + hadiah early-beta (idempoten)
+  ensureFounderReward(meta);
+  const imuEl = document.getElementById('dash-imun');
+  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   // AKUN + FRAKSI: routing konten per pasukan (layout sama, isi beda)
   const session = getSession();

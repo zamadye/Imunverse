@@ -16,6 +16,8 @@ const store = {
   upgrades: null,   // data/upgrades.json
   missions: null,   // data/missions.json
   evolutions: null, // data/evolutions.json
+  battlepass: null, // data/battlepass.json (Fase 14: Battle Pass + offerwall)
+  cosmetics: null,  // data/cosmetics.json (Fase 14: skin & aksesori)
   abilities: null,  // data/abilities.json
   arenas: null,     // data/arenas.json
   bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
@@ -34,6 +36,8 @@ export async function loadAllData() {
     upgrades: 'data/upgrades.json',
     missions: 'data/missions.json',
     evolutions: 'data/evolutions.json',
+    battlepass: 'data/battlepass.json',
+    cosmetics: 'data/cosmetics.json',
     abilities: 'data/abilities.json',
     arenas: 'data/arenas.json',
     modes: 'data/modes.json',

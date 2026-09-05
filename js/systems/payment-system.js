@@ -77,6 +77,18 @@ function grantContents(meta, contents) {
     meta.premiumTitle = contents.title;
     granted.push(`gelar "${contents.title}"`);
   }
+  // Fase 14: Imun Coin + kosmetik di dalam bundle (ekonomi premium)
+  if (contents.imun) {
+    meta.imun = (meta.imun || 0) + contents.imun;
+    granted.push(`+${contents.imun} Imun Coin`);
+  }
+  if (contents.skin || contents.acc) {
+    meta.cosmetics = meta.cosmetics || { owned: [], skin: {}, crown: null, aura: null };
+    for (const cid of [contents.skin, contents.acc].filter(Boolean)) {
+      if (!meta.cosmetics.owned.includes(cid)) meta.cosmetics.owned.push(cid);
+      granted.push('kosmetik eksklusif');
+    }
+  }
   return granted;
 }
 

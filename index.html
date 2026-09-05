@@ -52,6 +52,10 @@
             <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
             <span id="dash-currency">0</span>
           </div>
+          <div class="currency-chip imu-chip" title="Imun Coin (premium)">
+            <img class="coin" src="assets/sprites/icon_imu.png" alt="" />
+            <span id="dash-imun">0</span>
+          </div>
           <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
           <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
@@ -69,6 +73,9 @@
             </button>
             <button class="side-btn" id="side-codex" title="Bio-Pedia">
               <img src="assets/sprites/icon_scope.png" alt="" /><span>Bio</span>
+            </button>
+            <button class="side-btn" id="side-bp" title="Battle Pass">
+              <img src="assets/sprites/icon_bolt.png" alt="" /><span>Pass</span>
             </button>
             <button class="side-btn" id="side-records" title="Papan Rekor">
               <img src="assets/sprites/icon_trophy.png" alt="" /><span>Rekor</span>
@@ -224,6 +231,33 @@
           <button id="codex-detail-close" class="btn btn-ghost">Tutup</button>
         </div>
       </section>
+      <!-- ============ BATTLE PASS (Fase 14) ============ -->
+      <section id="screen-bp" class="screen" data-screen="bp">
+        <header class="topbar">
+          <button class="btn-back" id="btn-bp-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
+          <h1 class="screen-title">Battle Pass</h1>
+          <div class="currency-chip imu-chip"><img class="coin" src="assets/sprites/icon_imu.png" alt="" /><span id="bp-imun">0</span></div>
+        </header>
+        <div class="bp-body">
+          <div class="bp-head card">
+            <div class="bp-level-wrap">
+              <div class="bp-level-ring"><b id="bp-level">1</b><small>LV</small></div>
+              <div class="bp-xp-wrap">
+                <b id="bp-season">Beta Musim 1</b>
+                <div class="bp-xp-track"><div id="bp-xp-fill" class="bp-xp-fill"></div></div>
+                <span id="bp-xp-text" class="bp-xp-text">0 / 0 XP</span>
+              </div>
+            </div>
+            <button id="btn-bp-premium" class="btn btn-gold">PREMIUM</button>
+          </div>
+          <p id="bp-hint" class="bp-hint"></p>
+          <h3 class="bp-track-title gold">PREMIUM</h3>
+          <div id="bp-prem" class="bp-row"><!-- diisi JS --></div>
+          <h3 class="bp-track-title">GRATIS</h3>
+          <div id="bp-free" class="bp-row"><!-- diisi JS --></div>
+        </div>
+      </section>
+
       <section id="screen-herodetail" class="screen" data-screen="herodetail">
         <header class="topbar">
           <button class="back-btn icon-btn" data-back="roster" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="kembali" /></button>
@@ -242,6 +276,7 @@
         </header>
         <div class="topbar" style="justify-content:center;margin-bottom:14px">
           <div class="currency-chip"><img class="coin" src="assets/sprites/icon_coin.png" alt="" /><span id="shop-currency">0</span></div>
+          <div class="currency-chip imu-chip"><img class="coin" src="assets/sprites/icon_imu.png" alt="" /><span id="shop-imun">0</span></div>
         </div>
         <div id="shop-sections" class="shop-sections"><!-- diisi JS --></div>
       </section>
