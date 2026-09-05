@@ -87,7 +87,6 @@ export function show() {
       bundle.badge ? el('span', { class: 'prem-badge', style: `background:${bundle.color}`, text: bundle.badge }) : null,
       el('b', { class: 'prem-name', text: bundle.name }),
       el('span', { class: 'prem-value', text: bundle.valueNote }),
-      el('img', { class: 'prem-art', src: 'assets/sprites/deco_chest.png', alt: '' }), // Fase 12f: ilustrasi hadiah
       el('button', {
         class: 'btn btn-prem',
         text: owned ? '✓ DIMILIKI' : bundle.priceLabel,
@@ -129,7 +128,7 @@ export function show() {
         el('span', { text: String(heroDef.shopCost) }),
       ]));
     }
-    card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name })); // Fase 12f: chibi
+    card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
     card.appendChild(el('b', { text: heroDef.name }));
     card.appendChild(el('div', { class: 's-desc', text: heroDef.description }));
 

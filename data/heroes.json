@@ -1,5 +1,5 @@
 {
- "schemaVersion": 4,
+ "schemaVersion": 3,
  "heroes": [
   {
    "id": "macrophage",
@@ -42,11 +42,7 @@
     "label": "Kalahkan total 100 patogen"
    },
    "shopCost": 800,
-   "spritePortrait": "assets/sprites/portrait_macrophage.png",
-   "look": {
-    "build": "big",
-    "accent": "#f4d03f"
-   }
+   "spritePortrait": "assets/sprites/portrait_macrophage.png"
   },
   {
    "id": "dendritic",
@@ -90,11 +86,7 @@
     "label": "Kalahkan total 400 patogen"
    },
    "shopCost": 1800,
-   "spritePortrait": "assets/sprites/portrait_dendritic.png",
-   "look": {
-    "build": "slim",
-    "accent": "#f1c40f"
-   }
+   "spritePortrait": "assets/sprites/portrait_dendritic.png"
   },
   {
    "id": "neutrophil",
@@ -138,11 +130,7 @@
     "label": "Kalahkan total 250 patogen"
    },
    "shopCost": 1200,
-   "spritePortrait": "assets/sprites/portrait_neutrophil.png",
-   "look": {
-    "build": "athletic",
-    "accent": "#cfd8dc"
-   }
+   "spritePortrait": "assets/sprites/portrait_neutrophil.png"
   },
   {
    "id": "eosinophil",
@@ -187,11 +175,7 @@
     "label": "Kalahkan 3 Bos"
    },
    "shopCost": 3000,
-   "spritePortrait": "assets/sprites/portrait_eosinophil.png",
-   "look": {
-    "build": "slim",
-    "accent": "#ffb3ab"
-   }
+   "spritePortrait": "assets/sprites/portrait_eosinophil.png"
   },
   {
    "id": "basophil",
@@ -235,11 +219,7 @@
     "label": "Kalahkan total 550 patogen"
    },
    "shopCost": 2000,
-   "spritePortrait": "assets/sprites/portrait_basophil.png",
-   "look": {
-    "build": "compact",
-    "accent": "#2980b9"
-   }
+   "spritePortrait": "assets/sprites/portrait_basophil.png"
   },
   {
    "id": "mastcell",
@@ -282,11 +262,7 @@
     "label": "Kalahkan total 700 patogen"
    },
    "shopCost": 2200,
-   "spritePortrait": "assets/sprites/portrait_mastcell.png",
-   "look": {
-    "build": "big",
-    "accent": "#6d4c41"
-   }
+   "spritePortrait": "assets/sprites/portrait_mastcell.png"
   },
   {
    "id": "tcd8",
@@ -327,11 +303,7 @@
     "type": "default"
    },
    "shopCost": 0,
-   "spritePortrait": "assets/sprites/portrait_tcd8.png",
-   "look": {
-    "build": "athletic",
-    "accent": "#cfd8dc"
-   }
+   "spritePortrait": "assets/sprites/portrait_tcd8.png"
   },
   {
    "id": "tcd4",
@@ -375,12 +347,7 @@
     "label": "Kalahkan total 850 patogen"
    },
    "shopCost": 2600,
-   "spritePortrait": "assets/sprites/portrait_tcd4.png",
-   "look": {
-    "build": "slim",
-    "accent": "#ffffff",
-    "cape": "#ffffff"
-   }
+   "spritePortrait": "assets/sprites/portrait_tcd4.png"
   },
   {
    "id": "treg",
@@ -424,12 +391,7 @@
     "label": "Kalahkan total 1000 patogen"
    },
    "shopCost": 3200,
-   "spritePortrait": "assets/sprites/portrait_treg.png",
-   "look": {
-    "build": "medium",
-    "accent": "#ffffff",
-    "cape": "#e8f6ef"
-   }
+   "spritePortrait": "assets/sprites/portrait_treg.png"
   },
   {
    "id": "bcell",
@@ -473,11 +435,7 @@
     "label": "Capai Gelombang 10 dalam satu run"
    },
    "shopCost": 1500,
-   "spritePortrait": "assets/sprites/portrait_bcell.png",
-   "look": {
-    "build": "slim",
-    "accent": "#ff5c8a"
-   }
+   "spritePortrait": "assets/sprites/portrait_bcell.png"
   },
   {
    "id": "nkcell",
@@ -520,12 +478,7 @@
     "label": "Kalahkan 1 Bos"
    },
    "shopCost": 2500,
-   "spritePortrait": "assets/sprites/portrait_nkcell.png",
-   "look": {
-    "build": "slim",
-    "accent": "#7d3c98",
-    "cape": "#2a1533"
-   }
+   "spritePortrait": "assets/sprites/portrait_nkcell.png"
   }
  ]
 }

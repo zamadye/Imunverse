@@ -258,7 +258,7 @@ export function show() {
   const heroDef = getHero(meta.selectedHero) || getData().heroes.heroes[0];
   const img = document.getElementById('dash-hero-img');
   if (heroDef) {
-    img.src = spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle); // Fase 12f: chibi humanoid
+    img.src = spriteToDataURL(heroDef.spriteIdle);
     document.getElementById('dash-hero-name').textContent = heroDef.name;
     document.getElementById('dash-hero-title').textContent = heroDef.title;
   }

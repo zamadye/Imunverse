@@ -48,7 +48,6 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 
 import { Camera, PERSP } from '../render/camera.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
-import { drawFigure } from '../render/humanoid.js';
 import {
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
@@ -56,29 +55,6 @@ import {
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
-
-/** Fase 12d: warna aksen fallback dari warna utama hero. */
-function mixLookAccent(hex) {
-  const n = parseInt((hex || '#35d0ba').slice(1), 16);
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return `rgb(${Math.min(255, r + 70)},${Math.min(255, g + 60)},${Math.min(255, b + 40)})`;
-}
-
-/** Fase 12d: senjata bawaan per hero (visual di tangan). */
-const HERO_WEAPONS = {
-  eos: 'spear', helia: 'staff', bella: 'brush', nyx: 'dagger',
-};
-function defaultWeapon(heroId) {
-  return HERO_WEAPONS[heroId] || null;
-}
-
-/** Fase 12e: tangga pertumbuhan in-run — bulir → kaki → tangan → zirah → LEGENDA. */
-function growthStageFor(level) {
-  const tiers = getData().growth.tiers;
-  let cur = tiers[0];
-  for (const tr of tiers) if (level >= tr.atLevel) cur = tr;
-  return cur;
-}
 
 export const game = {
   canvas: null,
@@ -218,8 +194,6 @@ export const game = {
       xp: 0,
       xpGained: 0,
       level: 1,
-      growStage: 0,
-      growStageDef: growthStageFor(1), // Fase 12e: bentuk awal = Sel Bulir
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
@@ -372,13 +346,12 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    const grow = (this.run && this.run.growStageDef) || null; // Fase 12e
-    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * (grow ? grow.damageMult : 1);
+    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) * (grow ? grow.maxHPMult : 1) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
+    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
     const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
@@ -600,10 +573,7 @@ export const game = {
     // 8. Kollision player vs musuh (contact damage)
     if (player.alive && player.iframes <= 0) {
       const hit = run.collision.checkPlayerCollision(player);
-      if (hit) {
-        if (hit.enemy) hit.enemy.attackHint = 0.35; // Fase 12d: animasi pukul
-        this.damagePlayer(hit.damage);
-      }
+      if (hit) this.damagePlayer(hit.damage);
     }
 
     // 9. Pickup (nutrisi)
@@ -761,15 +731,6 @@ export const game = {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
-      // Fase 12e: pertumbuhan bentuk mengikuti level — kaki/tangan/zirah/LEGENDA
-      const g = growthStageFor(run.level);
-      if (g.stage > run.growStage) {
-        run.growStage = g.stage;
-        run.growStageDef = g;
-        this.recomputePlayerStats(); // kekuatan ikut meningkat
-        if (g.cheer) emit('toast', { message: g.cheer, kind: 'gold' });
-        run.effects.spawnKillFx('ring', run.player.x, run.player.y, '#ffd23f', 0);
-      }
     }
   },
 
@@ -1493,12 +1454,12 @@ export const game = {
       }
     }
     // Bayangan semua entitas (volume: badan "berdiri" di atas bayangan)
-    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.28, e.radius * 0.52, e.stealth && !e.stealthExposed ? 0.05 : 0.15);
-    for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.26, a.radius * 0.5, 0.13);
+    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.stealth && !e.stealthExposed ? 0.05 : 0.13);
+    for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.9, a.radius * 0.8, 0.11);
     if (player.alive) {
-      dropShadow(player.x, player.y + player.radius * 0.3, player.radius * 0.55, 0.18);
+      dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.16);
       // Ring tim ala MOBA di bawah hero (warna peran) + aura lembut
-      ground(player.x, player.y + player.radius * 0.3);
+      ground(player.x, player.y + player.radius * 0.92);
       ctx.strokeStyle = run.heroDef.roleColor || run.heroDef.color;
       ctx.lineWidth = 3;
       ctx.globalAlpha = 0.8;
@@ -1539,27 +1500,19 @@ export const game = {
       if (!e.alive) continue;
       draws.push({ y: e.y, fn: () => {
         const hidden = e.stealth && !e.stealthExposed;
+        const bob = Math.abs(Math.sin(time * 6.4 + e.weavePhase * 7)) * 2.4;
         const flip = player.x < e.x ? -1 : 1;
-        billboard(e.x, e.y, { lift: e.radius * 0.62, flip });
+        billboard(e.x, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
-        // Fase 12d: figur humanoid monster (kaki+tangan+wajah) — animasi ayun kaki
-        drawFigure(ctx, {
-          x: e.x, y: e.y, r: e.radius * 0.85,
-          primary: e.def.color, accent: e.def.accent,
-          form: e.def.form || 'spike',
-          float: !!e.def.hazard_drift,
-          phase: time * (e.def.form === 'runner' ? 11 : 7) + e.weavePhase * 7,
-          moving: !e.def.hazard_drift,
-          attackT: e.attackHint > 0 ? e.attackHint / 0.35 : 0,
+        const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
           flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
-          mood: 'angry', flip: 1, t: time,
         });
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
         ctx.restore();
         billboard(e.x, e.y, { lift: e.radius * 0.62 });
-        // Fase 12e: bar HP di atas puncak kepala figur monster
-        drawHealthBar(ctx, e.x, e.y - e.radius * (e.isBoss ? 4.2 : 3.5) - 8, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
+        drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
         ctx.restore();
       } });
     }
@@ -1574,47 +1527,23 @@ export const game = {
       draws.push({ y: player.y, fn: () => {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
+          const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          const evo = run.evoStage; // meta-evolusi (part drop) — tetap berpengaruh ke efek/stat
-          const grow = run.growStageDef || growthStageFor(run.level); // Fase 12e: bentuk in-run
-          const look = player.heroDef.look || {};
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob });
-          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.4, player.heroDef.color, time, 0, 0.55);
-          // Fase 12e: HERO TUMBUH BERURUTAN — bulir → kaki → tangan+senjata → zirah → LEGENDA
-          const hasArms = !!grow.arms;
-          drawFigure(ctx, {
-            x: pBody.x, y: pBody.y, r: player.radius * 0.95,
-            primary: player.heroDef.color,
-            accent: look.accent || mixLookAccent(player.heroDef.color),
-            build: look.build || 'medium',
-            trait: player.heroDef.id,
-            weapon: hasArms ? defaultWeapon(player.heroDef.id) : null,
-            shieldFront: hasArms && (player.heroDef.id === 'mastcell' || player.heroDef.id === 'treg'),
-            shieldBack: hasArms && player.heroDef.id === 'neutron',
-            cape: grow.legend || ['helia', 'treg', 'nyx'].includes(player.heroDef.id)
-              ? (player.heroDef.look && player.heroDef.look.cape) || '#ffd23f'
-              : null,
-            shoulderPads: (grow.armor >= 1 && hasArms) || grow.legend,
-            legs: grow.limbs !== false,
-            arms: hasArms,
-            armor: grow.armor || 0,
-            legend: !!grow.legend,
-            phase: player.walkPhase || 0,
-            moving: player.moving,
-            attackT: player.attackFlash > 0 ? player.attackFlash / 0.18 : 0,
-            swingT: player.swing > 0 ? player.swing / 0.22 : 0,
-            flash: 0,
-            mood: player.attackFlash > 0 || player.swing > 0 ? 'determined' : 'happy',
-            flip: 1, t: time,
-          });
-          // Meta-evolusi LEGENDARY (part drop): inti elemen melayang di atas kepala
-          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y - player.radius * 2.9, player.radius * 1.5, time * 1.1, { alpha: 0.9 });
+          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
+          drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);
+          const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
+          const evo = run.evoStage;
+          if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', pBody.x, pBody.y + bodySize * 0.34, bodySize * 0.62, 0, {});
+          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
+          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+          if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', pBody.x, pBody.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
+          if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', pBody.x + bodySize * 0.3, pBody.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
           ctx.restore();
 
           // NAMEPLATE ala MOBA: nama hero + level di atas kepala
           billboard(player.x, player.y, { lift: player.radius * 0.62 });
-          // Fase 12e: piringan nama dinaikkan ke atas puncak kepala (figur humanoid lebih tinggi)
-          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius * 3.55 - 12;
+          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius - 30;
           ctx.fillStyle = 'rgba(2,8,14,0.58)';
           ctx.strokeStyle = player.heroDef.color;
           ctx.lineWidth = 1.6;

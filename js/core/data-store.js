@@ -16,7 +16,6 @@ const store = {
   upgrades: null,   // data/upgrades.json
   missions: null,   // data/missions.json
   evolutions: null, // data/evolutions.json
-  growth: null,     // data/growth.json (Fase 12e: tangga pertumbuhan in-run)
   abilities: null,  // data/abilities.json
   arenas: null,     // data/arenas.json
   bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
@@ -35,7 +34,6 @@ export async function loadAllData() {
     upgrades: 'data/upgrades.json',
     missions: 'data/missions.json',
     evolutions: 'data/evolutions.json',
-    growth: 'data/growth.json',
     abilities: 'data/abilities.json',
     arenas: 'data/arenas.json',
     modes: 'data/modes.json',

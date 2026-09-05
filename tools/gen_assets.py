@@ -310,47 +310,6 @@ def gen_stage_heroes_v2(out):
     return outp
 
 
-def chibi_portrait(size, primary, accent, body="medium", trait=None):
-    """Fase 12d: avatar humanoid chibi (kepala besar, badan, 2 tangan, 2 kaki, wajah)."""
-    img, d = canvas(size)
-    S = size * SS
-    cx = S * 0.5
-    ground = S * 0.97
-    col = hex_rgb(primary)
-    acc = hex_rgb(accent)
-    scale = S * 0.0044  # Fase 12f: figur memenuhi avatar (chibi besar)
-    if body == "big":
-        bw, bh, hd = 46 * scale * 0.9, 40 * scale * 0.9, 26 * scale * 0.98
-    elif body == "slim":
-        bw, bh, hd = 34 * scale * 0.9, 42 * scale, 24 * scale
-    elif body == "athletic":
-        bw, bh, hd = 40 * scale, 42 * scale, 24 * scale
-    elif body == "compact":
-        bw, bh, hd = 38 * scale, 38 * scale, 25 * scale
-    else:
-        bw, bh, hd = 37 * scale, 40 * scale, 24.5 * scale
-    # proporsional dgn canvas 128: gunakan satuan px langsung
-    bw = bw * 1.05; bh = bh * 1.05; hd = hd * 1.05
-    legw = bw * 0.2
-    armw = bw * 0.17
-    hip = ground - bh * 0.95
-    # kaki
-    for sx in (-1, 1):
-        d.line([cx + sx * bw * 0.22, hip, cx + sx * bw * 0.24, ground - 2], fill=rgba(mix(col, (0, 0, 0), 0.25)), width=int(legw))
-        d.ellipse([cx + sx * bw * 0.24 - legw * 0.8, ground - 6, cx + sx * bw * 0.24 + legw * 0.8, ground - 1], fill=rgba(mix(acc, (0, 0, 0), 0.2)))
-    # badan
-    soft_body(d, cx, hip - bh * 0.1, bw * 0.62, col, squash=1.25)
-    # tangan
-    for sx in (-1, 1):
-        d.line([cx + sx * bw * 0.56, hip - bh * 0.42, cx + sx * bw * 0.72, hip + bh * 0.1], fill=rgba(mix(col, (255, 255, 255), 0.25)), width=int(armw))
-        d.ellipse([cx + sx * bw * 0.72 - armw * 0.85, hip + bh * 0.1 - armw * 0.85, cx + sx * bw * 0.72 + armw * 0.85, hip + bh * 0.1 + armw * 0.85], fill=rgba(mix(col, (255, 255, 255), 0.3)))
-    # kepala besar
-    hy = hip - bh * 0.62 - hd * 1.05
-    soft_body(d, cx, hy, hd, col)
-    kawaii_face(d, cx, hy, hd, col, mood="happy")
-    return done(img, size)
-
-
 def gen_stage_portraits_v2(out):
     print("STAGE 4b — Potret 11 Hero MLBB (siluet unik)")
     cols = {
@@ -359,17 +318,7 @@ def gen_stage_portraits_v2(out):
         "tcd8": ("#00d2ff", "zigzag"), "tcd4": ("#f1c40f", "sunray"), "treg": ("#2ecc71", "doublering"),
         "bcell": ("#bb8fce", "bean"), "nkcell": ("#4a235a", "burst"),
     }
-    builds = {
-        "macrophage": "big", "dendritic": "slim", "neutrophil": "athletic", "eosinophil": "slim",
-        "basophil": "compact", "mastcell": "big", "tcd8": "athletic", "tcd4": "slim",
-        "treg": "medium", "bcell": "slim", "nkcell": "slim",
-    }
-    accs = {
-        "macrophage": "#f4d03f", "dendritic": "#f1c40f", "neutrophil": "#cfd8dc", "eosinophil": "#ffb3ab",
-        "basophil": "#2980b9", "mastcell": "#6d4c41", "tcd8": "#cfd8dc", "tcd4": "#ffffff",
-        "treg": "#ffffff", "bcell": "#ff5c8a", "nkcell": "#b08cff",
-    }
-    return {f"portrait_{hid}.png": chibi_portrait(128, col, accs[hid], body=builds[hid]) for hid, (col, bd) in cols.items()}
+    return {f"portrait_{hid}.png": portrait(128, col, body=bd) for hid, (col, bd) in cols.items()}
 
 
 # =====================================================================
