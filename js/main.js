@@ -213,11 +213,15 @@ async function boot() {
   document.addEventListener('click', (e) => {
     if (e.target.closest('#btn-play-big')) screenManager.show('campaign');
   });
-  // Sidebar HOME: kembali ke atas beranda
+  // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
   if (sideHome) sideHome.addEventListener('click', () => {
     document.querySelector('.dash-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
+  document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
+  document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
+  document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
   // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons
   const fireBtn = document.getElementById('btn-fire');

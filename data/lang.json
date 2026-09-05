@@ -597,7 +597,12 @@
   "Heroes": "Heroes",
   "Squad": "Squad",
   "Shop": "Shop",
-  "Bio": "Bio"
+  "Bio": "Bio",
+  "Rekor": "Records",
+  "Tubuh": "Body",
+  "Terbuka": "Unlocked",
+  "item": "items",
+  "Beranda": "Home"
  },
  "rules": [
   {

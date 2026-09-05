@@ -32,6 +32,18 @@ export function show() {
   const grid = document.getElementById('roster-grid');
   grid.textContent = '';
 
+  // Fase 13.1: chip progres koleksi di subtitle (x/11 terbuka)
+  const heroesAll = getData().heroes.heroes;
+  const openCount = heroesAll.filter((h) => getHeroStatus(meta, h).unlocked).length;
+  const subEl = document.querySelector('#screen-roster .screen-subtitle');
+  if (subEl) {
+    let chip = subEl.querySelector('.count-chip');
+    if (!chip) { chip = el('span', { class: 'count-chip' }); subEl.appendChild(chip); }
+    chip.textContent = '';
+    chip.appendChild(el('span', { text: `${openCount}/${heroesAll.length} ` }));
+    chip.appendChild(el('span', { text: 'Terbuka' }));
+  }
+
   for (const heroDef of getData().heroes.heroes) {
     const status = getHeroStatus(meta, heroDef);
     const selected = meta.selectedHero === heroDef.id;

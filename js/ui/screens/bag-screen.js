@@ -13,6 +13,18 @@ export function show() {
   const meta = STATE.meta;
   document.getElementById('bag-currency').textContent = meta.currency.toLocaleString('id-ID');
 
+  // Fase 13.1: chip jumlah kepemilikan di header
+  const partTotal = Object.values(meta.evoParts || {}).reduce((a, b) => a + (b || 0), 0);
+  const itemTotal = Object.values(meta.consumables || {}).reduce((a, b) => a + (b || 0), 0);
+  const bagHead = document.querySelector('#screen-bag .topbar');
+  if (bagHead) {
+    let chip = bagHead.querySelector('.count-chip');
+    if (!chip) { chip = el('span', { class: 'count-chip' }); bagHead.insertBefore(chip, bagHead.querySelector('.currency-chip')); }
+    chip.textContent = '';
+    chip.appendChild(el('span', { text: `${partTotal + itemTotal} ` }));
+    chip.appendChild(el('span', { text: 'item' }));
+  }
+
   // ---- Bagian evolusi ----
   const partsGrid = document.getElementById('bag-parts');
   partsGrid.textContent = '';

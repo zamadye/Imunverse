@@ -1832,3 +1832,28 @@ img.lock-badge {
   .play-row { grid-template-columns: 1fr; }
   .duo-row { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   FASE 13.1 — de-dup navigasi + konsistensi halaman lain
+   ========================================================= */
+
+/* Chip informasi kecil di header/subtitle halaman (roster/bag/dll) */
+.count-chip {
+  display: inline-block; margin-left: 8px; padding: 2px 10px;
+  background: var(--teal); color: #fff; border-radius: var(--pill);
+  font-size: 10px; font-weight: 900; letter-spacing: 0.03em;
+  vertical-align: middle; box-shadow: 0 2px 6px rgba(31, 122, 112, 0.3);
+}
+.topbar .count-chip { margin-left: 0; }
+
+/* Footer roster: MULAI selalu terlihat saat menggulung koleksi */
+#screen-roster .screen-footer {
+  position: sticky; bottom: 0; z-index: 5;
+  padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(253, 246, 227, 0) 0%, var(--cream) 38%);
+}
+#screen-roster .screen-footer .btn { min-width: min(78vw, 340px); }
+
+/* Ikon sidebar aktif tetap terbaca untuk ikon sprite berwarna */
+.side-btn img { filter: saturate(0.25) opacity(0.75); }
+.side-btn.active img { filter: brightness(0) invert(1); opacity: 1; }

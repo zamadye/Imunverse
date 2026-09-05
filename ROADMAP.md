@@ -288,6 +288,13 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
 - **Kriteria lulus 12c:** e2e **21 PASS** (termasuk asersi tap-responds), autotest 17/17, perf 16,65 ms @41 musuh; screenshot 37 (HUD terang) & 39 (Detail Hero baru).
 
+**Fase 13.1 — De-dup navigasi + konsistensi halaman lain (temuan pemilik: sidebar = duplikat dock bawah)**
+- [x] **Sidebar & dock tidak lagi duplikat** — tugas dipisah ala MLBB: **dock bawah = tab inti** (Play · Heroes · Bag · Squad · Shop), **sidebar kiri = pintas fitur** (Home · Kampanye/Peta Tubuh · Bio-Pedia · Rekor → scroll ke papan · Tubuh → scroll ke kondisi tubuh).
+- [x] **Roster**: chip progres koleksi **"1/11 Terbuka"** di subtitle; tombol MULAI kini **sticky footer** (selalu terlihat saat menggulung koleksi).
+- [x] **Tas**: chip jumlah kepemilikan **"N item"** di header (bagian evolusi + consumable).
+- [x] Ikon sidebar non-aktif didesaturasi agar aktif menonjol; chip i18n-friendly (angka + label terpisah); 5 string i18n baru.
+- **Kriteria lulus 13.1:** e2e **21 asersi PASS**, tanpa error; bukti `docs/screenshots/51-sidebar-fix, 52-roster-chip, 53-bag-chip, 54-side-records`.
+
 **Fase 13 — Dashboard ala MLBB (layout referensi pemilik; palet pastel dipertahankan; karakter blob asli)**
 - [x] **Struktur layout meniru referensi MLBB** (tanpa konten stub — semua modul memakai fitur asli game): **sidebar kiri** (Home/Heroes/Squad/Shop/Bag/Bio), **banner carousel 3 slide** (panggung hero · bab kampanye berikutnya · ancaman Endless + mutator harian) dengan dot navigasi + auto-rotate 5,2s, **quick-menu 5 tile** (Bonus Harian/Misi/Toko/Tas/Bio-Pedia, badge notifikasi saat bonus bisa diklaim), **baris PLAY**: kartu KAMPANYE besar (ikon organ, bab 1/6, objektif, CTA MULAI) + kolom mode (Endless dengan status unlock & mutator asli, Arena, Lab Pasukan).
 - [x] **Topbar ala profil pemain**: chip akun = avatar + nama + fraksi (selaras referensi "ShadowHunter Lv32"); currency tetap pill emas.
