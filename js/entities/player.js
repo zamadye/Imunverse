@@ -7,6 +7,8 @@
 
 import { PERSP } from '../render/camera.js';
 
+import { audio } from '../systems/audio-system.js';
+
 let nextPlayerId = 1;
 
 export class Player {
@@ -30,6 +32,7 @@ export class Player {
     this.attackTimer = 0;     // hitungan mundur cooldown serangan
     this.iframes = 0;         // masa kebal setelah kena hit (detik)
     this.attackFlash = 0;     // timer untuk swap sprite attack
+    this.swing = 0;           // Fase 12c: animasi tebasan respons tombol
     this.moving = false;
     this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
     this.stepT = 0;     // jeda antar langkah (debu kaki)
@@ -85,7 +88,8 @@ export class Player {
    * bantu anak-anak: bidik musuh terdekat dalam jangkauan (assist aim).
    */
   tryFire(game) {
-    if (this.attackTimer > 0 || !this.alive) return;
+    if (!this.alive) return;
+    // Fase 12c: tombol SERANG SELALU merespons.
     const aimActive = game.input && game.run && (() => {
       try {
         const cam = game.run.camera;
@@ -95,19 +99,33 @@ export class Player {
         return false;
       }
     })();
-    let target = null;
-    if (!aimActive) {
-      target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
-      if (!target) return; // tidak ada musuh — tembakan kosong tidak diboroskan
+    let target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
+    if (!target && !aimActive) {
+      // Tidak ada musuh & tidak mengarahkan: swing + langkah maju (feedback jelas)
+      this.performAttack({ x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 }, game);
+      return;
     }
     if (!target) target = { x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 };
+    if (this.attackTimer > 0) {
+      // Cooldown berjalan: swing + tapakan ke arah target (karakter tetap bereaksi)
+      this.performAttack(target, game, { tap: true });
+      return;
+    }
     this.performAttack(target, game);
     this.attackTimer = this.stats.cooldown;
   }
 
   /** Jalankan attack pattern sesuai data hero. */
-  performAttack(target, game) {
+  performAttack(target, game, opts = {}) {
     const pattern = this.heroDef.attackPattern;
+    if (opts.tap) {
+      // Fase 12c: respons sentuhan saat cooldown — swing visual + audio ringan,
+      // damage tetap dari ritme auto-attack (tidak menembus cooldown).
+      this.swing = 0.22;
+      this.squash = 0.12;
+      audio.swing();
+      return;
+    }
     this.attackFlash = 0.18; // swap spriteAttack sebentar
     // AIM: bila player mengarahkan (stick kanan / mouse), serangan ikut arah itu
     let aimAngle = null;

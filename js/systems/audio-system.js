@@ -124,6 +124,12 @@ class AudioSystem {
     this._noise(0.05, { vol: 0.08, filter: 1600, filterTo: 700 });
   }
 
+  /** Fase 12c: whoosh ringan untuk swing tombol SERANG saat cooldown. */
+  swing() {
+    if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    this._noise(0.09, { vol: 0.06, filter: 2600, filterTo: 900 });
+  }
+
   kill() {
     if (!this._gate('kill')) return;
     this._noise(0.09, { vol: 0.12, filter: 900, filterTo: 250 });

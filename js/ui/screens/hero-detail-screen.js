@@ -40,17 +40,37 @@ function selectHero() {
 
   const box = document.getElementById('hero-detail-body');
   box.textContent = '';
-  box.appendChild(el('div', { class: 'card hero-lab-card' }, [
+
+  // ===== PANEL HERO (ala referensi: karakter besar di panggung + nama + tingkatan) =====
+  const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((sk) => sk.id === id)).filter(Boolean);
+  box.appendChild(el('div', { class: 'card hero-lab-card hl-hero-panel', style: `background:linear-gradient(180deg,${heroDef.color}22,var(--card) 62%)` }, [
     el('div', { class: 'hl-head' }, [
       el('span', { class: 'hl-count', text: `${stageDef.name} · ${stageDef.tier}` }),
       el('span', { class: 'hl-level', style: `background:${heroDef.color}`, text: `Lv ${level}` }),
     ]),
-    el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
+    el('div', { class: 'hl-stage' }, [
+      el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
+      el('div', { class: 'hl-skill-col' }, skillDefs.map((sk, i) =>
+        el('div', { class: 'hl-skill' + (i === 2 ? ' ult' : ''), title: `${sk.name} — tombol ${i + 1}` }, [
+          el('span', { class: 'hl-skill-key', text: i === 2 ? 'ULT' : String(i + 1) }),
+          el('span', { class: 'hl-skill-dot', style: `background:${sk.color}` }),
+        ])
+      )),
+    ]),
     el('b', { class: 'hl-name', text: heroDef.name }),
     el('span', { class: 'hl-title', text: tr(heroDef.title) }),
-    el('div', { class: 'hl-stats' }, [
-      el('span', { text: `Senjata ${Math.round(nowDamage)} (+${Math.round((nextDamage - nowDamage) * 10) / 10}/lvl)` }),
-      el('span', { text: `HP ${nowHP} (+${nextHP - nowHP}/lvl)` }),
+    // Stat chips (damage merah / HP hijau) — gaya kartu game modern
+    el('div', { class: 'hl-chips' }, [
+      el('span', { class: 'hl-chip atk' }, [
+        el('img', { src: 'assets/sprites/icon_sword.png', alt: '' }),
+        el('b', { text: `${Math.round(nowDamage)}` }),
+        el('i', { text: `+${Math.round((nextDamage - nowDamage) * 10) / 10}` }),
+      ]),
+      el('span', { class: 'hl-chip hp' }, [
+        el('img', { src: 'assets/sprites/icon_heart.png', alt: '' }),
+        el('b', { text: `${nowHP}` }),
+        el('i', { text: `+${nextHP - nowHP}` }),
+      ]),
     ]),
     el('div', { class: 'hl-slider upg-slider' + (maxed ? ' maxed' : '') }, [
       el('div', { class: 'upg-fill', style: `width:${(level / cfg.maxLevel) * 100}%` }),
@@ -72,20 +92,37 @@ function selectHero() {
   const aLvl = meta.allyLevel || 0;
   const aMaxed = aLvl >= allyCfg.maxLevel;
   const aCost = allyLevelCost(allyCfg, aLvl);
-  box.appendChild(el('div', { class: 'card hero-lab-card ally-panel' }, [
+  box.appendChild(el('div', { class: 'card hero-lab-card ally-panel', style: 'background:linear-gradient(180deg,#4aa3e022,var(--card) 62%)' }, [
     el('div', { class: 'hl-head' }, [
       el('span', { class: 'hl-count', text: `${meta.allies || 1} sel ikut bertarung` }),
       el('span', { class: 'hl-level ally', text: `Lv ${aLvl}` }),
     ]),
     el('div', { class: 'hl-ally-row' }, [
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_b_idle.png'), alt: 'Sel B' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_nk_idle.png'), alt: 'Sel NK' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_makrofag_idle.png'), alt: 'Makrofag' }),
+      el('div', { class: 'hl-ally-cell' }, [
+        el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_bcell_idle.png'), alt: 'Sel B' }),
+        el('span', { class: 'hl-ally-tag', text: 'Sel B' }),
+      ]),
+      el('div', { class: 'hl-ally-cell' }, [
+        el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_nkcell_idle.png'), alt: 'Sel NK' }),
+        el('span', { class: 'hl-ally-tag', text: 'Sel NK' }),
+      ]),
+      el('div', { class: 'hl-ally-cell' }, [
+        el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_macrophage_idle.png'), alt: 'Makrofag' }),
+        el('span', { class: 'hl-ally-tag', text: 'Makrofag' }),
+      ]),
     ]),
     el('b', { class: 'hl-name', text: 'Pasukan Imun' }),
-    el('div', { class: 'hl-stats' }, [
-      el('span', { text: `Damage pasukan +${Math.round(allyCfg.dmgPerLevel * aLvl * 100)}%` }),
-      el('span', { text: `Tempo +${Math.round(((0.95 - Math.max(0.55, 0.95 - allyCfg.speedPerLevel * aLvl)) / 0.95) * 100)}%` }),
+    el('div', { class: 'hl-chips' }, [
+      el('span', { class: 'hl-chip atk' }, [
+        el('img', { src: 'assets/sprites/icon_sword.png', alt: '' }),
+        el('b', { text: `+${Math.round(allyCfg.dmgPerLevel * aLvl * 100)}%` }),
+        el('i', { text: 'damage' }),
+      ]),
+      el('span', { class: 'hl-chip spd' }, [
+        el('img', { src: 'assets/sprites/icon_bolt.png', alt: '' }),
+        el('b', { text: `+${Math.round(((0.95 - Math.max(0.55, 0.95 - allyCfg.speedPerLevel * aLvl)) / 0.95) * 100)}%` }),
+        el('i', { text: 'tempo' }),
+      ]),
     ]),
     el('button', {
       class: 'btn btn-primary btn-ally-up',

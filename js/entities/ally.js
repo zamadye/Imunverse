@@ -11,12 +11,12 @@
 import { getSprite } from '../render/sprite-loader.js';
 
 const ALLY_SPRITES = [
-  'assets/sprites/hero_sel_b_idle.png',
-  'assets/sprites/hero_sel_nk_idle.png',
-  'assets/sprites/hero_makrofag_idle.png',
-  'assets/sprites/hero_eosinofil_idle.png',
-  'assets/sprites/hero_sel_t_idle.png',
-  'assets/sprites/hero_sel_t_attack.png',
+  'assets/sprites/hero_bcell_idle.png',
+  'assets/sprites/hero_nkcell_idle.png',
+  'assets/sprites/hero_macrophage_idle.png',
+  'assets/sprites/hero_eosinophil_idle.png',
+  'assets/sprites/hero_tcd8_idle.png',
+  'assets/sprites/hero_tcd4_idle.png',
 ];
 
 export class Ally {

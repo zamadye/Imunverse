@@ -139,6 +139,18 @@ try {
   await page.waitForTimeout(900);
   await page.locator('#btn-fire').dispatchEvent('pointerup');
   log('manual-attack-happened', true);
+  // Fase 12c: tap SATU kali saat cooldown → karakter tetap bereaksi (swing+lunge)
+  const tapResp = await page.evaluate(async () => {
+    const g = window.__IMUNVERSE.game;
+    const p = g.run.player;
+    p.attackTimer = 5; // paksa cooldown aktif
+    document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 90));
+    const s1 = p.swing > 0 || p.squash > 0;
+    document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    return s1;
+  });
+  log('attack-tap-responds', tapResp);
   await page.waitForTimeout(1500);
 
   const killed = await page.evaluate(async () => {

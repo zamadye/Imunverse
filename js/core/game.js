@@ -1480,7 +1480,8 @@ export const game = {
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
     const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
-    const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : 0;
+    const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
+    const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
     const pBody = {
       x: player.x + (player.alive ? Math.cos(player.facing) * pLunge : 0),
       y: player.y + (player.alive ? Math.sin(player.facing) * pLunge * PERSP.YS : 0),
@@ -1527,7 +1528,7 @@ export const game = {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
           const path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          const tilt = player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0;
+          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
           drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, player.heroDef.color, time, 0, 0.8);

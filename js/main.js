@@ -83,7 +83,12 @@ function showToast({ message, kind = '' }) {
 // Wiring event ui-bridge → screen UI
 // ---------------------------------------------------------------------
 function wireUiBridge() {
-  on('toast', showToast);
+  on('toast', (payload) => {
+    // Fase 12c: jangan menumpuk — maksimal 2 toast, yang tertua dihapus
+    const live = document.querySelectorAll('#toasts .toast');
+    if (live.length >= 2) live[0].remove();
+    showToast(payload);
+  });
 
   on('playerHit', () => {
     vignette.classList.add('flash');
@@ -206,13 +211,14 @@ async function boot() {
   // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
   document.getElementById('btn-play-big').addEventListener('click', () => screenManager.show('campaign'));
 
-  // Tombol TEMBAK (manual): tahan untuk menembak terus
+  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons
   const fireBtn = document.getElementById('btn-fire');
   const stopFire = () => input.setFire(false);
   fireBtn.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     input.setFire(true);
     audio.unlock();
+    game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
   });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => fireBtn.addEventListener(ev, stopFire));
   window.addEventListener('blur', stopFire);
