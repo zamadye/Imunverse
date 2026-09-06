@@ -7,6 +7,7 @@
 
 import { getFeatures } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
+import { isDevMode } from '../core/dev-mode.js';
 
 /** bestWave pemain aktif (0 untuk baru). */
 function bestWave() {
@@ -18,6 +19,7 @@ function bestWave() {
  * @returns {{locked:boolean, requireWave:number} | null} null bila tak terdaftar
  */
 export function gateFor(target, id) {
+  if (isDevMode()) return { locked: false, requireWave: 0 };
   const gates = (getFeatures() && getFeatures().gates) || [];
   const g = gates.find((x) => x.target === target && x.id === id);
   if (!g) return null;
@@ -26,7 +28,8 @@ export function gateFor(target, id) {
 
 /** Gate untuk tombol dock (dataset.nav = id screen tujuan). */
 export function isDockGated(btn) {
-  return gateFor('dock', btn.dataset.nav);
+  const target = btn.closest('.secondary-dock') ? 'secondary' : 'dock';
+  return gateFor(target, btn.dataset.nav);
 }
 
 /** Terapkan visual lock pada satu elemen (badge + label syarat). */

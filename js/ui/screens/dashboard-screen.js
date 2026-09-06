@@ -8,7 +8,7 @@ import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
-import { getMissionProgressList } from '../../systems/mission-system.js';
+import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
@@ -152,18 +152,15 @@ function renderBanner(meta) {
   bannerTimer = setInterval(() => setBannerSlide(bannerIdx + 1), 5200);
 }
 
-/** Fase 13: baris quick-menu 5 tile (semua menuju fitur nyata). */
+  /** Dashboard focus: empat pintu sekunder; daily/misi tetap hidup sebagai notifikasi di bawah. */
 function renderQuickRow(meta) {
   const row = document.getElementById('quick-row');
   row.textContent = '';
-  const claimable = checkDailyLives() && canClaimDailyReward(meta);
   const tiles = [
-    { key: 'daily', ico: 'assets/sprites/icon_star.png', label: 'Bonus Harian', badge: claimable ? '1' : '', act: () => document.getElementById('daily-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
-    { key: 'quests', ico: 'assets/sprites/icon_trophy.png', label: 'Misi', badge: '', act: () => document.querySelector('.missions-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
-    { key: 'shop', ico: 'assets/sprites/icon_shop.png', label: 'Toko', badge: '', act: () => screenManager.show('shop') },
-    { key: 'bag', ico: 'assets/sprites/icon_bag.png', label: 'Tas', badge: '', act: () => screenManager.show('bag') },
-    { key: 'codex', ico: 'assets/sprites/icon_scope.png', label: 'Bio-Pedia', badge: '', act: () => screenManager.show('codex') },
-    { key: 'bp', ico: 'assets/sprites/icon_bolt.png', label: 'Battle Pass', badge: '', act: () => screenManager.show('bp') },
+    { key: 'roster', ico: 'assets/sprites/icon_heroes.png', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
+    { key: 'shop', ico: 'assets/sprites/icon_shop.png', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
+    { key: 'codex', ico: 'assets/sprites/icon_scope.png', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
+    { key: 'rank', ico: 'assets/sprites/icon_trophy.png', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
   ];
   for (const tl of tiles) {
     const t = el('button', { class: 'quick-tile', title: tl.label }, [
@@ -494,6 +491,9 @@ export function show() {
   document.querySelectorAll('.dock-btn[data-nav]').forEach((b) => {
     applyGateVisual(b, 'dock', b.dataset.nav);
   });
+  document.querySelectorAll('.secondary-dock [data-nav]').forEach((b) => {
+    applyGateVisual(b, 'secondary', b.dataset.nav);
+  });
   // Fase 19: CHIP PANGKAT PENJAGA — tujuan pemain selalu terlihat (goal gradient)
   const rankChip = document.getElementById('rank-chip');
   if (rankChip) {
@@ -643,6 +643,37 @@ export function show() {
   } else if (doneCount > 0) {
     list.appendChild(el('p', { class: 'mission-more', text: `+${doneCount} misi lainnya sudah selesai ✓` }));
   }
+
+  // Daily/weekly quest aktif: pemain memilih quest, lalu claim reward Antibodi.
+  const questBox = el('div', { class: 'active-quests' });
+  questBox.appendChild(el('b', { class: 'quest-heading', text: 'Quest Pilihan' }));
+  for (const q of getQuestProgress(meta).slice(0, 4)) {
+    const pct = Math.round((q.value / q.def.target) * 100);
+    const row = el('div', { class: `quest-row${q.claimed ? ' claimed' : ''}` }, [
+      el('div', { class: 'quest-title' }, [
+        el('span', { class: 'quest-kind', text: q.kind === 'daily' ? 'HARIAN' : 'MINGGUAN' }),
+        el('b', { text: q.def.name }),
+      ]),
+      el('small', { class: 'quest-desc', text: `${q.def.desc} · ${q.value}/${q.def.target}` }),
+      el('div', { class: 'quest-track' }, [el('i', { style: `width:${pct}%` })]),
+    ]);
+    const action = el('button', {
+      class: 'btn btn-sm quest-action',
+      text: q.claimed ? '✓' : (q.accepted ? (q.done ? 'KLAIM' : 'AKTIF') : 'AMBIL'),
+      disabled: q.claimed || (q.accepted && !q.done),
+      onclick: () => {
+        if (!q.accepted) acceptQuest(meta, q.def.id);
+        else {
+          const reward = claimQuest(meta, q.def.id);
+          if (reward) emit('toast', { message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
+        }
+        show();
+      },
+    });
+    row.appendChild(action);
+    questBox.appendChild(row);
+  }
+  list.appendChild(questBox);
 }
 
 export function hide() {
