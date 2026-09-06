@@ -21,6 +21,7 @@ import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
 import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
+import { isDevMode } from './core/dev-mode.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -177,6 +178,14 @@ async function boot() {
   // 3) Save / meta
   const raw = loadSave();
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
+  if (isDevMode()) {
+    // In-memory only: dev access never overwrites the player's real save.
+    STATE.meta.imun = 999999;
+    STATE.meta.currency = 999999;
+    STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
+    STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
+    STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
+  }
   if (!raw) writeSave(STATE.meta);
   applyDataLanguage(STATE.meta.lang || 'id'); // dwibahasa: data sesuai bahasa tersimpan
 

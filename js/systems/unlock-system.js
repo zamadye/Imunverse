@@ -10,6 +10,7 @@
 
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
+import { isDevMode } from '../core/dev-mode.js';
 
 /** Nilai stat meta; 'unlockedHeroes' = jumlah hero yang dimiliki. */
 function metaValue(meta, stat) {
@@ -22,6 +23,7 @@ function metaValue(meta, stat) {
  * @returns {{unlocked:boolean, conditionLabel?:string, conditionMet:boolean, shopCost:number}}
  */
 export function getHeroStatus(meta, heroDef) {
+  if (isDevMode()) return { unlocked: true, conditionMet: true, shopCost: 0, dev: true };
   const unlock = heroDef.unlock || { type: 'default' };
 
   if (unlock.type === 'default' || meta.unlockedHeroes.includes(heroDef.id)) {

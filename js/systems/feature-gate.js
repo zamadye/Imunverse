@@ -7,6 +7,7 @@
 
 import { getFeatures } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
+import { isDevMode } from '../core/dev-mode.js';
 
 /** bestWave pemain aktif (0 untuk baru). */
 function bestWave() {
@@ -18,6 +19,7 @@ function bestWave() {
  * @returns {{locked:boolean, requireWave:number} | null} null bila tak terdaftar
  */
 export function gateFor(target, id) {
+  if (isDevMode()) return { locked: false, requireWave: 0 };
   const gates = (getFeatures() && getFeatures().gates) || [];
   const g = gates.find((x) => x.target === target && x.id === id);
   if (!g) return null;
