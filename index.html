@@ -10,6 +10,7 @@
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
   <link rel="stylesheet" href="styles/main.css?v=21a" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
   <div id="app">
@@ -78,18 +79,9 @@
               <small id="rank-sub">—</small>
             </span>
           </button>
-          <div class="currency-chip" title="Antibodi (mata uang)">
-            <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
-            <span id="dash-currency">0</span>
-          </div>
-          <div class="currency-chip imu-chip" title="Imun Coin (premium)">
-            <img class="coin" src="assets/sprites/icon_imu.png" alt="" />
-            <span id="dash-imun">0</span>
-          </div>
-          <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
-          <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
+          <div class="dash-points" title="Antibodi dari gameplay"><img class="coin" src="assets/sprites/icon_coin.png" alt="Antibodi" /><span id="dash-currency">0</span></div>
+          <div class="currency-chip imu-chip" title="Imun Coin premium"><img class="coin" src="assets/sprites/icon_imu.png" alt="Imun Coin" /><span id="dash-imun">0</span></div>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
-          <button id="btn-codex" class="icon-btn" title="Bio-Pedia" aria-label="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="Bio-Pedia" /></button>
         </header>
 
         <div class="dash-body">
@@ -175,14 +167,13 @@
           </div>
         </div>
 
-        <!-- Dock navigasi bawah (tetap) -->
+        <!-- CTA utama dipisah dari navigasi utilitas agar fokus visual tidak bercampur. -->
+        <button class="dashboard-play" id="btn-play" aria-label="Mulai run">
+          <span class="dashboard-play-icon"><img src="assets/sprites/icon_play.png" alt="" /></span>
+          <span class="dashboard-play-copy"><b>PLAY</b><small>Mulai run sekarang</small></span>
+        </button>
+        <!-- Dock navigasi utilitas -->
         <nav class="dock">
-          <button class="dock-btn primary" id="btn-play" aria-label="Mulai run">
-            <span class="dock-ico">
-              <img src="assets/sprites/icon_play.png" alt="" />
-            </span>
-            <span>Play</span>
-          </button>
           <button class="dock-btn" data-nav="roster" aria-label="Roster hero">
             <span class="dock-ico">
               <img src="assets/sprites/icon_heroes.png" alt="" />
@@ -336,6 +327,25 @@
         </div>
       </section>
 
+      <!-- ============ PROFIL PEMAIN ============ -->
+      <section id="screen-profile" class="screen" data-screen="profile">
+        <header class="screen-header">
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
+          <h2>Profil</h2><span class="spacer"></span>
+        </header>
+        <div class="profile-card card">
+          <img id="profile-avatar" class="profile-avatar" src="assets/sprites/portrait_tcd8.png" alt="" />
+          <h3 id="profile-name">—</h3>
+          <span id="profile-faction" class="faction-tag">Imun</span>
+          <div class="profile-balances">
+            <span><img src="assets/sprites/icon_coin.png" alt="" /><b id="profile-currency">0</b><small>Antibodi</small></span>
+            <span><img src="assets/sprites/icon_imu.png" alt="" /><b id="profile-imun">0</b><small>Imun Coin</small></span>
+          </div>
+          <div class="profile-stats" id="profile-stats"></div>
+          <button id="btn-profile-logout" class="btn btn-danger">Keluar Akun</button>
+        </div>
+      </section>
+
       <!-- ============ PETA KAMPANYE (Perang Sang Tubuh) ============ -->
       <section id="screen-campaign" class="screen" data-screen="campaign">
         <header class="topbar">
@@ -426,6 +436,12 @@
             <div class="hud-currency-run hud-imu-run" id="hud-imu-chip"><img src="assets/sprites/icon_imu.png" alt="" /><span id="hud-imu">0</span></div>
             <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
           </div>
+        </div>
+        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false">☰</button>
+        <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu gameplay">
+          <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/sprites/icon_sirkulasi.png" alt="" />Campaign</button>
+          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" />Bio-Pedia</button>
+          <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/sprites/icon_trophy.png" alt="" />Rank</button>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>

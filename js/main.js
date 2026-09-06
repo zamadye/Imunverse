@@ -18,9 +18,10 @@ import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
-import { loadSave, writeSave, clearSave } from './save/save-manager.js';
+import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
+import { isDevMode } from './core/dev-mode.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -50,6 +51,7 @@ import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
+import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 
 const canvas = document.getElementById('game');
@@ -107,6 +109,9 @@ function wireUiBridge() {
 
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
+  });
+  on('waveBreak', ({ wave }) => {
+    hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
   });
 
   on('levelup', (payload) => screenManager.show('levelup', payload));
@@ -173,6 +178,21 @@ async function boot() {
   // 3) Save / meta
   const raw = loadSave();
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
+  if (isDevMode()) {
+    // In-memory only: dev access never overwrites the player's real save.
+    STATE.meta.imun = 999999;
+    STATE.meta.currency = 999999;
+    STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
+    STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
+    STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
+    STATE.meta.evoStage = 99;
+    STATE.meta.evoParts = { silia: 999, pseudopodia: 999, mikropedang: 999, inti_elemen: 999 };
+    STATE.meta.allies = 6;
+    STATE.meta.allyLevel = 99;
+    for (const def of (data.upgrades.globalUpgrades || [])) {
+      STATE.meta.globalUpgrades[def.id] = def.maxLevel;
+    }
+  }
   if (!raw) writeSave(STATE.meta);
   applyDataLanguage(STATE.meta.lang || 'id'); // dwibahasa: data sesuai bahasa tersimpan
 
@@ -201,6 +221,7 @@ async function boot() {
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   screenManager.registerScreen('rank', rankScreen);
+  screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
@@ -211,6 +232,17 @@ async function boot() {
 
   // Tombol HUD pause (elemen statis — di-wire di sini agar hud-screen tetap murni view)
   document.getElementById('btn-pause').addEventListener('click', () => game.pause());
+  const hudMenu = document.getElementById('hud-game-menu');
+  const hudMenuToggle = document.getElementById('hud-menu-toggle');
+  hudMenuToggle?.addEventListener('click', () => {
+    const open = hudMenu.classList.toggle('hidden') === false;
+    hudMenuToggle.setAttribute('aria-expanded', String(open));
+  });
+  document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
+    game.pause();
+    hudMenu?.classList.add('hidden');
+    screenManager.show(btn.dataset.menuScreen);
+  }));
 
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
@@ -246,7 +278,7 @@ async function boot() {
   window.addEventListener('blur', stopFire);
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
-  document.getElementById('account-chip').addEventListener('click', () => screenManager.show('auth'));
+  document.getElementById('account-chip').addEventListener('click', () => screenManager.show('profile'));
   // Fase 19: chip pangkat → modal PANGKAT PENJAGA (klik riil)
   document.getElementById('rank-chip')?.addEventListener('click', () => screenManager.show('rank'));
 
@@ -262,10 +294,6 @@ async function boot() {
     const pauseBtn = document.getElementById('btn-sound-pause');
     if (pauseBtn) pauseBtn.textContent = `Suara: ${audio.muted ? 'MATI' : 'AKTIF'}`;
   };
-  document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-    audio.toggleMute();
-    refreshSoundUI();
-  });
   document.getElementById('btn-sound-pause').addEventListener('click', () => {
     audio.toggleMute();
     refreshSoundUI();
@@ -345,17 +373,6 @@ async function boot() {
     const heroDef = getHero(STATE.meta.selectedHero);
     return spriteToDataURL(heroDef ? (heroDef.spritePortrait || heroDef.spriteIdle) : '');
   };
-
-  // Reset save (dashboard footer)
-  document.getElementById('btn-reset-save').addEventListener('click', () => {
-    if (window.confirm('Hapus seluruh progress (antibodi, unlock, upgrade)?')) {
-      clearSave();
-      STATE.meta = createDefaultMeta();
-      writeSave(STATE.meta);
-      showToast({ message: 'Save direset. Organisme baru terbentuk. 🧬' });
-      screenManager.show('auth');
-    }
-  });
 
   // 5) Game loop (rAF + delta-time) — update hanya saat gameplay aktif
   const loop = new GameLoop(
