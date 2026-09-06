@@ -99,6 +99,12 @@ try {
   log('drag-moves-player', moveInfo.moving || moveInfo.phase !== p3d.walkPhase0 ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
 
   // ---------- KLIK RIIL 3 skill ----------
+  // Fase 17: hero default kini Mako — skill 2/3 terkunci di evolusi awal.
+  // Uji ini menverifikasi KLIK → cooldown, jadi buka kunci slotnya dulu.
+  await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    if (g.run && g.run.skills) g.run.skills.slots.forEach((s) => { s.unlocked = true; });
+  });
   const ensureGameplay = async () => {
     for (let k = 0; k < 12; k++) {
       const lu = await page.evaluate(() => document.querySelector('#screen-levelup')?.classList.contains('active'));
@@ -116,12 +122,39 @@ try {
     });
   };
   for (let i = 0; i < 3; i++) {
-    await ensureGameplay();
-    const before = await page.evaluate(() => window.__IMUNVERSE.game.run.skills.slots.filter((s) => s.cdLeft > 0).length);
-    await page.locator('#ability-bar .ability-btn').nth(i).click({ timeout: 6000 });
-    await page.waitForTimeout(400);
-    const after = await page.evaluate(() => window.__IMUNVERSE.game.run.skills.slots.filter((s) => s.cdLeft > 0).length);
-    log(`skill-${i + 1}-oncd`, after > before);
+    // Fase 18: XP per kill memicu level-up lebih sering — modal bisa menyela
+    // di tengah klik → tutup & ulangi. Setup deterministik: reset cd slot ini
+    // ke 0 sebelum KLIK RIIL (skill bisa saja masih memanas dari trigger lain),
+    // lalu klik harus men-set cd slot itu sendiri (>0) — bukan membanding hitungan.
+    let triggered = false;
+    for (let attempt = 0; attempt < 4 && !triggered; attempt++) {
+      await ensureGameplay();
+      await page.evaluate((idx) => {
+        const slots = window.__IMUNVERSE.game.run.skills.slots.filter(Boolean);
+        if (slots[idx]) slots[idx].cdLeft = 0; // setup: pastikan slot siap diklik
+      }, i);
+      await page.locator('#ability-bar .ability-btn').nth(i).click({ timeout: 6000 });
+      await page.waitForTimeout(400);
+      triggered = await page.evaluate((idx) => {
+        const slots = window.__IMUNVERSE.game.run.skills.slots.filter(Boolean);
+        return !!slots[idx] && slots[idx].cdLeft > 0;
+      }, i);
+      if (!triggered) {
+        const why = await page.evaluate(() => {
+          const S = window.__IMUNVERSE.STATE;
+          return { lvlOpen: S.levelUpOpen, modal: [...document.querySelectorAll('.screen.modal.active')].map((m) => m.id), cds: window.__IMUNVERSE.game.run.skills.slots.map((x) => Math.round(x.cdLeft)), paused: S.paused };
+        });
+        console.log('  diag skill-' + (i + 1) + ' attempt ' + attempt + ':', JSON.stringify(why));
+        // desync state: tutup lewat API bila levelUpOpen tanpa modal
+        await page.evaluate(() => {
+          const g = window.__IMUNVERSE.game;
+          const S = window.__IMUNVERSE.STATE;
+          if (S.levelUpOpen && g.run && g.run.currentChoices) g.chooseLevelUp(g.run.currentChoices[0].id);
+        });
+        await page.waitForTimeout(300);
+      }
+    }
+    log(`skill-${i + 1}-oncd`, triggered);
     if (i < 2) await page.waitForTimeout(8200);
   }
   await ensureGameplay();
@@ -140,16 +173,43 @@ try {
   await page.locator('#btn-fire').dispatchEvent('pointerup');
   log('manual-attack-happened', true);
   // Fase 12c: tap SATU kali saat cooldown → karakter tetap bereaksi (swing+lunge)
-  const tapResp = await page.evaluate(async () => {
-    const g = window.__IMUNVERSE.game;
-    const p = g.run.player;
-    p.attackTimer = 5; // paksa cooldown aktif
-    document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    await new Promise((r) => setTimeout(r, 90));
-    const s1 = p.swing > 0 || p.squash > 0;
-    document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
-    return s1;
-  });
+  // Fase 18: modal level-up bisa menyela (XP per kill) → ulangi sampai merespons
+  let tapResp = false;
+  for (let attempt = 0; attempt < 4 && !tapResp; attempt++) {
+    await ensureGameplay();
+    tapResp = await page.evaluate(async () => {
+      const g = window.__IMUNVERSE.game;
+      const S = window.__IMUNVERSE.STATE;
+      if (S.levelUpOpen || S.paused) return false; // pause → klik tak diproses
+      const p = g.run.player;
+      // F18 finding: tanpa musuh dalam jangkauan tryFire masuk cabang tanpa swing →
+      // taruh 1 musuh di dekat player (konteks realistis anak menyerang saat ada musuh)
+      const near = g.run.enemies.find((e) => !e.isBoss && e.hp > 0);
+      if (near) { near.x = p.x + 70; near.y = p.y + 10; }
+      window.__tapDiag = { enemies: g.run.enemies.length, near: !!near, range: p.stats.effectiveAttackRange };
+      p.attackTimer = 5; // paksa cooldown aktif
+      document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      // Kontrak 12c: tombol SERANG SELALU merespons. Respons = swing (saat ada musuh
+      // + cooldown) ATAU attackFlash (jalur tanpa musuh). tryFire dipanggil game-loop
+      // (bukan sinkron) → polling frame sampai 420ms.
+      let s1 = false;
+      for (let t = 0; t < 14 && !s1; t++) {
+        await new Promise((r) => setTimeout(r, 30));
+        s1 = p.swing > 0 || p.squash > 0 || p.attackFlash > 0;
+      }
+      document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+      return s1;
+    });
+    if (!tapResp) {
+      await page.waitForTimeout(500);
+      const why = await page.evaluate(() => {
+        const S = window.__IMUNVERSE.STATE;
+        const p = window.__IMUNVERSE.game.run.player;
+        return { paused: S.paused, lvlOpen: S.levelUpOpen, modal: [...document.querySelectorAll('.screen.modal.active')].map((m) => m.id), swing: p.swing, squash: p.squash, attackTimer: Math.round(p.attackTimer * 10) / 10, screen: S.screen, tapDiag: window.__tapDiag };
+      });
+      console.log('  diag tap attempt ' + attempt + ':', JSON.stringify(why));
+    }
+  }
   log('attack-tap-responds', tapResp);
   await page.waitForTimeout(1500);
 

@@ -637,7 +637,11 @@
     "Kalahkan 2 Bos + 130 Imun Coin": "Defeat 2 Bosses + 130 Imun Coins",
     "Kalahkan 500 patogen + 150 Imun Coin": "Defeat 500 pathogens + 150 Imun Coins",
     "GLOBAL": "GLOBAL",
-    "SYARAT BELUM": "NOT MET YET"
+    "SYARAT BELUM": "NOT MET YET",
+    "KALAHKAN PENJAGA!": "DEFEAT THE GUARDIAN!",
+    "GERBANG TERBUKA!": "GATE OPENED!",
+    "ditahan": "held",
+    "XP DITAHAN CAIR": "banked XP released"
   },
   "rules": [
     {

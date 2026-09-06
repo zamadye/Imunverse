@@ -24,6 +24,7 @@ const store = {
   arenas: null,     // data/arenas.json
   bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
   retention: null,  // data/retention.json (Fase 17: parameter 5 retention trigger)
+  progression: null, // data/progression.json (Fase 18: kurva early/mid/late + gatekeeper)
 };
 
 import { BUILD } from './version.js';
@@ -53,6 +54,7 @@ export async function loadAllData() {
     bodySystems: 'data/body-systems.json',
     codex: 'data/codex.json',
     retention: 'data/retention.json',
+    progression: 'data/progression.json',
   };
 
   const entries = await Promise.all(
@@ -148,23 +150,46 @@ export function getSpawnMultiplier(waveNumber) {
 }
 
 /** Formula interval spawn sesuai spek: max(0.4, 1.8 - wave*0.08),
- *  lalu dipercepat multiplier wave — dengan floor tetap dijaga. */
+ *  lalu dipercepat multiplier wave — dengan floor tetap dijaga.
+ *  Fase 18: × band kurva (early longgar 1.3×, late padat 0.78×). */
 export function getSpawnInterval(waveNumber) {
   const cfg = getWaveConfig();
   const base = cfg.spawnIntervalBase - waveNumber * cfg.spawnIntervalWaveDecay;
-  return Math.max(cfg.spawnIntervalMin, base / getSpawnMultiplier(waveNumber));
+  const band = getProgressionBand(waveNumber);
+  return Math.max(cfg.spawnIntervalMin, base / getSpawnMultiplier(waveNumber)) * band.spawnMult;
 }
 
-/** Scaling HP musuh: baseHP * (1 + (wave-1)*0.12) */
+/** Scaling HP musuh: baseHP * (1 + (wave-1)*hpScale) × band kurva (Fase 18). */
 export function getEnemyHPScale(waveNumber) {
   const cfg = getWaveConfig();
-  return 1 + (waveNumber - 1) * cfg.enemyHPScalePerWave;
+  return (1 + (waveNumber - 1) * cfg.enemyHPScalePerWave) * getProgressionBand(waveNumber).enemyHPMult;
 }
 
-/** Scaling speed musuh dengan batas atas. */
+/** Scaling speed musuh dengan batas atas (+ bonus band late agar musuh
+ *  level tinggi lebih gesit — Fase 18). */
 export function getEnemySpeedScale(waveNumber) {
   const cfg = getWaveConfig();
-  return Math.min(cfg.enemySpeedScaleMax, 1 + (waveNumber - 1) * cfg.enemySpeedScalePerWave);
+  const band = getProgressionBand(waveNumber);
+  return Math.min(
+    cfg.enemySpeedScaleMax + 0.15 + band.enemySpeedBonus,
+    1 + (waveNumber - 1) * cfg.enemySpeedScalePerWave + band.enemySpeedBonus,
+  );
+}
+
+// ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====
+
+/** Seluruh config progresi. */
+export function getProgression() {
+  return getData().progression;
+}
+
+/** Band kurva untuk wave tertentu: early (1–5), mid (6–15), late (16+). */
+export function getProgressionBand(waveNumber) {
+  const bands = getData().progression.bands;
+  for (const b of bands) {
+    if (waveNumber <= b.maxWave) return b;
+  }
+  return bands[bands.length - 1];
 }
 
 /** xpToNextLevel = ceil(base * level^exponent), default 10 * level^1.5 */

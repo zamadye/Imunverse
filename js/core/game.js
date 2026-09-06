@@ -34,6 +34,7 @@ import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
 import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention } from '../systems/retention-system.js';
+import { getProgressionBand, getProgression } from './data-store.js';
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
 import {
@@ -537,9 +538,9 @@ export const game = {
         this.winRun();
         return;
       }
-      // Endless: bonus antibodi tiap 5 wave
+      // Endless: bonus antibodi tiap 5 wave (× band reward — Fase 18)
       if (run.mode && run.mode.id === 'endless' && w % 5 === 0) {
-        const bonus = w * 5;
+        const bonus = Math.round(w * 5 * getProgressionBand(w).rewardMult);
         run.bonusCurrency += bonus;
         addCurrency(meta, bonus);
         emit('toast', { message: `Endless wave ${w}! +${bonus} antibodi`, kind: 'gold' });
@@ -735,15 +736,42 @@ export const game = {
   // =====================================================================
   addXP(baseAmount) {
     const run = this.run;
+    // Fase 18: kurva XP per band — early 1.6× (cepat naik), late 0.85× (berat)
+    const bandXp = getProgressionBand(run.spawnSys ? run.spawnSys.wave : 1).xpMult;
     // Fase 17 (trigger 2D): combo ≥3 kill/5 detik → XP ×1.2 (dopamine loop)
-    const gained = baseAmount * run.player.stats.xpMult * comboXpMult(run.combo.count);
-    run.xp += gained;
+    const gained = baseAmount * run.player.stats.xpMult * comboXpMult(run.combo.count) * bandXp;
     run.xpGained += gained;
+    // Fase 18: GERBANG TERTUTUP (penjaga masih hidup) → XP DITAHAN di bank,
+    // tanpa progres level (spesifikasi: naik-level berhenti sampai boss tumbang)
+    if (run.spawnSys && run.spawnSys.isGateBlocked()) {
+      run.xpBank = (run.xpBank || 0) + gained;
+      return;
+    }
+    this.applyXpGain(gained);
+  },
+
+  /** Terapkan XP mentah ke progres level (tax xpBankRatio = 1 → cair penuh). */
+  applyXpGain(gained) {
+    const run = this.run;
+    run.xp += gained;
     while (run.xp >= xpToNextLevel(run.level)) {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
     }
+  },
+
+  /** Fase 18: cairkan XP yang ditahan saat gerbang tertutup (dipanggil saat boss tumbang). */
+  flushXpBank() {
+    const run = this.run;
+    const banked = run.xpBank || 0;
+    if (banked <= 0) return 0;
+    run.xpBank = 0;
+    const prog = getProgression().gatekeeper || {};
+    const ratio = typeof prog.xpBankRatio === 'number' ? prog.xpBankRatio : 1;
+    this.applyXpGain(banked * ratio);
+    emit('toast', { message: `+${Math.round(banked * ratio * 10) / 10} XP ${tr('XP DITAHAN CAIR')}`, kind: 'gold' });
+    return banked * ratio;
   },
 
   openLevelUpModal() {
@@ -937,6 +965,12 @@ export const game = {
     if (def.isBoss) {
       scalers.hpScale *= run.spawnSys.getBossHPMultiplier();
     }
+    // Fase 18: musuh MENGIKUTI level player — makin tinggi level pemain,
+    // makin kuat & gesit musuhnya (bukan hanya ikut wave).
+    const pls = getProgression().playerLevelScaling;
+    const plvl = Math.max(1, run.level || 1);
+    scalers.hpScale *= 1 + (plvl - 1) * pls.hpPerLevel;
+    scalers.speedScale += Math.min(pls.speedMax, (plvl - 1) * pls.speedPerLevel);
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
     markSeen(enemyId); // Bio-Pedia: musuh ditemui
@@ -1146,6 +1180,13 @@ export const game = {
         this.winRun();
       } else {
         emit('toast', { message: tr(`Sel Kanker dikalahkan! +${enemy.xpPerKill} XP`), kind: 'gold' });
+        // Fase 18 GATEKEEPER: penjaga tumbang → gerbang wave terbuka
+        if (run.spawnSys.isGateBlocked()) {
+          run.spawnSys.openGate();
+          showAnnounce(tr('GERBANG TERBUKA!'), false);
+          // XP yang ditahan selama gerbang tertutup → cair penuh (bisa naik beberapa level)
+          this.flushXpBank();
+        }
         this.openBossChest(enemy);
       }
     }
@@ -1298,9 +1339,11 @@ export const game = {
 
     const meta = STATE.meta;
     const bonus = computeRunEndBonus(run);
-    const doubleMult = (this.runFlags && this.runFlags.ganda) ? 1.5 : 1;
+    const doubleMult = (this.runFlags && this.runFlags.ganda) ? 1.3 : 1; // Fase 18: cap premium 30%
     // Fase 12 (spek pemilik): bonus akhir run floor(wave×8 + kills×0.5 + boss×50)
-    const waveBonus = Math.floor((run.spawnSys ? run.spawnSys.wave : run.wave || 1) * 8 + run.kills * 0.5 + (run.bossKills || 0) * 50);
+    // Fase 18: × rewardMult band — early 1.5× (reward besar), late 1.3×
+    const endBand = getProgressionBand(run.spawnSys ? run.spawnSys.wave : 1);
+    const waveBonus = Math.floor(((run.spawnSys ? run.spawnSys.wave : run.wave || 1) * 8 + run.kills * 0.5 + (run.bossKills || 0) * 50) * endBand.rewardMult);
     const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0) + bonus + waveBonus) * doubleMult);
     run.earned = earned;
     const victory = !!run.victory;
@@ -1705,6 +1748,8 @@ export const game = {
         kills: run.kills,
         currency: run.currencyEarned,
         imu: Math.floor(run.imuAccrued || 0),
+        gate: run.spawnSys.isGateBlocked(),
+        gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,
         boss: run.boss && run.boss.alive ? { name: run.boss.def.name, pct: run.boss.hp / run.boss.maxHP } : null,
       });

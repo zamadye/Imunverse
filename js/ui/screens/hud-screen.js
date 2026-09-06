@@ -161,6 +161,19 @@ export function updateHUD(data) {
   updateBuffChips();
 
   // Combo pill (juice): tampil saat >= 3 kill beruntun
+  // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
+  const gateNode = document.getElementById('hud-gate');
+  if (gateNode) {
+    gateNode.classList.toggle('hidden', !data.gate);
+    // Fase 18 XP BANK: label "ditahan" — XP menunggu penjaga tumbang
+    const bankNode = document.getElementById('hud-gate-bank');
+    if (bankNode) {
+      const bank = data.gateBank || 0;
+      bankNode.classList.toggle('hidden', !(data.gate && bank > 0));
+      if (data.gate && bank > 0) bankNode.textContent = `+${bank} XP ${t('ditahan')}`;
+    }
+  }
+
   const comboNode = document.getElementById('hud-combo');
   if (comboNode) {
     const count = data.combo?.count || 0;

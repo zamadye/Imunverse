@@ -10,7 +10,7 @@
  * setiap `bossWaveEvery` wave, boss (behavior boss_pattern_a) muncul sekali.
  */
 
-import { getData, getWaveConfig, getSpawnInterval, getEnemyHPScale, getEnemySpeedScale } from '../core/data-store.js';
+import { getData, getWaveConfig, getSpawnInterval, getEnemyHPScale, getEnemySpeedScale, getProgression } from '../core/data-store.js';
 
 export class SpawnSystem {
   constructor() {
@@ -25,6 +25,17 @@ export class SpawnSystem {
     this.mods = {};             // modifier run (kondisi tubuh + mutator liveops)
     this.rampTimer = 0;         // HOOK: wave 1 mulai ramai (tidak sepi)
     this.rampMult = 0.45;       // spawn interval dikali ini (naik ke 1 dalam ±15 dtk)
+    this.gateOpen = true;       // Fase 18: gerbang wave — tertutup saat PENJAGA hidup
+  }
+
+  /** Gerbang tertutup = boss penjaga masih hidup, wave TIDAK bisa maju. */
+  isGateBlocked() {
+    return !this.gateOpen;
+  }
+
+  /** Boss penjaga tumbang → gerbang wave terbuka (dipanggil dari game.js). */
+  openGate() {
+    this.gateOpen = true;
   }
 
   /**
@@ -43,6 +54,22 @@ export class SpawnSystem {
       this.rampMult = 1;
     }
 
+    // ---- Fase 18 GATEKEEPER: wave 5/10/15… punya PENJAGA — wajib tumbang
+    // sebelum wave lanjut. Selama gerbang tertutup: timer wave BEKU, musuh
+    // reguler hanya menetes (trickle) supaya arena tetap hidup. ----
+    if (!this.gateOpen) {
+      const gk = getProgression().gatekeeper;
+      this.spawnTimer -= dt;
+      if (this.spawnTimer <= 0) {
+        this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * gk.trickleSpawnMult / (this.mods.spawnMult || 1);
+        if (game.run.enemies.length < cfg.maxAliveEnemies) {
+          const enemyId = this.pickEnemyId(this.wave);
+          if (enemyId) game.spawnEnemy(enemyId, false);
+        }
+      }
+      return events;
+    }
+
     // ---- Ganti wave ----
     this.waveTimer += dt;
     if (this.waveTimer >= cfg.waveDuration) {
@@ -51,7 +78,7 @@ export class SpawnSystem {
       events.newWave = true;
     }
 
-    // ---- Boss setiap N wave ----
+    // ---- Boss setiap N wave → GERBANG DITUTUP sampai boss tumbang ----
     if (
       this.wave % cfg.bossWaveEvery === 0 &&
       this.bossSpawnedForWave !== this.wave &&
@@ -62,10 +89,11 @@ export class SpawnSystem {
       const roster = (cfg.bossRoster && cfg.bossRoster.length) ? cfg.bossRoster : ['sel_kanker'];
       const bossNo = Math.max(0, this.wave / cfg.bossWaveEvery - 1);
       game.spawnEnemy(roster[Math.floor(bossNo) % roster.length], true);
+      this.gateOpen = false; // Fase 18: kunci wave sampai penjaga dikalahkan
       events.bossSpawn = true;
     }
 
-    // ---- Spawn musuh reguler ----
+    // ---- Spawn musuh reguler (band kurva sudah di dalam getSpawnInterval) ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
       this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult / (this.mods.spawnMult || 1);
@@ -110,7 +138,7 @@ export class SpawnSystem {
     };
   }
 
-  /** Scaler statistik musuh untuk wave sekarang. */
+  /** Scaler statistik musuh untuk wave sekarang (band kurva di getter). */
   getScalers() {
     return {
       hpScale: getEnemyHPScale(this.wave) * (this.mods.enemyHPMult || 1),

@@ -206,7 +206,7 @@
       "id": "koin_ganda",
       "name": "Sinyal Ganda",
       "icon": "assets/sprites/icon_coin.png",
-      "desc": "+50% antibodi dari run ini (dipakai otomatis)",
+      "desc": "+30% antibodi dari run ini (dipakai otomatis)",
       "cost": 300,
       "type": "consumable"
     }

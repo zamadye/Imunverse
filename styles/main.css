@@ -971,6 +971,40 @@ img.lock-badge {
 
 /* -- Battle prep -- */
 /* =========================================================
+   FASE 18 — PROGRESSION CURVE & GATEKEEPER
+   ========================================================= */
+
+/* Fase 18 XP BANK: chip "XP ditahan" di dalam pill gerbang */
+.hud-gate-bank {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 217, 61, 0.92);
+  color: #5b4200;
+  font-size: 11px;
+  font-weight: 800;
+}
+.hud-gate-bank.hidden { display: none; }
+
+/* Pill GERBANG DITUTUP — tampil saat boss penjaga masih hidup */
+.hud-gate {
+  position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(180deg, #ff8a80, #e5484d); color: #fffdf4;
+  font-size: 12px; font-weight: 900; letter-spacing: 0.08em;
+  padding: 7px 16px; border-radius: 999px; border: 2px solid #fffdf4;
+  box-shadow: 0 4px 12px rgba(165, 30, 30, 0.4);
+  animation: gate-throb 1.1s ease-in-out infinite;
+  pointer-events: none; z-index: 5;
+}
+.hud-gate.hidden { display: none; }
+@keyframes gate-throb {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.06); }
+}
+
+/* =========================================================
    FASE 17 — RETENTION TRIGGER (dokumen pemilik)
    ========================================================= */
 
