@@ -1,0 +1,8 @@
+{
+  "abilities": [
+    { "id": "tebasan", "name": "Tebasan Mitosis", "icon": "assets/sprites/icon_sword.png", "slot": 1, "key": "j", "kind": "melee_arc", "cooldown": 5.0, "damageMult": 2.2, "radius": 96, "arc": 4.2, "fxColor": "#e8f6f1" },
+    { "id": "siklon", "name": "Siklon Silia", "icon": "assets/sprites/icon_wind.png", "slot": 2, "key": "k", "kind": "push", "cooldown": 9.0, "damageMult": 0.8, "radius": 150, "pushForce": 430, "slowMult": 0.55, "slowTime": 2.5, "fxColor": "#a9d795" },
+    { "id": "petir", "name": "Petir Sitotoksik", "icon": "assets/sprites/icon_bolt.png", "slot": 3, "key": "l", "kind": "lightning", "cooldown": 12.0, "damageMult": 3.2, "targets": 5, "fxColor": "#ffe082" },
+    { "id": "beku", "name": "Beku Fagosit", "icon": "assets/sprites/icon_frost.png", "slot": 4, "key": "o", "kind": "freeze", "cooldown": 14.0, "damageMult": 1.0, "radius": 175, "freezeTime": 2.2, "fxColor": "#c8ecff" }
+  ]
+}

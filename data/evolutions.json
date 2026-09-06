@@ -1,0 +1,104 @@
+{
+  "parts": [
+    {
+      "id": "silia",
+      "name": "Silia",
+      "sprite": "assets/sprites/part_silia.png",
+      "dropWeight": 40
+    },
+    {
+      "id": "pseudopodia",
+      "name": "Pseudopodia",
+      "sprite": "assets/sprites/part_pseudopodia.png",
+      "dropWeight": 30
+    },
+    {
+      "id": "mikropedang",
+      "name": "Mikropedang",
+      "sprite": "assets/sprites/part_pedang.png",
+      "dropWeight": 20
+    },
+    {
+      "id": "inti_elemen",
+      "name": "Inti Elemen",
+      "sprite": "assets/sprites/part_inti.png",
+      "dropWeight": 10
+    }
+  ],
+  "stages": [
+    {
+      "stage": 0,
+      "id": "bulir",
+      "name": "Sel Bulir",
+      "tier": "Common",
+      "tierColor": "#9db1a8",
+      "cost": {},
+      "damageMult": 1.0,
+      "maxHPMult": 1.0,
+      "killFx": "ring",
+      "ability": "tebasan"
+    },
+    {
+      "stage": 1,
+      "id": "bersilia",
+      "name": "Sel Bersilia",
+      "tier": "Uncommon",
+      "tierColor": "#63c76a",
+      "cost": {
+        "silia": 2
+      },
+      "damageMult": 1.08,
+      "maxHPMult": 1.06,
+      "killFx": "slash",
+      "ability": "tebasan"
+    },
+    {
+      "stage": 2,
+      "id": "muda",
+      "name": "Fagosit Muda",
+      "tier": "Rare",
+      "tierColor": "#4aa3e0",
+      "cost": {
+        "silia": 3,
+        "pseudopodia": 2
+      },
+      "damageMult": 1.16,
+      "maxHPMult": 1.12,
+      "killFx": "wind",
+      "ability": "siklon"
+    },
+    {
+      "stage": 3,
+      "id": "elite",
+      "name": "Fagosit Elite",
+      "tier": "Epic",
+      "tierColor": "#b07ae0",
+      "cost": {
+        "pseudopodia": 3,
+        "mikropedang": 2
+      },
+      "damageMult": 1.25,
+      "maxHPMult": 1.18,
+      "killFx": "bolt",
+      "ability": "petir"
+    },
+    {
+      "stage": 4,
+      "id": "legenda",
+      "name": "Imun Legenda",
+      "tier": "Legendary",
+      "tierColor": "#f5c64f",
+      "cost": {
+        "mikropedang": 3,
+        "inti_elemen": 2
+      },
+      "damageMult": 1.35,
+      "maxHPMult": 1.25,
+      "killFx": "legend",
+      "ability": "beku"
+    }
+  ],
+  "dropChanceNormal": 0.06,
+  "dropChanceElite": 0.3,
+  "bossGuaranteedParts": 2
+}

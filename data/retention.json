@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "imuReward": {
+    "perWave": 8,
+    "perKill": 0.5,
+    "perBoss": 50
+  },
+  "combo": {
+    "window": 5,
+    "threshold": 3,
+    "xpMult": 1.2
+  },
+  "xpPerKill": {
+    "kecil": [
+      5,
+      8
+    ],
+    "medium": [
+      12,
+      15
+    ],
+    "hard": [
+      12,
+      15
+    ],
+    "boss": 50
+  },
+  "particles": {
+    "enemyDeath": 22,
+    "bossDeath": 34,
+    "playerHit": 6,
+    "levelUp": 56
+  },
+  "levelUpStopSec": 0.3,
+  "heroNotifSec": 3.2,
+  "synergy": {
+    "Tank": [
+      "maxHP",
+      "damage"
+    ],
+    "Damage": [
+      "damage",
+      "attackSpeed"
+    ],
+    "Support": [
+      "moveSpeed",
+      "maxHP"
+    ]
+  }
+}

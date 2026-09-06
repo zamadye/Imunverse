@@ -1,0 +1,12 @@
+{
+  "name": "imunverse",
+  "version": "1.0.0",
+  "description": "Imunverse — HTML5 roguelike survival bertema sel imun. Vanilla JS + Canvas 2D, tanpa framework.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --bind 0.0.0.0",
+    "sprites": "python3 tools/gen_sprites.py",
+    "check": "node scripts/check-imports.mjs"
+  }
+}

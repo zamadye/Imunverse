@@ -1,0 +1,2217 @@
+/* ============================================================
+   IMUNVERSE — styles/main.css
+   DESIGN SYSTEM v2 — mengikuti reference UI user:
+   • Palet cream / teal / coral / sage, ink hijau tua
+   • Bentuk rounded bubbly (pill, lingkaran, kartu super-rounded)
+   • Nav dock 4 tombol berlabel (Play · Heroes · Squad · Shop)
+   • HUD pill cream di atas arena teal
+   Semua screen UI adalah overlay HTML/CSS di atas canvas.
+   ============================================================ */
+
+:root {
+  /* --- Palet inti (dari reference) --- */
+  --cream: #fdf6e3;
+  --cream-2: #f7edd9;
+  --card: #fffdf4;
+  --ink: #123f3a;
+  --ink-soft: #41706a;
+  --teal: #2f9c8f;
+  --teal-deep: #1f7a70;
+  --teal-dark: #14584f;
+  --teal-light: #bfe3d8;
+  --mint: #ddeec9;
+  --mint-2: #eaf4dd;
+  --sage: #a9d795;
+  --green: #7cb86a;
+  --coral: #f2825c;
+  --coral-deep: #e96a4c;
+  --coral-light: #f8b29a;
+  --gold: #f5c64f;
+  --gold-deep: #e0a72e;
+  --heart: #f0685a;
+
+  /* --- Token bentuk & bayangan --- */
+  --r-xl: 34px;
+  --r-lg: 26px;
+  --r-md: 18px;
+  --r-sm: 13px;
+  --pill: 999px;
+  --shadow-card: 0 10px 24px rgba(31, 74, 66, 0.10), 0 2px 6px rgba(31, 74, 66, 0.08);
+  --shadow-pop: 0 18px 44px rgba(20, 60, 54, 0.28);
+  --shadow-dock: 0 12px 30px rgba(20, 60, 54, 0.22);
+
+  --font: "Nunito", "Quicksand", "Varela Round", ui-rounded, "SF Pro Rounded",
+    "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+}
+
+#app { position: fixed; inset: 0; }
+
+#game {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  touch-action: none;
+  background: #23857a; /* digambar ulang background.js (arena teal) */
+}
+
+/* Flash coral saat player kena hit */
+#damage-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 110px 34px rgba(233, 106, 76, 0.5);
+  opacity: 0; transition: opacity 0.5s ease;
+  z-index: 5;
+}
+#damage-vignette.flash { opacity: 1; transition: opacity 0.05s ease; }
+
+#ui { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+
+/* ---------------- Toast ---------------- */
+#toasts {
+  position: absolute; bottom: calc(160px + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%);
+  z-index: 60; display: flex; flex-direction: column-reverse; gap: 8px; align-items: center;
+  pointer-events: none; width: min(86vw, 400px);
+}
+/* Di luar pertempuran: toast kecil di ATAS layar (bukan menutup konten tengah) */
+body:not(.in-run) #toasts {
+  top: auto; bottom: 122px; flex-direction: column; /* di atas dock — tidak menutupi topbar */
+  width: min(72vw, 320px);
+}
+body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
+.toast {
+  background: var(--card); color: var(--ink);
+  border: 2px solid var(--teal-light); border-left: 6px solid var(--teal);
+  border-radius: var(--r-md); padding: 10px 16px; font-size: 14px; font-weight: 800;
+  box-shadow: var(--shadow-card); animation: toast-in 0.25s ease, toast-out 0.4s ease 2.6s forwards;
+  max-width: 100%;
+}
+.toast.gold { border-left-color: var(--gold); }
+.toast.danger { border-left-color: var(--coral); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-14px) scale(0.95); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(-10px); } }
+
+/* ---------------- Screen dasar ---------------- */
+.screen {
+  position: fixed; inset: 0; height: 100dvh; /* Fase 16: dinamis mengikuti URL-bar HP */
+  bottom: auto; /* tinggi dari 100dvh, bukan bottom — aman address bar */
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(14px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  pointer-events: auto;
+  background: var(--cream);
+}
+@supports not (height: 100dvh) {
+  .screen { height: 100vh; }
+}
+.screen.active { display: flex; animation: screen-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes screen-in { from { opacity: 0; transform: translateY(14px); } }
+
+.screen.modal {
+  justify-content: center; align-items: center;
+  background: rgba(18, 63, 58, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 10px; /* modal tidak menempel tepi di layar pendek */
+}
+
+/* HUD tembus pandang ke canvas */
+.screen.passive {
+  background: none; backdrop-filter: none; pointer-events: none; overflow: hidden;
+  padding: calc(10px + env(safe-area-inset-top)) 12px 12px;
+}
+
+h1, h2, h3 { letter-spacing: 0.2px; }
+
+/* ---------------- Buttons ---------------- */
+.btn {
+  appearance: none; border: none; border-radius: var(--pill);
+  background: var(--card); color: var(--ink);
+  font-family: var(--font); font-weight: 900; font-size: 16px;
+  padding: 13px 24px; cursor: pointer; pointer-events: auto;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--press, 0.08s) ease, filter 0.15s ease, opacity 0.15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 48px;
+}
+.btn:active { transform: scale(0.95); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--teal), var(--teal-deep));
+  color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 20px rgba(31, 122, 112, 0.42), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+.btn-danger {
+  background: linear-gradient(180deg, var(--coral), var(--coral-deep));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(233, 106, 76, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+.btn-gold {
+  background: linear-gradient(180deg, #f9d97a, var(--gold-deep));
+  color: #5c430e;
+  box-shadow: 0 8px 20px rgba(224, 167, 46, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-xl { font-size: 19px; padding: 17px 40px; width: min(100%, 430px); min-height: 58px; }
+.btn-back {
+  width: 48px; height: 48px; min-height: 48px; padding: 0; border-radius: 50%;
+  background: var(--card); color: var(--teal-dark); font-size: 24px; font-weight: 900;
+  box-shadow: var(--shadow-card); flex: 0 0 auto;
+}
+.btn-back img { width: 26px; height: 26px; object-fit: contain; }
+.btn-link {
+  background: none; border: none; color: var(--ink-soft); font-family: var(--font);
+  font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline;
+  pointer-events: auto; padding: 8px;
+}
+.btn-row { display: flex; gap: 12px; width: 100%; max-width: 430px; }
+.btn-row .btn { flex: 1; }
+
+/* Fokus keyboard terlihat jelas (aksesibilitas) */
+.btn:focus-visible, .dock-btn:focus-visible, .icon-btn:focus-visible,
+.choice-card:focus-visible, .hero-card:focus-visible {
+  outline: 3px solid rgba(47, 156, 143, 0.6); outline-offset: 2px;
+}
+
+.icon-btn img { width: 28px; height: 28px; object-fit: contain; }
+.icon-btn {
+  width: 48px; height: 48px; min-height: 48px; border: none; border-radius: 50%;
+  background: var(--card); color: var(--teal-dark); font-size: 20px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card); transition: transform 0.08s ease; pointer-events: auto;
+}
+.icon-btn:active { transform: scale(0.92); }
+
+/* ---------------- Topbar ---------------- */
+.topbar {
+  width: 100%; max-width: 520px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.currency-chip {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--card); border-radius: var(--pill);
+  padding: 7px 18px 7px 8px; font-weight: 900; font-size: 17px; color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+.currency-chip .coin {
+  width: 32px; height: 32px; object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(31, 74, 66, 0.25));
+}
+.currency-chip.small { padding: 4px 13px 4px 6px; font-size: 13.5px; }
+.currency-chip.small .coin { width: 26px; height: 26px; font-size: 12px; }
+
+/* ---------------- LOADING ---------------- */
+#screen-loading { justify-content: center; }
+.load-box { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.load-emblem {
+  width: min(52vw, 240px); aspect-ratio: 1; object-fit: contain;
+  filter: drop-shadow(0 16px 26px rgba(31, 74, 66, 0.22));
+  animation: bob 3.2s ease-in-out infinite;
+}
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+.load-title { font-size: 30px; font-weight: 900; color: var(--teal-dark); letter-spacing: 2px; }
+.load-title span { color: var(--coral); }
+.progress-track {
+  width: min(64vw, 300px); height: 16px; border-radius: var(--pill); margin-top: 10px;
+  background: #efe3c8; overflow: hidden; box-shadow: inset 0 2px 3px rgba(31, 74, 66, 0.12);
+}
+.progress-fill {
+  height: 100%; width: 0%; border-radius: var(--pill);
+  background: linear-gradient(180deg, #37ab9c, var(--teal-deep));
+  transition: width 0.15s ease;
+}
+.loading-label { color: var(--ink-soft); font-size: 13px; font-weight: 700; }
+
+/* ---------------- DASHBOARD ---------------- */
+.dash-scroll {
+  width: 100%; max-width: 520px; flex: 1;
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto; padding-bottom: 8px;
+}
+
+/* Kartu panggung hero ala mockup: pastel mint + blob organik */
+.hero-stage {
+  position: relative; border-radius: var(--r-xl); min-height: 300px;
+  background:
+    radial-gradient(circle at 82% 16%, rgba(169, 215, 149, 0.55) 0 46px, transparent 47px),
+    radial-gradient(circle at 12% 30%, rgba(169, 215, 149, 0.4) 0 30px, transparent 31px),
+    radial-gradient(circle at 85% 62%, rgba(47, 156, 143, 0.16) 0 58px, transparent 59px),
+    radial-gradient(circle at 20% 78%, rgba(191, 227, 216, 0.7) 0 40px, transparent 41px),
+    radial-gradient(circle at 55% 90%, rgba(169, 215, 149, 0.35) 0 34px, transparent 35px),
+    linear-gradient(160deg, var(--mint-2), #d8ecd0);
+  box-shadow: var(--shadow-card);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; padding: 18px;
+}
+.stage-hero {
+  width: min(46vw, 210px); aspect-ratio: 1; object-fit: contain;
+  filter: drop-shadow(0 18px 22px rgba(31, 74, 66, 0.3));
+  animation: bob 3.6s ease-in-out infinite;
+}
+.stage-info {
+  position: absolute; left: 18px; bottom: 14px; text-align: left;
+  background: rgba(255, 253, 244, 0.9); border-radius: var(--r-md);
+  padding: 8px 14px; box-shadow: var(--shadow-card);
+}
+.stage-info b { display: block; font-size: 15px; color: var(--teal-dark); }
+.stage-info span { font-size: 11px; color: var(--ink-soft); font-weight: 700; }
+.stage-badge {
+  position: absolute; right: 14px; top: 14px;
+  background: var(--teal-deep); color: #fff; font-size: 12px; font-weight: 900;
+  border-radius: var(--pill); padding: 7px 13px; box-shadow: var(--shadow-card);
+}
+
+/* Strip statistik kecil */
+.stat-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat-cell {
+  background: var(--card); border-radius: var(--r-md); text-align: center;
+  padding: 10px 6px; box-shadow: var(--shadow-card);
+}
+.stat-cell b { display: block; font-size: 17px; color: var(--teal-deep); }
+.stat-cell span { font-size: 10.5px; color: var(--ink-soft); font-weight: 800; }
+
+/* Kartu generik */
+.card {
+  width: 100%; background: var(--card); border-radius: var(--r-lg);
+  padding: 15px 17px; box-shadow: var(--shadow-card);
+}
+.card-title { font-size: 13.5px; color: var(--teal-deep); margin-bottom: 10px; font-weight: 900; letter-spacing: 0.4px; }
+
+.daily-card { display: flex; align-items: center; gap: 12px; }
+.daily-card .daily-info { flex: 1; }
+.daily-card .daily-info b { display: block; font-size: 14.5px; }
+.daily-card .daily-info span { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.daily-card .btn { min-height: 44px; padding: 10px 18px; font-size: 13.5px; }
+
+.mission-list { display: flex; flex-direction: column; gap: 11px; }
+.mission-item { display: flex; flex-direction: column; gap: 5px; }
+.mission-item .m-row { display: flex; justify-content: space-between; font-size: 12.5px; }
+.mission-item .m-name { font-weight: 900; }
+.mission-item .m-reward { color: var(--gold-deep); font-weight: 900; }
+.mission-item.done .m-name { color: var(--teal); }
+.mission-item.done .m-reward::after { content: " ✓"; color: var(--teal); }
+.mission-track { height: 9px; background: #efe3c8; border-radius: var(--pill); overflow: hidden; }
+.mission-fill { height: 100%; background: linear-gradient(90deg, var(--sage), var(--teal)); border-radius: var(--pill); }
+.mission-more { font-size: 11px; color: var(--ink-soft); font-weight: 700; }
+
+/* Dock navigasi bawah ala mockup */
+.dock {
+  width: 100%; max-width: 520px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  padding: 10px 4px calc(4px + env(safe-area-inset-bottom));
+  margin-top: 6px;
+}
+.dock-btn {
+  appearance: none; border: none; background: none; cursor: pointer; pointer-events: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  font-family: var(--font); padding: 0;
+}
+.dock-btn .dock-ico {
+  width: 62px; height: 62px; border-radius: 21px;
+  background: var(--card); color: var(--teal-deep);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.08s ease;
+}
+.dock-btn:active .dock-ico { transform: scale(0.9); }
+.dock-btn.primary .dock-ico {
+  background: linear-gradient(180deg, var(--teal), var(--teal-deep)); color: #fff;
+  box-shadow: 0 10px 22px rgba(31, 122, 112, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+.dock-btn .dock-ico img { width: 32px; height: 32px; object-fit: contain; }
+.dock-btn span { font-size: 13px; font-weight: 900; color: var(--ink); }
+
+/* ---------------- Header sub-screen ---------------- */
+.screen-header {
+  width: 100%; max-width: 560px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 4px;
+}
+.screen-header h2 { flex: 1; text-align: center; font-size: 21px; color: var(--teal-dark); font-weight: 900; }
+.screen-header .spacer { width: 48px; flex: 0 0 auto; }
+.screen-subtitle {
+  width: 100%; max-width: 560px; text-align: center;
+  color: var(--ink-soft); font-size: 12px; font-weight: 700; margin-bottom: 14px;
+}
+.screen-footer { padding: 18px 0 8px; display: flex; justify-content: center; width: 100%; }
+
+/* ---------------- ROSTER — lingkaran avatar ala mockup ---------------- */
+.roster-grid {
+  width: 100%; max-width: 560px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 14px;
+  padding: 20px; background: var(--card); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-card);
+}
+.hero-card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px;
+  cursor: pointer; border-radius: var(--r-lg); padding: 6px 4px 10px;
+  transition: transform 0.1s ease;
+}
+.hero-card:active { transform: scale(0.95); }
+.avatar-wrap {
+  position: relative; width: min(38vw, 150px); aspect-ratio: 1;
+  border-radius: 50%; border: 3px solid var(--teal-light);
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.hero-card.selected .avatar-wrap {
+  border-color: #35e0c8;
+  box-shadow: 0 0 0 4px rgba(53, 224, 200, 0.35), 0 0 26px rgba(53, 224, 200, 0.75);
+}
+.hero-sprite { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(31, 74, 66, 0.25)); }
+.hero-name { font-weight: 900; font-size: 14px; text-align: center; color: var(--ink); }
+.hero-pattern { font-size: 10.5px; color: var(--ink-soft); font-weight: 800; text-align: center; }
+
+/* Hero terkunci: siluet redup + badge gembok (ala mockup) */
+.hero-card.locked { cursor: default; }
+.hero-card.locked .avatar-wrap { border-color: #e4d9bf; }
+.hero-card.locked .hero-sprite { opacity: 0.28; filter: grayscale(1) contrast(0.8); }
+.hero-card.locked .hero-name { color: var(--ink-soft); }
+.lock-badge {
+  position: absolute; right: 2%; bottom: 2%;
+  width: 34%; aspect-ratio: 1; border-radius: 50%;
+  background: var(--teal-deep); border: 3px solid var(--card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; box-shadow: var(--shadow-card);
+}
+.hero-card.locked .lock-badge { background: #9db3ae; }
+.lock-cond {
+  font-size: 10px; color: var(--coral-deep); font-weight: 800; text-align: center;
+  line-height: 1.3; max-width: 92%;
+}
+.lock-buy-note { font-size: 10.5px; color: var(--gold-deep); font-weight: 900; text-align: center; }
+
+/* ---------------- UPGRADE SQUAD — slider ala mockup ---------------- */
+.upgrade-list { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 13px; }
+.upg-row {
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--card); border-radius: var(--r-lg); padding: 15px 17px;
+  box-shadow: var(--shadow-card);
+}
+.upg-head { display: flex; align-items: center; gap: 12px; }
+.upg-icon {
+  width: 46px; height: 46px; border-radius: 16px; flex: 0 0 auto;
+  background: linear-gradient(160deg, var(--mint-2), var(--teal-light));
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.upg-info { flex: 1; }
+.upg-info b { font-size: 15px; color: var(--teal-dark); }
+.upg-info .upg-desc { display: block; font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-top: 1px; }
+/* slider level: track + knob (meniru mockup Attack/Army Size) */
+.upg-slider { position: relative; height: 26px; border-radius: var(--pill); background: #f3e8cf; overflow: visible; }
+.upg-slider .upg-fill {
+  position: absolute; inset: 0 auto 0 0; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--teal-light), var(--teal));
+  min-width: 0;
+}
+.upg-slider .upg-knob {
+  position: absolute; top: 50%; width: 34px; height: 34px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #6cc4b6, var(--teal-deep));
+  border: 4px solid #fff; box-shadow: 0 3px 8px rgba(31, 74, 66, 0.35);
+}
+.upg-slider.maxed .upg-fill { background: linear-gradient(90deg, #f9d97a, var(--gold-deep)); }
+.upg-slider.maxed .upg-knob { background: radial-gradient(circle at 35% 30%, #fbe08a, var(--gold-deep)); }
+.upg-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.upg-count { font-size: 11.5px; color: var(--ink-soft); font-weight: 900; }
+.btn-buy { min-height: 44px; padding: 10px 20px; font-size: 14px; }
+.btn-buy.maxed {
+  background: none; box-shadow: none; color: var(--gold-deep);
+  font-weight: 900; cursor: default; transform: none;
+}
+
+/* ---------------- TOKO — kartu 3 kolom ala mockup ---------------- */
+.shop-sections { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; }
+.shop-section h3 { font-size: 13.5px; color: var(--teal-deep); margin-bottom: 9px; font-weight: 900; letter-spacing: 0.4px; }
+.shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+.shop-card {
+  position: relative; border-radius: var(--r-lg); padding: 13px 10px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  box-shadow: var(--shadow-card); overflow: visible;
+}
+.shop-card.c-teal { background: linear-gradient(170deg, #d7ece4, #b9ddD2); }
+.shop-card.c-green { background: linear-gradient(170deg, #e7f2d8, #cfe6b8); }
+.shop-card.c-coral { background: linear-gradient(170deg, #fbe3d8, #f6c8b4); }
+.shop-sprite { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 6px 8px rgba(31, 74, 66, 0.22)); }
+.shop-card b { font-size: 12px; color: var(--teal-dark); text-align: center; line-height: 1.2; }
+.shop-card .s-desc { font-size: 10px; color: var(--ink-soft); font-weight: 700; text-align: center; line-height: 1.35; flex: 1; }
+.price-tag {
+  position: absolute; top: -10px; right: -6px;
+  background: linear-gradient(180deg, #f9d97a, var(--gold-deep)); color: #5c430e;
+  font-size: 11px; font-weight: 900; border-radius: var(--pill); padding: 4px 9px;
+  box-shadow: 0 4px 10px rgba(224, 167, 46, 0.45);
+}
+.shop-card .lock-badge { width: 26px; height: 26px; font-size: 11px; right: 6px; bottom: 6px; }
+.shop-card .s-owned { font-size: 10.5px; color: var(--teal-deep); font-weight: 900; }
+.shop-card .btn { width: 100%; min-height: 36px; font-size: 12px; padding: 7px 8px; }
+.shop-card .icon-sprite { font-size: 40px; line-height: 64px; }
+
+/* ---------------- HUD ---------------- */
+.hud-top { width: 100%; max-width: 640px; margin: 0 auto; }
+.hud-xp-track {
+  position: relative; width: 100%; height: 10px; border-radius: var(--pill);
+  background: rgba(255, 253, 244, 0.55); overflow: visible;
+  box-shadow: inset 0 1px 3px rgba(20, 88, 79, 0.25);
+}
+.hud-xp-fill {
+  height: 100%; width: 0%; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--sage), var(--green));
+  transition: width 0.15s linear;
+}
+.hud-level-chip {
+  position: absolute; right: 0; top: 50%; transform: translate(2px, -50%);
+  background: var(--teal-dark); color: #fff; font-size: 9.5px; font-weight: 900;
+  border-radius: var(--pill); padding: 2px 7px;
+}
+.hud-row { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; gap: 8px; }
+
+/* Pill HP ala mockup (hearts) */
+.hp-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255, 253, 244, 0.92); border-radius: var(--pill);
+  padding: 5px 12px 5px 6px; box-shadow: var(--shadow-card);
+}
+.hp-pill .heart { width: 20px; height: 20px; object-fit: contain; }
+.hud-portrait {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--mint-2); border: 2px solid var(--teal-light);
+  object-fit: contain; padding: 2px;
+}
+.hud-hp-track {
+  width: clamp(70px, 22vw, 150px); height: 10px; border-radius: var(--pill);
+  background: #e9ddc2; overflow: hidden;
+}
+.hud-hp-fill {
+  height: 100%; width: 100%; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--coral-light), var(--heart));
+  transition: width 0.15s linear;
+}
+.hud-hp-text { font-size: 11px; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hp-pill.low { animation: hp-pulse 0.7s ease-in-out infinite; }
+@keyframes hp-pulse {
+  0%, 100% { box-shadow: var(--shadow-card); }
+  50% { box-shadow: 0 0 0 5px rgba(240, 104, 90, 0.35), var(--shadow-card); }
+}
+
+.hud-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.wave-pill {
+  background: var(--teal-dark); color: #fff; font-weight: 900; font-size: 12.5px;
+  letter-spacing: 0.8px; border-radius: var(--pill); padding: 7px 14px;
+  box-shadow: var(--shadow-card); white-space: nowrap; max-width: 34vw;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.timer-chip {
+  background: rgba(255, 253, 244, 0.85); color: var(--ink);
+  font-size: 11px; font-weight: 900; border-radius: var(--pill); padding: 3px 12px;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.timer-chip img { width: 13px; height: 13px; object-fit: contain; }
+.hud-boss-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; width: min(40vw, 220px); margin-top: 2px; }
+.hud-boss-track {
+  width: 100%; height: 10px; background: rgba(255, 253, 244, 0.5);
+  border-radius: var(--pill); overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+.hud-boss-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--coral-light), var(--coral-deep)); transition: width 0.15s linear; }
+.hud-boss-name { font-size: 9.5px; letter-spacing: 2px; color: #fff; font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+
+.hud-right { display: flex; flex-direction: row; align-items: center; gap: 6px; }
+.hud-kills, .hud-currency-run {
+  font-size: 11.5px; font-weight: 900; color: var(--ink);
+  background: rgba(255, 253, 244, 0.92); padding: 4px 11px; border-radius: var(--pill);
+  box-shadow: var(--shadow-card); font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.hud-kills img, .hud-currency-run img { width: 14px; height: 14px; object-fit: contain; }
+.hud-minimap {
+  position: absolute; top: 118px; right: 14px;
+  width: 74px; height: 74px; border-radius: 50%;
+  border: 3px solid rgba(255, 253, 244, 0.75);
+  background: rgba(20, 88, 79, 0.55); box-shadow: var(--shadow-card);
+  z-index: 3; pointer-events: none;
+}
+.btn-pause { pointer-events: auto; /* klikable di HUD passive */
+  width: 46px; height: 46px; min-height: 46px; padding: 0; font-size: 17px; border-radius: 50%;
+  background: rgba(255, 253, 244, 0.92); color: var(--teal-dark);
+}
+.btn-pause img { width: 22px; height: 22px; object-fit: contain; }
+
+.hud-announce {
+  position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+  font-size: clamp(22px, 6vw, 36px); font-weight: 900; letter-spacing: 3px;
+  color: #fff; background: var(--teal-deep); border-radius: var(--pill);
+  padding: 12px 34px; box-shadow: var(--shadow-pop);
+  pointer-events: none; animation: announce 1.8s ease forwards; white-space: nowrap;
+}
+.hud-announce.boss { background: var(--coral-deep); }
+@keyframes announce {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.06); }
+  30% { transform: translateX(-50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1); }
+}
+.hud-hint {
+  position: absolute; bottom: calc(128px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  color: #fff; font-size: 11.5px; font-weight: 800; pointer-events: none;
+  background: rgba(20, 88, 79, 0.6); border-radius: var(--pill); padding: 6px 16px;
+  white-space: nowrap;
+}
+.hud-hint .k {
+  display: inline-block; background: rgba(255,253,244,0.92); color: var(--teal-dark);
+  border-radius: 6px; padding: 0 6px; margin: 0 2px; font-weight: 900;
+}
+
+/* ---------------- Modal umum ---------------- */
+.modal-box {
+  width: min(92vw, 440px); background: var(--cream); border-radius: var(--r-xl);
+  padding: 20px 18px; box-shadow: var(--shadow-pop);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: calc(100dvh - 20px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+/* Layar pendek (portrait kecil): padatkan modal agar tombol aksi selalu terlihat */
+@media (max-height: 780px) {
+  .modal-box { gap: 7px; padding: 14px 16px 16px; }
+  .modal-box h2 { font-size: 20px; }
+  .modal-sub { font-size: 11px; }
+  .go-stars { margin-top: -30px; }
+  .go-stars .star { width: 44px !important; height: 44px !important; }
+  .summary-grid { gap: 5px !important; }
+  .btn-xl { min-height: 48px; }
+}
+@media (max-height: 680px) {
+  .go-stars { display: none; }
+}
+.modal-box.wide { width: min(94vw, 500px); }
+.modal-box h2 { font-size: 23px; font-weight: 900; color: var(--teal-dark); }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.85); } }
+
+/* Bintang dekorasi ala mockup victory */
+.go-stars { display: flex; gap: 6px; margin-top: -46px; }
+.go-stars .star {
+  width: 34px; height: 34px; object-fit: contain;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s;
+}
+.go-stars .star.on { filter: drop-shadow(0 0 10px rgba(245, 198, 79, 0.9)); }
+.go-stars .star.on:nth-child(2) { transform: scale(1.3) translateY(-4px); }
+
+/* Level-up */
+.lu-stars { display: flex; gap: 8px; align-items: center; }
+.lu-stars img { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(245, 198, 79, 0.7)); }
+.lu-stars img:nth-child(2) { width: 38px; height: 38px; }
+.levelup-title { color: var(--coral); font-size: 27px; }
+.levelup-title::before, .levelup-title::after { content: "—"; color: var(--coral-light); margin: 0 8px; }
+.levelup-sub { color: var(--ink-soft); font-size: 13px; font-weight: 800; }
+.choice-grid { display: flex; flex-direction: column; gap: 11px; width: 100%; margin-top: 2px; }
+.choice-card {
+  display: flex; align-items: center; gap: 13px; text-align: left; width: 100%;
+  border: none; font-family: var(--font);
+  border-radius: var(--r-lg); padding: 13px 15px; cursor: pointer;
+  color: var(--ink); box-shadow: var(--shadow-card);
+  transition: transform 0.08s ease, filter 0.15s;
+  opacity: 0; animation: choice-in 0.35s ease forwards;
+}
+.choice-card:nth-child(1) { background: linear-gradient(160deg, #e2f1ea, #cde7dc); animation-delay: 0.05s; }
+.choice-card:nth-child(2) { background: linear-gradient(160deg, #ecf4dc, #dbecc4); animation-delay: 0.13s; }
+.choice-card:nth-child(3) { background: linear-gradient(160deg, #fdeade, #f9d4c0); animation-delay: 0.21s; }
+@keyframes choice-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+.choice-card:active { transform: scale(0.96); }
+.choice-icon {
+  font-size: 24px; width: 48px; height: 48px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 253, 244, 0.9); border-radius: 16px; box-shadow: var(--shadow-card);
+}
+.choice-info { flex: 1; }
+.choice-info b { font-size: 15px; color: var(--teal-dark); }
+.choice-info p { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; }
+.choice-stack { font-size: 10.5px; color: var(--teal-deep); font-weight: 900; }
+
+/* Pause & revive */
+.pause-summary { font-size: 13px; color: var(--ink-soft); line-height: 1.8; font-weight: 700; }
+.modal-box .btn { width: 100%; }
+.revive-title { color: var(--coral); }
+.revive-title::before, .revive-title::after { content: "—"; color: var(--coral-light); margin: 0 8px; }
+.revive-sub { font-size: 12.5px; color: var(--ink-soft); font-weight: 700; }
+.revive-count { font-size: 12px; color: var(--gold-deep); font-weight: 900; }
+
+/* Game over */
+.gameover-title { color: var(--coral); }
+.gameover-title.win { color: var(--teal); }
+.gameover-title::before, .gameover-title::after { content: "—"; color: rgba(31, 74, 66, 0.25); margin: 0 8px; }
+.gameover-sub { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; width: 100%; }
+.summary-cell { background: var(--card); border-radius: var(--r-md); padding: 10px 4px; box-shadow: var(--shadow-card); }
+.summary-cell b { display: block; font-size: 17px; color: var(--teal-deep); }
+.summary-cell span { font-size: 10px; color: var(--ink-soft); font-weight: 800; }
+.summary-reward { display: flex; gap: 9px; align-items: center; font-size: 14px; font-weight: 900; color: var(--ink-soft); }
+.summary-reward strong { color: var(--gold-deep); font-size: 22px; font-variant-numeric: tabular-nums; }
+
+/* ---------------- Responsif & aksesibilitas ---------------- */
+@media (max-width: 420px) {
+  .roster-grid { gap: 18px 10px; padding: 16px 12px; }
+  .shop-grid { gap: 8px; }
+  .dock-btn .dock-ico { width: 56px; height: 56px; border-radius: 19px; }
+  .hud-minimap { width: 68px; height: 68px; }
+}
+/* Semua target sentuh kritikal ≥ 44px dijamin oleh ukuran komponen di atas
+   (dock 62, btn 48, back 48, pause 46, choice 48 icon, buy 44). */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+  .load-emblem, .stage-hero { animation: none !important; }
+}
+
+.summary-reward .coin-sm { width: 22px; height: 22px; object-fit: contain; vertical-align: -4px; }
+img.lock-badge {
+  position: absolute; right: 2%; bottom: 2%;
+  width: 34%; height: auto; aspect-ratio: 1;
+  border-radius: 50%; background: var(--teal-deep); border: 3px solid var(--card);
+  padding: 9%; object-fit: contain; box-shadow: var(--shadow-card);
+}
+.hero-card.locked img.lock-badge { background: #9db3ae; }
+.shop-card img.lock-badge { width: 26px; right: 6px; bottom: 6px; padding: 6px; }
+
+/* Inline ikon aset dalam teks */
+.inline-coin { width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; margin: 0 2px; }
+.badge-ico { width: 15px; height: 15px; object-fit: contain; }
+.stage-badge { display: inline-flex; align-items: center; gap: 6px; }
+.ico-title { display: flex; align-items: center; gap: 7px; }
+.t-ico { width: 17px; height: 17px; object-fit: contain; }
+.claim-line b { color: var(--gold-deep); }
+.m-reward { display: inline-flex; align-items: center; gap: 3px; }
+.lock-buy-note { display: flex; align-items: center; justify-content: center; gap: 3px; flex-wrap: wrap; }
+.btn-buy { gap: 6px; }
+
+/* Utilitas sembunyi (wajib — dipakai boss bar & announce) */
+.hidden { display: none !important; }
+
+/* Ikon dalam tombol */
+.btn-ico { width: 19px; height: 19px; object-fit: contain; }
+
+/* HUD dua baris: baris 1 = HP + kolom kanan; baris 2 = wave+timer+boss tengah */
+.hud-row { flex-wrap: wrap; }
+.hud-center { order: 3; width: 100%; flex-direction: row; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hud-boss-wrap { width: min(36vw, 190px); margin-top: 0; }
+.wave-pill { max-width: none; font-size: 14px; padding: 8px 20px; }
+
+/* =====================================================================
+   COMPOSITION LAYER (stage 9) — aura, kuman melayang, dekor victory,
+   weed sudut, banner upgrade, chip musuh panggung. Ala mockup 12.
+   ===================================================================== */
+.deco { position: absolute; pointer-events: none; }
+
+/* -- Loading: kuman lucu melayang di sekitar emblem -- */
+.load-stage { position: relative; display: inline-block; }
+.load-stage .germ { width: 44px; opacity: 0.95; filter: drop-shadow(0 3px 0 rgba(31,74,68,0.12)); }
+.load-stage .germ.g1 { top: -30px; left: -52px; animation: floaty 3.4s ease-in-out infinite; }
+.load-stage .germ.g2 { bottom: -18px; left: -30px; width: 34px; animation: floaty 2.9s 0.5s ease-in-out infinite reverse; }
+.load-stage .germ.g3 { top: -14px; right: -48px; width: 38px; animation: floaty 3.8s 0.9s ease-in-out infinite; }
+.load-stage .dot { width: 54px; right: -40px; bottom: -26px; opacity: 0.8; animation: floaty 3.1s 0.3s ease-in-out infinite; }
+
+/* -- Dashboard: aura + chip musuh di gelembung (ala mockup stage) -- */
+.stage-aura {
+  position: absolute; left: 50%; bottom: 6%; width: 340px; max-width: 92%;
+  transform: translateX(-50%); pointer-events: none; opacity: 0.95;
+}
+.stage-enemies { position: absolute; inset: 0; pointer-events: none; }
+.stage-enemy { position: absolute; width: 64px; height: 64px; }
+.stage-enemy .se-bubble { position: absolute; inset: 0; width: 100%; }
+.stage-enemy .se-sprite { position: absolute; inset: 12%; width: 76%; height: 76%; object-fit: contain; animation: floaty 3s ease-in-out infinite; }
+.stage-enemy.se1 { left: 7%; top: 16%; animation: floaty 4.2s ease-in-out infinite; }
+.stage-enemy.se2 { right: 6%; top: 10%; width: 72px; height: 72px; animation: floaty 3.4s 0.6s ease-in-out infinite reverse; }
+.stage-enemy.se3 { left: 12%; bottom: 14%; width: 52px; height: 52px; animation: floaty 3.8s 1s ease-in-out infinite; }
+
+/* -- Game over: hiasan victory (koin, bintang, siluet monster) -- */
+.go-card { overflow: hidden; }
+.go-deco { position: absolute; pointer-events: none; }
+.go-deco.monster { width: 62px; opacity: 0.18; }
+.go-deco.monster.m1 { top: -10px; left: -14px; transform: rotate(-14deg); }
+.go-deco.monster.m2 { bottom: 74px; right: -16px; transform: rotate(12deg); }
+.go-deco.coin { width: 30px; filter: drop-shadow(0 2px 0 rgba(224,167,46,0.4)); }
+.go-deco.coin.c1 { top: 6px; right: 58px; animation: floaty 2.8s ease-in-out infinite; }
+.go-deco.coin.c2 { top: 34px; left: 20px; width: 22px; animation: floaty 3.2s 0.4s ease-in-out infinite reverse; }
+.go-deco.coin.c3 { bottom: 150px; right: 14px; width: 24px; animation: floaty 3.5s 0.8s ease-in-out infinite; }
+.go-deco.starpop { width: 34px; top: -6px; left: 42%; transform: translateX(-50%) rotate(-10deg); animation: floaty 3s 0.2s ease-in-out infinite; }
+.go-chest { width: 40px; margin-left: auto; animation: floaty 3.4s ease-in-out infinite; }
+
+/* -- Banner upgrade ala mockup: tile hero besar + mini musuh -- */
+.upg-banner { display: flex; gap: 10px; justify-content: center; align-items: stretch; margin-bottom: 14px; }
+.ub-tile { border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ub-tile.big { width: 128px; height: 118px; background: #bfe3d8; box-shadow: inset 0 -5px 0 rgba(20,88,79,0.18), 0 4px 0 rgba(31,74,68,0.15); }
+.ub-tile.big img { width: 86%; }
+.ub-side { display: flex; flex-direction: column; gap: 10px; }
+.ub-tile.mini { width: 66px; height: 54px; background: #f8c9b8; box-shadow: inset 0 -4px 0 rgba(233,106,76,0.25); }
+.ub-tile.mini.light { background: #fbdcd0; }
+.ub-tile.mini img { width: 74%; animation: floaty 3s ease-in-out infinite; }
+
+/* -- Shop: badge kategori pojok kiri-atas kartu -- */
+.corner-deco {
+  position: absolute; top: -10px; left: -10px; width: 34px; transform: rotate(-8deg);
+  filter: drop-shadow(0 2px 0 rgba(31,74,68,0.18)); pointer-events: none;
+}
+
+/* -- Pola kuman melayang di latar layar DOM (ala mockup dashboard).
+      Screen dijadikan stacking context (z-index:0) supaya ::before
+      ber-z-index -1 muncul DI ATAS bg cream tapi DI BAWAH konten. -- */
+#screen-dashboard, #screen-roster, #screen-shop, #screen-upgrade, #screen-gameover { z-index: 0; }
+#screen-dashboard::before, #screen-roster::before, #screen-shop::before,
+#screen-upgrade::before, #screen-gameover::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-image:
+    url('../assets/sprites/deco_germ_teal.png'),
+    url('../assets/sprites/deco_germ_coral.png'),
+    url('../assets/sprites/deco_germ_sage.png'),
+    url('../assets/sprites/deco_dots.png');
+  background-size: 64px, 46px, 52px, 58px;
+  background-repeat: no-repeat;
+  background-position: 6% 12%, 92% 20%, 10% 78%, 88% 84%;
+  opacity: 0.16;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+
+/* -- Pause: baris ringkasan dengan ikon PNG inline -- */
+.pause-line { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.pause-ico { width: 15px; height: 15px; object-fit: contain; }
+
+/* -- Roster: nafas lebih longgar antar kartu (ala mockup grid hero) -- */
+.roster-grid { gap: 30px 18px; padding: 24px 20px; }
+.hero-card { gap: 10px; }
+.avatar-wrap { width: min(34vw, 132px); }
+.hero-name { font-size: 15px; }
+
+/* =====================================================================
+   FASE 5.2/5.3 — KEMAMPUAN AKTIF, EVOLUSI HERO, ARENA, PETI BOSS
+   ===================================================================== */
+
+/* -- Bar kemampuan aktif: 4 tombol bulat di kanan (1 senjata + 3 kekuatan) -- */
+
+
+/* -- Kartu evolusi hero di dashboard (selalu ada yang dikejar) -- */
+.evo-card { display: flex; flex-direction: column; gap: 10px; }
+.evo-head { display: flex; align-items: center; gap: 10px; }
+.evo-stage-chip {
+  min-width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 13px; color: var(--cream); background: var(--teal);
+}
+.evo-title { display: flex; flex-direction: column; }
+.evo-title b { font-size: 15px; color: var(--ink); }
+.evo-tier { font-size: 11px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+.evo-parts { display: flex; gap: 8px; flex-wrap: wrap; }
+.evo-part {
+  display: flex; align-items: center; gap: 5px; padding: 5px 9px;
+  background: var(--cream-deep, #f6ecd4); border-radius: 14px;
+  font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.evo-part img { width: 22px; height: 22px; }
+.evo-part.need { outline: 2px dashed var(--coral); border-radius: 14px; }
+.evo-progress { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+
+/* -- Overlay evolusi di panggung hero dashboard -- */
+#stage-evo { position: absolute; left: 50%; bottom: 6%; width: 340px; max-width: 92%; aspect-ratio: 1; transform: translateX(-50%); pointer-events: none; }
+#stage-evo img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+#stage-evo .ov-silia { width: 34%; margin-top: -26%; animation: floaty 3s ease-in-out infinite; }
+#stage-evo .ov-pseudopodia { width: 30%; margin-top: 30%; }
+#stage-evo .ov-pedang { width: 38%; margin-left: 22%; rotate: 18deg; }
+#stage-evo .ov-inti { width: 72%; animation: floaty 4s ease-in-out infinite reverse; }
+
+/* -- Kartu arena dashboard + modal pilih arena -- */
+.arena-card { display: flex; align-items: center; gap: 12px; }
+.arena-card img.arena-thumb { width: 64px; height: 64px; border-radius: 16px; box-shadow: var(--shadow-card); }
+.arena-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.arena-info b { color: var(--ink); }
+.arena-info span { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.arena-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.arena-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px;
+  border-radius: 18px; background: var(--cream); cursor: pointer;
+  border: 3px solid transparent; text-align: left; width: 100%;
+}
+.arena-item.selected { border-color: var(--teal); background: var(--teal-light); }
+.arena-item.locked { opacity: 0.6; cursor: default; }
+.arena-item img { width: 56px; height: 56px; border-radius: 14px; }
+.arena-item .ai-name { font-weight: 900; color: var(--ink); }
+.arena-item .ai-bonus { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.arena-item .ai-unlock { font-size: 11px; color: var(--coral); font-weight: 800; }
+.arena-item .ai-check { margin-left: auto; font-weight: 900; color: var(--teal); font-size: 18px; }
+
+/* -- Modal peti boss -- */
+.chest-box { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.chest-img { width: 86px; animation: floaty 2.6s ease-in-out infinite; }
+.chest-loot { display: flex; gap: 10px; margin: 4px 0 8px; }
+.chest-loot .loot {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  background: var(--cream); border-radius: 16px; font-weight: 900; color: var(--ink);
+}
+.chest-loot .loot img { width: 24px; height: 24px; }
+.btn-gold {
+  background: linear-gradient(180deg, #f7d272, #e0a72e); color: #5c3d0e;
+  box-shadow: 0 4px 0 #b98a20, 0 8px 18px rgba(224, 167, 46, 0.35);
+}
+.btn-gold:disabled { opacity: 0.5; }
+.modal-title.coral { color: var(--coral); }
+
+/* -- Gameover: baris bagian evolusi -- */
+.go-parts { font-size: 13px; font-weight: 800; color: var(--teal-dark, #14584f); }
+
+/* -- Baris terkunci dengan ikon gembok PNG (bukan emoji) -- */
+.lock-line { display: inline-flex; align-items: center; gap: 4px; }
+.lock-ico { width: 13px; height: 13px; object-fit: contain; }
+
+/* -- Kolom teks item arena (nama + bonus + status unlock) -- */
+.ai-mid { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-unlock.lock-line { margin-top: 2px; }
+
+.lock-line span { line-height: 14px; }
+.arena-item .ai-unlock.lock-line { display: flex; align-items: center; }
+
+/* =====================================================================
+   META-LAYER KONDISI TUBUH (Fase 6) — tubuh = organisme yang dikelola
+   ===================================================================== */
+
+/* -- Kartu kondisi tubuh di dashboard -- */
+.body-card { display: flex; flex-direction: column; gap: 10px; }
+.body-head { display: flex; align-items: center; gap: 10px; }
+.body-title-wrap { flex: 1; display: flex; flex-direction: column; }
+.body-title { color: var(--ink); font-size: 15px; }
+.body-sub { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+
+.body-rows { display: flex; flex-direction: column; gap: 7px; }
+.body-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 14px; background: var(--cream);
+}
+.body-row.critical { background: #fde4d8; animation: crit-pulse 1.4s ease-in-out infinite; }
+@keyframes crit-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 130, 92, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(242, 130, 92, 0.35); }
+}
+.body-ico { width: 26px; height: 26px; }
+.body-name { width: 84px; font-size: 12.5px; font-weight: 900; color: var(--ink); }
+.body-track {
+  position: relative; flex: 1; height: 14px; border-radius: 8px;
+  background: #e9dfc0; overflow: hidden;
+}
+.body-fill { height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+.body-val {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: var(--ink);
+}
+.body-crit { width: 22px; height: 22px; animation: floaty 2s ease-in-out infinite; }
+
+.body-meters { display: flex; gap: 8px; }
+.meter {
+  flex: 1; display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+  background: var(--cream); border-radius: 14px; font-size: 12px; font-weight: 800; color: var(--ink);
+}
+.meter img { width: 22px; height: 22px; }
+.meter.danger { background: #fde4d8; color: var(--coral); }
+
+.body-foot { display: flex; flex-direction: column; gap: 8px; }
+.body-milestone { font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+.body-milestone.done { color: var(--gold-dark, #b98a20); }
+
+/* -- Modal fokus run -- */
+.focus-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+.focus-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: 18px; background: var(--cream); cursor: pointer;
+  border: 3px solid transparent; text-align: left; width: 100%;
+}
+.focus-item.selected { border-color: var(--teal); background: var(--teal-light); }
+.focus-item img { width: 40px; height: 40px; }
+.fi-mid { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fi-name { font-weight: 900; color: var(--ink); }
+.fi-desc { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+
+/* -- Dampak tubuh di game over -- */
+.go-body { font-size: 12.5px; }
+
+/* =====================================================================
+   WORKFLOW UI v2 — CTA primer + Battle Prep + Tas (riset: 1 primary CTA,
+   pre-run choices dalam 1 alur, bottom nav 3-5, bag terpisah)
+   ===================================================================== */
+
+/* -- Tombol MULAI besar di dashboard (CTA primer, selalu terlihat) -- */
+.btn-play-big {
+  width: 100%; max-width: 560px; margin: 12px 0 4px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 22px; border: none; border-radius: 24px; cursor: pointer;
+  background: linear-gradient(180deg, #37b3a2, #1f7a70);
+  box-shadow: 0 5px 0 #14584f, 0 10px 22px rgba(31, 122, 112, 0.4);
+  transition: transform 0.1s ease;
+}
+.btn-play-big:active { transform: translateY(3px); box-shadow: 0 2px 0 #14584f; }
+.btn-play-big img { width: 30px; height: 30px; }
+.btn-play-big span {
+  font-size: 22px; font-weight: 900; letter-spacing: 0.04em; color: var(--cream);
+}
+.btn-play-big small { margin-left: auto; font-size: 11px; font-weight: 800; color: #bfe3d8; }
+
+/* -- Battle prep -- */
+/* =========================================================
+   FASE 17 — RETENTION TRIGGER (dokumen pemilik)
+   ========================================================= */
+
+/* Chip Imun Coin live di HUD kanan-atas + pulse saat bertambah */
+.hud-imu-run img { width: 16px; height: 16px; }
+.hud-imu-run.imu-pulse { animation: imu-pulse 0.35s ease; }
+@keyframes imu-pulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.22); filter: brightness(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* HP bar halus (lerp visual) — bukan lompatan instan (trigger 5C) */
+#hud-hp-fill { transition: width 0.18s ease-out; }
+#hud-xp-fill { transition: width 0.12s linear; }
+
+/* Roster: tombol BUKA hero dengan Imun Coin */
+.lock-unlock-btn {
+  margin-top: 5px; font-size: 10.5px; padding: 7px 10px; min-height: 32px;
+  border-radius: 12px; width: 100%;
+}
+.lock-unlock-btn.poor { filter: grayscale(0.55); opacity: 0.75; }
+
+/* Tab GLOBAL: upgrade permanen Imun Coin */
+.upg-note { font-size: 11px; color: var(--ink-soft); font-weight: 700; margin: 4px 0 10px; }
+.upg-layer.global { background: linear-gradient(180deg, #d9f6f1, #bfeae2); color: #0f6b60; }
+.upg-now { font-size: 10.5px; font-weight: 800; color: var(--teal-deep); }
+.global-row .btn-buy { background: linear-gradient(180deg, #ffd76a, #e8a614); color: #4a3305; }
+
+/* Badge sinergi di pilihan level-up (trigger 3C) */
+.syn-badge {
+  margin-left: 7px; font-size: 9px; font-weight: 900; letter-spacing: 0.06em;
+  color: #8a6d00; background: linear-gradient(180deg, #ffe9a8, #ffd76a);
+  padding: 2.5px 8px; border-radius: 9px; vertical-align: middle;
+  animation: syn-glow 1.6s ease-in-out infinite;
+}
+@keyframes syn-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 205, 90, 0.5); }
+  50% { box-shadow: 0 0 10px 2px rgba(255, 205, 90, 0.65); }
+}
+.choice-card.synergy { border-color: #ffcd5a; box-shadow: 0 6px 18px rgba(232, 166, 20, 0.25); }
+
+/* Overlay perayaan HERO BARU (trigger 1B) */
+#hero-notice {
+  position: fixed; inset: 0; z-index: 120; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(24, 68, 60, 0.45); backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+#hero-notice.show { display: flex; animation: hn-fade 3.2s ease forwards; }
+@keyframes hn-fade {
+  0% { opacity: 0; } 8% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; }
+}
+.hn-box {
+  position: relative; text-align: center; padding: 26px 44px 22px;
+  background: linear-gradient(170deg, #fffdf4, #e7f7ee);
+  border: 4px solid #ffd93d; border-radius: 26px;
+  box-shadow: 0 18px 50px rgba(24, 68, 60, 0.4);
+  animation: hn-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes hn-pop { from { transform: scale(0.55); opacity: 0; } }
+.hn-sprite { width: 110px; height: 110px; object-fit: contain; filter: drop-shadow(0 8px 14px rgba(35, 30, 22, 0.25)); }
+.hn-kicker {
+  font-size: 15px; font-weight: 900; letter-spacing: 0.18em; color: #b98a20;
+  animation: hn-zoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes hn-zoom { from { transform: scale(0.2); } }
+.hn-name { display: block; font-size: 26px; color: var(--teal-dark); margin-top: 2px; }
+.hn-title { font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+.hn-stars { position: absolute; inset: 0; pointer-events: none; }
+.hn-star {
+  position: absolute; left: 50%; top: 50%; width: 14px; height: 14px;
+  background: #ffd93d; clip-path: polygon(50% 0, 63% 35%, 100% 50%, 63% 65%, 50% 100%, 37% 65%, 0 50%, 37% 35%);
+  opacity: 0;
+  animation: hn-burst 1.1s ease-out forwards;
+}
+@keyframes hn-burst {
+  0% { opacity: 1; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(220deg); }
+}
+
+/* Fase 16: modal Jeda padat — Lanjutkan/Akhiri SELALU terlihat tanpa scroll */
+#screen-pause .modal-box { max-height: calc(100dvh - 16px); gap: 8px; padding: 14px 16px 16px; }
+#screen-pause .pause-summary { font-size: 12px; }
+#screen-pause .btn-xl { min-height: 50px; }
+#screen-pause .btn-danger { min-height: 44px; }
+
+/* Fase 16 — Battle Prep konsisten dgn home: langkah kiri, kartu LOADOUT kanan */
+.prep-scroll {
+  width: 100%; max-width: 1040px; display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; min-height: 0; scrollbar-width: thin; padding-right: 2px;
+}
+.prep-main { display: flex; flex-direction: column; gap: 4px; }
+.prep-step { display: flex; align-items: center; gap: 8px; margin: 10px 0 4px; font-size: 12.5px; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); }
+.prep-step b {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--teal); color: var(--cream);
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+  box-shadow: 0 2px 6px rgba(31, 122, 112, 0.25);
+}
+.prep-hint { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; text-transform: none; letter-spacing: 0; }
+
+.prep-hero-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 8px; }
+.prep-hero {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px 8px; border: 3px solid transparent; border-radius: 18px;
+  background: var(--card); box-shadow: var(--shadow-card); cursor: pointer;
+  transition: transform 0.12s;
+}
+.prep-hero:active { transform: scale(0.95); }
+.prep-hero.selected {
+  border-color: var(--teal);
+  background: linear-gradient(170deg, #eafaf4, #cdeee3);
+  box-shadow: 0 4px 12px rgba(53, 179, 160, 0.28);
+}
+.prep-hero.locked { opacity: 0.55; }
+.prep-hero.locked .ph-sprite { filter: grayscale(1); }
+.prep-hero .ph-sprite { width: 68%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 3px 5px rgba(35, 30, 22, 0.18)); }
+.prep-hero .ph-name { font-size: 11px; font-weight: 900; color: var(--ink); }
+.prep-hero .ph-stage {
+  position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px;
+  border-radius: 11px; font-size: 10px; font-weight: 900; color: var(--cream);
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
+  box-shadow: 0 2px 5px rgba(35, 30, 22, 0.25);
+}
+.prep-hero .ph-lock {
+  position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+}
+
+.prep-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.prep-chip {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border: 3px solid transparent; border-radius: 18px; background: var(--card);
+  box-shadow: var(--shadow-card); cursor: pointer; font-size: 12px; font-weight: 800; color: var(--ink);
+  transition: transform 0.12s;
+}
+.prep-chip:active { transform: scale(0.96); }
+.prep-chip.selected { border-color: var(--teal); background: linear-gradient(170deg, #eafaf4, #cdeee3); }
+.prep-chip.locked { opacity: 0.5; }
+.prep-chip img { width: 26px; height: 26px; border-radius: 8px; }
+.prep-chip.arena img { width: 30px; height: 30px; }
+
+/* Panel LOADOUT — satu kartu besar ala campaign-card di home */
+.prep-aside {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 16px 18px 18px; border-radius: 24px; text-align: center;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(169, 215, 149, 0.45) 0 40px, transparent 41px),
+    radial-gradient(circle at 10% 88%, rgba(191, 227, 216, 0.6) 0 34px, transparent 35px),
+    linear-gradient(165deg, #f2f8e8, #dcefe6);
+  box-shadow: var(--shadow-card);
+}
+.pa-tag { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; color: var(--teal-deep); }
+.prep-summary { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.prep-summary .ps-hero { width: 108px; height: 108px; object-fit: contain; filter: drop-shadow(0 8px 14px rgba(35, 30, 22, 0.22)); }
+.prep-summary .ps-mid { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.prep-summary .ps-mid b { font-size: 19px; color: var(--ink); }
+.prep-summary .ps-tier {
+  font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em;
+  background: rgba(255, 253, 244, 0.85); padding: 4px 12px; border-radius: 12px;
+}
+.prep-summary .ps-abilities { display: flex; gap: 7px; margin-top: 3px; }
+.prep-summary .ps-skill-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fffdf4; box-shadow: 0 2px 5px rgba(35, 30, 22, 0.22); }
+.prep-summary .ps-noab { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+.prep-summary .ps-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.prep-summary .ps-meta > div {
+  display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800; color: var(--ink-soft);
+  background: rgba(255, 253, 244, 0.9); border-radius: 12px; padding: 5px 9px; box-shadow: 0 1px 4px rgba(35, 30, 22, 0.08);
+}
+.prep-summary .ps-meta img { width: 18px; height: 18px; border-radius: 5px; }
+.prep-start {
+  width: 100%; margin: 4px 0 0; font-size: 17px; letter-spacing: 0.06em; min-height: 54px; border-radius: 18px;
+  background: linear-gradient(180deg, #3ec2ae, #1f7a70); border: none;
+  box-shadow: 0 6px 16px rgba(31, 122, 112, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+.prep-start:disabled { filter: grayscale(0.6); opacity: 0.7; }
+
+/* Lanskap: 2 kolom — langkah kiri, loadout kanan (sticky) */
+@media (orientation: landscape) and (min-width: 700px) {
+  .prep-scroll { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .prep-main { grid-column: 1; }
+  .prep-aside { grid-column: 2; position: sticky; top: 0; }
+  #screen-prep .screen-header, #screen-prep .topbar { flex: 0 0 auto; }
+  /* Fase 17: layar pendek (HP) — ringkasan scroll, CTA MULAI SELALU terlihat */
+  @media (max-height: 500px) {
+    .prep-aside { max-height: calc(100dvh - 104px); padding: 12px 14px 14px; gap: 8px; }
+    .prep-aside .prep-summary { overflow-y: auto; min-height: 0; flex: 1 1 auto; scrollbar-width: thin; }
+    .prep-aside .ps-hero { width: 76px; height: 76px; }
+    .prep-aside .prep-start { flex: 0 0 auto; min-height: 48px; font-size: 15px; }
+  }
+}
+
+/* -- Bag / inventory -- */
+.bag-scroll { width: 100%; max-width: 560px; }
+.bag-section-title { margin: 10px 0 8px; font-size: 13px; letter-spacing: 0.05em; color: var(--ink-soft); text-transform: uppercase; }
+.bag-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.bag-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px;
+  background: var(--card); border-radius: 18px; box-shadow: var(--shadow-card); text-align: center;
+}
+.bag-card.short { outline: 2px dashed var(--coral); }
+.bag-card.empty { opacity: 0.55; }
+.bag-card .bag-sprite { width: 44px; height: 44px; object-fit: contain; }
+.bag-card b { font-size: 11.5px; color: var(--ink); }
+.bag-card .bag-count { font-size: 15px; font-weight: 900; color: var(--ink); }
+.bag-card .bag-count.ok { color: var(--teal); }
+.bag-card small { font-size: 10px; color: var(--ink-soft); font-weight: 700; }
+.bag-hint { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.bag-evo-next { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.bag-evo-next b { color: var(--ink); }
+.bag-evo-next p { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin: 0; }
+.bag-evo-next .bag-ready { color: var(--teal); font-weight: 800; }
+
+.back-btn img { width: 20px; height: 20px; }
+
+/* -- Prep: judul tidak wrap -- */
+#screen-prep .screen-title { font-size: 22px; white-space: nowrap; }
+
+/* =====================================================================
+   TUTORIAL ONBOARDING (run pertama) — bubble + jari virtual
+   ===================================================================== */
+#tutorial-layer {
+  position: absolute; inset: 0; z-index: 8; pointer-events: none;
+}
+.tut-bubble {
+  position: absolute; left: 50%; top: 26%; transform: translateX(-50%);
+  max-width: 78%; padding: 12px 18px; border-radius: 18px;
+  background: var(--card); box-shadow: var(--shadow-card);
+  border: 3px solid var(--teal);
+  font-size: 14px; font-weight: 800; color: var(--ink); text-align: center;
+  animation: tut-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tut-bubble::after {
+  content: ''; position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%);
+  border: 7px solid transparent; border-top-color: var(--teal);
+}
+@keyframes tut-pop { from { transform: translateX(-50%) scale(0.6); opacity: 0; } }
+.tut-finger { position: absolute; width: 26px; height: 26px; border-radius: 50%; }
+.tut-finger.tut-move {
+  left: 70px; bottom: 150px; background: rgba(53, 224, 200, 0.85);
+  animation: tut-tap 1.1s ease-in-out infinite;
+}
+.tut-finger.tut-attack {
+  left: 50%; top: 48%; background: rgba(242, 130, 92, 0.9);
+  animation: tut-tap 0.8s ease-in-out infinite;
+}
+.tut-finger.tut-collect { left: 55%; top: 52%; background: rgba(245, 198, 79, 0.95); animation: tut-tap 0.8s 0.2s ease-in-out infinite; }
+@keyframes tut-tap {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(53, 224, 200, 0.5); }
+  50% { transform: scale(1.25); box-shadow: 0 0 0 14px rgba(53, 224, 200, 0); }
+}
+.tut-skip {
+  position: absolute; top: 150px; right: 14px; pointer-events: auto;
+  background: var(--card); color: var(--ink-soft); font-size: 11px;
+}
+
+/* =====================================================================
+   FASE 7 — AUDIO & JUICE: combo pill, tombol suara, ghost button
+   ===================================================================== */
+.hud-combo {
+  position: absolute; left: 14px; top: 150px;
+  padding: 6px 14px; border-radius: 18px;
+  background: var(--card); border: 3px solid var(--gold, #f5c64f);
+  color: #b98a20; font-weight: 900; font-size: 16px;
+  box-shadow: var(--shadow-card);
+  animation: combo-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hud-combo small { font-size: 10px; font-weight: 900; letter-spacing: 0.08em; color: var(--ink-soft); }
+@keyframes combo-pop {
+  0% { transform: scale(0.5) rotate(-6deg); }
+  60% { transform: scale(1.2) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.btn-ghost {
+  background: transparent; border: 3px solid var(--teal-light);
+  color: var(--ink-soft); box-shadow: none;
+}
+.btn-sm-sound { padding: 8px 16px; font-size: 12px; margin-top: 10px; }
+
+/* =====================================================================
+   FASE 7 — KONTEN & LIVEOPS: chip mode, papan rekor, judul menang
+   ===================================================================== */
+.prep-chip.mode { min-width: 118px; }
+.prep-chip .chip-sub {
+  display: block; width: 100%;
+  font-size: 9px; font-weight: 800; color: var(--ink-soft);
+  text-align: center; line-height: 1.2;
+}
+.prep-chip .chip-sub.lock { color: #c46a4a; }
+.lb-card .lb-empty { font-size: 12px; color: var(--ink-soft); margin: 4px 0 2px; }
+.lb-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lb-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--cream-2, #f6efe2); border-radius: 12px;
+  padding: 7px 12px; font-size: 12px;
+}
+.lb-row.best { background: #fdf3d8; border: 2px solid #f5c64f; }
+.lb-rank { color: #b98a20; min-width: 26px; }
+.lb-hero { font-weight: 800; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-wave { font-weight: 900; color: var(--teal, #2f9c8f); }
+.lb-time { color: var(--ink-soft); font-size: 11px; min-width: 52px; text-align: right; }
+.go-mode-line {
+  text-align: center; font-size: 13px; font-weight: 900;
+  color: #b98a20; margin-top: -6px; margin-bottom: 8px;
+}
+
+/* =====================================================================
+   FASE "PERANG SANG TUBUH" — Peta Kampanye, Sinematik, Mission HUD,
+   Ability Banner, Coach
+   ===================================================================== */
+
+/* ---------- PETA KAMPANYE ---------- */
+.campaign-scroll { padding: 14px 16px 96px; }
+.camp-intro { font-size: 12.5px; font-weight: 800; color: var(--ink-soft); text-align: center; margin: 4px 0 14px; }
+.campaign-path { display: flex; flex-direction: column; align-items: stretch; margin-bottom: 14px; }
+.camp-node {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--card); border: 3px solid transparent; border-radius: 18px;
+  padding: 10px 14px; box-shadow: var(--shadow-card); cursor: pointer;
+}
+.camp-node.locked { opacity: 0.55; cursor: default; }
+.camp-node.current { border-color: var(--teal, #2f9c8f); animation: camp-pulse 1.6s infinite; }
+.camp-node.selected { border-color: var(--coral, #f2825c); }
+.camp-node.cleared { border-color: #bfe8d2; }
+@keyframes camp-pulse {
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 0 rgba(47,156,143,0.35); }
+  50% { box-shadow: var(--shadow-card), 0 0 0 10px rgba(47,156,143,0); }
+}
+.camp-ico-wrap { position: relative; width: 52px; height: 52px; flex: 0 0 52px; }
+.camp-ico { width: 52px; height: 52px; border-radius: 14px; }
+.camp-check {
+  position: absolute; right: -6px; top: -6px; width: 20px; height: 20px;
+  background: #2f9c8f; color: #fff; border-radius: 50%; font-size: 12px;
+  font-weight: 900; display: flex; align-items: center; justify-content: center;
+}
+.camp-lock { position: absolute; right: -6px; top: -6px; width: 18px; height: 18px; }
+.camp-here {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: -7px;
+  background: var(--coral, #f2825c); color: #fff; font-size: 8px; font-weight: 900;
+  padding: 1px 6px; border-radius: 8px; letter-spacing: 0.06em;
+}
+.camp-label { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.camp-organ { font-size: 14px; }
+.camp-title { font-size: 11px; color: var(--teal, #2f9c8f); font-weight: 900; }
+.camp-obj { font-size: 10px; color: var(--ink-soft); }
+.camp-line { width: 4px; height: 18px; background: #d8cfc0; margin-left: 38px; border-radius: 2px; }
+.camp-line.done { background: #2f9c8f; }
+.camp-brief { padding: 14px 16px; }
+.camp-brief-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.camp-badge { font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 8px; }
+.camp-badge.done { background: #def3e9; color: #1f7a70; }
+.camp-badge.now { background: #ffe9d6; color: #c46a4a; }
+.camp-badge.lock { background: #eee6d8; color: #8b8175; }
+.camp-story { font-size: 12.5px; line-height: 1.55; color: var(--ink-soft); margin: 8px 0; font-style: italic; }
+.camp-brief-meta { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 800; margin-bottom: 10px; }
+.btn-camp-go { width: 100%; }
+
+/* ---------- SINEMATIK ---------- */
+#cinematic-layer {
+  position: fixed; inset: 0; z-index: 90; background: #000;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+#cinematic-layer.hidden { display: none; }
+#cinematic-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cine-text {
+  position: relative; z-index: 2; margin-bottom: 7%;
+  max-width: 82%; text-align: center; color: #274; 
+  font-size: 15px; font-weight: 800; line-height: 1.5;
+  background: rgba(255,252,245,0.92); border: 3px solid #2f9c8f;
+  border-radius: 14px; padding: 10px 16px;
+  opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.cine-text.visible { opacity: 1; transform: translateY(0); }
+.cine-skip {
+  position: absolute; top: 14px; right: 14px; z-index: 3;
+  background: rgba(255,252,245,0.9); border: 2px solid #d8cfc0;
+  border-radius: 12px; padding: 6px 14px; font-size: 12px; font-weight: 900;
+  color: #6b6156; cursor: pointer;
+}
+
+/* ---------- MISSION HUD (kampanye) ---------- */
+.hud-mission {
+  position: absolute; top: 96px; left: 50%; transform: translateX(-50%);
+  width: 210px; background: rgba(255,252,245,0.94); border: 2.5px solid var(--teal, #2f9c8f);
+  border-radius: 14px; padding: 6px 10px 8px; z-index: 5; text-align: center;
+}
+.hud-mission.hidden { display: none; }
+.hud-mission-text { font-size: 11.5px; font-weight: 900; color: #1f5f57; }
+.hud-mission-bar { height: 7px; background: #e8dfcf; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+#hud-mission-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2f9c8f, #7fd8c8); border-radius: 4px; transition: width 0.3s; }
+
+/* ---------- ABILITY BANNER ---------- */
+.ability-banner {
+  position: absolute; top: 26%; left: 50%; z-index: 6;
+  transform: translateX(-50%) scale(0.4); opacity: 0;
+  font-size: 26px; font-weight: 900; letter-spacing: 0.04em;
+  color: #2f9c8f; text-shadow: 0 2px 0 #fff, 0 0 18px rgba(255,255,255,0.8);
+  border-bottom: 3px solid currentColor; padding: 0 14px; pointer-events: none;
+}
+.ability-banner.show { animation: abil-banner 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes abil-banner {
+  0% { transform: translateX(-50%) scale(0.4) rotate(-4deg); opacity: 0; }
+  18% { transform: translateX(-50%) scale(1.25) rotate(2deg); opacity: 1; }
+  30% { transform: translateX(-50%) scale(1); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 0; }
+}
+
+/* ---------- COACH ---------- */
+#coach-layer { position: fixed; inset: 0; z-index: 80; display: none; }
+#coach-layer.active { display: block; }
+#coach-spot {
+  position: fixed; border-radius: 18px; pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgba(35, 30, 22, 0.66);
+  border: 3px dashed #ffd93d;
+  animation: coach-spot 1.4s infinite;
+  transition: top 0.35s, left 0.35s, width 0.35s, height 0.35s;
+}
+@keyframes coach-spot {
+  0%, 100% { border-color: #ffd93d; }
+  50% { border-color: #fff3c2; }
+}
+.coach-tip {
+  position: fixed; width: 250px; background: var(--card, #fffdf7);
+  border: 3px solid #ffd93d; border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 14px 34px rgba(35,30,22,0.35);
+  animation: coach-tip-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.coach-tip.above { transform: translateY(calc(-100% - 18px)); }
+.coach-tip b { font-size: 13px; color: #b98a20; letter-spacing: 0.04em; }
+.coach-tip p { font-size: 12px; color: var(--ink-soft); margin: 6px 0 10px; line-height: 1.5; }
+.coach-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.coach-skip { background: none; border: none; font-size: 11px; font-weight: 800; color: #a89e90; text-decoration: underline; cursor: pointer; }
+.coach-next { font-size: 12px; padding: 8px 14px; }
+@keyframes coach-tip-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =====================================================================
+   AKUN & FRAKSI — auth screen, chip akun, kartu fraksi
+   ===================================================================== */
+.auth-topbar { justify-content: center; }
+.auth-scroll { padding: 10px 18px 30px; overflow-y: auto; height: 100%; }
+.auth-lead { font-size: 12.5px; font-weight: 800; color: var(--ink-soft); text-align: center; line-height: 1.5; margin: 2px 0 14px; }
+.auth-tabs { display: flex; background: #efe7d8; border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 12px; }
+.auth-tab {
+  flex: 1; padding: 9px 0; border-radius: 11px; border: none;
+  font-weight: 900; font-size: 13px; color: #8b8175; background: transparent; cursor: pointer;
+}
+.auth-tab.active { background: var(--teal, #2f9c8f); color: #fff; box-shadow: 0 3px 10px rgba(47,156,143,0.35); }
+.auth-card { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.auth-label { font-size: 11px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.04em; margin-top: 6px; }
+.auth-input {
+  border: 2.5px solid #e0d6c4; border-radius: 12px; padding: 11px 14px;
+  font-size: 14px; font-weight: 800; background: #fffdf7; color: var(--ink, #3a342c);
+  outline: none; font-family: inherit;
+}
+.auth-input:focus { border-color: var(--teal, #2f9c8f); }
+.auth-error {
+  display: none; font-size: 11.5px; font-weight: 800; color: #c0392b;
+  background: #fdeae7; border: 2px solid #f5b7ae; border-radius: 10px; padding: 7px 10px;
+}
+.auth-error.show { display: block; animation: coach-tip-in 0.25s; }
+.auth-submit { margin-top: 12px; }
+.auth-resume { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.auth-resume-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: #e7f6ee; border: 2.5px solid #7fd8c8; border-radius: 12px;
+  padding: 10px 14px; cursor: pointer; text-align: left;
+}
+.auth-resume-btn b { display: block; font-size: 13px; color: #1f5f57; }
+.auth-resume-btn small { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+.auth-logout {
+  background: none; border: none; font-size: 11px; font-weight: 800;
+  color: #b0654a; text-decoration: underline; cursor: pointer; padding: 4px 0; text-align: left;
+}
+.auth-faction-title { font-size: 14px; margin: 16px 0 2px; }
+.auth-faction-hint { font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-bottom: 10px; }
+.auth-factions { display: flex; flex-direction: column; gap: 10px; }
+.faction-card {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--card, #fffdf7); border: 3px solid transparent; border-radius: 18px;
+  padding: 12px 14px; box-shadow: var(--shadow-card); cursor: pointer;
+}
+.faction-card.selected.imun { border-color: var(--teal, #2f9c8f); background: #f0faf6; }
+.faction-card.selected.virus { border-color: #f2825c; background: #fdf3ee; }
+.faction-card.locked { opacity: 0.75; }
+.fc-emblem {
+  width: 52px; height: 52px; border-radius: 16px; flex: 0 0 52px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.fc-emblem img { width: 40px; height: 40px; }
+.fc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.fc-body b { font-size: 14px; }
+.fc-tag { font-size: 11px; color: var(--ink-soft); font-weight: 700; line-height: 1.35; }
+.fc-goal { font-size: 10px; font-weight: 900; color: var(--teal, #2f9c8f); }
+.faction-card.virus .fc-goal { color: #c46a4a; }
+.fc-badge { font-size: 9px; font-weight: 900; padding: 3px 9px; border-radius: 8px; align-self: flex-start; }
+.fc-badge.live { background: #def3e9; color: #1f7a70; }
+.fc-badge.soon { background: #f5b7ae; color: #7a2e1d; }
+
+/* Chip akun di topbar dashboard */
+.account-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card, #fffdf7); border: 2.5px solid var(--teal, #2f9c8f);
+  border-radius: 999px; padding: 4px 6px 4px 12px; cursor: pointer;
+  box-shadow: var(--shadow-card); font-family: inherit;
+}
+.account-chip.hidden { display: none; }
+.account-chip #account-name { font-size: 11.5px; font-weight: 900; color: var(--ink, #3a342c); max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.faction-tag { font-size: 9px; font-weight: 900; color: #fff; border-radius: 8px; padding: 3px 8px; background: var(--teal, #2f9c8f); }
+
+/* =====================================================================
+   FASE 7.7 — ARSENAL & RASA TEMPUR: tombol TEMBAK manual (kid-friendly)
+   ===================================================================== */
+.fire-btn {
+  position: absolute; right: 16px; bottom: 64px; z-index: 7;
+  pointer-events: auto; /* .screen.passive = none — tombol wajib diopt-in */
+  width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffab8f, #f2825c 62%);
+  border: 4px solid #fff; box-shadow: 0 6px 0 #c46a4a, 0 10px 22px rgba(0,0,0,0.28);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0; color: #fff; font-weight: 900; font-size: 12px; letter-spacing: 0.04em;
+  cursor: pointer; touch-action: none; user-select: none;
+  animation: fire-breath 1.6s ease-in-out infinite;
+}
+.fire-btn img { width: 30px; height: 30px; filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2)); }
+.fire-btn:active, .fire-btn.held {
+  transform: scale(0.92); box-shadow: 0 2px 0 #c46a4a, 0 4px 10px rgba(0,0,0,0.25);
+}
+@keyframes fire-breath {
+  0%, 100% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 0 rgba(242,130,92,0.45); }
+  50% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 12px rgba(242,130,92,0); }
+}
+
+/* =====================================================================
+   FASE 7.7 — ARSENAL & RASA TEMPUR: tombol TEMBAK manual (kid-friendly)
+   ===================================================================== */
+.fire-btn {
+  position: absolute; right: 16px; bottom: 64px; z-index: 7;
+  pointer-events: auto; /* .screen.passive = none — tombol wajib diopt-in */
+  width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffab8f, #f2825c 62%);
+  border: 4px solid #fff; box-shadow: 0 6px 0 #c46a4a, 0 10px 22px rgba(0,0,0,0.28);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 12px; letter-spacing: 0.04em;
+  cursor: pointer; touch-action: none; user-select: none;
+  animation: fire-breath 1.6s ease-in-out infinite;
+}
+.fire-btn img { width: 30px; height: 30px; filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2)); }
+.fire-btn:active, .fire-btn.held {
+  transform: scale(0.92); box-shadow: 0 2px 0 #c46a4a, 0 4px 10px rgba(0,0,0,0.25);
+}
+@keyframes fire-breath {
+  0%, 100% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 0 rgba(242,130,92,0.45); }
+  50% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 12px rgba(242,130,92,0); }
+}
+
+/* Layer upgrade: badge kategori per baris */
+.upg-name-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.upg-layer {
+  font-size: 8.5px; font-weight: 900; letter-spacing: 0.07em;
+  color: #fff; background: var(--teal, #2f9c8f);
+  border-radius: 6px; padding: 2px 7px;
+}
+
+/* =====================================================================
+   FASE 7.8 — XP TERASA: ghost trail, shine, chip siap-naik
+   ===================================================================== */
+.hud-xp-track { height: 12px; }
+.hud-xp-ghost {
+  position: absolute; left: 0; top: 0; height: 100%; width: 0%;
+  border-radius: var(--pill); background: rgba(255, 236, 160, 0.55);
+  transition: width 0.1s linear;
+}
+.hud-xp-fill {
+  background: linear-gradient(90deg, #4adbc0, #f5c64f);
+  position: relative; overflow: hidden;
+}
+.hud-xp-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: xp-shine 1.8s linear infinite;
+}
+@keyframes xp-shine {
+  from { background-position: 120% 0; }
+  to { background-position: -80% 0; }
+}
+.hud-xp-ico {
+  position: absolute; left: -7px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(20,88,79,0.4));
+}
+.hud-level-chip.ready {
+  background: #f5c64f; color: #6b4d00;
+  animation: chip-ready 0.8s ease-in-out infinite;
+}
+@keyframes chip-ready {
+  0%, 100% { transform: translate(2px, -50%) scale(1); }
+  50% { transform: translate(2px, -50%) scale(1.18); }
+}
+
+/* =====================================================================
+   FASE 8.1 — LAB PASUKAN: tab HERO/PASUKAN/TIM + kartu level hero
+   ===================================================================== */
+.upg-tabs { display: flex; gap: 6px; padding: 0 18px; margin: 4px 0 10px; }
+.upg-tab {
+  flex: 1; padding: 9px 0; border-radius: 12px; border: 2.5px solid transparent;
+  background: #efe7d8; color: #8b8175; font-weight: 900; font-size: 12px; cursor: pointer;
+}
+.upg-tab.active { background: #fffdf7; border-color: var(--teal, #2f9c8f); color: #1f5f57; }
+.hero-lab-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 16px; margin: 0 18px 14px; }
+.hl-head { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+.hl-count { font-size: 11px; font-weight: 900; color: var(--ink-soft); }
+.hl-level { color: #fff; font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 12px; }
+.hl-level.ally { background: #4aa3e0; }
+.hl-sprite { width: 110px; height: 110px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(35,30,22,0.18)); }
+.hl-name { font-size: 18px; }
+.hl-title { font-size: 11px; color: var(--ink-soft); font-weight: 800; }
+.hl-stats { display: flex; gap: 10px; font-size: 11px; font-weight: 900; color: #1f7a70; background: #e7f6ee; border-radius: 10px; padding: 5px 12px; }
+.hl-slider { width: 100%; }
+.btn-hl-up { width: 100%; font-size: 14px; padding: 12px; }
+.hl-nav { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.hl-owned { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); }
+.hl-ally-row { display: flex; gap: 10px; }
+.hl-ally { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(35,30,22,0.15)); }
+.hl-hint { font-size: 10px; color: var(--ink-soft); text-align: center; line-height: 1.4; }
+
+/* =====================================================================
+   FASE 8 — PREMIUM: bundle cards + modal pembayaran (simulasi)
+   ===================================================================== */
+.premium-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.premium-card {
+  position: relative; display: flex; flex-direction: column; gap: 5px;
+  background: var(--card, #fffdf7); border: 3px solid var(--pc, #2f9c8f);
+  border-radius: 16px; padding: 12px 12px 10px; box-shadow: var(--shadow-card);
+}
+.prem-badge {
+  position: absolute; top: -9px; right: 8px; color: #fff;
+  font-size: 8.5px; font-weight: 900; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 8px;
+}
+.prem-name { font-size: 13.5px; }
+.prem-value { font-size: 10px; font-weight: 700; color: var(--ink-soft); line-height: 1.35; flex: 1; }
+.btn-prem { font-size: 13px; padding: 9px 0; color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; }
+.prem-receipts { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; }
+.pr-title { font-size: 10px; font-weight: 900; color: var(--ink-soft); }
+.pr-row { font-size: 9.5px; color: #a89e90; font-weight: 700; }
+
+.pay-modal {
+  position: fixed; inset: 0; z-index: 95; background: rgba(35,30,22,0.6);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.pay-box {
+  width: 100%; max-width: 330px; background: var(--card, #fffdf7);
+  border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.3); text-align: center;
+}
+.pay-title { font-size: 18px; }
+.pay-note { font-size: 10px; color: #b0654a; font-weight: 800; background: #fdf3ee; border-radius: 8px; padding: 5px 8px; }
+.pay-summary { display: flex; flex-direction: column; gap: 2px; background: #f6efe2; border-radius: 12px; padding: 10px; font-size: 11.5px; font-weight: 800; color: var(--ink-soft); }
+.pay-price { font-size: 20px; color: #1f5f57; }
+.pay-methods { display: flex; gap: 8px; }
+.pay-method {
+  flex: 1; padding: 10px 0; border-radius: 12px; border: 2.5px solid #e0d6c4;
+  background: #fff; font-weight: 900; font-size: 12px; color: #8b8175; cursor: pointer;
+}
+.pay-method.selected { border-color: var(--teal, #2f9c8f); color: #1f5f57; background: #e7f6ee; }
+.pay-cancel { background: none; border: none; font-size: 11px; font-weight: 800; color: #a89e90; text-decoration: underline; cursor: pointer; }
+.pay-ok-ico { width: 52px; height: 52px; object-fit: contain; margin: 0 auto; }
+.pay-granted { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.pg-item { font-size: 11px; font-weight: 900; color: #1f7a70; background: #e7f6ee; border-radius: 8px; padding: 4px 10px; }
+.pay-receipt { font-size: 9.5px; color: #a89e90; font-weight: 700; }
+
+/* =====================================================================
+   FASE 8.1 — badge level terhubung: panggung dashboard, roster chip
+   ===================================================================== */
+.stage-badge.lvl {
+  cursor: pointer; background: #fffdf7; color: #1f5f57;
+  border: 2.5px solid var(--teal, #2f9c8f); top: 10px; left: 10px; right: auto;
+  font-size: 10.5px;
+}
+.stage-badge.lvl:active { transform: scale(0.96); }
+.hero-lvl-chip {
+  background: #1f7a70; color: #fff; font-size: 9px; font-weight: 900;
+  border-radius: 8px; padding: 1px 7px; margin-left: 6px;
+}
+.ph-stage { font-variant-numeric: tabular-nums; }
+
+/* Chip level in-run (terhubung Lab) */
+.hud-lvls { position: absolute; left: 14px; top: 74px; display: flex; flex-direction: column; gap: 4px; z-index: 5; }
+.hud-lvl-chip {
+  width: fit-content; font-size: 9.5px; font-weight: 900; letter-spacing: 0.03em;
+  padding: 3px 10px; border-radius: var(--pill); background: rgba(255,253,244,0.92);
+  color: #1f5f57; border: 2px solid var(--teal, #2f9c8f); box-shadow: 0 2px 6px rgba(20,88,79,0.18);
+}
+.hud-lvl-chip.ally { border-color: #4aa3e0; color: #16558f; }
+
+/* Tombol HUD interaktif: .screen.passive menonaktifkan pointer — opt-in eksplisit */
+#screen-hud .ability-btn { pointer-events: auto; }
+#screen-hud #btn-pause { pointer-events: auto; }
+
+/* Detail hero (menu Heroes → klik kartu) */
+.hero-detail-body { padding: 10px 18px 24px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; height: 100%; }
+.btn-hl-lab { background: #fffdf7; color: #1f5f57; border: 2.5px solid var(--teal, #2f9c8f); font-size: 12px; padding: 11px; }
+
+/* ==== Fase 8.4: chip buff tempur di HUD (dokumen entitas) ==== */
+.hud-buffs{position:absolute;top:124px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:6}
+.hud-buff-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(18,42,40,.82);color:#fff8ea;border:2px solid #35d0ba;border-radius:999px;padding:2px 9px 2px 3px;font-size:11px;font-weight:800;letter-spacing:.02em;box-shadow:0 2px 6px rgba(20,40,38,.25)}
+.hud-buff-chip img{width:18px;height:18px;border-radius:50%;background:#fff8ea}
+
+/* ==== i18n: pil toggle bahasa ==== */
+.lang-pill{border:2px solid #35d0ba;background:#fff8ea;color:#0f4c46;border-radius:999px;font-weight:800;font-size:12px;padding:5px 11px;cursor:pointer;font-family:inherit}
+.lang-pill:active{transform:scale(.96)}
+.lang-pill-pause{align-self:center;margin-top:6px}
+
+/* ==== Fase 11: Kodex Sel (Bio-Pedia) ==== */
+.codex-progress{font-size:12px;font-weight:800;color:#0f4c46;background:#dff3ec;border:2px solid #35d0ba;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.codex-body{padding:10px 14px 90px;overflow-y:auto}
+.codex-cat{font-weight:900;letter-spacing:.06em;font-size:12px;color:#3f6b62;margin:14px 2px 8px;text-transform:uppercase}
+.codex-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.codex-card{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff8ea;border:2px solid #e8dfc8;border-radius:18px;padding:12px 6px 10px;cursor:pointer;font-family:inherit;min-height:108px;justify-content:center}
+.codex-card.seen{border-color:#35d0ba;box-shadow:0 3px 10px rgba(53,208,186,.16)}
+.codex-card.seen:active{transform:scale(.96)}
+.codex-img{width:52px;height:52px;object-fit:contain}
+.codex-q{font-size:30px;font-weight:900;color:#b9c7bd;line-height:1;filter:grayscale(1)}
+.codex-name{font-size:11px;font-weight:800;color:#2f5a52;text-align:center;line-height:1.2}
+.codex-card:not(.seen) .codex-name{color:#a8b5ab}
+.codex-detail{position:absolute;inset:0;background:rgba(15,42,40,.55);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:18px;z-index:30}
+.codex-detail.hidden{display:none}
+.codex-detail-box{background:#fff8ea;border-radius:22px;padding:18px;width:100%;max-height:70%;overflow-y:auto;border:3px solid #35d0ba;margin-bottom:10px}
+.cxd-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cxd-img{width:64px;height:64px;object-fit:contain}
+.cxd-titlewrap{display:flex;flex-direction:column}
+.cxd-name{font-size:18px;color:#123f3a}
+.cxd-real{font-size:11px;font-style:italic;color:#7d938c}
+.cxd-kicker{font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#35d0ba;margin-top:8px}
+.cxd-kid{font-size:14px;font-weight:600;color:#2f5a52;margin:4px 0 0}
+.cxd-fact{font-size:13px;color:#41625b;margin:4px 0 0}
+
+/* Fase 12: chip skill hero di ringkasan prep */
+.ps-abilities{display:flex;gap:5px;align-items:center}
+.ps-skill-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,253,244,.85);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.ps-skill-dot.ult{width:20px;height:20px;border-color:#f5c64f}
+/* Fase 12 v2: ikon skill + keyframes rounded (yang lama memaksa radius 50%) */
+@keyframes hudSkillPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,198,79,.55); }
+  50% { box-shadow: 0 0 0 7px rgba(245,198,79,0); }
+}
+#screen-hud .ability-btn.ready{animation:hudSkillPulse 1.6s ease-in-out infinite}
+#screen-hud .ability-btn .sk-ico{width:26px;height:26px;object-fit:contain;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+#screen-hud .ability-btn.ult .sk-ico{width:30px;height:30px}
+#screen-hud .ability-btn .sk-name{bottom:4px}
+
+/* =====================================================================
+   FASE 12c — HUD MLBB PALET TERANG (glass putih-biru langit + aksen emas)
+   ===================================================================== */
+#screen-hud .glass{background:linear-gradient(170deg,rgba(255,255,255,.86),rgba(224,244,240,.82));border:1.5px solid rgba(255,255,255,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:14px;box-shadow:0 3px 10px rgba(31,95,87,.16)}
+#screen-hud .hud-top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;z-index:5;pointer-events:none}
+#screen-hud .hud-stat-left,#screen-hud .hud-stat-right{display:flex;align-items:center;gap:8px;padding:6px 10px}
+#screen-hud .hud-stat-right{pointer-events:auto}
+#screen-hud .hud-center{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 16px;min-width:132px}
+#screen-hud .hud-center .wave-pill{background:linear-gradient(180deg,#2fb3a2,#1f7a70);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900;letter-spacing:.08em;font-size:14px}
+#screen-hud .hud-center .timer-chip{background:none;border:none;gap:4px;color:#16554e;font-weight:800}
+#screen-hud .hud-kills{display:flex;align-items:center;gap:4px;font-weight:900;color:#e05563;font-size:14px}
+#screen-hud .hud-kills img{width:15px;height:15px}
+#screen-hud .hud-currency-run{display:flex;align-items:center;gap:4px;font-weight:900;color:#c99013;font-size:14px}
+#screen-hud .hud-currency-run img{width:15px;height:15px}
+#screen-hud .btn-pause{background:linear-gradient(180deg,#2fb3a2,#1f7a70);border:none;width:clamp(40px,9.5vh,48px);height:clamp(40px,9.5vh,48px);min-height:clamp(40px,9.5vh,48px);border-radius:13px;box-shadow:0 3px 8px rgba(31,122,112,.3);flex:0 0 auto}
+#screen-hud .btn-pause img{filter:brightness(0) invert(1)}
+#screen-hud .hud-minimap{top:96px;right:12px;border-color:#fff;width:84px;height:84px;background:rgba(20,88,79,.5)}
+#screen-hud .hud-buffs{top:84px}
+#screen-hud .hud-lvls{flex-direction:column;gap:3px;align-items:flex-start}
+#screen-hud .hud-lvl-chip{background:rgba(255,255,255,.92);border:1.5px solid #35d0ba;font-size:9px;padding:2px 8px;color:#16554e;box-shadow:0 1px 4px rgba(31,95,87,.14)}
+#screen-hud .hud-lvl-chip.ally{border-color:#4aa3e0;color:#16558f}
+
+/* BOTTOM LEFT — panel status hero (putih bersih + emas avatar) */
+#screen-hud .hud-hero-status{position:absolute;left:10px;bottom:12px;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;z-index:6;pointer-events:none}
+#screen-hud .avatar-wrap{position:relative;width:56px;height:56px;flex:0 0 56px}
+#screen-hud .hud-portrait{width:56px;height:56px;border-radius:50%;border:3px solid #fff;background:#eaf6f2;box-shadow:0 0 0 2.5px #f0c04f,0 3px 8px rgba(31,95,87,.22);object-fit:cover}
+#screen-hud .level-badge{position:absolute;bottom:-5px;right:-9px;background:linear-gradient(180deg,#ffdf7e,#f0b428);color:#5a3d00;font-size:9px;font-weight:900;padding:2px 7px;border-radius:10px;border:1.5px solid #fff;white-space:nowrap;box-shadow:0 1px 4px rgba(160,110,20,.4)}
+#screen-hud .status-bars{width:168px;display:flex;flex-direction:column;gap:5px}
+#screen-hud .hp-row{display:flex;align-items:center;gap:6px}
+#screen-hud .hp-row .heart{width:14px;height:14px}
+#screen-hud .hud-hp-track{flex:1;height:14px;background:rgba(12,60,54,.16);border:1px solid rgba(12,60,54,.22);border-radius:8px;overflow:hidden}
+#screen-hud .hud-hp-fill{height:100%;width:100%;background:linear-gradient(180deg,#4ede9a,#26b568);border-radius:8px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);transition:width .18s ease}
+#screen-hud .hp-pill.low .hud-hp-fill{background:linear-gradient(180deg,#ff8496,#e14a5e)}
+#screen-hud .hud-hp-text{font-size:10px;font-weight:900;color:#123f38;min-width:46px;text-align:right}
+#screen-hud .xp-row{display:flex;align-items:center;gap:6px}
+#screen-hud .hud-xp-track{flex:1;height:7px;background:rgba(12,60,54,.14);border:1px solid rgba(12,60,54,.2);border-radius:5px;overflow:hidden;position:static}
+#screen-hud .hud-xp-fill{height:100%;width:0%;background:linear-gradient(90deg,#58c7f3,#2e86d6);border-radius:5px}
+#screen-hud .hud-xp-ghost{background:rgba(46,134,214,.35)}
+#screen-hud .hud-xp-ico{width:12px;height:12px}
+
+/* BOTTOM RIGHT — grid skill 2x2 + SERANG (terang, ikon jelas) */
+#screen-hud .hud-controls{position:absolute;right:10px;bottom:12px;display:flex;align-items:flex-end;gap:10px;z-index:6}
+#screen-hud .ability-bar{position:static;display:grid;grid-template-columns:repeat(2,62px);gap:8px;background:none;border:none;box-shadow:none;padding:0;bottom:auto;right:auto}
+#screen-hud .ability-btn{pointer-events:auto;position:relative;width:62px;height:62px;border-radius:18px;border:2.5px solid var(--sk,#35d0ba);background:linear-gradient(170deg,#ffffff,#d9f2ec);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:transform .08s ease;padding:0;box-shadow:0 3px 8px rgba(31,95,87,.18)}
+#screen-hud .ability-btn:active{transform:scale(.92)}
+#screen-hud .ability-btn.ready{box-shadow:0 0 0 2px rgba(53,208,186,.35),0 3px 10px rgba(31,95,87,.22)}
+#screen-hud .ability-btn .sk-name{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:7.5px;font-weight:900;letter-spacing:.02em;color:#123f38;text-transform:uppercase;z-index:2;padding:0 2px}
+#screen-hud .ability-btn .cd-fill{position:absolute;inset:0;height:auto;background:transparent;z-index:1;border-radius:inherit}
+#screen-hud .ability-btn .cd-num{position:absolute;inset:0;display:grid;place-items:center;font-size:21px;font-weight:900;color:#0d3833;text-shadow:0 1px 0 rgba(255,255,255,.8);z-index:3}
+#screen-hud .ability-btn .key-tag{position:absolute;top:3px;left:5px;font-size:8px;font-weight:900;color:#fff;background:var(--sk,#35d0ba);border-radius:6px;padding:0 4px;z-index:3}
+#screen-hud .ability-btn.ult{grid-column:span 2;width:100%;height:50px;border-color:#f0b428}
+#screen-hud .ability-btn.ult .sk-name{font-size:10px;bottom:5px}
+#screen-hud .ability-btn .sk-ico{width:28px;height:28px;object-fit:contain;z-index:2}
+#screen-hud .ability-btn.ult .sk-ico{width:32px;height:32px}
+#screen-hud .fire-btn{position:static;width:90px;height:90px;min-height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(170deg,#3ec9b5,#1f8f80);border:3.5px solid #fff;color:#fff;font-weight:900;font-size:12px;letter-spacing:.05em;box-shadow:0 5px 14px rgba(26,140,125,.42),inset 0 -4px 0 rgba(0,0,0,.12);cursor:pointer;pointer-events:auto;transition:transform .08s ease}
+#screen-hud .fire-btn:active{transform:scale(.93)}
+#screen-hud .fire-btn img{width:27px;height:27px;filter:brightness(0) invert(1)}
+#screen-hud .ability-btn.ready{animation:hudSkillPulse 1.6s ease-in-out infinite}
+@media (max-width:390px){
+  #screen-hud .ability-btn{width:56px;height:56px}
+  #screen-hud .ability-bar{grid-template-columns:repeat(2,56px)}
+  #screen-hud .fire-btn{width:80px;height:80px;min-height:80px}
+  #screen-hud .status-bars{width:150px}
+  #screen-hud .hud-minimap{width:72px;height:72px}
+}
+
+/* =====================================================================
+   FASE 12c — DETAIL HERO: layout ala referensi (panggung karakter + chips)
+   ===================================================================== */
+/* Fase 16: banner nama + panah ganti hero ala kartu hero MLBB */
+.hl-banner{display:flex;align-items:center;gap:9px;justify-content:center;width:100%;padding:7px 10px;border-radius:14px;background:linear-gradient(180deg,rgba(53,179,160,.16),rgba(53,179,160,.05));border:2px solid rgba(53,179,160,.35)}
+.hl-banner-role{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;color:#fffdf4;font-weight:900;font-size:11px;letter-spacing:.04em;box-shadow:0 3px 7px rgba(35,30,22,.25);flex:0 0 auto}
+.hl-banner-name{font-size:19px;font-weight:900;color:var(--ink);letter-spacing:.02em}
+.hl-banner-tier{margin-left:auto;font-size:10px;font-weight:900;color:#fffdf4;padding:4px 10px;border-radius:10px;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 2px 5px rgba(35,30,22,.22)}
+.hl-arrow{width:40px;height:56px;border:none;border-radius:13px;background:rgba(255,253,244,.9);color:var(--teal-deep);font-size:19px;font-weight:900;cursor:pointer;box-shadow:var(--shadow-card);flex:0 0 auto;transition:transform .12s}
+.hl-arrow:active{transform:scale(.92)}
+.hl-hero-panel .hl-stage{display:flex;align-items:center;justify-content:center;gap:18px;width:100%}
+.hl-hero-panel .hl-sprite{width:128px;height:128px;filter:drop-shadow(0 10px 16px rgba(35,30,22,.22))}
+.hl-skill-col{display:flex;flex-direction:column;gap:8px}
+.hl-skill{display:flex;align-items:center;gap:6px;background:#fffdf7;border:2px solid #e3dcc6;border-radius:12px;padding:5px 9px;box-shadow:0 2px 5px rgba(35,30,22,.08)}
+.hl-skill.ult{border-color:#f0b428;background:linear-gradient(170deg,#fff8e2,#ffedb3)}
+.hl-skill-key{font-size:9px;font-weight:900;color:#8a7f5f;min-width:20px}
+.hl-skill.ult .hl-skill-key{color:#a97a10}
+.hl-skill-dot{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.hl-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.hl-chip{display:flex;align-items:center;gap:5px;border-radius:12px;padding:5px 12px;font-weight:900;font-size:12px}
+.hl-chip img{width:14px;height:14px}
+.hl-chip.atk{background:#ffe9ec;color:#b3323f;border:1.5px solid #ffc9d1}
+.hl-chip.atk img{filter:hue-rotate(-20deg) saturate(2)}
+.hl-chip.hp{background:#e3f8ec;color:#1d7a4d;border:1.5px solid #c2ecd6}
+.hl-chip.spd{background:#e7f3ff;color:#1a5b9e;border:1.5px solid #c5e0fa}
+.hl-chip i{font-style:normal;font-weight:800;font-size:10px;color:inherit;opacity:.72}
+.hl-ally-cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.hl-ally-tag{font-size:9px;font-weight:900;color:#16558f;background:#e7f3ff;border-radius:8px;padding:1px 8px;border:1px solid #c5e0fa}
+.hl-ally-cell .hl-ally{width:58px;height:58px;background:#eef7fb;border-radius:50%;border:2px solid #d8ecf7;padding:6px}
+
+/* =========================================================
+   FASE 13 — DASHBOARD ALA MLBB (layout referensi pemilik)
+   Sidebar kiri + banner carousel + quick menu + baris PLAY
+   (kartu bab besar + kolom mode) + grid duo. Palet pastel.
+   ========================================================= */
+
+/* --- Kerangka: sidebar + konten --- */
+.dash-body {
+  width: 100%; max-width: 560px; flex: 1; min-height: 0;
+  display: flex; gap: 10px;
+}
+.side-nav {
+  flex: 0 0 62px; display: flex; flex-direction: column; gap: 6px;
+  background: var(--card); border-radius: 20px; padding: 8px 6px;
+  box-shadow: var(--shadow-card); align-self: flex-start;
+  position: sticky; top: 0;
+}
+.side-btn {
+  appearance: none; border: none; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 2px; border-radius: 14px; font-family: var(--font);
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+.side-btn img { width: 24px; height: 24px; object-fit: contain; opacity: 0.75; }
+.side-btn span { font-size: 8.5px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.02em; }
+.side-btn:active { transform: scale(0.94); }
+.side-btn.active { background: var(--teal); box-shadow: 0 4px 10px rgba(31, 122, 112, 0.35); }
+.side-btn.active img { filter: brightness(0) invert(1); opacity: 1; }
+.side-btn.active span { color: #fff; }
+
+.dash-scroll { flex: 1; min-width: 0; max-width: none; display: flex; flex-direction: column; gap: 10px; }
+
+/* --- Topbar: identitas pemain (avatar + nama) --- */
+.account-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--card); border: none; border-radius: var(--pill);
+  padding: 4px 12px 4px 5px; cursor: pointer; box-shadow: var(--shadow-card);
+  font-family: var(--font);
+}
+.dash-avatar {
+  width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+  background: var(--mint); border: 2px solid var(--teal-light);
+}
+.acct-id { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.acct-id b { font-size: 11.5px; color: var(--ink); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acct-id small { font-size: 9px; color: var(--ink-soft); font-weight: 800; }
+
+/* --- Banner carousel --- */
+.banner-carousel {
+  position: relative; height: 285px; border-radius: 26px; overflow: hidden;
+  box-shadow: var(--shadow-card);
+  flex: 0 0 auto; /* jangan menyusut di flex-column yang scroll (isi slide absolut) */
+}
+.banner-track, .banner-slide { position: absolute; inset: 0; }
+.banner-slide { opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
+.banner-slide.on { opacity: 1; pointer-events: auto; }
+.banner-slide .hero-stage { height: 100%; min-height: 0; border-radius: 0; }
+.banner-slide:nth-child(2) {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(169, 215, 149, 0.5) 0 44px, transparent 45px),
+    radial-gradient(circle at 12% 72%, rgba(191, 227, 216, 0.7) 0 40px, transparent 41px),
+    linear-gradient(160deg, #eaf4dd, #cfe9df);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; text-align: center; padding: 16px;
+}
+.banner-slide.bn-danger {
+  background:
+    radial-gradient(circle at 82% 24%, rgba(242, 130, 92, 0.35) 0 46px, transparent 47px),
+    radial-gradient(circle at 14% 70%, rgba(248, 178, 154, 0.45) 0 34px, transparent 35px),
+    linear-gradient(160deg, #fdeadd, #f9d7c4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; text-align: center; padding: 16px;
+}
+.bn-organ { width: 92px; height: 92px; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(31, 74, 66, 0.25)); animation: bob 3.4s ease-in-out infinite; }
+.bn-tag { font-size: 9.5px; font-weight: 900; letter-spacing: 0.14em; color: var(--teal-deep); background: rgba(255, 253, 244, 0.8); border-radius: var(--pill); padding: 3px 10px; }
+.bn-danger .bn-tag { color: #b3542f; }
+.bn-title { font-size: 21px; font-weight: 900; color: var(--teal-dark); }
+.bn-danger .bn-title { color: #7c3a1d; }
+.bn-sub { font-size: 11px; font-weight: 700; color: var(--ink-soft); max-width: 250px; }
+.bn-cta { margin-top: 5px; min-width: 150px; }
+.banner-dots {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 3;
+}
+.b-dot {
+  width: 7px; height: 7px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(18, 63, 58, 0.25); padding: 0;
+}
+.b-dot.on { background: var(--gold-deep); width: 16px; border-radius: 6px; }
+
+/* --- Quick menu 5 tile --- */
+.quick-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.quick-tile {
+  position: relative; appearance: none; border: none; cursor: pointer; font-family: var(--font);
+  background: var(--card); border-radius: 17px; padding: 9px 3px 7px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  box-shadow: var(--shadow-card); transition: transform 0.08s ease;
+}
+.quick-tile:active { transform: scale(0.93); }
+.quick-tile img { width: 27px; height: 27px; object-fit: contain; }
+.qt-label { font-size: 8.6px; font-weight: 900; color: var(--ink); text-align: center; line-height: 1.05; }
+.qt-badge {
+  position: absolute; top: -4px; right: -2px; min-width: 16px; height: 16px;
+  background: var(--coral); color: #fff; border-radius: 9px; font-size: 9px;
+  font-weight: 900; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--cream); padding: 0 3px;
+}
+
+/* --- Baris PLAY: kartu bab + kolom mode --- */
+.play-row { display: grid; grid-template-columns: 1.12fr 1fr; gap: 10px; align-items: stretch; }
+.campaign-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  background:
+    radial-gradient(circle at 84% 14%, rgba(169, 215, 149, 0.45) 0 34px, transparent 35px),
+    radial-gradient(circle at 10% 84%, rgba(191, 227, 216, 0.6) 0 30px, transparent 31px),
+    linear-gradient(165deg, #f2f8e8, #dcefe6);
+  padding: 13px 13px 15px;
+}
+.cc-head { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.cc-count { font-size: 10px; font-weight: 900; color: var(--teal-deep); background: rgba(255, 253, 244, 0.85); padding: 2px 9px; border-radius: var(--pill); }
+.cc-organ { width: 74px; height: 74px; object-fit: contain; margin-top: 2px; filter: drop-shadow(0 8px 10px rgba(31, 74, 66, 0.22)); }
+.cc-name { font-size: 16.5px; font-weight: 900; color: var(--teal-dark); }
+.cc-title { font-size: 11px; font-weight: 800; color: var(--ink-soft); }
+.cc-obj { font-size: 10px; font-weight: 700; color: var(--ink-soft); opacity: 0.85; }
+.campaign-card .btn-play-big {
+  width: 100%; margin: 8px 0 0; padding: 11px 16px;
+}
+.campaign-card .btn-play-big span { font-size: 17px; }
+.campaign-card .btn-play-big small { font-size: 9.5px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mode-stack { display: flex; flex-direction: column; gap: 10px; }
+.mode-card {
+  display: flex; align-items: center; gap: 9px; padding: 10px 11px;
+  background: var(--card); flex: 1;
+}
+.mode-card.locked { opacity: 0.75; }
+.mc-ico { width: 34px; height: 34px; object-fit: contain; flex: 0 0 auto; }
+.mc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.mc-body b { font-size: 12.5px; color: var(--ink); }
+.mc-body span { font-size: 9.3px; font-weight: 700; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-btn { font-size: 10.5px; padding: 8px 12px; min-height: 0; flex: 0 0 auto; }
+
+/* --- Duo grid: evolusi+misi, rekor+tubuh --- */
+.duo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.duo-row .card { margin: 0; }
+.duo-row .daily-card, .duo-row .arena-card { display: flex; }
+.duo-row .lb-list { font-size: 10px; }
+.duo-row .body-card .bar-track { height: 8px; }
+
+/* Stat strip lebih ramping */
+.stat-strip { gap: 8px; }
+.stat-cell { padding: 8px 4px; border-radius: 15px; }
+.stat-cell b { font-size: 15px; }
+
+/* Arena card dalam kolom mode: ramping */
+#arena-card { padding: 10px 11px; display: flex; align-items: center; gap: 8px; flex: 1; }
+#arena-card .card-title { margin-bottom: 0; font-size: 11px; }
+
+@media (max-width: 355px) {
+  .side-nav { flex-basis: 54px; }
+  .play-row { grid-template-columns: 1fr; }
+  .duo-row { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   FASE 13.1 — de-dup navigasi + konsistensi halaman lain
+   ========================================================= */
+
+/* Chip informasi kecil di header/subtitle halaman (roster/bag/dll) */
+.count-chip {
+  display: inline-block; margin-left: 8px; padding: 2px 10px;
+  background: var(--teal); color: #fff; border-radius: var(--pill);
+  font-size: 10px; font-weight: 900; letter-spacing: 0.03em;
+  vertical-align: middle; box-shadow: 0 2px 6px rgba(31, 122, 112, 0.3);
+}
+.topbar .count-chip { margin-left: 0; }
+
+/* Footer roster: MULAI selalu terlihat saat menggulung koleksi */
+#screen-roster .screen-footer {
+  position: sticky; bottom: 0; z-index: 5;
+  padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(253, 246, 227, 0) 0%, var(--cream) 38%);
+}
+#screen-roster .screen-footer .btn { min-width: min(78vw, 340px); }
+
+/* Ikon sidebar aktif tetap terbaca untuk ikon sprite berwarna */
+.side-btn img { filter: saturate(0.25) opacity(0.75); }
+.side-btn.active img { filter: brightness(0) invert(1); opacity: 1; }
+
+/* =========================================================
+   FASE 13.2 — LANDSCAPE-ONLY (arahan pemilik: semua landscape)
+   Overlay putar-HP di portrait, dashboard 2 kolom di lanskap,
+   HUD gameplay menyebar ke samping, teks anti-tumpuk.
+   ========================================================= */
+
+/* --- Overlay wajib lanskap --- */
+#rotate-hud {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(165deg, #2b8a7b, #14584f);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 24px; color: #fff;
+}
+#rotate-hud b { font-size: 22px; font-weight: 900; letter-spacing: 0.04em; }
+#rotate-hud .rh-sub { font-size: 12.5px; font-weight: 700; opacity: 0.92; max-width: 300px; }
+#rotate-hud .rh-en { font-size: 10.5px; font-weight: 700; opacity: 0.6; }
+.rh-phone {
+  width: 46px; height: 78px; border: 4px solid rgba(255, 255, 255, 0.92);
+  border-radius: 12px; position: relative;
+  animation: rh-rotate 1.8s ease-in-out infinite;
+}
+.rh-phone span {
+  position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+  width: 14px; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.92);
+}
+@keyframes rh-rotate {
+  0%, 22% { transform: rotate(0deg); }
+  55%, 82% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+@media (orientation: portrait) {
+  #rotate-hud { display: flex; }
+}
+
+/* --- Dashboard lanskap: grid 2 kolom (banner+kampanye | menu+info) --- */
+@media (orientation: landscape) {
+  .screen { padding-left: 14px; padding-right: 14px; }
+  /* Fase 15 AUDIT: hanya konten tengah yang scroll — topbar & dock tidak pernah bergeser */
+  #screen-dashboard { overflow: hidden; }
+  .topbar, .dock { flex: 0 0 auto; }
+  .dash-body { max-width: 1040px; gap: 12px; min-height: 0; overflow: hidden; }
+  .dash-scroll {
+    display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+    align-items: start; gap: 10px;
+    overflow-y: auto; min-height: 0; align-content: start;
+    scrollbar-width: thin; padding-right: 2px;
+  }
+  /* Fase 16: baris eksplisit — kartu TIDAK mungkin saling menabrak walau
+     urutan DOM/kolom berubah (bug user: stats menimpa kartu Endless) */
+  #dash-banner { grid-area: 1 / 1; height: 200px; }
+  .banner-slide .hero-stage .stage-hero { width: min(24vh, 150px); }
+  #quick-row { grid-area: 1 / 2; }
+  #quick-row .qt-label { white-space: nowrap; }
+  .play-row { grid-area: 2 / 1; }
+  #dash-stats { grid-area: 2 / 2; align-self: end; }
+  #daily-card { grid-area: 3 / 1 / 4 / -1; } /* baris penuh — tanpa lubang grid */
+  #duo-evo { grid-area: 4 / 1; }
+  #duo-lb { grid-area: 4 / 2; }
+  /* Toast di luar-run lanskap: kanan, di ATAS dock (dock 299..376) — zona kosong */
+  body:not(.in-run) #toasts {
+    top: auto; bottom: 102px; right: 12px; left: auto; transform: none;
+    width: min(28vw, 240px);
+  }
+  /* Dock ramping agar sisa tinggi untuk konten */
+  .dock { max-width: 640px; padding-top: 7px; gap: 6px; }
+  .dock-btn .dock-ico { width: 46px; height: 46px; border-radius: 15px; }
+  .dock-btn .dock-ico img { width: 24px; height: 24px; }
+  .dock-btn span { font-size: 11px; }
+  .screen-header h2, .screen-title { font-size: 17px; }
+  .duo-row { grid-template-columns: 1fr; }
+  /* Kartu-kartu tidak menumpuk teks di kolom lebar */
+  .evo-head .evo-progress, .cc-obj, .mc-body span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-id b { max-width: 130px; }
+  .stat-cell span { white-space: nowrap; }
+
+  /* Roster & shop memakai lebar lanskap */
+  .roster-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; width: 100%; }
+  .premium-grid, .shop-grid { max-width: 900px; margin-left: auto; margin-right: auto; width: 100%; }
+  .upg-list { max-width: 760px; margin: 0 auto; width: 100%; }
+
+  /* --- HUD gameplay lanskap: sebar ke samping, jangan tumpuk --- */
+  #screen-hud .hud-top { max-width: 780px; }
+  #screen-hud .hud-minimap { top: 10px; right: 10px; width: 74px; height: 74px; }
+  #screen-hud .hud-mission { top: 60px; width: 250px; }
+  body.in-run #toasts {
+    top: 96px; bottom: auto; right: 10px; left: auto; transform: none;
+    flex-direction: column; width: min(38vw, 300px);
+  }
+  .hud-hint { bottom: 108px; font-size: 10.5px; }
+  #screen-hud .hud-hero-status { left: 12px; bottom: 10px; }
+  #screen-hud .hud-controls { right: 12px; bottom: 10px; }
+  /* Modal pendek di lanskap: dua kolom pilihan level-up bila muat */
+  .choice-grid { max-height: 46vh; }
+}
+
+/* =========================================================
+   FASE 14 — IMUN COIN, BATTLE PASS, OFFERWALL, KOSMETIK
+   ========================================================= */
+
+/* Chip Imun (permata teal) */
+.imu-chip { background: linear-gradient(180deg, #d9f6f1, #bfeae2); }
+.imu-chip .coin { filter: none; }
+
+/* --- Layar Battle Pass --- */
+.bp-body { width: 100%; max-width: 1020px; display: flex; flex-direction: column; gap: 8px; }
+.bp-head { display: flex; align-items: center; gap: 14px; padding: 10px 16px; }
+.bp-level-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.bp-level-ring {
+  width: 54px; height: 54px; border-radius: 50%; flex: 0 0 auto;
+  background: linear-gradient(180deg, #ffe28a, #f2b93e);
+  border: 3px solid #fff; box-shadow: 0 3px 0 #a86f14;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.bp-level-ring b { font-size: 20px; color: #4a2f05; line-height: 1; }
+.bp-level-ring small { font-size: 7.5px; font-weight: 900; color: #7a4d09; }
+.bp-xp-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bp-xp-wrap b { font-size: 13.5px; color: var(--teal-dark); }
+.bp-xp-track { height: 12px; border-radius: var(--pill); background: #efe3c8; overflow: hidden; box-shadow: inset 0 2px 3px rgba(31, 74, 66, 0.12); }
+.bp-xp-fill { height: 100%; width: 0%; border-radius: var(--pill); background: linear-gradient(90deg, #4adbc0, #f5c64f); transition: width 0.3s ease; }
+.bp-xp-text { font-size: 10px; font-weight: 900; color: var(--ink-soft); }
+.bp-hint { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); text-align: center; }
+.bp-track-title { font-size: 11px; font-weight: 900; letter-spacing: 0.1em; color: var(--ink-soft); margin: 2px 4px; }
+.bp-track-title.gold { color: #a97a10; }
+.bp-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px;
+  scroll-snap-type: x proximity;
+}
+.bp-cell {
+  position: relative; scroll-snap-align: start; cursor: pointer;
+  flex: 0 0 128px; min-height: 64px; border: 2px solid #e3dcc6; border-radius: 14px;
+  background: var(--card); font-family: var(--font); text-align: left;
+  padding: 6px 9px 6px 30px; box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  transition: transform 0.08s ease;
+}
+.bp-cell:active { transform: scale(0.95); }
+.bp-lv {
+  position: absolute; left: 7px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; font-weight: 900; color: var(--teal-deep); min-width: 20px;
+}
+.bp-reward { font-size: 9.6px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+.bp-cell.prem .bp-lv, #bp-prem .bp-lv { color: #a97a10; }
+#bp-prem .bp-cell { border-color: #f0d79a; background: linear-gradient(180deg, #fffaf0, #fdf2d2); }
+.bp-cell.claimable { border-color: var(--teal); box-shadow: 0 0 0 2.5px rgba(47, 156, 143, 0.35), var(--shadow-card); animation: bpPulse 1.6s ease-in-out infinite; }
+@keyframes bpPulse { 50% { box-shadow: 0 0 0 6px rgba(47, 156, 143, 0), var(--shadow-card); } }
+.bp-cell.claimed { opacity: 0.6; }
+.bp-cell.claimed .bp-reward { text-decoration: line-through; }
+.bp-cell.locked { opacity: 0.55; }
+.bp-state { position: absolute; right: 7px; top: 6px; width: 15px; height: 15px; object-fit: contain; }
+.bp-state.lock { width: 12px; height: 12px; }
+
+/* --- Offerwall & kosmetik (shop) --- */
+.free-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.free-tile {
+  background: var(--card); border: 2px solid #d9f6f1; border-radius: 16px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 5px;
+  box-shadow: var(--shadow-card);
+}
+.free-tile.wide { grid-column: span 3; }
+.free-tile b { font-size: 12px; color: var(--teal-dark); }
+.free-tile span { font-size: 10px; font-weight: 700; color: var(--ink-soft); }
+.ft-btn { font-size: 11px; min-height: 34px; padding: 6px 14px; align-self: flex-start; }
+.rf-code { color: var(--teal-deep); letter-spacing: 0.06em; }
+.rf-row { display: flex; gap: 7px; }
+.rf-input {
+  flex: 1; min-width: 0; border: 2px solid var(--teal-light); border-radius: 12px;
+  padding: 7px 11px; font-family: var(--font); font-weight: 900; font-size: 11.5px;
+  color: var(--ink); background: #fff; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.rf-input:focus { outline: 2px solid var(--teal); }
+.ad-count { font-size: 34px; font-weight: 900; color: var(--teal-dark); }
+
+.skin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+.skin-card {
+  background: var(--card); border: 2px solid #e3dcc6; border-radius: 16px;
+  padding: 9px 10px; display: flex; flex-direction: column; align-items: center;
+  gap: 3px; text-align: center; box-shadow: var(--shadow-card);
+}
+.skin-card.on { border-color: var(--teal); box-shadow: 0 0 0 2.5px rgba(47, 156, 143, 0.3), var(--shadow-card); }
+.skin-preview { width: 52px; height: 52px; object-fit: contain; }
+.skin-preview.acc { filter: drop-shadow(0 0 6px rgba(122, 215, 255, 0.8)); }
+.skin-card b { font-size: 11px; color: var(--teal-dark); }
+.skin-desc { font-size: 8.8px; font-weight: 700; color: var(--ink-soft); line-height: 1.25; min-height: 22px; }
+.skin-card .ft-btn { align-self: center; font-size: 10px; min-height: 30px; padding: 5px 12px; }
+
+/* Baris Imun di ringkasan run */
+.go-imu { color: #0e7a6a; font-weight: 900; font-size: 12px; }
+
+@media (orientation: landscape) {
+  .free-grid { max-width: 900px; margin: 0 auto; width: 100%; }
+  .free-tile.wide { grid-column: span 3; }
+  .skin-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; width: 100%; }
+  .bp-body { max-width: 1000px; margin: 0 auto; }
+}
+
+/* =========================================================
+   FASE 15 — CINEMATIC BANNER (video battle di home) + audit
+   ========================================================= */
+.stage-cine {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border-radius: inherit; display: block;
+}
+.banner-slide .hero-stage { padding: 0; }
+.banner-slide .hero-stage .stage-info { z-index: 3; }
+.banner-slide .hero-stage .stage-badge { z-index: 3; }

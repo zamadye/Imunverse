@@ -1,0 +1,1011 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "id": "intro",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#ffe3c2",
+            "#f7b8a0"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                -0.1,
+                0.5
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.3
+            }
+          ],
+          "text": "Di dalam tubuh... sesuatu yang asing menyusup lewat makanan.",
+          "ease": "linear"
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#ffd6c2",
+            "#f2825c"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.5,
+                0.5
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.3
+            },
+            {
+              "sprite": "assets/sprites/enemy_bakteri.png",
+              "from": [
+                0.9,
+                0.7
+              ],
+              "to": [
+                0.62,
+                0.58
+              ],
+              "scale": 0.2
+            }
+          ],
+          "text": "Virus dan bakteri berkeliaran — tubuh mulai sakit.",
+          "ease": "linear"
+        },
+        {
+          "dur": 3400,
+          "bg": [
+            "#d8f3ec",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.42,
+                0.55
+              ],
+              "scale": 0.34
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.7
+              ],
+              "to": [
+                0.58,
+                0.68
+              ],
+              "scale": 0.2
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.75,
+                0.4
+              ],
+              "to": [
+                0.85,
+                0.3
+              ],
+              "scale": 0.16,
+              "alpha": 0.5
+            }
+          ],
+          "title": "IMUNVERSE",
+          "text": "Tapi tubuh tidak sendirian. Pasukan imun bangkit — saatnya perang!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_mulut",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Sisa permen yang tak berkehendak mengundang Bakteri Plak menari di gigi. Alarm biologinya berbunyi — pasukan imun pertama turun ke Rongga Mulut!"
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Rongga Mulut sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_mulut",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Rongga Mulut pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_lambung",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#ffe9c9",
+            "#f5c64f"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Tiba-tiba perutmu kram — sesuatu yang busuk masuk lewat makanan! Virus meradang di Lambung. Sang imun segera datang dengan pasukannya untuk membasmi sampai bersih."
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#ffe9c9",
+            "#f5c64f"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_sel_kanker.png",
+              "from": [
+                1.15,
+                0.45
+              ],
+              "to": [
+                0.68,
+                0.45
+              ],
+              "scale": 0.36
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Lambung sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_lambung",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Lambung pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_usus",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#ffe9c9",
+            "#f5c64f"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Para parasit menyusup ke Lorong Berliku Usus Halus dan menumpang makan nutrisi. Badan lemas — tapi pasukan imun makin besar dan takut hilang."
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#ffe9c9",
+            "#f5c64f"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_sel_kanker.png",
+              "from": [
+                1.15,
+                0.45
+              ],
+              "to": [
+                0.68,
+                0.45
+              ],
+              "scale": 0.36
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Usus Halus sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_usus",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Usus Halus pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_paru",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#ffe3e0",
+            "#f7a8a0"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Angin kotor masuk — Paru-paru dipenuhi virus bersabit yang bikin sesak. Di balik kabut udara, pasukan imun berbaris membersihkan kabut itu satu per satu."
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#ffe3e0",
+            "#f7a8a0"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_sel_kanker.png",
+              "from": [
+                1.15,
+                0.45
+              ],
+              "to": [
+                0.68,
+                0.45
+              ],
+              "scale": 0.36
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Paru-paru sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_paru",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Paru-paru pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_limfe",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Kelenjar Limfe — markas besar pasukan imun — ternyata disusupi! Patogen bersarang di rumah sendiri. Serangan terbesar dimulai dari sini: bersihkan markas!"
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_sel_kanker.png",
+              "from": [
+                1.15,
+                0.45
+              ],
+              "to": [
+                0.68,
+                0.45
+              ],
+              "scale": 0.36
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Kelenjar Limfe sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_limfe",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Kelenjar Limfe pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_jantung",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#ece0ff",
+            "#c9aef2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.15,
+                0.55
+              ],
+              "to": [
+                0.5,
+                0.5
+              ],
+              "scale": 0.28
+            }
+          ],
+          "text": "Di pusat tubuh, Raja Kanker mencoba menguasai Sumbu Kehidupan. Kalau jatuh, semuanya tamat. Seluruh pasukan imun — semua sel, satu tujuan: TUBUH BERSIH!"
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#ece0ff",
+            "#c9aef2"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                -0.15,
+                0.55
+              ],
+              "to": [
+                0.35,
+                0.55
+              ],
+              "scale": 0.32
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                -0.05,
+                0.72
+              ],
+              "to": [
+                0.52,
+                0.7
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_sel_kanker.png",
+              "from": [
+                1.15,
+                0.45
+              ],
+              "to": [
+                0.68,
+                0.45
+              ],
+              "scale": 0.36
+            }
+          ],
+          "text": "Pasukan imun tiba. Bersihkan Sumbu Kehidupan sampai tuntas!",
+          "ease": "out"
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_jantung",
+      "shots": [
+        {
+          "dur": 2600,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.5,
+                0.62
+              ],
+              "to": [
+                0.5,
+                0.45
+              ],
+              "scale": 0.34
+            }
+          ],
+          "title": "ORGAN BERSIH!",
+          "text": "Sumbu Kehidupan pulih kembali. Terima kasih, sang imun!",
+          "ease": "out"
+        },
+        {
+          "dur": 2400,
+          "bg": [
+            "#e7f6ee",
+            "#7fd8c8"
+          ],
+          "actors": [
+            {
+              "sprite": "assets/sprites/hero_sel_t_idle.png",
+              "from": [
+                0.38,
+                0.5
+              ],
+              "to": [
+                0.38,
+                0.42
+              ],
+              "scale": 0.26
+            },
+            {
+              "sprite": "assets/sprites/hero_sel_b_idle.png",
+              "from": [
+                0.6,
+                0.62
+              ],
+              "to": [
+                0.6,
+                0.56
+              ],
+              "scale": 0.18
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                0.8,
+                0.4
+              ],
+              "to": [
+                1.2,
+                0.2
+              ],
+              "scale": 0.14,
+              "alpha": 0.4
+            }
+          ],
+          "text": "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...",
+          "ease": "linear"
+        }
+      ]
+    }
+  ]
+}

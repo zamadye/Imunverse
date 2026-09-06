@@ -1,0 +1,514 @@
+{
+ "schemaVersion": 1,
+ "skills": [
+  {
+   "id": "taunt",
+   "name": "Taunt",
+   "description": "Tarik perhatian musuh di sekitar lalu bentalkan diri.",
+   "cooldown": 8,
+   "color": "#4a7c59",
+   "effects": [
+    {
+     "kind": "pull",
+     "radius": 180
+    },
+    {
+     "kind": "shield_self",
+     "amount": 15
+    }
+   ]
+  },
+  {
+   "id": "defensive_stance",
+   "name": "Sikap Bertahan",
+   "description": "Damage yang diterima -30% selama 4 detik.",
+   "cooldown": 12,
+   "color": "#5d8a6b",
+   "effects": [
+    {
+     "kind": "protect_self",
+     "mult": 0.7,
+     "duration": 4
+    }
+   ]
+  },
+  {
+   "id": "devour",
+   "name": "Devour",
+   "description": "Melahap mangsa terdekat: damage besar + pulih 30 HP.",
+   "cooldown": 20,
+   "color": "#d4a017",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 4
+    },
+    {
+     "kind": "heal",
+     "amount": 30,
+     "radius": 0
+    }
+   ]
+  },
+  {
+   "id": "mark_target",
+   "name": "Mark Target",
+   "description": "Tandai musuh terdekat: menerima +20% damage 6 dtk.",
+   "cooldown": 7,
+   "color": "#ff8c00",
+   "effects": [
+    {
+     "kind": "mark",
+     "dmg": 20,
+     "duration": 6
+    }
+   ]
+  },
+  {
+   "id": "heal_pulse",
+   "name": "Heal Pulse",
+   "description": "Pulihkan 15 HP untukmu & pasukan di sekitar.",
+   "cooldown": 9,
+   "color": "#ffd700",
+   "effects": [
+    {
+     "kind": "heal",
+     "amount": 15,
+     "radius": 160
+    }
+   ]
+  },
+  {
+   "id": "overcharge",
+   "name": "Overcharge",
+   "description": "Semua serangan +30% selama 5 detik.",
+   "cooldown": 22,
+   "color": "#ffaa00",
+   "effects": [
+    {
+     "kind": "buff_self",
+     "damage": 30,
+     "duration": 5
+    },
+    {
+     "kind": "buff_allies",
+     "radius": 999,
+     "damage": 30,
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "id": "grenade",
+   "name": "Grenade",
+   "description": "Ledakan granula: area damage 2.5×.",
+   "cooldown": 6,
+   "color": "#1a5276",
+   "effects": [
+    {
+     "kind": "area",
+     "radius": 95,
+     "mult": 2.5
+    }
+   ]
+  },
+  {
+   "id": "adrenaline",
+   "name": "Adrenaline",
+   "description": "Kecepatan +30% selama 3 detik.",
+   "cooldown": 10,
+   "color": "#bdc3c7",
+   "effects": [
+    {
+     "kind": "buff_self",
+     "speed": 30,
+     "duration": 3
+    }
+   ]
+  },
+  {
+   "id": "blitz",
+   "name": "Blitz",
+   "description": "5 serangan kilat beruntun ke target terdekat.",
+   "cooldown": 18,
+   "color": "#2980b9",
+   "effects": [
+    {
+     "kind": "instant_hits",
+     "hits": 5,
+     "mult": 1.0
+    }
+   ]
+  },
+  {
+   "id": "poison_dart",
+   "name": "Poison Dart",
+   "description": "Dart beracun: damage + racun 4 detik.",
+   "cooldown": 7,
+   "color": "#ff6b81",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 1.5,
+     "dot": {
+      "mult": 0.35,
+      "duration": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "evade",
+   "name": "Evade",
+   "description": "Menghindari 1 serangan berikutnya penuh.",
+   "cooldown": 12,
+   "color": "#ff8a80",
+   "effects": [
+    {
+     "kind": "buff_self",
+     "evade": 1,
+     "duration": 6
+    }
+   ]
+  },
+  {
+   "id": "parasite_strike",
+   "name": "Parasite Strike",
+   "description": "Tombak pemburu: damage besar 6× ke 1 musuh.",
+   "cooldown": 16,
+   "color": "#e05570",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 6
+    }
+   ]
+  },
+  {
+   "id": "histamine",
+   "name": "Histamine",
+   "description": "Awan histamin: damage kecil + musuh lambat 40%.",
+   "cooldown": 8,
+   "color": "#8e44ad",
+   "effects": [
+    {
+     "kind": "area",
+     "radius": 130,
+     "mult": 0.6,
+     "slow": {
+      "mult": 0.6,
+      "duration": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "allergy",
+   "name": "Allergy",
+   "description": "Musuh di dekat panik — tertegun sejenak.",
+   "cooldown": 11,
+   "color": "#6c3483",
+   "effects": [
+    {
+     "kind": "area",
+     "radius": 110,
+     "mult": 1.2,
+     "stun": 0.9
+    }
+   ]
+  },
+  {
+   "id": "chemical_storm",
+   "name": "Chemical Storm",
+   "description": "Badai kimia luas: damage 3× + lambat 5 detik.",
+   "cooldown": 20,
+   "color": "#9b59b6",
+   "effects": [
+    {
+     "kind": "area",
+     "radius": 175,
+     "mult": 3.0,
+     "slow": {
+      "mult": 0.55,
+      "duration": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "barrier",
+   "name": "Barrier",
+   "description": "Perisai menyerap 30 damage.",
+   "cooldown": 9,
+   "color": "#a03328",
+   "effects": [
+    {
+     "kind": "shield_self",
+     "amount": 30
+    }
+   ]
+  },
+  {
+   "id": "sting",
+   "name": "Sting",
+   "description": "Sengatan + musuh target melambat.",
+   "cooldown": 7,
+   "color": "#8b4513",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 2.0,
+     "slow": {
+      "mult": 0.6,
+      "duration": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "anaphylaxis",
+   "name": "Anaphylaxis",
+   "description": "Ledakan reaksi hebat: area damage 5×.",
+   "cooldown": 24,
+   "color": "#c0392b",
+   "effects": [
+    {
+     "kind": "area",
+     "radius": 155,
+     "mult": 5.0
+    }
+   ]
+  },
+  {
+   "id": "precision_shot",
+   "name": "Precision Shot",
+   "description": "Tembakan presisi: 2.5× damage.",
+   "cooldown": 6,
+   "color": "#00d2ff",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 2.5
+    }
+   ]
+  },
+  {
+   "id": "lock_on",
+   "name": "Lock On",
+   "description": "Target dikunci: menerima +50% damage 5 dtk.",
+   "cooldown": 10,
+   "color": "#00a8cc",
+   "effects": [
+    {
+     "kind": "mark",
+     "dmg": 50,
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "id": "execute",
+   "name": "Execute",
+   "description": "Damage 3× — atau 8× bila HP target di bawah 20%.",
+   "cooldown": 20,
+   "color": "#7fdbff",
+   "effects": [
+    {
+     "kind": "execute",
+     "threshold": 0.2,
+     "mult": 3.0,
+     "execMult": 8.0
+    }
+   ]
+  },
+  {
+   "id": "rally",
+   "name": "Rally",
+   "description": "Pasukan serang +15% selama 5 detik.",
+   "cooldown": 9,
+   "color": "#f1c40f",
+   "effects": [
+    {
+     "kind": "buff_allies",
+     "radius": 220,
+     "damage": 15,
+     "duration": 5
+    },
+    {
+     "kind": "buff_self",
+     "damage": 15,
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "id": "command",
+   "name": "Command",
+   "description": "Perintah fokus: pasukan +40% damage 5 detik.",
+   "cooldown": 11,
+   "color": "#f39c12",
+   "effects": [
+    {
+     "kind": "buff_allies",
+     "radius": 220,
+     "damage": 40,
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "id": "battle_cry",
+   "name": "Battle Cry",
+   "description": "Semua +50% serangan & pertahanan +30% (8 dtk).",
+   "cooldown": 26,
+   "color": "#ffd93d",
+   "effects": [
+    {
+     "kind": "buff_allies",
+     "radius": 999,
+     "damage": 50,
+     "protect": 30,
+     "duration": 8
+    },
+    {
+     "kind": "buff_self",
+     "damage": 50,
+     "duration": 8
+    }
+   ]
+  },
+  {
+   "id": "pacify",
+   "name": "Pacify",
+   "description": "Tenangkan 1 musuh — tak bergerak 2 detik.",
+   "cooldown": 9,
+   "color": "#2ecc71",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 0.5,
+     "stun": 2.0
+    }
+   ]
+  },
+  {
+   "id": "shield_ally",
+   "name": "Shield",
+   "description": "Perisai 25 HP untukmu & pasukan dekat.",
+   "cooldown": 8,
+   "color": "#27ae60",
+   "effects": [
+    {
+     "kind": "shield_self",
+     "amount": 25
+    }
+   ]
+  },
+  {
+   "id": "truce",
+   "name": "Truce",
+   "description": "Gencatan senjata: semua damage -50% 4 detik.",
+   "cooldown": 22,
+   "color": "#16a085",
+   "effects": [
+    {
+     "kind": "protect_self",
+     "mult": 0.5,
+     "duration": 4
+    },
+    {
+     "kind": "area",
+     "radius": 999,
+     "mult": 0,
+     "slow": {
+      "mult": 0.5,
+      "duration": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "antibody_burst",
+   "name": "Antibody",
+   "description": "Luncurkan 3 antibodi pengejar.",
+   "cooldown": 7,
+   "color": "#bb8fce",
+   "effects": [
+    {
+     "kind": "summon_homing",
+     "count": 3,
+     "mult": 1.2
+    }
+   ]
+  },
+  {
+   "id": "empower",
+   "name": "Empower",
+   "description": "Serangan +25% selama 4 detik.",
+   "cooldown": 10,
+   "color": "#d7bde2",
+   "effects": [
+    {
+     "kind": "buff_self",
+     "damage": 25,
+     "duration": 4
+    }
+   ]
+  },
+  {
+   "id": "plasma_rain",
+   "name": "Plasma Rain",
+   "description": "Hujan plasma: 10 serangan beruntun.",
+   "cooldown": 22,
+   "color": "#af7ac5",
+   "effects": [
+    {
+     "kind": "instant_hits",
+     "hits": 10,
+     "mult": 1.2
+    }
+   ]
+  },
+  {
+   "id": "backstab",
+   "name": "Backstab",
+   "description": "Serangan matang dari arah gelap: 2.5×.",
+   "cooldown": 6,
+   "color": "#4a235a",
+   "effects": [
+    {
+     "kind": "strike",
+     "mult": 2.5
+    }
+   ]
+  },
+  {
+   "id": "shadowstep",
+   "name": "Shadowstep",
+   "description": "Menghilang & muncul di depan arah gerak.",
+   "cooldown": 8,
+   "color": "#1c1c1c",
+   "effects": [
+    {
+     "kind": "dash",
+     "distance": 160
+    }
+   ]
+  },
+  {
+   "id": "annihilate",
+   "name": "Annihilate",
+   "description": "3× + ledakan + 10% HP maksimum target.",
+   "cooldown": 20,
+   "color": "#6c3483",
+   "effects": [
+    {
+     "kind": "annihilate",
+     "mult": 3.0,
+     "radius": 85,
+     "hpPct": 0.1
+    }
+   ]
+  }
+ ]
+}

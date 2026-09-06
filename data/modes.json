@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "modes": [
+    {
+      "id": "kampanye",
+      "name": "Kampanye",
+      "icon": "assets/sprites/icon_play.png",
+      "description": "Ikuti cerita: bersihkan organ satu per satu bersama pasukan imun. Bab berikutnya terbuka setelah bab sebelumnya bersih.",
+      "finalWave": null,
+      "unlock": {
+        "type": "default"
+      }
+    },
+    {
+      "id": "endless",
+      "name": "Endless",
+      "icon": "assets/sprites/icon_infinity.png",
+      "description": "Tanpa akhir + mutator harian. Uji seberapa jauh pasukanmu bertahan.",
+      "finalWave": null,
+      "unlock": {
+        "type": "winNormal",
+        "label": "Bersihkan bab Kampanye pertama"
+      }
+    }
+  ]
+}

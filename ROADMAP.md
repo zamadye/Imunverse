@@ -1,0 +1,415 @@
+# 🗺️ ROADMAP PENGEMBANGAN IMUNVERSE
+
+> Dokumen progres resmi proyek. Diperbarui setiap akhir fase.
+> Status: ✅ selesai · 🔄 sedang dikerjakan · ⬜ belum mulai · 🟡 sebagian
+> Legenda effort: S = ≤1 sesi · M = beberapa sesi · L = 1+ minggu
+
+| Fase | Nama | Status | Effort |
+|---|---|---|---|
+| 0 | Riset & Desain Dasar | ✅ | S |
+| 1 | Arsitektur & Fondasi Teknis | ✅ | M |
+| 2 | Core Gameplay Loop | ✅ | M |
+| 3 | Progresi Meta, Ekonomi & Save | ✅ | M |
+| 4 | UI/UX Pass 1 — Design System, Polish & Game Feel | ✅ | M |
+| 5 | UI/UX Pass 2 — Penyesuaian ke Reference User | ✅ | S–M |
+| 6 | Audio & Juice | ✅ | M |
+| 7 | Konten & Liveops | ✅ | M |
+| 7.5 | Deep Hooks & Story — "Perang Sang Tubuh" | ✅ | L |
+| 8 | Integrasi Monetisasi (SDK nyata) | 🟡 hook siap | M |
+| 9 | Optimasi, QA & Release | ⬜ | L |
+
+---
+
+## Fase 0 — Riset & Desain Dasar ✅
+**Tujuan:** memutuskan arah game sebelum menulis kode.
+- [x] Game design ringkas: roguelike survival arena, tema sel imun, sesi 3–8 menit.
+- [x] Skema data (hero/enemy/nutrient/wave/upgrade/mission) → kontrak file JSON.
+- [x] Arah visual: bioluminescent interior tubuh (bg gelap biru-cyan, accent teal/pink).
+- [x] Daftar screen: loading, dashboard, roster, upgrade squad, toko, HUD, level-up, pause, revive, game over.
+- **Kriteria lulus:** semua keputusan terdokumentasi & data punya skema konkret.
+
+## Fase 1 — Arsitektur & Fondasi Teknis ✅
+**Tujuan:** kerangka teknis benar sebelum konten.
+- [x] ES6 modules terpisah per tanggung jawab (core/input/entities/systems/render/save/ui).
+- [x] Game loop `requestAnimationFrame` + delta-time nyata (clamp 50 ms).
+- [x] `data-store` loader JSON + formula terpusat (spawn, scaling HP, kurva XP).
+- [x] `save-manager` localStorage (JSON.stringify/parse) + struktur meta berversi.
+- [x] `input-handler`: virtual joystick (touchstart/move/end dari titik awal sentuh) + WASD/arrow.
+- [x] `sprite-loader`: `loadAllSprites()` Promise + cache + fallback placeholder dev.
+- [x] `ui-bridge` event bus (gameplay tidak mengimpor UI).
+- **Kriteria lulus:** boot tanpa error; delta-time terverifikasi identik di 30 & 120 fps.
+
+## Fase 2 — Core Gameplay Loop ✅
+**Tujuan:** "fun core" 30 detik pertama terasa benar.
+- [x] Player auto-attack 3 pattern: `melee_swipe`, `ranged_pierce`, `ranged_homing`.
+- [x] 6 tipe musuh, 4 behavior: `chase_direct`, `splitter` (pecah 2), `chase_weave`, `boss_pattern_a` (AOE ter-telegraf).
+- [x] Wave system: `spawnInterval = max(0.4, 1.8 − wave×0.08)`, HP scaling `1+(wave−1)×0.12`, boss tiap 5 wave, spawn di luar viewport.
+- [x] Collision circle-to-circle + spatial hash grid; separation anti-menumpuk.
+- [x] Pickup nutrisi (XP/heal/currency/magnet) + radius magnet + kedaluwarsa.
+- [x] Level-up: kurva `10×level^1.5`, pause → modal 3 pilihan acak.
+- [x] Camera follow smoothing + screen shake; vignette damage.
+- **Kriteria lulus:** 150 musuh + 60 proyektil = **0,27 ms/frame** (target < 8 ms); 98 assertion runtime lulus.
+
+## Fase 3 — Progresi Meta, Ekonomi & Save ✅
+**Tujuan:** progres terasa permanen & adil.
+- [x] Currency Antibodi: drop in-run + bonus akhir run (per wave + per kill).
+- [x] Upgrade Squad permanen 6 jalur (harga `base×growth^level`).
+- [x] Toko: unlock hero (jalur alternatif) + consumable Serum Awal.
+- [x] Unlock 2 jalur: statistik misi (auto) & pembelian; roster menampilkan gembok + kondisi.
+- [x] 12 misi/achievement + reward otomatis; daily reward 1×/hari.
+- [x] Auto-save di setiap titik penting (akhir run, beli, unlock, klaim harian).
+- **Kriteria lulus:** siklus unlock–beli–persist terverifikasi antar sesi.
+
+## Fase 4 — UI/UX Pass 1: Design System, Polish & Game Feel ✅
+**Tujuan:** dari "UI berfungsi" → "UI terasa dirancang".
+- [x] **4.1 Design tokens**: skala warna, spacing, radius, shadow, tipografi terpusat di CSS variables.
+- [x] **4.2 Layout dashboard**: hierarki jelas (topbar → panggung hero → statistik → daily → misi → dock).
+- [x] **4.3 Transisi & micro-interaction**: animasi masuk screen, modal pop, tombol press-state, stagger kartu level-up.
+- [x] **4.4 Onboarding run pertama**: hint kontrol adaptif (touch vs keyboard), auto-hide 8 detik.
+- [x] **4.5 Feedback game-feel**: badge level di bar XP, denyut peringatan HP rendah, bintang rating + count-up currency di akhir run.
+- [x] **4.6 Aksesibilitas dasar**: target sentuh ≥ 44 px, `focus-visible`, `prefers-reduced-motion`, kontras teks.
+- **Kriteria lulus:** harness 84 assertion + perf + self-test tetap hijau setelah restyling.
+
+## Fase 5 — UI/UX Pass 2: Penyesuaian Reference User ✅
+**Tujuan:** menyamakan gaya visual dengan 12 mockup reference yang diunggah user.
+- [x] Palet diambil dari mockup: cream `#FDF6E3`, teal `#2F9C8F`/`#1F7A70`, coral `#F2825C`, sage `#A9D795`, gold `#F5C64F`, ink `#123F3A`.
+- [x] Loading screen: emblem perisai+virus lucu (sprite prosedural baru) + bar teal di track cream — sesuai mockup loading.
+- [x] Dashboard: panggung hero pastel ber-blob + dock 4 tombol berlabel **Play · Heroes · Squad · Shop** (ikon SVG) — sesuai mockup home.
+- [x] Roster: lingkaran avatar berwarna per hero, badge gembok pojok, ring glow teal untuk terpilih — sesuai mockup hero select.
+- [x] Squad Upgrade: baris kartu dengan **slider level (track + knob)** + tombol pill harga 💠 — sesuai mockup upgrade.
+- [x] Toko: grid kartu pastel 3 kolom, badge harga kuning pojok kanan-atas, gembok pojok — sesuai mockup shop.
+- [x] HUD: pill HP cream (portrait + ❤️ + bar), **wave pill** teal gelap, timer chip — sesuai mockup gameplay.
+- [x] Game over: kartu kemenangan dengan **3 bintang rating** + judul coral bergaris hias + count-up — sesuai mockup victory.
+- [x] Arena canvas: air teal + **arena heksagon cream** di pusat dunia + siluet terumbu & gelembung parallax — sesuai mockup battle.
+- **Kriteria lulus:** setiap screen dapat dipetakan langsung ke mockup reference-nya.
+
+## Fase 5.1 — Composition Fidelity Pass ✅
+**Tujuan:** menambal kritik "UI monoton" — menambah **lapisan dekorasi komposisi**
+(aset stage 8: 10 deco_*) yang ter-wire nyata, bukan pajangan:
+- [x] Preload: `EXTRA_PRELOAD` di sprite-loader (prop/fx/joystick/deco ikut loadAllSprites Promise) — tidak ada lagi placeholder senyap untuk path hardcode.
+- [x] Gameplay canvas: **aura putih gradasi** di belakang player, **shadow pipih** semua musuh, **rumput laut & terumbu siluet besar** menempel sudut bawah layar (screen-anchored, sway sin(time)).
+- [x] Dashboard: **chip patogen dalam gelembung** (virus/sel_kanker/bakteri) melayang di panggung + aura di belakang hero.
+- [x] Loading: **kuman lucu teal/coral/sage + dots** melayang mengelilingi emblem.
+- [x] Game over: **dekor victory** — koin melayang, bintang pop, peti di baris reward, siluet monster pojok kartu.
+- [x] Squad Upgrade: **banner tile hero besar + 2 tile musuh mini** (ala header mockup).
+- [x] Shop: **badge kategori bulat** di pojok kiri-atas tiap kartu.
+- [x] Pause: emoji ⏱/🛡 diganti ikon PNG (Chromium headless tanpa font emoji).
+- **Kriteria lulus:** 12 screenshot Chromium asli tanpa console error/404; elemen dekor terverifikasi di DOM (chipCount=3, aura 326px); perf tetap vsync 60 fps @150 musuh.
+
+## Fase 5.2 — Kekuatan yang Terlihat: Evolusi, Kemampuan Aktif & Kill FX ✅
+**Tujuan:** hero terlihat makin kuat (bentuk berubah) + efek kalahkan musuh sesuai tier.
+- [x] **Drop bagian evolusi**: musuh normal 6%, elite (virion/parasit) 30%, boss dijamin 2 — dari `data/evolutions.json`.
+- [x] **5 tahap evolusi** Common→Legendary: Silia → +Pseudopodia (kaki) → +Mikropedang → +Inti Elemen; tiap tahap = mult damage/HP nyata di `computePlayerStats`.
+- [x] **Overlay bentuk di canvas & panggung**: silia berkibar, kaki, pedang, aura elemen berputar (`ov_*.png`) — hero Common benar-benar lingkaran, Legendary penuh kelengkapan.
+- [x] **Kill FX per tier**: ring (common), slash (uncommon), spiral angin (rare), petir menyambar (epic), petir+ring emas (legendary) — `spawnKillFx` + `drawKillFx`.
+- [x] **4 tombol kemampuan di kanan** (1 senjata: Tebasan Mitosis; 3 kekuatan: Siklon Silia, Petir Sitotoksik, Beku Fagosit) — cooldown ring, keyboard J/K/L/O & 1-4, terkunci merah-duplikat sampai evolusi cukup; damage/push/freeze nyata.
+- [x] Status musuh baru: `applyFreeze` (berhenti total) & `applySlow` (siklon) di enemy.js.
+- **Kriteria lulus:** SELFTEST `abilityFired`, `evolutionPartsDropped`, `evolutionPersisted` true; petir menyambar terlihat di screenshot `12-skill-petir.png`.
+
+## Fase 5.3 — Retensi & Monetisasi Etis: Arena, Peti Boss, Meta-Progress ✅
+**Tujuan:** sesuatu yang selalu dikejar + ads di titik istirahat alami (riset: revive > booster > bonus, selalu opsional, cap harian).
+- [x] **4 arena** (`data/arenas.json`) dengan palet/prop/bonus berbeda; **terkunci sesuai cara main**: Lambung (150 kill total), Paru (best wave 8), Saraf (2 boss kill) — progres unlock tampil di modal; `getRunArena` menolak arena terkunci dari save lama.
+- [x] **Peti Boss** = natural break: muncul saat boss tumbang (gameplay pause), isi antibodi + bagian; **iklan opsional 2x loot** (`triggerRewardedAdBossChest`) + **kuota iklan harian** `adDailyLimit` dari JSON (`canWatchAd`/`trackAdWatch`).
+- [x] **Kartu Evolusi di dashboard**: tahap, tier, bagian terkumpul vs kebutuhan, tombol BEREVOLUSI (bentuk panggung ikut berubah) — selalu ada target berikutnya.
+- [x] **Kartu arena + modal pilih arena** dengan syarat unlock berbasis statistik nyata.
+- [x] Emoji tersisa (🛡/🔒/⏱/🧬) diganti ikon PNG — Chromium headless tanpa font emoji.
+- [x] **Bugfix nyata**: `Pickup.isCollectedBy` NaN (`player.pickupRadius` tidak ada di Player) → nutrisi TIDAK PERNAH terambil; kini fallback `stats.pickupRadius` — nutrisi/bagian kembali terkumpul.
+- **Kriteria lulus:** 15/15 screenshot Chromium CLEAN (0 error/404); perf vsync 16,6 ms/frame @151 musuh dengan semua overlay evolusi aktif; SELFTEST_PASS 15 langkah.
+
+## Fase 6 — Body as a System: Tubuh = Organisme yang Dikelola ✅
+**Tujuan:** ubah tujuan game dari "bertahan selama mungkin" menjadi **"jaga universe-tubuh tetap sehat"** — roguelite manajemen organisme (in-run TIDAK berubah; murni meta-layer antar-run).
+- [x] **5 sistem saling terhubung** (`data/body-systems.json`): Sirkulasi, Pencernaan, Saraf, Imun, Limfatik — masing-masing 0-100, decay -1/hari bila tak dirawat (offline cap 7 hari).
+- [x] **Rumus interdependency sesuai desain**: `Sirkulasi_efektif = Sirkulasi_base × (Pencernaan/100)`; `racun += kills × 0.3 − limfatik × 0.02`; racun ≥70 meracuni Pencernaan (−2/run) → loop tertutup.
+- [x] **Energi**: dihasilkan Pencernaan tiap run (0,5–1,5× + wave), dipakai boost pemulihan sistem fokus (−25/boost).
+- [x] **Kondisi kritis < 20**: bukan game over — modifier run (Imun kritis → musuh +20% cepat; Saraf kritis → XP −25%; dst) + badge kritis berdenyut di dashboard.
+- [x] **Modifier run bertahap** dari kondisi tubuh: cooldownScale (Sirkulasi efektif), nutrientMult (Pencernaan — nilai nutrisi run), xpMult (Saraf), damageMult (Imun) — di-set via `applyBodyModifiers` di startRun.
+- [x] **Fokus Run** (modal 6 pilihan): "Run Detoksifikasi Limfatik" (saring racun ekstra), "Run Respons Cepat" (pulihkan Sirkulasi), dst — menang (wave ≥3) = +10 sistem fokus, gagal = +3.
+- [x] **Milestone makro**: "Tubuh Sehat Sempurna" = SEMUA sistem ≥80 selama 3 hari berturut-turut (streak tersimpan) + **arc naratif**: Terinfeksi Kronis → Tubuh Mulai Melawan → Zaman Pemulihan → Hampir Sehat → Sehat Sempurna.
+- [x] **Monetisasi natural**: rewarded ad "percepat pemulihan sistem kritis" (masuk kuota harian) + IAP simulasi "Suplemen Premium" (+20 semua sistem) + suplemen per-sistem 250 antibodi di shop.
+- [x] **Dampak run tampil di game over**: "+X racun · +Y energi · Sirkulasi +10 · racun meracuni Pencernaan −2".
+- [x] **8 aset stage 10**: ikon 5 sistem, meter energi/racun, badge kritis (total 96 PNG).
+- **Kriteria lulus:** SELFTEST 17 langkah PASS (bodyRacunRegistered, bodyStatePersisted); screenshot: kartu kondisi tubuh, kondisi kritis, modal fokus, suplemen shop, dampak gameover; perf tetap vsync 16,6 ms/frame.
+
+## Fase 6.1 — Workflow UI: Battle Prep, Tas & CTA Primer ✅
+**Tujuan:** perbaiki workflow dashboard yang membingungkan (riset: 1 primary CTA, pre-run choices dalam 1 layar, bottom nav 3–5 item, bag terpisah).
+- [x] **CTA primer "MULAI" besar** tepat di bawah panggung (gradient teal, sub label hero·arena) — mengarah ke **Battle Prep**, bukan langsung run.
+- [x] **Battle Prep (Siap Tempur)**: satu layar alur linier — ① pilih hero (kartu horizontal, badge tier evolusi) → ② fokus run (chip) → ③ arena (chip, terkunci sesuai progres) → ringkasan loadout (hero+tier+ikon kemampuan terbuka+fokus+arena) → **tombol MULAI selalu terlihat** (pola Archero/Survivor.io).
+- [x] **Tas (Bag)** via dock: grid bagian evolusi (butuh berapa lagi, badge dashed bila kurang) + consumable + info evolusi berikutnya.
+- [x] **Dock 5 tombol**: Play · Heroes · Bag · Squad · Shop (ikon tas PNG baru — 97 aset).
+- [x] Kartu kondisi tubuh: tombol FOKUS kini mengarah ke Battle Prep (satu gerbang keputusan).
+- [x] **Dev server baru `tools/server.py`**: menelan `ConnectionResetError [Errno 104]` (noise keep-alive mobile yang membanjiri log http.server) tanpa mengubah perilaku serving.
+- **Kriteria lulus:** screenshot alur baru — dashboard dengan MULAI besar (02), Battle Prep 3 langkah + ringkasan (20), Tas (19); 20/20 shot CLEAN; run tetap jalan dari alur prep (07).
+
+## Fase 6.2 — Bentuk Hero Variatif + Tutorial Onboarding ✅
+**Tujuan:** "bentuk hero harus ada bentuk lain selain lingkaran" + onboarding run pertama.
+- [x] **Siluet unik per hero**: Sel T = bulat klasik; Makrofag = **ameba berlobus pseudopodia** (siluet tidak simetris); Sel B = **antena reseptor-Y** keluar dari kepala; Sel NK = berduri. Generasi via parameter baru `lobes`/`receptors` di `tools/gen_assets.py`.
+- [x] **Tutorial 3 langkah run pertama** (`tutorial-system.js`, hanya `totalRuns === 0`): ① bergerak (akumulasi jarak ±2,5 dtk) → ② auto-attack (kill pertama) → ③ ambil nutrisi (pickup pertama) — bubble + jari animasi + tombol LEWATI; ditandai `meta.tutorialDone` di save; gameplay tidak dipause.
+- [x] **FIX input desktop**: joystick virtual kini juga mendengarkan **Pointer Events (mouse/pena)** — sebelumnya drag mouse TIDAK menggerakkan player di desktop (hanya touch/keyboard); hint HUD ditambah "tarik mouse".
+- **Kriteria lulus:** 4 hero punya siluet berbeda (sheet); tutorial terverifikasi maju 1→2→3 di browser asli (script terpisah); screenshot `21-tutorial` (bubble langkah + LEWATI); 20/20 shot CLEAN; perf tetap vsync 16,6 ms.
+
+## Fase 7 — Audio & Juice ✅
+**Tujuan:** semua event penting bersuara (SFX prosedural WebAudio — tanpa file audio) + game feel (juice).
+- [x] **audio-system.js**: 17 SFX disintesis oscillator+noise (tembak, hit, kill, pickup, playerHit, level-up, boss spawn/mati, 4 kemampuan, peti, evolusi, wave, combo, klik UI); throttle per-event anti-spam; **AudioContext di-unlock pada gesture pertama** (kebijakan autoplay); mute **tersimpan di save** (`meta.soundMuted`).
+- [x] **Mute toggle 2 tempat**: ikon speaker di topbar dashboard + tombol di modal pause (ikon berubah on/off, sinkron via event pause/resume).
+- [x] **Hit-stop**: 70 ms saat boss tumbang, 35 ms untuk musuh elite — update dibekukan sesaat, render tetap jalan (juice standar survivors-like).
+- [x] **Squash-stretch player**: badan memantul (sin 48 Hz) saat menerima hit & saat mengeluarkan kemampuan.
+- [x] **Combo counter**: kill beruntun (window 2 dtk) → pill "xN COMBO" dengan animasi pop; milestone tiap kelipatan 10 → bonus XP + toast.
+- [x] **2 aset baru**: ikon speaker on/off (total 99 PNG).
+- **Kriteria lulus:** ctxState=running & 17 SFX dipanggil tanpa error di Chromium asli; toggle mute persist (icon_sound_off.png saat mati); hitStop 0.035 terverifikasi; SELFTEST_PASS 17 langkah; perf tetap vsync 16,6 ms/frame @151 musuh; 21/21 shot CLEAN.
+
+## Fase 7 — Konten & Liveops ✅
+**Tujuan:** konten baru = data baru, bukan kode baru; liveops tanpa server.
+- [x] **Konten via JSON murni** (logic sudah dispatch dari data):
+  - Hero baru **Eosinofil** (attackPattern `ranged_homing` yang sudah ada; 2 granula homing) — cukup entri `data/heroes.json` + aset generator.
+  - Musuh baru **Protozoa** (behavior `chase_weave` zig-zag, minWave 4) — cukup entri `data/enemies.json` + aset.
+  - Roster/Prep/Shop otomatis menampilkan konten baru tanpa kode.
+- [x] **Mode via `data/modes.json`**: Klasik = perjalanan 10 wave → **MENANG** (judul + stat `wins`); **Endless** = tanpa akhir, unlock `winNormal` (terkunci "Menangkan mode Klasik"); step Mode di Battle Prep.
+- [x] **Mutator harian seeded** (`data/mutators.json` × `liveops-system.js`): PRNG mulberry32 + hash tanggal → semua pemain di tanggal sama dapat mutator sama tanpa server; khusus Endless; mods digabung ke jalur modifier run (enemyHP/enemySpeed/spawn/damage/XP/magnet/nutrien/cooldown); toast pengumuman; ditampilkan di gameover.
+- [x] **Leaderboard lokal per mode** (top-10, urut wave→waktu→kill): kartu "Papan Rekor" di dashboard, badge REKOR BARU di gameover.
+- [x] Bonus liveops: milestone XP tiap kelipatan 10 wave; Endless bonus antibodi tiap 5 wave; 8 aset baru (hero ×2, protozoa, portrait, ikon infinity, granula) — total **104 PNG**.
+- **Kriteria lulus:** e2e 7 langkah RESULT OK (mutator deterministik same-date/beda-tanggal; Endless terkunci→menang→terbuka; run endless pakai mutator `mut_arus_panas`; leaderboard 2 bucket; persist); SELFTEST_PASS 17; 22/22 shot CLEAN; perf 16,5 ms vsync @151 musuh.
+
+## Fase 7.5 — Deep Hooks & Story: "Perang Sang Tubuh" ✅
+**Tujuan (arah user):** tunda SDK; benahi UI sampai benar-benar menarik dengan hook yang dalam & kuat; cari yang di game lain belum ada; alur harus terasa tujuannya; imun bertarung BERSAMA PASUKAN; ada cerita & video sinematik; level terus maju (eksplorasi), difficulty medium.
+- [x] **Hook 1 — paham semua tombol di kunjungan pertama**: sinematik intro (sekali) → **coach onboarding spotlight** (`data/coach.json`): tur 5 titik (MULAI, Kondisi Tubuh, Heroes, Tas, Shop) tap-untuk-lanjut, sekali saja (`meta.coachDone`).
+- [x] **Hook 2 — dampak terasa di detik pertama**: 2 patogen **pasti mendekat dalam ±3 dtk**; wave 1 ramp-up (interval ×0,45 → 1 dalam 15 dtk — ramai sejak awal); copy tutorial set ekspektasi ("Senjata menembak OTOMATIS").
+- [x] **Hook 3 — difficulty MEDIUM**: retuning `waves.json` (decay 0,08→0,068; HP scale 0,12→0,105; wave-1 ×0,85; maxAlive 130) — menantang tapi tidak menumpuk.
+- [x] **AIM — hero bisa diarahkan** (kritik user): aim stick zona kanan layar (touch/mouse drag) + **mouse hover aim** desktop; chevron penunjuk arah; auto-aim tetap jalan bila tidak mengarahkan.
+- [x] **Kemampuan terasa** (kritik user): banner nama kemampuan (animasi pop) + hit-stop 30 ms saat cast + squash + SFX (audio ability yang sempat tidak ter-patch kini terpasang).
+- [x] **KAMPANYE "Perang Sang Tubuh"** (`data/campaign.json` — konten = data): **Peta Tubuh** 6 organ (Rongga Mulut → Lambung → Usus Halus → Paru-paru → Kelenjar Limfe → Sumbu Kehidupan), node ✓/MISI/🔒, maju terus (eksplorasi, tidak mengulang); tiap bab = cerita organ sakit + kuota bersih + **boss bernama** (Raja Radang, Ibu Parasit, Ratu Sabit, Jenderal Kanker, Raja Kanker) + reward.
+- [x] **Misi terlihat jelas**: mission tracker HUD (kuota patogen live-progress → BOSS!) + objective di peta/briefing + sub CTA MULAI menunjuk bab aktif.
+- [x] **PASUKAN IMUN (permanen)** — `js/entities/ally.js`: sel imun kecil ikut bertarung (orbit + auto-tembak); dimulai 1, **+1 per bab bersih (maks 6)**, tersimpan di save — di bab mudah pasukan kecil, makin jalan makin besar.
+- [x] **MESIN SINEMATIK** (`js/ui/cinematic.js` + `data/cinematics.json`, tanpa file video): cutscene canvas 2D — aktor sprite tween, narasi, judul, skip; **intro** (virus menyusup → pasukan bangkit), **briefing** sebelum bab baru (cerita organ sakit), **clear** setelah menang (organ pulih) — diletakkan di natural breakpoint.
+- [x] **Siklus cerita lengkap**: tubuh sakit → imun datang → bersihkan patogen → boss tumbang → ORGAN BERSIH → organ berikutnya menunggu bantuan.
+- **Kriteria lulus:** e2e kampanye 7 langkah RESULT OK (intro→coach→peta 6 node/5 kunci→brief cine→run kuota→MENANG+pasukan+1→clear cine→bab berikutnya→boss bernama "Raja Radang"→peta progres); SELFTEST_PASS 17; 26/26 shot CLEAN; perf 16,6 ms vsync @151 musuh; check-imports ✔.
+
+## Fase 7.6 — Fondasi Akun & Fraksi (Imun vs Virus) ✅
+**Tujuan (arah user):** sebelum SDK — akun user wajib ada dulu (fondasi online): tanpa ID user, leaderboard/level hero/**pembelian** tidak bisa dikenali. Plus fondasi ide **dua fraksi**: Imun (biru/teal) vs Virus (merah/coral) — layout dashboard sama, hero/pasukan/tujuan beda; pilihan saat daftar yang men-trigger dashboard masing-masing.
+- [x] **account-system.js (SERVER-READY, 1 modul)**: `signUp` (validasi nama 3–16 [a-z0-9_], sandi ≥4, hash djb2 lokal — server nanti bcrypt/argon2), `login` (verifikasi hash), `logout`, sesi di `meta.account` {uid, username, faction, createdAt}; **registry akun perangkat** terpisah (`imunverse.accounts.v1`) → multi-akun, data & pembelian tidak hilang saat logout.
+- [x] **Screen auth** (MASUK/DAFTAR tab): form nama+sandi, error inline, tombol "Lanjutkan sebagai X" (akun terdaftar), **kartu pilih fraksi** — Imun **AKTIF**, Virus **SEGERA** (tap → toast "segera hadir"); boot baru: intro cine → **auth** (user baru) → dashboard → coach; chip akun di topbar dashboard (nama + tag fraksi warna fraksi, klik → ganti akun).
+- [x] **Pembelian wajib akun** (paling krusial): `requireAccount()` menjaga SEMUA tombol BELI (hero, item, suplemen) — tanpa sesi → toast + dialihkan ke auth; dengan akun → purchase jalan & terikat uid.
+- [x] **Leaderboard terikat nama pemain**: entry kini menyimpan `playerName` + `faction` dari akun.
+- [x] **data/factions.json**: definisi fraksi (nama, warna, status live/segera, goal, heroIds) — konten fraksi = data.
+- [x] **Routing fraksi**: dashboard membaca `meta.account.faction` → set `--faction-color` + tag; fondasi siap untuk dashboard virus (layout sama, konten beda) saat fraksi dibuka.
+- [x] **BUG KRITIS ditemukan & diperbaiki**: helper `el()` selalu set `disabled` (juga saat `false`) → **semua tombol BELI tidak pernah bisa diklik sejak awal**; kini atribut false/null dilewati.
+- **Kriteria lulus:** e2e auth 7 langkah RESULT OK (validasi form, daftar imun+chip, **beli tanpa akun → dialihkan auth**, login balik + beli sukses terikat akun, routing fraksi virus, leaderboard nama pemain, logout + daftar dobel terhalang); e2e kampanye tetap RESULT OK; SELFTEST_PASS 17; 28/28 shot CLEAN (incl. 00-auth, 00b-auth-filled); perf 16,6 ms vsync @150 musuh.
+
+## Fase 7.7 — Arsenal & Rasa Tempur (feedback imun fraksi) ✅
+**Tujuan (kritik user):** gameplay belum matang — tembak harus MANUAL pakai tombol & bisa diarahkan, control lemot, jurus tidak terasa/tak punya, pasukan tidak menembak, tidak ada yang di-farm saat bertempur, butuh layer upgrade (senjata/jurus/damage/pertahanan/serangan). Target user pertama: **anak-anak** — semudah & sejelas mungkin.
+- [x] **TEMBAK MANUAL**: tombol TEMBAK! besar (sensitif anak, ramah jempol) + tahan Space/K di desktop; **tanpa fire = tidak ada tembakan** (e2e: shots tetap 0 saat idle). Aim: mouse/stick → assist-aim otomatis ke musuh terdekat kalau anak belum bisa mengarahkan.
+- [x] **JURUS dari stage 0**: evolusi stage 0 kini bawa **tebasan** (anak langsung pegang jurus sejak run pertama); cast kini TERASA: ring blast + shake + squash + hit-stop 60 ms + banner nama + SFX.
+- [x] **Control gesit**: semua hero +30–40 kecepatan (Sel T 150→186 dll.); joystick full-speed lebih cepat tercapai (radius ×0,55).
+- [x] **Pasukan menembak beneran**: fireInterval 1,15→0,95, damage 35%→45%, proyektil lebih besar & cerah (e2e: cooldown ter-reset + proyektil muncul).
+- [x] **EQUITY yang di-farm**: koin ANTIBODI berjatuhan dari patogen (30%) dengan label "+1" emas — menambah currency run secara terasa.
+- [x] **Damage feedback**: angka damage 30% lebih besar (ramah anak).
+- [x] **Layer upgrade permanen (Squad Upgrade)**: 3 kategori baru — **SENJATA** (sq_weapon +10%/lvl dmg senjata), **JURUS** (sq_jurus cooldown −6% & area +8%/lvl — berlaku nyata ke cooldown & radius kemampuan), **PERTAHANAN** (sq_armor damage diterima −5%/lvl); total 9 upgrade dengan badge layer di tiap baris.
+- [x] Aset baru: ikon perisai (105 PNG); tutorial & hint HUD disinkron dengan serangan manual.
+- **Kriteria lulus:** e2e gameplay 6 langkah RESULT OK (idle=0 tembakan; manual fire → 2 tembakan + kill; jurus stage-0 fire + cd jalan; pasukan menembak; koin farm → currencyEarned naik; speed 186 + 3 layer baru ada); SELFTEST_PASS 17; 28/28 shot CLEAN (TEMBAK! terlihat di shot gameplay); perf 16,6 ms vsync @153 musuh.
+
+## Fase 7.8 — XP Terasa (feedback user: "naik level tiba-tiba, tidak ada indikator") ✅
+**Tujuan:** progres XP harus terlihat & dipahami anak-anak — bukan tiba-tiba naik level.
+- [x] **XP bar diperjelas**: ikon bintang di pangkal bar, gradasi teal→emas, efek shine mengalir (terbaca sebagai XP, bukan dekorasi).
+- [x] **Ghost trail**: saat banyak orb terambil sekaligus, trail kuning "mengejar" fill — lonjakan XP terasa; saat naik level trail menyusut dari 100%.
+- [x] **Label "+N XP" melayang** di setiap orb nutrisi yang terambil.
+- [x] **Chip level menyala** (emas, berdenyut) saat XP ≥80% — sinyal "hampir naik level!".
+- [x] **Ringkasan akhir run** menambah sel **"XP Didapat"**.
+- **Kriteria lulus:** e2e XP 5 langkah RESULT OK (bar 0% + elemen lengkap; orb → fill & ghost bergerak; ≥80% → chip `ready`; naik level → modal muncul; summary berisi XP Didapat); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,6 ms vsync.
+
+## Fase 8 — Ekonomi Dalam: Lab Upgrade, Equity Tier, Item Variasi, Premium & Gateway ✅
+**Urutan permintaan user:** (1) layer upgrade hero satu-per-satu + pasukan berlevel, (2) equity per tier musuh, (3) item variasi, (4) premium bundle + payment gateway + balancing.
+- [x] **LAB PASUKAN (tab HERO/PASUKAN/TIM)**: tab HERO menampilkan hero yang DIMILIKI **satu per satu** (carousel ‹ ›) — portrait, chip level, stats DMG/HP terkumpul, slider progress, tombol LEVEL UP (biaya naik ×1,35; maks Lv 20; efek nyata: +6% dmg & +8% HP/lvl khusus hero itu); tab PASUKAN: **level pasukan** (maks 10) — +12% damage & +4% tempo tembak/lvl, berlaku nyata di run; tab TIM: 9 squad upgrade lama.
+- [x] **EQUITY PER TIER MUSUH** (`tier` di enemies.json): kecil jarang (15%), **medium sering** (45% koin), **hard pasti koin ×2 + 60% nutrisi bonus** (vitamin_c/amino) — makin berat musuh makin berhadiah.
+- [x] **ITEM VARIASI**: 4 consumable pre-run baru — Vaksin Awal (+30 HP), Kopi Limfa (+12% speed), **Pelindung Lendir (serap 1 serangan, VFX "TERSERAP!")**, Sinyal Ganda (+50% antibodi run) — dipakai otomatis saat run dimulai.
+- [x] **PREMIUM BENERAN PREMIUM** (`data/premium.json`): 4 bundle — Pemula Rp15rb (HEMAT 40%), Imun Pro Rp45rb (PALING LARIS), Legenda Rp99rb (15 item + gelar eksklusif "Legenda Tubuh"), **Bebas Iklan Rp35rb** (sekali beli, `canWatchAd` jadi false — pengguna membayar = nol interupsi).
+- [x] **PAYMENT GATEWAY (persiapan SDK nyata)**: `payment-system.js` — katalog → order ID → pilih metode (QRIS/E-Wallet/Kartu) → bayar (simulasi ±700ms) → **receipt tersimpan di save (terikat uid akun)** → entitlement diberikan; riwayat pembelian di Shop. Backend nyata = ganti isi `payOrder()` dengan fetch ke PSP (Midtrans/Xendit/Play Billing) — satu modul.
+- [x] **Balancing premium** (catatan di JSON): 1 antibodi ±Rp10; nilai bundle 1,5–1,8× lipat vs satuan — hemat terasa, tidak mematahkan progres gratisan.
+- **Kriteria lulus:** e2e ekonomi 6 langkah RESULT OK (hero Lv 0→1 −150 antibodi; pasukan Lv 1; tier drops → currencyEarned naik & tier 'hard' terbaca; pelindung menyerap hit + vaksin maxHP 138; beli Paket Pemula via modal penuh → receipt terikat uid; Bebas Iklan → canWatchAd false); e2e kampanye & gameplay tetap OK; SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
+
+## Fase 8.1 — Level Terhubung ke Seluruh UI ✅
+**Tujuan:** hubungkan level hero & pasukan (dari Lab) ke semua titik UI, biar progres terasa di mana-mana.
+- [x] **Dashboard**: badge level di panggung — "Lv N · Pasukan Lv M · X sel" (klik → langsung buka Lab Pasukan); CTA MULAI membawa level hero ("Bab: Lambung — Perut Kram · Lv 3").
+- [x] **Roster**: chip level teal di kartu tiap hero.
+- [x] **Battle Prep**: chip hero picker gabungan evolusi+level ("T2 · Lv 3").
+- [x] **HUD in-run**: chip "Hero Lv N" + "Pasukan Lv M · X sel" di bawah HP pill — pemain tahu kekuatan yang dibawakan masuk run.
+- [x] Damage hero Lv-3 terverifikasi lebih besar dari base (13,72 vs 11 base = +6%/lvl benar).
+- **Kriteria lulus:** e2e 6 langkah RESULT OK (badge dashboard & klik→Lab; CTA bawa level; roster chip; prep chip; HUD chips; damage sesuai formula); SELFTEST_PASS 17; 28/28 shot CLEAN; perf 16,5 ms vsync.
+
+## Fase 10 — Dwibahasa Satu-Klik (ID/EN) Tanpa Edit Manual ✅
+Permintaan pemilik: 1 fungsi/tombol yang mengubah SELURUH UI & konten ke bahasa lain tanpa edit manual satu-persatu, tanpa bug bahasa. Riset dulu (i18next best-practices, dom-i18n, lokalise) → pola diadopsi, lib eksternal TIDAK (constraint vanilla).
+- [x] **Mesin `js/systems/i18n.js`** (~120 baris, vanilla): `t()` kamus berkunci teks-asli + 76 aturan regex utk string ber-angka, rekursi tangkapan (angka & nama dalam kalimat ikut diterjemahkan), normalisasi whitespace multi-baris, guard meta-null, fallback aman (kunci tak dikenal → teks asli).
+- [x] **Kamus `data/lang.json`**: 386 string ID→EN + 76 aturan, dibangun dari PEMINDAIAN otomatis seluruh repo (modul layar, toasts, index.html, semua field tampilan di 17 file data JSON) — bukan dari daftar manual.
+- [x] **NOL atribut manual**: sapuan DOM otomatis (`translateTree` DFS) + **MutationObserver** — setiap elemen yang baru dirender layar mana pun langsung diterjemahkan; data JSON diterjemahkan saat load/toggle dari salinan raw (`applyDataLanguage`, field tampilan saja).
+- [x] **Toggle 1-klik**: pil EN/ID di Dashboard & modal Pause — UI + data + canvas-label berganti serentak tanpa reload; pilihan tersimpan di save (persisten).
+- [x] **Audit residu otomatis (e2e)**: sapu 10 layar + run + modal level-up dalam mode EN dengan daftar penanda bahasa Indonesia → **0 residu**; bug yang ditemukan & diperbaiki: kunci salah ketik (Penembak/Pelahap), konkatenasi toast, `String.replace` substitusi $n native (bentuk fungsi), rule spesifik vs umum (urutan), field `goal`/`tagline`, cache stale dev-server (Cache-Control no-store).
+- [x] **Fix dev-server**: `tools/server.py` kini `Cache-Control: no-store` — iterasi JS/JSON selalu segar.
+- **Kriteria lulus:** i18n-audit **3/3 OK** (10 layar 0 residu; run 0 residu; modal EN); mekanik-check 3/4 OK (Zinc 11,63→12,32; armor GN; split virion — 1 asersi salah arah: label canvas bukan DOM); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
+
+## Fase 11 — Kodex Sel (Bio-Pedia) ✅
+Lapis 1 dari workflow edukasi (desain docs/edu-workflow.md): koleksi kartu sains yang terbuka karena BERMAIN, bukan lewat menu.
+- [x] **Data `data/codex.json`**: 43 entitas (6 hero, 13 musuh, 13 nutrisi, 5 sistem tubuh, 6 organ) × 2 kedalaman — `funKid` (bahasa anak) & `fact` (istilah ilmiah ringan: perforin-granzim, LPS/endotoksin, GALT 70% imun di usus, ±480 juta alveolus, dst.) + `realName`.
+- [x] **`js/systems/codex-system.js`**: `markSeen(id)` — idempotent, cermin ke `meta.stats.codexCards`, toast saat kartu baru; dipanggil dari: spawn musuh & boss, pickup nutrisi (non-part), hero dimainkan + sistem imun (startRun), peta 5 sistem (dashboard dibuka), organ dipilih (kampanye), target fokus dipilih.
+- [x] **`js/ui/screens/codex-screen.js` + section `#screen-codex`**: grid per kategori; kartu terkunci = siluet "?" ("Belum ditemukan"); kartu terbuka = sprite + nama (resolusi nama/gambar dari data sumber — TANPA duplikasi); klik kartu terbuka → detail modal: "Untuk kamu" (anak) + "Tahukah kamu?" (dewasa muda) + nama ilmiah. Tombol teleskop di dashboard; APP_STATE codex→dashboard.
+- [x] **Dwibahasa otomatis (Fase 10)**: semua funKid/fact/UI terdaftar di lang.json (481 string, 78 rules) — kartu & detail penuh EN via toggle yang sudah ada.
+- [x] **Misi pengikat ekonomi**: "Peneliti Muda — Temukan 10 kartu Bio-Pedia" (+150 antibodi) via stats.codexCards; dipindah ke urutan ke-2 agar selalu tampak di top-3 dashboard.
+- **Kriteria lulus:** codex-check e2e **5/5 RESULT OK** (klik teleskop→43 kartu; 12 penemuan tercatat dari alur main nyata [hero, imun, 5 sistem, organ, 2 musuh, 2 nutrisi]; klik kartu virus→detail kid+sains+realName; EN: "Found 12/43"+konten Inggris; misi terbaca); reg-after-i18n **3/3** (autotest 17; TEMBAK klik-riil; perf 16,6 ms); node --check & check-imports ✔.
+
+## Fase 12 — UI Gameplay Ala MLBB + Roster 11 Hero Bernama + 33 Skill Aktif ✅
+Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legends (glassmorphism biru gelap + emas, rounded, overlay HTML/CSS di atas canvas — karakter tetap jelas terlihat), (B) roster hero dokumen 11 sel imun bernama, masing-masing 3 skill aktif (2 skill + ultimate) persis tabel pemilik.
+
+**A. HUD MLBB (overlay DOM, container passive + tombol `pointer-events:auto`)**
+- [x] **Top HUD**: kiri = kill count + chip Level Hero/Pasukan; tengah (glass) = nomor wave + timer MM:SS + boss bar; kanan (glass) = antibodi run + jeda. Semua panel `glass` (blur + border emas).
+- [x] **Bottom-left panel status hero**: avatar bulat potret + badge `Lv N`, HP bar hijau berteks `curr/max`, XP bar biru (di bawah HP) — persis layout referensi.
+- [x] **Bottom-right kontrol**: grid skill 2×2 — S1, S2 (60px) + ULTIMATE (lebar, border emas); tiap tombol: ikon PNG sesuai jenis efek, nama skill, overlay cooldown (gelap + angka sisa detik), label tombol 1/2/3; tombol **SERANG** besar bundar (88px) di sisi kanan; efek press `scale(.92)`, glow saat siap.
+- [x] **Kamera zoom 1.16** (karakter & arena lebih besar/jelas); `worldToScreen` + aim player ikut skala; minimap bertahan kanan-atas.
+- [x] Banner nama skill saat cast (ID/EN mengikuti bahasa aktif).
+
+**B. Roster 11 Hero (data/heroes.json = sumber kebenaran; angka persis tabel pemilik)**
+- [x] **11 hero**: Mako (Makrofag, Tank), Dendri (Dendritik, Support), Neutron (Neutrofil, Damage), Eos (Eosinofil, Damage), Baso (Basofil, Support), Mastia (Sel Mast, Tank), T-Bolt (Sel T CD8, Damage — gratis awal), Helia (Sel T CD4, Support), Treg (Regulasi, Support), Bella (Sel B, Damage), Nyx (Sel NK, Damage) — masing-masing baseStats/attackPattern/patternParams/unlock/harga toko sesuai tabel; sprite idle+attack+potret baru (generator `gen_stage_heroes_v2`/`gen_stage_portraits_v2`; total 156 PNG).
+- [x] **33 skill aktif** (`data/skills.json`, data-driven penuh): executor primitif (strike/area/heal/shield/protect/buff/mark/dash/summon/instant-hits/execute/annihilate/pull/dot/slow/stun) di `js/systems/skill-system.js` — TIDAK ada logika hero yang di-hardcode; ultimate = slot ke-3.
+- [x] **Lapisan pertahanan baru di damagePlayer**: SHIELD (serap) → EVADE (hindari 1 serangan) → PROTECT (×mult) → armor upgrade (urutan eksplisit, label "TERSERAP!"/"Evade!").
+- [x] **Attack otomatis** ke musuh terdekat dalam range (wave-loop ala survivors) + tombol SERANG/tombol 4 = serangan manual (assist aim tetap).
+- [x] **Level-up**: pool 7 pilihan (+ Life Steal 5%/stack), XP `10·level^1.5` (kurva data tetap); modal 3 pilihan acak (mekanik lama dipertahankan).
+- [x] **Ekonomi**: bonus akhir run `floor(wave×8 + kills×0,5 + boss×50)` (spek pemilik) ditumpang di atas pickup antibodi in-run; wave pacing decay 0,08 & HP scale 0,12/wave.
+- [x] **Migrasi save**: id hero lama (sel_t/makrofag/neutrofil/sel_b/sel_nk/eosinofil) → id roster baru otomatis di `mergeMetaDefaults` (unlockedHeroes/selectedHero/heroLevels/codexSeen); default hero = T-Bolt; kodex hero diremap (43 kartu utuh); fraksi imun = 11 hero.
+- [x] **i18n**: +97 string EN (nama/deskripsi 33 skill, 11 judul hero, label unlock, HUD SERANG/TERSERAP); skill banner & tombol mengikuti bahasa aktif.
+- [x] **FIX dari e2e**: tombol "Lanjutkan/Akhiri Run" layar Jeda kini ter-wire (sebelumnya tanpa handler); keyframes pulse lama memaksa radius 50% dihapus.
+**Fase 12b — Presentasi Arena Pseudo-3D ala MOBA (arahan pemilik: "karakter hidup jalan di atas")**
+- [x] **Proyeksi perspektif** (`PERSP` di camera.js): kamera miring dari atas — ground dimampetkan (YS 0,58), entitas dekat kamera LEBIH BESAR (F/K 1700/1,35 → scale 0,66–1,85); `makeProjector()` = konverter world→layar tunggal untuk semua render.
+- [x] **Lantai arena terproyeksi** (`drawArena3D`): heksagon sudut tajam dengan kedalaman (sisi jauh sempit), bibir arena tebal, grid lantai 90px ter-clip dalam arena, bercak organik mengikuti squash ground.
+- [x] **Billboard & depth-sort**: semua entitas (pickup, musuh, pasukan, hero, proyektil, efek) digambar sebagai billboard "berdiri" di ground, diurutkan per-Y (painter's algorithm) — yang bawah menutupi yang atas.
+- [x] **Karakter hidup**: bayangan riil di lantai + ring tim warna peran di bawah hero; animasi jalan (bobbing + tilt + lunge saat menyerang + flip arah); debu langkah; musuh ikut melompat-lompat; nameplate "Nama · Lv" ala MOBA di atas kepala hero; sudut aim dikompensasi squash.
+- [x] **Siluet hero unik**: generator sprite diperluas `poly_body()` + 11 bentuk (ameba/dendrit/3-lobus/oval/tetes/mast/gerigi-petir/matahari/ring-ganda/kacang/ledakan-duri) — 33 PNG idle+attack+potret diregenerasi; tiap hero kini BEDA BENTUK, bukan sekadar beda warna.
+- [x] **Perbaikan tumpang-tindih**: toast pindah ke bawah layar saat pertempuran (tidak lagi menutup wave/timer; otomatis via screen-manager); misi turun ke bawah panel tengah; hint naik di atas panel bawah; modal aman di layar pendek (tombol tidak terpotong lagi saat keluar menang/kalah).
+**Fase 12c — Polish: respons tombol SERANG + palet HUD terang + Detail Hero ala referensi (arahan pemilik)**
+- [x] **Tombol SERANG selalu merespons** (bug: tombol terasa mati karena cooldown dipakai auto-attack & tembakan kosong `return` diam): tiap tap/hold kini memicu **swing + lunge + tilt + whoosh audio** di karakter bahkan saat cooldown (damage tetap dari ritme auto-attack — balance dipertahankan); tanpa musuh → swing + langkah ke arah hadap; asersi e2e baru `attack-tap-responds`.
+- [x] **Palet HUD diganti terang** (keluhan: "terlalu dominan gelap"): glass putih-hijau mint + border putih; wave = teks gradien teal; tombol skill putih ber-border warna skill + ikon penuh; SERANG = lingkaran teal dengan ikon putih; HP/XP track transparan gelap-tipis dengan fill cerah; badge avatar emas; key-tag chip berwarna.
+- [x] **Detail Hero di-polish ala referensi** (AFK-Arena/Archero-style): panggung karakter besar dengan gradasi warna hero, kolom chip skill 1/2/ULT (emas) di samping sprite, **stat chips** berwarna (damage merah, HP hijau, tempo biru) dengan nilai +bonus per level; panel Pasukan: sel dengan siluet unik (Bella/Nyx/Mako) + tag nama + chips bonus.
+- [x] **Pasukan di run memakai sprite roster baru** (sebelumnya sprite lama lingkaran teal) — sel pasukan kini siluet unik di medan tempur.
+- [x] **Toast maksimal 2** & lebih kecil di luar pertempuran (tidak lagi menutup judul layar).
+- **Kriteria lulus 12c:** e2e **21 PASS** (termasuk asersi tap-responds), autotest 17/17, perf 16,65 ms @41 musuh; screenshot 37 (HUD terang) & 39 (Detail Hero baru).
+
+**Fase 14 — EKONOMI PREMIUM "IMUN COIN" (5 pilar strategi pemilik: earn-from-play → beli item premium)**
+- [x] **Pilar 1 — Ekonomi ganda**: Antibodi = soft currency (tetap); **Imun Coin (IMU)** = premium (skin, Pass premium, bundle). Chip IMU di dashboard/shop/BP (ikon permata teal baru `icon_imu.png`); beta: hasil run dikonversi `floor(earned/400)` (maks 15/run).
+- [x] **Pilar 2 — Battle Pass** (`data/battlepass.json` + layar `#screen-bp` + `battlepass-system.js`): 30 level × 2 jalur; XP dari bermain (level×40 + wave×15 + kills); klaim manual klik-riil; jalur premium **500 IMU**; **twist self-sustaining**: total IMU premium (525) > harga pass; ring XP + dua baris scroll horizontal; sidebar "Pass" + tile quick-menu.
+- [x] **Pilar 3 — Monetisasi tanpa P2W**: **kosmetik visual saja** (`data/cosmetics.json`): 5 skin tint (`getTintedSprite` — warna pada karakter in-game & preview) + mahkota/aura; beli & pasang via Shop "SKIN & GAYA"; **Welcome Bundle Rp 15rb** (1.500 antibodi + 300 IMU + Skin Pendiri + item), Pass bundle, top-up IMU di bundle — alur pembayaran simulasi existing (receipt) tetap dipakai.
+- [x] **Pilar 4 — Offerwall non-paying**: section "DAPATKAN IMUN GRATIS" (video sponsor +8 IMU wajib-tonton 5 detik simulasi, survei +15 IMU 1×/hari, referral +50 IMU dengan kode `IMUN-XXXXX` — guard kode salah/sendiri/duplikat); hook `triggerRewardedAdOfferwall` siap SDK.
+- [x] **Pilar 5 — Early beta**: hadiah **"Pendiri Imunverse"** otomatis per akun (gelar + Skin Pendiri terbatas + 300 IMU); kode referral per-uid; bundle pra-rilis di katalog.
+- [x] Ringkasan akhir run menampilkan `+N Imun Coin · Battle Pass Lv X → Y`; toast keluar-run lanskap pindah ke pojok kanan-bawah (tidak menutupi tile).
+- **Kriteria lulus 14:** **e2e-eco 14/14 PASS** (founder reward, klaim BP gratis, guard premium saat saldo kurang, beli premium, klaim skin premium, offerwall +8, beli+pasang skin, tolak referral salah) + **e2e inti 20 asersi PASS**; bukti `docs/screenshots/57-eco-dash, 58-eco-battlepass, 59-eco-shop-imun, 60-eco-gameover`.
+
+**Fase 13.2 — LANDSCAPE-ONLY + perapian tumpukan (arahan pemilik: semua landscape; teks/kartu & HUD XP tidak tertumpuk)**
+- [x] **Wajib lanskap**: overlay `#rotate-hud` (animasi telepon berputar + teks ID/EN) tampil saat portrait; semua layout dioptimalkan di `@media (orientation: landscape)`.
+- [x] **Dashboard lanskap = grid 2 kolom** (banner+kampanye | quick-menu+stats), Bonus Harian baris penuh (`1 / -1` — tanpa lubang grid), dock dirampingkan (46px), toast ke pojok kanan-atas kecil — tidak menutupi banner/kartu; teks panjang dipotong ellipsis (judul kartu, objektif, label quick).
+- [x] **HUD gameplay lanskap menyebar ke samping**: HP+XP penuh kiri-bawah (tanpa tumpukan), skill 2x2 + SERANG kanan-bawah, minimap & misi turun dari tepi atas, toast in-run pindah ke kolom kanan (top 96px) — pusat layar bersih untuk gameplay.
+- [x] Roster 4 kolom, premium/shop grid melebar di lanskap; harness e2e & seluruh skrip bukti diubah ke viewport **844×390**.
+- **Kriteria lulus 13.2:** e2e **21 asersi PASS** di lanskap (drag joystick disesuaikan), tanpa error; bukti `docs/screenshots/55-landscape-dash, 56-landscape-hud`.
+
+**Fase 13.1 — De-dup navigasi + konsistensi halaman lain (temuan pemilik: sidebar = duplikat dock bawah)**
+- [x] **Sidebar & dock tidak lagi duplikat** — tugas dipisah ala MLBB: **dock bawah = tab inti** (Play · Heroes · Bag · Squad · Shop), **sidebar kiri = pintas fitur** (Home · Kampanye/Peta Tubuh · Bio-Pedia · Rekor → scroll ke papan · Tubuh → scroll ke kondisi tubuh).
+- [x] **Roster**: chip progres koleksi **"1/11 Terbuka"** di subtitle; tombol MULAI kini **sticky footer** (selalu terlihat saat menggulung koleksi).
+- [x] **Tas**: chip jumlah kepemilikan **"N item"** di header (bagian evolusi + consumable).
+- [x] Ikon sidebar non-aktif didesaturasi agar aktif menonjol; chip i18n-friendly (angka + label terpisah); 5 string i18n baru.
+- **Kriteria lulus 13.1:** e2e **21 asersi PASS**, tanpa error; bukti `docs/screenshots/51-sidebar-fix, 52-roster-chip, 53-bag-chip, 54-side-records`.
+
+**Fase 13 — Dashboard ala MLBB (layout referensi pemilik; palet pastel dipertahankan; karakter blob asli)**
+- [x] **Struktur layout meniru referensi MLBB** (tanpa konten stub — semua modul memakai fitur asli game): **sidebar kiri** (Home/Heroes/Squad/Shop/Bag/Bio), **banner carousel 3 slide** (panggung hero · bab kampanye berikutnya · ancaman Endless + mutator harian) dengan dot navigasi + auto-rotate 5,2s, **quick-menu 5 tile** (Bonus Harian/Misi/Toko/Tas/Bio-Pedia, badge notifikasi saat bonus bisa diklaim), **baris PLAY**: kartu KAMPANYE besar (ikon organ, bab 1/6, objektif, CTA MULAI) + kolom mode (Endless dengan status unlock & mutator asli, Arena, Lab Pasukan).
+- [x] **Topbar ala profil pemain**: chip akun = avatar + nama + fraksi (selaras referensi "ShadowHunter Lv32"); currency tetap pill emas.
+- [x] **Grid duo di bawah**: evolusi + misi, papan rekor + kondisi tubuh — semua kartu existing dipertahankan & diikat ke sel grid.
+- [x] **Detail teknis**: `#btn-play-big` dirender ulang tiap show() → binding dipindah ke event delegation; banner `flex: 0 0 auto` (slide absolut tidak boleh menyusut di flex-column scroll); toast keluar-run dipindah ke atas dock (tidak menutupi topbar); ikon `icon_paru.png` baru (ikon limfa diperbaiki ke `icon_limfatik.png`); 15 string i18n baru (LANJUT BAB/TANTANG/TERKUNCI/dll).
+- **Kriteria lulus 13:** e2e **21 asersi PASS** (alur klik-riil utuh termasuk MULAI→Kampanye), autotest **17/17**, 404 audit bersih; bukti `docs/screenshots/48-dashboard13, 49-dashboard13-bab, 50-dashboard13-endless`.
+
+- **Kriteria lulus 12b:** mlbb-check e2e diperluas **21 asersi PASS** (near>far 1,32/1,04 → 1,55/1,02 setelah K dinaikkan; squash-Y 0,62; sentuh-&-tarik benar-benar MEMINDAHKAN karakter + walkPhase berjalan); autotest 17/17; perf 16,84 ms avg @41 musuh; roster 11 siluet unik terdokumentasi.
+- **Kriteria lulus:** mlbb-check e2e **19/19 PASS klik-riil** (HUD glass 3 panel; potret roster baru; 3 tombol skill + ult; klik 3 skill → cooldown berjalan; SERANG klik-riil; auto-attack membunuh tanpa input; level-up modal 3 pilihan + pilih; shield menyerap damage; pause → toggle EN → nama skill & UI berubah; resume); autotest **SELFTEST_PASS 17/17**; roster-check (11 kartu, label unlock, klik kartu→detail, potret baru; kodex 43 kartu + kartu hero T-Bolt terbuka); perf **16,65 ms avg / 17,6 p95** @39 musuh; node --check & check-imports ✔.
+
+## Rencana Fase 13–14 — Workflow Edukasi "Tubuh Sebagai Universe"
+Desain lengkap: `docs/edu-workflow.md`. Ringkas: **Kodex Sel** (kartu sains terbuka via bertemu entitas, dua kedalaman: anak/dewasa muda, dwibahasa otomatis) → **Kuis Gerbang** pra-bos (benar = buff, salah = tetap main) → **Mode Belajar** (panel narasi sains di pause/gameover, tanpa fail-state keras) + **lencana Biolog Muda** per sistem tubuh. Prinsip: setiap mekanik yang SUDAH ada adalah metafora sainsnya (armor Gram± = membran luar; stealth Sel Abnormal = sel tapiuan; buff nutrisi = pesan gizi nyata) — edukasi dibungkus gameplay, bukan ditempel.
+
+## Fase 9 — Musuh Dokumen Terlengkapi: Armor, Hazard, Stealth, Prion, Boss Kedua ✅
+Melengkapi 5 entitas musuh tersisa dari dokumen desain (total kini 13 musuh; hero 6/12).
+- [x] **Bakteri Gram Negatif** — `armorLayers:1`: membran luar MENYERAP satu tepukan (feedback "TERLAPIS!"), lalu HP rentan. Gram Positif (8.4) pakai mekanik sama (armor implisit via HP tebal tetap; GN eksplisit berlapis).
+- [x] **Toksin** — `hazard_drift`: hampir diam; saat hancur meninggalkan **genangan racun** (radius ~40, 5 dps, 9 dtk); player di dalam genangan terluka berkala; render layer hijau berdenyut.
+- [x] **Prion** — armor 3 lapis + **aura konversi** tiap 6 dtk: musuh biasa radius 150 jadi "kristal" (HP×1,6, damage×1,3, speed×1,15, sprite prion) + toast peringatan.
+- [x] **Sel Abnormal** — `stealth:true`: digambar alpha 0,14 (nyaris tak terlihat); **sorotan berkala Sel NK** (pulse tiap 1,3 dtk) mengungkapnya 1,6 dtk — selaras peran dokumen (detector).
+- [x] **Toksin Raksasa (Boss kedua)** — `boss_pattern_a` + ledakan area + **menumbuhkan genangan racun baru** tiap 8 dtk; masuk `bossRoster` waves.json (boss wave: sel_kanker → toksin_raksasa bergantian); boss bab: bab_usus=Ratu Racun (toksin_raksasa), bab_paru=Bayangan Alveolus (sel_abnormal+areaAttack), bab_limfe=Inti Pehit & bab_jantung=Mahakristal (prion+areaAttack).
+- [x] **Jurus menembus armor**: `takeDamageRaw` — jurus (Petir Sel NK dll.) mengabaikan lapisan armor, selaras peran penembus.
+- [x] **Aset**: +6 PNG (bakteri_gn, toksin, prion, sel_abnormal, toksin_raksasa idle/attack) via generator kanonik — total 123 sprite.
+- [x] **Fix kecil**: toast spawn boss kini pakai nama def (bukan hard-code "SEL KANKER"); timer genangan boss di-reset per boss.
+- **Kriteria lulus:** fase9-check e2e **9/9 RESULT OK** (13 musuh+roster+boss bab; run Sel NK; armor GN hit-1 diserap hit-2 merusak; Toksin→genangan→player terluka; Prion mengkristalkan (20→32 HP, sprite prion); stealth terungkap sorotan NK; Toksin Raksasa boss+genangan; wave 10 → toksin_raksasa; jurus tembus armor); regresi fase84-check **7/7**; regen-check **6/6** (autotest 17, jurus klik-riil, tak overlap, pause, perf 16,6 ms); node --check & check-imports ✔.
+
+## Fase 8.4 — Eksekusi Keputusan Audit: Entitas & Nutrisi Baru ✅
+Keputusan pemilik (post-audit 8.3): (1) "Sel T Killer" TETAP; (2) induk virus → **Virus Replikasi**, pecahan tetap Virion; (3) 9 nutrisi dokumen → **pickup saat bertempur**; (4) paralel: poles kecil + entitas prioritas.
+- [x] **Nama**: `virus` → tampil **"Virus Replikasi"** (deskripsi baru; perilaku splitOnDeath sudah persis dokumen).
+- [x] **Hero baru — Neutrofil** (hero ke-6): responder tercepat — melee_swipe cepat beruntun (cd 0,22 dtk, damage kecil), unlock **Kalahkan total 300 patogen** atau beli 1.800 antibodi; sprite idle/attack + potret baru.
+- [x] **Musuh baru — Bakteri Gram Positif**: dinding tebal (HP 44 vs 20 bakteri), lambat, tier hard, minWave 4, XP 5.
+- [x] **8 nutrisi buff tempur** (data-driven, pickupType 'buff'): *sementara* — Zinc +6% dmg 30 dtk, Zat Besi +10% dmg 20 dtk, Probiotik -15% cd 25 dtk, Serat +25% XP 30 dtk; *permanen se-run* — Protein +20 HP maks, Vitamin D +1,5 HP/dtk, Air +0,8 HP/dtk, Omega-3 bersihkan 6 racun meta. Bobot drop bonus diperluas, bonusDropChance 0,09→0,16.
+- [x] **Bonus Eosinofil nyata**: antiParasitMult 1,5× mengalir Player→Projectile→damage vs `parasit` (pipeline asli, bukan mock).
+- [x] **HUD**: chip buff aktif (`#hud-buffs`, ikon + sisa detik; REGEN permanen) — pointer-events none, tidak mengganggu input.
+- [x] **FIX bug lama (terbuka e2e baru)**: `recomputePlayerStats()` kehilangan pengali evolusi/arena/kondisi-tubuh setiap upgrade in-run — kini diterapkan ulang konsisten dengan startRun (bodyMods disimpan di run).
+- [x] **Aset**: +12 PNG via `tools/gen_assets.py` (generator kanonik diperbarui: item_drop baru; hero/enemy/item/portrait stage) — total 117 sprite; TIDAK menimpa PNG lama.
+- **Kriteria lulus:** fase84-check e2e **8/8 RESULT OK** (roster 6 kartu + label unlock; klik kartu→Detail Hero; Zinc damage 11,63→12,32 (+6%) + chip DMG; Protein HP 100→120; Air regen 0,8 + chip; Eosinofil 1,5× vs parasit via proyektil asli; Virus Replikasi pecah 2 virion; TEMBAK klik-riil); regen-check **6/6** (autotest SELFTEST_PASS 17; jurus klik-riil cd 4,77; fire/bar tak overlap; pause; perf 16,5 ms); check-imports ✔; node --check ✔.
+
+## Fase 8.3 — Audit Nama Entitas Imunologi (dokumen desain pemilik) ✅
+Sumber: lampiran pemilik `konten-entitas-imunverse.md` (sistem/organ, 12 hero, 10 musuh, 9 nutrisi).
+- Laporan lengkap: `docs/audit-entitas-imunologi.md` — tabel pemetaan doc↔game + status per entitas.
+- Hasil ringkas: sistem/organ 6/6 selaras; hero 5/12 (6 belum ada; Sel T Killer vs "Sel T Pembunuh"); musuh 4/10 tanpa catatan (5 belum ada: Gram±, Toksin, Prion, Sel Abnormal stealth, Toksin Raksasa); nutrisi 1/9 nama (efek Vitamin C beda: heal vs +attack speed).
+- Temuan teknis: bonus anti-parasit Eosinofil & mekanik stealth/drain/area-burst baru teks rasa, belum di kode.
+- Keputusan 5 butir (rename, virion, nutrisi, fase konten, perilaku) menunggu arahan pemilik — tidak ada rename dieksekusi sebelum persetujuan.
+
+## Fase 17 — 5 RETENTION TRIGGER (dokumen implementasi pemilik) ✅
+Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di logic.
+1. **META-PROGRESSION** — Imun Coin akhir run kini persis rumus spek: **(wave×8) + (kills×0.5) + (boss×50)** (menggantikan konversi beta 400:1; +8 IMU live per wave & +0.5/kill terlihat di chip HUD kanan-atas, pulse emas saat bertambah). **Peta unlock 11 hero sesuai spek**: Mako default; Neutron/Dendri/Nyx dibuka **Imun Coin** (100/150/200) langsung dari tombol Roster klik-riil; T-Bolt/Helia/Eos via **misi** (wave 5, 50 kill, 3 run); Bella/Treg/Baso/Mastia **kombinasi misi+Imun** (imu_stat). Overlay perayaan **"HERO BARU!"** (potret + 14 partikel bintang) saat unlock. **6 UPGRADE GLOBAL** (damage +10%/HP +15/speed +8%/atk-speed +10%/range +12%/life-steal +3%; biaya **50×1.15^level**; maks 15–25) di tab GLOBAL — berlaku semua hero. **13 misi reward Imun Coin** (+ baru: runs_5 200, unlock_3 250) tampil dengan ikon permata di dashboard.
+2. **HIGH-FREQUENCY FEEDBACK** — **XP per kill** sesuai tier (kecil 5–8, besar 12–15, boss 50) dengan label `+N XP` mengambang; damage number sudah ada (putih normal/emas saat mati); **level-up celebration**: hit-stop 0.3 dtk + burst emas 56 partikel + announce "LEVEL UP!"; **combo**: window 2 dtk → **5 dtk (spek)**, threshold 3, **XP ×1.2** saat aktif (pill COMBO sudah ada).
+3. **AUTONOMY** — 11 hero siluet unik + 3 skill; level-up **3 pilihan acak** dari 7-stat pool (sudah ada); **badge ✦ SINERGI** berkilau pada pilihan yang cocok dengan peran hero (Tank/Damage/Support → map di retention.json).
+4. **STRUCTURED RELAXATION** — spawn interval kini **max(0.4, 1.8 − wave×0.08)** persis spek (boss tiap 5 wave, wave 25 dtk sudah ada); auto-attack + run bisa diakhiri kapan saja via Jeda → Akhiri Run (ekonomi tetap diproses); default run 2–5 menit.
+5. **GAME FEEL** — partikel kematian musuh dinaikkan ke **22 (boss 34)** sesuai spek; percikan merah 6 saat player kena hit; **HP bar lerp 0.18s**; **cooldown skill kini sirkular conic** berputar; tombol skill scale 0.92 saat ditekan (sudah ada).
+**Kriteria lulus 17:** e2e baru `scripts/e2e-retention.mjs` **20/20 PASS** (klik riil: unlock Nyx via roster, beli upgrade global 50 IMU, misi dibayar IMU, overlay hero baru, config wave/combo, HP transition, chip IMU live) + regresi **e2e inti 20/20** & **e2e-eco 14/14** — tanpa pageerror. Harness inti diperkuat (tutup modal level-up dulu; toleransi Mako melee). Default hero `macrophage` (Mako). Bukti `shots/71-roster-unlock, 72-dash-misi-imu, 73-global-upgrades, 74-hud-imu-combo`.
+
+## Fase 16 — 5 Masukan Pemilik: Sprite Abstrak, Grid Terkunci, Prep Konsisten, Tombol Aman-Viewport, Detail Hero ala MLBB ✅
+1. **Karakter tidak lagi dominan lingkaran** — `body_radius()` di `tools/gen_assets.py` dipertegas (ameba bergelombang, dendrit 4 lengan panjang, 3-lobus dalam, tetes lancip, 7 duri panjang, gerigi tegas, 12 sinar, crescent, benteng 6 tonjolan, oval, ring scallop); 33+ PNG hero idle/attack/potret diregenerasi. Wajah kawaii dipertahankan (target anak). Ikon hand-made (`icon_imu`, `icon_paru`) masuk keep-set generator.
+2. **Kartu tabrakan di dashboard (laporan: "card kill")** — akar: baris grid `.dash-scroll` mengandalkan auto-flow (browser HP user memegang CSS lama → kartu stats melompat menimpa Endless). Fix ganda: (a) **grid-area eksplisit** 1/1·1/2·2/1·2/2·3·4 — placement terkunci, tak tergantung urutan DOM; (b) **cache-buster** `main.css?v=16b` + `main.js?v=16b` agar perangkat user menerima CSS baru.
+3. **Siap Tempur konsisten dengan home** — direstrukturisasi 2 kolom: langkah 1–4 (grid hero auto-fill, chip putih) di kiri; panel **LOADOUT** kanan bergaya campaign-card (gradasi mint, hero besar 108px, tier pill, chips skill S1/S2/ULT, meta chips mode/fokus/arena, CTA **MULAI — HERO** besar) sticky di lanskap.
+4. **Tombol keluar terpotong (statis, tidak dinamis)** — `.screen` kini `position:fixed; height:100dvh` (fallback 100vh): mengikuti URL-bar HP yang menyusut/memanjang; tombol pause HUD ukuran fluid `clamp(40px,9.5vh,48px)`; modal Jeda dipadatkan (Lanjutkan/Akhiri selalu terlihat tanpa scroll).
+5. **Detail Hero ala referensi (MLBB "Bulldog Johnson")** — banner nama: emblem peran berwarna + nama besar + chip tier; **panah ❮ ❯ klik-riil** berganti hero di panggung (loop semua 11 hero); statistik & upgrade tetap.
+**Kriteria lulus 16:** audit overlap 7 layar CLEAN; e2e inti **20/20** + e2e-eco **14/14** (ERRORS: none); bukti `shots/67-dash-fix, 68-prep-fix, 69-herodetail-fix, 70-herodetail-next` + sheet siluet 11 hero.
+
+## Fase 15 — Audit UI Anti-Tumpuk + Cinematic "Video" Banner Home ✅
+**(A) Audit & polish UI — tidak ada yang tertumpuk, tidak komplik**
+- [x] **Akar auto-scroll liar ditemukan & dibunuh**: overlay coach memanggil `scrollIntoView` tiap langkah → `.dash-scroll` lompat ke bawah (banner terpotong top −240). Kini: coach hanya **menyorot** (block 'nearest' + scrollTop direset), geometri spot/tooltip **dikunci ke viewport** (clamp) — tooltip tak mungkin keluar layar/tak terklik di 844×390.
+- [x] **Containment lanskap dipertegas**: `#screen-dashboard{overflow:hidden}`, `.dash-scroll` satu-satunya scroller; probe overlap clip-aware di 7 layar (dashboard/roster/shop/bp/upgrade/campaign/bag) → **CLEAN** (dua sisa = by-design: slide banner non-aktif invisible & footer sticky roster).
+- [x] **Sisa warisan panggung dibersihkan**: chip musuh statis F13 (se1–se3) dipensiunkan — panggung kini milik cinematic; kartu nama hero (T-Bolt · Avenger Adaptif) kini terisi benar (bug lama: menulis ke `#dash-hero-img` yang sudah tak ada).
+- [x] **Toast lanskap** dinaikkan ke atas dock (bottom 102px) — tidak lagi menyenggol dock.
+- [x] Harness e2e diperkuat: skip coach toleran (retry klik) — tidak flaky lagi.
+**(B) Cinematic battle imun-vs-virus di atas home ("video" agar web hidup)**
+- [x] `js/render/cine-banner.js` — **video prosedural Canvas 2D** loop 6 detik: virus merah masuk → dieksekusi 3 tembakan homing emas → ledakan partikel + ring + screen-shake; virus ungu mengejar → hero **charge aura** → **ULT shockwave** melansir; spawn virus baru; bug branding `⬡ IMUNVERSE`. Tanpa file video — tajam di semua DPI, ringan.
+- [x] Panggung dashboard kini canvas penuh (`#dash-cine`); start/stop mengikuti slide banner aktif & lifecycle layar; fix impor dinamis (path salah 404 diam) + restart-instance; ukuran kanvas 392×200 (DPR-aware).
+- [x] **i18n**: bug branding lewat `t()` + kamus `lang.json` — EN klik → judul canvas ikut berubah.
+- [x] Hero lebih besar & center; trail dash; spacing musuh proporsional.
+- **Kriteria lulus 15:** e2e inti **20/20 PASS** (ERRORS: none) + **e2e-eco 14/14 PASS**; audit overlap 7 layar bersih; bukti `docs/screenshots/61-cine-duel, 62-cine-ledakan, 63-cine-ultimate, 64-cine-en, 65-cine-en-title, 66-portrait-rotate`.
+
+## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
+**Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
+- [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.
+- [x] **Fix**: opt-in `pointer-events: auto` untuk `.fire-btn`, `.ability-bar`/`.ability-btn`, `#btn-pause`; **posisi TEMBAK dipindah ke kanan-bawah (bottom 64px)** — tidak lagi menutupi ability-bar (terverifikasi bounding-box tak overlap).
+- [x] **Detail Hero (dari menu Heroes)**: klik kartu hero → layar **Detail & Upgrade Hero** — kartu hero (tier evolusi, chip Lv, portrait, **statistik senjata live** "Senjata 11 (+0.7/lvl) · HP 100 (+8/lvl)" dengan formula nyata, slider, UPGRADE antibodi) + **panel PASUKAN** (level pasukan, tempo/damage, upgrade) + pintasan Lab Tim. Ini jawaban "letak yang benar": upgrade per-hero tinggal di menu Heroes, bukan menumpuk di Squad Upgrade.
+- **Kriteria lulus:** e2e klik-riil 5 langkah RESULT OK (TEMBAK → shotsFired naik; jurus → cooldown jalan + banner muncul; fire & ability-bar TIDAK overlap; klik kartu roster → Detail Hero → UPGRADE −150 antibodi → level 1; klik pause → modal); SELFTEST_PASS 17; 29 shot CLEAN; perf 16,6 ms vsync.
+
+## Fase 8 — Integrasi Monetisasi (SDK nyata) 🟡
+- [x] Hook & alur sekitarnya siap: `triggerRewardedAdRevive`, `triggerRewardedAdDoubleCurrency`, `checkDailyLives` (alur pasca-iklan = logic asli).
+- [ ] Ganti simulasi di `monetization.js` dengan SDK pihak ketiga (1 file saja).
+- [ ] Remote config harga/cost, IAP non-consumable (hapus ads), banner aman untuk gameplay.
+- **Kriteria:** sswit SDK = edit 1 modul, tanpa sentuh game.js.
+
+## Fase 9 — Optimasi, QA & Release ⬜
+- [ ] Profilkan device kelas bawah (budget frame 33 ms), cap DPI adaptif.
+- [ ] PWA: manifest + service worker (playable offline).
+- [ ] Matriks QA: Chrome/Safari/Firefox, Android/iOS, layar kecil–besar.
+- [ ] Freeze konten v1.0 → tag rilis.
+- **Kriteria:** 60 fps di device low-end referensi; 0 error console selama 30 menit main.
+
+---
+
+### jejak verifikasi
+Setiap fase yang menyentuh kode wajib lolos:
+1. `node scripts/check-imports.mjs` (struktur & aset)
+2. `node --check` seluruh modul (sintaks)
+3. Harness runtime jsdom (98 assertion alur nyata) + perf test + self-test `?autotest=1`
