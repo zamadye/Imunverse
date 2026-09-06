@@ -11,6 +11,8 @@ import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
+import { audio } from '../../systems/audio-system.js';
+import { t as tr } from '../../systems/i18n.js';
 
 let wiringDone = false;
 
@@ -124,6 +126,35 @@ export function show(summary) {
       el('img', { src: 'assets/sprites/icon_imu.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${bits.join(' · ')}` }),
     ]));
+  }
+
+  // Fase 19: GP PANGKAT PENJAGA + ceremony NAIK PANGKAT (momen emosional)
+  const rankupBox = document.getElementById('go-rankup');
+  if (summary.rank) {
+    const rk = summary.rank;
+    const rankLine = el('div', { class: 'go-parts go-rank' }, [
+      el('span', { class: 'rank-emblem sm', text: rk.insignia, style: `background:linear-gradient(160deg, ${rk.tierColor}, ${rk.tierColor}cc)` }),
+      el('span', {
+        text: rk.tierUp
+          ? `+${rk.gained} GP — ${tr('NAIK PANGKAT!')} ${tr(rk.tierName)}`
+          : `+${rk.gained} GP ${tr('Pangkat Penjaga')} · ${tr(rk.tierName)}${rk.nextName ? ` · ${rk.need} ${tr('GP lagi ke')} ${tr(rk.nextName)}` : ''}`,
+      }),
+    ]);
+    grid.insertAdjacentElement('afterend', rankLine);
+    if (rankupBox) {
+      if (rk.tierUp) {
+        rankupBox.classList.remove('hidden');
+        const em = document.getElementById('go-rankup-emblem');
+        em.textContent = rk.insignia;
+        em.style.background = `linear-gradient(160deg, ${rk.tierColor}, ${rk.tierColor}cc)`;
+        document.getElementById('go-rankup-tier').textContent = `${tr(rk.prevTierName)} → ${tr(rk.tierName)}`;
+        setTimeout(() => audio.evolve(), 350); // fanfare naik pangkat
+      } else {
+        rankupBox.classList.add('hidden');
+      }
+    }
+  } else if (rankupBox) {
+    rankupBox.classList.add('hidden');
   }
 
   // Kampanye MENANG: tombol berubah jadi alur cerita (bab berikutnya / peta)

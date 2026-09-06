@@ -19,6 +19,7 @@ import { getTintedSprite } from '../render/sprite-loader.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
+import { applyRunGP } from '../systems/rank-system.js';
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -1382,6 +1383,17 @@ export const game = {
       emit('toast', { message: `+${imuFromRun} Imun Coin dari hasil run!`, kind: 'gold' });
     }
 
+    // Fase 19 — TUJUAN PEMAIN: GP Pangkat Penjaga (setiap run menghasilkan GP;
+    // kenaikan pangkat = momen emosional ala naik-rank, tanpa demosi utk anak)
+    const rankRes = applyRunGP(meta, {
+      wave: run.spawnSys.wave,
+      kills: run.kills,
+      bossKills: run.bossKills,
+      victory,
+      chapterId: run.chapter ? run.chapter.id : null,
+    });
+    run.rankGain = rankRes;
+
     // META-LAYER kondisi tubuh: racun, energi, pemulihan sistem fokus,
     // toxic seep, streak milestone — loop tertutup antar-run.
     this.lastBodyImpact = registerRunResult(meta, {
@@ -1443,6 +1455,17 @@ export const game = {
       bpFrom: run.bpGain ? run.bpGain.from : null,
       bpTo: run.bpGain ? run.bpGain.to : null,
       newMissions: completedMissions.length,
+      rank: {
+        gained: rankRes.gained,
+        gpAfter: rankRes.gpAfter,
+        tierUp: rankRes.tierUp,
+        tierName: rankRes.toTier.name,
+        tierColor: rankRes.toTier.color,
+        insignia: rankRes.toTier.insignia,
+        prevTierName: rankRes.fromTier.name,
+        need: rankRes.need,
+        nextName: rankRes.nextName,
+      },
     });
   },
 

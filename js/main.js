@@ -48,6 +48,7 @@ import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
+import * as rankScreen from './ui/screens/rank-screen.js';
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -197,7 +198,9 @@ async function boot() {
   screenManager.registerScreen('herodetail', heroDetailScreen);
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
+  screenManager.registerScreen('rank', rankScreen);
   bosschestScreen.wire();
+  rankScreen.wire(); // Fase 19: modal pangkat
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
   screenManager.show('loading');
@@ -240,6 +243,8 @@ async function boot() {
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
   document.getElementById('account-chip').addEventListener('click', () => screenManager.show('auth'));
+  // Fase 19: chip pangkat → modal PANGKAT PENJAGA (klik riil)
+  document.getElementById('rank-chip')?.addEventListener('click', () => screenManager.show('rank'));
 
   // ---- AUDIO: unlock di gesture pertama (kebijakan autoplay browser) ----
   const unlockAudio = () => audio.unlock();

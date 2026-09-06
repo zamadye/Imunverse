@@ -11,6 +11,7 @@ import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-sys
 import { getMissionProgressList } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
+import { t as tr } from '../../systems/i18n.js';
 import { markSeen } from '../../systems/codex-system.js';
 import { drainHeroNotices } from '../../systems/retention-system.js';
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
@@ -19,6 +20,7 @@ import {
   applyDailyDecay, recoverViaAd,
 } from '../../systems/body-system.js';
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
+import { playerRank } from '../../systems/rank-system.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
@@ -471,6 +473,24 @@ export function show() {
     } else {
       chip.classList.add('hidden');
     }
+  }
+
+  // Fase 19: CHIP PANGKAT PENJAGA — tujuan pemain selalu terlihat (goal gradient)
+  const rankChip = document.getElementById('rank-chip');
+  if (rankChip) {
+    const rk = playerRank();
+    rankChip.classList.remove('hidden');
+    const em = document.getElementById('rank-emblem');
+    em.textContent = rk.tier.insignia;
+    em.style.background = `linear-gradient(160deg, ${rk.tier.color}, ${rk.tier.color}cc)`;
+    document.getElementById('rank-tier-name').textContent = tr(rk.tier.name);
+    const rf = document.getElementById('rank-bar-fill');
+    rf.style.width = `${Math.round(rk.pct * 100)}%`;
+    rf.style.background = rk.tier.color;
+    document.getElementById('rank-sub').textContent = rk.next
+      ? `${rk.need} ${tr('GP lagi ke')} ${tr(rk.next.name)}`
+      : tr('Pangkat tertinggi!');
+    rankChip.onclick = () => screenManager.show('rank');
   }
 
   // ---- Panggung hero: sprite + nama hero terpilih + badge gelombang terbaik ----

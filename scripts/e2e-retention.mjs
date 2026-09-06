@@ -109,6 +109,24 @@ let tries = 0;
 let kills = 0;
 let lvlChoices = 0;
 let synBadge = 0;
+// F19 temuan: musuh kiter menetap di 200px+ (di luar jangkauan melee 90) —
+// tes lama "borderline-lucky". Setup deterministik: jaga musuh dalam jangkauan
+// (penempatan = konteks tes; membunuh tetap oleh auto-attack RIIL).
+const topUpEnemies = () => page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  const run = g.run;
+  if (!run || run.ended) return;
+  const p = run.player;
+  const alive = run.enemies.filter((e) => e.alive && !e.isBoss);
+  const need = 4 - run.kills + 1 - alive.length;
+  for (let i = 0; i < need; i++) g.spawnEnemy('parasit', false);
+  run.enemies.filter((e) => e.alive && !e.isBoss).slice(0, 6).forEach((e, i) => {
+    e.x = p.x + 55 + (i % 3) * 18;
+    e.y = p.y - 20 + Math.floor(i / 3) * 26;
+    e.hp = 1;                    // 1 tebasan auto-attack cukup (yang membunuh tetap riil)
+    e.applyFreeze(3);            // musuh kiter langsung kabur dari jangkauan — dibekukan di tempat
+  });
+});
 while (tries < 70) {
   // modal level-up meng-pause game → pilih satu lalu lanjut berburu
   if (await page.locator('#screen-levelup.active').isVisible().catch(() => false)) {
@@ -120,6 +138,7 @@ while (tries < 70) {
     await page.waitForTimeout(350);
     continue;
   }
+  await topUpEnemies();
   await dragJoystick(240, 260, 240, 170); // maju ke arah musuh (arah layar atas)
   kills = await page.evaluate(() => window.__IMUNVERSE.game.run ? window.__IMUNVERSE.game.run.kills : -1);
   if (kills >= 4) break;
@@ -155,10 +174,37 @@ ok('levelup-3-choices', lvlChoices === 3, `choices=${lvlChoices}`);
 ok('synergy-badge-rendered', synBadge >= 0); // informatif: tergantung peran & pool
 
 // akhiri run: pause → Akhiri Run (klik riil)
-await page.click('#btn-pause', { timeout: 8000 });
-await page.waitForTimeout(500);
-await page.click('#btn-quit-run', { timeout: 8000 });
-await page.waitForFunction(() => document.querySelector('#screen-gameover')?.classList.contains('active'), null, { timeout: 10000 });
+// F19: topUp menaruh musuh tepat di pemain → pemain bisa tumbang duluan;
+// jika revive muncul → "Tidak, Akhiri Run"; jika sudah gameover → lewati pause.
+if (await page.locator('#screen-revive.active').isVisible().catch(() => false)) {
+  await page.click('#btn-skip-revive', { timeout: 3000 }).catch(() => {});
+  await page.waitForTimeout(600);
+}
+if (!(await page.evaluate(() => document.querySelector('#screen-gameover')?.classList.contains('active')))) {
+  // tutup modal level-up yang menyela (pause "tak terlihat" saat modal aktif — F19)
+  for (let k = 0; k < 12; k++) {
+    const lu = await page.evaluate(() => document.querySelector('#screen-levelup')?.classList.contains('active'));
+    if (!lu) break;
+    await page.locator('#levelup-choices .choice-card').first().click({ force: true, timeout: 1500 }).catch(() => {});
+    await page.waitForTimeout(450);
+  }
+  try {
+    await page.click('#btn-pause', { timeout: 5000 });
+    await page.waitForTimeout(500);
+    await page.click('#btn-quit-run', { timeout: 8000 });
+  } catch { /* pemain tumbang sendiri sebelum sempat jeda */ }
+  // modal bisa menyela lagi di tengah try → tutup sekali lagi
+  for (let k = 0; k < 6; k++) {
+    const lu = await page.evaluate(() => document.querySelector('#screen-levelup')?.classList.contains('active'));
+    if (!lu) break;
+    await page.locator('#levelup-choices .choice-card').first().click({ force: true, timeout: 1500 }).catch(() => {});
+    await page.waitForTimeout(400);
+  }
+  if (await page.locator('#screen-revive.active').isVisible().catch(() => false)) {
+    await page.click('#btn-skip-revive', { timeout: 3000 }).catch(() => {});
+  }
+  await page.waitForFunction(() => document.querySelector('#screen-gameover')?.classList.contains('active'), null, { timeout: 12000 });
+}
 await page.waitForTimeout(900);
 
 // ---- TRIGGER 1: IMU = rumus + reward misi baru ----

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "season": {
+    "number": 1,
+    "start": "2026-08-31",
+    "daysPerSeason": 28
+  },
+  "points": {
+    "perWave": 18,
+    "perKill": 2,
+    "perBoss": 120,
+    "victoryBonus": 250,
+    "chapterBonus": 100
+  },
+  "tiers": [
+    { "id": "sel_baru",    "name": "Sel Baru",             "min": 0,     "color": "#c9d6d0", "insignia": "•" },
+    { "id": "patroli_3",   "name": "Patroli Imun III",     "min": 250,   "color": "#a9d795", "insignia": "III" },
+    { "id": "patroli_2",   "name": "Patroli Imun II",      "min": 550,   "color": "#98cf82", "insignia": "II" },
+    { "id": "patroli_1",   "name": "Patroli Imun I",       "min": 900,   "color": "#84c76e", "insignia": "I" },
+    { "id": "jaringan_3",  "name": "Penjaga Jaringan III", "min": 1400,  "color": "#7fc9b3", "insignia": "III" },
+    { "id": "jaringan_2",  "name": "Penjaga Jaringan II",  "min": 2000,  "color": "#64bd9f", "insignia": "II" },
+    { "id": "jaringan_1",  "name": "Penjaga Jaringan I",   "min": 2700,  "color": "#45ab8a", "insignia": "I" },
+    { "id": "limfa_3",     "name": "Komando Limfa III",    "min": 3600,  "color": "#3f9f92", "insignia": "III" },
+    { "id": "limfa_2",     "name": "Komando Limfa II",     "min": 4700,  "color": "#2f8f83", "insignia": "II" },
+    { "id": "limfa_1",     "name": "Komando Limfa I",      "min": 6000,  "color": "#1f7a70", "insignia": "I" },
+    { "id": "elite",       "name": "Elite Antibodi",       "min": 7600,  "color": "#f2b93e", "insignia": "★" },
+    { "id": "legenda",     "name": "Makro Legenda",        "min": 9500,  "color": "#f2825c", "insignia": "★★" },
+    { "id": "sejati",      "name": "Penjaga Sejati",       "min": 12000, "color": "#8a5cf6", "insignia": "♛" }
+  ]
+}

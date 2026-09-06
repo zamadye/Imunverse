@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=18a" />
+  <link rel="stylesheet" href="styles/main.css?v=19a" />
 </head>
 <body>
   <div id="app">
@@ -46,6 +46,14 @@
             <span class="acct-id">
               <b id="account-name">—</b>
               <small><span id="account-faction" class="faction-tag">Imun</span></small>
+            </span>
+          </button>
+          <button id="rank-chip" class="rank-chip hidden" title="Pangkat Penjaga" aria-label="Buka Pangkat Penjaga">
+            <span class="rank-emblem" id="rank-emblem">•</span>
+            <span class="rank-meta">
+              <b id="rank-tier-name">—</b>
+              <span class="rank-bar"><i id="rank-bar-fill"></i></span>
+              <small id="rank-sub">—</small>
             </span>
           </button>
           <div class="currency-chip" title="Antibodi (mata uang)">
@@ -504,6 +512,27 @@
         </div>
       </section>
 
+      <!-- ============ PANGKAT PENJAGA (Fase 19: tujuan pemain) ============ -->
+      <section id="screen-rank" class="screen modal" data-screen="rank">
+        <div class="modal-box wide rank-box">
+          <h2 class="modal-title rank-title">⚑ <span data-i18n="PANGKAT PENJAGA">PANGKAT PENJAGA</span></h2>
+          <p id="rank-season-line" class="rank-season-line"><!-- Musim & sisa hari --></p>
+          <div class="rank-hero">
+            <span class="rank-emblem big" id="rank-modal-emblem">•</span>
+            <div class="rank-hero-meta">
+              <b id="rank-modal-tier">—</b>
+              <div class="rank-bar lg"><i id="rank-modal-fill"></i></div>
+              <small id="rank-modal-next">—</small>
+            </div>
+            <div class="rank-gp"><b id="rank-modal-gp">0</b><span data-i18n="GP">GP</span></div>
+          </div>
+          <h3 class="rank-ladder-title" data-i18n="JALUR PANJAT PANGKAT">JALUR PANJAT PANGKAT</h3>
+          <ol id="rank-ladder" class="rank-ladder"><!-- diisi JS --></ol>
+          <p id="rank-earn" class="rank-earn"><!-- cara dapat GP (dari data) --></p>
+          <button id="btn-rank-close" class="btn btn-primary btn-xl" data-i18n="Lanjut Berburu">Lanjut Berburu</button>
+        </div>
+      </section>
+
       <!-- ============ GAME OVER / VICTORY SUMMARY ============ -->
       <section id="screen-gameover" class="screen modal" data-screen="gameover">
         <div class="modal-box wide go-card">
@@ -518,6 +547,13 @@
           </div>
           <h2 id="gameover-title" class="gameover-title">Run Selesai</h2>
           <p id="gameover-sub" class="gameover-sub">Sistem imun mengingat pengorbananmu.</p>
+          <div id="go-rankup" class="go-rankup hidden">
+            <span class="rank-emblem big pulse" id="go-rankup-emblem">•</span>
+            <div class="go-rankup-text">
+              <b data-i18n="NAIK PANGKAT!">NAIK PANGKAT!</b>
+              <span id="go-rankup-tier">—</span>
+            </div>
+          </div>
           <div id="gameover-summary" class="summary-grid"><!-- diisi JS --></div>
           <div class="summary-reward">
             <span>Antibodi didapat:</span>
@@ -545,7 +581,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=18a"></script>
+  <script type="module" src="js/main.js?v=19a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

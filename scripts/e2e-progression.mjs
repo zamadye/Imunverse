@@ -165,8 +165,19 @@ await page.evaluate(() => {
   ss.wave = 4;
   ss.waveTimer = 24.4; // 0.6 dtk lagi ganti wave
 });
+// TUNGGU KONDISI (bukan waktu tetap) — tahan beban suite lain mesin lambat
+await page.waitForFunction(() => window.__IMUNVERSE.game.run.spawnSys.wave === 5, null, { timeout: 6000 }).catch(() => {});
+await page.waitForTimeout(700); // beri waktu boss penjaga spawn
+const bossReady = await page.evaluate(() => {
+  const run = window.__IMUNVERSE.game.run;
+  return run.spawnSys.wave === 5 && !!run.boss;
+});
+if (!bossReady) { // satu nagihan: dorong timer sekali lagi
+  await page.evaluate(() => { window.__IMUNVERSE.game.run.spawnSys.waveTimer = 24.9; });
+  await page.waitForTimeout(1500);
+}
 await closeModals(); // modal sisa (jika ada) — jangan biarkan pause saat mengukur
-await page.waitForTimeout(1500);
+await page.waitForTimeout(400);
 const gate1 = await page.evaluate(() => {
   const run = window.__IMUNVERSE.game.run;
   const S = window.__IMUNVERSE.STATE;

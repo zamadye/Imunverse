@@ -2140,6 +2140,147 @@ img.lock-badge {
 }
 
 /* =========================================================
+   FASE 19 — TUJUAN PEMAIN: PANGKAT PENJAGA + LAYOUT HOME FULL-BLEED
+   Feedback pemilik (2026-09-06):
+   1) tutup ruang kosong di bawah kartu battle pass/quests
+   2) carousel full-bleed kiri-kanan (mentok) — lebih enak dilihat
+   3) dock & topbar dilebarkan sampai penuh (layar landscape)
+   ========================================================= */
+
+/* --- (2) Carousel full-bleed: mentok kiri & kanan layar --- */
+@media (orientation: landscape) {
+  .dash-scroll { overflow-x: hidden; }
+  #dash-banner {
+    grid-area: 1 / 1 / 2 / -1;          /* penuh kedua kolom */
+    height: clamp(176px, 46vh, 236px);  /* baris Play tetap mengintip di fold */
+    margin: 0 calc(-1 * var(--screen-pad, 14px)); /* tembus padding layar */
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #dash-banner .banner-track, #dash-banner .banner-slide { border-radius: 0; }
+
+  /* --- (1) Tutup ruang kosong: quick-menu pindah ke samping play-row --- */
+  /* 6 tile = 2×3, meregang penuh setinggi kartu kampanye — TANPA lubang */
+  #quick-row {
+    grid-area: 2 / 2; grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr); gap: 9px; height: 100%;
+  }
+  #quick-row .quick-tile { height: 100%; justify-content: center; padding: 8px 4px; }
+  #quick-row .quick-tile img { width: 30px; height: 30px; }
+  #quick-row .qt-label { font-size: 9.3px; }
+  #dash-stats { grid-area: 3 / 1 / 4 / -1; }      /* strip statistik full-width */
+  #daily-card { grid-area: 4 / 1 / 5 / -1; }
+  #duo-evo { grid-area: 5 / 1; }
+  #duo-lb { grid-area: 5 / 2; }
+
+  /* --- (3) Dock & topbar melebar penuh (ala MLBB landscape) --- */
+  #screen-dashboard .topbar { max-width: none; }
+  .dock { max-width: none; padding-left: 10px; padding-right: 10px; }
+  .dock-btn .dock-ico { width: 56px; height: 56px; }
+}
+
+/* Layar landscape pendek (ponsel): sidebar 6 tombol tetap muat */
+@media (orientation: landscape) and (max-height: 500px) {
+  .side-nav { flex: 0 0 56px; gap: 2px; padding: 4px; }
+  .side-btn { padding: 2px; gap: 0; border-radius: 11px; }
+  .side-btn img { width: 17px; height: 17px; }
+  .side-btn span { font-size: 7px; }
+}
+
+/* Modal pangkat kompak di layar pendek — ladder tetap terbaca */
+@media (max-height: 500px) {
+  .rank-box { gap: 7px; padding: 12px 18px 14px; }
+  .rank-hero { padding: 8px 12px; gap: 10px; }
+  .rank-emblem.big { width: 52px; height: 52px; border-radius: 16px; font-size: 20px; }
+  .rank-hero-meta b { font-size: 15px; }
+  .rank-gp b { font-size: 16px; }
+  .rank-row { padding: 4px 8px; }
+  .rank-row b { font-size: 11.5px; }
+  .rank-ladder { flex: 0 0 auto; max-height: 178px; }
+}
+
+/* --- Chip pangkat di topbar dashboard --- */
+.rank-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--card); border: none; border-radius: var(--pill);
+  padding: 4px 12px 4px 5px; cursor: pointer; box-shadow: var(--shadow-card);
+  font-family: var(--font); text-align: left;
+  transition: transform 0.08s ease;
+}
+.rank-chip:active { transform: scale(0.95); }
+.rank-chip.hidden { display: none; }
+.rank-emblem {
+  width: 34px; height: 34px; border-radius: 12px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 13px; letter-spacing: 0.02em;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 3px 8px rgba(31, 74, 66, 0.25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.rank-emblem.big { width: 64px; height: 64px; border-radius: 20px; font-size: 24px; }
+.rank-emblem.sm { width: 22px; height: 22px; border-radius: 8px; font-size: 10px; vertical-align: middle; }
+.rank-meta { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.rank-meta b { font-size: 11.5px; font-weight: 900; color: var(--ink); white-space: nowrap; }
+.rank-bar {
+  width: 96px; height: 6px; border-radius: 4px; background: rgba(31, 122, 112, 0.14);
+  overflow: hidden; margin: 2px 0 1px;
+}
+.rank-bar i { display: block; height: 100%; width: 0%; border-radius: 4px; background: var(--teal); transition: width 0.4s ease; }
+.rank-bar.lg { width: 100%; height: 10px; margin: 6px 0 4px; }
+.rank-meta small { font-size: 9px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; }
+
+/* --- Modal PANGKAT PENJAGA --- */
+.rank-box { display: flex; flex-direction: column; gap: 10px; max-height: calc(100dvh - 32px); }
+.rank-title { color: var(--teal-dark); letter-spacing: 0.06em; }
+.rank-season-line { font-size: 11px; font-weight: 800; color: var(--ink-soft); text-align: center; margin-top: -6px; }
+.rank-hero {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(165deg, #f2f8e8, #dcefe6);
+  border-radius: 18px; padding: 12px 14px;
+}
+.rank-hero-meta { flex: 1; min-width: 0; }
+.rank-hero-meta b { font-size: 17px; font-weight: 900; color: var(--teal-dark); }
+.rank-hero-meta small { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); }
+.rank-gp {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--card); border-radius: 14px; padding: 8px 14px; box-shadow: var(--shadow-card);
+}
+.rank-gp b { font-size: 19px; font-weight: 900; color: var(--teal-dark); }
+.rank-gp span { font-size: 9px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.08em; }
+.rank-ladder-title { font-size: 11px; letter-spacing: 0.12em; color: var(--ink-soft); font-weight: 900; margin: 2px 0 -2px; }
+.rank-ladder {
+  list-style: none; margin: 0; padding: 4px; display: flex; flex-direction: column; gap: 5px;
+  overflow-y: auto; min-height: 0; flex: 1; scrollbar-width: thin;
+}
+.rank-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 9px; border-radius: 12px; background: rgba(31, 122, 112, 0.05);
+}
+.rank-row .rank-row-left { display: inline-flex; align-items: center; gap: 9px; }
+.rank-row b { font-size: 12.5px; font-weight: 900; color: var(--ink); }
+.rank-row .rank-row-right { font-size: 11px; font-weight: 900; color: var(--ink-soft); }
+.rank-row.reached .rank-row-right { color: var(--teal-deep); }
+.rank-row.current { background: linear-gradient(165deg, #fff6d8, #ffe9ad); outline: 2px solid var(--gold-deep, #f2b93e); }
+.rank-row.current b { color: var(--teal-dark); }
+.rank-earn { font-size: 10px; font-weight: 800; color: var(--ink-soft); text-align: center; }
+
+/* --- Ceremony NAIK PANGKAT di kartu gameover --- */
+.go-rankup {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin: 2px auto 6px; padding: 10px 22px;
+  background: linear-gradient(165deg, #ffe9ad, #ffd93d);
+  border-radius: 18px; box-shadow: 0 6px 0 #d9a51f, var(--shadow-card);
+  animation: rankup-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.go-rankup.hidden { display: none; }
+.go-rankup-text { display: flex; flex-direction: column; line-height: 1.2; }
+.go-rankup-text b { font-size: 17px; font-weight: 900; color: #7a5205; letter-spacing: 0.08em; }
+.go-rankup-text span { font-size: 12px; font-weight: 900; color: var(--teal-dark); }
+.go-rankup .rank-emblem.big.pulse { animation: rankup-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1), rankup-bob 1.6s ease-in-out 0.5s infinite; }
+@keyframes rankup-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes rankup-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.go-parts.go-rank { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 900; color: var(--teal-dark); }
+
+/* =========================================================
    FASE 14 — IMUN COIN, BATTLE PASS, OFFERWALL, KOSMETIK
    ========================================================= */
 
