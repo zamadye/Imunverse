@@ -167,14 +167,13 @@
           </div>
         </div>
 
-        <!-- Dock navigasi bawah (tetap) -->
+        <!-- CTA utama dipisah dari navigasi utilitas agar fokus visual tidak bercampur. -->
+        <button class="dashboard-play" id="btn-play" aria-label="Mulai run">
+          <span class="dashboard-play-icon"><img src="assets/sprites/icon_play.png" alt="" /></span>
+          <span class="dashboard-play-copy"><b>PLAY</b><small>Mulai run sekarang</small></span>
+        </button>
+        <!-- Dock navigasi utilitas -->
         <nav class="dock">
-          <button class="dock-btn primary" id="btn-play" aria-label="Mulai run">
-            <span class="dock-ico">
-              <img src="assets/sprites/icon_play.png" alt="" />
-            </span>
-            <span>Play</span>
-          </button>
           <button class="dock-btn" data-nav="roster" aria-label="Roster hero">
             <span class="dock-ico">
               <img src="assets/sprites/icon_heroes.png" alt="" />
