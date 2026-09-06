@@ -298,3 +298,25 @@
   #screen-hud .hud-hero-status { transform:none; }
   #screen-hud .hud-controls { transform:none; }
 }
+
+/* Gameover CTA must never disappear below a tall victory summary on phones. */
+@media (max-height: 760px) {
+  #screen-gameover .go-card { width:min(94vw,500px); max-height:calc(100dvh - 8px); padding:10px 14px 8px; gap:5px; }
+  #screen-gameover .go-stars { display:none; }
+  #screen-gameover .gameover-title { font-size:20px; }
+  #screen-gameover .gameover-sub { font-size:10px; }
+  #screen-gameover .go-rankup { margin:0 auto 2px; padding:6px 12px; gap:8px; }
+  #screen-gameover .go-rankup .rank-emblem.big { width:38px; height:38px; font-size:15px; }
+  #screen-gameover .go-rankup-text b { font-size:12px; }
+  #screen-gameover .go-rankup-text span { font-size:9px; }
+  #screen-gameover #gameover-summary { max-height:17vh; overflow-y:auto; }
+  #screen-gameover .summary-cell { padding:5px 3px; }
+  #screen-gameover .summary-cell b { font-size:14px; }
+  #screen-gameover .summary-cell span { font-size:8px; }
+  #screen-gameover .summary-reward { font-size:11px; gap:5px; }
+  #screen-gameover .summary-reward strong { font-size:18px; }
+  #screen-gameover .go-chest { width:25px; }
+  #screen-gameover #btn-double-currency { min-height:36px; padding:6px 10px; font-size:11px; }
+  #screen-gameover .btn-row { position:sticky; bottom:-8px; padding:6px 0 2px; background:var(--cream); z-index:2; }
+  #screen-gameover .btn-row .btn { min-height:42px; padding:8px 9px; font-size:12px; }
+}
