@@ -20,13 +20,14 @@ export function getRetention() {
  * @returns {number} bulat
  */
 export function imuForRun(wave, kills, bossKills, victory = false) {
-  // Fase 20 (feedback pemilik): Imun Coin = MATA UANG PREMIUM LANGKA.
-  // Musuh biasa hanya memberi antibodi (point standar utk upgrade biasa).
-  // IMU hanya dari: boss (farm battle/dungeon) + bonus menang bab.
+  // Early-beta: pemain dapat mengumpulkan Imun Coin lewat bermain.
+  // Rumus kontrak: wave × perWave + kill × perKill + boss × perBoss + bonus menang.
   const r = getRetention().imuReward;
-  let imu = Math.floor((bossKills || 0) * (r.perBoss || 0));
-  if (victory) imu += r.victoryBonus || 0;
-  return imu;
+  const imu = (wave * (r.perWave || 0))
+    + (kills * (r.perKill || 0))
+    + (bossKills * (r.perBoss || 0))
+    + (victory ? (r.victoryBonus || 0) : 0);
+  return Math.floor(imu);
 }
 
 /**

@@ -79,8 +79,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 350,
-        "label": "Buka dengan 350 Imun Coin"
+        "imuCost": 150,
+        "label": "Buka dengan 150 Imun Coin"
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
@@ -123,8 +123,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 120,
-        "label": "Buka dengan 120 Imun Coin"
+        "imuCost": 100,
+        "label": "Buka dengan 100 Imun Coin"
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
@@ -485,8 +485,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 1500,
-        "label": "Buka dengan 1500 Imun Coin"
+        "imuCost": 200,
+        "label": "Buka dengan 200 Imun Coin"
       },
       "shopCost": 200,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",
