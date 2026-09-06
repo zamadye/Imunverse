@@ -41,15 +41,29 @@ function selectHero() {
   const box = document.getElementById('hero-detail-body');
   box.textContent = '';
 
-  // ===== PANEL HERO (ala referensi: karakter besar di panggung + nama + tingkatan) =====
+  // ===== PANEL HERO (ala referensi MLBB: banner nama + panah ganti hero + panggung) =====
+  const heroes = getData().heroes.heroes;
+  const heroPos = heroes.findIndex((h) => h.id === heroDef.id);
+  const stepHero = (dir) => {
+    heroId = heroes[(heroPos + dir + heroes.length) % heroes.length].id;
+    selectHero();
+  };
   const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((sk) => sk.id === id)).filter(Boolean);
   box.appendChild(el('div', { class: 'card hero-lab-card hl-hero-panel', style: `background:linear-gradient(180deg,${heroDef.color}22,var(--card) 62%)` }, [
+    // Banner nama ala kartu hero game: emblem peran + nama + tier
+    el('div', { class: 'hl-banner' }, [
+      el('span', { class: 'hl-banner-role', style: `background:${heroDef.roleColor || heroDef.color}`, text: (heroDef.role || heroDef.name).slice(0, 3).toUpperCase() }),
+      el('b', { class: 'hl-banner-name', text: heroDef.name }),
+      el('span', { class: 'hl-banner-tier', style: `background:${stageDef.tierColor}`, text: stageDef.tier }),
+    ]),
     el('div', { class: 'hl-head' }, [
-      el('span', { class: 'hl-count', text: `${stageDef.name} · ${stageDef.tier}` }),
+      el('span', { class: 'hl-count', text: `${stageDef.name}` }),
       el('span', { class: 'hl-level', style: `background:${heroDef.color}`, text: `Lv ${level}` }),
     ]),
     el('div', { class: 'hl-stage' }, [
+      el('button', { class: 'hl-arrow', 'aria-label': 'Hero sebelumnya', text: '❮', onclick: () => stepHero(-1) }),
       el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
+      el('button', { class: 'hl-arrow', 'aria-label': 'Hero berikutnya', text: '❯', onclick: () => stepHero(1) }),
       el('div', { class: 'hl-skill-col' }, skillDefs.map((sk, i) =>
         el('div', { class: 'hl-skill' + (i === 2 ? ' ult' : ''), title: `${sk.name} — tombol ${i + 1}` }, [
           el('span', { class: 'hl-skill-key', text: i === 2 ? 'ULT' : String(i + 1) }),

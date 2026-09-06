@@ -107,7 +107,8 @@ body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 
 /* ---------------- Screen dasar ---------------- */
 .screen {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0; height: 100dvh; /* Fase 16: dinamis mengikuti URL-bar HP */
+  bottom: auto; /* tinggi dari 100dvh, bukan bottom — aman address bar */
   display: none;
   flex-direction: column;
   align-items: center;
@@ -115,6 +116,9 @@ body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
   overflow-y: auto;
   pointer-events: auto;
   background: var(--cream);
+}
+@supports not (height: 100dvh) {
+  .screen { height: 100vh; }
 }
 .screen.active { display: flex; animation: screen-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes screen-in { from { opacity: 0; transform: translateY(14px); } }
@@ -966,29 +970,48 @@ img.lock-badge {
 .btn-play-big small { margin-left: auto; font-size: 11px; font-weight: 800; color: #bfe3d8; }
 
 /* -- Battle prep -- */
-.prep-scroll { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; }
-.prep-step { display: flex; align-items: center; gap: 8px; margin: 10px 0 2px; font-size: 14px; color: var(--ink); }
+/* Fase 16: modal Jeda padat — Lanjutkan/Akhiri SELALU terlihat tanpa scroll */
+#screen-pause .modal-box { max-height: calc(100dvh - 16px); gap: 8px; padding: 14px 16px 16px; }
+#screen-pause .pause-summary { font-size: 12px; }
+#screen-pause .btn-xl { min-height: 50px; }
+#screen-pause .btn-danger { min-height: 44px; }
+
+/* Fase 16 — Battle Prep konsisten dgn home: langkah kiri, kartu LOADOUT kanan */
+.prep-scroll {
+  width: 100%; max-width: 1040px; display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; min-height: 0; scrollbar-width: thin; padding-right: 2px;
+}
+.prep-main { display: flex; flex-direction: column; gap: 4px; }
+.prep-step { display: flex; align-items: center; gap: 8px; margin: 10px 0 4px; font-size: 12.5px; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); }
 .prep-step b {
   width: 22px; height: 22px; border-radius: 50%; background: var(--teal); color: var(--cream);
   display: flex; align-items: center; justify-content: center; font-size: 12px;
+  box-shadow: 0 2px 6px rgba(31, 122, 112, 0.25);
 }
-.prep-hint { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
+.prep-hint { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; text-transform: none; letter-spacing: 0; }
 
-.prep-hero-row { display: flex; gap: 10px; }
+.prep-hero-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 8px; }
 .prep-hero {
-  position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 10px 4px 8px; border: 3px solid transparent; border-radius: 20px;
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px 8px; border: 3px solid transparent; border-radius: 18px;
   background: var(--card); box-shadow: var(--shadow-card); cursor: pointer;
+  transition: transform 0.12s;
 }
-.prep-hero.selected { border-color: #35e0c8; background: var(--teal-light); }
+.prep-hero:active { transform: scale(0.95); }
+.prep-hero.selected {
+  border-color: var(--teal);
+  background: linear-gradient(170deg, #eafaf4, #cdeee3);
+  box-shadow: 0 4px 12px rgba(53, 179, 160, 0.28);
+}
 .prep-hero.locked { opacity: 0.55; }
 .prep-hero.locked .ph-sprite { filter: grayscale(1); }
-.prep-hero .ph-sprite { width: 72%; aspect-ratio: 1; object-fit: contain; }
+.prep-hero .ph-sprite { width: 68%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 3px 5px rgba(35, 30, 22, 0.18)); }
 .prep-hero .ph-name { font-size: 11px; font-weight: 900; color: var(--ink); }
 .prep-hero .ph-stage {
   position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px;
   border-radius: 11px; font-size: 10px; font-weight: 900; color: var(--cream);
   display: flex; align-items: center; justify-content: center; padding: 0 5px;
+  box-shadow: 0 2px 5px rgba(35, 30, 22, 0.25);
 }
 .prep-hero .ph-lock {
   position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
@@ -999,24 +1022,56 @@ img.lock-badge {
   display: flex; align-items: center; gap: 6px; padding: 7px 12px;
   border: 3px solid transparent; border-radius: 18px; background: var(--card);
   box-shadow: var(--shadow-card); cursor: pointer; font-size: 12px; font-weight: 800; color: var(--ink);
+  transition: transform 0.12s;
 }
-.prep-chip.selected { border-color: var(--teal); background: var(--teal-light); }
+.prep-chip:active { transform: scale(0.96); }
+.prep-chip.selected { border-color: var(--teal); background: linear-gradient(170deg, #eafaf4, #cdeee3); }
 .prep-chip.locked { opacity: 0.5; }
 .prep-chip img { width: 26px; height: 26px; border-radius: 8px; }
 .prep-chip.arena img { width: 30px; height: 30px; }
 
-.prep-summary { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-.prep-summary .ps-hero { width: 64px; height: 64px; object-fit: contain; }
-.prep-summary .ps-mid { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.prep-summary .ps-mid b { color: var(--ink); }
-.prep-summary .ps-tier { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
-.prep-summary .ps-abilities { display: flex; gap: 5px; }
-.prep-summary .ps-abilities img { width: 24px; height: 24px; }
+/* Panel LOADOUT — satu kartu besar ala campaign-card di home */
+.prep-aside {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 16px 18px 18px; border-radius: 24px; text-align: center;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(169, 215, 149, 0.45) 0 40px, transparent 41px),
+    radial-gradient(circle at 10% 88%, rgba(191, 227, 216, 0.6) 0 34px, transparent 35px),
+    linear-gradient(165deg, #f2f8e8, #dcefe6);
+  box-shadow: var(--shadow-card);
+}
+.pa-tag { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; color: var(--teal-deep); }
+.prep-summary { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.prep-summary .ps-hero { width: 108px; height: 108px; object-fit: contain; filter: drop-shadow(0 8px 14px rgba(35, 30, 22, 0.22)); }
+.prep-summary .ps-mid { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.prep-summary .ps-mid b { font-size: 19px; color: var(--ink); }
+.prep-summary .ps-tier {
+  font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em;
+  background: rgba(255, 253, 244, 0.85); padding: 4px 12px; border-radius: 12px;
+}
+.prep-summary .ps-abilities { display: flex; gap: 7px; margin-top: 3px; }
+.prep-summary .ps-skill-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fffdf4; box-shadow: 0 2px 5px rgba(35, 30, 22, 0.22); }
 .prep-summary .ps-noab { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; }
-.prep-summary .ps-meta { display: flex; flex-direction: column; gap: 5px; }
-.prep-summary .ps-meta > div { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; color: var(--ink-soft); }
-.prep-summary .ps-meta img { width: 20px; height: 20px; border-radius: 6px; }
-.prep-start { width: 100%; max-width: 560px; margin: 12px auto 18px; font-size: 18px; letter-spacing: 0.05em; }
+.prep-summary .ps-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.prep-summary .ps-meta > div {
+  display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800; color: var(--ink-soft);
+  background: rgba(255, 253, 244, 0.9); border-radius: 12px; padding: 5px 9px; box-shadow: 0 1px 4px rgba(35, 30, 22, 0.08);
+}
+.prep-summary .ps-meta img { width: 18px; height: 18px; border-radius: 5px; }
+.prep-start {
+  width: 100%; margin: 4px 0 0; font-size: 17px; letter-spacing: 0.06em; min-height: 54px; border-radius: 18px;
+  background: linear-gradient(180deg, #3ec2ae, #1f7a70); border: none;
+  box-shadow: 0 6px 16px rgba(31, 122, 112, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+.prep-start:disabled { filter: grayscale(0.6); opacity: 0.7; }
+
+/* Lanskap: 2 kolom — langkah kiri, loadout kanan (sticky) */
+@media (orientation: landscape) and (min-width: 700px) {
+  .prep-scroll { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .prep-main { grid-column: 1; }
+  .prep-aside { grid-column: 2; position: sticky; top: 0; }
+  #screen-prep .screen-header, #screen-prep .topbar { flex: 0 0 auto; }
+}
 
 /* -- Bag / inventory -- */
 .bag-scroll { width: 100%; max-width: 560px; }
@@ -1594,7 +1649,7 @@ img.lock-badge {
 #screen-hud .hud-kills img{width:15px;height:15px}
 #screen-hud .hud-currency-run{display:flex;align-items:center;gap:4px;font-weight:900;color:#c99013;font-size:14px}
 #screen-hud .hud-currency-run img{width:15px;height:15px}
-#screen-hud .btn-pause{background:linear-gradient(180deg,#2fb3a2,#1f7a70);border:none;width:36px;height:36px;min-height:36px;border-radius:11px;box-shadow:0 3px 8px rgba(31,122,112,.3)}
+#screen-hud .btn-pause{background:linear-gradient(180deg,#2fb3a2,#1f7a70);border:none;width:clamp(40px,9.5vh,48px);height:clamp(40px,9.5vh,48px);min-height:clamp(40px,9.5vh,48px);border-radius:13px;box-shadow:0 3px 8px rgba(31,122,112,.3);flex:0 0 auto}
 #screen-hud .btn-pause img{filter:brightness(0) invert(1)}
 #screen-hud .hud-minimap{top:96px;right:12px;border-color:#fff;width:84px;height:84px;background:rgba(20,88,79,.5)}
 #screen-hud .hud-buffs{top:84px}
@@ -1649,6 +1704,13 @@ img.lock-badge {
 /* =====================================================================
    FASE 12c — DETAIL HERO: layout ala referensi (panggung karakter + chips)
    ===================================================================== */
+/* Fase 16: banner nama + panah ganti hero ala kartu hero MLBB */
+.hl-banner{display:flex;align-items:center;gap:9px;justify-content:center;width:100%;padding:7px 10px;border-radius:14px;background:linear-gradient(180deg,rgba(53,179,160,.16),rgba(53,179,160,.05));border:2px solid rgba(53,179,160,.35)}
+.hl-banner-role{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;color:#fffdf4;font-weight:900;font-size:11px;letter-spacing:.04em;box-shadow:0 3px 7px rgba(35,30,22,.25);flex:0 0 auto}
+.hl-banner-name{font-size:19px;font-weight:900;color:var(--ink);letter-spacing:.02em}
+.hl-banner-tier{margin-left:auto;font-size:10px;font-weight:900;color:#fffdf4;padding:4px 10px;border-radius:10px;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 2px 5px rgba(35,30,22,.22)}
+.hl-arrow{width:40px;height:56px;border:none;border-radius:13px;background:rgba(255,253,244,.9);color:var(--teal-deep);font-size:19px;font-weight:900;cursor:pointer;box-shadow:var(--shadow-card);flex:0 0 auto;transition:transform .12s}
+.hl-arrow:active{transform:scale(.92)}
 .hl-hero-panel .hl-stage{display:flex;align-items:center;justify-content:center;gap:18px;width:100%}
 .hl-hero-panel .hl-sprite{width:128px;height:128px;filter:drop-shadow(0 10px 16px rgba(35,30,22,.22))}
 .hl-skill-col{display:flex;flex-direction:column;gap:8px}
@@ -1905,15 +1967,17 @@ img.lock-badge {
     overflow-y: auto; min-height: 0; align-content: start;
     scrollbar-width: thin; padding-right: 2px;
   }
-  #dash-banner { height: 200px; grid-column: 1; }
+  /* Fase 16: baris eksplisit — kartu TIDAK mungkin saling menabrak walau
+     urutan DOM/kolom berubah (bug user: stats menimpa kartu Endless) */
+  #dash-banner { grid-area: 1 / 1; height: 200px; }
   .banner-slide .hero-stage .stage-hero { width: min(24vh, 150px); }
-  #quick-row { grid-column: 2; }
+  #quick-row { grid-area: 1 / 2; }
   #quick-row .qt-label { white-space: nowrap; }
-  .play-row { grid-column: 1; }
-  #dash-stats { grid-column: 2; }
-  #daily-card { grid-column: 1 / -1; } /* baris penuh — tanpa lubang grid */
-  #duo-evo { grid-column: 1; }
-  #duo-lb { grid-column: 2; }
+  .play-row { grid-area: 2 / 1; }
+  #dash-stats { grid-area: 2 / 2; align-self: end; }
+  #daily-card { grid-area: 3 / 1 / 4 / -1; } /* baris penuh — tanpa lubang grid */
+  #duo-evo { grid-area: 4 / 1; }
+  #duo-lb { grid-area: 4 / 2; }
   /* Toast di luar-run lanskap: kanan, di ATAS dock (dock 299..376) — zona kosong */
   body:not(.in-run) #toasts {
     top: auto; bottom: 102px; right: 12px; left: auto; transform: none;

@@ -355,6 +355,14 @@ Sumber: lampiran pemilik `konten-entitas-imunverse.md` (sistem/organ, 12 hero, 1
 - Temuan teknis: bonus anti-parasit Eosinofil & mekanik stealth/drain/area-burst baru teks rasa, belum di kode.
 - Keputusan 5 butir (rename, virion, nutrisi, fase konten, perilaku) menunggu arahan pemilik — tidak ada rename dieksekusi sebelum persetujuan.
 
+## Fase 16 — 5 Masukan Pemilik: Sprite Abstrak, Grid Terkunci, Prep Konsisten, Tombol Aman-Viewport, Detail Hero ala MLBB ✅
+1. **Karakter tidak lagi dominan lingkaran** — `body_radius()` di `tools/gen_assets.py` dipertegas (ameba bergelombang, dendrit 4 lengan panjang, 3-lobus dalam, tetes lancip, 7 duri panjang, gerigi tegas, 12 sinar, crescent, benteng 6 tonjolan, oval, ring scallop); 33+ PNG hero idle/attack/potret diregenerasi. Wajah kawaii dipertahankan (target anak). Ikon hand-made (`icon_imu`, `icon_paru`) masuk keep-set generator.
+2. **Kartu tabrakan di dashboard (laporan: "card kill")** — akar: baris grid `.dash-scroll` mengandalkan auto-flow (browser HP user memegang CSS lama → kartu stats melompat menimpa Endless). Fix ganda: (a) **grid-area eksplisit** 1/1·1/2·2/1·2/2·3·4 — placement terkunci, tak tergantung urutan DOM; (b) **cache-buster** `main.css?v=16b` + `main.js?v=16b` agar perangkat user menerima CSS baru.
+3. **Siap Tempur konsisten dengan home** — direstrukturisasi 2 kolom: langkah 1–4 (grid hero auto-fill, chip putih) di kiri; panel **LOADOUT** kanan bergaya campaign-card (gradasi mint, hero besar 108px, tier pill, chips skill S1/S2/ULT, meta chips mode/fokus/arena, CTA **MULAI — HERO** besar) sticky di lanskap.
+4. **Tombol keluar terpotong (statis, tidak dinamis)** — `.screen` kini `position:fixed; height:100dvh` (fallback 100vh): mengikuti URL-bar HP yang menyusut/memanjang; tombol pause HUD ukuran fluid `clamp(40px,9.5vh,48px)`; modal Jeda dipadatkan (Lanjutkan/Akhiri selalu terlihat tanpa scroll).
+5. **Detail Hero ala referensi (MLBB "Bulldog Johnson")** — banner nama: emblem peran berwarna + nama besar + chip tier; **panah ❮ ❯ klik-riil** berganti hero di panggung (loop semua 11 hero); statistik & upgrade tetap.
+**Kriteria lulus 16:** audit overlap 7 layar CLEAN; e2e inti **20/20** + e2e-eco **14/14** (ERRORS: none); bukti `shots/67-dash-fix, 68-prep-fix, 69-herodetail-fix, 70-herodetail-next` + sheet siluet 11 hero.
+
 ## Fase 15 — Audit UI Anti-Tumpuk + Cinematic "Video" Banner Home ✅
 **(A) Audit & polish UI — tidak ada yang tertumpuk, tidak komplik**
 - [x] **Akar auto-scroll liar ditemukan & dibunuh**: overlay coach memanggil `scrollIntoView` tiap langkah → `.dash-scroll` lompat ke bawah (banner terpotong top −240). Kini: coach hanya **menyorot** (block 'nearest' + scrollTop direset), geometri spot/tooltip **dikunci ke viewport** (clamp) — tooltip tak mungkin keluar layar/tak terklik di 844×390.

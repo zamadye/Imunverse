@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/main.css?v=16b" />
 </head>
 <body>
   <div id="app">
@@ -327,27 +327,31 @@
         </header>
 
         <div class="prep-scroll">
-          <!-- LANGKAH 1: pilih hero -->
-          <h3 class="prep-step"><b>1</b> Pilih Hero</h3>
-          <div id="prep-hero-row" class="prep-hero-row"><!-- diisi JS --></div>
+          <div class="prep-main">
+            <!-- LANGKAH 1: pilih hero -->
+            <h3 class="prep-step"><b>1</b> <span data-i18n="Pilih Hero">Pilih Hero</span></h3>
+            <div id="prep-hero-row" class="prep-hero-row"><!-- diisi JS --></div>
 
-          <!-- LANGKAH 2: mode (Klasik / Endless + mutator harian) -->
-          <h3 class="prep-step"><b>2</b> Mode <span class="prep-hint">(Endless = mutator harian)</span></h3>
-          <div id="prep-mode-row" class="prep-chip-row"><!-- diisi JS --></div>
+            <!-- LANGKAH 2: mode (Klasik / Endless + mutator harian) -->
+            <h3 class="prep-step"><b>2</b> <span data-i18n="Mode">Mode</span> <span class="prep-hint" data-i18n="(Endless = mutator harian)">(Endless = mutator harian)</span></h3>
+            <div id="prep-mode-row" class="prep-chip-row"><!-- diisi JS --></div>
 
-          <!-- LANGKAH 3: fokus run -->
-          <h3 class="prep-step"><b>3</b> Fokus Run <span class="prep-hint">(menentukan sistem tubuh yang dipulihkan)</span></h3>
-          <div id="prep-focus-row" class="prep-chip-row"><!-- diisi JS --></div>
+            <!-- LANGKAH 3: fokus run -->
+            <h3 class="prep-step"><b>3</b> <span data-i18n="Fokus Run">Fokus Run</span> <span class="prep-hint" data-i18n="(menentukan sistem tubuh yang dipulihkan)">(menentukan sistem tubuh yang dipulihkan)</span></h3>
+            <div id="prep-focus-row" class="prep-chip-row"><!-- diisi JS --></div>
 
-          <!-- LANGKAH 4: arena -->
-          <h3 class="prep-step"><b>4</b> Arena <span class="prep-hint">(terbuka sesuai progresmu)</span></h3>
-          <div id="prep-arena-row" class="prep-chip-row"><!-- diisi JS --></div>
+            <!-- LANGKAH 4: arena -->
+            <h3 class="prep-step"><b>4</b> <span data-i18n="Arena">Arena</span> <span class="prep-hint" data-i18n="(terbuka sesuai progresmu)">(terbuka sesuai progresmu)</span></h3>
+            <div id="prep-arena-row" class="prep-chip-row"><!-- diisi JS --></div>
+          </div>
 
-          <!-- RINGKASAN loadout -->
-          <div id="prep-summary" class="card prep-summary"><!-- diisi JS --></div>
+          <!-- PANEL LOADOUT ala kartu home (Fase 16) -->
+          <aside class="card prep-aside">
+            <div class="pa-tag">⬡ LOADOUT</div>
+            <div id="prep-summary" class="prep-summary"><!-- diisi JS --></div>
+            <button id="btn-prep-start" class="btn btn-primary btn-xl prep-start">MULAI RUN</button>
+          </aside>
         </div>
-
-        <button id="btn-prep-start" class="btn btn-primary btn-xl prep-start">MULAI RUN</button>
       </section>
 
       <!-- ============ BAG / INVENTORY ============ -->
@@ -537,7 +541,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=16b"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

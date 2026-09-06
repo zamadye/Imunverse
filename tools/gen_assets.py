@@ -163,17 +163,20 @@ def glow(img, color, radius, alpha=80):
 # =====================================================================
 
 def body_radius(kind, th, R):
-    """Fase 12b: siluet tubuh per hero — r(theta) supaya tiap hero BEDA BENTUK."""
-    if kind == 'ameba':      return R * (1 + 0.10 * math.sin(3 * th + 1.2) + 0.05 * math.sin(5 * th))
-    if kind == 'dendrite':   return R * (0.66 + 0.42 * max(0.0, math.sin(4 * th + 0.6)) ** 3)   # 4 lengan dendrit runcing
-    if kind == 'lobed3':     return R * (0.80 + 0.26 * max(0.0, math.cos(3 * th)) ** 1.1)       # 3 lobus (polimorfonuklear)
-    if kind == 'teardrop':   return R * (0.74 + 0.30 * ((0.5 + 0.5 * math.sin(th)) ** 0.7))     # lebar bawah, sempit atas
-    if kind == 'burst':      return R * (0.60 + 0.46 * abs(math.sin(3.5 * th)) ** 0.55)         # 7 duri tajam
-    if kind == 'zigzag':     return R * (0.80 + 0.20 * (1.0 if math.cos(6 * th) > 0 else 0.0))  # gerigi petir
-    if kind == 'sunray':     return R * (0.80 + 0.24 * max(0.0, math.cos(12 * th)) ** 2)        # 12 sinar
-    if kind == 'bean':       return R * (0.90 + 0.14 * math.cos(th - 2.4))                      # asimetris
-    if kind == 'mast':       return R * (0.88 + 0.12 * max(0.0, math.cos(6 * th)) ** 0.8)       # 6 tonjolan granula
-    if kind == 'oval':       return R * (0.88 + 0.14 * abs(math.cos(th)) ** 3)                  # buah samping
+    """Fase 12b/16: siluet tubuh per hero — r(theta) supaya tiap hero BEDA BENTUK.
+    Fase 16 (masukan pemilik): amplitudo dipertegas — tidak ada lagi yang terbaca
+    'lingkaran' di ukuran kecil; tiap kind kini punya karakter kuat & abstrak."""
+    if kind == 'ameba':      return R * (1 + 0.18 * math.sin(3 * th + 1.2) + 0.08 * math.sin(5 * th + 0.4) + 0.05 * math.sin(8 * th))  # ameba bergelombang
+    if kind == 'dendrite':   return R * (0.50 + 0.58 * max(0.0, math.sin(4 * th + 0.6)) ** 2)   # 4 lengan dendrit PANJANG
+    if kind == 'lobed3':     return R * (0.62 + 0.42 * max(0.0, math.cos(3 * th)) ** 0.9)       # 3 lobus dalam (polimorfonuklear)
+    if kind == 'teardrop':   return R * (0.58 + 0.46 * ((0.5 + 0.5 * math.sin(th)) ** 0.55))    # lebar bawah, lancip atas
+    if kind == 'burst':      return R * (0.50 + 0.58 * abs(math.sin(3.5 * th)) ** 0.40)         # 7 duri tajam panjang
+    if kind == 'zigzag':     return R * (0.70 + 0.30 * (1.0 if math.cos(6 * th) > 0 else 0.0))  # gerigi petir tegas
+    if kind == 'sunray':     return R * (0.66 + 0.38 * max(0.0, math.cos(12 * th)) ** 3)        # 12 sinar panjang
+    if kind == 'bean':       return R * (0.80 + 0.20 * math.cos(th - 2.4))                      # kacang/crescent asimetris
+    if kind == 'mast':       return R * (0.78 + 0.22 * max(0.0, math.cos(6 * th)) ** 0.55)      # benteng 6 tonjolan
+    if kind == 'oval':       return R * (0.78 + 0.26 * abs(math.cos(th)) ** 2)                  # buah samping jelas
+    if kind == 'doublering': return R * (0.86 + 0.14 * math.cos(8 * th))                        # ring ber-scallop
     return R
 
 
@@ -1930,6 +1933,9 @@ def main():
     for stage in stages:
         keep.update(stage(OUT).keys())
     keep.add("ui_shield_emblem.png")
+    # Fase 14/13: ikon hand-made (bukan output generator) — jangan dihapus
+    keep.add("icon_imu.png")
+    keep.add("icon_paru.png")
     for f in os.listdir(OUT):
         if f.endswith(".png") and f not in keep:
             os.remove(os.path.join(OUT, f))
