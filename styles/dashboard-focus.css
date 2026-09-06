@@ -248,3 +248,53 @@
 #screen-dashboard .quest-track i { display:block; height:100%; border-radius:inherit; background:var(--coral); }
 #screen-dashboard .quest-action { grid-column:2; grid-row:1 / span 3; min-height:28px; padding:5px 8px; font-size:9px; }
 #screen-dashboard .quest-action:disabled { opacity:.58; }
+
+/* Compact HUD: gameplay canvas is primary; HUD is an unobtrusive safety rail. */
+#screen-hud .hud-top { top:5px; left:6px; right:6px; gap:4px; }
+#screen-hud .hud-stat-left, #screen-hud .hud-stat-right { padding:3px 5px; gap:4px; border-radius:10px; }
+#screen-hud .hud-center { min-width:86px; padding:3px 7px; gap:0; border-radius:10px; }
+#screen-hud .hud-center .wave-pill { font-size:10px; }
+#screen-hud .hud-center .timer-chip { font-size:9px; }
+#screen-hud .hud-center .timer-chip img { width:11px; height:11px; }
+#screen-hud .hud-kills, #screen-hud .hud-currency-run { font-size:10px; }
+#screen-hud .hud-kills img, #screen-hud .hud-currency-run img { width:11px; height:11px; }
+#screen-hud .hud-imu-run { display:none; }
+#screen-hud .hud-stat-left .hud-lvls { display:none; }
+#screen-hud .btn-pause { width:30px; height:30px; min-height:30px; border-radius:9px; padding:5px; }
+#screen-hud .btn-pause img { width:17px; height:17px; }
+#screen-hud .hud-hero-status { left:6px; bottom:6px; padding:4px 8px 4px 4px; gap:5px; border-radius:10px; }
+#screen-hud .hud-portrait, #screen-hud .hud-hero-status .avatar-wrap { width:38px; height:38px; }
+#screen-hud .hud-portrait { border-width:2px; }
+#screen-hud .level-badge { font-size:7px; padding:1px 4px; bottom:-3px; right:-6px; }
+#screen-hud .status-bars { width:112px; gap:3px; }
+#screen-hud .hp-row { gap:3px; }
+#screen-hud .hp-row .heart { width:10px; height:10px; }
+#screen-hud .hud-hp-track { height:8px; }
+#screen-hud .hud-hp-text { font-size:8px; min-width:32px; }
+#screen-hud .xp-row { gap:3px; }
+#screen-hud .hud-xp-track { height:4px; }
+#screen-hud .hud-xp-ico { width:9px; height:9px; }
+#screen-hud .hud-controls { right:6px; bottom:6px; gap:5px; }
+#screen-hud .ability-bar { grid-template-columns:repeat(2,42px); gap:4px; }
+#screen-hud .ability-btn { width:42px; height:42px; border-radius:11px; border-width:1.5px; }
+#screen-hud .ability-btn.ult { height:34px; }
+#screen-hud .ability-btn .sk-ico { width:19px; height:19px; }
+#screen-hud .ability-btn.ult .sk-ico { width:22px; height:22px; }
+#screen-hud .ability-btn .sk-name { font-size:6px; bottom:2px; }
+#screen-hud .ability-btn.ult .sk-name { font-size:7px; bottom:3px; }
+#screen-hud .ability-btn .key-tag { font-size:6px; top:2px; left:3px; }
+#screen-hud .ability-btn .cd-num { font-size:14px; }
+#screen-hud .fire-btn { width:58px; height:58px; min-height:58px; border-width:2px; font-size:8px; border-radius:50%; }
+#screen-hud .fire-btn img { width:20px; height:20px; }
+#screen-hud .hud-mission { top:45px; width:180px; padding:4px 7px; border-radius:9px; }
+#screen-hud .hud-mission-text { font-size:8px; }
+#screen-hud .hud-mission-bar { height:4px; margin-top:2px; }
+#screen-hud .hud-gate { font-size:8px; padding:3px 7px; }
+#screen-hud .hud-buffs { top:43px; gap:3px; }
+#screen-hud .hud-buff-chip { font-size:8px; padding:1px 5px 1px 2px; border-width:1px; }
+#screen-hud .hud-buff-chip img { width:13px; height:13px; }
+@media (orientation: landscape) {
+  #screen-hud .hud-top { top:4px; }
+  #screen-hud .hud-hero-status { transform:none; }
+  #screen-hud .hud-controls { transform:none; }
+}
