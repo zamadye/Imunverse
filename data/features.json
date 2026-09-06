@@ -53,6 +53,26 @@
       "requireWave": 6
     },
     {
+      "target": "secondary",
+      "id": "codex",
+      "requireWave": 1
+    },
+    {
+      "target": "secondary",
+      "id": "bp",
+      "requireWave": 6
+    },
+    {
+      "target": "secondary",
+      "id": "campaign",
+      "requireWave": 0
+    },
+    {
+      "target": "secondary",
+      "id": "rank",
+      "requireWave": 0
+    },
+    {
       "target": "side",
       "id": "home",
       "requireWave": 0

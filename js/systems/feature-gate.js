@@ -26,7 +26,8 @@ export function gateFor(target, id) {
 
 /** Gate untuk tombol dock (dataset.nav = id screen tujuan). */
 export function isDockGated(btn) {
-  return gateFor('dock', btn.dataset.nav);
+  const target = btn.closest('.secondary-dock') ? 'secondary' : 'dock';
+  return gateFor(target, btn.dataset.nav);
 }
 
 /** Terapkan visual lock pada satu elemen (badge + label syarat). */

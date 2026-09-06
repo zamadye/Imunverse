@@ -25,6 +25,7 @@ Applied to Imunverse:
   - `scripts/shot-pages131.mjs`
 - Runtime E2E scripts retain only their `/tmp` failure captures for debugging; they are not shipped UI assets.
 - `styles/dashboard-focus.css` is the active presentation layer for the dashboard/meta pass. Runtime screen modules remain intact.
+- Secondary dashboard icons use the same progression gate system as the original sidebar; `data/features.json` now explicitly declares the secondary target so Battle Pass/Codex cannot bypass unlock rules.
 
 ## Remaining legacy candidates (not removed yet)
 

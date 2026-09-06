@@ -491,6 +491,9 @@ export function show() {
   document.querySelectorAll('.dock-btn[data-nav]').forEach((b) => {
     applyGateVisual(b, 'dock', b.dataset.nav);
   });
+  document.querySelectorAll('.secondary-dock [data-nav]').forEach((b) => {
+    applyGateVisual(b, 'secondary', b.dataset.nav);
+  });
   // Fase 19: CHIP PANGKAT PENJAGA — tujuan pemain selalu terlihat (goal gradient)
   const rankChip = document.getElementById('rank-chip');
   if (rankChip) {
