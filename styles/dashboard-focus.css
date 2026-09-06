@@ -235,3 +235,16 @@
   #screen-hud .hud-controls { right:12px; bottom:10px; transform:scale(.86); transform-origin:bottom right; }
   #screen-hud .hud-mission { top:58px; left:50%; transform:translateX(-50%); }
 }
+
+/* Active daily/weekly quests: explicit accept → play → claim loop. */
+#screen-dashboard .active-quests { margin-top:10px; padding-top:8px; border-top:1px solid rgba(47,156,143,.16); display:flex; flex-direction:column; gap:7px; }
+#screen-dashboard .quest-heading { font-size:11px; color:var(--teal-deep); }
+#screen-dashboard .quest-row { position:relative; display:grid; grid-template-columns:1fr auto; gap:2px 7px; align-items:center; padding:6px 7px; border-radius:11px; background:rgba(234,244,221,.6); }
+#screen-dashboard .quest-title { display:flex; align-items:center; gap:5px; min-width:0; }
+#screen-dashboard .quest-title b { font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#screen-dashboard .quest-kind { font-size:7px; font-weight:900; color:#fff; background:var(--teal); border-radius:5px; padding:2px 4px; }
+#screen-dashboard .quest-desc { grid-column:1; color:var(--ink-soft); font-size:9px; }
+#screen-dashboard .quest-track { grid-column:1; height:4px; border-radius:4px; background:#d8ddc8; overflow:hidden; }
+#screen-dashboard .quest-track i { display:block; height:100%; border-radius:inherit; background:var(--coral); }
+#screen-dashboard .quest-action { grid-column:2; grid-row:1 / span 3; min-height:28px; padding:5px 8px; font-size:9px; }
+#screen-dashboard .quest-action:disabled { opacity:.58; }

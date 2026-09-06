@@ -8,7 +8,7 @@ import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
-import { getMissionProgressList } from '../../systems/mission-system.js';
+import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
@@ -643,6 +643,37 @@ export function show() {
   } else if (doneCount > 0) {
     list.appendChild(el('p', { class: 'mission-more', text: `+${doneCount} misi lainnya sudah selesai ✓` }));
   }
+
+  // Daily/weekly quest aktif: pemain memilih quest, lalu claim reward Antibodi.
+  const questBox = el('div', { class: 'active-quests' });
+  questBox.appendChild(el('b', { class: 'quest-heading', text: 'Quest Pilihan' }));
+  for (const q of getQuestProgress(meta).slice(0, 4)) {
+    const pct = Math.round((q.value / q.def.target) * 100);
+    const row = el('div', { class: `quest-row${q.claimed ? ' claimed' : ''}` }, [
+      el('div', { class: 'quest-title' }, [
+        el('span', { class: 'quest-kind', text: q.kind === 'daily' ? 'HARIAN' : 'MINGGUAN' }),
+        el('b', { text: q.def.name }),
+      ]),
+      el('small', { class: 'quest-desc', text: `${q.def.desc} · ${q.value}/${q.def.target}` }),
+      el('div', { class: 'quest-track' }, [el('i', { style: `width:${pct}%` })]),
+    ]);
+    const action = el('button', {
+      class: 'btn btn-sm quest-action',
+      text: q.claimed ? '✓' : (q.accepted ? (q.done ? 'KLAIM' : 'AKTIF') : 'AMBIL'),
+      disabled: q.claimed || (q.accepted && !q.done),
+      onclick: () => {
+        if (!q.accepted) acceptQuest(meta, q.def.id);
+        else {
+          const reward = claimQuest(meta, q.def.id);
+          if (reward) emit('toast', { message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
+        }
+        show();
+      },
+    });
+    row.appendChild(action);
+    questBox.appendChild(row);
+  }
+  list.appendChild(questBox);
 }
 
 export function hide() {
