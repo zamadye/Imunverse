@@ -39,12 +39,12 @@ await page.click('#auth-submit');
 await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 10000 });
 for (let k = 0; k < 6; k++) { if (!(await page.locator('#coach-skip').isVisible().catch(() => false))) break; await page.click('#coach-skip'); await page.waitForTimeout(300); }
 
-// 1) Hadiah early-beta: Pendiri = 300 Imun + skin pendiri
+// 1) Hadiah early-beta: Pendiri = 150 Imun (F20: dipangkas — IMU langka) + skin pendiri
 const founder = await page.evaluate(() => {
   const m = window.__IMUNVERSE.STATE?.meta || window.__IMUNVERSE.game?.run && null;
   return window.__IMUNVERSE.STATE.meta;
 });
-log('founder-300-imu', founder.imun === 300, `imun=${founder.imun}`);
+log('founder-150-imu', founder.imun === 150, `imun=${founder.imun}`);
 log('founder-skin', founder.cosmetics?.owned?.includes('skin_pendiri'), founder.cosmetics?.owned?.join(','));
 log('founder-title', founder.premiumTitle === 'Pendiri Imunverse', founder.premiumTitle);
 
@@ -64,7 +64,7 @@ const claimedLabel = await page.evaluate(() => {
 await page.waitForTimeout(600);
 log('bp-claim-free', !!claimedLabel, claimedLabel);
 const imuAfterClaim = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.imun);
-log('bp-claim-kept-imu', imuAfterClaim === 300, `imu=${imuAfterClaim}`); // reward lv1 = antibodi, bukan Imun
+log('bp-claim-kept-imu', imuAfterClaim === 150, `imu=${imuAfterClaim}`); // reward lv1 = antibodi, bukan Imun
 
 // 4) Beli jalur PREMIUM (500 IMU) — saldo 310 < 500 → harus ditolak dulu (guard nyata)
 await page.click('#btn-bp-premium');
@@ -108,7 +108,7 @@ await page.waitForTimeout(500);
 const imuAfterAd = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.imun);
 log('offerwall-ad-grants', imuAfterAd === imuBeforeAd + 8, `${imuBeforeAd}→${imuAfterAd}`);
 
-// 7) Beli skin Mako Daun (180 IMU) + pasang (klik riil)
+// 7) Beli skin Mako Daun (45 IMU — F20: skin dasar terjangkau, skin langka mahal) + pasang
 const bought = await page.evaluate(() => {
   const cards = [...document.querySelectorAll('.skin-card')];
   const card = cards.find((c) => c.querySelector('b')?.textContent === 'Mako Daun');

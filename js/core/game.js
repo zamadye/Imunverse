@@ -242,7 +242,12 @@ export const game = {
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     // PASUKAN IMUN (permanen): ikut bertarung sesuai meta.allies
     this.run.allies = [];
-    const allyCount = Math.max(0, Math.min(6, meta.allies || 0));
+    // Fase 20 (feedback pemilik): jumlah pasukan bertambah mengikuti LEVEL PASUKAN
+    // (+1 anggota tiap N level — data upgrades.allyUpgrade.membersPerLevels),
+    // bab kampanye yang dibersihkan tetap menambah (meta.allies).
+    const membersPerLv = getData().upgrades.allyUpgrade.membersPerLevels || 3;
+    const allyByLevel = 1 + Math.floor((meta.allyLevel || 0) / membersPerLv);
+    const allyCount = Math.max(0, Math.min(6, Math.max(meta.allies || 0, allyByLevel)));
     const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
     for (let i = 0; i < allyCount; i++) this.run.allies.push(new Ally(i, player, allySpeedBonus));
     if (allyCount > 0) {
@@ -340,6 +345,10 @@ export const game = {
   computePlayerStats(heroDef, runUpgrades) {
     const base = heroDef.baseStats;
     const squad = squadMultipliers(STATE.meta);
+    // Fase 20: TIER HERO SEJAK AWAL (common–legend, TIDAK berubah oleh upgrade).
+    // Tier lebih tinggi = basis lebih kuat (data/heroes.json → tiers.statMult).
+    const tierCfg = (getData().heroes.tiers || {})[heroDef.tier];
+    const tierMult = tierCfg ? tierCfg.statMult : 1;
     // LEVEL HERO (upgrade antibodi per hero): damage & HP tumbuh
     const heroCfg = getData().upgrades.heroUpgrade;
     const heroLvl = (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0;
@@ -353,12 +362,12 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    const damage = base.damage * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
     const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
     const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
     const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
+    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
     const projectileCount = base.projectileCount + (up.projectileCount || 0);
     const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
@@ -1376,7 +1385,7 @@ export const game = {
     const bpRes = addBpXP(meta, run.level * 40 + run.spawnSys.wave * 15 + run.kills);
     run.bpGain = bpRes; // ringkasan akhir run
     // Fase 17 (trigger 1A) — spek dokumen: (wave×8) + (kills×0.5) + (boss×50)
-    const imuFromRun = imuForRun(run.spawnSys.wave, run.kills, run.bossKills);
+    const imuFromRun = imuForRun(run.spawnSys.wave, run.kills, run.bossKills, victory);
     if (imuFromRun > 0) {
       addImun(meta, imuFromRun);
       run.imuEarned = imuFromRun;
@@ -1770,7 +1779,7 @@ export const game = {
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,
-        imu: Math.floor(run.imuAccrued || 0),
+        imu: Math.floor((STATE.meta.imun || 0) + (run.imuAccrued || 0)), // F20: saldo total, bukan akruan run saja
         gate: run.spawnSys.isGateBlocked(),
         gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,

@@ -2,14 +2,64 @@
   "schemaVersion": 1,
   "doc": "Fase 14 — Kosmetik (tanpa pay-to-win: hanya warna/aksesori visual). Skin = tint warna pada karakter (diterapkan canvas tint). acc = aksesori di atas karakter. Harga dalam Imun Coin. limited=true tidak dijual lagi setelah periode beta.",
   "skins": [
-    { "id": "skin_pendiri", "name": "Skin Pendiri", "hero": "semua", "color": "#3fd9c2", "priceImun": 0, "limited": true, "desc": "Eksklusif Early Beta — tidak dijual lagi." },
-    { "id": "skin_tbolt_krom", "name": "T-Bolt Krom", "hero": "semua", "color": "#8fd3ff", "priceImun": 150, "desc": "Kilau krom dingin ala plasma." },
-    { "id": "skin_mako_daun", "name": "Mako Daun", "hero": "semua", "color": "#7cb86a", "priceImun": 180, "desc": "Kamuflase daun hutan limfe." },
-    { "id": "skin_eos_sakura", "name": "Eos Sakura", "hero": "semua", "color": "#ff9fb2", "priceImun": 180, "desc": "Kelopak sakura paru kristal." },
-    { "id": "skin_helia_murni", "name": "Helia Murni", "hero": "semua", "color": "#fff3c4", "priceImun": 250, "desc": "Cahaya keemasan murni komandan." }
+    {
+      "id": "skin_pendiri",
+      "name": "Skin Pendiri",
+      "hero": "semua",
+      "color": "#3fd9c2",
+      "priceImun": 0,
+      "limited": true,
+      "desc": "Eksklusif Early Beta — tidak dijual lagi."
+    },
+    {
+      "id": "skin_tbolt_krom",
+      "name": "T-Bolt Krom",
+      "hero": "semua",
+      "color": "#8fd3ff",
+      "priceImun": 400,
+      "desc": "Kilau krom dingin ala plasma."
+    },
+    {
+      "id": "skin_mako_daun",
+      "name": "Mako Daun",
+      "hero": "semua",
+      "color": "#7cb86a",
+      "priceImun": 45,
+      "desc": "Kamuflase daun hutan limfe."
+    },
+    {
+      "id": "skin_eos_sakura",
+      "name": "Eos Sakura",
+      "hero": "semua",
+      "color": "#ff9fb2",
+      "priceImun": 60,
+      "desc": "Kelopak sakura paru kristal."
+    },
+    {
+      "id": "skin_helia_murni",
+      "name": "Helia Murni",
+      "hero": "semua",
+      "color": "#fff3c4",
+      "priceImun": 250,
+      "desc": "Cahaya keemasan murni komandan."
+    }
   ],
   "accs": [
-    { "id": "acc_aura_bintang", "name": "Aura Bintang", "kind": "aura", "color": "#7ad7ff", "priceImun": 120, "desc": "Pendar biru bintang mengelilingi sel." },
-    { "id": "acc_mahkota_beta", "name": "Mahkota Beta", "kind": "crown", "color": "#ffd23f", "priceImun": 300, "desc": "Mahkota musim pertama — bukti veteran." }
+    {
+      "id": "acc_aura_bintang",
+      "name": "Aura Bintang",
+      "kind": "aura",
+      "color": "#7ad7ff",
+      "priceImun": 120,
+      "desc": "Pendar biru bintang mengelilingi sel."
+    },
+    {
+      "id": "acc_mahkota_beta",
+      "name": "Mahkota Beta",
+      "kind": "crown",
+      "color": "#ffd23f",
+      "priceImun": 300,
+      "desc": "Mahkota musim pertama — bukti veteran."
+    }
   ]
 }

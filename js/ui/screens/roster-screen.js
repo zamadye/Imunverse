@@ -61,6 +61,18 @@ export function show() {
 
     const children = [avatar];
 
+    // Fase 20: TIER SEJAK AWAL (common–legend) — ditentukan saat dapat hero,
+    // TIDAK berubah oleh upgrade (feedback pemilik: eksklusivitas).
+    const tierCfg = (getData().heroes.tiers || {})[heroDef.tier];
+    if (tierCfg) {
+      children.push(el('span', {
+        class: 'tier-badge',
+        style: `background:${tierCfg.color}`,
+        text: tierCfg.label,
+        title: `Tier ${tierCfg.label} — tetap selamanya, upgrade menambah kekuatan bukan tier`,
+      }));
+    }
+
     if (status.unlocked) {
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'hero-pattern' }, [

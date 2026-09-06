@@ -87,7 +87,7 @@ export function ensureFounderReward(meta) {
   if (!meta.account || meta.founderGranted) return false;
   meta.founderGranted = true;
   meta.premiumTitle = meta.premiumTitle || FOUNDER_TITLE;
-  addImun(meta, 300);
+  addImun(meta, 150); // Fase 20: ekonomi IMU diperketat — hadiah pendiri dipangkas
   const cos = ensureCosmetics(meta);
   if (!cos.owned.includes('skin_pendiri')) cos.owned.push('skin_pendiri');
   cos.skin.semua = cos.skin.semua || 'skin_pendiri';

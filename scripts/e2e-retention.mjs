@@ -59,7 +59,7 @@ for (let k = 0; k < 8; k++) {
 
 // ---- TRIGGER 1: founder 300 Imun Coin (titik awal ekonomi) ----
 const imu0 = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.imun || 0);
-ok('meta-founder-300-imu', imu0 === 300, `imu0=${imu0}`);
+ok('meta-founder-150-imu', imu0 === 150, `imu0=${imu0}`); // F20: hadiah pendiri dipangkas (IMU langka)
 
 // default hero = Mako (spek: Mako default)
 const selHero = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.selectedHero);
@@ -93,6 +93,10 @@ for (let k = 0; k < 4; k++) {
 }
 await page.waitForFunction(() => document.querySelector('#screen-hud')?.classList.contains('active'), null, { timeout: 15000 });
 await page.waitForTimeout(800);
+// F20: kurva XP baru jauh lebih berat (L2 = 280 XP) → beri XP via jalur riil
+// (sama dgn pickup orb) supaya modal level-up tetap terverifikasi
+await page.evaluate(() => window.__IMUNVERSE.game.addXP(400));
+await page.waitForTimeout(400);
 
 // auto-attack ON (spek 4C) — pemain hanya mengarahkan gerak (drag joystick riil)
 async function dragJoystick(fx, fy, tx, ty) {
@@ -240,23 +244,31 @@ const summary = await page.evaluate(() => {
   const m = t.match(/(\d+)\s*Gelombang/i);
   return m ? Number(m[1]) : null;
 });
-const waveUsed = summary || Math.min(after.wave, 3);
-const expectedFormula = Math.floor(waveUsed * 8 + 0 + 0 * 50); // kills variatif — cek konservatif: wave×8 saja pasti ≤ total
-ok('imu-grew-after-run', after.imu > imu0, `imu0=${imu0} imu1=${after.imu}`);
-ok('imu-at-least-wave-formula', after.imu - imu0 >= expectedFormula, `delta=${after.imu - imu0} formulaMin=${expectedFormula}`);
+// F20 (feedback pemilik): kill musuh biasa TIDAK memberi Imun Coin (langka) —
+// hasil run polos (tanpa boss/menang) = 0 IMU; delta saldo boleh >0 via reward BP
+const imuEarnedRun = await page.evaluate(() => window.STATE?.lastGameoverSummary?.imuEarned ?? window.__IMUNVERSE?.STATE?.lastGameoverSummary?.imuEarned);
+ok('imu-not-from-plain-kills', imuEarnedRun === 0, `imuEarned=${imuEarnedRun}`);
 ok('mission-claim-paid-imu', missionSum > 0, `missionSum=${missionSum} done=${missionPay.done.join(',')}`);
 
 // ---- TRIGGER 1: unlock hero via ROSTER (klik riil tombol BUKA) ----
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('roster'));
 await page.waitForTimeout(600);
-const nyxBtn = page.locator('.hero-card', { hasText: 'Nyx' }).locator('.lock-unlock-btn');
-const hasBtn = await nyxBtn.isVisible().catch(() => false);
-if (hasBtn && (await nyxBtn.isEnabled())) {
-  await nyxBtn.click();
+// F20: hero ber-TIER — Legend (Nyx, 1500 IMU) sengaja TIDAK terjangkau awal;
+// yang dibeli klik-riil: Neutron (Uncommon, 120 IMU) — tier tercantum di kartu
+const neuBtn = page.locator('.hero-card', { hasText: 'Neutron' }).locator('.lock-unlock-btn');
+const hasBtn = await neuBtn.isVisible().catch(() => false);
+if (hasBtn && (await neuBtn.isEnabled())) {
+  await neuBtn.click();
   await page.waitForTimeout(700);
 }
-const nyxUnlocked = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.unlockedHeroes.includes('nkcell'));
-ok('unlock-nyx-via-roster-click', nyxUnlocked, `btn=${hasBtn}`);
+const neuUnlocked = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.unlockedHeroes.includes('neutrophil'));
+ok('unlock-neutron-via-roster-click', neuUnlocked, `btn=${hasBtn}`);
+const legendAffordable = await page.evaluate(() => {
+  const card = [...document.querySelectorAll('.hero-card')].find((c) => c.textContent.includes('Nyx'));
+  const btn = card && card.querySelector('.lock-unlock-btn');
+  return btn ? !btn.classList.contains('poor') : null;
+});
+ok('legend-scarce-at-start', legendAffordable === false, `affordable=${legendAffordable}`);
 // notifikasi HERO BARU tampil di dashboard
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
 await page.waitForTimeout(500);

@@ -54,7 +54,8 @@ function selectHero() {
     el('div', { class: 'hl-banner' }, [
       el('span', { class: 'hl-banner-role', style: `background:${heroDef.roleColor || heroDef.color}`, text: (heroDef.role || heroDef.name).slice(0, 3).toUpperCase() }),
       el('b', { class: 'hl-banner-name', text: heroDef.name }),
-      el('span', { class: 'hl-banner-tier', style: `background:${stageDef.tierColor}`, text: stageDef.tier }),
+      // Fase 20: tier = RARITY hero sejak awal (bukan evolusi — evolusi hanya tingkat kekuatan)
+      el('span', { class: 'hl-banner-tier', style: `background:${((getData().heroes.tiers || {})[heroDef.tier] || {}).color || stageDef.tierColor}`, text: ((getData().heroes.tiers || {})[heroDef.tier] || {}).label || stageDef.tier }),
     ]),
     el('div', { class: 'hl-head' }, [
       el('span', { class: 'hl-count', text: `${stageDef.name}` }),

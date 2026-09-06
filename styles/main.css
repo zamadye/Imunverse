@@ -1962,6 +1962,22 @@ img.lock-badge {
   border: 2px solid var(--cream); padding: 0 3px;
 }
 
+/* Fase 20: badge TIER rarity hero (common–legend, tetap selamanya) */
+.tier-badge {
+  position: absolute; top: 7px; right: 7px; z-index: 2;
+  padding: 2px 7px; border-radius: 999px;
+  color: #fff; font-size: 7.6px; font-weight: 900; letter-spacing: 0.08em;
+  text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(31, 74, 66, 0.25);
+}
+
+/* Fase 20 feedback #2: tombol hasil run SELALU terlihat — ringkasan yang scroll */
+.go-card #gameover-summary {
+  overflow-y: auto; min-height: 0; flex: 0 1 auto; max-height: 30vh;
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+}
+.go-card .btn-row, .go-card #btn-double-currency, .go-card .summary-reward { flex: 0 0 auto; }
+
 /* --- Baris PLAY: kartu bab + kolom mode --- */
 .play-row { display: grid; grid-template-columns: 1.12fr 1fr; gap: 10px; align-items: stretch; }
 .campaign-card {
@@ -2160,15 +2176,23 @@ img.lock-badge {
   #dash-banner .banner-track, #dash-banner .banner-slide { border-radius: 0; }
 
   /* --- (1) Tutup ruang kosong: quick-menu pindah ke samping play-row --- */
-  /* 6 tile = 2×3, meregang penuh setinggi kartu kampanye — TANPA lubang */
+  /* 6 tile = 2×3 KOMPAK (feedback pemilik: tile jangan terlalu besar/tumpuk) */
   #quick-row {
     grid-area: 2 / 2; grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr); gap: 9px; height: 100%;
+    grid-template-rows: repeat(2, auto); gap: 8px; align-self: start;
   }
-  #quick-row .quick-tile { height: 100%; justify-content: center; padding: 8px 4px; }
+  #quick-row .quick-tile { padding: 9px 3px 7px; }
   #quick-row .quick-tile img { width: 30px; height: 30px; }
   #quick-row .qt-label { font-size: 9.3px; }
-  #dash-stats { grid-area: 3 / 1 / 4 / -1; }      /* strip statistik full-width */
+  /* Kolom kanan: tiles kompak + strip statistik mengisi sisa — TANPA lubang */
+  .play-row {
+    grid-area: 2 / 1 / 4 / 2;
+    /* F20 fix (screenshot pemilik): min-content kartu Arena meluber ke kolom
+       tile → paksa track bisa menyusut; kartu memotong isi, bukan menimpa */
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  }
+  .play-row .campaign-card, .play-row .mode-stack, .play-row .mode-card, .play-row .arena-card { min-width: 0; overflow: hidden; }
+  #dash-stats { grid-area: 3 / 2; align-self: stretch; }
   #daily-card { grid-area: 4 / 1 / 5 / -1; }
   #duo-evo { grid-area: 5 / 1; }
   #duo-lb { grid-area: 5 / 2; }
@@ -2185,6 +2209,29 @@ img.lock-badge {
   .side-btn { padding: 2px; gap: 0; border-radius: 11px; }
   .side-btn img { width: 17px; height: 17px; }
   .side-btn span { font-size: 7px; }
+}
+
+/* Fase 20 feedback #2: kartu hasil run ringkas di layar pendek */
+@media (max-height: 500px) {
+  .go-card { padding: 12px 16px 12px; gap: 6px; }
+  .go-stars .star { width: 32px !important; height: 32px !important; }
+  .gameover-title { font-size: 19px; }
+  .gameover-sub { font-size: 10.5px; margin: 0 0 2px; }
+  #gameover-summary { max-height: 24vh; }
+  .summary-grid { gap: 5px; }
+  .summary-cell { padding: 5px 6px; }
+  .summary-cell b { font-size: 14px; }
+  .summary-cell span { font-size: 8.4px; }
+  .go-parts { font-size: 9.6px; margin: 1px 0; }
+  .summary-reward { padding: 6px 10px; margin: 2px 0 0; }
+  .go-chest { width: 32px; }
+  .go-rankup { padding: 6px 14px; gap: 10px; }
+  .go-rankup .rank-emblem.big { width: 40px; height: 40px; border-radius: 12px; font-size: 15px; }
+  .go-rankup-text b { font-size: 13px; }
+  .go-rankup-text span { font-size: 10px; }
+  .go-deco { display: none; }
+  .go-card .btn-row .btn { padding: 10px 12px; font-size: 14px; }
+  #btn-double-currency { padding: 9px 12px; font-size: 12.5px; }
 }
 
 /* Modal pangkat kompak di layar pendek — ladder tetap terbaca */

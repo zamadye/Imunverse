@@ -39,7 +39,8 @@
         "type": "default"
       },
       "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_macrophage.png"
+      "spritePortrait": "assets/sprites/portrait_macrophage.png",
+      "tier": "common"
     },
     {
       "id": "dendritic",
@@ -78,11 +79,12 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 150,
-        "label": "Buka dengan 150 Imun Coin"
+        "imuCost": 350,
+        "label": "Buka dengan 350 Imun Coin"
       },
       "shopCost": 150,
-      "spritePortrait": "assets/sprites/portrait_dendritic.png"
+      "spritePortrait": "assets/sprites/portrait_dendritic.png",
+      "tier": "rare"
     },
     {
       "id": "neutrophil",
@@ -121,11 +123,12 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 100,
-        "label": "Buka dengan 100 Imun Coin"
+        "imuCost": 120,
+        "label": "Buka dengan 120 Imun Coin"
       },
       "shopCost": 100,
-      "spritePortrait": "assets/sprites/portrait_neutrophil.png"
+      "spritePortrait": "assets/sprites/portrait_neutrophil.png",
+      "tier": "uncommon"
     },
     {
       "id": "eosinophil",
@@ -170,7 +173,8 @@
         "label": "Selesaikan 3 run"
       },
       "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_eosinophil.png"
+      "spritePortrait": "assets/sprites/portrait_eosinophil.png",
+      "tier": "uncommon"
     },
     {
       "id": "basophil",
@@ -209,13 +213,14 @@
       ],
       "unlock": {
         "type": "imu_stat",
-        "imuCost": 130,
+        "imuCost": 260,
         "stat": "bossKills",
         "value": 2,
-        "label": "Kalahkan 2 Bos + 130 Imun Coin"
+        "label": "Kalahkan 2 Bos + 260 Imun Coin"
       },
       "shopCost": 130,
-      "spritePortrait": "assets/sprites/portrait_basophil.png"
+      "spritePortrait": "assets/sprites/portrait_basophil.png",
+      "tier": "rare"
     },
     {
       "id": "mastcell",
@@ -253,13 +258,14 @@
       ],
       "unlock": {
         "type": "imu_stat",
-        "imuCost": 150,
+        "imuCost": 700,
         "stat": "totalKills",
         "value": 500,
-        "label": "Kalahkan 500 patogen + 150 Imun Coin"
+        "label": "Kalahkan 500 patogen + 700 Imun Coin"
       },
       "shopCost": 150,
-      "spritePortrait": "assets/sprites/portrait_mastcell.png"
+      "spritePortrait": "assets/sprites/portrait_mastcell.png",
+      "tier": "epic"
     },
     {
       "id": "tcd8",
@@ -303,7 +309,8 @@
         "label": "Capai Gelombang 5"
       },
       "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_tcd8.png"
+      "spritePortrait": "assets/sprites/portrait_tcd8.png",
+      "tier": "uncommon"
     },
     {
       "id": "tcd4",
@@ -347,7 +354,8 @@
         "label": "Kalahkan 50 patogen (total)"
       },
       "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_tcd4.png"
+      "spritePortrait": "assets/sprites/portrait_tcd4.png",
+      "tier": "uncommon"
     },
     {
       "id": "treg",
@@ -386,13 +394,14 @@
       ],
       "unlock": {
         "type": "imu_stat",
-        "imuCost": 120,
+        "imuCost": 700,
         "stat": "totalKills",
         "value": 300,
-        "label": "Kalahkan 300 patogen + 120 Imun Coin"
+        "label": "Kalahkan 300 patogen + 700 Imun Coin"
       },
       "shopCost": 120,
-      "spritePortrait": "assets/sprites/portrait_treg.png"
+      "spritePortrait": "assets/sprites/portrait_treg.png",
+      "tier": "epic"
     },
     {
       "id": "bcell",
@@ -431,13 +440,14 @@
       ],
       "unlock": {
         "type": "imu_stat",
-        "imuCost": 100,
+        "imuCost": 350,
         "stat": "bestWave",
         "value": 8,
-        "label": "Capai Gel. 8 + 100 Imun Coin"
+        "label": "Capai Gel. 8 + 350 Imun Coin"
       },
       "shopCost": 100,
-      "spritePortrait": "assets/sprites/portrait_bcell.png"
+      "spritePortrait": "assets/sprites/portrait_bcell.png",
+      "tier": "rare"
     },
     {
       "id": "nkcell",
@@ -475,11 +485,39 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 200,
-        "label": "Buka dengan 200 Imun Coin"
+        "imuCost": 1500,
+        "label": "Buka dengan 1500 Imun Coin"
       },
       "shopCost": 200,
-      "spritePortrait": "assets/sprites/portrait_nkcell.png"
+      "spritePortrait": "assets/sprites/portrait_nkcell.png",
+      "tier": "legend"
     }
-  ]
+  ],
+  "tiers": {
+    "common": {
+      "label": "Common",
+      "color": "#9db1a8",
+      "statMult": 1.0
+    },
+    "uncommon": {
+      "label": "Uncommon",
+      "color": "#63c76a",
+      "statMult": 1.07
+    },
+    "rare": {
+      "label": "Rare",
+      "color": "#4aa3e0",
+      "statMult": 1.15
+    },
+    "epic": {
+      "label": "Epic",
+      "color": "#a86ff0",
+      "statMult": 1.24
+    },
+    "legend": {
+      "label": "Legend",
+      "color": "#f2b93e",
+      "statMult": 1.35
+    }
+  }
 }

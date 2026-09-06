@@ -1,8 +1,8 @@
 {
   "schemaVersion": 4,
   "xpCurve": {
-    "base": 10,
-    "exponent": 1.5
+    "base": 280,
+    "exponent": 0.45
   },
   "levelUpChoices": 3,
   "levelUpPool": [
@@ -232,7 +232,8 @@
     "maxLevel": 10,
     "dmgPerLevel": 0.12,
     "speedPerLevel": 0.04,
-    "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level"
+    "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level",
+    "membersPerLevels": 3
   },
   "globalUpgrades": [
     {
