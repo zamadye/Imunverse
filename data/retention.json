@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "imuReward": {
-    "perWave": 8,
-    "perKill": 0.5,
-    "perBoss": 50,
-    "victoryBonus": 0
+    "perWave": 0,
+    "perKill": 0,
+    "perBoss": 20,
+    "victoryBonus": 50
   },
   "combo": {
     "window": 5,

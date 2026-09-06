@@ -17,13 +17,15 @@ Dibandingkan dengan dokumen spesifikasi Retention Trigger Imunverse.
 
 ### Gap yang ditutup pada audit ini
 
-- Formula Imun Coin sebelumnya hanya memberi reward boss/victory, berlawanan dengan kontrak early-beta.
-- Sekarang `imuForRun()` memakai:
+- Ekonomi Imun Coin dikembalikan ke model premium langka: kill biasa tidak memberi Imun Coin.
+- `imuForRun()` hanya menghitung:
 
 ```text
-floor(wave * 8 + kills * 0.5 + bossKills * 50)
+bossKills * 20 + victoryBonus 50
 ```
 
+- Antibodi tetap menjadi soft currency dari drop/kill dan reward run.
+- Sumber Imun Coin yang valid: boss, victory, event, rewarded ads, dan pembelian premium.
 - Biaya unlock hero diselaraskan dengan spesifikasi:
   - Neutron: 100 Imun Coin
   - Dendri: 150 Imun Coin
