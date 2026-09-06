@@ -44,11 +44,13 @@ import * as battlepassScreen from './ui/screens/battlepass-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
+import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
+import * as titleScreen from './ui/screens/title-screen.js';
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -199,8 +201,10 @@ async function boot() {
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   screenManager.registerScreen('rank', rankScreen);
+  screenManager.registerScreen('title', titleScreen);
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
+  titleScreen.wire(); // F21: layar judul gameplay-first
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
   screenManager.show('loading');
@@ -299,6 +303,13 @@ async function boot() {
   // Navigasi statis antar screen (atribut data-nav / data-back di index.html)
   document.querySelectorAll('[data-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      // F21: gerbang bertahap — menu terbuka sesuai Gelombang terbaik (data/features.json)
+      const gate = isDockGated(btn);
+      if (gate) {
+        showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+        audio.ui();
+        return;
+      }
       audio.ui();
       screenManager.show(btn.dataset.nav);
     });
@@ -320,7 +331,15 @@ async function boot() {
   document.getElementById('btn-start-run').addEventListener('click', () => rosterScreen.startSelectedRun());
 
   // Helper global kecil (dipakai tombol "Dashboard" di gameover)
-  window.__IMUNVERSE_goDashboard = () => screenManager.show('dashboard');
+  // F21: akun WAJIB sebelum dashboard — run pertama berakhir → daftar (simpan progres)
+  window.__IMUNVERSE_goDashboard = () => {
+    if (!hasAccount()) {
+      showToast({ message: 'Buat akun untuk menyimpan perjalananmu!' });
+      screenManager.show('auth');
+      return;
+    }
+    screenManager.show('dashboard');
+  };
   // Portrait HUD: pakai aset potret khusus hero (dipakai hud-screen.resetHUD)
   window.__IMUNVERSE_getHeroPortrait = () => {
     const heroDef = getHero(STATE.meta.selectedHero);
@@ -395,15 +414,15 @@ async function boot() {
     if (!hasAccount()) signUp({ username: 'Tester', password: '1234', faction: 'imun' });
     screenManager.show('dashboard');
     runAutotest();
+  } else if (!hasAccount()) {
+    // F21 GAMEPLAY-FIRST: user baru disambut layar judul → cerita → LANGSUNG
+    // gameplay (bukan dashboard/daftar akun dulu). Akun diminta setelah run pertama.
+    screenManager.show('title');
   } else {
-    // Sinematik pembuka (sekali) → AKUN (daftar/masuk) → dashboard → coach
+    // Pemain lama: sinematik pembuka (sekali) → dashboard → coach
     playOnce('intro', () => {
-      if (hasAccount()) {
-        screenManager.show('dashboard');
-        coach.startIfFirstTime();
-      } else {
-        screenManager.show('auth'); // user baru: daftar + pilih fraksi dulu
-      }
+      screenManager.show('dashboard');
+      coach.startIfFirstTime();
     });
   }
 }

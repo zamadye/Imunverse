@@ -26,9 +26,14 @@ try {
   if (await page.locator('#cine-skip').isVisible().catch(() => false)) { await page.click('#cine-skip'); await page.waitForTimeout(700); }
 
   // AUTH (akun e2e persist)
+  // F21: layar judul gameplay-first — suite menguji alur pemain lama via MASUK
+if (await page.locator('#screen-title.active').isVisible().catch(() => false)) {
+  await page.click('#btn-title-login', { timeout: 4000, force: true });
+  await page.waitForTimeout(400);
+}
   await page.waitForFunction(() => document.querySelector('#screen-auth')?.classList.contains('active'), null, { timeout: 8000 }).catch(() => {});
   log('auth-active', await active('#screen-auth'));
-  await page.fill('#auth-username', 'PemainHebat');
+await page.fill('#auth-username', 'PemainHebat');
   await page.fill('#auth-password', '1234');
   await page.click('#auth-submit');
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 }).catch(() => {});

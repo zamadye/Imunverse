@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "doc": "F21: menu dashboard terbuka bertahap berdasar Gelombang terbaik (bestWave). 0 = selalu terbuka.",
+  "gates": [
+    {
+      "target": "dock",
+      "id": "roster",
+      "requireWave": 2
+    },
+    {
+      "target": "dock",
+      "id": "bag",
+      "requireWave": 4
+    },
+    {
+      "target": "dock",
+      "id": "upgrade",
+      "requireWave": 6
+    },
+    {
+      "target": "dock",
+      "id": "shop",
+      "requireWave": 8
+    },
+    {
+      "target": "quick",
+      "id": "daily",
+      "requireWave": 0
+    },
+    {
+      "target": "quick",
+      "id": "quests",
+      "requireWave": 2
+    },
+    {
+      "target": "quick",
+      "id": "bag",
+      "requireWave": 4
+    },
+    {
+      "target": "quick",
+      "id": "shop",
+      "requireWave": 8
+    },
+    {
+      "target": "quick",
+      "id": "codex",
+      "requireWave": 1
+    },
+    {
+      "target": "quick",
+      "id": "bp",
+      "requireWave": 6
+    },
+    {
+      "target": "side",
+      "id": "home",
+      "requireWave": 0
+    },
+    {
+      "target": "side",
+      "id": "campaign",
+      "requireWave": 0
+    },
+    {
+      "target": "side",
+      "id": "codex",
+      "requireWave": 1
+    },
+    {
+      "target": "side",
+      "id": "bp",
+      "requireWave": 6
+    },
+    {
+      "target": "side",
+      "id": "records",
+      "requireWave": 3
+    },
+    {
+      "target": "side",
+      "id": "body",
+      "requireWave": 2
+    }
+  ]
+}

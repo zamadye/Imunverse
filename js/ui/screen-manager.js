@@ -27,6 +27,7 @@ const APP_STATE_BY_SCREEN = {
   herodetail: 'roster', // detail upgrade hero (bagian alur Heroes)
   hud: 'gameplay',
   gameover: 'gameover',
+  title: 'title', // F21: layar judul gameplay-first
 };
 
 function elFor(id) {

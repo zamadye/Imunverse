@@ -27,7 +27,12 @@ try {
   await page.goto('http://localhost:8000/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2400);
   if (await page.locator('#cine-skip').isVisible().catch(() => false)) { await page.click('#cine-skip', { timeout: 2000 }).catch(() => {}); await page.waitForTimeout(400); }
-  await page.fill('#auth-username', 'RankTester');
+  // F21: layar judul gameplay-first — suite menguji alur pemain lama via MASUK
+if (await page.locator('#screen-title.active').isVisible().catch(() => false)) {
+  await page.click('#btn-title-login', { timeout: 4000, force: true });
+  await page.waitForTimeout(400);
+}
+await page.fill('#auth-username', 'RankTester');
   await page.fill('#auth-password', '1234');
   await page.click('#auth-submit');
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 });

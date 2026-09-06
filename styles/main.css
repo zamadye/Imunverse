@@ -1962,6 +1962,98 @@ img.lock-badge {
   border: 2px solid var(--cream); padding: 0 3px;
 }
 
+/* =========================================================
+   FASE 21 — GAMEPLAY-FIRST: TITLE SCREEN, LEVEL-UP SCENE,
+   DASHBOARD BERTAHAP (GATE), DOCK RAMPING, HALAMAN FULL-BLEED
+   Feedback pemilik: 90% game indie menyambut pemain dengan GAMEPLAY
+   langsung (cerita → main), bukan dashboard. Menu muncul bertahap.
+   ========================================================= */
+
+/* --- Layar judul --- */
+#screen-title.active {
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(169, 215, 149, 0.5) 0 120px, transparent 121px),
+    radial-gradient(circle at 82% 80%, rgba(63, 217, 194, 0.35) 0 140px, transparent 141px),
+    linear-gradient(165deg, #f2f8e8, #bfeae2);
+  overflow: hidden;
+}
+.title-bg { position: absolute; inset: 0; pointer-events: none; }
+.title-blob {
+  position: absolute; border-radius: 50%; opacity: 0.5; filter: blur(2px);
+  animation: blob-float 9s ease-in-out infinite;
+}
+.tb1 { width: 190px; height: 190px; left: -50px; top: -60px; background: rgba(255, 217, 61, 0.4); }
+.tb2 { width: 150px; height: 150px; right: -40px; bottom: -50px; background: rgba(63, 217, 194, 0.45); animation-delay: 1.6s; }
+.tb3 { width: 90px; height: 90px; right: 18%; top: 12%; background: rgba(242, 130, 92, 0.35); animation-delay: 3.1s; }
+@keyframes blob-float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-16px) scale(1.06); } }
+.title-card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 26px 34px; border-radius: 30px;
+  background: rgba(255, 253, 247, 0.82); box-shadow: var(--shadow-pop);
+  backdrop-filter: blur(4px); animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.title-logo { text-align: center; }
+.title-star { font-size: 40px; color: var(--teal); filter: drop-shadow(0 4px 6px rgba(31, 74, 66, 0.3)); animation: blob-float 5s ease-in-out infinite; display: block; }
+.title-logo h1 {
+  font-size: clamp(34px, 9vh, 52px); font-weight: 900; letter-spacing: 0.06em;
+  color: var(--teal-dark); margin: 2px 0 0;
+  text-shadow: 0 3px 0 #fff, 0 6px 12px rgba(31, 74, 66, 0.25);
+}
+.title-tag { font-size: 12px; font-weight: 800; color: var(--ink-soft); margin: 4px 0 0; }
+.title-start { min-width: 230px; font-size: 19px; animation: title-pulse 2.2s ease-in-out infinite; }
+@keyframes title-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+.title-login { min-width: 200px; font-size: 12px; }
+.title-lang { position: absolute; right: 14px; bottom: -20px; }
+
+/* --- LEVEL-UP jadi SCENE (bukan modal tiba-tiba) --- */
+#screen-levelup .lu-scene {
+  position: relative; width: min(94vw, 560px); height: calc(100dvh - 16px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; text-align: center; padding: 14px 18px;
+  border-radius: 26px; overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 217, 61, 0.28) 0 120px, transparent 160px),
+    linear-gradient(170deg, rgba(242, 248, 232, 0.96), rgba(191, 234, 226, 0.96));
+  box-shadow: var(--shadow-pop);
+}
+#screen-levelup .lu-scene.anim .lu-hero { animation: lu-hero-in 0.6s cubic-bezier(0.2, 1.5, 0.4, 1); }
+#screen-levelup .lu-scene.anim .levelup-title { animation: lu-title-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0.12s backwards; }
+#screen-levelup .lu-scene.anim .choice-card { animation: lu-card-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; } /* forwards: kartu tetap tampil setelah animasi (dasar opacity:0) */
+#screen-levelup .lu-scene.anim .choice-card:nth-child(1) { animation-delay: 0.28s; }
+#screen-levelup .lu-scene.anim .choice-card:nth-child(2) { animation-delay: 0.4s; }
+#screen-levelup .lu-scene.anim .choice-card:nth-child(3) { animation-delay: 0.52s; }
+.lu-glow {
+  position: absolute; inset: -40%;
+  background: conic-gradient(from 0deg, rgba(255, 217, 61, 0.16), transparent 25%, rgba(63, 217, 194, 0.16) 50%, transparent 75%, rgba(255, 217, 61, 0.16));
+  animation: lu-spin 14s linear infinite; pointer-events: none;
+}
+@keyframes lu-spin { to { transform: rotate(360deg); } }
+.lu-hero {
+  width: clamp(90px, 24vh, 140px); height: auto; z-index: 1;
+  filter: drop-shadow(0 10px 16px rgba(31, 74, 66, 0.35));
+}
+@keyframes lu-hero-in { 0% { transform: scale(0.3) translateY(40px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+@keyframes lu-title-in { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes lu-card-in { 0% { transform: translateY(30px) scale(0.85); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+#screen-levelup .levelup-title { z-index: 1; margin: 0; }
+#screen-levelup .levelup-sub { z-index: 1; margin: 0; }
+#screen-levelup .choice-grid { z-index: 1; max-height: 44vh; }
+
+/* --- Gerbang menu bertahap (F21) --- */
+.gate-lock {
+  position: absolute; top: -6px; right: -4px; z-index: 3;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(42, 31, 20, 0.78); color: #ffe9ad;
+  font-size: 8.4px; font-weight: 900; text-align: center; letter-spacing: 0.03em;
+  box-shadow: 0 2px 6px rgba(42, 31, 20, 0.35);
+  white-space: nowrap;
+}
+.side-btn .gate-lock { top: -5px; right: -6px; padding: 1px 4px; border-radius: 999px; font-size: 6.5px; } /* pojok kanan-atas kecil: tumpukan sidebar rapat */
+.side-btn.gated, .quick-tile.gated, .dock-btn.gated { position: relative; }
+.side-btn.gated img, .quick-tile.gated img, .dock-btn.gated .dock-ico img { opacity: 0.35; filter: grayscale(0.7); }
+.side-btn.gated span, .quick-tile.gated .qt-label { opacity: 0.55; }
+
 /* Fase 20: badge TIER rarity hero (common–legend, tetap selamanya) */
 .tier-badge {
   position: absolute; top: 7px; right: 7px; z-index: 2;
@@ -2135,10 +2227,15 @@ img.lock-badge {
   .acct-id b { max-width: 130px; }
   .stat-cell span { white-space: nowrap; }
 
-  /* Roster & shop memakai lebar lanskap */
-  .roster-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; width: 100%; }
-  .premium-grid, .shop-grid { max-width: 900px; margin-left: auto; margin-right: auto; width: 100%; }
-  .upg-list { max-width: 760px; margin: 0 auto; width: 100%; }
+  /* F21: halaman non-home memakai FULL lebar landscape (auto-fill, tanpa max-width) */
+  .roster-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); max-width: none; margin: 0; width: 100%; }
+  .premium-grid, .shop-grid { max-width: none; margin: 0; width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .upg-list { max-width: none; margin: 0; width: 100%; }
+  .bag-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); max-width: none; width: 100%; }
+  .bp-body { max-width: none; }
+  .free-grid { max-width: none; }
+  .skin-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); max-width: none; margin: 0; }
+  .codex-scroll, .shop-sections { max-width: none; width: 100%; }
 
   /* --- HUD gameplay lanskap: sebar ke samping, jangan tumpuk --- */
   #screen-hud .hud-top { max-width: 780px; }
@@ -2199,8 +2296,13 @@ img.lock-badge {
 
   /* --- (3) Dock & topbar melebar penuh (ala MLBB landscape) --- */
   #screen-dashboard .topbar { max-width: none; }
-  .dock { max-width: none; padding-left: 10px; padding-right: 10px; }
-  .dock-btn .dock-ico { width: 56px; height: 56px; }
+  .dock {
+    max-width: none; padding: 4px 10px calc(3px + env(safe-area-inset-bottom)); gap: 5px;
+  }
+  .dock-btn { gap: 2px; }
+  .dock-btn .dock-ico { width: 42px; height: 42px; border-radius: 12px; }
+  .dock-btn .dock-ico img { width: 20px; height: 20px; }
+  .dock-btn span { font-size: 9.5px; }
 }
 
 /* Layar landscape pendek (ponsel): sidebar 6 tombol tetap muat */

@@ -25,7 +25,7 @@ const active = (sel) => page.evaluate((s) => document.querySelector(s)?.classLis
 // ---- Auth (akun fresh per run → hadiah pendiri bisa diasersi) ----
 await page.goto('http://localhost:8000/', { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(2200);
-if (await page.locator('#cine-skip').isVisible().catch(() => false)) { await page.click('#cine-skip'); await page.waitForTimeout(500); }
+if (await page.locator('#screen-title.active').isVisible().catch(() => false)) { await page.click('#btn-title-login', { force: true }); await page.waitForTimeout(500); }
 const stamp = Date.now().toString(36).slice(-6);
 await page.evaluate(() => {
   const tabs = [...document.querySelectorAll('#auth-tabs .auth-tab')];
@@ -33,6 +33,11 @@ await page.evaluate(() => {
   daftar.click();
 });
 await page.waitForTimeout(400);
+// F21: layar judul gameplay-first — suite menguji alur pemain lama via MASUK
+if (await page.locator('#screen-title.active').isVisible().catch(() => false)) {
+  await page.click('#btn-title-login', { timeout: 4000, force: true });
+  await page.waitForTimeout(400);
+}
 await page.fill('#auth-username', `Beta${stamp}`);
 await page.fill('#auth-password', '1234');
 await page.click('#auth-submit');

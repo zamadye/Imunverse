@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=20a" />
+  <link rel="stylesheet" href="styles/main.css?v=21a" />
 </head>
 <body>
   <div id="app">
@@ -35,6 +35,28 @@
           <div class="load-title">IMUN<span>VERSE</span></div>
           <div class="progress-track"><div id="loading-bar" class="progress-fill"></div></div>
           <p id="loading-label" class="loading-label">Menyiapkan organisme…</p>
+        </div>
+      </section>
+
+      <!-- ============ TITLE SCREEN (F21: gameplay-first) ============ -->
+      <section id="screen-title" class="screen" data-screen="title">
+        <div class="title-bg">
+          <div class="title-blob tb1"></div>
+          <div class="title-blob tb2"></div>
+          <div class="title-blob tb3"></div>
+        </div>
+        <div class="title-card">
+          <div class="title-logo">
+            <span class="title-star">⬢</span>
+            <h1>IMUNVERSE</h1>
+            <p class="title-tag" data-i18n="Sel Imun vs Patogen — Selamatkan Tubuh!">Sel Imun vs Patogen — Selamatkan Tubuh!</p>
+          </div>
+          <button id="btn-title-start" class="btn btn-primary btn-xl title-start">
+            <img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />
+            <span data-i18n="MULAI">MULAI</span>
+          </button>
+          <button id="btn-title-login" class="btn btn-ghost title-login" data-i18n="Sudah punya akun? Masuk">Sudah punya akun? Masuk</button>
+          <button id="btn-lang-title" class="lang-pill title-lang" title="Language / Bahasa">EN</button>
         </div>
       </section>
 
@@ -481,7 +503,9 @@
 
       <!-- ============ LEVEL UP MODAL ============ -->
       <section id="screen-levelup" class="screen modal" data-screen="levelup">
-        <div class="modal-box">
+        <div class="lu-scene">
+          <div class="lu-glow"></div>
+          <img id="levelup-hero" class="lu-hero" src="assets/sprites/portrait_macrophage.png" alt="" />
           <div class="lu-stars"><img src="assets/sprites/icon_star.png" alt="" /><img src="assets/sprites/icon_star.png" alt="" /><img src="assets/sprites/icon_star.png" alt="" /></div>
           <h2 class="levelup-title">Level Up!</h2>
           <p id="levelup-sub" class="levelup-sub">Level 2 — pilih satu peningkatan</p>
@@ -581,7 +605,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=20a"></script>
+  <script type="module" src="js/main.js?v=21a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

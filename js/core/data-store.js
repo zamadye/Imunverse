@@ -26,6 +26,7 @@ const store = {
   retention: null,  // data/retention.json (Fase 17: parameter 5 retention trigger)
   progression: null, // data/progression.json (Fase 18: kurva early/mid/late + gatekeeper)
   ranks: null,       // data/ranks.json (Fase 19: pangkat penjaga — tujuan pemain)
+  features: null,    // data/features.json (F21: gerbang unlock menu bertahap)
 };
 
 import { BUILD } from './version.js';
@@ -57,6 +58,7 @@ export async function loadAllData() {
     retention: 'data/retention.json',
     progression: 'data/progression.json',
     ranks: 'data/ranks.json',
+    features: 'data/features.json',
   };
 
   const entries = await Promise.all(
@@ -179,6 +181,11 @@ export function getEnemySpeedScale(waveNumber) {
 }
 
 // ===== Fase 19: pangkat penjaga (data/ranks.json) =====
+
+/** Gerbang unlock menu (F21: dashboard muncul bertahap). */
+export function getFeatures() {
+  return getData().features;
+}
 
 /** Seluruh config pangkat (tier ladder, formula GP, musim). */
 export function getRanks() {

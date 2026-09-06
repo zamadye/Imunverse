@@ -21,6 +21,7 @@ import {
 } from '../../systems/body-system.js';
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { playerRank } from '../../systems/rank-system.js';
+import { applyGateVisual, gateFor } from '../../systems/feature-gate.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
@@ -157,12 +158,12 @@ function renderQuickRow(meta) {
   row.textContent = '';
   const claimable = checkDailyLives() && canClaimDailyReward(meta);
   const tiles = [
-    { ico: 'assets/sprites/icon_star.png', label: 'Bonus Harian', badge: claimable ? '1' : '', act: () => document.getElementById('daily-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
-    { ico: 'assets/sprites/icon_trophy.png', label: 'Misi', badge: '', act: () => document.querySelector('.missions-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
-    { ico: 'assets/sprites/icon_shop.png', label: 'Toko', badge: '', act: () => screenManager.show('shop') },
-    { ico: 'assets/sprites/icon_bag.png', label: 'Tas', badge: '', act: () => screenManager.show('bag') },
-    { ico: 'assets/sprites/icon_scope.png', label: 'Bio-Pedia', badge: '', act: () => screenManager.show('codex') },
-    { ico: 'assets/sprites/icon_bolt.png', label: 'Battle Pass', badge: '', act: () => screenManager.show('bp') },
+    { key: 'daily', ico: 'assets/sprites/icon_star.png', label: 'Bonus Harian', badge: claimable ? '1' : '', act: () => document.getElementById('daily-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+    { key: 'quests', ico: 'assets/sprites/icon_trophy.png', label: 'Misi', badge: '', act: () => document.querySelector('.missions-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+    { key: 'shop', ico: 'assets/sprites/icon_shop.png', label: 'Toko', badge: '', act: () => screenManager.show('shop') },
+    { key: 'bag', ico: 'assets/sprites/icon_bag.png', label: 'Tas', badge: '', act: () => screenManager.show('bag') },
+    { key: 'codex', ico: 'assets/sprites/icon_scope.png', label: 'Bio-Pedia', badge: '', act: () => screenManager.show('codex') },
+    { key: 'bp', ico: 'assets/sprites/icon_bolt.png', label: 'Battle Pass', badge: '', act: () => screenManager.show('bp') },
   ];
   for (const tl of tiles) {
     const t = el('button', { class: 'quick-tile', title: tl.label }, [
@@ -170,7 +171,17 @@ function renderQuickRow(meta) {
       el('img', { src: tl.ico, alt: '' }),
       el('span', { class: 'qt-label', text: tl.label }),
     ]);
-    t.addEventListener('click', tl.act);
+    // F21: gerbang bertahap — tile terkunci menampilkan syarat & toast (buka via main)
+    const gate = gateFor('quick', tl.key);
+    if (gate && gate.locked) {
+      t.classList.add('gated');
+      t.appendChild(el('span', { class: 'gate-lock', text: `🔒 Gel.${gate.requireWave}` }));
+      t.addEventListener('click', () => {
+        emit('toast', { message: `Capai Gelombang ${gate.requireWave} untuk membuka!`, kind: 'gold' });
+      });
+    } else {
+      t.addEventListener('click', tl.act);
+    }
     row.appendChild(t);
   }
 }
@@ -475,6 +486,14 @@ export function show() {
     }
   }
 
+  // F21: GERBANG MENU BERTAHAP — side-nav & quick-menu terbuka sesuai bestWave
+  document.querySelectorAll('.side-btn').forEach((b) => {
+    const id = b.id.replace('side-', '');
+    applyGateVisual(b, 'side', id);
+  });
+  document.querySelectorAll('.dock-btn[data-nav]').forEach((b) => {
+    applyGateVisual(b, 'dock', b.dataset.nav);
+  });
   // Fase 19: CHIP PANGKAT PENJAGA — tujuan pemain selalu terlihat (goal gradient)
   const rankChip = document.getElementById('rank-chip');
   if (rankChip) {
