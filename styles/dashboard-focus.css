@@ -74,3 +74,73 @@
 #screen-dashboard .secondary-dock img { width: 19px; height: 19px; object-fit: contain; opacity: .8; }
 #screen-dashboard .secondary-dock button:active { transform: scale(.92); }
 #screen-dashboard .secondary-dock button:focus-visible { outline: 2px solid var(--teal); border-radius: 8px; }
+
+/* ---------------------------------------------------------------
+   Meta screens: same lightweight visual language, existing logic intact.
+   Each screen keeps its own CTA and back route; only density changes.
+   --------------------------------------------------------------- */
+#screen-roster, #screen-upgrade, #screen-shop, #screen-herodetail,
+#screen-campaign, #screen-prep, #screen-bag, #screen-codex, #screen-bp {
+  padding-left: 12px; padding-right: 12px;
+}
+#screen-roster .screen-subtitle { max-width: 420px; margin-bottom: 8px; }
+#screen-roster .roster-grid { max-width: 620px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 10px; }
+#screen-roster .hero-card { padding: 8px 4px; background: rgba(255,253,244,.5); }
+#screen-roster .avatar-wrap { width: min(31vw, 120px); }
+#screen-roster .hero-name { font-size: 12px; }
+#screen-roster .hero-pattern, #screen-roster .lock-cond, #screen-roster .lock-buy-note { font-size: 9px; }
+#screen-roster .screen-footer { position: sticky; bottom: 0; padding: 8px 0 calc(4px + env(safe-area-inset-bottom)); background: linear-gradient(transparent,var(--cream) 30%); z-index: 2; }
+#screen-roster .screen-footer .btn { min-height: 52px; }
+
+#screen-upgrade .topbar, #screen-shop .topbar { max-width: 420px; margin-bottom: 7px !important; }
+#screen-upgrade .upg-tabs { position: sticky; top: 0; z-index: 3; width: min(100%,560px); padding: 4px; background: rgba(253,246,227,.92); backdrop-filter: blur(7px); }
+#screen-upgrade .upg-tab { min-height: 38px; font-size: 10px; padding: 8px 5px; }
+#screen-upgrade .upg-banner { margin: 4px 0 8px; }
+#screen-upgrade .upgrade-list { gap: 8px; }
+#screen-upgrade .upg-row { padding: 11px 12px; border-radius: 18px; gap: 7px; }
+#screen-upgrade .upg-info b { font-size: 13px; }
+#screen-upgrade .upg-info .upg-desc { font-size: 10px; }
+#screen-upgrade .upg-slider { height: 20px; }
+#screen-upgrade .btn-buy { min-height: 38px; padding: 8px 14px; font-size: 12px; }
+
+#screen-shop .shop-sections { max-width: 620px; gap: 11px; }
+#screen-shop .shop-section { padding: 10px; border-radius: 20px; background: rgba(255,253,244,.45); }
+#screen-shop .shop-section h3 { margin-bottom: 7px; font-size: 12px; }
+#screen-shop .shop-grid { gap: 8px; }
+#screen-shop .shop-card { padding: 9px 7px 9px; gap: 4px; border-radius: 17px; }
+#screen-shop .shop-sprite { width: 48px; height: 48px; }
+#screen-shop .shop-card b { font-size: 10.5px; }
+#screen-shop .shop-card .s-desc { font-size: 9px; }
+#screen-shop .shop-card .btn { min-height: 33px; font-size: 10px; }
+
+#screen-herodetail .hero-detail-body { width: min(100%,560px); margin: 0 auto; padding: 4px 6px 20px; gap: 9px; }
+#screen-herodetail .hero-detail-body > * { border-radius: 20px; }
+
+#screen-prep .prep-scroll { width: min(100%,760px); gap: 10px; }
+#screen-prep .prep-main { gap: 0; }
+#screen-prep .prep-step { margin: 7px 0 4px; font-size: 11px; }
+#screen-prep .prep-hint { font-size: 9px; }
+#screen-prep .prep-hero-row { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+#screen-prep .prep-hero { min-height: 104px; padding: 6px 3px; gap: 3px; }
+#screen-prep .prep-hero .ph-sprite { width: 62%; }
+#screen-prep .prep-hero .ph-name { font-size: 9px; }
+#screen-prep .prep-chip-row { gap: 6px; }
+#screen-prep .prep-chip { min-height: 42px; padding: 6px 9px; font-size: 10px; }
+#screen-prep .prep-aside { padding: 11px; border-radius: 22px; }
+#screen-prep .prep-summary .ps-hero { width: 82px; height: 82px; }
+#screen-prep .prep-summary .ps-mid b { font-size: 16px; }
+#screen-prep .prep-start { min-height: 54px; font-size: 17px; }
+
+#screen-bag .bag-scroll, #screen-codex .codex-body, #screen-bp .bp-body { width: min(100%,620px); margin: 0 auto; }
+#screen-bag .bag-grid { gap: 7px; }
+#screen-bag .bag-card { padding: 9px 5px; border-radius: 16px; }
+#screen-bag .bag-card .bag-sprite { width: 38px; height: 38px; }
+#screen-bag .bag-section-title { margin-top: 7px; font-size: 11px; }
+#screen-bp .bp-body { padding-bottom: 20px; }
+#screen-bp .bp-head { padding: 10px; border-radius: 20px; }
+
+@media (min-width: 600px) {
+  #screen-roster .roster-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  #screen-prep .prep-scroll { grid-template-columns: minmax(0,1.35fr) minmax(260px,.85fr); }
+  #screen-prep .prep-aside { position: sticky; top: 0; }
+}
