@@ -185,6 +185,13 @@ async function boot() {
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
     STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
+    STATE.meta.evoStage = 99;
+    STATE.meta.evoParts = { silia: 999, pseudopodia: 999, mikropedang: 999, inti_elemen: 999 };
+    STATE.meta.allies = 6;
+    STATE.meta.allyLevel = 99;
+    for (const def of (data.upgrades.globalUpgrades || [])) {
+      STATE.meta.globalUpgrades[def.id] = def.maxLevel;
+    }
   }
   if (!raw) writeSave(STATE.meta);
   applyDataLanguage(STATE.meta.lang || 'id'); // dwibahasa: data sesuai bahasa tersimpan
