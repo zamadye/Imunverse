@@ -1,0 +1,61 @@
+/*
+ * Dashboard focus layer
+ * Kept separate from main.css so the existing screen system remains intact.
+ * This changes presentation only; screens, IDs, gates and event handlers stay.
+ */
+#screen-dashboard .side-nav { display: none; }
+#screen-dashboard .dash-body { max-width: 560px; display: block; }
+#screen-dashboard .dash-scroll { width: 100%; max-width: none; gap: 10px; padding-bottom: 4px; }
+#screen-dashboard .topbar { max-width: 560px; gap: 6px; }
+#screen-dashboard .topbar .currency-chip:first-of-type { display: none; }
+#screen-dashboard .topbar .currency-chip.imu-chip {
+  margin-left: auto; padding: 4px 10px 4px 6px; font-size: 13px;
+}
+#screen-dashboard .topbar .currency-chip.imu-chip .coin { width: 25px; height: 25px; }
+
+/* Hero remains the first visual anchor. */
+#screen-dashboard .banner-carousel { height: clamp(230px, 38vh, 330px); }
+#screen-dashboard .quick-row { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+#screen-dashboard .quick-tile {
+  min-height: 62px; padding: 10px 4px 8px;
+  border: 1px solid rgba(47, 156, 143, .12);
+}
+#screen-dashboard .quick-tile img { width: 30px; height: 30px; }
+#screen-dashboard .qt-label { font-size: 10px; }
+
+/* The campaign card remains a meaningful chapter entry, while the actual
+   one-tap Play action stays in the dock and gets the strongest emphasis. */
+#screen-dashboard .play-row { display: block; }
+#screen-dashboard .campaign-card { min-height: 178px; padding: 13px 16px 16px; }
+#screen-dashboard .campaign-card .cc-organ { width: 54px; height: 54px; }
+#screen-dashboard .mode-stack { display: none; }
+
+/* Daily and missions become compact status surfaces, not competing cards. */
+#screen-dashboard .daily-card {
+  min-height: 0; padding: 9px 12px; display: flex; align-items: center; gap: 10px;
+}
+#screen-dashboard .daily-card .daily-info { flex: 1; min-width: 0; }
+#screen-dashboard .daily-card .claim-line { font-size: 10px; }
+#screen-dashboard .daily-card .btn { min-height: 34px; padding: 7px 12px; font-size: 11px; }
+#screen-dashboard .missions-card { padding: 12px; }
+#screen-dashboard .missions-card .card-title { margin-bottom: 7px; font-size: 13px; }
+#screen-dashboard .missions-card .mission-list { gap: 7px; }
+#screen-dashboard .missions-card .mission-item { gap: 3px; }
+
+/* Keep the existing lower progression surfaces available when scrolling, but
+   reduce their visual weight versus hero and Play. */
+#screen-dashboard #dash-stats { opacity: .8; }
+#screen-dashboard #duo-lb { opacity: .82; }
+#screen-dashboard .dock { max-width: 560px; grid-template-columns: repeat(5, 1fr); padding-top: 7px; }
+#screen-dashboard .dock-btn .dock-ico { width: 48px; height: 48px; border-radius: 16px; }
+#screen-dashboard .dock-btn .dock-ico img { width: 26px; height: 26px; }
+#screen-dashboard .dock-btn span { font-size: 11px; }
+#screen-dashboard .dock-btn.primary .dock-ico {
+  width: 66px; height: 66px; border-radius: 22px;
+  background: linear-gradient(180deg, var(--coral), var(--coral-deep));
+  box-shadow: 0 10px 24px rgba(233, 106, 76, .42), inset 0 2px 0 rgba(255,255,255,.3);
+}
+#screen-dashboard .dock-btn.primary span { color: var(--coral-deep); font-size: 14px; }
+@media (min-width: 700px) {
+  #screen-dashboard .banner-carousel { height: 330px; }
+}
