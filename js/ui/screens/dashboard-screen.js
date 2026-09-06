@@ -38,6 +38,7 @@ const ORGAN_ICONS = {
 };
 
 let bannerTimer = null;
+let dashWasHidden = true; // Fase 15 audit: reset scroll hanya saat masuk layar
 let bannerIdx = 0;
 
 function setBannerSlide(i) {
@@ -47,6 +48,12 @@ function setBannerSlide(i) {
   bannerIdx = i % slides.length;
   slides.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
   dots.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
+  // Fase 15: cinematic hanya jalan saat slide panggung (0) tampil
+  import('../../render/cine-banner.js').then((m) => {
+    const cv = document.getElementById('dash-cine');
+    if (bannerIdx === 0 && cv) m.startBannerCine(cv);
+    else m.stopBannerCine();
+  }).catch((e) => console.error('cine-banner import gagal:', e));
 }
 
 function stopBannerTimer() {
@@ -396,6 +403,14 @@ function renderArenaCard(meta) {
 }
 
 export function show() {
+  if (dashWasHidden) {
+    // Fase 15: cegah auto-scroll browser memotong banner saat layar dibuka
+    requestAnimationFrame(() => {
+      const sc = document.querySelector('.dash-scroll');
+      if (sc) sc.scrollTop = 0;
+    });
+    dashWasHidden = false;
+  }
   // Bio-Pedia: peta 5 sistem tubuh selalu tampil di dashboard = 'bertemu' sistem
   for (const sid of ['sirkulasi', 'pencernaan', 'saraf', 'imun', 'limfatik']) markSeen(sid);
   const meta = STATE.meta;
@@ -424,11 +439,12 @@ export function show() {
 
   // ---- Panggung hero: sprite + nama hero terpilih + badge gelombang terbaik ----
   const heroDef = getHero(meta.selectedHero) || getData().heroes.heroes[0];
-  const img = document.getElementById('dash-hero-img');
-  if (heroDef) {
-    img.src = spriteToDataURL(heroDef.spriteIdle);
-    document.getElementById('dash-hero-name').textContent = heroDef.name;
-    document.getElementById('dash-hero-title').textContent = heroDef.title;
+  // Fase 15: panggung digambar cinematic canvas — nama/jabatan hero tetap diisi
+  const heroNameEl = document.getElementById('dash-hero-name');
+  const heroTitleEl = document.getElementById('dash-hero-title');
+  if (heroDef && heroNameEl) {
+    heroNameEl.textContent = heroDef.name;
+    heroTitleEl.textContent = heroDef.title;
   }
   const badge = document.getElementById('dash-best-badge');
   badge.textContent = '';
@@ -456,21 +472,10 @@ export function show() {
     }
   }
 
-  // ---- Chip musuh melayang di panggung (ala mockup: patogen dalam gelembung) ----
+  // ---- Fase 15: panggung kini milik cinematic canvas — chip musuh statis
+  // F13 dipensiunkan (musuh digambar hidup oleh cine-banner.js) ----
   const stageEnemies = document.getElementById('stage-enemies');
-  stageEnemies.textContent = '';
-  const showcase = ['virus', 'sel_kanker', 'bakteri'];
-  const bubbles = ['assets/sprites/deco_bubble_mint.png', 'assets/sprites/deco_bubble_coral.png', 'assets/sprites/deco_bubble_sage.png'];
-  const enemyDefs = getData().enemies.enemies;
-  showcase.forEach((id, i) => {
-    const def = enemyDefs.find((e) => e.id === id);
-    if (!def) return;
-    const chip = el('div', { class: `stage-enemy se${i + 1}` }, [
-      el('img', { class: 'se-bubble', src: bubbles[i], alt: '' }),
-      el('img', { class: 'se-sprite', src: spriteToDataURL(def.spriteIdle || def.sprite), alt: def.name }),
-    ]);
-    stageEnemies.appendChild(chip);
-  });
+  if (stageEnemies) stageEnemies.textContent = '';
 
   renderLeaderboardCard(meta);
   renderBanner(meta); // Fase 13: banner carousel
@@ -565,4 +570,8 @@ export function show() {
   }
 }
 
-export function hide() { stopBannerTimer(); }
+export function hide() {
+  stopBannerTimer();
+  dashWasHidden = true;
+  import('../../render/cine-banner.js').then((m) => m.stopBannerCine()).catch(() => {});
+}

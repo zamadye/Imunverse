@@ -43,23 +43,43 @@ function showStep() {
     next();
     return;
   }
-  target.scrollIntoView({ block: 'center', behavior: 'instant' in window ? 'instant' : 'auto' });
-  const r = target.getBoundingClientRect();
+  // Fase 15: highlight SAJA — jangan scrollIntoView (merusak posisi banner home;
+  // user diarahkan lewat sorotan & tombol lanjut, bukan lompatan layout).
+  target.scrollIntoView({ block: 'nearest', behavior: 'instant' in window ? 'instant' : 'auto' });
+  const sc = target.closest('.dash-scroll');
+  if (sc) sc.scrollTop = 0;
+  // Fase 15: geometri DIKUNCI ke viewport (tanpa scrollIntoView agar banner
+  // home tidak bergeser) — sorotan & tooltip selalu terlihat & bisa diklik.
+  const raw = target.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const top = Math.max(10, Math.min(vh - 60, raw.top));
+  const left = Math.max(10, Math.min(vw - 60, raw.left));
+  const r = {
+    top,
+    left,
+    width: Math.min(raw.width, vw - left - 10),
+    height: Math.min(raw.height, vh - top - 10),
+    bottom: 0,
+  };
+  r.bottom = r.top + r.height;
   const spot = document.getElementById('coach-spot');
   spot.style.top = `${r.top - 8}px`;
   spot.style.left = `${r.left - 8}px`;
-  spot.style.width = `${r.width + 16}px`;
-  spot.style.height = `${r.height + 16}px`;
+  spot.style.width = `${Math.max(60, r.width + 16)}px`;
+  spot.style.height = `${Math.max(40, r.height + 16)}px`;
 
   const tip = document.getElementById('coach-tip');
   document.getElementById('coach-title').textContent = s.title;
   document.getElementById('coach-text').textContent = s.text;
-  // Tooltip di bawah target; kalau mepet bawah → di atas
   layer.classList.add('active');
   tip.classList.remove('above');
   const tipH = 150;
-  if (r.bottom + tipH > window.innerHeight) tip.classList.add('above');
-  tip.style.left = `${Math.max(12, Math.min(window.innerWidth - 262, r.left + r.width / 2 - 125))}px`;
+  const tipTop = r.bottom + 14 + tipH > vh - 10
+    ? Math.max(10, r.top - tipH - 14)
+    : Math.min(vh - tipH - 10, r.bottom + 14);
+  if (r.bottom + tipH > vh - 10) tip.classList.add('above');
+  tip.style.top = `${tipTop}px`;
+  tip.style.left = `${Math.max(12, Math.min(vw - 262, r.left + r.width / 2 - 125))}px`;
   document.getElementById('coach-next').textContent = step === steps.length - 1 ? 'SIAP, MARI MULAI!' : 'MENGERTI';
   audioSafe();
 }

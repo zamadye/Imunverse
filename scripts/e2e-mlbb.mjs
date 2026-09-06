@@ -32,7 +32,7 @@ try {
   await page.fill('#auth-password', '1234');
   await page.click('#auth-submit');
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 }).catch(() => {});
-  for (let k = 0; k < 6; k++) { if (!(await page.locator('#coach-skip').isVisible().catch(() => false))) break; await page.click('#coach-skip'); await page.waitForTimeout(500); }
+  for (let k = 0; k < 8; k++) { if (!(await page.locator('#coach-skip').isVisible().catch(() => false))) break; await page.click('#coach-skip', { timeout: 1500 }).catch(() => {}); await page.waitForTimeout(350); }
   await page.waitForTimeout(300);
 
   // CAMPAIGN → prep → MULAI (skip sinematik briefing)

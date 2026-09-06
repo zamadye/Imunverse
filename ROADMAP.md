@@ -355,6 +355,20 @@ Sumber: lampiran pemilik `konten-entitas-imunverse.md` (sistem/organ, 12 hero, 1
 - Temuan teknis: bonus anti-parasit Eosinofil & mekanik stealth/drain/area-burst baru teks rasa, belum di kode.
 - Keputusan 5 butir (rename, virion, nutrisi, fase konten, perilaku) menunggu arahan pemilik — tidak ada rename dieksekusi sebelum persetujuan.
 
+## Fase 15 — Audit UI Anti-Tumpuk + Cinematic "Video" Banner Home ✅
+**(A) Audit & polish UI — tidak ada yang tertumpuk, tidak komplik**
+- [x] **Akar auto-scroll liar ditemukan & dibunuh**: overlay coach memanggil `scrollIntoView` tiap langkah → `.dash-scroll` lompat ke bawah (banner terpotong top −240). Kini: coach hanya **menyorot** (block 'nearest' + scrollTop direset), geometri spot/tooltip **dikunci ke viewport** (clamp) — tooltip tak mungkin keluar layar/tak terklik di 844×390.
+- [x] **Containment lanskap dipertegas**: `#screen-dashboard{overflow:hidden}`, `.dash-scroll` satu-satunya scroller; probe overlap clip-aware di 7 layar (dashboard/roster/shop/bp/upgrade/campaign/bag) → **CLEAN** (dua sisa = by-design: slide banner non-aktif invisible & footer sticky roster).
+- [x] **Sisa warisan panggung dibersihkan**: chip musuh statis F13 (se1–se3) dipensiunkan — panggung kini milik cinematic; kartu nama hero (T-Bolt · Avenger Adaptif) kini terisi benar (bug lama: menulis ke `#dash-hero-img` yang sudah tak ada).
+- [x] **Toast lanskap** dinaikkan ke atas dock (bottom 102px) — tidak lagi menyenggol dock.
+- [x] Harness e2e diperkuat: skip coach toleran (retry klik) — tidak flaky lagi.
+**(B) Cinematic battle imun-vs-virus di atas home ("video" agar web hidup)**
+- [x] `js/render/cine-banner.js` — **video prosedural Canvas 2D** loop 6 detik: virus merah masuk → dieksekusi 3 tembakan homing emas → ledakan partikel + ring + screen-shake; virus ungu mengejar → hero **charge aura** → **ULT shockwave** melansir; spawn virus baru; bug branding `⬡ IMUNVERSE`. Tanpa file video — tajam di semua DPI, ringan.
+- [x] Panggung dashboard kini canvas penuh (`#dash-cine`); start/stop mengikuti slide banner aktif & lifecycle layar; fix impor dinamis (path salah 404 diam) + restart-instance; ukuran kanvas 392×200 (DPR-aware).
+- [x] **i18n**: bug branding lewat `t()` + kamus `lang.json` — EN klik → judul canvas ikut berubah.
+- [x] Hero lebih besar & center; trail dash; spacing musuh proporsional.
+- **Kriteria lulus 15:** e2e inti **20/20 PASS** (ERRORS: none) + **e2e-eco 14/14 PASS**; audit overlap 7 layar bersih; bukti `docs/screenshots/61-cine-duel, 62-cine-ledakan, 63-cine-ultimate, 64-cine-en, 65-cine-en-title, 66-portrait-rotate`.
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.
