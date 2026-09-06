@@ -10,6 +10,7 @@
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
   <link rel="stylesheet" href="styles/main.css?v=21a" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
   <div id="app">
@@ -78,18 +79,9 @@
               <small id="rank-sub">—</small>
             </span>
           </button>
-          <div class="currency-chip" title="Antibodi (mata uang)">
-            <img class="coin" src="assets/sprites/icon_coin.png" alt="" />
-            <span id="dash-currency">0</span>
-          </div>
-          <div class="currency-chip imu-chip" title="Imun Coin (premium)">
-            <img class="coin" src="assets/sprites/icon_imu.png" alt="" />
-            <span id="dash-imun">0</span>
-          </div>
-          <button id="btn-sound-toggle" class="icon-btn" title="Suara" aria-label="Suara"><img id="img-sound-icon" src="assets/sprites/icon_sound_on.png" alt="suara" /></button>
-          <button id="btn-reset-save" class="icon-btn" title="Reset save" aria-label="Reset save"><img src="assets/sprites/icon_gear.png" alt="" /></button>
+          <div class="dash-points" title="Antibodi dari gameplay"><img class="coin" src="assets/sprites/icon_coin.png" alt="Antibodi" /><span id="dash-currency">0</span></div>
+          <div class="currency-chip imu-chip" title="Imun Coin premium"><img class="coin" src="assets/sprites/icon_imu.png" alt="Imun Coin" /><span id="dash-imun">0</span></div>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
-          <button id="btn-codex" class="icon-btn" title="Bio-Pedia" aria-label="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="Bio-Pedia" /></button>
         </header>
 
         <div class="dash-body">
@@ -207,6 +199,13 @@
             </span>
             <span>Shop</span>
           </button>
+        </nav>
+        <!-- Fitur sekunder tetap tersedia tanpa mengambil fokus dari Play. -->
+        <nav class="secondary-dock" aria-label="Fitur sekunder">
+          <button data-nav="campaign" title="Kampanye"><img src="assets/sprites/icon_sirkulasi.png" alt="" /><span>Campaign</span></button>
+          <button data-nav="bp" title="Battle Pass"><img src="assets/sprites/icon_bolt.png" alt="" /><span>Pass</span></button>
+          <button data-nav="codex" title="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="" /><span>Bio</span></button>
+          <button data-nav="rank" title="Pangkat"><img src="assets/sprites/icon_trophy.png" alt="" /><span>Rank</span></button>
         </nav>
       </section>
 
@@ -333,6 +332,25 @@
           <h3 class="auth-faction-title">Pilih Pasukanmu</h3>
           <p class="auth-faction-hint">Fraksi menentukan dashboard, hero &amp; pasukanmu — layout sama, sisi berbeda.</p>
           <div id="auth-factions" class="auth-factions"></div>
+        </div>
+      </section>
+
+      <!-- ============ PROFIL PEMAIN ============ -->
+      <section id="screen-profile" class="screen" data-screen="profile">
+        <header class="screen-header">
+          <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/sprites/icon_back.png" alt="" /></button>
+          <h2>Profil</h2><span class="spacer"></span>
+        </header>
+        <div class="profile-card card">
+          <img id="profile-avatar" class="profile-avatar" src="assets/sprites/portrait_tcd8.png" alt="" />
+          <h3 id="profile-name">—</h3>
+          <span id="profile-faction" class="faction-tag">Imun</span>
+          <div class="profile-balances">
+            <span><img src="assets/sprites/icon_coin.png" alt="" /><b id="profile-currency">0</b><small>Antibodi</small></span>
+            <span><img src="assets/sprites/icon_imu.png" alt="" /><b id="profile-imun">0</b><small>Imun Coin</small></span>
+          </div>
+          <div class="profile-stats" id="profile-stats"></div>
+          <button id="btn-profile-logout" class="btn btn-danger">Keluar Akun</button>
         </div>
       </section>
 

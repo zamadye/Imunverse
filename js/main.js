@@ -18,7 +18,7 @@ import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
-import { loadSave, writeSave, clearSave } from './save/save-manager.js';
+import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
 
@@ -50,6 +50,7 @@ import * as bagScreen from './ui/screens/bag-screen.js';
 import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
+import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 
 const canvas = document.getElementById('game');
@@ -201,6 +202,7 @@ async function boot() {
   screenManager.registerScreen('bag', bagScreen);
   screenManager.registerScreen('bosschest', bosschestScreen);
   screenManager.registerScreen('rank', rankScreen);
+  screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
@@ -246,7 +248,7 @@ async function boot() {
   window.addEventListener('blur', stopFire);
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
-  document.getElementById('account-chip').addEventListener('click', () => screenManager.show('auth'));
+  document.getElementById('account-chip').addEventListener('click', () => screenManager.show('profile'));
   // Fase 19: chip pangkat → modal PANGKAT PENJAGA (klik riil)
   document.getElementById('rank-chip')?.addEventListener('click', () => screenManager.show('rank'));
 
@@ -262,10 +264,6 @@ async function boot() {
     const pauseBtn = document.getElementById('btn-sound-pause');
     if (pauseBtn) pauseBtn.textContent = `Suara: ${audio.muted ? 'MATI' : 'AKTIF'}`;
   };
-  document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-    audio.toggleMute();
-    refreshSoundUI();
-  });
   document.getElementById('btn-sound-pause').addEventListener('click', () => {
     audio.toggleMute();
     refreshSoundUI();
@@ -345,17 +343,6 @@ async function boot() {
     const heroDef = getHero(STATE.meta.selectedHero);
     return spriteToDataURL(heroDef ? (heroDef.spritePortrait || heroDef.spriteIdle) : '');
   };
-
-  // Reset save (dashboard footer)
-  document.getElementById('btn-reset-save').addEventListener('click', () => {
-    if (window.confirm('Hapus seluruh progress (antibodi, unlock, upgrade)?')) {
-      clearSave();
-      STATE.meta = createDefaultMeta();
-      writeSave(STATE.meta);
-      showToast({ message: 'Save direset. Organisme baru terbentuk. 🧬' });
-      screenManager.show('auth');
-    }
-  });
 
   // 5) Game loop (rAF + delta-time) — update hanya saat gameplay aktif
   const loop = new GameLoop(
