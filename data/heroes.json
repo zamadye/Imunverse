@@ -12,15 +12,15 @@
       "spriteAttack": "assets/sprites/hero_macrophage_attack.png",
       "color": "#4a7c59",
       "roleColor": "#2ecc71",
-      "attackPattern": "melee_swipe",
+      "attackPattern": "ranged_pierce",
       "baseStats": {
         "maxHP": 120,
         "speed": 130,
         "damage": 10,
         "attackCooldown": 1.0,
-        "attackRange": 64,
+        "attackRange": 300,
         "swipeRadius": 64,
-        "projectileSpeed": 0,
+        "projectileSpeed": 280,
         "projectileCount": 1,
         "pierce": 0,
         "radius": 15,
@@ -28,7 +28,7 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 1.9
+        "spreadAngle": 0.18
       },
       "skills": [
         "taunt",

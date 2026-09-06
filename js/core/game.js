@@ -529,6 +529,9 @@ export const game = {
 
     // 2. Wave & spawn
     const events = run.spawnSys.update(dt, this);
+    if (events.waveBreak) {
+      emit('waveBreak', { wave: run.spawnSys.wave });
+    }
     if (events.newWave) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: false });
       audio.wave();

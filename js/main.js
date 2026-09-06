@@ -109,6 +109,9 @@ function wireUiBridge() {
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
   });
+  on('waveBreak', ({ wave }) => {
+    hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
+  });
 
   on('levelup', (payload) => screenManager.show('levelup', payload));
   on('bosschest', (payload) => screenManager.show('bosschest', payload));

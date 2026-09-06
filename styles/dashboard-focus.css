@@ -219,3 +219,19 @@
   #screen-dashboard .dashboard-play-copy b { font-size:21px; }
   #screen-dashboard .dock { padding-top: 3px; }
 }
+
+/* Gameplay focus: keep only survival-critical HUD. The arena owns the screen. */
+#screen-hud .hud-minimap { display:none; }
+#screen-hud .hud-buffs { max-width:72vw; margin:0 auto; overflow:hidden; }
+#screen-hud .hud-mission { max-width:220px; opacity:.9; }
+#screen-hud .hud-gate { font-size:11px; padding:5px 10px; }
+#screen-hud .hud-hint { max-width:80vw; }
+@media (orientation: landscape) {
+  #screen-hud { padding:0; }
+  #screen-hud .hud-top { left:12px; right:12px; max-width:none; }
+  #screen-hud .hud-center { min-width:112px; padding:4px 10px; }
+  #screen-hud .hud-stat-left, #screen-hud .hud-stat-right { padding:4px 7px; gap:5px; }
+  #screen-hud .hud-hero-status { left:12px; bottom:10px; transform:scale(.9); transform-origin:bottom left; }
+  #screen-hud .hud-controls { right:12px; bottom:10px; transform:scale(.86); transform-origin:bottom right; }
+  #screen-hud .hud-mission { top:58px; left:50%; transform:translateX(-50%); }
+}

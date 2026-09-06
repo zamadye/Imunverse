@@ -26,6 +26,8 @@ export class SpawnSystem {
     this.rampTimer = 0;         // HOOK: wave 1 mulai ramai (tidak sepi)
     this.rampMult = 0.45;       // spawn interval dikali ini (naik ke 1 dalam ±15 dtk)
     this.gateOpen = true;       // Fase 18: gerbang wave — tertutup saat PENJAGA hidup
+    this.waveClearing = false;  // wave berhenti spawn setelah durasi habis
+    this.breakTimer = 0;        // jeda singkat agar pemain bisa mengumpulkan nutrisi
   }
 
   /** Gerbang tertutup = boss penjaga masih hidup, wave TIDAK bisa maju. */
@@ -44,7 +46,7 @@ export class SpawnSystem {
    */
   update(dt, game) {
     const cfg = getWaveConfig();
-    const events = { newWave: false, bossSpawn: false };
+    const events = { newWave: false, bossSpawn: false, waveBreak: false };
 
     // HOOK: 15 detik pertama ramp-up — aksi terasa sejak awal, sulit merambat naik
     if (this.wave === 1) {
@@ -70,12 +72,32 @@ export class SpawnSystem {
       return events;
     }
 
-    // ---- Ganti wave ----
+    // ---- Istirahat antar wave: berhenti spawn, beri ruang untuk bergerak
+    // dan mengumpulkan nutrisi. Wave baru dimulai setelah arena relatif bersih.
+    if (this.waveClearing) {
+      const active = game.run.enemies.some((e) => e.alive && !e.isBoss);
+      if (!active) {
+        this.breakTimer -= dt;
+        if (this.breakTimer <= 0) {
+          this.wave += 1;
+          this.waveTimer = 0;
+          this.waveClearing = false;
+          this.breakTimer = 0;
+          events.newWave = true;
+        }
+      } else {
+        this.breakTimer = Math.max(this.breakTimer, 1.2);
+      }
+      return events;
+    }
+
+    // ---- Ganti wave menjadi fase clear, bukan arus musuh tanpa akhir ----
     this.waveTimer += dt;
     if (this.waveTimer >= cfg.waveDuration) {
-      this.waveTimer -= cfg.waveDuration;
-      this.wave += 1;
-      events.newWave = true;
+      this.waveClearing = true;
+      this.breakTimer = 2.5;
+      events.waveBreak = true;
+      return events;
     }
 
     // ---- Boss setiap N wave → GERBANG DITUTUP sampai boss tumbang ----
