@@ -11,21 +11,12 @@ let xpGhost = 0;      // trail putih yang "mengejar" fill XP (efek kejar)
 let lastXpPct = 0;
 
 import { getData } from '../../core/data-store.js';
-import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
 
 export function show() {
-  // Level hero & pasukan (terhubung ke Lab) — diisi sekali saat run tampil
-  try {
-    const meta = STATE.meta;
-    const heroId = meta.selectedHero;
-    const heroLvl = (meta.heroLevels && meta.heroLevels[heroId]) || 0;
-    const chipH = document.getElementById('hud-hero-lvl');
-    const chipA = document.getElementById('hud-ally-lvl');
-    if (chipH) chipH.textContent = `Hero Lv ${heroLvl}`;
-    if (chipA) chipA.textContent = `Pasukan Lv ${meta.allyLevel || 0} · ${meta.allies || 1} sel`;
-  } catch { /* STATE belum siap */ }
+  // Combat HUD hanya menampilkan informasi yang berguna selama pertarungan.
+  // Level meta hero/pasukan tetap tersedia di layar roster dan tidak diulang di arena.
 }
 
 export function hide() {
