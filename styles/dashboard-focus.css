@@ -59,3 +59,18 @@
 @media (min-width: 700px) {
   #screen-dashboard .banner-carousel { height: 330px; }
 }
+
+/* Sekunder: ikon kecil di bawah, tetap discoverable tanpa menjadi sidebar baru. */
+#screen-dashboard .secondary-dock {
+  width: 100%; max-width: 560px; display: flex; justify-content: center;
+  gap: clamp(14px, 5vw, 28px); padding: 2px 8px calc(2px + env(safe-area-inset-bottom));
+  opacity: .72;
+}
+#screen-dashboard .secondary-dock button {
+  appearance: none; border: 0; background: none; color: var(--ink-soft); cursor: pointer;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 40px; padding: 2px; font: 800 9px var(--font);
+}
+#screen-dashboard .secondary-dock img { width: 19px; height: 19px; object-fit: contain; opacity: .8; }
+#screen-dashboard .secondary-dock button:active { transform: scale(.92); }
+#screen-dashboard .secondary-dock button:focus-visible { outline: 2px solid var(--teal); border-radius: 8px; }
