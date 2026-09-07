@@ -306,7 +306,7 @@ async function boot() {
   document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
     const gate = gateFor('dock', btn.dataset.menu2Screen);
     if (gate && gate.locked) {
-      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
       audio.ui();
       return;
     }
@@ -319,7 +319,7 @@ async function boot() {
     // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
     const gate = gateFor('secondary', btn.dataset.menuScreen);
     if (gate && gate.locked) {
-      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
       audio.ui();
       return;
     }
@@ -334,10 +334,25 @@ async function boot() {
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
-  // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
+  // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
+  // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
+  // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
   // Fase 13: tombol dirender ulang saat dashboard tampil → pakai delegasi
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#btn-play-big')) screenManager.show('campaign');
+    if (!e.target.closest('#btn-play-big')) return;
+    const meta = STATE.meta;
+    const runs = (meta.stats && meta.stats.totalRuns) || 0;
+    if (runs >= 3) {
+      screenManager.show('campaign'); // pemain sudah paham loop → boleh memilih
+      return;
+    }
+    // Default otomatis: bab pertama yang belum tamat, mode kampanye
+    const chapters = (getData().campaign && getData().campaign.chapters) || [];
+    const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
+    if (ch) { meta.selectedChapter = ch.id; meta.selectedMode = 'kampanye'; }
+    const heroDef = getHero(meta.selectedHero);
+    const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
+    game.startRun(unlocked ? heroDef.id : (getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0]).id);
   });
   // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
@@ -419,7 +434,7 @@ async function boot() {
       // F21: gerbang bertahap — menu terbuka sesuai Gelombang terbaik (data/features.json)
       const gate = isDockGated(btn);
       if (gate) {
-        showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+        showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
         audio.ui();
         return;
       }

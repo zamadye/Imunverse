@@ -13,6 +13,7 @@ import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
+import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
 
 let wiringDone = false;
 
@@ -37,6 +38,25 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
+  // R1 (Rebuild): guest-first — ajakan akun DI LAYAR HASIL, setelah reward
+  // masuk ("sayang kalau hilang"), bukan gate di depan. Non-blocking.
+  const oldSavePrompt = document.getElementById('go-save-prompt');
+  if (oldSavePrompt) oldSavePrompt.remove();
+  if (!hasAccount()) {
+    const box = document.getElementById('screen-gameover').querySelector('.gameover-card') || document.getElementById('screen-gameover');
+    const prompt = el('div', { id: 'go-save-prompt', class: 'go-save-prompt', style: 'margin:6px auto;padding:8px 12px;border-radius:12px;background:rgba(255,217,61,0.16);font-size:12px;font-weight:800;color:#8a6d1a;max-width:420px' }, [
+      el('span', { text: `${tr('Hadiahmu belum tersimpan!')} ` }),
+      el('button', {
+        class: 'btn btn-gold', id: 'btn-go-save-account', style: 'font-size:11px;padding:4px 12px;margin-left:6px',
+        text: tr('SIMPAN PROGRES'),
+      }),
+    ]);
+    prompt.querySelector('#btn-go-save-account').addEventListener('click', () => {
+      screenManager.show('auth');
+    });
+    const titleEl = document.getElementById('gameover-title');
+    titleEl.insertAdjacentElement('afterend', prompt);
+  }
   const title = document.getElementById('gameover-title');
   if (summary.victory) title.textContent = 'MENANG!';
   else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';

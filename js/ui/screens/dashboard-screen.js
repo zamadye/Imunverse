@@ -172,14 +172,10 @@ function renderQuickRow(meta) {
     // F21: gerbang bertahap — tile terkunci menampilkan syarat & toast (buka via main)
     const gate = gateFor('quick', tl.key);
     if (gate && gate.locked) {
-      t.classList.add('gated');
-      t.appendChild(el('span', { class: 'gate-lock', text: `🔒 Gel.${gate.requireWave}` }));
-      t.addEventListener('click', () => {
-        emit('toast', { message: `Capai Gelombang ${gate.requireWave} untuk membuka!`, kind: 'gold' });
-      });
-    } else {
-      t.addEventListener('click', tl.act);
+      // R1: progressive disclosure — tile terkunci TIDAK dirender (muncul saat unlock)
+      continue;
     }
+    t.addEventListener('click', tl.act);
     row.appendChild(t);
   }
 }

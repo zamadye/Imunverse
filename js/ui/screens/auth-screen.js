@@ -9,9 +9,8 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { writeSave } from '../../save/save-manager.js';
-import { getData } from '../../core/data-store.js';
 import { el, screenManager } from '../screen-manager.js';
-import { signUp, login, logout, hasAccount, hasRegisteredAccount, getRegisteredUsernames, getSession, getFactionDef, isFactionPlayable } from '../../systems/account-system.js';
+import { signUp, login, logout, hasAccount, hasRegisteredAccount, getRegisteredUsernames, getSession } from '../../systems/account-system.js';
 import { startIfFirstTime as startCoach } from '../coach.js';
 
 let mode = 'daftar';
@@ -23,18 +22,9 @@ function setMode(m) {
   renderAll();
 }
 
-function selectFaction(id) {
-  if (!isFactionPlayable(id)) {
-    const def = getFactionDef(id);
-    const err = document.getElementById('auth-error');
-    err.textContent = `${def.name} SEGERA hadir — mulai dulu dengan ${getFactionDef('imun').name}!`;
-    err.classList.add('show');
-    setTimeout(() => err.classList.remove('show'), 2600);
-    return;
-  }
-  chosenFaction = id;
-  renderAll();
-}
+// R1 (Rebuild): pemilihan fraksi DICOPOT dari signup (addendum UX) —
+// fitur PvP Virus belum ada; menampilkan pilihan non-fungsional di momen
+// onboarding paling kritis merusak trust. Fraksi default: imun.
 
 function setError(msg) {
   const err = document.getElementById('auth-error');
@@ -78,37 +68,12 @@ function renderTabs() {
   });
 }
 
-function renderFactionCards() {
-  const wrap = document.getElementById('auth-factions');
-  wrap.textContent = '';
-  for (const f of getData().factions.factions) {
-    const playable = isFactionPlayable(f.id);
-    const card = el('button', {
-      class: `faction-card ${f.id}${chosenFaction === f.id ? ' selected' : ''}${playable ? '' : ' locked'}`,
-      type: 'button',
-    }, [
-      el('span', { class: 'fc-emblem', style: `background:${f.color}` }, [
-        el('img', { src: f.id === 'imun' ? 'assets/sprites/hero_sel_t_idle.png' : 'assets/sprites/enemy_sel_kanker.png', alt: f.name }),
-      ]),
-      el('span', { class: 'fc-body' }, [
-        el('b', { text: f.name }),
-        el('span', { class: 'fc-tag', text: f.tagline }),
-        el('span', { class: 'fc-goal', text: f.goal }),
-      ]),
-      playable
-        ? el('span', { class: 'fc-badge live', text: 'AKTIF' })
-        : el('span', { class: 'fc-badge soon', text: 'SEGERA' }),
-    ]);
-    card.addEventListener('click', () => selectFaction(f.id));
-    wrap.appendChild(card);
-  }
-}
 
 function renderAll() {
   const meta = STATE.meta;
   document.getElementById('auth-currency') && (document.getElementById('auth-currency').textContent = meta.currency.toLocaleString('id-ID'));
   renderTabs();
-  renderFactionCards();
+  // R1: kartu fraksi tidak dirender — kontainer disembunyikan via index.html
   document.getElementById('auth-submit').textContent = mode === 'daftar' ? 'BUAT AKUN & MULAI' : 'MASUK';
   const resume = document.getElementById('auth-resume');
   resume.textContent = '';

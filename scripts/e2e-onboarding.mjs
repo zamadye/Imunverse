@@ -209,8 +209,9 @@ try {
     n: document.querySelectorAll('.hud-menu2-link').length,
   }));
   log('menu2-opens-left', m2.open && m2.n === 5, JSON.stringify(m2));
-  // klik Shop (Gel.8 > 3) → toast, tetap di gameplay (tidak pindah layar)
-  await page.locator('.hud-menu2-link[data-menu2-screen="shop"]').click({ force: true });
+  // R1: gate kini trigger-based (runs) — di titik ini totalRuns=1: shop TERBUKA,
+  // roster (butuh 2 run) masih terkunci → klik roster harus diblokir + toast
+  await page.locator('.hud-menu2-link[data-menu2-screen="roster"]').click({ force: true });
   await page.waitForTimeout(600);
   const stillHud = await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'));
   log('menu2-gate-blocked', stillHud, stillHud ? 'tetap gameplay' : 'BOCOR');
