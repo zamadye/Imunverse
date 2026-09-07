@@ -458,6 +458,16 @@ Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di
 - [x] pointer-events:auto untuk semua elemen interaktif HUD baru (screen passive); buster `25a`; i18n +9 (Misi/AMBIL/KLAIM dst).
 - **Kriteria lulus:** ONBOARD **18/18** (+hud25-quests-and-notimer, +quest-manual-claim-flow, +menu2-opens-left, +menu2-gate-blocked), CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13; bukti `shots/99-hud-menus`.
 
+## Fase 25b — 5 Polish HUD Terakhir (arah pemilik, sebelum F26) ✅
+**Arahan pemilik:** (1) XP progres pindah ke kanan-atas; (2) ikon menu = karakter game (hero/virus), bukan garis-3/foto profil; (3) SERANG lebih besar + ikon tepat, semua tombol bulat ber-bordir; (4) menu kanan-bawah geser ke tengah agar tak mengganggu SERANG & skill; (5) kartu notif diperkecil agar gameplay dominan.
+- [x] **XP kanan-atas**: chip pill baru `#hud-xp-top` (bintang + track 116px, ghost trail dipertahankan); xp-row lama dihapus dari status kiri-bawah (HP saja); minimap & buff turun sedikit.
+- [x] **Ikon menu tematik**: menu 1 ☰ → **virus bakteri** (enemy_bakteri), menu 2 → **wajah Mako** (portrait_macrophage); kedua tombol bulat ber-border putih — tema game, bukan aplikasi.
+- [x] **SERANG 96px** (dari 84) bulat + inset border; skill TAUNT/SIKAP & ult DEVOUR ikut **bulat ber-bordir** (grid 56px).
+- [x] **Menu 2 digeser ke tengah** (right 168px, bottom 104px) + baris menunya — bebas dari cluster SERANG/skill di pojok.
+- [x] **Notif ringkas**: toast in-run 10.5px, bubble tutorial 58%/11.5px, announce 190px — arena makin dominan.
+- [x] buster `25b`.
+- **Kriteria lulus:** 7 suite hijau (ONBOARD 18/18, CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13); bukti `shots/100-hud-polish` (geometri terukur: XP kanan-atas, fire 96px radius 50%, menu2 di tengah-kanan).
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.

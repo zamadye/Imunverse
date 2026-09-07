@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=25a" />
+  <link rel="stylesheet" href="styles/main.css?v=25b" />
   <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
@@ -453,7 +453,7 @@
             <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
           </div>
         </div>
-        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false">☰<span id="menu1-badge" class="menu-badge hidden"></span></button>
+        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false"><img src="assets/sprites/enemy_bakteri.png" alt="" /><span id="menu1-badge" class="menu-badge hidden"></span></button>
         <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu gameplay">
           <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/sprites/icon_sirkulasi.png" alt="" />Campaign</button>
           <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/sprites/icon_trophy.png" alt="" />Rank</button>
@@ -461,7 +461,7 @@
           <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/sprites/icon_bolt.png" alt="" />Battle Pass</button>
         </div>
         <!-- F25: MENU 2 — pojok kanan-bawah, melebar ke kiri: Hero/Collections/Shop/Battle/Squad -->
-        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu hero &amp; toko" aria-expanded="false"><img src="assets/sprites/icon_heroes.png" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
+        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu hero &amp; toko" aria-expanded="false"><img src="assets/sprites/portrait_macrophage.png" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
         <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu hero, koleksi &amp; toko">
           <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/sprites/icon_heroes.png" alt="" /><span>Heroes</span></button>
           <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" /><span>Collection</span></button>
@@ -478,6 +478,14 @@
           <div id="hud-quests-body" class="hud-quests-body"><!-- diisi JS --></div>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
+        <!-- F25b: XP progres pindah ke kanan-atas (konvensi UI game); HP tetap kiri-bawah -->
+        <div id="hud-xp-top" class="hud-xp-top" aria-label="Progres XP">
+          <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
+          <div class="hud-xp-track">
+            <div id="hud-xp-ghost" class="hud-xp-ghost"></div>
+            <div id="hud-xp-fill" class="hud-xp-fill"></div>
+          </div>
+        </div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
         <div id="hud-announce" class="hud-announce hidden"></div>
         <div id="hud-gate" class="hud-gate hidden">⚑ <span data-i18n="KALAHKAN PENJAGA!">KALAHKAN PENJAGA!</span><span id="hud-gate-bank" class="hud-gate-bank hidden"></span></div>
@@ -500,13 +508,6 @@
               <img class="heart" src="assets/sprites/icon_heart.png" alt="" />
               <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
               <span id="hud-hp-text" class="hud-hp-text">100</span>
-            </div>
-            <div class="xp-row">
-              <div class="hud-xp-track">
-                <div id="hud-xp-ghost" class="hud-xp-ghost"></div>
-                <div id="hud-xp-fill" class="hud-xp-fill"></div>
-              </div>
-              <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
             </div>
           </div>
         </div>
@@ -655,7 +656,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=25a"></script>
+  <script type="module" src="js/main.js?v=25b"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

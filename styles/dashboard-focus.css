@@ -465,3 +465,75 @@
   #screen-hud .hud-game-menu2 { right: 7px; bottom: 132px; }
   #screen-hud .hud-quests { left: 7px; width: 150px; }
 }
+
+/* ---------------------------------------------------------------
+   F25b — 5 POLISH TERAKHIR SEBELUM F26 (arah pemilik)
+   1) XP progres → kanan-atas (konvensi UI game)
+   2) Ikon menu = karakter game (virus / hero), bukan garis-3/profil
+   3) SERANG lebih besar, ikon tepat, semuanya bulat ber-bordir
+   4) Menu kanan-bawah geser ke tengah — bebas dari SERANG & skill
+   5) Kartu notif diperkecil — gameplay dominan
+   --------------------------------------------------------------- */
+
+/* 1) XP kanan-atas */
+#screen-hud .status-bars .xp-row { display: none; } /* sisa markup lama (jika ada) */
+#screen-hud .hud-xp-top {
+  position: absolute; top: 46px; right: 12px; z-index: 6;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 999px;
+  background: rgba(255, 253, 244, 0.78); box-shadow: 0 2px 6px rgba(31, 95, 87, 0.12);
+}
+#screen-hud .hud-xp-top .hud-xp-ico { width: 13px; height: 13px; }
+#screen-hud .hud-xp-top .hud-xp-track {
+  width: 116px; height: 6px; border-radius: 3px;
+  background: rgba(47, 156, 143, 0.22); overflow: hidden; position: relative;
+}
+#screen-hud .hud-xp-top .hud-xp-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #8fe8d2, #f5c64f); }
+#screen-hud .hud-xp-top .hud-xp-ghost { height: 100%; border-radius: 3px; background: rgba(255, 255, 255, 0.85); }
+#screen-hud .hud-minimap { top: 80px; }
+#screen-hud .hud-buffs { top: 80px; }
+
+/* 2) Ikon menu = karakter game; tombol bulat ber-bordir */
+#screen-hud .hud-menu-toggle img { width: 24px; height: 24px; object-fit: contain; }
+#screen-hud .hud-menu-toggle {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  display: grid; place-items: center; background: rgba(255, 253, 244, 0.92);
+}
+#screen-hud .hud-menu2-toggle {
+  right: 168px; bottom: 104px;  /* 4) geser ke tengah — bebas dari SERANG/skill */
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #e8f4ea);
+}
+#screen-hud .hud-menu2-toggle img { width: 28px; height: 28px; object-fit: contain; border-radius: 50%; }
+#screen-hud .hud-game-menu2 { right: 168px; bottom: 158px; }
+#screen-hud .hud-menu2-link { border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.9); width: 56px; height: 56px; }
+#screen-hud .menu-badge { border: 1.5px solid #fff; }
+
+/* 3) SERANG: lebih besar, ikon pedang jelas, bulat ber-bordir */
+#screen-hud .fire-btn {
+  width: 96px; height: 96px; min-height: 96px; border-radius: 50%;
+  border: 4px solid #fff; font-size: 11px; bottom: 14px;
+  box-shadow: 0 6px 0 #c46a4a, 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+#screen-hud .fire-btn img { width: 36px; height: 36px; }
+#screen-hud .ability-btn { border-radius: 50%; border-width: 2px; } /* ikut bulat ber-bordir */
+#screen-hud .ability-btn.ult { width: 58px; height: 58px; border-radius: 50%; justify-self: end; }
+#screen-hud .ability-btn.ult .sk-ico { width: 26px; height: 26px; }
+#screen-hud .ability-bar { grid-template-columns: repeat(2, 56px); gap: 6px; }
+
+/* 5) Kartu notif diperkecil — gameplay dominan */
+body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; border-left-width: 4px; border-radius: 10px; }
+#screen-hud .tut-bubble { max-width: 58%; padding: 8px 13px; font-size: 11.5px; border-width: 2px; }
+#screen-hud .hud-announce { max-width: 190px; font-size: 10.5px; }
+
+@media (max-width: 390px) {
+  #screen-hud .hud-xp-top { top: 40px; right: 7px; }
+  #screen-hud .hud-xp-top .hud-xp-track { width: 96px; }
+  #screen-hud .hud-minimap { top: 72px; right: 7px; }
+  #screen-hud .hud-menu2-toggle { right: 130px; bottom: 92px; width: 42px; height: 42px; }
+  #screen-hud .hud-game-menu2 { right: 130px; bottom: 142px; }
+  #screen-hud .fire-btn { width: 84px; height: 84px; min-height: 84px; }
+  #screen-hud .fire-btn img { width: 31px; height: 31px; }
+}
