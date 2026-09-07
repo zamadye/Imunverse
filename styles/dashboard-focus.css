@@ -341,3 +341,48 @@
   #screen-hud .hud-center { min-width:82px; }
   #screen-hud .hud-menu-toggle { top:5px; right:6px; }
 }
+
+/* ---------------------------------------------------------------
+   F24 — HOME LAUNCHER SINEMATIK
+   Home hanya: chip akun/rank (topbar) + tombol PLAY besar.
+   Banner carousel jadi BACKGROUND "video" sinematik fullscreen
+   (mesin cine-banner: duel imun vs patogen loop — tanpa file video).
+   Semua menu lama disembunyikan dari home (pindah ke menu gameplay, F25).
+   --------------------------------------------------------------- */
+#screen-dashboard .dash-scroll > :not(#dash-banner) { display: none; }  /* quick-row, play-row, stats, daily, duo-row */
+#screen-dashboard .dock, #screen-dashboard .secondary-dock { display: none; }
+#screen-dashboard .dash-body { max-width: none; }
+#screen-dashboard .dash-scroll { padding: 0; margin: 0; }
+
+/* Banner = panggung sinematik fullscreen */
+#screen-dashboard .banner-carousel {
+  position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%;
+  background: var(--cream);
+}
+#screen-dashboard .banner-track { height: 100%; transform: none !important; }
+#screen-dashboard .banner-slide[data-slide="1"],
+#screen-dashboard .banner-slide[data-slide="2"],
+#screen-dashboard .banner-dots { display: none; }
+#screen-dashboard .banner-slide.on { display: block; height: 100%; }
+#screen-dashboard .hero-stage {
+  height: 100%; width: 100%; border-radius: 0; border: 0; box-shadow: none;
+  padding: 0; margin: 0; overflow: hidden; background: transparent;
+}
+#screen-dashboard .stage-cine {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border-radius: 0; opacity: 1;
+}
+/* Bersihkan overlay panggung: home murni sinematik + PLAY */
+#screen-dashboard .stage-badge,
+#screen-dashboard .stage-info,
+#screen-dashboard .stage-enemies,
+#screen-dashboard .hero-stage .deco { display: none; }
+
+/* Topbar & PLAY melayang di atas sinematik */
+#screen-dashboard .topbar { position: relative; z-index: 3; background: transparent; box-shadow: none; border: 0; }
+#screen-dashboard .dashboard-play {
+  position: fixed; left: 50%; bottom: max(30px, env(safe-area-inset-bottom));
+  transform: translateX(-50%); z-index: 3;
+  width: min(92vw, 430px); min-height: 86px;
+}
+#screen-dashboard .dashboard-play:active { transform: translateX(-50%) translateY(4px) scale(.98); }

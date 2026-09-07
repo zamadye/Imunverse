@@ -80,15 +80,14 @@ ok('wave-config-1.8-0.08-0.4', waveCfg.base === 1.8 && waveCfg.decay === 0.08 &&
 
 // ---- TRIGGER 2/4: mulai run — auto-attack membunuh; XP label & combo muncul ----
 await page.evaluate(() => { const sc = document.querySelector('.dash-scroll'); if (sc) sc.scrollTop = 0; });
-await page.click('#btn-play-big');
-await page.waitForTimeout(700);
-await page.locator('.camp-node:not(.locked)').first().click();
-await page.waitForTimeout(500);
-await page.click('#btn-campaign-go', { timeout: 8000 }); // peta → ringkasan bab → prep
-await page.waitForTimeout(700);
-await page.evaluate(() => document.querySelector('#btn-prep-start')?.scrollIntoView({ block: 'center' }));
-await page.waitForTimeout(300);
-await page.click('#btn-prep-start', { timeout: 8000 });
+// F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
+await page.click('#btn-play', { timeout: 8000 });
+await page.waitForTimeout(600);
+if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+  await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+  await page.click('#btn-prep-start', { timeout: 8000 });
+}
+await page.waitForTimeout(600);
 // sinematik briefing bab baru → lewati (klik riil), lalu tunggu HUD aktif
 await page.waitForTimeout(900);
 for (let k = 0; k < 4; k++) {

@@ -149,7 +149,8 @@ function renderBanner(meta) {
 
   setBannerSlide(0);
   stopBannerTimer();
-  bannerTimer = setInterval(() => setBannerSlide(bannerIdx + 1), 5200);
+  // F24: home launcher sinematik — carousel berhenti di slide panggung (cine fullscreen permanen)
+  // bannerTimer = setInterval(() => setBannerSlide(bannerIdx + 1), 5200);
 }
 
   /** Dashboard focus: empat pintu sekunder; daily/misi tetap hidup sebagai notifikasi di bawah. */

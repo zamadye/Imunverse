@@ -155,34 +155,22 @@ try {
   await page.click('#screen-profile .btn-back', { timeout: 4000 }); // .btn-back pertama di DOM milik layar lain (tersembunyi)
   await page.waitForTimeout(500);
 
-  // ---- 7) Dashboard MENU TERKUNCI bertahap (akun OnboardTester sudah dibuat di 6b) ----
+  // ---- 7) HOME LAUNCHER (F24): hanya PLAY + chip akun/rank + sinematik fullscreen ----
   await page.waitForTimeout(700);
-  const gates = await page.evaluate(() => {
-    const dock = [...document.querySelectorAll('.dock-btn[data-nav]')].map((b) => ({
-      nav: b.dataset.nav, gated: b.classList.contains('gated'),
-      lock: b.querySelector('.gate-lock')?.textContent || null,
-    }));
-    const tiles = [...document.querySelectorAll('#quick-row .quick-tile')].map((b) => ({
-      gated: b.classList.contains('gated'),
-      lock: b.querySelector('.gate-lock')?.textContent || null,
-    }));
-    return { dock, gatedTiles: tiles.filter((t) => t.gated).length, openTiles: tiles.length - tiles.filter((t) => t.gated).length };
+  const launcher = await page.evaluate(() => {
+    const vis = (sel) => { const e = document.querySelector(sel); if (!e) return false; const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden') return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    return {
+      play: vis('#btn-play'), rank: vis('#rank-chip'), account: vis('#account-chip'),
+      cine: vis('#dash-cine'),
+      dock: vis('.dock'), quick: vis('#quick-row'), daily: vis('#daily-card'),
+      duo: vis('#duo-evo'), playRow: vis('.play-row'), stats: vis('#dash-stats'),
+    };
   });
-  // F21: pemain baru = semua menu ekstra terkunci (Play/Home selalu terbuka);
-  // label syarat "🔒 Gel.N" terlihat — menu muncul bertahap jam/hari bermain
-  log('dock-gated-gradually', gates.dock.length === 4 && gates.dock.every((d) => d.gated && /Gel\.\d/.test(d.lock || '')), JSON.stringify(gates.dock));
-  log('quick-tiles-gated', gates.gatedTiles >= 2 && gates.openTiles >= 1, `gated=${gates.gatedTiles} open=${gates.openTiles}`);
-
-  // klik tile terkunci → toast, TIDAK pindah layar
-  const beforeScreen = await page.evaluate(() => window.__IMUNVERSE.STATE.screen);
-  await page.locator('#quick-row .quick-tile.gated').first().click({ force: true }).catch(() => {});
-  await page.waitForTimeout(500);
-  const afterScreen = await page.evaluate(() => window.__IMUNVERSE.STATE.screen);
-  log('gated-click-blocked', beforeScreen === afterScreen, `${beforeScreen}→${afterScreen}`);
-
-  // ---- 8) Dock ramping: tinggi dock < 30% viewport ----
-  const dockH = await page.evaluate(() => Math.round(document.querySelector('.dock').getBoundingClientRect().height));
-  log('dock-compact', dockH <= 100, `h=${dockH}px (viewport 390)`);
+  log('home-launcher-clean', launcher.play && launcher.cine && launcher.rank && launcher.account
+    && !launcher.dock && !launcher.quick && !launcher.daily && !launcher.duo && !launcher.playRow && !launcher.stats,
+    JSON.stringify(launcher));
+  await page.screenshot({ path: 'shots/98-home-launcher.png' });
+  // (Gerbang bertahap kini tampil di menu gameplay — F25; badge unlock menyusul)
 
   // ---- 9) Reload dengan akun → TIDAK ke title (alur lama untuk pemain lama) ----
   await page.reload({ waitUntil: 'domcontentloaded' });

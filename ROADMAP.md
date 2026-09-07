@@ -441,6 +441,14 @@ Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di
 - [x] **Battle Pass masuk menu ☰ gameplay** (Campaign/Bio-Pedia/Rank/Battle Pass) — gap #1 tuntas; menu gameplay kini ikut gerbang bertahap `secondary` (BP Gel.6) → toast "Capai Gelombang N…".
 - **Kriteria lulus:** ONBOARD **17/17** (+profile-sound-toggles, +sound-settings-persist), CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13; verifikasi runtime musik: scheduler jalan (step maju 26 @7s, ctx running, timer aktif); bukti `shots/97-profile-sound`.
 
+## Fase 24 — Home = Launcher Sinematik (PLAY saja + background "video" cinematic) ✅
+**Arahan pemilik (F24):** "bersihkan UI di home page — only play button saja dengan background video cinematic game full background."
+- [x] **Home hanya PLAY**: quick-row, play-row (kartu kampanye/mode), stat-strip, daily-card, duo-row (evo/missions/leaderboard/body), dock & secondary-dock → disembunyikan dari home (menu pindah ke dalam gameplay — F25). Topbar ringkas tetap: chip akun (→Profil), chip rank (tujuan), antibodi, Imun Coin, EN.
+- [x] **Background sinematik fullscreen**: banner carousel dipakai sebagai panggung — `cine-banner` (duel imun vs patogen, loop canvas) dirender full-viewport di belakang topbar & PLAY; rotasi slide dimatikan (sinematik permanen, tanpa dots); tanpa file video (tetap vanilla, ringan).
+- [x] **PLAY = fast-play 1 tap** (wiring existing `#btn-play` → `startRun` langsung).
+- [x] **Suite adaptif**: ONBOARD home-launcher-clean (PLAY+sinematik+chip tampil; semua menu lama tak tampil); 5 suite lain dialihkan ke jalur fast-play (klik `#btn-play`); PROG gate/wave checks dibuat kondisional (tunggu boss, tutup modal apa pun, loop fase CLEAR→BREAK).
+- **Kriteria lulus:** ONBOARD 14/14, CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13; bukti `shots/98-home-launcher`.
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.

@@ -78,15 +78,14 @@ ok('late-hp-hard', Math.abs(bands.hpScaleWave20 - (1 + 19 * 0.105) * 1.55) < 0.0
 
 // ---- masuk run (klik riil) ----
 await page.evaluate(() => { const sc = document.querySelector('.dash-scroll'); if (sc) sc.scrollTop = 0; });
-await page.click('#btn-play-big');
-await page.waitForTimeout(700);
-await page.locator('.camp-node:not(.locked)').first().click();
-await page.waitForTimeout(400);
-await page.click('#btn-campaign-go', { timeout: 8000 });
+// F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
+await page.click('#btn-play', { timeout: 8000 });
 await page.waitForTimeout(600);
-await page.evaluate(() => document.querySelector('#btn-prep-start')?.scrollIntoView({ block: 'center' }));
-await page.waitForTimeout(250);
-await page.click('#btn-prep-start', { timeout: 8000 });
+if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+  await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+  await page.click('#btn-prep-start', { timeout: 8000 });
+}
+await page.waitForTimeout(600);
 await page.waitForTimeout(900);
 for (let k = 0; k < 4; k++) {
   if (!(await page.locator('#cine-skip').isVisible().catch(() => false))) break;
@@ -114,6 +113,14 @@ async function stabilize() {
 }
 
 /** Tutup modal level-up / peti boss yang mem-pause game (klik riil). */
+async function clearModalsAll() {
+  for (let i = 0; i < 10; i++) {
+    if (await page.locator('#screen-levelup.active').isVisible().catch(() => false)) { await page.locator('#levelup-choices .choice-card').first().click({ force: true }).catch(() => {}); await page.waitForTimeout(300); continue; }
+    if (await page.locator('#screen-bosschest.active').isVisible().catch(() => false)) { await page.click('#btn-chest-keep', { force: true }).catch(() => {}); await page.waitForTimeout(300); continue; }
+    if (await page.locator('#screen-pause.active').isVisible().catch(() => false)) { await page.click('#btn-resume', { force: true }).catch(() => {}); await page.waitForTimeout(300); continue; }
+    break;
+  }
+}
 async function closeModals() {
   for (let i = 0; i < 8; i++) {
     if (await page.locator('#screen-levelup.active').isVisible().catch(() => false)) {
@@ -169,18 +176,23 @@ await closeModals();
 await page.evaluate(() => {
   const ss = window.__IMUNVERSE.game.run.spawnSys;
   ss.wave = 4;
-  ss.waveTimer = 24.4; // 0.6 dtk lagi ganti wave
+  ss.waveTimer = 24.4; // picu fase CLEAR → wave 5
 });
-// TUNGGU KONDISI (bukan waktu tetap) — tahan beban suite lain mesin lambat
-await page.waitForFunction(() => window.__IMUNVERSE.game.run.spawnSys.wave === 5, null, { timeout: 6000 }).catch(() => {});
-await page.waitForTimeout(700); // beri waktu boss penjaga spawn
-const bossReady = await page.evaluate(() => {
-  const run = window.__IMUNVERSE.game.run;
-  return run.spawnSys.wave === 5 && !!run.boss;
-});
-if (!bossReady) { // satu nagihan: dorong timer sekali lagi
-  await page.evaluate(() => { window.__IMUNVERSE.game.run.spawnSys.waveTimer = 24.9; });
-  await page.waitForTimeout(1500);
+// Fase system (01a07727): wave 5 datang setelah arena bersih + jeda break.
+// Tunggu kondisi (bukan waktu tetap); bersihkan musuh & modal agar break berjalan.
+let bossReady = false;
+for (let k = 0; k < 16 && !bossReady; k++) {
+  await clearModalsAll();
+  await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    g.run.enemies.forEach((e) => { if (e.alive && !e.isBoss) e.takeDamageRaw ? e.takeDamageRaw(e.hp + 5) : e.takeDamage(e.hp + 5); });
+    if (g.run.spawnSys.wave >= 5 && !g.run.boss) g.run.spawnSys.waveTimer = 24.9;
+  });
+  await page.waitForTimeout(900);
+  bossReady = await page.evaluate(() => {
+    const run = window.__IMUNVERSE.game.run;
+    return run.spawnSys.wave === 5 && !!run.boss && run.boss.alive;
+  });
 }
 await closeModals(); // modal sisa (jika ada) — jangan biarkan pause saat mengukur
 await page.waitForTimeout(400);
@@ -257,21 +269,25 @@ const flushed = await page.evaluate(() => {
 ok('xp-bank-flushes-on-gate-open', flushed.bank === 0 && typeof bankState.lvl0 === 'number' && flushed.lvlEnd >= bankState.lvl0, JSON.stringify({ ...flushed, lvl0: bankState.lvl0 }));
 
 // Desain 01a07727 — wave berfase: timer habis → fase CLEAR (spawn berhenti, "ARENA BERSIH"),
-// arena relatif bersih → jeda ±2.5 dtk → wave baru. Uji ketiga fasenya.
-await closeModals();
-await page.evaluate(() => { window.__IMUNVERSE.game.run.spawnSys.waveTimer = 24.5; });
-await page.waitForTimeout(900);
-const clearing = await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.waveClearing === true);
+// arena relatif bersih → jeda ±2.5 dtk → wave baru. Uji ketiga fasenya (robust: tutup modal apa pun).
+let clearing = false;
+for (let k = 0; k < 8 && !clearing; k++) {
+  await clearModalsAll();
+  await page.evaluate(() => { window.__IMUNVERSE.game.run.spawnSys.waveTimer = 24.5; });
+  await page.waitForTimeout(800);
+  clearing = await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.waveClearing === true);
+}
 ok('wave-enter-clear-phase', clearing, `wave=${await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.wave)}`);
 // bersihkan sisa musuh non-boss → breakTimer berjalan → wave naik
-for (let k = 0; k < 12; k++) {
+for (let k = 0; k < 14; k++) {
+  await clearModalsAll();
   const w = await page.evaluate(() => {
     const g = window.__IMUNVERSE.game;
     g.run.enemies.forEach((e) => { if (e.alive && !e.isBoss) e.takeDamageRaw ? e.takeDamageRaw(e.hp + 5) : e.takeDamage(e.hp + 5); });
     return g.run.spawnSys.wave;
   });
   if (w >= 6) break;
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(800);
 }
 const advanced = await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.wave);
 ok('wave-advances-after-clear-break', advanced >= 6, `wave=${advanced}`);
