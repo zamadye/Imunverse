@@ -468,6 +468,15 @@ Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di
 - [x] buster `25b`.
 - **Kriteria lulus:** 7 suite hijau (ONBOARD 18/18, CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13); bukti `shots/100-hud-polish` (geometri terukur: XP kanan-atas, fire 96px radius 50%, menu2 di tengah-kanan).
 
+## Fase 26 — Pivot Gameplay MMORPG: Imun Mencari Virus ✅
+**Arahan pemilik (F26):** "design mainnya seperti MMORPG — imun CARI virus, dia explore; bukan virus yang terus menyerang. Ada waktu untuk user periksa menu & upgrade tanpa meninggalkan gameplay."
+- [x] **AI sarang** (`js/entities/enemy.js`): musuh dilahirkan terikat sarang (`setNest`) dengan state machine **guard → patrol → chase → return** — hanya mengejar bila pemain masuk `aggroRadius` (190), menyerah & pulang bila melewati `leashRadius` (430); patroli kecil di sekitar sarang biar arena hidup. Boss TETAP bebas mengejar (penjaga tetap menegangkan).
+- [x] **Sarang per wave** (`spawn-system.js`): tiap wave dibentangkan **1 sarang dekat (±230px — dalam jangkauan auto-attack)** + sarang jauh (±620px) sebagai target jelajah; jumlah sarang 2→5 & isi pak 3→ tumbuh per wave (data-driven `explore` di `data/waves.json`). Trickle pelan (interval ×2.2) juga bernest di titik spawnnya — **tidak ada lagi pengejaran tanpa ujung**.
+- [x] **Wave berakhir dua cara**: durasi habis (25 dtk) ATAU **semua sarang dibersihkan** (≥ 8 dtk) → fase CLEAR → break 2.5 dtk → wave baru; boss-wave dicek dulu agar gerbang penjaga tidak terlewat. Downtime eksplorasi = waktu natural buka menu ganda F25 tanpa keluar gameplay.
+- [x] **Panah petunjuk sarang** (`drawNestHint`, emas berdenyut — beda dari merah boss): muncul saat TIDAK ada patogen di layar, menunjuk kawanan terdekat → pemain selalu tahu ke mana menjelajah.
+- [x] **Regresi kunci F26** (ONBOARD section 11): `enemies-guard-nests-not-swarm` (9/9 bernest & menjaga), `aggro-leash-cycle` (dekat→chase, jauh→return), `nest-clear-advances-wave` (bersih-bersih mempercepat wave). Buster `26a`.
+- **Kriteria lulus:** ONBOARD **21/21**, CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13 — semua di AI baru tanpa penyesuaian suite lama (kompatibel penuh); bukti `shots/101-explore-mmorpg` (arena tenang + panah emas penunjuk sarang).
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.

@@ -28,6 +28,7 @@ export class SpawnSystem {
     this.gateOpen = true;       // Fase 18: gerbang wave — tertutup saat PENJAGA hidup
     this.waveClearing = false;  // wave berhenti spawn setelah durasi habis
     this.breakTimer = 0;        // jeda singkat agar pemain bisa mengumpulkan nutrisi
+    this.nestsSpawnedForWave = 0; // F26: sarang per wave (explore MMORPG)
   }
 
   /** Gerbang tertutup = boss penjaga masih hidup, wave TIDAK bisa maju. */
@@ -100,12 +101,9 @@ export class SpawnSystem {
       return events;
     }
 
-    // ---- Boss setiap N wave → GERBANG DITUTUP sampai boss tumbang ----
-    if (
-      this.wave % cfg.bossWaveEvery === 0 &&
-      this.bossSpawnedForWave !== this.wave &&
-      this.waveTimer < cfg.waveDuration // bukan saat frame ganti wave ganda
-    ) {
+    // ---- F26 BOSS: dicek SEBELUM early-clear agar wave penjaga tak terlewati ----
+    const bossDue = this.wave % cfg.bossWaveEvery === 0 && this.bossSpawnedForWave !== this.wave;
+    if (bossDue && this.waveTimer < cfg.waveDuration) {
       this.bossSpawnedForWave = this.wave;
       // Fase 9: boss bergantian sesuai roster (sel_kanker → toksin_raksasa → …)
       const roster = (cfg.bossRoster && cfg.bossRoster.length) ? cfg.bossRoster : ['sel_kanker'];
@@ -115,17 +113,68 @@ export class SpawnSystem {
       events.bossSpawn = true;
     }
 
-    // ---- Spawn musuh reguler (band kurva sudah di dalam getSpawnInterval) ----
+    // ---- F26 SARANG (explore MMORPG): sekali per wave — 1 dekat + sisanya jauh ----
+    const ai = cfg.explore || {};
+    if (ai.aggroRadius && this.nestsSpawnedForWave !== this.wave) {
+      this.nestsSpawnedForWave = this.wave;
+      this.spawnWaveNests(game, ai);
+    }
+
+    // ---- Trickle pelan: arena tetap hidup; free-ranger juga punya sarang ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult / (this.mods.spawnMult || 1);
+      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * 2.2 / (this.mods.spawnMult || 1);
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
         const enemyId = this.pickEnemyId(this.wave);
-        if (enemyId) game.spawnEnemy(enemyId, false);
+        if (enemyId) game.spawnEnemy(enemyId, false, { nest: true, ai });
       }
     }
 
+    // ---- Wave berakhir: durasi habis ATAU semua sarang dibersihkan (≥ minWaveTime) ----
+    const regularAlive = game.run.enemies.some((e) => e.alive && !e.isBoss);
+    const bossPending = bossDue && this.waveTimer < cfg.waveDuration;
+    if (
+      this.waveTimer >= cfg.waveDuration ||
+      (!regularAlive && !bossPending && this.waveTimer >= (ai.minWaveTime || 8))
+    ) {
+      this.waveClearing = true;
+      this.breakTimer = 2.5;
+      events.waveBreak = true;
+    }
+
     return events;
+  }
+
+  /**
+   * F26 — Tempatkan sarang patogen di sekitar pemain: satu sarang dekat
+   * (aksi terasa sejak awal, dalam jangkauan auto-attack) dan sisanya jauh
+   * (target jelajah — imun yang mencari virus).
+   */
+  spawnWaveNests(game, ai) {
+    const cfg = getWaveConfig();
+    const nNests = Math.min(ai.nestsMax || 5, (ai.nestsBase || 2) + Math.floor((this.wave - 1) / (ai.nestsAddEveryWaves || 4)));
+    const packSize = Math.max(2, Math.round((ai.packSize || 3) + (this.wave - 1) * (ai.packPerWave || 0.45)));
+    const baseAngle = Math.random() * Math.PI * 2;
+    for (let n = 0; n < nNests; n++) {
+      const near = n === 0;
+      const dist = (near ? ai.nearNestDist || 300 : ai.farNestDist || 620) + (Math.random() - 0.5) * 80;
+      const angle = baseAngle + (n / nNests) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+      const px = game.run.player.x + Math.cos(angle) * dist;
+      const py = game.run.player.y + Math.sin(angle) * dist;
+      const enemyId = this.pickEnemyId(this.wave);
+      if (!enemyId) return;
+      for (let m = 0; m < packSize; m++) {
+        if (game.run.enemies.length >= cfg.maxAliveEnemies) return;
+        game.spawnEnemy(enemyId, false, { nest: false }); // posisi ditimpa di bawah
+        const e = game.run.enemies[game.run.enemies.length - 1];
+        if (!e) break;
+        const sa = Math.random() * Math.PI * 2;
+        const sr = 30 + Math.random() * 45;
+        e.x = px + Math.cos(sa) * sr;
+        e.y = py + Math.sin(sa) * sr;
+        e.setNest(px, py, ai);
+      }
+    }
   }
 
   /**

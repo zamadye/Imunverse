@@ -54,7 +54,7 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 
 import { Camera, PERSP } from '../render/camera.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
-import {
+import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawKillFx,
@@ -267,11 +267,12 @@ export const game = {
     // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
     for (let gi = 0; gi < 2; gi++) {
       const ga = (gi / 2) * Math.PI * 2 + 0.7;
-      this.spawnEnemy('bakteri', false);
+      this.spawnEnemy('bakteri', false, { nest: true });
       const ge = this.run.enemies[this.run.enemies.length - 1];
       if (ge) {
         ge.x = player.x + Math.cos(ga) * 250;
         ge.y = player.y + Math.sin(ga) * 250;
+        ge.setNest(ge.x, ge.y, null); // F26: jaga posisinya; mengejar bila player dekat
       }
     }
     this.run.camera.reset(player.x, player.y);
@@ -970,7 +971,7 @@ export const game = {
   /**
    * Spawn musuh di luar area pandang (dipanggil SpawnSystem).
    */
-  spawnEnemy(enemyId, isBossSpawn) {
+  spawnEnemy(enemyId, isBossSpawn, opts = null) {
     const run = this.run;
     const def = getEnemyDef(enemyId);
     if (!def) return;
@@ -994,6 +995,11 @@ export const game = {
     // Mutator liveops: damage kontak musuh
     if (run.bodyMods && run.bodyMods.enemyDamageMult) {
       enemy.damage = Math.round(enemy.damage * run.bodyMods.enemyDamageMult);
+    }
+    // F26: free-ranger trickle juga punya sarang (di titik spawn-nya) —
+    // tidak ada patogen yang mengejar tanpa ujung; imunlah yang mencari.
+    if (opts && opts.nest && !def.isBoss) {
+      enemy.setNest(enemy.x, enemy.y, opts.ai || null);
     }
     run.enemies.push(enemy);
     if (def.isBoss) {
@@ -1765,6 +1771,7 @@ export const game = {
 
     // ---- Screen-space overlays ----
     cam.drawBossIndicatorIfOffscreen(ctx, run.boss, w, h, time);
+    drawNestHint(ctx, run, cam.x, cam.y, w, h, time); // F26: petunjuk arah sarang terdekat
     drawJoystick(ctx, this.input.joystick, this.input.maxRadius, drawImageAt);
 
     // ---- HUD DOM + minimap ----

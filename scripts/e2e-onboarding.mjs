@@ -217,6 +217,51 @@ try {
   await page.click('#hud-menu2-toggle', { force: true }); // tutup
   await page.waitForTimeout(300);
 
+  // ---- 11) F26: gameplay MMORPG — imun mencari virus (AI sarang + leash + early clear) ----
+  const ai1 = await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    const es = g.run.enemies.filter((e) => e.alive);
+    return {
+      total: es.length,
+      nested: es.filter((e) => e.homeX !== null && !e.isBoss).length,
+      guarding: es.filter((e) => e.aiState === 'guard' || e.aiState === 'patrol').length,
+    };
+  });
+  log('enemies-guard-nests-not-swarm', ai1.total > 0 && ai1.nested === ai1.total, JSON.stringify(ai1));
+  // siklus aggro: dekat → chase; jauh → return (imun yang mencari, bukan dikejar tanpa ujung)
+  const cycle = await page.evaluate(async () => {
+    const g = window.__IMUNVERSE.game;
+    const e = g.run.enemies.find((x) => x.alive && x.homeX !== null && !x.isBoss);
+    if (!e) return { err: 'no nested enemy' };
+    const p = g.run.player;
+    const ox = p.x, oy = p.y;
+    p.x = e.x + 100; p.y = e.y;
+    await new Promise((r) => setTimeout(r, 450));
+    const chased = e.aiState === 'chase';
+    p.x = e.x + 1500; p.y = e.y;
+    let returned = false;
+    const t0 = performance.now();
+    while (performance.now() - t0 < 9000) {
+      await new Promise((r) => setTimeout(r, 350));
+      if (e.aiState === 'return' || e.aiState === 'guard') { returned = true; break; }
+    }
+    p.x = ox; p.y = oy;
+    return { chased, returned };
+  });
+  log('aggro-leash-cycle', cycle.chased && cycle.returned, JSON.stringify(cycle));
+  // early-clear: bunuh semua musuh reguler → wave selesai sebelum durasi penuh (jeda break)
+  const early = await page.evaluate(async () => {
+    const g = window.__IMUNVERSE.game;
+    const w0 = g.run.spawnSys.wave;
+    for (let k = 0; k < 14; k++) {
+      g.run.enemies.forEach((e) => { if (e.alive && !e.isBoss) e.takeDamageRaw ? e.takeDamageRaw(e.hp + 5) : e.takeDamage(e.hp + 5); });
+      await new Promise((r) => setTimeout(r, 700));
+      if (g.run.spawnSys.wave > w0 || g.run.spawnSys.waveClearing) return { early: true, w0, w1: g.run.spawnSys.wave, t: Math.round(g.run.spawnSys.waveTimer) };
+    }
+    return { early: g.run.spawnSys.waveClearing, w0, w1: g.run.spawnSys.wave };
+  });
+  log('nest-clear-advances-wave', early.early === true || early.w1 > early.w0, JSON.stringify(early));
+
   log('no-pageerrors', errors.length === 0, errors.slice(0, 3).join(' | '));
 } catch (e) {
   await page.screenshot({ path: '/tmp/fail-onboarding.png' });

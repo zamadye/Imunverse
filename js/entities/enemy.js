@@ -61,12 +61,32 @@ export class Enemy {
     // Result split (untuk enemy anak dari splitter)
     this.splitSource = splitOverrides ? true : false;
 
+    // F26 — AI MMORPG: imun yang mencari virus. Musuh JAGA sarangnya dan
+    // hanya mengejar bila player masuk radius aggro; melewati leash → pulang.
+    // null = free-ranger (fallback perilaku lama: terus mengejar).
+    this.homeX = null;
+    this.homeY = null;
+    this.aiState = 'chase';   // 'guard' | 'patrol' | 'chase' | 'return'
+    this.patrolAngle = Math.random() * Math.PI * 2;
+    this.patrolT = 0;
+
     // Kontrol status (kemampuan aktif): beku total & pelankan (siklon)
     this.frozen = 0;
     this.slowT = 0;
     this.slowMult = 1;
     this.vx = 0; // dorongan (knockback siklon), meluruh tiap frame
     this.vy = 0;
+  }
+
+  /**
+   * F26: tempelkan musuh ke sarang — guard/patrol di sekitar (x,y),
+   * mengejar bila player masuk aggroRadius, pulang bila melewati leashRadius.
+   */
+  setNest(x, y, ai) {
+    this.homeX = x;
+    this.homeY = y;
+    this.aiCfg = ai || null;
+    this.aiState = 'guard';
   }
 
   /** Beku total: musuh berhenti bergerak & menyerang sementara. */
@@ -107,8 +127,52 @@ export class Enemy {
 
     const dx = playerPos.x - this.x;
     const dy = playerPos.y - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    const baseAngle = Math.atan2(dy, dx);
+    let dist = Math.hypot(dx, dy) || 1;
+    let baseAngle = Math.atan2(dy, dx);
+
+    // ---- F26 AI sarang: guard → chase → return (boss selalu bebas mengejar) ----
+    if (this.homeX !== null && !this.isBoss) {
+      const ai = this.aiCfg || { aggroRadius: 190, leashRadius: 430, patrolRadius: 80 };
+      const dHome = Math.hypot(this.x - this.homeX, this.y - this.homeY) || 1;
+      if (this.aiState === 'return') {
+        if (dist < ai.aggroRadius * 0.75) {
+          this.aiState = 'chase'; // player terlalu dekat lagi → kejar
+        } else if (dHome <= 14) {
+          this.aiState = 'guard'; // sampai rumah → jaga lagi
+        } else {
+          // jalan pulang, abaikan player
+          this.x += ((this.homeX - this.x) / dHome) * this.speed * 0.9 * dt;
+          this.y += ((this.homeY - this.y) / dHome) * this.speed * 0.9 * dt;
+          if (this.def.orientToMovement) this.rotation = Math.atan2(this.homeY - this.y, this.homeX - this.x);
+          return;
+        }
+      }
+      if (this.aiState === 'guard' || this.aiState === 'patrol') {
+        if (dist < ai.aggroRadius) {
+          this.aiState = 'chase'; // player ketahuan → kejar
+        } else {
+          // patroli kecil mengelilingi sarang (terlihat hidup, tetap di zona)
+          this.patrolT -= dt;
+          if (this.patrolT <= 0) {
+            this.patrolT = 1.6 + Math.random() * 1.6;
+            this.patrolAngle += (Math.random() - 0.5) * 2.2;
+          }
+          const tx = this.homeX + Math.cos(this.patrolAngle) * ai.patrolRadius * 0.6;
+          const ty = this.homeY + Math.sin(this.patrolAngle) * ai.patrolRadius * 0.6;
+          const tdx = tx - this.x, tdy = ty - this.y;
+          const td = Math.hypot(tdx, tdy) || 1;
+          if (td > 6) {
+            this.x += (tdx / td) * this.speed * 0.4 * dt;
+            this.y += (tdy / td) * this.speed * 0.4 * dt;
+            if (this.def.orientToMovement) this.rotation = Math.atan2(tdy, tdx);
+          }
+          return;
+        }
+      }
+      if (this.aiState === 'chase' && dHome > ai.leashRadius) {
+        this.aiState = 'return'; // terlalu jauh dari rumah → pulang (imun yang mencari)
+      }
+    }
 
     switch (this.behavior) {
       case 'chase_direct':

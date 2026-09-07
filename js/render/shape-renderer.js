@@ -270,6 +270,49 @@ export function drawBossIndicator(ctx, boss, camX, camY, w, h, time) {
   ctx.globalAlpha = 1;
 }
 
+/**
+ * F26 — Panah "cari sarang": menunjuk sarang/musuh terdekat saat TIDAK ada
+ * patogen di layar. Inti gameplay MMORPG: imun yang mencari virus.
+ */
+export function drawNestHint(ctx, run, camX, camY, w, h, time) {
+  if (!run || !run.enemies) return;
+  const margin = 60;
+  let nearest = null;
+  let nearestD = Infinity;
+  for (const e of run.enemies) {
+    if (!e.alive || e.isBoss) continue;
+    const sx = e.x - camX + w / 2;
+    const sy = e.y - camY + h / 2;
+    const onScreen = sx > margin && sx < w - margin && sy > margin && sy < h - margin;
+    if (onScreen) return; // masih ada patogen terlihat → panah tak perlu
+    const d = (e.x - camX) ** 2 + (e.y - camY) ** 2;
+    if (d < nearestD) { nearestD = d; nearest = e; }
+  }
+  if (!nearest) return;
+  const cx = w / 2;
+  const cy = h / 2;
+  const sx = nearest.x - camX + w / 2;
+  const sy = nearest.y - camY + h / 2;
+  const angle = Math.atan2(sy - cy, sx - cx);
+  const edgeX = cx + Math.cos(angle) * (Math.min(w, h) / 2 - 22);
+  const edgeY = cy + Math.sin(angle) * (Math.min(h, w) / 2 - 22);
+  const pulse = 0.6 + 0.4 * Math.sin(time * 5);
+  ctx.save();
+  ctx.translate(edgeX, edgeY);
+  ctx.rotate(angle);
+  ctx.globalAlpha = 0.45 + pulse * 0.55;
+  ctx.fillStyle = '#f5c64f'; // emas = petunjuk jelajah (beda dari merah boss)
+  ctx.beginPath();
+  ctx.moveTo(13, 0);
+  ctx.lineTo(-8, -8);
+  ctx.lineTo(-4, 0);
+  ctx.lineTo(-8, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
+
 /** Minimap bulat di HUD. */
 export function drawMinimap(ctx, canvas, run, player, mapRadius) {
   const w = canvas.width;

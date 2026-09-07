@@ -40,5 +40,18 @@
   "bossRoster": [
     "sel_kanker",
     "toksin_raksasa"
-  ]
+  ],
+  "explore": {
+    "aggroRadius": 190,
+    "leashRadius": 430,
+    "patrolRadius": 80,
+    "nearNestDist": 230,
+    "farNestDist": 620,
+    "nestsBase": 2,
+    "nestsAddEveryWaves": 4,
+    "nestsMax": 5,
+    "packSize": 3,
+    "packPerWave": 0.45,
+    "minWaveTime": 8
+  }
 }
