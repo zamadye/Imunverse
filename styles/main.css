@@ -2040,6 +2040,18 @@ img.lock-badge {
 #screen-levelup .levelup-sub { z-index: 1; margin: 0; }
 #screen-levelup .choice-grid { z-index: 1; max-height: 44vh; }
 
+/* F23: Pengaturan di Profil (suara & reset) — pola umum: settings tinggal di profil */
+.profile-settings {
+  display: flex; flex-direction: column; gap: 8px; width: 100%;
+  padding: 12px 14px; border-radius: var(--r-lg);
+  background: rgba(255, 253, 244, 0.6); box-shadow: var(--shadow-card);
+}
+.profile-settings-title { font-size: 12px; font-weight: 900; color: var(--ink-soft); letter-spacing: 0.04em; text-transform: uppercase; }
+.profile-setting-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.profile-setting-row .ps-label { font-size: 13px; font-weight: 800; color: var(--ink); }
+.profile-setting-row .btn { min-width: 84px; min-height: 34px; font-size: 12px; }
+.profile-reset { align-self: flex-end; min-height: 34px; font-size: 12px; }
+
 /* --- Gerbang menu bertahap (F21) --- */
 .gate-lock {
   position: absolute; top: -6px; right: -4px; z-index: 3;

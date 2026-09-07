@@ -680,7 +680,11 @@
     "Capai Gelombang $1 untuk membuka!": "Reach Wave $1 to unlock!",
     "Level $1 — $2 beradaptasi! Pilih evolusi:": "Level $1 — $2 is adapting! Choose an evolution:",
     "Buat akun untuk menyimpan perjalananmu!": "Create an account to save your journey!",
-    "Mulai run sekarang": "Start a run now"
+    "Mulai run sekarang": "Start a run now",
+    "Pengaturan": "Settings",
+    "Musik": "Music",
+    "Efek Suara": "Sound FX",
+    "MATI": "OFF"
   },
   "rules": [
     {

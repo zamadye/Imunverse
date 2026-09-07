@@ -57,6 +57,7 @@ export function createDefaultMeta() {
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,
+    musicOn: true, // F23: musik latar prosedural (Profil → Pengaturan)
     bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
     squadUpgrades: {
       sq_damage: 0,

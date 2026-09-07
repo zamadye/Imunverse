@@ -22,6 +22,8 @@ import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
+import { music } from './systems/music-system.js';
+import { gateFor } from './systems/feature-gate.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -105,6 +107,7 @@ function wireUiBridge() {
     hudScreen.resetHUD();
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
+    music.start(); // F23: musik latar prosedural saat bermain
   });
 
   on('wave', ({ wave, isBoss }) => {
@@ -122,7 +125,7 @@ function wireUiBridge() {
   on('resume', () => {
     if (STATE.screen === 'gameplay') screenManager.show('hud');
   });
-  on('gameover', (payload) => screenManager.show('gameover', payload));
+  on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
 
   // Banner nama kemampuan saat dicast (impact terlihat jelas)
   let bannerTimer = null;
@@ -239,8 +242,16 @@ async function boot() {
     hudMenuToggle.setAttribute('aria-expanded', String(open));
   });
   document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
+    // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
+    const gate = gateFor('secondary', btn.dataset.menuScreen);
+    if (gate && gate.locked) {
+      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      audio.ui();
+      return;
+    }
     game.pause();
     hudMenu?.classList.add('hidden');
+    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
     screenManager.show(btn.dataset.menuScreen);
   }));
 

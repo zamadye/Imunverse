@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=21a" />
+  <link rel="stylesheet" href="styles/main.css?v=23a" />
   <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
@@ -349,6 +349,19 @@
             <span><img src="assets/sprites/icon_imu.png" alt="" /><b id="profile-imun">0</b><small>Imun Coin</small></span>
           </div>
           <div class="profile-stats" id="profile-stats"></div>
+          <!-- F23: Pengaturan tinggal di Profil (pola umum game; tanpa layar settings terpisah) -->
+          <div class="profile-settings">
+            <b class="profile-settings-title">Pengaturan</b>
+            <div class="profile-setting-row">
+              <span class="ps-label">Musik</span>
+              <button id="btn-profile-music" class="btn btn-sm" type="button">AKTIF</button>
+            </div>
+            <div class="profile-setting-row">
+              <span class="ps-label">Efek Suara</span>
+              <button id="btn-profile-sfx" class="btn btn-sm" type="button">AKTIF</button>
+            </div>
+            <button id="btn-profile-reset" class="btn btn-danger btn-sm profile-reset" type="button">Reset Save</button>
+          </div>
           <button id="btn-profile-logout" class="btn btn-danger">Keluar Akun</button>
         </div>
       </section>
@@ -445,6 +458,7 @@
           <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/sprites/icon_sirkulasi.png" alt="" />Campaign</button>
           <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" />Bio-Pedia</button>
           <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/sprites/icon_trophy.png" alt="" />Rank</button>
+          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/sprites/icon_bolt.png" alt="" />Battle Pass</button>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
@@ -624,7 +638,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=21a"></script>
+  <script type="module" src="js/main.js?v=23a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

@@ -125,11 +125,37 @@ try {
   const authRequired = await page.evaluate(() => document.querySelector('#screen-auth')?.classList.contains('active'));
   log('account-required-after-first-run', authRequired);
 
-  // ---- 7) Daftar → dashboard dengan MENU TERKUNCI bertahap ----
+  // ---- 6b) F23: Pengaturan suara di PROFIL (klik riil) + persist setelah reload ----
   await page.fill('#auth-username', 'OnboardTester');
   await page.fill('#auth-password', '1234');
   await page.click('#auth-submit');
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 });
+  for (let k = 0; k < 6; k++) { if (!(await page.locator('#coach-skip').isVisible().catch(() => false))) break; await page.click('#coach-skip', { force: true }).catch(() => {}); await page.waitForTimeout(300); }
+  await page.click('#account-chip', { timeout: 4000, force: true });
+  await page.waitForFunction(() => document.querySelector('#screen-profile')?.classList.contains('active'), null, { timeout: 6000 });
+  await page.click('#btn-profile-music');
+  await page.click('#btn-profile-sfx');
+  await page.waitForTimeout(400);
+  const snd = await page.evaluate(() => ({
+    musicOn: window.__IMUNVERSE.STATE.meta.musicOn,
+    musicLbl: document.querySelector('#btn-profile-music')?.textContent,
+    sfxLbl: document.querySelector('#btn-profile-sfx')?.textContent,
+  }));
+  log('profile-sound-toggles', snd.musicOn === false && snd.musicLbl === 'MATI' && snd.sfxLbl === 'MATI', JSON.stringify(snd));
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2400);
+  await page.waitForFunction(() => (document.querySelector('#screen-dashboard') || document.querySelector('#screen-title'))?.classList.contains('active'), null, { timeout: 10000 });
+  if (await page.locator('#screen-title.active').isVisible().catch(() => false)) { await page.click('#btn-title-login', { force: true }); await page.waitForTimeout(500); }
+  await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 });
+  await page.click('#account-chip', { timeout: 4000 });
+  await page.waitForFunction(() => document.querySelector('#screen-profile')?.classList.contains('active'), null, { timeout: 6000 });
+  const sndPersist = await page.evaluate(() => ({ musicOn: window.__IMUNVERSE.STATE.meta.musicOn, lbl: document.querySelector('#btn-profile-music')?.textContent }));
+  log('sound-settings-persist', sndPersist.musicOn === false && sndPersist.lbl === 'MATI', JSON.stringify(sndPersist));
+  await page.screenshot({ path: 'shots/97-profile-sound.png' });
+  await page.click('#screen-profile .btn-back', { timeout: 4000 }); // .btn-back pertama di DOM milik layar lain (tersembunyi)
+  await page.waitForTimeout(500);
+
+  // ---- 7) Dashboard MENU TERKUNCI bertahap (akun OnboardTester sudah dibuat di 6b) ----
   await page.waitForTimeout(700);
   const gates = await page.evaluate(() => {
     const dock = [...document.querySelectorAll('.dock-btn[data-nav]')].map((b) => ({
