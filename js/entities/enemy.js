@@ -8,6 +8,8 @@
  *  - boss_pattern_a : lambat, HP besar, serangan area berkala (AOE ter-telegraf)
  */
 
+import { getCombat } from '../core/data-store.js';
+
 let nextEnemyId = 1;
 
 export class Enemy {
@@ -76,6 +78,14 @@ export class Enemy {
     this.slowMult = 1;
     this.vx = 0; // dorongan (knockback siklon), meluruh tiap frame
     this.vy = 0;
+
+    // V2 Phase 2 — CONTACT ATTACK bertelegraph (chase_*/splitter, bukan boss/hazard):
+    // 'ready' → masuk strikeRange → 'windup' (berhenti, sprite attack, shiver)
+    // → strike bila player masih dekat → 'cooldown'. Dodge saat windup = whiff.
+    this.atkPhase = 'ready';       // 'ready' | 'windup' | 'cooldown'
+    this.atkT = 0;                 // timer fase berjalan
+    this.attackSpriteHint = false; // dibaca render game.js (spriteAttack)
+    this.usesContactTelegraph = !def.isBoss && def.behavior !== 'hazard_drift' && def.behavior !== 'boss_pattern_a';
   }
 
   /**
@@ -129,6 +139,35 @@ export class Enemy {
     const dy = playerPos.y - this.y;
     let dist = Math.hypot(dx, dy) || 1;
     let baseAngle = Math.atan2(dy, dx);
+
+    // ---- V2 Phase 2: CONTACT ATTACK bertelegraph ----
+    // Musuh pengejar TIDAK melukai lewat sentuhan pasif; ia berhenti, windup
+    // terbaca (sprite attack + shiver), lalu menerkam — dodge dihargai.
+    if (this.usesContactTelegraph && game) {
+      const ca = getCombat().contactAttack;
+      const strikeRange = this.radius + (playerPos.radius || 0) + ca.rangeBonus;
+      if (this.atkPhase === 'cooldown') {
+        this.atkT -= dt;
+        if (this.atkT <= 0) this.atkPhase = 'ready';
+      } else if (this.atkPhase === 'windup') {
+        this.atkT -= dt;
+        if (this.atkT <= 0) {
+          // STRIKE: hanya kena bila player masih dalam toleransi (whiff bila dodge)
+          this.attackSpriteHint = false;
+          this.atkPhase = 'cooldown';
+          this.atkT = ca.cooldown;
+          if (dist <= strikeRange * ca.strikeTolerance) {
+            game.enemyContactStrike(this, dx / dist, dy / dist);
+          }
+        }
+        return; // selama windup: berdiri di tempat (telegraph jelas)
+      } else if (dist <= strikeRange) {
+        this.atkPhase = 'windup';
+        this.atkT = ca.windup;
+        this.attackSpriteHint = true;
+        return;
+      }
+    }
 
     // ---- F26 AI sarang: guard → chase → return (boss selalu bebas mengejar) ----
     if (this.homeX !== null && !this.isBoss) {

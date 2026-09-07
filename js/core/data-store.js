@@ -28,6 +28,7 @@ const store = {
   ranks: null,       // data/ranks.json (Fase 19: pangkat penjaga — tujuan pemain)
   features: null,    // data/features.json (F21: gerbang unlock menu bertahap)
   gamefeel: null,    // data/gamefeel.json (V2 Phase 1: rantai feedback game feel)
+  combat: null,      // data/combat.json (V2 Phase 2: movement/targeting/contact attack)
 };
 
 import { BUILD } from './version.js';
@@ -61,6 +62,7 @@ export async function loadAllData() {
     ranks: 'data/ranks.json',
     features: 'data/features.json',
     gamefeel: 'data/gamefeel.json',
+    combat: 'data/combat.json',
   };
 
   const entries = await Promise.all(
@@ -199,6 +201,13 @@ export function getRanks() {
 /** Seluruh config rantai feedback (knockback/hit-stop/crit/haptic/dll). */
 export function getGameFeel() {
   return getData().gamefeel;
+}
+
+// ===== V2 Phase 2: core combat (data/combat.json) =====
+
+/** Config movement feel, smart targeting, contact attack bertelegraph. */
+export function getCombat() {
+  return getData().combat;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

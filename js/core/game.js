@@ -35,7 +35,7 @@ import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
 import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention } from '../systems/retention-system.js';
-import { getProgressionBand, getProgression, getGameFeel } from './data-store.js';
+import { getProgressionBand, getProgression, getGameFeel, getCombat } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
@@ -619,8 +619,11 @@ export const game = {
     run.collision.separateEnemies(run.enemies);
 
     // 8. Kollision player vs musuh (contact damage)
+    // V2 Phase 2: musuh pengejar menyerang lewat WINDUP→STRIKE (enemy.js →
+    // enemyContactStrike). Contact instan hanya untuk hazard (toksin/prion —
+    // identitas "jangan disentuh") dan boss (punya telegraph AOE sendiri).
     if (player.alive && player.iframes <= 0) {
-      const hit = run.collision.checkPlayerCollision(player);
+      const hit = run.collision.checkPlayerCollision(player, (e) => !e.usesContactTelegraph);
       if (hit) this.damagePlayer(hit.damage);
     }
 
@@ -927,6 +930,24 @@ export const game = {
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
   findNearestEnemy(x, y, range) {
     return this.run.collision.findNearestEnemy(x, y, range);
+  },
+
+  /** V2 Phase 2: target auto-attack — bias "finisher" ke musuh sekarat. */
+  findAttackTarget(x, y, range) {
+    return this.run.collision.findAttackTarget(x, y, range, getCombat().targeting.woundedWeight);
+  },
+
+  /**
+   * V2 Phase 2: STRIKE musuh pengejar setelah windup — dipanggil dari
+   * enemy.update. Lunge visual (terkam) + damage lewat jalur damagePlayer
+   * (shield/evade/iframes/haptic Phase 1 semua tetap berlaku).
+   */
+  enemyContactStrike(enemy, dirX, dirY) {
+    if (!enemy.alive || !this.run || this.run.ended) return;
+    const lunge = getCombat().contactAttack.lunge;
+    enemy.vx += dirX * lunge;
+    enemy.vy += dirY * lunge;
+    this.damagePlayer(enemy.damage);
   },
 
   /** Ledakan AOE boss: cek player dalam radius + shake. */
@@ -1703,7 +1724,13 @@ export const game = {
         const hidden = e.stealth && !e.stealthExposed;
         const bob = Math.abs(Math.sin(time * 6.4 + e.weavePhase * 7)) * 2.4;
         const flip = player.x < e.x ? -1 : 1;
-        billboard(e.x, e.y, { lift: e.radius * 0.62 + bob, flip });
+        // V2 Phase 2: SHIVER telegraph — musuh bergetar selama windup serangan
+        let shiverX = 0;
+        if (e.attackSpriteHint) {
+          const ca = getCombat().contactAttack;
+          shiverX = Math.sin(time * ca.shiverHz * Math.PI * 2 + e.weavePhase) * ca.shiverAmp;
+        }
+        billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
         const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
         drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {

@@ -53,5 +53,7 @@
     "packSize": 3,
     "packPerWave": 0.45,
     "minWaveTime": 8
-  }
+  },
+  "breakDuration": 2.5,
+  "trickleIntervalMult": 2.2
 }

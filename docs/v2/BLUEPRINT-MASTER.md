@@ -48,7 +48,7 @@ Retention (9) dan Monetization (10) adalah **hasil** dari 1–5, bukan sumber ni
 |---|---|---|---|---|
 | 0 | Foundation Audit | `phase-00-foundation-audit.md` | P0 — gerbang semua phase | ✅ (BUILD 27a) |
 | 1 | Game Feel | `phase-01-game-feel.md` | P0 | ✅ (BUILD 27a) |
-| 2 | Core Combat | `phase-02-core-combat.md` | P0 | ⬜ |
+| 2 | Core Combat | `phase-02-core-combat.md` | P0 | ✅ (BUILD 28a) |
 | 3 | Hero Identity | `phase-03-hero-identity.md` | P1 | ⬜ |
 | 4 | Build & Evolution | `phase-04-build-evolution.md` | P1 | ⬜ |
 | 5 | Enemy & Boss | `phase-05-enemy-boss.md` | P1 | ⬜ |
@@ -220,4 +220,5 @@ Ringkasan di bawah adalah *seed* untuk masing-masing dokumen phase. Baseline dia
 
 1. ✅ Phase 0 — dokumen + `js/systems/metrics.js` + verifikasi e2e (BUILD 27a).
 2. ✅ Phase 1 — dokumen + implementasi game feel + `scripts/e2e-v2phase1.mjs` semua PASS (BUILD 27a).
-3. ⬜ Phase 2 — Core Combat: dokumen + implementasi + verifikasi (paket berikutnya).
+3. ✅ Phase 2 — Core Combat: contact attack bertelegraph + smart targeting + movement smoothing, `scripts/e2e-v2phase2.mjs` 17/17 PASS (BUILD 28a).
+4. ⬜ Phase 3 — Hero Identity ATAU Phase 5 — Enemy & Boss (urutan blueprint: 3∥5, paket berikutnya).

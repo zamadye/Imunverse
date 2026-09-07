@@ -96,7 +96,7 @@ export class SpawnSystem {
     this.waveTimer += dt;
     if (this.waveTimer >= cfg.waveDuration) {
       this.waveClearing = true;
-      this.breakTimer = 2.5;
+      this.breakTimer = cfg.breakDuration; // V2 Phase 2: pacing dari data/waves.json
       events.waveBreak = true;
       return events;
     }
@@ -123,7 +123,7 @@ export class SpawnSystem {
     // ---- Trickle pelan: arena tetap hidup; free-ranger juga punya sarang ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * 2.2 / (this.mods.spawnMult || 1);
+      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * cfg.trickleIntervalMult / (this.mods.spawnMult || 1); // V2 Phase 2: dari data
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
         const enemyId = this.pickEnemyId(this.wave);
         if (enemyId) game.spawnEnemy(enemyId, false, { nest: true, ai });
@@ -138,7 +138,7 @@ export class SpawnSystem {
       (!regularAlive && !bossPending && this.waveTimer >= (ai.minWaveTime || 8))
     ) {
       this.waveClearing = true;
-      this.breakTimer = 2.5;
+      this.breakTimer = cfg.breakDuration; // V2 Phase 2: pacing dari data/waves.json
       events.waveBreak = true;
     }
 
