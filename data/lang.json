@@ -684,7 +684,11 @@
     "Pengaturan": "Settings",
     "Musik": "Music",
     "Efek Suara": "Sound FX",
-    "MATI": "OFF"
+    "MATI": "OFF",
+    "Collection": "Collection",
+    "Battle": "Battle",
+    "AMBIL": "TAKE",
+    "KLAIM": "CLAIM"
   },
   "rules": [
     {

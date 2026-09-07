@@ -183,6 +183,40 @@ try {
   }));
   log('returning-skips-title', returning.dash && !returning.title, JSON.stringify(returning));
 
+  // ---- 10) F25: badge unlock + menu gameplay ganda + quest klaim manual ----
+  // Run 2 via PLAY (bestWave run-1 = 1 → roster(2)/bag(4)/upgrade(6)/shop(8) baru saja terbuka? belum —
+  // badge muncul setelah run mencapai wave lebih tinggi; simulasi: bestWave=3 via API lalu renderBadges)
+  await page.click('#btn-play', { timeout: 6000, force: true });
+  await page.waitForFunction(() => document.querySelector('#screen-hud')?.classList.contains('active'), null, { timeout: 12000 });
+  await page.waitForTimeout(800);
+  const badgeInfo = await page.evaluate(() => {
+    window.__IMUNVERSE.STATE.meta.stats.bestWave = 3; // simulasi progres run nyata
+    window.__IMUNVERSE_renderQuestPanel && window.__IMUNVERSE_renderQuestPanel();
+    return { q: !!document.querySelector('#hud-quests-body .hq-row'), center: getComputedStyle(document.querySelector('.hud-center')).display };
+  });
+  log('hud25-quests-and-notimer', badgeInfo.q && badgeInfo.center === 'none', JSON.stringify(badgeInfo));
+  // AMBIL quest pertama (klik riil) → tombol berubah '…' (aktif, progres berjalan)
+  const btnAmbil = page.locator('#hud-quests-body .hq-act').first();
+  await btnAmbil.click({ force: true });
+  await page.waitForTimeout(500);
+  const qAfter = await page.evaluate(() => document.querySelector('#hud-quests-body .hq-act')?.textContent);
+  log('quest-manual-claim-flow', qAfter === '…' || qAfter === 'KLAIM' || qAfter === '✓', `label=${qAfter}`);
+  // menu 2 kanan-bawah melebar ke kiri: 5 pintu terlihat; Heroes terkunci (Gel.2 > bestWave sim 3? — 3≥2 → terbuka; pakai shop Gel.8 utk uji kunci)
+  await page.click('#hud-menu2-toggle', { force: true });
+  await page.waitForTimeout(400);
+  const m2 = await page.evaluate(() => ({
+    open: !document.querySelector('#hud-game-menu2').classList.contains('hidden'),
+    n: document.querySelectorAll('.hud-menu2-link').length,
+  }));
+  log('menu2-opens-left', m2.open && m2.n === 5, JSON.stringify(m2));
+  // klik Shop (Gel.8 > 3) → toast, tetap di gameplay (tidak pindah layar)
+  await page.locator('.hud-menu2-link[data-menu2-screen="shop"]').click({ force: true });
+  await page.waitForTimeout(600);
+  const stillHud = await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'));
+  log('menu2-gate-blocked', stillHud, stillHud ? 'tetap gameplay' : 'BOCOR');
+  await page.click('#hud-menu2-toggle', { force: true }); // tutup
+  await page.waitForTimeout(300);
+
   log('no-pageerrors', errors.length === 0, errors.slice(0, 3).join(' | '));
 } catch (e) {
   await page.screenshot({ path: '/tmp/fail-onboarding.png' });

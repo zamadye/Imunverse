@@ -449,6 +449,15 @@ Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di
 - [x] **Suite adaptif**: ONBOARD home-launcher-clean (PLAY+sinematik+chip tampil; semua menu lama tak tampil); 5 suite lain dialihkan ke jalur fast-play (klik `#btn-play`); PROG gate/wave checks dibuat kondisional (tunggu boss, tutup modal apa pun, loop fase CLEAR→BREAK).
 - **Kriteria lulus:** ONBOARD 14/14, CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13; bukti `shots/98-home-launcher`.
 
+## Fase 25 — Dua Menu Gameplay + Badge Unlock + Quest Klaim Manual + Tanpa Wave/Timer Atas ✅
+**Arahan pemilik (F25):** menu ada 2 dalam gameplay — menu 1 ☰ kiri-atas turun ke bawah (Campaign/Rank/dll + modul mendatang), menu 2 kanan-bawah MELEBAR KE KIRI (Heroes/Collections/Shop/Battle/Squad/Dungeon); keduanya tersembunyi sampai unlock, saat unlock muncul badge angka ¹²…; quest daily/weekly di KIRI TENGAH, hadiah TIDAK otomatis — harus di-KLAIM, panel juga ber-badge; hapus wave/timer atas (makan porsi).
+- [x] **Menu 2** `#hud-menu2-toggle` (ikon Heroes) + `#hud-game-menu2` baris horizontal row-reverse (melebar ke kiri): Heroes/Collection/Shop/Battle/Squad — gerbang `dock` (F21 data/features.json), klik terkunci → toast, tetap di gameplay; Battle → modal arena.
+- [x] **Badge angka** `js/systems/unlock-badge-system.js`: gerbang yang baru terbuka sejak `meta.seenUnlockWave` dihitung; badge ¹² di kedua ikon menu; dibuka → `markSeen()` (queue notif, hilang permanen).
+- [x] **Panel quest kiri-tengah** `#hud-quests` (header Misi + badge klaimable): 3 quest teratas AMBIL → … (aktif, progress bar) → KLAIM (badge kuning) → ✓; reward Antibodi hanya via klik KLAIM.
+- [x] **Wave/timer atas dihapus** (`.hud-center` display:none) — informasi wave cukup lewat announce event ("WAVE N", "ARENA BERSIH", "BOSS!").
+- [x] pointer-events:auto untuk semua elemen interaktif HUD baru (screen passive); buster `25a`; i18n +9 (Misi/AMBIL/KLAIM dst).
+- **Kriteria lulus:** ONBOARD **18/18** (+hud25-quests-and-notimer, +quest-manual-claim-flow, +menu2-opens-left, +menu2-gate-blocked), CORE 20/20, RET 20/20, ECO 14/14, BAL 13/13, PROG 18/18, PURPOSE 13/13; bukti `shots/99-hud-menus`.
+
 ## Fase 8.2 — Koreksi: Tombol Hud Klik-Riil + Detail Upgrade di Menu Heroes ✅
 **Koreksi user:** (1) tombol TEMBAK tidak berfungsi & menutupi tombol jurus; (2) tombol jurus juga tidak berfungsi; (3) menu Heroes harus punya halaman detail per hero berisi upgrade persenjataan/damage/pasukan — "kalau sudah dibuat di mana letaknya? kalau ada berarti salah tempat".
 - [x] **AKAR MASALAH (1)&(2)**: `#screen-hud` ber-class `.screen.passive` = `pointer-events: none` (biar canvas tetap menerima joystick) → SEMUA tombol HUD tidak pernah bisa diklik. E2e lama memanggil API langsung (bukan klik) — lubang verifikasi; kini semua tes tombol memakai **klik mouse riil**.

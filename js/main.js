@@ -24,6 +24,8 @@ import { getHero } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
 import { gateFor } from './systems/feature-gate.js';
+import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
+import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -108,11 +110,60 @@ function wireUiBridge() {
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
     music.start(); // F23: musik latar prosedural saat bermain
+    renderBadges(); // F25: badge unlock baru pada ikon menu
+    renderQuestPanel(); // F25: panel misi harian/mingguan (kiri tengah)
   });
 
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
   });
+  // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
+  function renderQuestPanel() {
+    const body = document.getElementById('hud-quests-body');
+    const badge = document.getElementById('quests-badge');
+    if (!body) return;
+    try {
+      const meta = STATE.meta;
+      const quests = getQuestProgress(meta).filter((q) => !q.claimed).slice(0, 3);
+      let claimable = 0;
+      body.textContent = '';
+      for (const q of quests) {
+        const pct = Math.min(100, Math.round((q.value / q.def.target) * 100));
+        const row = document.createElement('div');
+        row.className = 'hq-row';
+        row.innerHTML = `<div class="hq-top"><b>${q.def.name}</b><span>${q.value}/${q.def.target}</span></div>
+          <div class="hq-bar"><i style="width:${pct}%"></i></div>`;
+        const act = document.createElement('button');
+        act.className = `hq-act${q.done && q.accepted ? ' claim' : ''}`;
+        act.textContent = q.claimed ? '✓' : (q.accepted ? (q.done ? 'KLAIM' : '…') : 'AMBIL');
+        act.disabled = q.claimed || (q.accepted && !q.done);
+        act.addEventListener('click', () => {
+          if (!q.accepted) acceptQuest(meta, q.def.id);
+          else {
+            const reward = claimQuest(meta, q.def.id);
+            if (reward) showToast({ message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
+          }
+          audio.ui();
+          renderQuestPanel();
+        });
+        row.appendChild(act);
+        body.appendChild(row);
+        if (q.done && q.accepted) claimable += 1;
+        if (!q.accepted) claimable += 0; // belum diambil tidak dihitung badge (bijak utk anak)
+      }
+      badge.textContent = String(claimable);
+      badge.classList.toggle('hidden', claimable === 0);
+    } catch { /* meta belum siap */ }
+  }
+  window.__IMUNVERSE_renderQuestPanel = renderQuestPanel;
+
+  document.getElementById('hud-quests-toggle')?.addEventListener('click', () => {
+    const body = document.getElementById('hud-quests-body');
+    const open = body.classList.toggle('hidden') === false;
+    document.getElementById('hud-quests-toggle').setAttribute('aria-expanded', String(open));
+    audio.ui();
+  });
+
   on('waveBreak', ({ wave }) => {
     hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
   });
@@ -240,7 +291,28 @@ async function boot() {
   hudMenuToggle?.addEventListener('click', () => {
     const open = hudMenu.classList.toggle('hidden') === false;
     hudMenuToggle.setAttribute('aria-expanded', String(open));
+    if (open) markSeen(); // F25: badge unlock dianggap dilihat saat menu dibuka
   });
+  // F25: MENU 2 — Hero/Collection/Shop/Battle/Squad (pojok kanan-bawah, melebar ke kiri)
+  const hudMenu2 = document.getElementById('hud-game-menu2');
+  const hudMenu2Toggle = document.getElementById('hud-menu2-toggle');
+  hudMenu2Toggle?.addEventListener('click', () => {
+    const open = hudMenu2.classList.toggle('hidden') === false;
+    hudMenu2Toggle.setAttribute('aria-expanded', String(open));
+    if (open) markSeen();
+  });
+  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
+    const gate = gateFor('dock', btn.dataset.menu2Screen);
+    if (gate && gate.locked) {
+      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      audio.ui();
+      return;
+    }
+    game.pause();
+    hudMenu2?.classList.add('hidden');
+    music.stop();
+    screenManager.show(btn.dataset.menu2Screen);
+  }));
   document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
     // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
     const gate = gateFor('secondary', btn.dataset.menuScreen);

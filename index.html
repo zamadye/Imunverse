@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=23a" />
+  <link rel="stylesheet" href="styles/main.css?v=25a" />
   <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
@@ -453,12 +453,29 @@
             <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
           </div>
         </div>
-        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false">☰</button>
+        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false">☰<span id="menu1-badge" class="menu-badge hidden"></span></button>
         <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu gameplay">
           <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/sprites/icon_sirkulasi.png" alt="" />Campaign</button>
-          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" />Bio-Pedia</button>
           <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/sprites/icon_trophy.png" alt="" />Rank</button>
+          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" />Bio-Pedia</button>
           <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/sprites/icon_bolt.png" alt="" />Battle Pass</button>
+        </div>
+        <!-- F25: MENU 2 — pojok kanan-bawah, melebar ke kiri: Hero/Collections/Shop/Battle/Squad -->
+        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu hero &amp; toko" aria-expanded="false"><img src="assets/sprites/icon_heroes.png" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
+        <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu hero, koleksi &amp; toko">
+          <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/sprites/icon_heroes.png" alt="" /><span>Heroes</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" /><span>Collection</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/sprites/icon_shop.png" alt="" /><span>Shop</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="arena"><img src="assets/sprites/icon_play.png" alt="" /><span>Battle</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="upgrade"><img src="assets/sprites/icon_sirkulasi.png" alt="" /><span>Squad</span></button>
+        </div>
+        <!-- F25: panel quest harian/mingguan — kiri tengah; hadiah manual-claim + badge kecil -->
+        <div id="hud-quests" class="hud-quests">
+          <button id="hud-quests-toggle" class="hud-quests-head" aria-expanded="true">
+            <img src="assets/sprites/icon_trophy.png" alt="" /><span>Misi</span>
+            <b id="quests-badge" class="menu-badge hidden"></b>
+          </button>
+          <div id="hud-quests-body" class="hud-quests-body"><!-- diisi JS --></div>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
         <canvas id="hud-minimap" width="120" height="120" class="hud-minimap"></canvas>
@@ -638,7 +655,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=23a"></script>
+  <script type="module" src="js/main.js?v=25a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>
