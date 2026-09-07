@@ -12,15 +12,15 @@
       "spriteAttack": "assets/sprites/hero_macrophage_attack.png",
       "color": "#4a7c59",
       "roleColor": "#2ecc71",
-      "attackPattern": "melee_swipe",
+      "attackPattern": "ranged_pierce",
       "baseStats": {
         "maxHP": 120,
         "speed": 130,
         "damage": 10,
         "attackCooldown": 1.0,
-        "attackRange": 64,
+        "attackRange": 300,
         "swipeRadius": 64,
-        "projectileSpeed": 0,
+        "projectileSpeed": 280,
         "projectileCount": 1,
         "pierce": 0,
         "radius": 15,
@@ -28,7 +28,7 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 1.9
+        "spreadAngle": 0.18
       },
       "skills": [
         "taunt",
@@ -79,8 +79,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 350,
-        "label": "Buka dengan 350 Imun Coin"
+        "imuCost": 150,
+        "label": "Buka dengan 150 Imun Coin"
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
@@ -123,8 +123,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 120,
-        "label": "Buka dengan 120 Imun Coin"
+        "imuCost": 100,
+        "label": "Buka dengan 100 Imun Coin"
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
@@ -169,8 +169,8 @@
       "unlock": {
         "type": "stat",
         "stat": "totalRuns",
-        "value": 3,
-        "label": "Selesaikan 3 run"
+        "value": 15,
+        "label": "Selesaikan 15 run"
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_eosinophil.png",
@@ -305,8 +305,8 @@
       "unlock": {
         "type": "stat",
         "stat": "bestWave",
-        "value": 5,
-        "label": "Capai Gelombang 5"
+        "value": 20,
+        "label": "Capai Gelombang 20"
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_tcd8.png",
@@ -350,8 +350,8 @@
       "unlock": {
         "type": "stat",
         "stat": "totalKills",
-        "value": 50,
-        "label": "Kalahkan 50 patogen (total)"
+        "value": 500,
+        "label": "Kalahkan 500 patogen (total)"
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_tcd4.png",
@@ -485,8 +485,8 @@
       ],
       "unlock": {
         "type": "imu",
-        "imuCost": 1500,
-        "label": "Buka dengan 1500 Imun Coin"
+        "imuCost": 200,
+        "label": "Buka dengan 200 Imun Coin"
       },
       "shopCost": 200,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",

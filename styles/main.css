@@ -2539,3 +2539,65 @@ img.lock-badge {
 .banner-slide .hero-stage { padding: 0; }
 .banner-slide .hero-stage .stage-info { z-index: 3; }
 .banner-slide .hero-stage .stage-badge { z-index: 3; }
+
+/* Gameplay HUD v2: combat-first final composition. Keep this as the single
+   final override while the older experimental HUD rules remain documented. */
+#screen-hud .hud-top{top:10px;left:12px;right:12px;max-width:none;align-items:flex-start;pointer-events:none}
+#screen-hud .hud-stat-left,#screen-hud .hud-stat-right{padding:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none;gap:8px}
+#screen-hud .hud-stat-left{min-width:34px}
+#screen-hud .hud-stat-right{margin-right:42px}
+#screen-hud .hud-stat-right .hud-currency-run{font-size:11px;padding:4px 6px;border-radius:8px;background:rgba(255,253,244,.78);box-shadow:0 2px 6px rgba(31,95,87,.1)}
+#screen-hud .hud-stat-right .hud-currency-run img{width:12px;height:12px}
+#screen-hud .hud-stat-right .btn-pause{width:32px;height:32px;min-height:32px;border-radius:9px}
+#screen-hud .hud-stat-right .btn-pause img{width:15px;height:15px}
+#screen-hud .hud-kills{font-size:11px;padding:4px 6px;border-radius:8px;background:rgba(255,253,244,.78);box-shadow:0 2px 6px rgba(31,95,87,.1)}
+#screen-hud .hud-kills img{width:12px;height:12px}
+#screen-hud .hud-center{min-width:0;padding:2px 7px;gap:0;background:rgba(255,253,244,.66);border:0;border-radius:8px;box-shadow:none}
+#screen-hud .hud-center .wave-pill{font-size:9px;letter-spacing:.06em;line-height:12px}
+#screen-hud .hud-center .timer-chip{font-size:9px;line-height:11px}
+#screen-hud .hud-center .timer-chip img{width:10px;height:10px}
+#screen-hud .hud-hero-status{left:12px;bottom:14px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;gap:6px}
+#screen-hud .hud-hero-status .avatar-wrap{width:40px;height:40px;flex-basis:40px}
+#screen-hud .hud-hero-status .hud-portrait{width:40px;height:40px;border-width:2px;box-shadow:0 0 0 1px #f0c04f,0 2px 5px rgba(31,95,87,.2)}
+#screen-hud .hud-hero-status .level-badge{font-size:7px;padding:1px 4px;bottom:-4px;right:-5px}
+#screen-hud .hud-hero-status .status-bars{width:124px;padding:3px 5px;background:rgba(255,253,244,.72);border-radius:7px}
+#screen-hud .hud-hero-status .hp-row{gap:4px}
+#screen-hud .hud-hero-status .hp-row .heart{width:11px;height:11px}
+#screen-hud .hud-hero-status .hud-hp-track{height:8px}
+#screen-hud .hud-hero-status .hud-hp-text{font-size:8px;min-width:32px}
+#screen-hud .hud-hero-status .xp-row{gap:4px}
+#screen-hud .hud-hero-status .hud-xp-track{height:4px}
+#screen-hud .hud-hero-status .hud-xp-ico{width:9px;height:9px}
+#screen-hud .hud-controls{right:12px;bottom:14px;gap:6px}
+#screen-hud .ability-bar{grid-template-columns:repeat(2,48px);gap:4px}
+#screen-hud .ability-btn{width:48px;height:48px;border-radius:12px;border-width:1.5px}
+#screen-hud .ability-btn .sk-ico{width:22px;height:22px}
+#screen-hud .ability-btn.ult{height:38px}
+#screen-hud .ability-btn.ult .sk-ico{width:24px;height:24px}
+#screen-hud .ability-btn .sk-name{font-size:6px;bottom:2px}
+#screen-hud .fire-btn{width:68px;height:68px;min-height:68px;border-width:2px;font-size:9px}
+#screen-hud .fire-btn img{width:22px;height:22px}
+#screen-hud .hud-minimap{top:72px;right:12px;width:64px;height:64px;opacity:.72}
+#screen-hud .hud-buffs{top:72px;left:80px;right:80px}
+#screen-hud .hud-announce{max-width:220px;font-size:12px}
+@media (max-width:390px){
+  #screen-hud .hud-top{left:7px;right:7px}
+  #screen-hud .hud-stat-right{margin-right:38px}
+  #screen-hud .hud-hero-status{left:7px;bottom:8px}
+  #screen-hud .hud-controls{right:7px;bottom:8px}
+  #screen-hud .ability-bar{grid-template-columns:repeat(2,42px)}
+  #screen-hud .ability-btn{width:42px;height:42px}
+  #screen-hud .ability-btn.ult{height:34px}
+  #screen-hud .fire-btn{width:58px;height:58px;min-height:58px}
+  #screen-hud .hud-hero-status .status-bars{width:106px}
+  #screen-hud .hud-minimap{right:7px;width:54px;height:54px}
+}
+
+/* Event HUD: readable but never a permanent card wall. */
+#screen-hud .hud-mission{top:58px;width:auto;max-width:min(230px,62vw);padding:4px 8px 5px;border:1px solid rgba(47,156,143,.7);border-radius:8px;background:rgba(255,252,245,.86);box-shadow:0 2px 8px rgba(31,95,87,.12)}
+#screen-hud .hud-mission-text{font-size:9px;line-height:12px}
+#screen-hud .hud-mission-bar{height:4px;margin-top:3px}
+#screen-hud .hud-gate{top:58px;font-size:9px;padding:5px 10px;border-width:1px;letter-spacing:.05em}
+#screen-hud .hud-gate-bank{font-size:8px;padding:1px 5px;margin-left:3px}
+#screen-hud .hud-hint{bottom:92px;max-width:70vw;overflow:hidden;text-overflow:ellipsis;font-size:9px;padding:4px 9px;background:rgba(20,88,79,.48)}
+@media (max-width:390px){#screen-hud .hud-hint{bottom:74px}}

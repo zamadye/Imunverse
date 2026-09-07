@@ -15,6 +15,7 @@ let currentId = null;
 // Modal (levelup/pause/revive) tampil di atas gameplay — state tidak berubah.
 const APP_STATE_BY_SCREEN = {
   codex: 'dashboard',
+  profile: 'dashboard',
   loading: 'loading',
   dashboard: 'dashboard',
   roster: 'roster',

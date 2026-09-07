@@ -11,6 +11,7 @@
  */
 
 import { getData } from '../core/data-store.js';
+import { isDevMode } from '../core/dev-mode.js';
 
 /** PRNG deterministik mulberry32 (32-bit). @returns {() => number} rng 0..1 */
 export function mulberry32(seed) {
@@ -56,6 +57,7 @@ export function getTodayMutator() {
 
 /** Status unlock mode (default / winNormal). */
 export function getModeUnlockStatus(modeDef, meta) {
+  if (isDevMode()) return { unlocked: true, label: 'DEV MODE' };
   const type = (modeDef.unlock && modeDef.unlock.type) || 'default';
   if (type === 'default') return { unlocked: true, label: '' };
   if (type === 'winNormal') {

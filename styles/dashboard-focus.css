@@ -1,0 +1,343 @@
+/*
+ * Dashboard focus layer
+ * Kept separate from main.css so the existing screen system remains intact.
+ * This changes presentation only; screens, IDs, gates and event handlers stay.
+ */
+#screen-dashboard .side-nav { display: none; }
+#screen-dashboard .dash-body { max-width: 560px; display: block; }
+#screen-dashboard .dash-scroll { width: 100%; max-width: none; gap: 10px; padding-bottom: 4px; }
+#screen-dashboard .topbar { max-width: 560px; gap: 6px; }
+#screen-dashboard .topbar .currency-chip:first-of-type { display: none; }
+#screen-dashboard .topbar .currency-chip.imu-chip {
+  margin-left: auto; padding: 4px 10px 4px 6px; font-size: 13px;
+}
+#screen-dashboard .topbar .currency-chip.imu-chip .coin { width: 25px; height: 25px; }
+
+/* Hero remains the first visual anchor. */
+#screen-dashboard .banner-carousel { height: clamp(230px, 38vh, 330px); }
+#screen-dashboard .quick-row { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+#screen-dashboard .quick-tile {
+  min-height: 62px; padding: 10px 4px 8px;
+  border: 1px solid rgba(47, 156, 143, .12);
+}
+#screen-dashboard .quick-tile img { width: 30px; height: 30px; }
+#screen-dashboard .qt-label { font-size: 10px; }
+
+/* The campaign card remains a meaningful chapter entry, while the actual
+   one-tap Play action stays in the dock and gets the strongest emphasis. */
+#screen-dashboard .play-row { display: block; }
+#screen-dashboard .campaign-card { min-height: 178px; padding: 13px 16px 16px; }
+#screen-dashboard .campaign-card .cc-organ { width: 54px; height: 54px; }
+#screen-dashboard .mode-stack { display: none; }
+
+/* Daily and missions become compact status surfaces, not competing cards. */
+#screen-dashboard .daily-card {
+  min-height: 0; padding: 9px 12px; display: flex; align-items: center; gap: 10px;
+}
+#screen-dashboard .daily-card .daily-info { flex: 1; min-width: 0; }
+#screen-dashboard .daily-card .claim-line { font-size: 10px; }
+#screen-dashboard .daily-card .btn { min-height: 34px; padding: 7px 12px; font-size: 11px; }
+#screen-dashboard .missions-card { padding: 12px; }
+#screen-dashboard .missions-card .card-title { margin-bottom: 7px; font-size: 13px; }
+#screen-dashboard .missions-card .mission-list { gap: 7px; }
+#screen-dashboard .missions-card .mission-item { gap: 3px; }
+
+/* Keep the existing lower progression surfaces available when scrolling, but
+   reduce their visual weight versus hero and Play. */
+#screen-dashboard #dash-stats { opacity: .8; }
+#screen-dashboard #duo-lb { opacity: .82; }
+#screen-dashboard .dock { max-width: 560px; grid-template-columns: repeat(5, 1fr); padding-top: 7px; }
+#screen-dashboard .dock-btn .dock-ico { width: 48px; height: 48px; border-radius: 16px; }
+#screen-dashboard .dock-btn .dock-ico img { width: 26px; height: 26px; }
+#screen-dashboard .dock-btn span { font-size: 11px; }
+#screen-dashboard .dock-btn.primary .dock-ico {
+  width: 66px; height: 66px; border-radius: 22px;
+  background: linear-gradient(180deg, var(--coral), var(--coral-deep));
+  box-shadow: 0 10px 24px rgba(233, 106, 76, .42), inset 0 2px 0 rgba(255,255,255,.3);
+}
+#screen-dashboard .dock-btn.primary span { color: var(--coral-deep); font-size: 14px; }
+@media (min-width: 700px) {
+  #screen-dashboard .banner-carousel { height: 330px; }
+}
+
+/* Sekunder: ikon kecil di bawah, tetap discoverable tanpa menjadi sidebar baru. */
+#screen-dashboard .secondary-dock {
+  width: 100%; max-width: 560px; display: flex; justify-content: center;
+  gap: clamp(14px, 5vw, 28px); padding: 2px 8px calc(2px + env(safe-area-inset-bottom));
+  opacity: .72;
+}
+#screen-dashboard .secondary-dock button {
+  appearance: none; border: 0; background: none; color: var(--ink-soft); cursor: pointer;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 40px; padding: 2px; font: 800 9px var(--font);
+}
+#screen-dashboard .secondary-dock img { width: 19px; height: 19px; object-fit: contain; opacity: .8; }
+#screen-dashboard .secondary-dock button:active { transform: scale(.92); }
+#screen-dashboard .secondary-dock button:focus-visible { outline: 2px solid var(--teal); border-radius: 8px; }
+
+/* ---------------------------------------------------------------
+   Meta screens: same lightweight visual language, existing logic intact.
+   Each screen keeps its own CTA and back route; only density changes.
+   --------------------------------------------------------------- */
+#screen-roster, #screen-upgrade, #screen-shop, #screen-herodetail,
+#screen-campaign, #screen-prep, #screen-bag, #screen-codex, #screen-bp {
+  padding-left: 12px; padding-right: 12px;
+}
+#screen-roster .screen-subtitle { max-width: 420px; margin-bottom: 8px; }
+#screen-roster .roster-grid { max-width: 620px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 10px; }
+#screen-roster .hero-card { padding: 8px 4px; background: rgba(255,253,244,.5); }
+#screen-roster .avatar-wrap { width: min(31vw, 120px); }
+#screen-roster .hero-name { font-size: 12px; }
+#screen-roster .hero-pattern, #screen-roster .lock-cond, #screen-roster .lock-buy-note { font-size: 9px; }
+#screen-roster .screen-footer { position: sticky; bottom: 0; padding: 8px 0 calc(4px + env(safe-area-inset-bottom)); background: linear-gradient(transparent,var(--cream) 30%); z-index: 2; }
+#screen-roster .screen-footer .btn { min-height: 52px; }
+
+#screen-upgrade .topbar, #screen-shop .topbar { max-width: 420px; margin-bottom: 7px !important; }
+#screen-upgrade .upg-tabs { position: sticky; top: 0; z-index: 3; width: min(100%,560px); padding: 4px; background: rgba(253,246,227,.92); backdrop-filter: blur(7px); }
+#screen-upgrade .upg-tab { min-height: 38px; font-size: 10px; padding: 8px 5px; }
+#screen-upgrade .upg-banner { margin: 4px 0 8px; }
+#screen-upgrade .upgrade-list { gap: 8px; }
+#screen-upgrade .upg-row { padding: 11px 12px; border-radius: 18px; gap: 7px; }
+#screen-upgrade .upg-info b { font-size: 13px; }
+#screen-upgrade .upg-info .upg-desc { font-size: 10px; }
+#screen-upgrade .upg-slider { height: 20px; }
+#screen-upgrade .btn-buy { min-height: 38px; padding: 8px 14px; font-size: 12px; }
+
+#screen-shop .shop-sections { max-width: 620px; gap: 11px; }
+#screen-shop .shop-section { padding: 10px; border-radius: 20px; background: rgba(255,253,244,.45); }
+#screen-shop .shop-section h3 { margin-bottom: 7px; font-size: 12px; }
+#screen-shop .shop-grid { gap: 8px; }
+#screen-shop .shop-card { padding: 9px 7px 9px; gap: 4px; border-radius: 17px; }
+#screen-shop .shop-sprite { width: 48px; height: 48px; }
+#screen-shop .shop-card b { font-size: 10.5px; }
+#screen-shop .shop-card .s-desc { font-size: 9px; }
+#screen-shop .shop-card .btn { min-height: 33px; font-size: 10px; }
+
+#screen-herodetail .hero-detail-body { width: min(100%,560px); margin: 0 auto; padding: 4px 6px 20px; gap: 9px; }
+#screen-herodetail .hero-detail-body > * { border-radius: 20px; }
+
+#screen-prep .prep-scroll { width: min(100%,760px); gap: 10px; }
+#screen-prep .prep-main { gap: 0; }
+#screen-prep .prep-step { margin: 7px 0 4px; font-size: 11px; }
+#screen-prep .prep-hint { font-size: 9px; }
+#screen-prep .prep-hero-row { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+#screen-prep .prep-hero { min-height: 104px; padding: 6px 3px; gap: 3px; }
+#screen-prep .prep-hero .ph-sprite { width: 62%; }
+#screen-prep .prep-hero .ph-name { font-size: 9px; }
+#screen-prep .prep-chip-row { gap: 6px; }
+#screen-prep .prep-chip { min-height: 42px; padding: 6px 9px; font-size: 10px; }
+#screen-prep .prep-aside { padding: 11px; border-radius: 22px; }
+#screen-prep .prep-summary .ps-hero { width: 82px; height: 82px; }
+#screen-prep .prep-summary .ps-mid b { font-size: 16px; }
+#screen-prep .prep-start { min-height: 54px; font-size: 17px; }
+
+#screen-bag .bag-scroll, #screen-codex .codex-body, #screen-bp .bp-body { width: min(100%,620px); margin: 0 auto; }
+#screen-bag .bag-grid { gap: 7px; }
+#screen-bag .bag-card { padding: 9px 5px; border-radius: 16px; }
+#screen-bag .bag-card .bag-sprite { width: 38px; height: 38px; }
+#screen-bag .bag-section-title { margin-top: 7px; font-size: 11px; }
+#screen-bp .bp-body { padding-bottom: 20px; }
+#screen-bp .bp-head { padding: 10px; border-radius: 20px; }
+
+@media (min-width: 600px) {
+  #screen-roster .roster-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  #screen-prep .prep-scroll { grid-template-columns: minmax(0,1.35fr) minmax(260px,.85fr); }
+  #screen-prep .prep-aside { position: sticky; top: 0; }
+}
+
+/* Compact topbar: profile is the only account entry; no settings/scope/sound clutter. */
+#screen-dashboard .account-chip { cursor: pointer; }
+#screen-dashboard .dash-points { display:inline-flex; align-items:center; gap:5px; background:var(--card); border-radius:999px; padding:4px 10px 4px 6px; font-weight:900; font-size:13px; box-shadow:var(--shadow-card); }
+#screen-dashboard .dash-points .coin { width:25px; height:25px; object-fit:contain; }
+#screen-dashboard .topbar .lang-pill { font-size:10px; padding:4px 8px; }
+
+/* Full-bleed page canvas on landscape; content remains readable inside cards. */
+@media (orientation: landscape) {
+  #screen-dashboard, #screen-roster, #screen-upgrade, #screen-shop,
+  #screen-herodetail, #screen-campaign, #screen-prep, #screen-bag,
+  #screen-codex, #screen-bp, #screen-profile { padding-left:0; padding-right:0; }
+  #screen-dashboard .topbar, #screen-dashboard .dock, #screen-dashboard .secondary-dock { padding-left:18px; padding-right:18px; max-width:none; }
+  #screen-roster .screen-header, #screen-roster .screen-subtitle,
+  #screen-upgrade .screen-header, #screen-shop .screen-header,
+  #screen-herodetail .topbar, #screen-campaign .topbar, #screen-prep .topbar,
+  #screen-bag .topbar, #screen-codex .topbar, #screen-bp .topbar,
+  #screen-profile .screen-header { max-width:none; padding-left:18px; padding-right:18px; }
+  #screen-roster .roster-grid, #screen-upgrade .upgrade-list, #screen-shop .shop-sections,
+  #screen-campaign .campaign-scroll, #screen-prep .prep-scroll, #screen-bag .bag-scroll,
+  #screen-codex .codex-body, #screen-bp .bp-body, #screen-profile .profile-card,
+  #screen-herodetail .hero-detail-body { max-width:1180px; width:calc(100% - 36px); }
+}
+
+/* Profile is a focused account surface, not another dashboard widget. */
+#screen-profile { justify-content:flex-start; }
+#screen-profile .profile-card { width:min(100%,420px); margin:8px auto 20px; padding:22px; display:flex; flex-direction:column; align-items:center; gap:9px; }
+#screen-profile .profile-avatar { width:86px; height:86px; object-fit:cover; border-radius:50%; border:3px solid var(--teal); background:var(--mint); }
+#screen-profile .profile-card h3 { font-size:21px; }
+#screen-profile .profile-balances { display:flex; gap:10px; width:100%; margin:8px 0; }
+#screen-profile .profile-balances span { flex:1; display:grid; grid-template-columns:24px 1fr; align-items:center; column-gap:5px; padding:8px; background:var(--cream-2); border-radius:13px; }
+#screen-profile .profile-balances img { width:23px; height:23px; grid-row:span 2; }
+#screen-profile .profile-balances b { font-size:13px; }
+#screen-profile .profile-balances small, #screen-profile .profile-stats small { font-size:9px; color:var(--ink-soft); font-weight:800; }
+#screen-profile .profile-stats { display:grid; grid-template-columns:repeat(3,1fr); width:100%; gap:7px; margin-bottom:8px; }
+#screen-profile .profile-stats span { text-align:center; padding:8px 3px; background:var(--mint-2); border-radius:12px; }
+#screen-profile .profile-stats b, #screen-profile .profile-stats small { display:block; }
+#screen-profile #btn-profile-logout { width:100%; min-height:45px; font-size:13px; }
+
+/* New-player state: locked destinations stay in code and unlock progressively,
+   but do not occupy dashboard space before they are useful. */
+#screen-dashboard .quick-tile.gated,
+#screen-dashboard .dock-btn.gated:not(.primary),
+#screen-dashboard .secondary-dock button.gated { display:none; }
+#screen-dashboard .quick-row:has(.quick-tile:not(.gated)) { min-height:0; }
+
+/* Primary loop action: independent from utility navigation. */
+#screen-dashboard .dashboard-play {
+  width: min(92vw, 360px); min-height: 76px; margin: 8px auto 4px;
+  border: 0; border-radius: 26px; cursor: pointer; pointer-events: auto;
+  display: flex; align-items: center; justify-content: center; gap: 13px;
+  padding: 9px 24px; color: #fff; font-family: var(--font);
+  background: linear-gradient(135deg, var(--coral), var(--coral-deep));
+  box-shadow: 0 12px 0 rgba(182, 76, 52, .22), 0 16px 28px rgba(233,106,76,.34), inset 0 2px 0 rgba(255,255,255,.3);
+  transition: transform .12s ease, filter .15s ease;
+}
+#screen-dashboard .dashboard-play:hover { filter: brightness(1.04); }
+#screen-dashboard .dashboard-play:active { transform: translateY(4px) scale(.98); box-shadow: 0 7px 0 rgba(182,76,52,.2), 0 10px 18px rgba(233,106,76,.28); }
+#screen-dashboard .dashboard-play:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+#screen-dashboard .dashboard-play-icon { width: 52px; height: 52px; border-radius: 18px; display:grid; place-items:center; background:rgba(255,255,255,.2); }
+#screen-dashboard .dashboard-play-icon img { width: 32px; height:32px; filter: brightness(0) invert(1); }
+#screen-dashboard .dashboard-play-copy { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
+#screen-dashboard .dashboard-play-copy b { font-size: 26px; line-height:1; letter-spacing:.08em; }
+#screen-dashboard .dashboard-play-copy small { font-size: 10px; font-weight:800; opacity:.88; }
+#screen-dashboard .dock { margin-top: 4px; }
+#screen-dashboard .dock-btn .dock-ico { width: 40px; height: 40px; border-radius: 13px; }
+#screen-dashboard .dock-btn .dock-ico img { width: 22px; height:22px; }
+#screen-dashboard .dock-btn span { font-size: 9px; }
+#screen-dashboard .secondary-dock { margin-top: 0; }
+@media (orientation: landscape) {
+  #screen-dashboard .dashboard-play { margin: 5px auto 2px; min-height: 62px; width: min(42vw, 330px); }
+  #screen-dashboard .dashboard-play-icon { width:42px; height:42px; border-radius:14px; }
+  #screen-dashboard .dashboard-play-copy b { font-size:21px; }
+  #screen-dashboard .dock { padding-top: 3px; }
+}
+
+/* Gameplay focus: keep only survival-critical HUD. The arena owns the screen. */
+#screen-hud .hud-minimap { display:none; }
+#screen-hud .hud-buffs { max-width:72vw; margin:0 auto; overflow:hidden; }
+#screen-hud .hud-mission { max-width:220px; opacity:.9; }
+#screen-hud .hud-gate { font-size:11px; padding:5px 10px; }
+#screen-hud .hud-hint { max-width:80vw; }
+@media (orientation: landscape) {
+  #screen-hud { padding:0; }
+  #screen-hud .hud-top { left:12px; right:12px; max-width:none; }
+  #screen-hud .hud-center { min-width:112px; padding:4px 10px; }
+  #screen-hud .hud-stat-left, #screen-hud .hud-stat-right { padding:4px 7px; gap:5px; }
+  #screen-hud .hud-hero-status { left:12px; bottom:10px; transform:scale(.9); transform-origin:bottom left; }
+  #screen-hud .hud-controls { right:12px; bottom:10px; transform:scale(.86); transform-origin:bottom right; }
+  #screen-hud .hud-mission { top:58px; left:50%; transform:translateX(-50%); }
+}
+
+/* Active daily/weekly quests: explicit accept → play → claim loop. */
+#screen-dashboard .active-quests { margin-top:10px; padding-top:8px; border-top:1px solid rgba(47,156,143,.16); display:flex; flex-direction:column; gap:7px; }
+#screen-dashboard .quest-heading { font-size:11px; color:var(--teal-deep); }
+#screen-dashboard .quest-row { position:relative; display:grid; grid-template-columns:1fr auto; gap:2px 7px; align-items:center; padding:6px 7px; border-radius:11px; background:rgba(234,244,221,.6); }
+#screen-dashboard .quest-title { display:flex; align-items:center; gap:5px; min-width:0; }
+#screen-dashboard .quest-title b { font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#screen-dashboard .quest-kind { font-size:7px; font-weight:900; color:#fff; background:var(--teal); border-radius:5px; padding:2px 4px; }
+#screen-dashboard .quest-desc { grid-column:1; color:var(--ink-soft); font-size:9px; }
+#screen-dashboard .quest-track { grid-column:1; height:4px; border-radius:4px; background:#d8ddc8; overflow:hidden; }
+#screen-dashboard .quest-track i { display:block; height:100%; border-radius:inherit; background:var(--coral); }
+#screen-dashboard .quest-action { grid-column:2; grid-row:1 / span 3; min-height:28px; padding:5px 8px; font-size:9px; }
+#screen-dashboard .quest-action:disabled { opacity:.58; }
+
+/* Compact HUD: gameplay canvas is primary; HUD is an unobtrusive safety rail. */
+#screen-hud .hud-top { top:5px; left:6px; right:6px; gap:4px; }
+#screen-hud .hud-stat-left, #screen-hud .hud-stat-right { padding:3px 5px; gap:4px; border-radius:10px; }
+#screen-hud .hud-center { min-width:86px; padding:3px 7px; gap:0; border-radius:10px; }
+#screen-hud .hud-center .wave-pill { font-size:10px; }
+#screen-hud .hud-center .timer-chip { font-size:9px; }
+#screen-hud .hud-center .timer-chip img { width:11px; height:11px; }
+#screen-hud .hud-kills, #screen-hud .hud-currency-run { font-size:10px; }
+#screen-hud .hud-kills img, #screen-hud .hud-currency-run img { width:11px; height:11px; }
+#screen-hud .hud-imu-run { display:none; }
+#screen-hud .hud-stat-left .hud-lvls { display:none; }
+#screen-hud .btn-pause { width:30px; height:30px; min-height:30px; border-radius:9px; padding:5px; }
+#screen-hud .btn-pause img { width:17px; height:17px; }
+#screen-hud .hud-hero-status { left:6px; bottom:6px; padding:4px 8px 4px 4px; gap:5px; border-radius:10px; }
+#screen-hud .hud-portrait, #screen-hud .hud-hero-status .avatar-wrap { width:38px; height:38px; }
+#screen-hud .hud-portrait { border-width:2px; }
+#screen-hud .level-badge { font-size:7px; padding:1px 4px; bottom:-3px; right:-6px; }
+#screen-hud .status-bars { width:112px; gap:3px; }
+#screen-hud .hp-row { gap:3px; }
+#screen-hud .hp-row .heart { width:10px; height:10px; }
+#screen-hud .hud-hp-track { height:8px; }
+#screen-hud .hud-hp-text { font-size:8px; min-width:32px; }
+#screen-hud .xp-row { gap:3px; }
+#screen-hud .hud-xp-track { height:4px; }
+#screen-hud .hud-xp-ico { width:9px; height:9px; }
+#screen-hud .hud-controls { right:6px; bottom:6px; gap:5px; }
+#screen-hud .ability-bar { grid-template-columns:repeat(2,42px); gap:4px; }
+#screen-hud .ability-btn { width:42px; height:42px; border-radius:11px; border-width:1.5px; }
+#screen-hud .ability-btn.ult { height:34px; }
+#screen-hud .ability-btn .sk-ico { width:19px; height:19px; }
+#screen-hud .ability-btn.ult .sk-ico { width:22px; height:22px; }
+#screen-hud .ability-btn .sk-name { font-size:6px; bottom:2px; }
+#screen-hud .ability-btn.ult .sk-name { font-size:7px; bottom:3px; }
+#screen-hud .ability-btn .key-tag { font-size:6px; top:2px; left:3px; }
+#screen-hud .ability-btn .cd-num { font-size:14px; }
+#screen-hud .fire-btn { width:58px; height:58px; min-height:58px; border-width:2px; font-size:8px; border-radius:50%; }
+#screen-hud .fire-btn img { width:20px; height:20px; }
+#screen-hud .hud-mission { top:45px; width:180px; padding:4px 7px; border-radius:9px; }
+#screen-hud .hud-mission-text { font-size:8px; }
+#screen-hud .hud-mission-bar { height:4px; margin-top:2px; }
+#screen-hud .hud-gate { font-size:8px; padding:3px 7px; }
+#screen-hud .hud-buffs { top:43px; gap:3px; }
+#screen-hud .hud-buff-chip { font-size:8px; padding:1px 5px 1px 2px; border-width:1px; }
+#screen-hud .hud-buff-chip img { width:13px; height:13px; }
+@media (orientation: landscape) {
+  #screen-hud .hud-top { top:4px; }
+  #screen-hud .hud-hero-status { transform:none; }
+  #screen-hud .hud-controls { transform:none; }
+}
+
+/* Gameover CTA must never disappear below a tall victory summary on phones. */
+@media (max-height: 760px) {
+  #screen-gameover .go-card { width:min(94vw,500px); max-height:calc(100dvh - 8px); padding:10px 14px 8px; gap:5px; }
+  #screen-gameover .go-stars { display:none; }
+  #screen-gameover .gameover-title { font-size:20px; }
+  #screen-gameover .gameover-sub { font-size:10px; }
+  #screen-gameover .go-rankup { margin:0 auto 2px; padding:6px 12px; gap:8px; }
+  #screen-gameover .go-rankup .rank-emblem.big { width:38px; height:38px; font-size:15px; }
+  #screen-gameover .go-rankup-text b { font-size:12px; }
+  #screen-gameover .go-rankup-text span { font-size:9px; }
+  #screen-gameover #gameover-summary { max-height:17vh; overflow-y:auto; }
+  #screen-gameover .summary-cell { padding:5px 3px; }
+  #screen-gameover .summary-cell b { font-size:14px; }
+  #screen-gameover .summary-cell span { font-size:8px; }
+  #screen-gameover .summary-reward { font-size:11px; gap:5px; }
+  #screen-gameover .summary-reward strong { font-size:18px; }
+  #screen-gameover .go-chest { width:25px; }
+  #screen-gameover #btn-double-currency { min-height:36px; padding:6px 10px; font-size:11px; }
+  #screen-gameover .btn-row { position:sticky; bottom:-8px; padding:6px 0 2px; background:var(--cream); z-index:2; }
+  #screen-gameover .btn-row .btn { min-height:42px; padding:8px 9px; font-size:12px; }
+}
+
+/* Gameplay HUD refinement: arena first, compact utility controls. */
+#screen-hud .hud-center { min-width:72px; padding:2px 6px; background:rgba(255,253,244,.72); box-shadow:0 2px 5px rgba(31,95,87,.1); }
+#screen-hud .hud-center .wave-pill { font-size:8px; letter-spacing:.04em; padding:1px 3px; }
+#screen-hud .hud-center .timer-chip { font-size:8px; }
+#screen-hud .hud-center .timer-chip img { width:9px; height:9px; }
+#screen-hud .hud-hero-status { background:transparent; border:0; box-shadow:none; backdrop-filter:none; padding:2px; }
+#screen-hud .hud-hero-status .status-bars { background:rgba(255,253,244,.64); border-radius:7px; padding:3px 5px; }
+#screen-hud .hud-menu-toggle { position:absolute; top:7px; right:6px; z-index:8; width:30px; height:30px; border:0; border-radius:9px; background:rgba(255,253,244,.82); color:var(--teal-dark); font:900 18px/1 var(--font); box-shadow:0 2px 6px rgba(0,0,0,.16); pointer-events:auto; }
+#screen-hud .hud-game-menu { position:absolute; top:42px; right:6px; z-index:9; width:138px; padding:5px; border-radius:12px; background:rgba(255,253,244,.96); box-shadow:0 8px 22px rgba(0,0,0,.22); display:flex; flex-direction:column; gap:3px; pointer-events:auto; }
+#screen-hud .hud-game-menu.hidden { display:none; }
+#screen-hud .hud-menu-link { border:0; border-radius:8px; background:transparent; padding:7px; display:flex; align-items:center; gap:7px; color:var(--ink); font:900 10px var(--font); text-align:left; }
+#screen-hud .hud-menu-link:active { background:var(--mint-2); }
+#screen-hud .hud-menu-link img { width:16px; height:16px; }
+#screen-dashboard .dock { grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); justify-content:center; max-width:340px; margin-left:auto; margin-right:auto; }
+#screen-dashboard .dock-btn { min-width:0; }
+#screen-dashboard .secondary-dock { display:none; }
+@media (orientation:landscape) {
+  #screen-hud .hud-center { min-width:82px; }
+  #screen-hud .hud-menu-toggle { top:5px; right:6px; }
+}

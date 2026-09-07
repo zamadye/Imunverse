@@ -9,9 +9,11 @@ import { STATE } from '../../core/state-manager.js';
 import { getData } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el } from '../screen-manager.js';
+import { isDevMode } from '../../core/dev-mode.js';
 
 /** Evaluasi syarat unlock arena dari statistik meta. @returns {{unlocked:boolean, text:string, pct:number}} */
 export function arenaUnlockStatus(arenaDef, meta = STATE.meta) {
+  if (isDevMode()) return { unlocked: true, text: 'DEV MODE', pct: 1 };
   const { type, value } = arenaDef.unlock;
   const stats = meta.stats;
   switch (type) {

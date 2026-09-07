@@ -68,6 +68,7 @@ export function createDefaultMeta() {
     },
     consumables: { serum_awal: 0 },
     missionsClaimed: [],
+    questState: { periodKey: null, accepted: {}, claimed: {}, baseline: {} },
     globalUpgrades: {},   // Fase 17: upgrade permanen global (Imun Coin, semua hero)
     heroNotices: [],      // Fase 17: antrean notifikasi "HERO BARU" (overlay dashboard)
     stats: {

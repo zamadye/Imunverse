@@ -1,5 +1,14 @@
 {
   "schemaVersion": 3,
+  "daily": [
+    { "id": "daily_kill_10", "name": "Pembersihan Pagi", "desc": "Kalahkan 10 patogen", "stat": "totalKills", "target": 10, "reward": 15 },
+    { "id": "daily_collect_8", "name": "Nutrisi Tubuh", "desc": "Kumpulkan 8 nutrisi", "stat": "totalNutrients", "target": 8, "reward": 12 },
+    { "id": "daily_survive_60", "name": "Penjaga Satu Menit", "desc": "Bertahan 60 detik dalam run", "stat": "totalSurviveSeconds", "target": 60, "reward": 20 }
+  ],
+  "weekly": [
+    { "id": "weekly_kill_100", "name": "Operasi Bersih", "desc": "Kalahkan 100 patogen", "stat": "totalKills", "target": 100, "reward": 80 },
+    { "id": "weekly_boss_2", "name": "Pemburu Penjaga", "desc": "Kalahkan 2 boss", "stat": "bossKills", "target": 2, "reward": 100 }
+  ],
   "missions": [
     {
       "id": "first_blood",
