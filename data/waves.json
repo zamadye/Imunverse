@@ -53,5 +53,52 @@
     "packSize": 3,
     "packPerWave": 0.45,
     "minWaveTime": 8
+  },
+  "breakDuration": 2.5,
+  "trickleIntervalMult": 2.2,
+  "elite": {
+    "startWave": 3,
+    "base": 1,
+    "addEveryWaves": 4,
+    "max": 3,
+    "hpMult": 2.6,
+    "radiusMult": 1.25,
+    "affixes": [
+      "brute",
+      "swift",
+      "regen",
+      "volatile"
+    ],
+    "affixParams": {
+      "brute": {
+        "dmgMult": 1.5,
+        "color": "#ff6b6b",
+        "label": "BRUTAL"
+      },
+      "swift": {
+        "speedMult": 1.35,
+        "windup": 0.28,
+        "color": "#5ef2ff",
+        "label": "GESIT"
+      },
+      "regen": {
+        "pctPerSec": 0.02,
+        "color": "#7ae582",
+        "label": "REGEN"
+      },
+      "volatile": {
+        "fuse": 0.5,
+        "radius": 90,
+        "damage": 12,
+        "color": "#ffd93d",
+        "label": "LEDAK"
+      }
+    }
+  },
+  "bossEnrage": {
+    "threshold": 0.4,
+    "speedMult": 1.3,
+    "intervalMult": 0.62,
+    "telegraphMult": 0.85
   }
 }

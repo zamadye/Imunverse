@@ -12,6 +12,7 @@
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
+import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
 import { loadLang, initSweep, sweepAll } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
@@ -253,6 +254,7 @@ async function boot() {
   // 4) Wiring UI
   game.init({ canvas, input });
   wireUiBridge();
+  initMetrics(); // V2 Phase 0: rekam KPI run (localStorage, pasif via event bus)
 
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);

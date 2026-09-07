@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 Phase 2 — CORE COMBAT. Movement feel, smart targeting, contact attack bertelegraph (docs/v2/phase-02-core-combat.md).",
+  "movement": {
+    "accel": 9,
+    "decel": 13,
+    "stopSnap": 40
+  },
+  "targeting": {
+    "woundedWeight": 0.45
+  },
+  "contactAttack": {
+    "windup": 0.35,
+    "cooldown": 0.9,
+    "rangeBonus": 6,
+    "strikeTolerance": 1.35,
+    "lunge": 220,
+    "shiverHz": 26,
+    "shiverAmp": 1.6
+  }
+}

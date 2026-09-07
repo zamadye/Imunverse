@@ -5,7 +5,8 @@
  * dieksekusi executor di bawah — TIDAK ada logika hero yang di-hardcode.
  */
 
-import { getData } from '../core/data-store.js';
+import { getData, getGameFeel } from '../core/data-store.js';
+import { buzz } from './haptics.js'; // V2 Phase 1
 import { audio } from './audio-system.js';
 import { emit } from '../core/ui-bridge.js';
 import { t as tr } from '../systems/i18n.js';
@@ -49,8 +50,16 @@ export class SkillSystem {
     const run = ctx.game.run;
     for (const fx of s.def.effects) this.#apply(fx, ctx, run);
     ctx.player.squash = 0.16;
-    ctx.camera?.addShake(0.2);
-    ctx.game.hitStopRun(0.05);
+    // V2 Phase 1: ULTIMATE cast lebih "berat" — hit-stop & shake dari gamefeel.json
+    if (s.ult) {
+      const gf = getGameFeel();
+      ctx.camera?.addShake(gf.shake.ultCast);
+      ctx.game.hitStopRun(gf.hitStop.ult);
+      buzz('levelup'); // pola selebrasi pendek utk momen ult
+    } else {
+      ctx.camera?.addShake(0.2);
+      ctx.game.hitStopRun(0.05);
+    }
     audio.ability(s.ult ? 'petir' : 'tebasan');
     this.lastBanner = tr(s.def.name);
     emit('abilityBanner', { name: tr(s.def.name), color: s.def.color, ult: s.ult });

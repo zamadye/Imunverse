@@ -8,6 +8,7 @@
 import { PERSP } from '../render/camera.js';
 
 import { audio } from '../systems/audio-system.js';
+import { getCombat } from '../core/data-store.js';
 
 let nextPlayerId = 1;
 
@@ -36,6 +37,8 @@ export class Player {
     this.moving = false;
     this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
     this.stepT = 0;     // jeda antar langkah (debu kaki)
+    this.vx = 0;        // V2 Phase 2: velocity smoothing (accel/decel)
+    this.vy = 0;
     this.alive = true;
   }
 
@@ -49,10 +52,29 @@ export class Player {
     if (!this.alive) return;
 
     // ---- Gerakan (delta-time based) ----
-    if (move.magnitude > 0.01) {
+    // V2 Phase 2: velocity smoothing — ramp ~0.11s saat mulai, berhenti tajam
+    // ~0.08s saat lepas (decel > accel). Bukan momentum licin; hanya
+    // menghaluskan transisi supaya arah tidak patah-patah.
+    const mv = getCombat().movement;
+    const hasInput = move.magnitude > 0.01;
+    let tvx = 0, tvy = 0;
+    if (hasInput) {
       const speed = this.stats.speed * Math.min(1, move.magnitude);
-      this.x += move.x * speed * dt;
-      this.y += move.y * speed * dt;
+      tvx = move.x * speed;
+      tvy = move.y * speed;
+    }
+    const k = 1 - Math.exp(-(hasInput ? mv.accel : mv.decel) * dt);
+    this.vx += (tvx - this.vx) * k;
+    this.vy += (tvy - this.vy) * k;
+    // snap-to-zero: decay eksponensial tak pernah 0 — sisa kecepatan kecil
+    // saat lepas input dipangkas supaya berhenti terasa TAJAM (spek §4.3)
+    if (!hasInput && Math.hypot(this.vx, this.vy) < (mv.stopSnap || 40)) {
+      this.vx = 0;
+      this.vy = 0;
+    }
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    if (hasInput) {
       this.facing = Math.atan2(move.y, move.x);
       this.moving = true;
       // Fase 12b: animasi jalan — bobbing + debu langkah kecil
@@ -63,7 +85,7 @@ export class Player {
         game.run.effects.spawnBurst(this.x, this.y + this.radius * 0.75, 'rgba(224,244,236,0.85)', 1, 30, 2.2);
       }
     } else {
-      this.moving = false;
+      this.moving = Math.hypot(this.vx, this.vy) > 4; // masih meluncur pelan
     }
 
     // ---- Timers ----
@@ -72,7 +94,7 @@ export class Player {
     this.attackTimer -= dt;
     // Fase 12: ATTACK OTOMATIS — bila cooldown siap & ada musuh dalam jangkauan
     if (this.attackTimer <= 0 && this.alive) {
-      const target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
+      const target = game.findAttackTarget(this.x, this.y, this.stats.effectiveAttackRange); // V2 Phase 2: finisher bias
       if (target) {
         this.performAttack(target, game);
         this.attackTimer = this.stats.cooldown;
@@ -99,7 +121,7 @@ export class Player {
         return false;
       }
     })();
-    let target = game.findNearestEnemy(this.x, this.y, this.stats.effectiveAttackRange);
+    let target = game.findAttackTarget(this.x, this.y, this.stats.effectiveAttackRange); // V2 Phase 2: finisher bias
     if (!target && !aimActive) {
       // Tidak ada musuh & tidak mengarahkan: swing + langkah maju (feedback jelas)
       this.performAttack({ x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 }, game);

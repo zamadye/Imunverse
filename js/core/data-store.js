@@ -27,6 +27,9 @@ const store = {
   progression: null, // data/progression.json (Fase 18: kurva early/mid/late + gatekeeper)
   ranks: null,       // data/ranks.json (Fase 19: pangkat penjaga — tujuan pemain)
   features: null,    // data/features.json (F21: gerbang unlock menu bertahap)
+  gamefeel: null,    // data/gamefeel.json (V2 Phase 1: rantai feedback game feel)
+  combat: null,      // data/combat.json (V2 Phase 2: movement/targeting/contact attack)
+  mastery: null,     // data/mastery.json (V2 Phase 6: hero mastery dari bermain)
 };
 
 import { BUILD } from './version.js';
@@ -59,6 +62,9 @@ export async function loadAllData() {
     progression: 'data/progression.json',
     ranks: 'data/ranks.json',
     features: 'data/features.json',
+    gamefeel: 'data/gamefeel.json',
+    combat: 'data/combat.json',
+    mastery: 'data/mastery.json',
   };
 
   const entries = await Promise.all(
@@ -190,6 +196,27 @@ export function getFeatures() {
 /** Seluruh config pangkat (tier ladder, formula GP, musim). */
 export function getRanks() {
   return getData().ranks;
+}
+
+// ===== V2 Phase 1: game feel (data/gamefeel.json) =====
+
+/** Seluruh config rantai feedback (knockback/hit-stop/crit/haptic/dll). */
+export function getGameFeel() {
+  return getData().gamefeel;
+}
+
+// ===== V2 Phase 2: core combat (data/combat.json) =====
+
+/** Config movement feel, smart targeting, contact attack bertelegraph. */
+export function getCombat() {
+  return getData().combat;
+}
+
+// ===== V2 Phase 6: hero mastery (data/mastery.json) =====
+
+/** Config mastery: formula XP, kurva level, reward, gelar. */
+export function getMastery() {
+  return getData().mastery;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

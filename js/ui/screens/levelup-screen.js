@@ -35,8 +35,11 @@ export function show({ level, choices }) {
   for (const def of choices) {
     const stacks = STATE.meta && game.run ? game.run.upgrades[def.id] || 0 : 0;
     const isSyn = syn.includes(def.id);
+    // V2 Phase 4: kelas rarity + kartu evolusi (denyut kejutan terlihat)
+    const rar = def.rarity || 'common';
     const card = el('button', {
-      class: 'choice-card' + (isSyn ? ' synergy' : ''),
+      class: 'choice-card' + (isSyn ? ' synergy' : '') +
+        (rar !== 'common' ? ` rar-${rar}` : '') + (def.isEvo ? ' evo-card' : ''),
       onclick: () => {
         game.chooseLevelUp(def.id);
         // bila masih ada level berlebih, game.js membuka modal baru — render ulang
@@ -52,6 +55,10 @@ export function show({ level, choices }) {
         el('b', {}, [
           el('span', { text: def.name }),
           isSyn ? el('span', { class: 'syn-badge', title: `Cocok untuk ${heroDef.name}`, text: '✦ Sinergi' }) : null,
+          // V2 Phase 4: label rarity/evo
+          def.isEvo ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: '⚡ EVOLUSI' })
+            : (rar === 'epic' ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: 'EPIC' })
+              : rar === 'rare' ? el('span', { class: 'syn-badge', style: 'background:#7fdbff;color:#0b2a33', text: 'RARE' }) : null),
         ]),
         el('p', { text: def.desc }),
         stacks > 0 ? el('span', { class: 'choice-stack', text: `Dimiliki: ${stacks}x` }) : null,

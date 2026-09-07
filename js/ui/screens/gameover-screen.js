@@ -128,6 +128,19 @@ export function show(summary) {
     ]));
   }
 
+  // V2 Phase 6: HERO MASTERY — hadiah kecil tiap run untuk hero yang DIPAKAI
+  if (summary.mastery) {
+    const mm = summary.mastery;
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-mastery' }, [
+      el('span', { text: '★', style: 'color:#ffd93d;font-weight:900' }),
+      el('span', {
+        text: mm.levelsGained > 0
+          ? ` Mastery ${mm.heroName} +${mm.xp} XP — NAIK Lv ${mm.level}${mm.title ? ` (${mm.title})` : ''}!`
+          : ` Mastery ${mm.heroName} +${mm.xp} XP · Lv ${mm.level}${mm.title ? ` (${mm.title})` : ''}`,
+      }),
+    ]));
+  }
+
   // Fase 19: GP PANGKAT PENJAGA + ceremony NAIK PANGKAT (momen emosional)
   const rankupBox = document.getElementById('go-rankup');
   if (summary.rank) {

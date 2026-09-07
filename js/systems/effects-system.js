@@ -70,6 +70,18 @@ export class EffectsSystem {
     this.effects.push({ type: 'killfx', kind, x, y, color, seed, life, maxLife: life });
   }
 
+  /**
+   * V2 Phase 1 "death pop": sprite musuh membesar lalu memudar saat mati,
+   * supaya kill tidak terasa "lenyap begitu saja" (spek docs/v2/phase-01).
+   * @param {string} sprite path aset musuh
+   * @param {number} radius radius render musuh (px dunia)
+   * @param {boolean} flip  arah hadap terakhir
+   */
+  spawnKillPop(x, y, sprite, radius, flip = false, dur = 0.15, scaleTo = 1.3) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    this.effects.push({ type: 'killpop', x, y, sprite, radius, flip, scaleTo, life: dur, maxLife: dur });
+  }
+
   /** Bintang hit (aset fx_hit.png) saat musuh menerima damage. */
   spawnSpark(x, y, big = false) {
     if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
@@ -80,7 +92,7 @@ export class EffectsSystem {
    * Angka damage mengambang (real, dipanggil dari setiap hit).
    * @param {number} amount
    */
-  spawnDamageNumber(x, y, amount, color = '#fff') {
+  spawnDamageNumber(x, y, amount, color = '#fff', size = 13) {
     if (this.numbers.length >= MAX_NUMBERS) this.numbers.shift();
     this.numbers.push({
       x: x + (Math.random() - 0.5) * 14,
@@ -90,7 +102,7 @@ export class EffectsSystem {
       maxLife: 0.65,
       text: String(Math.max(1, Math.round(amount))),
       color,
-      size: 13,
+      size, // V2 Phase 1: skala mengikuti besaran damage + varian crit
     });
   }
 

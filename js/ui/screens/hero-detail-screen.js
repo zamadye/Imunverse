@@ -16,6 +16,7 @@ import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } fr
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { squadMultipliers } from '../../systems/upgrade-system.js';
 import { t as tr } from '../../systems/i18n.js';
+import { masteryInfo } from '../../systems/mastery-system.js'; // V2 Phase 6
 
 let heroId = null;
 
@@ -74,6 +75,32 @@ function selectHero() {
     ]),
     el('b', { class: 'hl-name', text: heroDef.name }),
     el('span', { class: 'hl-title', text: tr(heroDef.title) }),
+    // V2 Phase 3: PASSIVE khas hero — identitas harus terbaca sebelum dipilih
+    heroDef.passive ? el('span', {
+      class: 'hl-passive',
+      style: 'display:block;font-size:11px;color:#ffd93d;margin:2px 0 0;font-weight:800',
+      text: `✦ ${heroDef.passive.name} — ${heroDef.passive.desc}`,
+    }) : null,
+    // V2 Phase 6: HERO MASTERY — level + gelar + bar progres + statistik per-hero
+    (() => {
+      const mi = masteryInfo(meta, heroId);
+      return el('div', { class: 'hl-mastery', style: 'margin:4px 0 0;font-size:11px' }, [
+        el('span', {
+          style: 'color:#c39bd3;font-weight:900',
+          text: `★ Mastery Lv ${mi.level}${mi.title ? ` — ${mi.title}` : ''}`,
+        }),
+        el('div', {
+          class: 'hl-mastery-bar',
+          style: 'height:5px;border-radius:3px;background:rgba(0,0,0,0.15);margin:3px auto;max-width:220px;overflow:hidden',
+        }, [
+          el('div', { style: `height:100%;width:${Math.round(mi.pct * 100)}%;background:#c39bd3;border-radius:3px` }),
+        ]),
+        el('span', {
+          style: 'color:#5b7d74',
+          text: mi.maxed ? 'MAKSIMAL — Legenda!' : `${mi.intoLevel}/${mi.needed} XP · ${mi.kills} kill · ${mi.runs} run`,
+        }),
+      ]);
+    })(),
     // Stat chips (damage merah / HP hijau) — gaya kartu game modern
     el('div', { class: 'hl-chips' }, [
       el('span', { class: 'hl-chip atk' }, [
