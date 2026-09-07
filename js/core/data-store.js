@@ -27,6 +27,7 @@ const store = {
   progression: null, // data/progression.json (Fase 18: kurva early/mid/late + gatekeeper)
   ranks: null,       // data/ranks.json (Fase 19: pangkat penjaga — tujuan pemain)
   features: null,    // data/features.json (F21: gerbang unlock menu bertahap)
+  gamefeel: null,    // data/gamefeel.json (V2 Phase 1: rantai feedback game feel)
 };
 
 import { BUILD } from './version.js';
@@ -59,6 +60,7 @@ export async function loadAllData() {
     progression: 'data/progression.json',
     ranks: 'data/ranks.json',
     features: 'data/features.json',
+    gamefeel: 'data/gamefeel.json',
   };
 
   const entries = await Promise.all(
@@ -190,6 +192,13 @@ export function getFeatures() {
 /** Seluruh config pangkat (tier ladder, formula GP, musim). */
 export function getRanks() {
   return getData().ranks;
+}
+
+// ===== V2 Phase 1: game feel (data/gamefeel.json) =====
+
+/** Seluruh config rantai feedback (knockback/hit-stop/crit/haptic/dll). */
+export function getGameFeel() {
+  return getData().gamefeel;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

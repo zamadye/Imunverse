@@ -35,7 +35,8 @@ import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
 import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention } from '../systems/retention-system.js';
-import { getProgressionBand, getProgression } from './data-store.js';
+import { getProgressionBand, getProgression, getGameFeel } from './data-store.js';
+import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
 import {
@@ -427,6 +428,21 @@ export const game = {
     }
     run.time += dt;
 
+    // V2 Phase 1: LOW-HP heartbeat — HP < threshold → detak jantung berkala
+    {
+      const lowHp = getGameFeel().lowHp;
+      const p = run.player;
+      if (p.alive && p.hp / p.maxHP < lowHp.threshold) {
+        run.heartbeatT = (run.heartbeatT ?? 0) - dt;
+        if (run.heartbeatT <= 0) {
+          run.heartbeatT = lowHp.heartbeatSec;
+          audio.heartbeat();
+        }
+      } else {
+        run.heartbeatT = 0;
+      }
+    }
+
     // Fase 9: genangan toksin — damage berkala saat player di dalamnya
     for (let i = run.hazards.length - 1; i >= 0; i--) {
       const hz = run.hazards[i];
@@ -565,6 +581,7 @@ export const game = {
     if (events.bossSpawn) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: true });
       run.camera.addShake(0.7);
+      buzz('boss'); // V2 Phase 1: kehadiran boss terasa fisik
     }
 
     // 3. Update musuh (behavior + boss AOE)
@@ -581,12 +598,17 @@ export const game = {
     // 6. Kollision proyektil vs musuh
     run.collision.handleProjectileHits(run.projectiles, (proj, enemy) => {
       // Eosinofil: granula toksik 1,5x damage ke Parasit (dokumen entitas, nyata)
-      const dmg = (proj.antiParasitMult && enemy.def && enemy.def.id === 'parasit')
+      let dmg = (proj.antiParasitMult && enemy.def && enemy.def.id === 'parasit')
         ? proj.damage * proj.antiParasitMult
         : proj.damage;
+      // V2 Phase 1: critical hit (chance & mult dari data/gamefeel.json)
+      const crit = this.rollCrit();
+      if (crit) dmg *= getGameFeel().crit.mult;
       const died = enemy.takeDamage(dmg);
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
-      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died);
+      // V2 Phase 1: knockback mikro searah proyektil (boss imun)
+      this.applyHitKnockback(enemy, proj.vx, proj.vy, getGameFeel().knockback.projectile);
+      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit);
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
@@ -800,6 +822,7 @@ export const game = {
     setLevelUpOpen(true);
     setPaused(true);
     audio.levelup();
+    buzz('levelup'); // V2 Phase 1: selebrasi terasa di tangan
     emit('levelup', { level: run.level, choices: run.currentChoices });
   },
 
@@ -849,21 +872,56 @@ export const game = {
       while (diff > Math.PI) diff -= Math.PI * 2;
       while (diff < -Math.PI) diff += Math.PI * 2;
       if (Math.abs(diff) > half) return;
-      const died = e.takeDamage(damage);
+      // V2 Phase 1: crit roll + knockback melee (lebih kuat dari proyektil)
+      const crit = this.rollCrit();
+      const dmg = crit ? damage * getGameFeel().crit.mult : damage;
+      const died = e.takeDamage(dmg);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
-      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : damage, died);
-      if (!e.lastHitAbsorbed) this.onDamageDealt(damage);
+      this.applyHitKnockback(e, dx, dy, getGameFeel().knockback.melee);
+      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit);
+      if (!e.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(e, null);
     });
+  },
+
+  /** V2 Phase 1: roll critical hit global (data/gamefeel.json crit.chance). */
+  rollCrit() {
+    const cfg = getGameFeel().crit;
+    return Math.random() < (this.run.critChanceOverride ?? cfg.chance);
+  },
+
+  /**
+   * V2 Phase 1: knockback mikro — dorong musuh searah datangnya hit.
+   * Memakai e.vx/vy yang sudah punya decay friksi di enemy.update.
+   * Boss imun (gamefeel.knockback.bossImmune) agar fight tetap terbaca.
+   */
+  applyHitKnockback(enemy, dirX, dirY, force) {
+    if (!enemy.alive) return;
+    if (enemy.isBoss && getGameFeel().knockback.bossImmune) return;
+    const len = Math.hypot(dirX, dirY);
+    if (len < 0.001) return;
+    enemy.vx += (dirX / len) * force;
+    enemy.vy += (dirY / len) * force;
   },
 
   /**
    * Feedback visual per hit: bintang aset fx_hit.png + angka damage mengambang.
    */
-  spawnHitFeedback(enemy, damage, died) {
+  spawnHitFeedback(enemy, damage, died, crit = false) {
     const run = this.run;
-    run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || enemy.isBoss);
-    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, died ? '#ffd93d' : '#ffffff');
+    const gf = getGameFeel();
+    run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
+    // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
+    const dn = gf.damageNumber;
+    let size = dn.base + Math.min(dn.maxBonus, damage * dn.perDamage);
+    let color = died ? '#ffd93d' : '#ffffff';
+    if (crit) {
+      size *= gf.crit.sizeMult;
+      color = gf.crit.color;
+      this.hitStopRun(gf.hitStop.crit); // jeda mikro "berat" khusus crit
+      buzz('crit');
+    }
+    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
@@ -922,6 +980,7 @@ export const game = {
     // Screen shake saat kena damage besar (sesuai spek)
     run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
     audio.playerHit();
+    buzz('playerHit'); // V2 Phase 1: getaran pola [30,40,30] di HP
     player.squash = 0.28; // JUICE squash saat terkena hit
     if (!player.alive) {
       this.handlePlayerDeath();
@@ -1175,8 +1234,18 @@ export const game = {
       emit('toast', { message: `COMBO x${run.combo.count}! +${10 + run.combo.count} XP`, kind: 'gold' });
     }
     audio.kill();
-    if (enemy.isBoss) this.hitStopRun(0.07);      // hit-stop 70ms boss
-    else if (enemy.def.elite) this.hitStopRun(0.035); // 35ms elite
+    // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
+    const gf = getGameFeel();
+    if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
+    else if (enemy.def.elite) { this.hitStopRun(gf.hitStop.elite); buzz('elite'); }
+    else { this.hitStopRun(gf.hitStop.kill); buzz('kill'); }
+    // V2 Phase 1: micro shake per kill (biasa/elite; boss sudah shake 0.65 di bawah)
+    if (!enemy.isBoss) run.camera.addShake(enemy.def.elite ? gf.shake.elite : gf.shake.kill);
+    // V2 Phase 1: DEATH POP — sprite membesar & memudar, kill tidak "lenyap"
+    run.effects.spawnKillPop(
+      enemy.x, enemy.y, enemy.def.spriteIdle, enemy.radius,
+      run.player.x < enemy.x, gf.killPop.dur, gf.killPop.scaleTo,
+    );
     const pfx = getRetention().particles;
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
@@ -1756,6 +1825,14 @@ export const game = {
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
       else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
+      else if (fx.type === 'killpop') {
+        // V2 Phase 1 death pop: sprite musuh membesar 1→scaleTo lalu memudar
+        const kt = 1 - fx.life / fx.maxLife; // 0..1
+        const scale = 1 + (fx.scaleTo - 1) * kt;
+        ctx.globalAlpha = Math.max(0, 1 - kt);
+        drawSprite(ctx, fx.sprite, fx.x, fx.y, fx.radius * 2.667 * scale, 0, {});
+        ctx.globalAlpha = 1;
+      }
       ctx.restore();
     }
     for (const pt of run.effects.particles) {
