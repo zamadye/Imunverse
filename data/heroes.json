@@ -40,7 +40,15 @@
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_macrophage.png",
-      "tier": "common"
+      "tier": "common",
+      "passive": {
+        "type": "lifesteal_kill",
+        "name": "Fagositosis",
+        "desc": "Melahap sisa musuh: tiap kill memulihkan 2 HP.",
+        "params": {
+          "heal": 2
+        }
+      }
     },
     {
       "id": "dendritic",
@@ -84,7 +92,16 @@
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
-      "tier": "rare"
+      "tier": "rare",
+      "passive": {
+        "type": "mark_on_hit",
+        "name": "Presentasi Antigen",
+        "desc": "Serangan menandai musuh: damage yang diterimanya +10% selama 3 dtk.",
+        "params": {
+          "dmg": 10,
+          "duration": 3
+        }
+      }
     },
     {
       "id": "neutrophil",
@@ -128,7 +145,16 @@
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
-      "tier": "uncommon"
+      "tier": "uncommon",
+      "passive": {
+        "type": "frenzy_on_kill",
+        "name": "Amukan Granula",
+        "desc": "Setelah kill: kecepatan serang +25% selama 3 dtk.",
+        "params": {
+          "haste": 25,
+          "duration": 3
+        }
+      }
     },
     {
       "id": "eosinophil",
@@ -174,7 +200,16 @@
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_eosinophil.png",
-      "tier": "uncommon"
+      "tier": "uncommon",
+      "passive": {
+        "type": "poison_on_hit",
+        "name": "Granula Toksik",
+        "desc": "Serangan meracuni musuh: 30% damage per detik selama 2 dtk.",
+        "params": {
+          "mult": 0.3,
+          "duration": 2
+        }
+      }
     },
     {
       "id": "basophil",
@@ -220,7 +255,16 @@
       },
       "shopCost": 130,
       "spritePortrait": "assets/sprites/portrait_basophil.png",
-      "tier": "rare"
+      "tier": "rare",
+      "passive": {
+        "type": "slow_aura",
+        "name": "Awan Histamin",
+        "desc": "Musuh di dekatmu melambat 15%.",
+        "params": {
+          "radius": 150,
+          "mult": 0.85
+        }
+      }
     },
     {
       "id": "mastcell",
@@ -265,7 +309,16 @@
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_mastcell.png",
-      "tier": "epic"
+      "tier": "epic",
+      "passive": {
+        "type": "retaliate",
+        "name": "Degranulasi",
+        "desc": "Saat terpukul: ledakan kimia 12 damage ke musuh sekitar.",
+        "params": {
+          "damage": 12,
+          "radius": 120
+        }
+      }
     },
     {
       "id": "tcd8",
@@ -310,7 +363,16 @@
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_tcd8.png",
-      "tier": "uncommon"
+      "tier": "uncommon",
+      "passive": {
+        "type": "execute_bonus",
+        "name": "Sitotoksik",
+        "desc": "+30% damage ke musuh ber-HP di bawah 25%.",
+        "params": {
+          "threshold": 0.25,
+          "bonus": 0.3
+        }
+      }
     },
     {
       "id": "tcd4",
@@ -355,7 +417,15 @@
       },
       "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_tcd4.png",
-      "tier": "uncommon"
+      "tier": "uncommon",
+      "passive": {
+        "type": "skill_haste",
+        "name": "Komando Sitokin",
+        "desc": "Cooldown semua skill berkurang 15%.",
+        "params": {
+          "cdMult": 0.85
+        }
+      }
     },
     {
       "id": "treg",
@@ -401,7 +471,15 @@
       },
       "shopCost": 120,
       "spritePortrait": "assets/sprites/portrait_treg.png",
-      "tier": "epic"
+      "tier": "epic",
+      "passive": {
+        "type": "regen",
+        "name": "Toleransi",
+        "desc": "Memulihkan 0.8 HP per detik.",
+        "params": {
+          "hpPerSec": 0.8
+        }
+      }
     },
     {
       "id": "bcell",
@@ -447,7 +525,15 @@
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_bcell.png",
-      "tier": "rare"
+      "tier": "rare",
+      "passive": {
+        "type": "crit_up",
+        "name": "Memori Antibodi",
+        "desc": "Peluang critical +6%.",
+        "params": {
+          "bonus": 0.06
+        }
+      }
     },
     {
       "id": "nkcell",
@@ -490,7 +576,16 @@
       },
       "shopCost": 200,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",
-      "tier": "legend"
+      "tier": "legend",
+      "passive": {
+        "type": "reveal_pulse",
+        "name": "Sensor Sitolitik",
+        "desc": "Sensor berkala mengungkap musuh yang menyamar.",
+        "params": {
+          "interval": 1.3,
+          "revealSec": 1.6
+        }
+      }
     }
   ],
   "tiers": {

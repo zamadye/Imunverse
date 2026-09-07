@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 Phase 1 — GAME FEEL. Semua angka rantai feedback hidup di sini (docs/v2/phase-01-game-feel.md).",
+  "knockback": {
+    "projectile": 120,
+    "melee": 150,
+    "bossImmune": true
+  },
+  "hitStop": {
+    "kill": 0.03,
+    "elite": 0.05,
+    "boss": 0.09,
+    "crit": 0.025,
+    "ult": 0.06
+  },
+  "crit": {
+    "chance": 0.08,
+    "mult": 1.5,
+    "color": "#ff9f43",
+    "sizeMult": 1.35
+  },
+  "damageNumber": {
+    "base": 13,
+    "perDamage": 0.125,
+    "maxBonus": 9
+  },
+  "killPop": {
+    "dur": 0.15,
+    "scaleTo": 1.3
+  },
+  "shake": {
+    "kill": 0.06,
+    "elite": 0.18,
+    "boss": 0.65,
+    "ultCast": 0.35
+  },
+  "haptic": {
+    "enabled": true,
+    "throttleMs": 90,
+    "kill": 12,
+    "elite": 25,
+    "crit": 8,
+    "playerHit": [30, 40, 30],
+    "boss": [60, 50, 60],
+    "levelup": [20, 30, 20]
+  },
+  "lowHp": {
+    "threshold": 0.3,
+    "heartbeatSec": 1.2
+  }
+}

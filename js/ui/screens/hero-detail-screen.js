@@ -74,6 +74,12 @@ function selectHero() {
     ]),
     el('b', { class: 'hl-name', text: heroDef.name }),
     el('span', { class: 'hl-title', text: tr(heroDef.title) }),
+    // V2 Phase 3: PASSIVE khas hero — identitas harus terbaca sebelum dipilih
+    heroDef.passive ? el('span', {
+      class: 'hl-passive',
+      style: 'display:block;font-size:11px;color:#ffd93d;margin:2px 0 0;font-weight:800',
+      text: `✦ ${heroDef.passive.name} — ${heroDef.passive.desc}`,
+    }) : null,
     // Stat chips (damage merah / HP hijau) — gaya kartu game modern
     el('div', { class: 'hl-chips' }, [
       el('span', { class: 'hl-chip atk' }, [

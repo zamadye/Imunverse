@@ -8,6 +8,8 @@
  *  - boss_pattern_a : lambat, HP besar, serangan area berkala (AOE ter-telegraf)
  */
 
+import { getCombat } from '../core/data-store.js';
+
 let nextEnemyId = 1;
 
 export class Enemy {
@@ -76,6 +78,39 @@ export class Enemy {
     this.slowMult = 1;
     this.vx = 0; // dorongan (knockback siklon), meluruh tiap frame
     this.vy = 0;
+
+    // V2 Phase 2 — CONTACT ATTACK bertelegraph (chase_*/splitter, bukan boss/hazard):
+    // 'ready' → masuk strikeRange → 'windup' (berhenti, sprite attack, shiver)
+    // → strike bila player masih dekat → 'cooldown'. Dodge saat windup = whiff.
+    this.atkPhase = 'ready';       // 'ready' | 'windup' | 'cooldown'
+    this.atkT = 0;                 // timer fase berjalan
+    this.attackSpriteHint = false; // dibaca render game.js (spriteAttack)
+    this.usesContactTelegraph = !def.isBoss && def.behavior !== 'hazard_drift' && def.behavior !== 'boss_pattern_a';
+
+    // V2 Phase 5 — ELITE affix & boss enrage
+    this.eliteAffix = null;   // 'brute'|'swift'|'regen'|'volatile' (via makeElite)
+    this.affixCfg = null;     // params affix dari waves.json
+    this.windupOverride = 0;  // swift: windup lebih singkat
+    this.enraged = false;     // boss: fase mengamuk (sekali per boss)
+  }
+
+  /**
+   * V2 Phase 5: promosikan musuh reguler jadi ELITE ber-affix (mini-boss).
+   * Statistik & param dari data/waves.json (elite.*). def dishadow supaya
+   * feedback tier elite Phase 1 (hit-stop 50ms, part drop) otomatis aktif.
+   */
+  makeElite(affix, cfg) {
+    this.eliteAffix = affix;
+    this.affixCfg = (cfg.affixParams && cfg.affixParams[affix]) || {};
+    this.def = { ...this.def, elite: true };
+    this.maxHP = Math.round(this.maxHP * cfg.hpMult);
+    this.hp = this.maxHP;
+    this.radius = this.radius * cfg.radiusMult;
+    if (affix === 'brute') this.damage = Math.round(this.damage * this.affixCfg.dmgMult);
+    else if (affix === 'swift') {
+      this.speed *= this.affixCfg.speedMult;
+      this.windupOverride = this.affixCfg.windup;
+    }
   }
 
   /**
@@ -104,6 +139,11 @@ export class Enemy {
     if (!this.alive) return;
     if (this.hitFlash > 0) this.hitFlash -= dt;
 
+    // V2 Phase 5: affix REGEN — elite pulih 2%/dtk (jawaban pemain: fokus burst)
+    if (this.eliteAffix === 'regen' && this.hp < this.maxHP) {
+      this.hp = Math.min(this.maxHP, this.hp + this.maxHP * this.affixCfg.pctPerSec * dt);
+    }
+
     // Dorongan knockback meluruh (tetap jalan meski beku, tapi melemah)
     if (Math.abs(this.vx) > 1 || Math.abs(this.vy) > 1) {
       this.x += this.vx * dt;
@@ -129,6 +169,36 @@ export class Enemy {
     const dy = playerPos.y - this.y;
     let dist = Math.hypot(dx, dy) || 1;
     let baseAngle = Math.atan2(dy, dx);
+
+    // ---- V2 Phase 2: CONTACT ATTACK bertelegraph ----
+    // Musuh pengejar TIDAK melukai lewat sentuhan pasif; ia berhenti, windup
+    // terbaca (sprite attack + shiver), lalu menerkam — dodge dihargai.
+    if (this.usesContactTelegraph && game) {
+      const ca = getCombat().contactAttack;
+      const strikeRange = this.radius + (playerPos.radius || 0) + ca.rangeBonus;
+      if (this.atkPhase === 'cooldown') {
+        this.atkT -= dt;
+        if (this.atkT <= 0) this.atkPhase = 'ready';
+      } else if (this.atkPhase === 'windup') {
+        this.atkT -= dt;
+        if (this.atkT <= 0) {
+          // STRIKE: hanya kena bila player masih dalam toleransi (whiff bila dodge)
+          this.attackSpriteHint = false;
+          this.atkPhase = 'cooldown';
+          this.atkT = ca.cooldown;
+          if (dist <= strikeRange * ca.strikeTolerance) {
+            game.enemyContactStrike(this, dx / dist, dy / dist);
+          }
+        }
+        return; // selama windup: berdiri di tempat (telegraph jelas)
+      } else if (dist <= strikeRange) {
+        this.atkPhase = 'windup';
+        // V2 Phase 5: affix SWIFT menyerang dengan windup lebih singkat
+        this.atkT = this.windupOverride || ca.windup;
+        this.attackSpriteHint = true;
+        return;
+      }
+    }
 
     // ---- F26 AI sarang: guard → chase → return (boss selalu bebas mengejar) ----
     if (this.homeX !== null && !this.isBoss) {
@@ -206,6 +276,8 @@ export class Enemy {
         break;
       }
       case 'boss_pattern_a': {
+        // V2 Phase 5: ENRAGE — HP rendah → boss mengamuk sekali (drama akhir)
+        if (!this.enraged && game && game.tryBossEnrage) game.tryBossEnrage(this);
         // Bergerak lebih lambat + serangan area berkala
         const stopDist = this.radius + 24;
         if (dist > stopDist) {
