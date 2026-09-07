@@ -50,7 +50,7 @@ Retention (9) dan Monetization (10) adalah **hasil** dari 1–5, bukan sumber ni
 | 1 | Game Feel | `phase-01-game-feel.md` | P0 | ✅ (BUILD 27a) |
 | 2 | Core Combat | `phase-02-core-combat.md` | P0 | ✅ (BUILD 28a) |
 | 3 | Hero Identity | `phase-03-hero-identity.md` | P1 | ✅ (BUILD 29a) |
-| 4 | Build & Evolution | `phase-04-build-evolution.md` | P1 | ⬜ |
+| 4 | Build & Evolution | `phase-04-build-evolution.md` | P1 | ✅ (BUILD 30a) |
 | 5 | Enemy & Boss | `phase-05-enemy-boss.md` | P1 | ✅ (BUILD 29a) |
 | 6 | Progression | `phase-06-progression.md` | P1 | ⬜ |
 | 7 | World / Body | `phase-07-world-body.md` | P2 | ⬜ |
@@ -222,4 +222,5 @@ Ringkasan di bawah adalah *seed* untuk masing-masing dokumen phase. Baseline dia
 2. ✅ Phase 1 — dokumen + implementasi game feel + `scripts/e2e-v2phase1.mjs` semua PASS (BUILD 27a).
 3. ✅ Phase 2 — Core Combat: contact attack bertelegraph + smart targeting + movement smoothing, `scripts/e2e-v2phase2.mjs` 17/17 PASS (BUILD 28a).
 4. ✅ Phase 3+5 — Hero Identity & Enemy/Boss (satu paket): 11 passive data-driven + fix mark/NK, elite affix + spawn terencana + boss enrage; `scripts/e2e-v2phase35.mjs` PASS penuh (BUILD 29a).
-5. ⬜ Phase 4 — Build & Evolution (paket berikutnya sesuai urutan 0→1→2→(3∥5)→4).
+5. ✅ Phase 4 — Build & Evolution: rarity+pity+sinergi nyata+evolusi senjata in-run; `scripts/e2e-v2phase4.mjs` 20/20 PASS (BUILD 30a).
+6. ⬜ Phase 6 — Progression (paket berikutnya sesuai urutan …→4→6→8).

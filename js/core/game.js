@@ -29,12 +29,12 @@ import { Pickup } from '../entities/pickup.js';
 
 import { SpawnSystem } from '../systems/spawn-system.js';
 import { CollisionSystem } from '../systems/collision-system.js';
-import { rollLevelUpChoices, applyLevelUp, squadMultipliers } from '../systems/upgrade-system.js';
+import { rollLevelUpChoices, applyLevelUp, squadMultipliers, evolutionBoosts, effectiveStacks } from '../systems/upgrade-system.js';
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
-import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention } from '../systems/retention-system.js';
+import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import {
@@ -209,6 +209,8 @@ export const game = {
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
+      luPity: 0,      // V2 Phase 4: counter pity roll rare+
+      evoTaken: {},   // V2 Phase 4: evolusi senjata yang sudah diambil run ini
       levelUpQueue: 0,
       currentChoices: null,
       reviveUsed: false,
@@ -370,13 +372,22 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
-    const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
-    const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
-    const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
-    const projectileCount = base.projectileCount + (up.projectileCount || 0);
+    // V2 Phase 4: SINERGI ROLE NYATA — stack upgrade yang cocok role hero
+    // dihitung ×1.25 (luRules.synergyBonus); badge "✦ Sinergi" jadi jujur.
+    const syn = synergyFor(heroDef);
+    const eff = (id) => effectiveStacks({ upgrades: up, heroDef }, id, syn);
+    // V2 Phase 4: EVOLUSI SENJATA in-run (Badai Sitokin / Benteng / Kawanan).
+    // Guard: saat run BARU di-init, this.run masih run lama — evoTaken lama
+    // tidak boleh bocor; pakai this.run hanya bila upgrades-nya objek yang sama.
+    const evoB = evolutionBoosts(this.run && this.run.upgrades === up ? this.run : null);
+
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
+    const cooldown = base.attackCooldown / ((1 + eff('attackSpeed') * 0.12) * squad.attackSpeed) * buffCooldown * evoB.cooldownMult;
+    const speed = base.speed * squad.speed * (1 + eff('moveSpeed') * 0.08) * (tb ? tb.speed.mult : 1);
+    const attackRange = base.attackRange * squad.attackRange * (1 + eff('attackRange') * 0.12);
+    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + eff('attackRange') * 0.12);
+    const maxHP = Math.round((base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + eff('maxHP') * 20 + (perm.maxHP || 0)) * evoB.maxHPMult);
+    const projectileCount = base.projectileCount + (up.projectileCount || 0) + evoB.projectileFlat;
     const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
@@ -390,9 +401,10 @@ export const game = {
       swipeRadius,
       maxHP,
       projectileCount,
-      pierce: base.pierce,
+      // V2 Phase 4: entri pool baru — pierce (rare) & magnet (common)
+      pierce: base.pierce + (up.pierce || 0),
       projectileSpeed: base.projectileSpeed,
-      magnetRadius: base.magnetRadius,
+      magnetRadius: base.magnetRadius * (1 + (up.magnet || 0) * 0.25),
       pickupRadius: base.pickupRadius,
       xpMult: squad.xpGain * buffXP,
       lifeSteal,
@@ -860,6 +872,16 @@ export const game = {
     const result = applyLevelUp(run, upgradeId);
     this.recomputePlayerStats();
     if (result.healAmount > 0) run.player.heal(result.healAmount);
+    // V2 Phase 4: EVOLUSI SENJATA diambil → selebrasi besar (momen memorable)
+    if (result.evolved) {
+      showAnnounce(result.evolved.name.toUpperCase() + '!', true);
+      run.effects.spawnBurst(run.player.x, run.player.y, '#c39bd3', 40, 280, 5);
+      run.camera.addShake(0.5);
+      this.hitStopRun(getGameFeel().hitStop.ult);
+      audio.evolve();
+      buzz('levelup');
+      emit('toast', { message: `EVOLUSI: ${result.evolved.name}!`, kind: 'gold' });
+    }
 
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
     if (run.levelUpQueue > 0) {
@@ -916,8 +938,9 @@ export const game = {
   /** V2 Phase 1: roll critical hit global (data/gamefeel.json crit.chance). */
   rollCrit() {
     const cfg = getGameFeel().crit;
-    // V2 Phase 3: passive bcell "Memori Antibodi" menambah chance
-    const chance = this.run.critChanceOverride ?? (cfg.chance + passiveCritBonus(this.run));
+    // V2 Phase 3: passive bcell + V2 Phase 4: upgrade "Titik Lemah" (+4%/stack)
+    const upBonus = ((this.run.upgrades && this.run.upgrades.critChance) || 0) * 0.04;
+    const chance = this.run.critChanceOverride ?? (cfg.chance + passiveCritBonus(this.run) + upBonus);
     return Math.random() < chance;
   },
 
