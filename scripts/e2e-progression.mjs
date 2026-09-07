@@ -256,12 +256,25 @@ const flushed = await page.evaluate(() => {
 });
 ok('xp-bank-flushes-on-gate-open', flushed.bank === 0 && typeof bankState.lvl0 === 'number' && flushed.lvlEnd >= bankState.lvl0, JSON.stringify({ ...flushed, lvl0: bankState.lvl0 }));
 
-// wave lanjut setelah durasi wave berikutnya (percepat timer)
+// Desain 01a07727 — wave berfase: timer habis → fase CLEAR (spawn berhenti, "ARENA BERSIH"),
+// arena relatif bersih → jeda ±2.5 dtk → wave baru. Uji ketiga fasenya.
 await closeModals();
 await page.evaluate(() => { window.__IMUNVERSE.game.run.spawnSys.waveTimer = 24.5; });
-await page.waitForTimeout(1200);
+await page.waitForTimeout(900);
+const clearing = await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.waveClearing === true);
+ok('wave-enter-clear-phase', clearing, `wave=${await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.wave)}`);
+// bersihkan sisa musuh non-boss → breakTimer berjalan → wave naik
+for (let k = 0; k < 12; k++) {
+  const w = await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    g.run.enemies.forEach((e) => { if (e.alive && !e.isBoss) e.takeDamageRaw ? e.takeDamageRaw(e.hp + 5) : e.takeDamage(e.hp + 5); });
+    return g.run.spawnSys.wave;
+  });
+  if (w >= 6) break;
+  await page.waitForTimeout(900);
+}
 const advanced = await page.evaluate(() => window.__IMUNVERSE.game.run.spawnSys.wave);
-ok('wave-advances-after-gate-open', advanced === 6, `wave=${advanced}`);
+ok('wave-advances-after-clear-break', advanced >= 6, `wave=${advanced}`);
 
 // ---- 5) Premium cap 30% ----
 const prem = await page.evaluate(async () => {

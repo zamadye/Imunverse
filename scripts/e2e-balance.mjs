@@ -197,11 +197,12 @@ await page.fill('#auth-username', 'BalanceTester');
     const tiles = [...document.querySelectorAll('#quick-row .quick-tile')];
     const maxH = Math.max(...tiles.map((t) => t.getBoundingClientRect().height));
     const qr = document.getElementById('quick-row').getBoundingClientRect();
-    const pr = document.querySelector('.play-row').getBoundingClientRect();
+    const pr = document.querySelector('.dashboard-play').getBoundingClientRect();
     const overlap = !(qr.left >= pr.right - 1 || qr.right <= pr.left + 1 || qr.top >= pr.bottom - 1 || qr.bottom <= pr.top + 1);
     return { tiles: tiles.length, maxH: Math.round(maxH), overlap };
   });
-  log('tiles-compact', layout.tiles === 6 && layout.maxH <= 110, JSON.stringify(layout));
+  // Desain 01a07727: quick-row = 4 pintu (Heroes/Shop/Collection/Stats); CTA PLAY terpisah
+  log('tiles-compact', layout.tiles === 4 && layout.maxH <= 110, JSON.stringify(layout));
   log('tiles-no-overlap-playrow', !layout.overlap, JSON.stringify(layout));
 
   log('no-pageerrors', errors.length === 0, errors.slice(0, 3).join(' | '));

@@ -679,9 +679,18 @@
     "Sel Imun vs Patogen — Selamatkan Tubuh!": "Immune cells vs pathogens — save the body!",
     "Capai Gelombang $1 untuk membuka!": "Reach Wave $1 to unlock!",
     "Level $1 — $2 beradaptasi! Pilih evolusi:": "Level $1 — $2 is adapting! Choose an evolution:",
-    "Buat akun untuk menyimpan perjalananmu!": "Create an account to save your journey!"
+    "Buat akun untuk menyimpan perjalananmu!": "Create an account to save your journey!",
+    "Mulai run sekarang": "Start a run now"
   },
   "rules": [
+    {
+      "pattern": "^ARENA BERSIH · WAVE (\\d+)$",
+      "replace": "ARENA CLEAR · WAVE $1"
+    },
+    {
+      "pattern": "^Lv (\\d+) · Pasukan Lv (\\d+) · (\\d+) sel$",
+      "replace": "Lv $1 · Squad Lv $2 · $3 cells"
+    },
     {
       "pattern": "^Misi: bersihkan (\\d+) patogen \\((\\d+)/(\\d+)\\)$",
       "replace": "Mission: clear $1 pathogens ($2/$3)"

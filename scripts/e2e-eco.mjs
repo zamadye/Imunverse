@@ -53,8 +53,10 @@ log('founder-150-imu', founder.imun === 150, `imun=${founder.imun}`);
 log('founder-skin', founder.cosmetics?.owned?.includes('skin_pendiri'), founder.cosmetics?.owned?.join(','));
 log('founder-title', founder.premiumTitle === 'Pendiri Imunverse', founder.premiumTitle);
 
-// 2) Buka Battle Pass via sidebar (klik riil)
-await page.click('#side-bp');
+// 2) Buka Battle Pass — desain 01a07727 menyembunyikan sidebar & secondary-dock;
+//    BP saat ini TANPA pintu masuk UI (gap dilaporkan ke pemilik). Alur klaim tetap diuji:
+//    navigasi via API, semua KLIK KLAIM tetap riil di dalam layar BP.
+await page.evaluate(() => window.__IMUNVERSE.screenManager.show('bp'));
 await page.waitForTimeout(600);
 log('bp-screen', await active('#screen-bp'));
 
