@@ -109,6 +109,25 @@ function wireUiBridge() {
     showToast(payload);
   });
 
+  // R3 Modul A: chip memori antigen di HUD — tipe terdekat tier berikutnya
+  on('antigen', ({ near }) => {
+    const chip = document.getElementById('hud-antigen');
+    if (!chip) return;
+    if (!near) { chip.classList.add('hidden'); return; }
+    const enemyDef = (getData().enemies.enemies || []).find((e) => e.id === near.typeId);
+    const label = enemyDef ? enemyDef.name : near.typeId;
+    chip.innerHTML = '';
+    const nm = document.createElement('span');
+    nm.textContent = `Ag· ${label}${near.tier > 0 ? ` T${near.tier}` : ''}`;
+    const bar = document.createElement('span'); bar.className = 'ag-bar';
+    const fill = document.createElement('span'); fill.className = 'ag-fill';
+    fill.style.width = `${Math.min(100, Math.round(near.pct * 100))}%`;
+    bar.appendChild(fill);
+    chip.appendChild(nm); chip.appendChild(bar);
+    chip.classList.toggle('tiered', near.tier > 0);
+    chip.classList.remove('hidden');
+  });
+
   on('playerHit', () => {
     vignette.classList.add('flash');
     setTimeout(() => vignette.classList.remove('flash'), 60);
@@ -116,6 +135,7 @@ function wireUiBridge() {
 
   on('runstart', () => {
     hudScreen.resetHUD();
+    document.getElementById('hud-antigen')?.classList.add('hidden'); // R3: chip reset
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
     music.start(); // F23: musik latar prosedural saat bermain

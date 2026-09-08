@@ -7,6 +7,7 @@
 
 import { getData, xpToNextLevel } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
+import { antigenUpgradeAvailable, applyAntigenUpgrade } from './antigen-memory.js'; // R3 Modul A
 
 // ---------------------------------------------------------------
 // Level-up (in-run)
@@ -30,7 +31,10 @@ export function rollLevelUpChoices(run) {
 
   const available = pool.filter((u) =>
     (run.upgrades[u.id] || 0) < u.maxStacks &&
-    (!u.patterns || !pattern || u.patterns.includes(pattern)));
+    (!u.patterns || !pattern || u.patterns.includes(pattern)) &&
+    // R3 Modul A: kartu Memori Antigen hanya muncul bila progress >=70%
+    // ke tier berikutnya (earned, bukan random murni — combat doc §2.3)
+    (u.conditional !== 'antigen' || antigenUpgradeAvailable(run)));
 
   // weighted sampling tanpa penggantian
   const picked = [];
@@ -91,6 +95,10 @@ export function applyLevelUp(run, upgradeId) {
   const def = getData().upgrades.levelUpPool.find((u) => u.id === upgradeId);
   if (!def) throw new Error('Upgrade tidak ditemukan: ' + upgradeId);
   run.upgrades[upgradeId] = (run.upgrades[upgradeId] || 0) + 1;
+  // R3 Modul A: kartu Memori Antigen → tier tipe terdekat threshold naik 1
+  if (def.conditional === 'antigen') {
+    return { healAmount: 0, antigenType: applyAntigenUpgrade(run) };
+  }
   return { healAmount: def.id === 'maxHP' ? def.amount : 0 };
 }
 

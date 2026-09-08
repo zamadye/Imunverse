@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=33a" />
+  <link rel="stylesheet" href="styles/main.css?v=34a" />
   <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
@@ -478,6 +478,8 @@
           <div id="hud-quests-body" class="hud-quests-body"><!-- diisi JS --></div>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
+        <!-- R3 Modul A: chip memori antigen — tipe terdekat tier berikutnya -->
+        <div id="hud-antigen" class="hud-antigen hidden" aria-label="Memori antigen"></div>
         <!-- F25b: XP progres pindah ke kanan-atas (konvensi UI game); HP tetap kiri-bawah -->
         <div id="hud-xp-top" class="hud-xp-top" aria-label="Progres XP">
           <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
@@ -656,7 +658,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=33a"></script>
+  <script type="module" src="js/main.js?v=34a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

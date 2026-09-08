@@ -22,6 +22,7 @@ import { markSeen } from '../systems/codex-system.js';
 import { applyRunGP } from '../systems/rank-system.js';
 import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
 import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
+import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -293,6 +294,7 @@ export const game = {
     setPaused(false);
     setLevelUpOpen(false);
     resetNarrativeRun(); // R2: bark boss boleh tampil lagi di run baru
+    initAntigenRun(this.run); // R3 Modul A: memori antigen reset tiap run
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
   },
@@ -643,7 +645,10 @@ export const game = {
       if (crit) dmg *= getGameFeel().crit.mult;
       // V2 Phase 3: mark (+10% bila ditandai) + execute (tcd8) — lalu passive on-hit
       dmg = modifyOutgoingDamage(run, enemy, dmg);
-      const died = enemy.takeDamage(dmg);
+      // R3 Modul A: memori antigen — bonus damage per tipe + T2 tembus armor
+      dmg *= antigenDamageMult(run, enemy);
+      enemy.lastHitDamage = dmg;
+      const died = antigenIgnoreArmor(run, enemy) ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
       if (!enemy.lastHitAbsorbed) passiveOnHit(run, enemy, dmg);
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       // V2 Phase 1: knockback mikro searah proyektil (boss imun)
@@ -929,7 +934,9 @@ export const game = {
       const crit = this.rollCrit();
       let dmg = crit ? damage * getGameFeel().crit.mult : damage;
       dmg = modifyOutgoingDamage(run, e, dmg); // V2 Phase 3: mark + execute
-      const died = e.takeDamage(dmg);
+      dmg *= antigenDamageMult(run, e); // R3 Modul A
+      e.lastHitDamage = dmg;
+      const died = antigenIgnoreArmor(run, e) ? e.takeDamageRaw(dmg) : e.takeDamage(dmg);
       if (!e.lastHitAbsorbed) passiveOnHit(run, e, dmg);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.applyHitKnockback(e, dx, dy, getGameFeel().knockback.melee);
@@ -1292,6 +1299,7 @@ export const game = {
     run.kills += 1;
     tutorial.notifyKill();
     passiveOnKill(run, this); // V2 Phase 3: heal Mako / frenzy Neo
+    onAntigenKill(run, enemy, this); // R3 Modul A: memori antigen per tipe
 
     // ---- Fase 17 (trigger 2A): XP per KILL — kecil 5–8, besar 12–15, boss 50 ----
     const killXp = xpForKill(enemy.def.tier, enemy.isBoss);
@@ -1594,6 +1602,7 @@ export const game = {
     });
     run.rankGain = rankRes;
 
+    recordAntigenMeta(meta, run); // R3: encounter record memori antigen (collection)
     // V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain
     const masteryRes = addMasteryXP(meta, run.heroDef.id, {
       kills: run.kills,

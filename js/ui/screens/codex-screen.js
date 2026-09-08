@@ -99,6 +99,15 @@ function showDetail(id) {
   box.appendChild(el('p', { class: 'cxd-kid', text: e.funKid || '' }));
   box.appendChild(el('div', { class: 'cxd-kicker', text: 'Tahukah kamu?' }));
   box.appendChild(el('p', { class: 'cxd-fact', text: e.fact || '' }));
+  // R3 Modul A: encounter record — tier memori antigen tertinggi (collection)
+  const agTier = (STATE.meta.antigenRecords || {})[e.id] || 0;
+  if (agTier > 0) {
+    box.appendChild(el('p', {
+      class: 'cxd-antigen',
+      style: 'color:#c39bd3;font-weight:900;font-size:12px',
+      text: `Ag· Memori Antigen: Tier ${agTier} — pasukan mengingat musuh ini`,
+    }));
+  }
   const wrap = document.getElementById('codex-detail');
   wrap.classList.remove('hidden');
   sweepSubtree(box);

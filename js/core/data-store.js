@@ -31,6 +31,7 @@ const store = {
   combat: null,      // data/combat.json (V2 Phase 2: movement/targeting/contact attack)
   mastery: null,     // data/mastery.json (V2 Phase 6: hero mastery dari bermain)
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
+  modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
 };
 
 import { BUILD } from './version.js';
@@ -67,6 +68,7 @@ export async function loadAllData() {
     combat: 'data/combat.json',
     mastery: 'data/mastery.json',
     narrative: 'data/narrative.json',
+    modules: 'data/modules.json',
   };
 
   const entries = await Promise.all(
@@ -226,6 +228,13 @@ export function getMastery() {
 /** RIA/Dr. Amara, glossary awam, barks boss & akhir run. */
 export function getNarrative() {
   return getData().narrative;
+}
+
+// ===== R3+ Rebuild: modul combat differentiation (data/modules.json) =====
+
+/** Flag & config 5 modul combat (Antigen Memory, Phagocytosis, dst). */
+export function getModules() {
+  return getData().modules;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

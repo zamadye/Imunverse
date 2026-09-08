@@ -47,7 +47,7 @@ try {
       pierceGated: !!u.levelUpPool.find((x) => x.id === 'pierce' && Array.isArray(x.patterns)),
     };
   });
-  log('pool-10-with-rarity', d.pool === 10 && d.allRarity);
+  log('pool-10-with-rarity', d.pool >= 10 && d.allRarity); // R3: +antigen_boost → pool 11
   log('lurules-loaded', d.hasRules);
   log('evolutions-3', d.evos === 3);
   log('pierce-pattern-gated', d.pierceGated);

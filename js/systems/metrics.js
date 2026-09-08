@@ -35,12 +35,29 @@ function write(db) {
 }
 
 let pendingStart = null; // {t, hero, mode, retryOf} — diisi runstart, ditutup gameover
+let runModuleCounts = {}; // R3: agregat module_trigger per run (ikut ringkasan run)
+
+/**
+ * R3 (Rebuild): telemetry modul combat (doc §7) — event `module_trigger`.
+ * Ring buffer terpisah (cap 500) + agregat per-run masuk ringkasan run.
+ */
+export function recordModuleTrigger(moduleId, payload = {}) {
+  runModuleCounts[moduleId] = (runModuleCounts[moduleId] || 0) + 1;
+  try {
+    const db = read();
+    db.moduleEvents = db.moduleEvents || [];
+    db.moduleEvents.push({ t: Date.now(), moduleId, ...payload });
+    if (db.moduleEvents.length > 500) db.moduleEvents.splice(0, db.moduleEvents.length - 500);
+    write(db);
+  } catch { /* metrics tak boleh merusak game */ }
+}
 
 /** Pasang listener sekali dari main.js (setelah data & save siap). */
 export function initMetrics() {
   on('runstart', ({ heroDef } = {}) => {
     const db = read();
     const now = Date.now();
+    runModuleCounts = {}; // reset agregat modul per run
     pendingStart = {
       t: now,
       hero: heroDef ? heroDef.id : (STATE.meta && STATE.meta.selectedHero) || null,
@@ -65,6 +82,7 @@ export function initMetrics() {
       victory: !!summary.victory,
       quit: !!summary.quit,
       retryOf: start.retryOf,
+      modules: { ...runModuleCounts }, // R3: exposure modul run ini (doc §7 korelasi sesi)
     });
     if (db.runs.length > MAX_RUNS) db.runs.splice(0, db.runs.length - MAX_RUNS);
     db.lastGameoverAt = Date.now();

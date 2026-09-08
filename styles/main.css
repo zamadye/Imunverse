@@ -2632,3 +2632,27 @@ img.lock-badge {
   font-style: italic;
 }
 .toast.ria::before { content: '⚡ '; font-style: normal; }
+
+/* ===== R3 Modul A: chip memori antigen (kiri-bawah, di atas HP) ===== */
+.hud-antigen {
+  position: absolute;
+  left: 12px;
+  bottom: 86px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(20, 40, 36, 0.55);
+  color: #e8fff8;
+  font-size: 11px;
+  font-weight: 800;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+.hud-antigen .ag-bar {
+  width: 54px; height: 5px; border-radius: 3px;
+  background: rgba(255,255,255,0.2); overflow: hidden;
+}
+.hud-antigen .ag-fill { height: 100%; background: #c39bd3; border-radius: 3px; }
+.hud-antigen.tiered { box-shadow: 0 0 10px rgba(195,155,211,0.55); }

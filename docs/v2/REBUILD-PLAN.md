@@ -1,7 +1,7 @@
 # 🔧 IMUNVERSE V2 — REBUILD PLAN
 > Status: 🔄 EKSEKUSI · Basis: BUILD 31a (V2 Phase 0–6 ✅)
 > KEPUTUSAN USER: Q1 = REMAP PENUH campaign ke 6 kondisi kesehatan · Q2 = urutan R1→R2→R3..R7 · Q3 = SEMUA 5 modul dibangun.
-> Progres: R1 ✅ (BUILD 32a) · R2 ✅ (BUILD 33a, e2e-r2 18/18, campaign remap penuh + RIA/Dr. Amara + cutscene dua-lapis) · R3 🔜 (Antigen Memory + framework flag/instrumentasi)
+> Progres: R1 ✅ (BUILD 32a) · R2 ✅ (BUILD 33a, e2e-r2 18/18, campaign remap penuh + RIA/Dr. Amara + cutscene dua-lapis) · R3 ✅ (BUILD 34a: Antigen Memory + framework modules.json + telemetry module_trigger) · R4 🔜 (Phagocytosis)
 > Sumber: `docs/design/imunverse-combat-differentiation-design-doc.md`,
 > `docs/design/imunverse-ux-prioritization-addendum.md`,
 > `docs/design/imunverse-story-narrative-design-doc.md`
@@ -58,7 +58,7 @@ Prinsip urutan: **core loop dulu (nyawa produk, kata addendum) → narasi (konte
 |---|---|---|---|
 | **R1 ✅ (BUILD 32a)** — Core Loop UX | PLAY→langsung run (default otomatis, pilihan muncul run ke-3+); prompt akun pasca-run; copot faction dari signup; dock collapse 4 tab + trigger unlock campuran (runs/wave/currency); gate BP & Rank digeser | Addendum | Rendah |
 | **R2 ✅ (BUILD 33a)** — Narrative Layer | RIA (rebrand coach + barks) + Dr. [Nama]; cutscene pembuka dua-lapis (shot list 7.2, naskah 6.1); transisi bab 2-panel; glossary awam; mystery hook Inang + keputusan Q1 campaign | Story doc | Rendah–menengah |
-| **R3 — Modul A: Antigen Memory** | + framework flag `data/modules.json` + instrumentasi metrics `module_trigger`/`module_perf_sample` (dipakai semua modul berikutnya) | Combat doc §2, §7 | Rendah |
+| **R3 ✅ (BUILD 34a)** — Modul A: Antigen Memory | + framework flag `data/modules.json` + instrumentasi metrics `module_trigger`/`module_perf_sample` (dipakai semua modul berikutnya) | Combat doc §2, §7 | Rendah |
 | **R4 — Modul B: Phagocytosis** | Execute-window + telan instan + resource meter ultimate (Mako dulu) | Combat doc §3 | Rendah–menengah |
 | **R5 — Modul C: Inflammation Zone** | Zona + intensity + cytokine storm + telegraph warna | Combat doc §4 | Menengah |
 | **R6 — Modul D: Tag-Cascade** | Cascade hop + camera punch-zoom layer + throttling | Combat doc §5 | Menengah–tinggi |
