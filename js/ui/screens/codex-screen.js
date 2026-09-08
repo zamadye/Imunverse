@@ -10,6 +10,7 @@ let wired = false;
 import { STATE } from '../../core/state-manager.js';
 import { getData, getHero, getCharacterDesigns } from '../../core/data-store.js';
 import { el } from '../screen-manager.js';
+import { createHeroEquityPreview, createPathogenMutationPreview } from '../../render/character-preview.js';
 import { isSeen, progress } from '../../systems/codex-system.js';
 import { audio } from '../../systems/audio-system.js';
 
@@ -99,6 +100,7 @@ function appendHeroEquityDesign(box, heroId) {
       style: `--tier:${row.color};`,
       title: row.cue,
     }, [
+      createHeroEquityPreview(hero, row.stage, { size: 44, className: 'cxd-preview character-preview' }),
       el('span', { class: 'cxd-tier-no', text: String(row.stage) }),
       el('b', { text: row.label }),
       el('small', { text: row.name }),
@@ -108,7 +110,7 @@ function appendHeroEquityDesign(box, heroId) {
 }
 
 function appendEnemyMutationDesign(box, enemyId) {
-  const { family, design, tiers } = enemyFamilyDesign(enemyId);
+  const { family, def, design, tiers } = enemyFamilyDesign(enemyId);
   if (!design || !tiers.length) return;
   box.appendChild(el('div', { class: 'cxd-kicker', text: 'Design Mutasi Pathogen' }));
   box.appendChild(el('div', { class: 'cxd-mutation-panel' }, [
@@ -124,6 +126,7 @@ function appendEnemyMutationDesign(box, enemyId) {
         style: `--tier:${tier.color || '#ff5d73'};`,
         title: cue,
       }, [
+        def ? createPathogenMutationPreview(def, tier.tier, { size: 44, className: 'cxd-preview character-preview' }) : null,
         el('span', { class: 'cxd-tier-no', text: tier.tier === 0 ? '0' : String(tier.tier) }),
         el('b', { text: tier.label }),
         el('small', { text: tier.tier <= 0 ? 'base/polos' : `mulai wave ${tier.fromWave || (tier.tier * 4 + 1)}` }),

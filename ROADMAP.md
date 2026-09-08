@@ -7,6 +7,8 @@
 ## Progress map aktif
 
 - Character Agent / equity / pathogen / collection UI: [`docs/character-agent-progress-map.md`](docs/character-agent-progress-map.md)
+- Character skill visual audit: [`docs/character-skill-visual-audit.md`](docs/character-skill-visual-audit.md)
+- Character handoff agent lain: [`docs/character-agent-handoff.md`](docs/character-agent-handoff.md)
 
 | Fase | Nama | Status | Effort |
 |---|---|---|---|

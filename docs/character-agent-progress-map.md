@@ -24,7 +24,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | HUD gameplay | ✅ | `index.html` + `js/ui/screens/hud-screen.js` menampilkan badge Equity stage aktif di portrait hero. |
 | Screenshot review terbaru | ✅ | Ada 4 screenshot review di `shots/review/`, termasuk gameplay equity 11 hero dan UI showcase. |
 | Browser walkthrough semua screen Character UI | 🟡 | Runtime data/import sudah hijau. Screenshot UI terbaru berupa static review sheet dari data/assets; perlu capture DOM interaktif jika ingin QA visual per screen secara ketat. |
-| Active skill visual per hero/state | 🟡 | HUD glyph skill sudah ada dan tetap data-driven; belum ada animasi skill unik per hero berdasarkan setiap state/skill selain equity overlay dan existing ability FX. |
+| Runtime mini renderer collection | ✅ | `js/render/character-preview.js` membuat mini canvas memakai `drawHeroEquity()`/`drawPathogenMutation()` yang sama dengan gameplay; dipakai di roster, detail, bag, dan codex. |
+| Active skill visual per hero/state | 🟡 | Audit skill selesai dan HUD button kini punya accent archetype/equity visual-only; gameplay impact/trail unik per hero masih backlog. |
 | Combat damage/balance changes | 🚫 | Tidak disentuh sesuai instruksi; desain visual tidak mengubah math damage. |
 | Arena/background systems | 🚫 | Tidak disentuh untuk scope Character Agent. |
 
@@ -46,8 +47,11 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Hero detail | `js/ui/screens/hero-detail-screen.js` | Ladder desain Equity per hero. |
 | Bag/inventory | `js/ui/screens/bag-screen.js` | Part evolusi + konteks design collection. |
 | Codex/Bio-Pedia | `js/ui/screens/codex-screen.js` | Panel detail equity hero dan mutation pathogen. |
-| HUD | `index.html`, `js/ui/screens/hud-screen.js`, `styles/main.css` | Badge stage equity pada portrait saat gameplay. |
-| CSS presentation | `styles/main.css` | Styling khusus chip, ladder, panel, badge Character UI. |
+| HUD | `index.html`, `js/ui/screens/hud-screen.js`, `styles/main.css` | Badge stage equity pada portrait saat gameplay + accent skill archetype/equity. |
+| Runtime mini previews | `js/render/character-preview.js` | Membuat canvas preview hero/pathogen dari renderer gameplay agar UI collection konsisten. |
+| CSS presentation | `styles/main.css` | Styling khusus chip, ladder, panel, badge Character UI, preview canvas, dan skill accent. |
+| Skill audit | `docs/character-skill-visual-audit.md` | Mapping 11 hero × skill → effect kind → status visual. |
+| Handoff agent lain | `docs/character-agent-handoff.md` | Daftar koordinasi QA/E2E, Arena, Combat, i18n/copy yang di luar atau lintas scope saya. |
 | Review screenshots | `shots/review/*.png` | Bukti visual hasil pass Character Agent. |
 
 ---
@@ -59,6 +63,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `c9b7cdb Redesign immune equity and pathogen visuals` | ✅ | Data desain 11 hero × 4 equity, renderer equity/pathogen, part icon equity, gameplay screenshot awal. |
 | `8cfcc9c Add arena equity showcase screenshot` | ✅ | Screenshot arena gameplay sheet 11 hero × 4 Equity stage. |
 | `54d9c91 Extend character collection design surfaces` | ✅ | Roster, hero detail, bag, codex, HUD badge, pathogen family metadata, screenshot UI + atlas pathogen. |
+| Runtime preview + skill accent pass | ✅ | Mini preview canvas memakai renderer gameplay, HUD skill accent per archetype/equity, skill visual audit, i18n label Character. |
 
 ---
 
@@ -76,6 +81,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Detail hero menampilkan ladder lengkap | ✅ | `renderEquityPathCard()` di `js/ui/screens/hero-detail-screen.js`. |
 | Bag menampilkan konteks part → stage | ✅ | `appendDesignCollection()` di `js/ui/screens/bag-screen.js`. |
 | Codex hero menampilkan design equity | ✅ | `appendHeroEquityDesign()` di `js/ui/screens/codex-screen.js`. |
+| Mini preview hero memakai renderer gameplay | ✅ | `createHeroEquityPreview()` dipakai di roster, hero detail, bag, dan codex. |
 | HUD menampilkan badge stage aktif | ✅ | `hud-equity-stage` di `index.html` + `resetHUD()`. |
 
 ### 4.2 Pathogen Mutation
@@ -89,6 +95,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Elite/boss visual lebih ganas | ✅ | `pathogenVisualTier()` bump elite dan boss minimal tier 3. |
 | Render mutasi di gameplay | ✅ | `drawPathogenMutation()` dipanggil dari `js/core/game.js`. |
 | Codex enemy punya panel mutasi | ✅ | `appendEnemyMutationDesign()` di `js/ui/screens/codex-screen.js`. |
+| Mini preview pathogen memakai renderer gameplay | ✅ | `createPathogenMutationPreview()` dipakai untuk tier 0–4 di Codex. |
 | Tidak mengubah damage/HP/speed | ✅ | Renderer hanya menggambar overlay; tidak mengubah entity stats. |
 
 ### 4.3 Screenshots review
@@ -151,25 +158,25 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 | Task | Status | Acceptance criteria |
 |---|---:|---|
-| Audit skill actual per hero | 🔄 | Tabel hero → skill ids → effect kind → glyph/FX current. |
-| Tentukan apakah perlu skill FX unik per archetype | ⬜ | Keputusan design: cukup glyph generik atau perlu overlay mikro per hero. |
-| Implement visual-only skill accent per hero/archetype | ⬜ | Tidak mengubah damage/cooldown; hanya trail, color, motif, atau impact cue. |
-| Screenshot skill state | ⬜ | Minimal 3 hero archetype berbeda dengan skill ready/cooldown/trigger. |
+| Audit skill actual per hero | ✅ | `docs/character-skill-visual-audit.md` memetakan hero → skill ids → effect kind → visual status. |
+| Tentukan apakah perlu skill FX unik per archetype | 🟡 | HUD accent sudah cukup untuk UI; gameplay impact/trail unik masih perlu keputusan/QA. |
+| Implement visual-only skill accent per hero/archetype | ✅ | `hud-screen.js` + `styles/main.css` memberi accent button berdasarkan archetype dan warna Equity aktif, tanpa mengubah damage/cooldown. |
+| Screenshot skill state | ⬜ | Minimal 3 hero archetype berbeda dengan skill ready/cooldown/trigger; cocok dikerjakan QA/browser agent. |
 
 ### Prioritas C — Runtime preview renderer untuk collection
 
 | Task | Status | Acceptance criteria |
 |---|---:|---|
-| Reuse `drawHeroEquity()` untuk canvas mini di Hero Detail/Roster | ⬜ | UI preview bukan hanya text/dots; render stage mini memakai renderer sama. |
-| Reuse `drawPathogenMutation()` untuk Codex enemy mini | ⬜ | Panel Codex bisa menampilkan tier 0–4 mini langsung dari canvas renderer. |
-| Refactor pure draw helpers bila perlu | ⬜ | Helper tetap di `js/render/character-visuals.js`; tidak mencampur UI logic ke gameplay. |
+| Reuse `drawHeroEquity()` untuk canvas mini di Hero Detail/Roster | ✅ | `createHeroEquityPreview()` dipakai di Roster, Hero Detail, Bag, dan Codex. |
+| Reuse `drawPathogenMutation()` untuk Codex enemy mini | ✅ | `createPathogenMutationPreview()` menampilkan tier 0–4 mini langsung dari renderer yang sama. |
+| Refactor pure draw helpers bila perlu | ✅ | Helper preview dipisah di `js/render/character-preview.js`; gameplay renderer tetap menjadi sumber visual. |
 
 ### Prioritas D — Data design QA dan copy polish
 
 | Task | Status | Acceptance criteria |
 |---|---:|---|
-| Copy review semua `visualCue`, `baseCue`, `mutationFocus` | 🔄 | Bahasa konsisten, ramah anak, istilah imunologi tetap benar. |
-| i18n English untuk field baru | 🟡 | `data-store.js` sudah menandai `mutationFocus`; kamus EN perlu dicek/ditambah bila target bilingual strict. |
+| Copy review semua `visualCue`, `baseCue`, `mutationFocus` | 🔄 | Bahasa ID sudah konsisten untuk pass visual; review istilah publik/anak masih bisa dipoles. |
+| i18n English untuk field baru | 🟡 | Label/rule UI Character baru sudah ditambah di `data/lang.json`; terjemahan mendalam untuk seluruh `baseCue`/`visualCue` data masih backlog bila target bilingual strict. |
 | Dense screenshot label cleanup | 🟡 | Screenshot atlas/large sheet cukup untuk review; jika dipakai publik perlu padding/label lebih besar. |
 
 ### Prioritas E — Konten/logic di luar Character visual pass
@@ -183,7 +190,19 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 ---
 
-## 7. Known issues / risiko
+## 7. Koordinasi ke agent lain / luar scope Character
+
+| Area | Agent yang cocok | Status koordinasi | Catatan handoff |
+|---|---|---:|---|
+| Browser QA visual interaktif | QA / E2E agent | 🔄 perlu dikerjakan | Capture DOM Roster, Hero Detail, Bag, Codex, HUD; cek console error/404 dan overflow mobile. Character code sudah siap, tetapi perlu runner browser yang stabil. |
+| Arena/background redesign | Arena/Environment agent | 🚫 luar scope saya | Jangan dikerjakan di Character Agent; perubahan background harus menjaga renderer Character tidak tertutup. |
+| Combat damage/balance | Combat/Balance agent | 🚫 luar scope saya | Jangan mengubah damage math dari pass Character; kalau diperlukan, buat task eksplisit dengan benchmark balance. |
+| Monetisasi SDK/release | Monetization/Release agent | 🚫 luar scope saya | Hooks ada di roadmap umum, bukan scope Character visual. |
+| Enemy behavior baru | Combat Content agent | ⬜ terpisah | Pathogen visual family sudah siap; behavior seperti drain/spawn hazard/conversion aura perlu task logic tersendiri. |
+
+---
+
+## 8. Known issues / risiko
 
 1. **Screenshot UI showcase terbaru bukan capture DOM interaktif.**  
    File `character-collection-ui-showcase.png` dibuat dari data/assets aktual untuk merangkum design state, tetapi QA final tetap sebaiknya melakukan browser walkthrough per screen.
@@ -199,7 +218,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 ---
 
-## 8. Definition of Done untuk fase Character berikutnya
+## 9. Definition of Done untuk fase Character berikutnya
 
 Sebuah subtask Character dianggap selesai jika memenuhi semua poin ini:
 
@@ -213,12 +232,11 @@ Sebuah subtask Character dianggap selesai jika memenuhi semua poin ini:
 
 ---
 
-## 9. Rekomendasi langkah berikutnya
+## 10. Rekomendasi langkah berikutnya
 
 Jika lanjut dari sini, urutan paling aman:
 
-1. **QA visual interaktif**: capture Roster, Hero Detail, Bag, Codex, HUD setelah perubahan terakhir.
-2. **Mini renderer collection**: tampilkan preview canvas stage 0–4 di UI menggunakan renderer yang sama dengan gameplay.
-3. **Skill visual identity audit**: petakan skill tiap hero dan tentukan visual-only accent yang masih aman.
-4. **Copy/i18n polish**: rapikan istilah Indonesia/English untuk semua cue Character.
-5. **Update progress map lagi** setelah tiap milestone selesai.
+1. **QA visual interaktif oleh QA/browser agent**: capture Roster, Hero Detail, Bag, Codex, HUD setelah perubahan terakhir.
+2. **Copy/i18n polish**: rapikan istilah Indonesia/English untuk semua cue Character.
+3. **Putuskan gameplay skill trail/impact**: bila disetujui, kerjakan sebagai visual-only pass terpisah dengan screenshot multi-hero.
+4. **Update progress map lagi** setelah tiap milestone selesai.

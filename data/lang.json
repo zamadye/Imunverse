@@ -699,7 +699,23 @@
     "Cue anatomi pertama per hero muncul jelas di siluet.": "The first anatomy cue for each hero appears clearly in the silhouette.",
     "Organela/alat membran kedua aktif sesuai desain hero.": "The second organelle or membrane tool activates according to the hero design.",
     "Payoff ofensif/defensif hero terbaca dan lebih agresif.": "The hero’s offensive or defensive payoff is readable and more aggressive.",
-    "Seluruh equity utama aktif; mahkota/core full-equity muncul.": "All main equity is active; the full-equity crown or core appears."
+    "Seluruh equity utama aktif; mahkota/core full-equity muncul.": "All main equity is active; the full-equity crown or core appears.",
+    "Jalur Design Equity": "Equity Design Path",
+    "Stage 0 tetap polos; Equity I–Full Equity membuka cue anatomi unik hero ini.": "Stage 0 stays plain; Equity I–Full Equity unlock this hero’s unique anatomy cues.",
+    "Character Design Collection": "Character Design Collection",
+    "Inventori part di atas sekarang punya konteks visual untuk tiap stage hero.": "The part inventory above now has visual context for each hero stage.",
+    "Design Equity Hero": "Hero Equity Design",
+    "Koleksi Bio-Pedia menampilkan bentuk polos sampai Full Equity supaya identitas biologis hero tetap terbaca di luar arena.": "Bio-Pedia shows the plain form through Full Equity so each hero’s biological identity remains readable outside the arena.",
+    "Design Mutasi Pathogen": "Pathogen Mutation Design",
+    "base/polos": "base/plain",
+    "Base Polos": "Plain Base",
+    "silhouette dasar": "base silhouette",
+    "tanpa part — bentuk dasar/polos": "no parts — base/plain form",
+    "Equity I": "Equity I",
+    "Equity II": "Equity II",
+    "Equity III": "Equity III",
+    "Cue visual equity.": "Equity visual cue.",
+    "Butuh browser capture per hero atau QA agent dengan screenshot runner.": "Needs browser capture per hero or a QA agent with a screenshot runner."
   },
   "rules": [
     {
@@ -1021,6 +1037,26 @@
     {
       "pattern": "^Bio-Pedia: kartu (.+?) tercatat!$",
       "replace": "Bio-Pedia: $1 card logged!"
+    },
+    {
+      "pattern": "^Aktif: (.+)$",
+      "replace": "Active: $1"
+    },
+    {
+      "pattern": "^mulai wave (\\d+)$",
+      "replace": "from wave $1"
+    },
+    {
+      "pattern": "^Stage (\\d+)$",
+      "replace": "Stage $1"
+    },
+    {
+      "pattern": "^(.+?) — Jalur Equity$",
+      "replace": "$1 — Equity Path"
+    },
+    {
+      "pattern": "^(.+?) · (.+?)$",
+      "replace": "$1 · $2"
     }
   ],
   "Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan namamu sendiri.": "Create your account — progress, hero levels & purchases stay safe under your own name.",

@@ -10,7 +10,7 @@ import { purchaseHeroUnlock } from '../../systems/economy-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
 import { emit } from '../../core/ui-bridge.js';
 import { t as tr } from '../../systems/i18n.js';
-import { spriteToDataURL } from '../../render/sprite-loader.js';
+import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
@@ -97,7 +97,7 @@ export function show() {
       class: 'avatar-wrap',
       style: `background: ${hexAlpha(heroDef.color, status.unlocked ? 0.35 : 0.18)}; border-color: ${status.unlocked ? hexAlpha(heroDef.color, 0.85) : '#e4d9bf'};`,
     }, [
-      el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
+      createHeroEquityPreview(heroDef, meta.evoStage || 0, { size: 128, className: 'hero-sprite roster-hero-preview' }),
     ]);
 
     const children = [avatar];

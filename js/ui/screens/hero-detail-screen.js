@@ -12,6 +12,7 @@ import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el, screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
+import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { squadMultipliers } from '../../systems/upgrade-system.js';
@@ -67,6 +68,7 @@ function renderEquityPathCard(heroDef, currentStage) {
       }, [
         el('span', { class: 'hl-equity-node', text: item.stage === 0 ? '0' : String(item.stage) }),
         el('span', { class: 'hl-equity-line' }),
+        createHeroEquityPreview(heroDef, item.stage, { size: 54, className: 'hl-equity-preview character-preview' }),
         el('div', { class: 'hl-equity-copy' }, [
           el('b', { text: item.label }),
           el('small', { text: `${item.name} · ${item.anatomy}` }),

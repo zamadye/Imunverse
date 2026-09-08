@@ -7,6 +7,7 @@
 import { STATE } from '../../core/state-manager.js';
 import { getData, getCharacterDesigns, getHero } from '../../core/data-store.js';
 import { getNextEvoStageDef, canEvolve } from '../../systems/evolution-system.js';
+import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { el } from '../screen-manager.js';
 
 function appendDesignCollection(evoBox, meta) {
@@ -48,6 +49,7 @@ function appendDesignCollection(evoBox, meta) {
       style: `--eq:${row.color};`,
     }, [
       el('span', { class: 'bag-design-node', text: String(row.stage) }),
+      createHeroEquityPreview(selectedHero, row.stage, { size: 46, className: 'bag-design-preview character-preview' }),
       el('div', { class: 'bag-design-copy' }, [
         el('b', { text: `${row.label} · ${row.name}` }),
         el('span', { text: row.cue || 'Cue visual equity.' }),

@@ -56,22 +56,44 @@ const KIND_GLYPH = {
   devour: '<svg viewBox="0 0 24 24"><path d="M20.8 7.3A9.6 9.6 0 1 0 20.8 16.7L12.4 12z"/><path d="M19.4 8.6l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/></svg>',
 };
 
+function currentHeroSkillVisual(run) {
+  const heroDef = run?.heroDef;
+  const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+  const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+  const eq = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+  const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+  return {
+    archetype: design?.archetype || 'generic',
+    heroColor: heroDef?.color || '#35d0ba',
+    equityColor: eq?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba',
+    stageLabel: stageDef?.collectionLabel || (stage > 0 ? `Equity ${stage}` : 'Polos'),
+    cue: eq?.visualCue || design?.baseCue || '',
+  };
+}
+
 export function buildAbilityBar() {
   const bar = document.getElementById('ability-bar');
   if (!bar) return;
   bar.textContent = '';
   const run = game.run;
+  const visual = currentHeroSkillVisual(run);
   const views = run && run.skills ? run.skills.getView() : [];
   views.forEach((view, i) => {
     const def = getData().skills.skills.find((s) => s.id === view.id);
     const iconKind = def && def.effects[0] ? def.effects[0].kind : 'strike';
     const glyph = KIND_GLYPH[iconKind] || KIND_GLYPH.strike;
     const btn = document.createElement('button');
-    btn.className = `ability-btn${view.ult ? ' ult' : ''}`;
+    btn.className = `ability-btn character-skill${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
+    btn.dataset.archetype = visual.archetype;
+    btn.dataset.stage = visual.stageLabel;
     btn.style.setProperty('--sk', view.color || '#35d0ba');
-    btn.setAttribute('aria-label', view.name);
+    btn.style.setProperty('--hero', visual.heroColor);
+    btn.style.setProperty('--eq', visual.equityColor);
+    btn.setAttribute('aria-label', `${view.name} — ${visual.stageLabel}`);
+    btn.title = visual.cue ? `${visual.stageLabel}: ${visual.cue}` : visual.stageLabel;
     btn.innerHTML =
+      `<span class="sk-bio-accent" aria-hidden="true"></span>` +
       `<span class="sk-ico sk-glyph">${glyph}</span>` +
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
