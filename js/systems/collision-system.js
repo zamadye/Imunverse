@@ -105,6 +105,34 @@ export class CollisionSystem {
   }
 
   /**
+   * V2 Phase 2 — SMART TARGETING "finisher" untuk auto-attack:
+   * skor = jarak × (bias + (1−bias) × rasioHP). Musuh sekarat "terasa lebih
+   * dekat" sehingga kill dituntaskan (feedback Phase 1 menyala lebih sering),
+   * tapi bias jarak tetap dominan (tidak menembak melewati gerombolan).
+   * @param {number} woundedWeight 0..1 — porsi skor yang dipengaruhi HP
+   */
+  findAttackTarget(x, y, range, woundedWeight = 0) {
+    if (!woundedWeight) return this.findNearestEnemy(x, y, range);
+    let best = null;
+    let bestScore = Infinity;
+    this.grid.queryCircle(x, y, range, (e) => {
+      if (!e.alive) return;
+      const dx = e.x - x;
+      const dy = e.y - y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > range * range) return;
+      const dist = Math.sqrt(Math.max(0, d2 - e.radius * e.radius * 0.5));
+      const hpRatio = Math.max(0, Math.min(1, e.hp / e.maxHP));
+      const score = dist * ((1 - woundedWeight) + woundedWeight * hpRatio);
+      if (score < bestScore) {
+        bestScore = score;
+        best = e;
+      }
+    });
+    return best;
+  }
+
+  /**
    * Kollision proyektil vs musuh (grid query per proyektil).
    * @returns {string[]} uid musuh yang mati frame ini
    */
@@ -135,10 +163,11 @@ export class CollisionSystem {
    * Kollision player vs musuh (contact damage).
    * @returns {{enemy, damage} | null}
    */
-  checkPlayerCollision(player) {
+  checkPlayerCollision(player, filter = null) {
     let hit = null;
     this.grid.queryCircle(player.x, player.y, player.radius + 50, (e) => {
       if (hit || !e.alive) return;
+      if (filter && !filter(e)) return; // V2 Phase 2: hanya hazard/boss utk contact instan
       const dx = e.x - player.x;
       const dy = e.y - player.y;
       const rr = e.radius + player.radius;

@@ -14,7 +14,8 @@
       "stat": "damage",
       "mode": "percent",
       "amount": 0.15,
-      "maxStacks": 99
+      "maxStacks": 99,
+      "rarity": "common"
     },
     {
       "id": "attackSpeed",
@@ -24,7 +25,8 @@
       "stat": "attackSpeed",
       "mode": "percent",
       "amount": 0.12,
-      "maxStacks": 99
+      "maxStacks": 99,
+      "rarity": "common"
     },
     {
       "id": "moveSpeed",
@@ -34,7 +36,8 @@
       "stat": "moveSpeed",
       "mode": "percent",
       "amount": 0.08,
-      "maxStacks": 99
+      "maxStacks": 99,
+      "rarity": "common"
     },
     {
       "id": "maxHP",
@@ -44,7 +47,8 @@
       "stat": "maxHP",
       "mode": "flat",
       "amount": 20,
-      "maxStacks": 99
+      "maxStacks": 99,
+      "rarity": "common"
     },
     {
       "id": "attackRange",
@@ -54,7 +58,8 @@
       "stat": "attackRange",
       "mode": "percent",
       "amount": 0.12,
-      "maxStacks": 99
+      "maxStacks": 99,
+      "rarity": "common"
     },
     {
       "id": "projectileCount",
@@ -64,7 +69,8 @@
       "stat": "projectileCount",
       "mode": "flat",
       "amount": 1,
-      "maxStacks": 4
+      "maxStacks": 4,
+      "rarity": "epic"
     },
     {
       "id": "lifeSteal",
@@ -74,7 +80,45 @@
       "stat": "lifeSteal",
       "mode": "flat",
       "amount": 1,
-      "maxStacks": 4
+      "maxStacks": 4,
+      "rarity": "rare"
+    },
+    {
+      "id": "pierce",
+      "name": "Duri Penembus",
+      "icon": "assets/sprites/icon_scope.png",
+      "desc": "+1 tembus musuh per proyektil",
+      "stat": "pierce",
+      "mode": "flat",
+      "amount": 1,
+      "maxStacks": 3,
+      "rarity": "rare",
+      "patterns": [
+        "ranged_pierce",
+        "ranged_homing"
+      ]
+    },
+    {
+      "id": "critChance",
+      "name": "Titik Lemah",
+      "icon": "assets/sprites/fx_spark.png",
+      "desc": "+4% peluang critical hit",
+      "stat": "critChance",
+      "mode": "flat",
+      "amount": 0.04,
+      "maxStacks": 5,
+      "rarity": "rare"
+    },
+    {
+      "id": "magnet",
+      "name": "Medan Kemotaksis",
+      "icon": "assets/sprites/icon_multi.png",
+      "desc": "+25% radius magnet nutrisi",
+      "stat": "magnet",
+      "mode": "percent",
+      "amount": 0.25,
+      "maxStacks": 4,
+      "rarity": "common"
     }
   ],
   "squadUpgrades": [
@@ -307,6 +351,56 @@
       "maxLevel": 15,
       "baseCost": 50,
       "costGrowth": 1.15
+    }
+  ],
+  "luRules": {
+    "rarityWeights": {
+      "common": 70,
+      "rare": 24,
+      "epic": 6
+    },
+    "pityRolls": 2,
+    "synergyBonus": 0.25
+  },
+  "evolutions": [
+    {
+      "id": "evo_storm",
+      "name": "Badai Sitokin",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "EVOLUSI: damage ×1.3 & serangan 15% lebih cepat — build DPS menyatu!",
+      "requires": {
+        "damage": 4,
+        "attackSpeed": 3
+      },
+      "boost": {
+        "damageMult": 1.3,
+        "cooldownMult": 0.85
+      }
+    },
+    {
+      "id": "evo_fortress",
+      "name": "Benteng Membran",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "EVOLUSI: HP maksimum ×1.35 & damage ×1.1 — pertahanan hidup!",
+      "requires": {
+        "maxHP": 4
+      },
+      "boost": {
+        "maxHPMult": 1.35,
+        "damageMult": 1.1
+      }
+    },
+    {
+      "id": "evo_swarm",
+      "name": "Kawanan Reseptor",
+      "icon": "assets/sprites/icon_multi.png",
+      "desc": "EVOLUSI: +2 proyektil ekstra — kawanan tak terbendung!",
+      "requires": {
+        "projectileCount": 3
+      },
+      "boost": {
+        "projectileFlat": 2
+      }
     }
   ]
 }

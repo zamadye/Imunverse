@@ -261,46 +261,46 @@
    "fact": "Sistem limfatik mengembalikan cairan jaringan ke darah; kelenjar limfe adalah pos filtrasi & aktivasi limfosit."
   },
   {
-   "id": "bab_mulut",
+   "id": "bab_luka",
    "category": "organ",
-   "realName": "Oral cavity",
-   "funKid": "Gerbang makanan! Petualangan semua rasa dimulai di sini.",
-   "fact": "Enzim amilase di mulut mulai mencerna pati; sisa makanan manis memicu bakteri plak dan gigi berlubang."
+   "realName": "Skin wound (laceration)",
+   "funKid": "Gerbang darurat! Luka kecil = pintu masuk kuman.",
+   "fact": "Kulit adalah organ pertahanan terbesar; luka terbuka memicu respons imun bawaan dalam hitungan menit."
   },
   {
-   "id": "bab_lambung",
+   "id": "bab_demam",
    "category": "organ",
-   "realName": "Stomach (pH 1.5–3.5)",
-   "funKid": "Mesin peras asam! Membunuh kuman yang ikut dalam makanan.",
-   "fact": "Asam lambung (pH 1,5–3,5) mematikan sebagian besar patogen — H. pylori justru sanggup bertahan di sana."
+   "realName": "Fever (pyrexia)",
+   "funKid": "Mode panas! Tubuh sengaja menaikkan suhu biar kuman kepanasan.",
+   "fact": "Demam adalah respons terkoordinasi: pirogen memicu hipotalamus menaikkan set-point suhu untuk mempercepat kerja imun."
   },
   {
-   "id": "bab_usus",
+   "id": "bab_racun",
    "category": "organ",
-   "realName": "Small intestine (villi & microbiome)",
-   "funKid": "Jalur panjang penyerap makanan! Berkelok-kelok seperti taman labirin.",
-   "fact": "Villi usus memperluas permukaan serapan; usus juga rumah triliunan mikroba baik (mikrobioma)."
+   "realName": "Food poisoning",
+   "funKid": "Alarm perut! Makanan kotor bawa pasukan kuman jahat.",
+   "fact": "Lambung (pH 1.5–3.5) membunuh sebagian besar mikroba; yang lolos dihadapi imun mukosa usus."
   },
   {
-   "id": "bab_paru",
+   "id": "bab_alergi",
    "category": "organ",
-   "realName": "Lungs (alveoli)",
-   "funKid": "Balon udara hidup! Tempat oksigen ditukar dengan karbon dioksida.",
-   "fact": "±480 juta alveolus adalah tempat difusi gas; rambut-rambut halus (mukosilier) menyapu debu dan kuman keluar."
+   "realName": "Allergic reaction",
+   "funKid": "Pasukan salah sasaran! Menyerang benda yang sebenarnya tidak jahat.",
+   "fact": "Alergi = respons IgE berlebihan terhadap antigen tak berbahaya; histamin dari sel mast memicu gejalanya."
   },
   {
-   "id": "bab_limfe",
+   "id": "bab_kanker",
    "category": "organ",
-   "realName": "Lymph nodes",
-   "funKid": "Markas besar pasukan imun! Pos centang para pemburu kuman.",
-   "fact": "Kelenjar limfe memfiltrasi limfa — lokasi limfosit bertemu antigen dan mulai merespons."
+   "realName": "Early neoplasm",
+   "funKid": "Musuh dari dalam — sel sendiri yang tumbuh salah dan menyamar.",
+   "fact": "Sel NK dan T sitotoksik mengenali sel abnormal lewat penanda permukaan yang berubah — imunosurveilans."
   },
   {
-   "id": "bab_jantung",
+   "id": "bab_final",
    "category": "organ",
-   "realName": "Heart",
-   "funKid": "Pompa keajaiban yang tak pernah tidur!",
-   "fact": "Jantung memompa ±5 liter darah per menit — pusat sirkulasi sekaligus akses berbahaya bagi patogen sistemik."
+   "realName": "Critical condition",
+   "funKid": "Pertarungan pamungkas! Semua pasukan turun tangan bersama.",
+   "fact": "Respons imun penuh melibatkan koordinasi imun bawaan dan adaptif — dipandu sinyal sitokin."
   }
  ]
 }

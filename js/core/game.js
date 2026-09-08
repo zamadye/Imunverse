@@ -20,6 +20,8 @@ import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
 import { applyRunGP } from '../systems/rank-system.js';
+import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
+import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -29,13 +31,18 @@ import { Pickup } from '../entities/pickup.js';
 
 import { SpawnSystem } from '../systems/spawn-system.js';
 import { CollisionSystem } from '../systems/collision-system.js';
-import { rollLevelUpChoices, applyLevelUp, squadMultipliers } from '../systems/upgrade-system.js';
+import { rollLevelUpChoices, applyLevelUp, squadMultipliers, evolutionBoosts, effectiveStacks } from '../systems/upgrade-system.js';
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
-import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention } from '../systems/retention-system.js';
-import { getProgressionBand, getProgression } from './data-store.js';
+import { imuForRun, xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
+import { getProgressionBand, getProgression, getGameFeel, getCombat } from './data-store.js';
+import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
+import {
+  passiveCritBonus, modifyOutgoingDamage, passiveOnHit,
+  passiveOnKill, passiveOnPlayerHit, passiveTick, passiveSkillCdMult,
+} from '../systems/passive-system.js'; // V2 Phase 3: identitas hero
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
 import {
@@ -184,6 +191,7 @@ export const game = {
       projectiles: [],
       pickups: [],
       hazards: [], // Fase 9: genangan toksin (area damage statis)
+      pendingBlasts: [], // V2 Phase 5: ledakan tertunda elite VOLATILE (fuse→blast)
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -203,6 +211,8 @@ export const game = {
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
+      luPity: 0,      // V2 Phase 4: counter pity roll rare+
+      evoTaken: {},   // V2 Phase 4: evolusi senjata yang sudah diambil run ini
       levelUpQueue: 0,
       currentChoices: null,
       reviveUsed: false,
@@ -226,7 +236,8 @@ export const game = {
       focusId,
       focusDef,
       // Fase 12: 3 skill aktif hero (S1/S2/Ult) ala MLBB — data-driven skills.json
-      skills: new SkillSystem(heroDef, { cdMult: squadMultipliers(meta).jurusCd }),
+      // V2 Phase 3: passive tcd4 "Komando Sitokin" memangkas cooldown skill
+      skills: new SkillSystem(heroDef, { cdMult: (squadMultipliers(meta).jurusCd || 1) * passiveSkillCdMult(heroDef) }),
       // lapisan pertahanan Fase 12: shield → protect → evade
       shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
       parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
@@ -281,6 +292,7 @@ export const game = {
     setScreen('gameplay');
     setPaused(false);
     setLevelUpOpen(false);
+    resetNarrativeRun(); // R2: bark boss boleh tampil lagi di run baru
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
   },
@@ -363,13 +375,22 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + (up.damage || 0) * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
-    const cooldown = base.attackCooldown / ((1 + (up.attackSpeed || 0) * 0.12) * squad.attackSpeed) * buffCooldown;
-    const speed = base.speed * squad.speed * (1 + (up.moveSpeed || 0) * 0.08) * (tb ? tb.speed.mult : 1);
-    const attackRange = base.attackRange * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + (up.attackRange || 0) * 0.12);
-    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + (up.maxHP || 0) * 20 + (perm.maxHP || 0));
-    const projectileCount = base.projectileCount + (up.projectileCount || 0);
+    // V2 Phase 4: SINERGI ROLE NYATA — stack upgrade yang cocok role hero
+    // dihitung ×1.25 (luRules.synergyBonus); badge "✦ Sinergi" jadi jujur.
+    const syn = synergyFor(heroDef);
+    const eff = (id) => effectiveStacks({ upgrades: up, heroDef }, id, syn);
+    // V2 Phase 4: EVOLUSI SENJATA in-run (Badai Sitokin / Benteng / Kawanan).
+    // Guard: saat run BARU di-init, this.run masih run lama — evoTaken lama
+    // tidak boleh bocor; pakai this.run hanya bila upgrades-nya objek yang sama.
+    const evoB = evolutionBoosts(this.run && this.run.upgrades === up ? this.run : null);
+
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
+    const cooldown = base.attackCooldown / ((1 + eff('attackSpeed') * 0.12) * squad.attackSpeed) * buffCooldown * evoB.cooldownMult;
+    const speed = base.speed * squad.speed * (1 + eff('moveSpeed') * 0.08) * (tb ? tb.speed.mult : 1);
+    const attackRange = base.attackRange * squad.attackRange * (1 + eff('attackRange') * 0.12);
+    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + eff('attackRange') * 0.12);
+    const maxHP = Math.round((base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + eff('maxHP') * 20 + (perm.maxHP || 0)) * evoB.maxHPMult);
+    const projectileCount = base.projectileCount + (up.projectileCount || 0) + evoB.projectileFlat;
     const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
@@ -383,9 +404,10 @@ export const game = {
       swipeRadius,
       maxHP,
       projectileCount,
-      pierce: base.pierce,
+      // V2 Phase 4: entri pool baru — pierce (rare) & magnet (common)
+      pierce: base.pierce + (up.pierce || 0),
       projectileSpeed: base.projectileSpeed,
-      magnetRadius: base.magnetRadius,
+      magnetRadius: base.magnetRadius * (1 + (up.magnet || 0) * 0.25),
       pickupRadius: base.pickupRadius,
       xpMult: squad.xpGain * buffXP,
       lifeSteal,
@@ -427,6 +449,21 @@ export const game = {
     }
     run.time += dt;
 
+    // V2 Phase 1: LOW-HP heartbeat — HP < threshold → detak jantung berkala
+    {
+      const lowHp = getGameFeel().lowHp;
+      const p = run.player;
+      if (p.alive && p.hp / p.maxHP < lowHp.threshold) {
+        run.heartbeatT = (run.heartbeatT ?? 0) - dt;
+        if (run.heartbeatT <= 0) {
+          run.heartbeatT = lowHp.heartbeatSec;
+          audio.heartbeat();
+        }
+      } else {
+        run.heartbeatT = 0;
+      }
+    }
+
     // Fase 9: genangan toksin — damage berkala saat player di dalamnya
     for (let i = run.hazards.length - 1; i >= 0; i--) {
       const hz = run.hazards[i];
@@ -436,6 +473,20 @@ export const game = {
       if (player.alive && hz.tick <= 0 && Math.hypot(player.x - hz.x, player.y - hz.y) < hz.r + player.radius * 0.4) {
         hz.tick = 0.8;
         this.damagePlayer(hz.dps);
+      }
+    }
+
+    // V2 Phase 5 — elite VOLATILE: ledakan bangkai setelah fuse (dodgeable)
+    for (let i = run.pendingBlasts.length - 1; i >= 0; i--) {
+      const b = run.pendingBlasts[i];
+      b.t -= dt;
+      if (b.t > 0) continue;
+      run.pendingBlasts.splice(i, 1);
+      run.effects.spawnBlast(b.x, b.y, b.radius, b.color);
+      run.camera.addShake(0.2);
+      if (player.alive && player.iframes <= 0 &&
+          Math.hypot(player.x - b.x, player.y - b.y) < b.radius + player.radius) {
+        this.damagePlayer(b.damage);
       }
     }
 
@@ -453,13 +504,14 @@ export const game = {
       }
     }
 
-    // Fase 9 — Sel NK: sorot berkala mengungkap Sel Abnormal yang menyamar
-    run.nkPulseT -= dt;
-    if (run.nkPulseT <= 0) {
-      run.nkPulseT = 1.3;
-      if (run.heroDef.id === 'sel_nk') {
-        run.effects.spawnKillFx('ring', player.x, player.y, '#5ef2ff', Math.random() * 10);
-        for (const e of run.enemies) if (e.alive && e.stealth) e.nkRevealT = 1.6;
+    // V2 Phase 3 — PASSIVE HERO per-frame: regen (treg), aura slow (baso),
+    // reveal pulse (nkcell — fix bug V1: dulu cek id 'sel_nk' yang tak pernah ada)
+    passiveTick(run, dt);
+    // V2 Phase 3: mark meluruh (dipasang skill mark_target / passive dendritic)
+    for (const e of run.enemies) {
+      if (e.markT > 0) {
+        e.markT -= dt;
+        if (e.markT <= 0) e.markMult = 1;
       }
     }
 
@@ -482,6 +534,7 @@ export const game = {
       run.objective.bossSpawned = true;
       const boss = run.chapter.boss;
       if (boss) {
+        bossBark(run.chapter.id); // R2: RIA berkomentar — non-blocking, 1×/run
         this.spawnChapterBoss(run.chapter);
       } else {
         // Bab tanpa boss → langsung bersih saat kuota tercapai
@@ -565,6 +618,7 @@ export const game = {
     if (events.bossSpawn) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: true });
       run.camera.addShake(0.7);
+      buzz('boss'); // V2 Phase 1: kehadiran boss terasa fisik
     }
 
     // 3. Update musuh (behavior + boss AOE)
@@ -581,12 +635,20 @@ export const game = {
     // 6. Kollision proyektil vs musuh
     run.collision.handleProjectileHits(run.projectiles, (proj, enemy) => {
       // Eosinofil: granula toksik 1,5x damage ke Parasit (dokumen entitas, nyata)
-      const dmg = (proj.antiParasitMult && enemy.def && enemy.def.id === 'parasit')
+      let dmg = (proj.antiParasitMult && enemy.def && enemy.def.id === 'parasit')
         ? proj.damage * proj.antiParasitMult
         : proj.damage;
+      // V2 Phase 1: critical hit (chance & mult dari data/gamefeel.json)
+      const crit = this.rollCrit();
+      if (crit) dmg *= getGameFeel().crit.mult;
+      // V2 Phase 3: mark (+10% bila ditandai) + execute (tcd8) — lalu passive on-hit
+      dmg = modifyOutgoingDamage(run, enemy, dmg);
       const died = enemy.takeDamage(dmg);
+      if (!enemy.lastHitAbsorbed) passiveOnHit(run, enemy, dmg);
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
-      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died);
+      // V2 Phase 1: knockback mikro searah proyektil (boss imun)
+      this.applyHitKnockback(enemy, proj.vx, proj.vy, getGameFeel().knockback.projectile);
+      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit);
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
@@ -597,8 +659,11 @@ export const game = {
     run.collision.separateEnemies(run.enemies);
 
     // 8. Kollision player vs musuh (contact damage)
+    // V2 Phase 2: musuh pengejar menyerang lewat WINDUP→STRIKE (enemy.js →
+    // enemyContactStrike). Contact instan hanya untuk hazard (toksin/prion —
+    // identitas "jangan disentuh") dan boss (punya telegraph AOE sendiri).
     if (player.alive && player.iframes <= 0) {
-      const hit = run.collision.checkPlayerCollision(player);
+      const hit = run.collision.checkPlayerCollision(player, (e) => !e.usesContactTelegraph);
       if (hit) this.damagePlayer(hit.damage);
     }
 
@@ -800,6 +865,7 @@ export const game = {
     setLevelUpOpen(true);
     setPaused(true);
     audio.levelup();
+    buzz('levelup'); // V2 Phase 1: selebrasi terasa di tangan
     emit('levelup', { level: run.level, choices: run.currentChoices });
   },
 
@@ -810,6 +876,16 @@ export const game = {
     const result = applyLevelUp(run, upgradeId);
     this.recomputePlayerStats();
     if (result.healAmount > 0) run.player.heal(result.healAmount);
+    // V2 Phase 4: EVOLUSI SENJATA diambil → selebrasi besar (momen memorable)
+    if (result.evolved) {
+      showAnnounce(result.evolved.name.toUpperCase() + '!', true);
+      run.effects.spawnBurst(run.player.x, run.player.y, '#c39bd3', 40, 280, 5);
+      run.camera.addShake(0.5);
+      this.hitStopRun(getGameFeel().hitStop.ult);
+      audio.evolve();
+      buzz('levelup');
+      emit('toast', { message: `EVOLUSI: ${result.evolved.name}!`, kind: 'gold' });
+    }
 
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
     if (run.levelUpQueue > 0) {
@@ -849,26 +925,112 @@ export const game = {
       while (diff > Math.PI) diff -= Math.PI * 2;
       while (diff < -Math.PI) diff += Math.PI * 2;
       if (Math.abs(diff) > half) return;
-      const died = e.takeDamage(damage);
+      // V2 Phase 1: crit roll + knockback melee (lebih kuat dari proyektil)
+      const crit = this.rollCrit();
+      let dmg = crit ? damage * getGameFeel().crit.mult : damage;
+      dmg = modifyOutgoingDamage(run, e, dmg); // V2 Phase 3: mark + execute
+      const died = e.takeDamage(dmg);
+      if (!e.lastHitAbsorbed) passiveOnHit(run, e, dmg);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
-      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : damage, died);
-      if (!e.lastHitAbsorbed) this.onDamageDealt(damage);
+      this.applyHitKnockback(e, dx, dy, getGameFeel().knockback.melee);
+      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit);
+      if (!e.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(e, null);
     });
+  },
+
+  /** V2 Phase 1: roll critical hit global (data/gamefeel.json crit.chance). */
+  rollCrit() {
+    const cfg = getGameFeel().crit;
+    // V2 Phase 3: passive bcell + V2 Phase 4: upgrade "Titik Lemah" (+4%/stack)
+    const upBonus = ((this.run.upgrades && this.run.upgrades.critChance) || 0) * 0.04;
+    const chance = this.run.critChanceOverride ?? (cfg.chance + passiveCritBonus(this.run) + upBonus);
+    return Math.random() < chance;
+  },
+
+  /**
+   * V2 Phase 1: knockback mikro — dorong musuh searah datangnya hit.
+   * Memakai e.vx/vy yang sudah punya decay friksi di enemy.update.
+   * Boss imun (gamefeel.knockback.bossImmune) agar fight tetap terbaca.
+   */
+  applyHitKnockback(enemy, dirX, dirY, force) {
+    if (!enemy.alive) return;
+    if (enemy.isBoss && getGameFeel().knockback.bossImmune) return;
+    const len = Math.hypot(dirX, dirY);
+    if (len < 0.001) return;
+    enemy.vx += (dirX / len) * force;
+    enemy.vy += (dirY / len) * force;
   },
 
   /**
    * Feedback visual per hit: bintang aset fx_hit.png + angka damage mengambang.
    */
-  spawnHitFeedback(enemy, damage, died) {
+  spawnHitFeedback(enemy, damage, died, crit = false) {
     const run = this.run;
-    run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || enemy.isBoss);
-    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, died ? '#ffd93d' : '#ffffff');
+    const gf = getGameFeel();
+    run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
+    // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
+    const dn = gf.damageNumber;
+    let size = dn.base + Math.min(dn.maxBonus, damage * dn.perDamage);
+    let color = died ? '#ffd93d' : '#ffffff';
+    if (crit) {
+      size *= gf.crit.sizeMult;
+      color = gf.crit.color;
+      this.hitStopRun(gf.hitStop.crit); // jeda mikro "berat" khusus crit
+      buzz('crit');
+    }
+    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
   findNearestEnemy(x, y, range) {
     return this.run.collision.findNearestEnemy(x, y, range);
+  },
+
+  /** V2 Phase 2: target auto-attack — bias "finisher" ke musuh sekarat. */
+  findAttackTarget(x, y, range) {
+    return this.run.collision.findAttackTarget(x, y, range, getCombat().targeting.woundedWeight);
+  },
+
+  /**
+   * V2 Phase 5: BOSS ENRAGE — dipanggil dari enemy.update (boss_pattern_a).
+   * HP ≤ threshold → sekali: lebih cepat & agresif, telegraph tetap terbaca.
+   * Angka dari data/waves.json (bossEnrage).
+   */
+  tryBossEnrage(boss) {
+    const cfg = getData().waves.bossEnrage;
+    if (!cfg || boss.enraged || boss.hp / boss.maxHP > cfg.threshold) return;
+    boss.enraged = true;
+    boss.speed *= cfg.speedMult;
+    if (boss.def.areaAttack) {
+      // shadow def: jangan mutasi definisi bersama di data-store
+      boss.def = {
+        ...boss.def,
+        areaAttack: {
+          ...boss.def.areaAttack,
+          interval: boss.def.areaAttack.interval * cfg.intervalMult,
+          telegraphTime: boss.def.areaAttack.telegraphTime * cfg.telegraphMult,
+        },
+      };
+    }
+    showAnnounce(tr('MENGAMUK!'), true);
+    this.run.camera.addShake(0.5);
+    audio.bossSpawn();
+    buzz('boss');
+    this.run.effects.spawnBurst(boss.x, boss.y, '#ff5d73', 26, 260, 5);
+  },
+
+  /**
+   * V2 Phase 2: STRIKE musuh pengejar setelah windup — dipanggil dari
+   * enemy.update. Lunge visual (terkam) + damage lewat jalur damagePlayer
+   * (shield/evade/iframes/haptic Phase 1 semua tetap berlaku).
+   */
+  enemyContactStrike(enemy, dirX, dirY) {
+    if (!enemy.alive || !this.run || this.run.ended) return;
+    const lunge = getCombat().contactAttack.lunge;
+    enemy.vx += dirX * lunge;
+    enemy.vy += dirY * lunge;
+    this.damagePlayer(enemy.damage);
   },
 
   /** Ledakan AOE boss: cek player dalam radius + shake. */
@@ -922,7 +1084,9 @@ export const game = {
     // Screen shake saat kena damage besar (sesuai spek)
     run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
     audio.playerHit();
+    buzz('playerHit'); // V2 Phase 1: getaran pola [30,40,30] di HP
     player.squash = 0.28; // JUICE squash saat terkena hit
+    passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -1127,6 +1291,7 @@ export const game = {
     const run = this.run;
     run.kills += 1;
     tutorial.notifyKill();
+    passiveOnKill(run, this); // V2 Phase 3: heal Mako / frenzy Neo
 
     // ---- Fase 17 (trigger 2A): XP per KILL — kecil 5–8, besar 12–15, boss 50 ----
     const killXp = xpForKill(enemy.def.tier, enemy.isBoss);
@@ -1175,8 +1340,25 @@ export const game = {
       emit('toast', { message: `COMBO x${run.combo.count}! +${10 + run.combo.count} XP`, kind: 'gold' });
     }
     audio.kill();
-    if (enemy.isBoss) this.hitStopRun(0.07);      // hit-stop 70ms boss
-    else if (enemy.def.elite) this.hitStopRun(0.035); // 35ms elite
+    // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
+    const gf = getGameFeel();
+    if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
+    else if (enemy.def.elite) { this.hitStopRun(gf.hitStop.elite); buzz('elite'); }
+    else { this.hitStopRun(gf.hitStop.kill); buzz('kill'); }
+    // V2 Phase 1: micro shake per kill (biasa/elite; boss sudah shake 0.65 di bawah)
+    if (!enemy.isBoss) run.camera.addShake(enemy.def.elite ? gf.shake.elite : gf.shake.kill);
+    // V2 Phase 5: elite VOLATILE — bangkai meledak setelah fuse ber-telegraph
+    // (konsisten filosofi Phase 2: bisa dihindari dengan menjauh)
+    if (enemy.eliteAffix === 'volatile') {
+      const vc = enemy.affixCfg;
+      run.pendingBlasts.push({ x: enemy.x, y: enemy.y, t: vc.fuse, radius: vc.radius, damage: vc.damage, color: vc.color });
+      run.effects.spawnBlast(enemy.x, enemy.y, vc.radius, vc.color);
+    }
+    // V2 Phase 1: DEATH POP — sprite membesar & memudar, kill tidak "lenyap"
+    run.effects.spawnKillPop(
+      enemy.x, enemy.y, enemy.def.spriteIdle, enemy.radius,
+      run.player.x < enemy.x, gf.killPop.dur, gf.killPop.scaleTo,
+    );
     const pfx = getRetention().particles;
     run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
@@ -1412,6 +1594,20 @@ export const game = {
     });
     run.rankGain = rankRes;
 
+    // V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain
+    const masteryRes = addMasteryXP(meta, run.heroDef.id, {
+      kills: run.kills,
+      wave: run.spawnSys.wave,
+      victory,
+    });
+    run.masteryGain = masteryRes;
+    if (masteryRes.levelsGained > 0) {
+      emit('toast', {
+        message: `MASTERY ${run.heroDef.name} Lv ${masteryRes.level}${masteryRes.title ? ` — ${masteryRes.title}` : ''}! +${masteryRes.reward} Imun`,
+        kind: 'gold',
+      });
+    }
+
     // META-LAYER kondisi tubuh: racun, energi, pemulihan sistem fokus,
     // toxic seep, streak milestone — loop tertutup antar-run.
     this.lastBodyImpact = registerRunResult(meta, {
@@ -1473,6 +1669,14 @@ export const game = {
       bpFrom: run.bpGain ? run.bpGain.from : null,
       bpTo: run.bpGain ? run.bpGain.to : null,
       newMissions: completedMissions.length,
+      // V2 Phase 6: mastery hero yang dipakai run ini
+      mastery: run.masteryGain ? {
+        heroName: run.heroDef.name,
+        xp: run.masteryGain.xp,
+        level: run.masteryGain.level,
+        levelsGained: run.masteryGain.levelsGained,
+        title: run.masteryGain.title,
+      } : null,
       rank: {
         gained: rankRes.gained,
         gpAfter: rankRes.gpAfter,
@@ -1634,17 +1838,48 @@ export const game = {
         const hidden = e.stealth && !e.stealthExposed;
         const bob = Math.abs(Math.sin(time * 6.4 + e.weavePhase * 7)) * 2.4;
         const flip = player.x < e.x ? -1 : 1;
-        billboard(e.x, e.y, { lift: e.radius * 0.62 + bob, flip });
+        // V2 Phase 2: SHIVER telegraph — musuh bergetar selama windup serangan
+        let shiverX = 0;
+        if (e.attackSpriteHint) {
+          const ca = getCombat().contactAttack;
+          shiverX = Math.sin(time * ca.shiverHz * Math.PI * 2 + e.weavePhase) * ca.shiverAmp;
+        }
+        // V2 Phase 5: aura ELITE — ring warna affix di lantai (terlihat dari jauh)
+        if (e.eliteAffix) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = e.affixCfg.color || '#ffd93d';
+          ctx.globalAlpha = 0.5 + Math.sin(time * 5 + e.weavePhase) * 0.2;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.15, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+        billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
         const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
         drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
-          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : 0,
+          // V2 Phase 5: boss enrage = tint merah konstan (drama fase akhir)
+          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : (e.enraged ? 0.3 : 0),
+          flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
         });
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
         ctx.restore();
         billboard(e.x, e.y, { lift: e.radius * 0.62 });
         drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
+        // V2 Phase 5: label affix elite di atas HP bar
+        if (e.eliteAffix) {
+          ctx.font = '900 9px Nunito, system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = e.affixCfg.color || '#ffd93d';
+          ctx.strokeStyle = 'rgba(18,63,58,0.85)';
+          ctx.lineWidth = 3;
+          const lbl = e.affixCfg.label || 'ELITE';
+          ctx.strokeText(lbl, e.x, e.y - e.radius - 16);
+          ctx.fillText(lbl, e.x, e.y - e.radius - 16);
+        }
         ctx.restore();
       } });
     }
@@ -1756,6 +1991,14 @@ export const game = {
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
       else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
+      else if (fx.type === 'killpop') {
+        // V2 Phase 1 death pop: sprite musuh membesar 1→scaleTo lalu memudar
+        const kt = 1 - fx.life / fx.maxLife; // 0..1
+        const scale = 1 + (fx.scaleTo - 1) * kt;
+        ctx.globalAlpha = Math.max(0, 1 - kt);
+        drawSprite(ctx, fx.sprite, fx.x, fx.y, fx.radius * 2.667 * scale, 0, {});
+        ctx.globalAlpha = 1;
+      }
       ctx.restore();
     }
     for (const pt of run.effects.particles) {

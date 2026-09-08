@@ -13,31 +13,114 @@ import { writeSave } from '../save/save-manager.js';
 // ---------------------------------------------------------------
 
 /**
- * Acak `count` pilihan upgrade unik dari pool.
- * @param {object} run  state run (untuk cek jumlah stack yang sudah diambil)
- * @returns {object[]} pilihan (referensi ke entri pool)
+ * V2 Phase 4 — roll pilihan level-up dengan RARITY + PITY + anti dead-choice.
+ * (menggantikan Fisher-Yates seragam V1; spek docs/v2/phase-04-build-evolution.md)
+ *  - weighted sampling tanpa penggantian (bobot luRules.rarityWeights)
+ *  - patterns per entri: hero melee tidak pernah ditawari upgrade proyektil
+ *  - pity: run.luPity ≥ pityRolls → dijamin ≥1 rare+ pada roll ini
+ *  - evolusi senjata: resep terpenuhi & belum diambil → kartu EVO di slot 0
+ * @returns {object[]} pilihan (entri pool / kartu evo dengan flag isEvo)
  */
 export function rollLevelUpChoices(run) {
-  const pool = getData().upgrades.levelUpPool;
-  const count = getData().upgrades.levelUpChoices || 3;
-  const available = pool.filter((u) => (run.upgrades[u.id] || 0) < u.maxStacks);
-  // Fisher–Yates shuffle
-  for (let i = available.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [available[i], available[j]] = [available[j], available[i]];
+  const data = getData().upgrades;
+  const pool = data.levelUpPool;
+  const count = data.levelUpChoices || 3;
+  const rules = data.luRules || { rarityWeights: { common: 1 }, pityRolls: 99 };
+  const pattern = run.heroDef ? run.heroDef.attackPattern : null;
+
+  const available = pool.filter((u) =>
+    (run.upgrades[u.id] || 0) < u.maxStacks &&
+    (!u.patterns || !pattern || u.patterns.includes(pattern)));
+
+  // weighted sampling tanpa penggantian
+  const picked = [];
+  const bag = [...available];
+  while (picked.length < count && bag.length > 0) {
+    let total = 0;
+    for (const u of bag) total += rules.rarityWeights[u.rarity || 'common'] || 1;
+    let roll = Math.random() * total;
+    let idx = bag.length - 1;
+    for (let i = 0; i < bag.length; i++) {
+      roll -= rules.rarityWeights[bag[i].rarity || 'common'] || 1;
+      if (roll <= 0) { idx = i; break; }
+    }
+    picked.push(bag.splice(idx, 1)[0]);
   }
-  return available.slice(0, count);
+
+  // PITY: dua roll tanpa rare+ → jamin ≥1 rare+ sekarang
+  const isRarePlus = (u) => u.rarity === 'rare' || u.rarity === 'epic';
+  if (!picked.some(isRarePlus) && (run.luPity || 0) >= rules.pityRolls) {
+    const candidates = bag.filter(isRarePlus);
+    if (candidates.length > 0) {
+      picked[picked.length - 1] = candidates[Math.floor(Math.random() * candidates.length)];
+    }
+  }
+  run.luPity = picked.some(isRarePlus) ? 0 : (run.luPity || 0) + 1;
+
+  // EVOLUSI SENJATA: resep terpenuhi → kartu evo DIJAMIN terlihat (slot 0)
+  const evo = availableEvolution(run);
+  if (evo && picked.length > 0) {
+    picked[0] = { ...evo, isEvo: true, rarity: 'epic', maxStacks: 1 };
+  }
+  return picked;
+}
+
+/** Resep evolusi pertama yang syaratnya terpenuhi & belum diambil run ini. */
+export function availableEvolution(run) {
+  const evos = getData().upgrades.evolutions || [];
+  for (const evo of evos) {
+    if (run.evoTaken && run.evoTaken[evo.id]) continue;
+    const ok = Object.entries(evo.requires).every(([id, need]) => (run.upgrades[id] || 0) >= need);
+    if (ok) return evo;
+  }
+  return null;
 }
 
 /**
- * Terapkan pilihan level-up ke state run.
- * @returns {{healAmount:number}} info efek untuk diolah game.js
+ * Terapkan pilihan level-up ke state run (upgrade biasa ATAU kartu evolusi).
+ * @returns {{healAmount:number, evolved?:object}} info efek untuk diolah game.js
  */
 export function applyLevelUp(run, upgradeId) {
+  // V2 Phase 4: kartu evolusi senjata
+  const evo = (getData().upgrades.evolutions || []).find((e) => e.id === upgradeId);
+  if (evo) {
+    run.evoTaken = run.evoTaken || {};
+    run.evoTaken[evo.id] = true;
+    return { healAmount: 0, evolved: evo };
+  }
   const def = getData().upgrades.levelUpPool.find((u) => u.id === upgradeId);
   if (!def) throw new Error('Upgrade tidak ditemukan: ' + upgradeId);
   run.upgrades[upgradeId] = (run.upgrades[upgradeId] || 0) + 1;
   return { healAmount: def.id === 'maxHP' ? def.amount : 0 };
+}
+
+/**
+ * V2 Phase 4: gabungan boost seluruh evolusi yang diambil run ini.
+ * @returns {{damageMult:number, cooldownMult:number, maxHPMult:number, projectileFlat:number}}
+ */
+export function evolutionBoosts(run) {
+  const out = { damageMult: 1, cooldownMult: 1, maxHPMult: 1, projectileFlat: 0 };
+  if (!run || !run.evoTaken) return out;
+  for (const evo of getData().upgrades.evolutions || []) {
+    if (!run.evoTaken[evo.id]) continue;
+    const b = evo.boost;
+    if (b.damageMult) out.damageMult *= b.damageMult;
+    if (b.cooldownMult) out.cooldownMult *= b.cooldownMult;
+    if (b.maxHPMult) out.maxHPMult *= b.maxHPMult;
+    if (b.projectileFlat) out.projectileFlat += b.projectileFlat;
+  }
+  return out;
+}
+
+/**
+ * V2 Phase 4: stack EFEKTIF sebuah upgrade — sinergi role ×(1+synergyBonus).
+ * Membuat badge "✦ Sinergi" di kartu level-up akhirnya berdampak nyata.
+ */
+export function effectiveStacks(run, upgradeId, synergyIds) {
+  const stacks = run.upgrades[upgradeId] || 0;
+  if (!stacks || !synergyIds || !synergyIds.includes(upgradeId)) return stacks;
+  const bonus = (getData().upgrades.luRules || {}).synergyBonus || 0;
+  return stacks * (1 + bonus);
 }
 
 // ---------------------------------------------------------------

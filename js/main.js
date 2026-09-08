@@ -12,6 +12,7 @@
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
+import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
 import { loadLang, initSweep, sweepAll } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
@@ -85,8 +86,12 @@ function showToast({ message, kind = '' }) {
   el.className = 'toast ' + kind;
   el.textContent = message;
   box.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
-  while (box.children.length > 4) box.firstChild.remove();
+  // R2: bark RIA = beat naratif — tampil lebih lama & tidak tergusur toast lain
+  setTimeout(() => el.remove(), kind === 'ria' ? 5200 : 3200);
+  while (box.children.length > 4) {
+    const victim = [...box.children].find((c) => !c.classList.contains('ria')) || box.firstChild;
+    victim.remove();
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -95,8 +100,12 @@ function showToast({ message, kind = '' }) {
 function wireUiBridge() {
   on('toast', (payload) => {
     // Fase 12c: jangan menumpuk — maksimal 2 toast, yang tertua dihapus
-    const live = document.querySelectorAll('#toasts .toast');
-    if (live.length >= 2) live[0].remove();
+    const live = [...document.querySelectorAll('#toasts .toast')];
+    if (live.length >= 2) {
+      // R2: jangan gusur bark RIA — korbankan toast non-naratif tertua
+      const victim = live.find((c) => !c.classList.contains('ria')) || live[0];
+      victim.remove();
+    }
     showToast(payload);
   });
 
@@ -253,6 +262,7 @@ async function boot() {
   // 4) Wiring UI
   game.init({ canvas, input });
   wireUiBridge();
+  initMetrics(); // V2 Phase 0: rekam KPI run (localStorage, pasif via event bus)
 
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);
@@ -304,7 +314,7 @@ async function boot() {
   document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
     const gate = gateFor('dock', btn.dataset.menu2Screen);
     if (gate && gate.locked) {
-      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
       audio.ui();
       return;
     }
@@ -317,7 +327,7 @@ async function boot() {
     // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
     const gate = gateFor('secondary', btn.dataset.menuScreen);
     if (gate && gate.locked) {
-      showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
       audio.ui();
       return;
     }
@@ -332,10 +342,25 @@ async function boot() {
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => screenManager.show('dashboard'));
   document.getElementById('btn-focus-close').addEventListener('click', () => screenManager.show('dashboard'));
-  // MULAI → Peta Tubuh (kampanye = alur utama; Endless tetap via prep)
+  // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
+  // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
+  // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
   // Fase 13: tombol dirender ulang saat dashboard tampil → pakai delegasi
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#btn-play-big')) screenManager.show('campaign');
+    if (!e.target.closest('#btn-play-big')) return;
+    const meta = STATE.meta;
+    const runs = (meta.stats && meta.stats.totalRuns) || 0;
+    if (runs >= 3) {
+      screenManager.show('campaign'); // pemain sudah paham loop → boleh memilih
+      return;
+    }
+    // Default otomatis: bab pertama yang belum tamat, mode kampanye
+    const chapters = (getData().campaign && getData().campaign.chapters) || [];
+    const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
+    if (ch) { meta.selectedChapter = ch.id; meta.selectedMode = 'kampanye'; }
+    const heroDef = getHero(meta.selectedHero);
+    const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
+    game.startRun(unlocked ? heroDef.id : (getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0]).id);
   });
   // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
@@ -417,7 +442,7 @@ async function boot() {
       // F21: gerbang bertahap — menu terbuka sesuai Gelombang terbaik (data/features.json)
       const gate = isDockGated(btn);
       if (gate) {
-        showToast({ message: `Capai Gelombang ${gate.requireWave} untuk membuka!` });
+        showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
         audio.ui();
         return;
       }
