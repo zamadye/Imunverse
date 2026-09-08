@@ -24,6 +24,7 @@ import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
 import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
 import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4: Modul B
+import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.js'; // R5: Modul C
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -194,6 +195,7 @@ export const game = {
       pickups: [],
       hazards: [], // Fase 9: genangan toksin (area damage statis)
       pendingBlasts: [], // V2 Phase 5: ledakan tertunda elite VOLATILE (fuse→blast)
+      inflamZones: [], // R5 Modul C: zona inflamasi (DoT lantai → cytokine storm)
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -479,6 +481,9 @@ export const game = {
         this.damagePlayer(hz.dps);
       }
     }
+
+    // R5 Modul C: zona inflamasi — DoT musuh + cytokine storm (risk hero)
+    inflamUpdate(this, dt);
 
     // V2 Phase 5 — elite VOLATILE: ledakan bangkai setelah fuse (dodgeable)
     for (let i = run.pendingBlasts.length - 1; i >= 0; i--) {
@@ -1802,6 +1807,28 @@ export const game = {
       ctx.beginPath();
       ctx.arc(hz.x, hz.y, hz.r, 0, Math.PI * 2);
       ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    // R5 Modul C: zona inflamasi — telegraph kuning pucat → merah menyala,
+    // pulsa makin cepat mendekati storm (sinyal "keluar sekarang!" tanpa HUD).
+    if (run.inflamZones) for (const z of run.inflamZones) {
+      const heat = inflamHeat(z, run.time);
+      const col = inflamColor(heat);
+      const pulse = Math.sin(run.time * (3 + heat * 9) + z.id) * 0.5 + 0.5;
+      ground(z.x, z.y);
+      ctx.globalAlpha = 0.14 + heat * 0.2 + pulse * 0.06;
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.arc(z.x, z.y, z.radius, 0, Math.PI * 2);
+      ctx.fill();
+      // Rim menebal saat panas — batas zona jelas terbaca
+      ctx.globalAlpha = 0.35 + heat * 0.45;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2 + heat * 4;
+      ctx.beginPath();
+      ctx.arc(z.x, z.y, z.radius * (0.94 + pulse * 0.05), 0, Math.PI * 2);
+      ctx.stroke();
       ctx.globalAlpha = 1;
       ctx.restore();
     }

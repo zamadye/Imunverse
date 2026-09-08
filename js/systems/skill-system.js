@@ -10,6 +10,7 @@ import { buzz } from './haptics.js'; // V2 Phase 1
 import { audio } from './audio-system.js';
 import { emit } from '../core/ui-bridge.js';
 import { tryDevour } from './phagocytosis.js'; // R4: Modul B
+import { spawnInflamZone } from './inflammation.js'; // R5: Modul C
 import { t as tr } from '../systems/i18n.js';
 
 export class SkillSystem {
@@ -92,6 +93,10 @@ export class SkillSystem {
           if (fx.stun) e.frozen = Math.max(e.frozen, fx.stun);
           if (died) game.onEnemyKilled(e, null);
         }
+        // R5 Modul C: skill area menumpuk INFLAMASI di lantai (bukan di
+        // musuh) — zona DoT yang memanas menuju cytokine storm. Flag OFF
+        // = tidak ada zona (perilaku pra-R5 utuh).
+        spawnInflamZone(game, px, py, fx.radius);
         break;
       }
       case 'devour': {

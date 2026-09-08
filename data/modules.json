@@ -9,7 +9,7 @@
       "enabled": true
     },
     "inflammationZone": {
-      "enabled": false
+      "enabled": true
     },
     "tagCascade": {
       "enabled": false
@@ -41,5 +41,17 @@
     "healOnDevour": 8,
     "meterPerDevour": 25,
     "meterMax": 100
+  },
+  "inflammationZone": {
+    "baseRate": 2.0,
+    "intensityExp": 1.2,
+    "maxIntensity": 10,
+    "stormThreshold": 8,
+    "dotTickSec": 0.5,
+    "dotDmgPct": 0.08,
+    "stormMult": 2.5,
+    "heroSplashDamage": 12,
+    "radius": 90,
+    "maxZones": 3
   }
 }
