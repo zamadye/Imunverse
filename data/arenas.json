@@ -1,6 +1,6 @@
 {
   "schemaVersion": 5,
-  "doc": "MAP AGENT: skema data-driven per-map. Seluruh layar = permukaan organ TANPA BATAS (tak ada tambalan/ring). palette.hex = warna dasar jaringan; palette.ground.features = isi anatomi world-anchored (mengikuti kamera saat menjelajah). Lihat docs/map-environment-schema.md.",
+  "doc": "MAP AGENT: skema data-driven per-map. Seluruh layar = permukaan organ TANPA BATAS (tak ada tambalan/ring). palette.hex = warna dasar jaringan; palette.ground.features = isi anatomi world-anchored (mengikuti kamera saat menjelajah). Tipe: blotch|fold|chunk|pool|sacs|thread|flowcell|villi|mist|motes. Lihat docs/map-environment-schema.md.",
   "arenas": [
     {
       "id": "limfe", "name": "Saluran Limfe", "thumb": "assets/sprites/arena_limfe.png",
@@ -10,9 +10,12 @@
       "palette": { "hex": "#e2ecc9", "hexEdge": "#b9c795", "vignette": "rgba(24,70,52,0.28)", "props": ["prop_weed.png", "prop_cell.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": { "shade": "50,100,70", "features": [
           { "type": "blotch", "color": "170,205,150", "color2": "200,220,180", "spacing": 380, "density": 0.6, "size": 70, "alpha": 0.5 },
-          { "type": "fold", "color": "150,200,160", "color2": "190,225,195", "spacing": 520, "density": 0.6, "width": 22, "len": 700, "wave": 70, "angle": 0.9 },
+          { "type": "fold", "color": "150,200,160", "color2": "190,225,195", "spacing": 520, "density": 0.6, "width": 22, "len": 700, "wave": 70, "angle": 0.9, "crawl": 0.4 },
           { "type": "chunk", "colors": ["235,245,225", "215,235,200", "200,225,185"], "line": "90,140,105", "spacing": 280, "density": 0.5, "size": 34, "var": 16, "bob": 2 },
           { "type": "pool", "color": "200,230,205", "color2": "230,245,230", "spacing": 540, "density": 0.45, "size": 85, "bubbles": true },
+          { "type": "villi", "color": "160,210,170", "color2": "200,235,205", "spacing": 420, "density": 0.45, "size": 44, "alpha": 0.8 },
+          { "type": "mist", "color": "220,240,225", "spacing": 700, "density": 0.6, "size": 150, "alpha": 0.10 },
+          { "type": "motes", "color": "180,220,185", "color2": "230,245,230", "spacing": 380, "density": 0.5, "size": 90, "dot": 3, "alpha": 0.5 },
           { "type": "flowcell", "color": "70,130,95", "count": 24, "size": 5, "dx": 0.8, "dy": 0.4, "speed": 12, "span": 700, "alpha": 0.8 }
         ] },
         "ambient": { "density": 0.55, "spacing": 250, "size": 26, "drift": 8, "opacity": 0.16, "parallax": 0.08, "tint": "240,250,235", "shade": "40,110,80" },
@@ -28,10 +31,13 @@
       "palette": { "hex": "#f3d3ac", "hexEdge": "#dfa878", "vignette": "rgba(90,30,22,0.3)", "props": ["prop_asam.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": { "shade": "120,60,45", "features": [
           { "type": "blotch", "color": "210,140,115", "color2": "225,175,140", "spacing": 380, "density": 0.6, "size": 70, "alpha": 0.5 },
-          { "type": "fold", "color": "200,110,95", "color2": "235,170,150", "spacing": 420, "density": 0.8, "width": 30, "len": 750, "wave": 90, "angle": 0.4 },
+          { "type": "fold", "color": "200,110,95", "color2": "235,170,150", "spacing": 420, "density": 0.8, "width": 30, "len": 750, "wave": 90, "angle": 0.4, "crawl": 0.7 },
           { "type": "chunk", "colors": ["245,240,225", "165,103,74", "127,174,90", "224,138,60", "217,176,106"], "line": "150,100,80", "spacing": 260, "density": 0.55, "size": 30, "var": 18, "bob": 3 },
-          { "type": "pool", "color": "205,215,110", "color2": "235,245,170", "spacing": 520, "density": 0.5, "size": 95, "bubbles": true },
-          { "type": "thread", "color": "240,200,180", "spacing": 480, "density": 0.5, "len": 380, "width": 5 },
+          { "type": "pool", "color": "205,215,110", "color2": "235,245,170", "spacing": 520, "density": 0.5, "size": 95, "bubbles": true, "boil": true, "danger": true },
+          { "type": "thread", "color": "240,200,180", "spacing": 480, "density": 0.5, "len": 380, "width": 5, "sway": 16 },
+          { "type": "villi", "color": "215,150,130", "color2": "240,190,170", "spacing": 400, "density": 0.5, "size": 46, "alpha": 0.85 },
+          { "type": "mist", "color": "225,230,160", "spacing": 700, "density": 0.55, "size": 150, "alpha": 0.10 },
+          { "type": "motes", "color": "240,210,170", "color2": "255,240,220", "spacing": 360, "density": 0.5, "size": 90, "dot": 3, "alpha": 0.5 },
           { "type": "flowcell", "color": "230,200,150", "count": 20, "size": 6, "dx": 1, "dy": 0.25, "speed": 24, "span": 700, "alpha": 0.8 }
         ] },
         "ambient": { "density": 0.6, "spacing": 230, "size": 24, "drift": 16, "opacity": 0.15, "parallax": 0.08, "tint": "255,225,190", "shade": "150,70,45" },
@@ -47,10 +53,12 @@
       "palette": { "hex": "#f4ccd6", "hexEdge": "#dda0b4", "vignette": "rgba(90,30,50,0.3)", "props": ["prop_cell.png", "prop_dots.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": { "shade": "130,70,95", "features": [
           { "type": "blotch", "color": "225,160,180", "color2": "235,190,200", "spacing": 380, "density": 0.6, "size": 70, "alpha": 0.5 },
-          { "type": "thread", "color": "215,140,160", "color2": "240,190,205", "spacing": 460, "density": 0.6, "len": 420, "width": 16 },
+          { "type": "thread", "color": "215,140,160", "color2": "240,190,205", "spacing": 460, "density": 0.6, "len": 420, "width": 16, "sway": 20 },
           { "type": "thread", "color": "200,80,100", "spacing": 420, "density": 0.5, "len": 350, "width": 3 },
           { "type": "thread", "color": "110,140,200", "spacing": 430, "density": 0.45, "len": 350, "width": 3 },
           { "type": "sacs", "color": "245,200,215", "color2": "230,150,175", "spacing": 300, "density": 0.55, "size": 26, "n": 6 },
+          { "type": "mist", "color": "255,225,235", "spacing": 680, "density": 0.6, "size": 150, "alpha": 0.12 },
+          { "type": "motes", "color": "255,235,240", "color2": "255,255,255", "spacing": 380, "density": 0.45, "size": 90, "dot": 2.5, "alpha": 0.5 },
           { "type": "flowcell", "color": "255,240,245", "count": 14, "size": 4, "dx": 0.3, "dy": -1, "speed": 30, "span": 700, "alpha": 0.8 }
         ] },
         "ambient": { "density": 0.5, "spacing": 270, "size": 20, "drift": 14, "opacity": 0.13, "parallax": 0.08, "tint": "255,230,238", "shade": "170,90,110" },
@@ -66,10 +74,12 @@
       "palette": { "hex": "#ecdcab", "hexEdge": "#d3ba7f", "vignette": "rgba(60,50,18,0.32)", "props": ["prop_kristal.png", "prop_dots.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": { "shade": "110,95,50", "features": [
           { "type": "blotch", "color": "205,185,130", "color2": "220,205,160", "spacing": 380, "density": 0.6, "size": 70, "alpha": 0.5 },
-          { "type": "fold", "color": "200,175,100", "color2": "230,210,140", "spacing": 400, "density": 0.8, "width": 14, "len": 800, "wave": 50, "angle": 0.2 },
+          { "type": "fold", "color": "200,175,100", "color2": "230,210,140", "spacing": 400, "density": 0.8, "width": 14, "len": 800, "wave": 50, "angle": 0.2, "pulse": true, "pulseSpeed": 0.3 },
           { "type": "chunk", "colors": ["240,225,170", "225,205,140", "250,240,200"], "line": "150,130,80", "spacing": 300, "density": 0.5, "size": 26, "var": 14, "bob": 0 },
           { "type": "thread", "color": "255,235,160", "color2": "255,255,255", "spacing": 340, "density": 0.55, "len": 300, "width": 3, "flicker": true },
-          { "type": "thread", "color": "180,155,90", "spacing": 460, "density": 0.5, "len": 380, "width": 5 }
+          { "type": "thread", "color": "180,155,90", "spacing": 460, "density": 0.5, "len": 380, "width": 5 },
+          { "type": "mist", "color": "240,225,170", "spacing": 720, "density": 0.5, "size": 150, "alpha": 0.10 },
+          { "type": "motes", "color": "255,240,190", "color2": "255,255,255", "spacing": 360, "density": 0.5, "size": 90, "dot": 3, "alpha": 0.55 }
         ] },
         "ambient": { "density": 0.5, "spacing": 260, "size": 22, "drift": 7, "opacity": 0.17, "parallax": 0.08, "tint": "250,240,200", "shade": "130,110,50" },
         "pulse": { "bpm": 88, "strength": 1.15, "glowAlpha": 0.06 },
@@ -84,11 +94,13 @@
       "palette": { "hex": "#efc2b6", "hexEdge": "#d69384", "vignette": "rgba(70,12,18,0.32)", "props": ["prop_cell.png", "prop_dots.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": { "shade": "120,45,50", "features": [
           { "type": "blotch", "color": "210,135,125", "color2": "225,165,150", "spacing": 380, "density": 0.6, "size": 70, "alpha": 0.5 },
-          { "type": "fold", "color": "150,55,60", "color2": "190,90,95", "spacing": 380, "density": 0.85, "width": 34, "len": 800, "wave": 60, "angle": 1.2 },
-          { "type": "pool", "color": "170,50,60", "color2": "210,100,110", "spacing": 560, "density": 0.45, "size": 90, "bubbles": false },
+          { "type": "fold", "color": "150,55,60", "color2": "190,90,95", "spacing": 380, "density": 0.85, "width": 34, "len": 800, "wave": 60, "angle": 1.2, "crawl": 1.6, "pulse": true, "pulseSpeed": 0.5 },
+          { "type": "pool", "color": "170,50,60", "color2": "210,100,110", "spacing": 560, "density": 0.45, "size": 90, "bubbles": false, "danger": true },
           { "type": "thread", "color": "235,180,175", "spacing": 480, "density": 0.5, "len": 400, "width": 3 },
           { "type": "flowcell", "color": "220,70,80", "count": 30, "size": 7, "dx": 1, "dy": 0.15, "speed": 90, "span": 800, "alpha": 0.85 },
-          { "type": "flowcell", "color": "255,160,150", "count": 16, "size": 4, "dx": 1, "dy": 0.15, "speed": 90, "span": 800, "alpha": 0.8 }
+          { "type": "flowcell", "color": "255,160,150", "count": 16, "size": 4, "dx": 1, "dy": 0.15, "speed": 90, "span": 800, "alpha": 0.8 },
+          { "type": "mist", "color": "230,150,140", "spacing": 720, "density": 0.5, "size": 150, "alpha": 0.10 },
+          { "type": "motes", "color": "255,170,160", "color2": "255,220,210", "spacing": 360, "density": 0.5, "size": 90, "dot": 3, "alpha": 0.5 }
         ] },
         "ambient": { "density": 0.6, "spacing": 230, "size": 26, "drift": 10, "opacity": 0.17, "parallax": 0.08, "tint": "255,200,190", "shade": "140,40,45" },
         "pulse": { "bpm": 72, "strength": 1.3, "glowAlpha": 0.06 },

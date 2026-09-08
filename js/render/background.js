@@ -124,7 +124,7 @@ function bubblesCfg() {
 }
 
 // DEFAULT tanah organ (palette.ground): bayangan + DAFTAR FITUR anatomi
-// world-anchored. Tipe fitur: blotch|fold|chunk|pool|sacs|thread|flowcell.
+// world-anchored. Tipe: blotch|fold|chunk|pool|sacs|thread|flowcell|villi|mist|motes.
 const GROUND_DEFAULTS = {
   shade: '80,90,80', // triplet rgb bayangan jaringan
   features: [],      // [] = dasar polos (entri lama tetap jalan)
@@ -509,6 +509,9 @@ function drawGroundFeature(ctx, P, vw, cam, w, h, time, beat, f, fi) {
       else if (f.type === 'pool') featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
       else if (f.type === 'sacs') featSacs(ctx, P, w, h, wx, wy, time, r1, r2, f);
       else if (f.type === 'thread') featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
+      else if (f.type === 'villi') featVilli(ctx, P, w, h, wx, wy, time, r1, r2, f);
+      else if (f.type === 'mist') featMist(ctx, P, w, h, wx, wy, time, r1, r2, f);
+      else if (f.type === 'motes') featMotes(ctx, P, w, h, wx, wy, time, r1, r2, f);
     }
   }
 }
@@ -529,7 +532,8 @@ function featBlotch(ctx, P, w, h, wx, wy, r1, r2, f, beat) {
   ctx.fill();
 }
 
-/** Lipatan panjang berombak: rugae lambung / serat otot / berkas akson. */
+/** Lipatan panjang berombak: rugae lambung / serat otot / berkas akson.
+ *  Hidup: gelombang MERAMBAT (peristaltik) + sinyal berjalan opsional. */
 function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const q0 = P.project(wx, wy);
   if (!onScreen(P, w, h, q0, 260)) return;
@@ -539,7 +543,7 @@ function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const pts = [];
   for (let k = 0; k <= N; k++) {
     const t = k / N - 0.5;
-    const off = Math.sin(t * Math.PI * 2 + r1 * 9) * amp;
+    const off = Math.sin(t * Math.PI * 2 + r1 * 9 - time * (f.crawl || 0) * 2) * amp;
     pts.push(P.project(wx + dx * L * t + nx * off, wy + dy * L * t + ny * off));
   }
   const lw = (f.width || 24) * q0.s;
@@ -559,9 +563,21 @@ function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
     });
     ctx.stroke();
   }
+  if (f.pulse) { // sinyal/denyut berjalan sepanjang lipatan (2 titik + glow)
+    for (let d = 0; d < 2; d++) {
+      const u = ((((time * (f.pulseSpeed || 0.25) + r2 + d / 2) % 1) + 1) % 1);
+      const fi2 = Math.min(N - 0.001, u * N), i0 = Math.floor(fi2), fr = fi2 - i0;
+      const px = pts[i0].x + (pts[i0 + 1].x - pts[i0].x) * fr;
+      const py = pts[i0].y + (pts[i0 + 1].y - pts[i0].y) * fr;
+      ctx.fillStyle = `rgba(${f.color2 || '255,255,255'},0.25)`;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(3, lw * 0.7), 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(${f.color2 || '255,255,255'},0.85)`;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(2, lw * 0.3), 0, Math.PI * 2); ctx.fill();
+    }
+  }
 }
 
-/** Gumpalan: makanan / nodul limfe / mielin — 3 lobus + garis tepi + sorot. */
+/** Gumpalan: makanan / nodul limfe / mielin — 3 lobus + garis tepi + sorot + putaran. */
 function featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const bob = Math.sin(time * 1.2 + r1 * 12) * (f.bob || 0);
   const q = P.project(wx, wy + bob);
@@ -570,37 +586,52 @@ function featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const col = cols[Math.floor(r3 * cols.length) % cols.length];
   const s = ((f.size || 28) + (r2 - 0.5) * 2 * (f.var || 0)) * q.s;
   const sq = 0.72;
+  // putaran lambat seluruh gumpalan (lobus mengorbit inti)
+  const spin = (f.spin == null ? 1 : f.spin) * (r1 > 0.5 ? 1 : -1);
+  const a0 = r1 * 6.28 + time * 0.3 * spin;
+  const lx1 = q.x + Math.cos(a0) * s * 0.55, ly1 = q.y + Math.sin(a0) * s * 0.4;
+  const lx2 = q.x + Math.cos(a0 + 2.4) * s * 0.5, ly2 = q.y + Math.sin(a0 + 2.4) * s * 0.38;
   ctx.fillStyle = `rgba(${col},0.95)`;
-  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(q.x + s * 0.55, q.y + s * 0.2, s * 0.55, s * 0.42, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(q.x - s * 0.45, q.y + s * 0.3, s * 0.4, s * 0.32, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, a0 * 0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(lx1, ly1, s * 0.55, s * 0.42, a0 * 0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(lx2, ly2, s * 0.4, s * 0.32, a0 * 0.15, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = `rgba(${f.line || '90,70,60'},0.55)`;
   ctx.lineWidth = Math.max(1.5, 2.5 * q.s);
-  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, a0 * 0.15, 0, Math.PI * 2); ctx.stroke();
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.beginPath(); ctx.ellipse(q.x - s * 0.3, q.y - s * 0.3, s * 0.22, s * 0.16, 0, 0, Math.PI * 2); ctx.fill();
 }
 
-/** Kolam berkilau: asam / darah / cairan — denyut + gelembung mikro. */
+/** Kolam berkilau: asam / darah / cairan — aduk + didih + telegraf bahaya. */
 function featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const q = P.project(wx, wy);
   if (!onScreen(P, w, h, q, 180)) return;
   const s = (f.size || 90) * (0.8 + r1 * 0.4) * q.s * (1 + 0.03 * Math.sin(time * 1.5 + r2 * 9));
   ctx.fillStyle = `rgba(${f.color},0.75)`;
   ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-  if (f.color2) {
+  if (f.color2) { // aduk: sumbu-x/y berdenyut berlawanan fase
+    const chx = 1 + 0.06 * Math.sin(time * 2.2 + r2 * 8);
+    const chy = 1 - 0.06 * Math.sin(time * 2.2 + r2 * 8);
     ctx.fillStyle = `rgba(${f.color2},0.5)`;
-    ctx.beginPath(); ctx.ellipse(q.x, q.y, s * 0.62, s * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(q.x, q.y, s * 0.62 * chx, s * 0.3 * chy, 0, 0, Math.PI * 2); ctx.fill();
   }
   ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.beginPath(); ctx.ellipse(q.x - s * 0.3, q.y - s * 0.18, s * 0.18, s * 0.08, 0, 0, Math.PI * 2); ctx.fill();
   if (f.bubbles) {
+    const spd = f.boil ? 2.4 : 0.6 + r3 * 0.5; // didih = orbit cepat
     for (let b = 0; b < 3; b++) {
-      const ba = time * (0.6 + r3 * 0.5) + r1 * 6.28 + b * 2.1;
+      const ba = time * spd + r1 * 6.28 + b * 2.1;
       const bx = q.x + Math.cos(ba) * s * 0.4, by = q.y + Math.sin(ba) * s * 0.2;
       ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.beginPath(); ctx.arc(bx, by, Math.max(1.5, s * 0.045), 0, Math.PI * 2); ctx.fill();
     }
+  }
+  if (f.danger) { // TELEGRAF BAHAYA (visual): tepi merah berdenyut = "jangan injak"
+    // Mekanik damage = follow-up Combat agent — render hanya menandai zona.
+    const da = 0.22 + 0.22 * Math.sin(time * 4 + r1 * 9);
+    ctx.strokeStyle = `rgba(255,60,50,${da.toFixed(3)})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(q.x, q.y, s * 1.02, s * 0.52, 0, 0, Math.PI * 2); ctx.stroke();
   }
 }
 
@@ -626,7 +657,7 @@ function featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const ang = (f.angle != null ? f.angle : 0.5) + (r3 - 0.5) * 0.8;
   const L = (f.len || 350) / 2;
   const dx = Math.cos(ang), dy = Math.sin(ang);
-  const bow = (r2 - 0.5) * L;
+  const bow = (r2 - 0.5) * L + Math.sin(time * 1.5 + r1 * 10) * (f.sway == null ? 12 : f.sway);
   const p0 = P.project(wx - dx * L, wy - dy * L);
   const p1 = P.project(wx - dy * bow, wy + dx * bow);
   const p2 = P.project(wx + dx * L, wy + dy * L);
@@ -641,6 +672,50 @@ function featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
     ctx.strokeStyle = `rgba(${f.color2},${(a * 0.8).toFixed(3)})`;
     ctx.lineWidth = Math.max(1, lw * 0.4);
     ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.quadraticCurveTo(p1.x, p1.y, p2.x, p2.y); ctx.stroke();
+  }
+}
+
+/** Jari-jari berayun: vili dinding organ (5 jari bergoyang). */
+function featVilli(ctx, P, w, h, wx, wy, time, r1, r2, f) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 120)) return;
+  const n = 5, base = (f.size || 40) * q.s;
+  for (let v = 0; v < n; v++) {
+    const off = (v / (n - 1) - 0.5) * base * 2.2;
+    const sway = Math.sin(time * 1.8 + r1 * 9 + v * 0.9) * 0.28;
+    const len = base * (0.8 + hash2(v * 3 + 1, v * 7 + 2) * 0.5);
+    const tipX = q.x + off + Math.sin(sway) * len;
+    const tipY = q.y - Math.cos(sway) * len * 0.9;
+    ctx.strokeStyle = `rgba(${v % 2 ? (f.color2 || f.color) : f.color},${(f.alpha || 0.8).toFixed(3)})`;
+    ctx.lineWidth = Math.max(2, base * 0.22);
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(q.x + off, q.y); ctx.lineTo(tipX, tipY); ctx.stroke();
+  }
+}
+
+/** Kabut lembut melayang: 2 gumpalan tembus pandang beriras perlahan. */
+function featMist(ctx, P, w, h, wx, wy, time, r1, r2, f) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 220)) return;
+  const s = (f.size || 120) * q.s;
+  const dx1 = Math.sin(time * 0.3 + r1 * 8) * 30, dy1 = Math.cos(time * 0.23 + r2 * 6) * 18;
+  ctx.fillStyle = `rgba(${f.color},${(f.alpha || 0.12).toFixed(3)})`;
+  ctx.beginPath(); ctx.ellipse(q.x + dx1, q.y + dy1, s, s * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = `rgba(${f.color2 || f.color},${((f.alpha || 0.12) * 0.8).toFixed(3)})`;
+  ctx.beginPath(); ctx.ellipse(q.x - dx1 * 0.7, q.y - dy1 * 0.7 + s * 0.2, s * 0.6, s * 0.32, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+/** Partikel kerlip: 6 titik berkelip (pengisi ruang murah). */
+function featMotes(ctx, P, w, h, wx, wy, time, r1, r2, f) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 120)) return;
+  const spread = (f.size || 90) * q.s;
+  for (let m = 0; m < 6; m++) {
+    const mx = q.x + (hash2(m * 13 + 1, m * 7 + 3) - 0.5) * 2 * spread;
+    const my = q.y + (hash2(m * 11 + 5, m * 5 + 9) - 0.5) * 1.2 * spread;
+    const tw = 0.5 + 0.5 * Math.sin(time * (2 + (m % 3)) + r1 * 9 + m * 1.7);
+    ctx.fillStyle = `rgba(${m % 3 === 0 ? (f.color2 || f.color) : f.color},${((f.alpha || 0.5) * tw).toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(mx, my, Math.max(1.2, (f.dot || 3) * q.s), 0, Math.PI * 2); ctx.fill();
   }
 }
 

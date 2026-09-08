@@ -48,11 +48,11 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
 
 | Map | Dasar jaringan | Isi anatomi (`ground.features`) | Denyut |
 |---|---|---|---|
-| Saluran Limfe | hijau pucat jernih | nodul limfe (chunk) · limfosit hanyut (flowcell) · kolam jernih (pool) · gundukan pembuluh (fold) | 60 bpm |
-| Lambung Asam | persik mukosa | **rugae** (fold) · **makanan** nasi/daging/sayur/wortel/roti (chunk) · **kolam asam** (pool) · kimus hanyut (flowcell) · lendir (thread) | 76 bpm |
-| Paru Kristal | rose-milk | **bronkiolus** (thread tebal) · **alveoli** (sacs) · kapiler merah & biru (thread) · debu udara (flowcell) | 68 bpm |
-| Sumbu Saraf | pasir keemasan | **berkas akson** (fold) · mielin & badan sel (chunk) · **sinapsis** (thread flicker) · serabut (thread) | 88 bpm |
-| Bilik Jantung | flesh-rose | **serat otot** (fold) · **darah deras** (flowcell cepat) · kolam darah (pool) · korda tendinea (thread) | 72 bpm, paling kuat |
+| Saluran Limfe | hijau pucat jernih | nodul (chunk) · limfosit (flowcell) · kolam jernih (pool) · gundukan (fold) · vili · kabut (mist) · kerlip (motes) | 60 bpm |
+| Lambung Asam | persik mukosa | **rugae merambat** (fold+crawl) · **makanan** (chunk) · **kolam asam didih + telegraf bahaya** (pool) · kimus (flowcell) · lendir (thread) · vili · kabut asam (mist) · kerlip (motes) | 76 bpm |
+| Paru Kristal | rose-milk | **bronkiolus** (thread) · **alveoli** (sacs) · kapiler merah & biru · debu udara (flowcell) · kabut napas (mist) · kerlip (motes) | 68 bpm |
+| Sumbu Saraf | pasir keemasan | **berkas akson + sinyal berjalan** (fold+pulse) · mielin & badan sel (chunk) · **sinapsis** (thread flicker) · serabut · kabut (mist) · ion kerlip (motes) | 88 bpm |
+| Bilik Jantung | flesh-rose | **serat otot merambat + denyut berjalan** (fold+crawl+pulse) · **darah deras** (flowcell) · kolam darah + telegraf bahaya (pool) · korda (thread) · kabut (mist) · kerlip plasma (motes) | 72 bpm, paling kuat |
 
 ### 2.1 Referensi tipe fitur tanah
 
@@ -67,9 +67,19 @@ pseudo-3D, ter-cull di luar layar). Penempatan deterministik — stabil tiap fra
 | `pool` | kolam berkilau + gelembung mikro mengorbit | `color`/`color2`, `size`, `bubbles` |
 | `sacs` | gugus 6 kantung tembus pandang bernapas | `color`/`color2`, `size`, `n` |
 | `thread` | serat melengkung + inti (+ kedip listrik) | `color`/`color2`, `len`, `width`, `angle`, `flicker` |
+| `villi` | 5 jari vili berayun | `color`/`color2`, `size`, `alpha` |
+| `mist` | 2 kabut tembus pandang beriras | `color`/`color2`, `size`, `alpha` |
+| `motes` | 6 titik kerlip (pengisi murah) | `color`/`color2`, `size`, `dot`, `alpha` |
 | `flowcell` | medan sel hanyut searah + pudar di tepi | `color`, `count`, `size`, `dx`, `dy`, `speed`, `span`, `alpha` |
 
-Anggaran: tiap map ±90–150 shape tanah/frame, tanpa `shadowBlur`.
+Anggaran: tiap map ±150–250 shape tanah/frame, tanpa `shadowBlur`.
+
+Parameter gerak (semua opsional): `fold.crawl` (rambat gelombang/dtk) ·
+`fold.pulse` + `fold.pulseSpeed` (sinyal berjalan, putaran/dtk) ·
+`thread.sway` (ayunan px) · `thread.flicker` (kedip) · `chunk.spin` (putaran) ·
+`chunk.bob` (naik-turun) · `pool.boil` (didih cepat) · `pool.danger`
+(telegraf bahaya: tepi merah berdenyut — VISUAL SAJA; mekanik damage =
+follow-up Combat agent, bukan scope MAP).
 
 ## 3. Blok `element` — materi fluida khas tiap organ
 
