@@ -106,6 +106,10 @@ export function show(summary) {
 
   const grid = document.getElementById('gameover-summary');
   grid.textContent = '';
+  // UI/UX: baris `.go-parts` (Tubuh/Evolusi/Imun/Mastery/Pangkat) disisipkan
+  // SETELAH grid tiap render → tanpa pembersihan, baris run sebelumnya menumpuk.
+  let sib = grid.nextElementSibling;
+  while (sib && sib.classList.contains('go-parts')) { const n = sib.nextElementSibling; sib.remove(); sib = n; }
   const cells = [
     [summary.wave, 'Gelombang'],
     [formatTime(summary.time), 'Bertahan'],

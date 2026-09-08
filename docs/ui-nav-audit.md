@@ -101,3 +101,42 @@ run/wave/currency-based, bukan waktu. Kekurangan yang ditemukan:
 - `#btn-codex` handler tanpa elemen.
 - Gameover: baris `.go-parts` (GP/Mastery/BP/Tubuh) **menumpuk antar run** (`insertAdjacentElement` tanpa cleanup) — bug UI di scope ini.
 - HUD: `.hud-quests` (top 56%) menimpa `.hud-combo` (top 150px) dan `.hud-antigen` (bottom 86px).
+
+## 5. Perubahan yang diterapkan (commit UI/UX Task 2–4, BUILD 41)
+
+Keputusan pemilik produk: dashboard memang 1 tombol PLAY (opsional); semua fitur hidup di
+gameplay. Maka disclosure diterapkan di **menu HUD**, bukan dashboard.
+
+| # | Perubahan | File |
+|---|---|---|
+| 1 | **Item menu terkunci TIDAK dirender** (`.gated{display:none}`), toggle menu ikut hilang bila belum ada item terbuka (`.gate-hidden`); panel Misi ikut gerbang `quick/quests`. Dievaluasi saat `runstart` dan tiap kembali ke HUD dari layar menu. | `js/main.js` (`applyHudDisclosure`), `styles/dashboard-focus.css` |
+| 2 | **Satu sumber kebenaran** pemetaan tombol → gerbang: `HUD_MENU_GATES` + `hudMenuGate()` **fail-closed** (id yang tidak terdaftar di `features.json` = terkunci). Handler klik kedua menu memakai jalur yang sama (`openHudMenuScreen`). | `js/systems/feature-gate.js`, `js/main.js` |
+| 3 | Menutup lubang gate: entri `dock/codex` (Gel.10 — sama dengan `secondary/codex`) & `dock/arena` (3 run — sama dengan kampanye). **Ambang lain tidak diubah.** | `data/features.json` |
+| 4 | Badge unlock per menu: dihitung dari item yang **baru muncul** (bukan dari `bestWave` global), tersimpan di `meta.seenUnlocks` (save lama dimigrasi tanpa badge palsu); hilang saat menu bersangkutan dibuka. | `js/systems/unlock-badge-system.js` |
+| 5 | **Set ikon menu baru** — SVG digambar khusus konteks game (emblem perisai + sel imun, siluet Inang + jalur bab, lensa + virus kawaii, tiket imunisasi, regu sel, kios Antibodi, ubin arena + antibodi-Y, labu serum, gelembung sinyal misi). Palet = token `:root` (`--teal/--teal-deep/--sage/--coral/--gold/--cream`). Menggantikan ikon generik (crosshair, siluet orang, gembok, play, petir). | `assets/icons/menu-*.svg`, `index.html` |
+| 6 | Bahasa visual kedua menu disamakan: emblem bulat krem ber-bordir putih, label 8–11px; badge angka lebih kontras. Panel Misi tak lagi menimpa chip combo/antigen (badan misi dibatasi tinggi + scroll; combo/antigen digeser). | `styles/dashboard-focus.css` |
+| 7 | **Prep = 1 langkah** (Hero). Langkah Mode hanya muncul bila Endless sudah terbuka (≥1 bab tamat) → maks 2. Fokus Run dipaksa `seimbang`, arena kampanye = bab (sudah begitu di `game.getRunArena`), arena endless = arena terbuka terbaik (auto-default). Ringkasan loadout tetap menampilkan mode·bab·arena hasil default. | `index.html`, `js/ui/screens/prep-screen.js` |
+| 8 | **Fraksi**: tag "Pasukan Imun" di profil diganti gelar netral "Penjaga Tubuh"; `--faction-color` dan `getFactionDef` tidak lagi dipakai UI; CSS kartu fraksi auth (mati) dihapus. `signUp({faction})` internal tetap (data akun tidak disentuh). | `index.html`, `js/ui/screens/profile-screen.js`, `js/ui/screens/dashboard-screen.js`, `styles/main.css` |
+| 9 | Bug: baris `.go-parts` gameover menumpuk antar render → dibersihkan sebelum render. | `js/ui/screens/gameover-screen.js` |
+| 10 | Label menu di-ID-kan (Peta Tubuh, Pangkat, Koleksi, Arena, Lab Pasukan) + entri `lang.json` EN. | `index.html`, `data/lang.json` |
+
+Hasil disclosure per progres (runtime, `scripts/e2e-ui-nav.mjs`):
+
+| Progres | Menu 1 (kanan-atas) | Menu 2 (bawah) |
+|---|---|---|
+| 0 run | *(toggle tidak ada)* | Heroes |
+| 3 run | Peta Tubuh | Heroes, Arena |
+| 5 run + 150 Antibodi | Peta Tubuh | Heroes, Shop, Arena, Lab Pasukan |
+| 6 run | + Battle Pass | — |
+| Gel. 10 | + Bio-Pedia | + Koleksi |
+| 15 run | + Pangkat | — |
+
+Tidak diubah (di luar scope / perlu keputusan lain): ambang angka di `features.json`; `data/factions.json`
+(masih memuat `virus: segera` — tidak lagi dirender di UI mana pun); string lama `Pilih Pasukanmu` di
+`lang.json` (tidak dipakai).
+
+## 6. Catatan untuk pemilik lain (issue)
+- #16 (Bio-Pedia lolos lewat Collection): ditutup oleh perubahan #2–#3 di atas; suite `e2e-ui-nav.mjs`
+  kini exit 1 saat ada FAIL (poin acceptance #6 terpenuhi untuk suite ini).
+- Dead UI dashboard (side-nav/dock/quick-row/kartu) masih dirender lalu disembunyikan CSS — dibiarkan
+  karena pemilik menyatakan dashboard opsional; kandidat pembersihan terpisah bila F24 dipermanenkan.

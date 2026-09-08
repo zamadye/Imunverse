@@ -173,6 +173,7 @@
 #screen-profile .profile-card { width:min(100%,420px); margin:8px auto 20px; padding:22px; display:flex; flex-direction:column; align-items:center; gap:9px; }
 #screen-profile .profile-avatar { width:86px; height:86px; object-fit:cover; border-radius:50%; border:3px solid var(--teal); background:var(--mint); }
 #screen-profile .profile-card h3 { font-size:21px; }
+#screen-profile .profile-title { font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--teal-deep); background:var(--mint-2); border-radius:999px; padding:3px 10px; margin-top:-4px; }
 #screen-profile .profile-balances { display:flex; gap:10px; width:100%; margin:8px 0; }
 #screen-profile .profile-balances span { flex:1; display:grid; grid-template-columns:24px 1fr; align-items:center; column-gap:5px; padding:8px; background:var(--cream-2); border-radius:13px; }
 #screen-profile .profile-balances img { width:23px; height:23px; grid-row:span 2; }
@@ -571,4 +572,87 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 @media (max-width:390px){
   #screen-hud .hud-menu2-toggle{ right:176px; }
   #screen-hud .hud-game-menu2{ right:176px; }
+}
+
+/* ================================================================
+   UI/UX — MENU GAMEPLAY: PROGRESSIVE DISCLOSURE + IKON GAME
+   Dashboard = launcher 1 tombol (F24) → semua pintu hidup di HUD.
+   Aturan: item terkunci TIDAK dirender (.gated), toggle hilang bila
+   menu kosong (.gate-hidden); dua menu memakai bahasa visual yang sama:
+   emblem bulat krem ber-bordir putih + ikon set assets/icons/menu-*.svg.
+   Ditaruh di akhir file agar menang kaskade atas rule F25/E2 di atas.
+   ================================================================ */
+#screen-hud .hud-menu-link.gated,
+#screen-hud .hud-menu2-link.gated,
+#screen-hud .hud-menu-toggle.gate-hidden,
+#screen-hud .hud-menu2-toggle.gate-hidden,
+#screen-hud .hud-quests.gate-hidden { display: none !important; }
+
+/* Toggle menu = emblem bulat (kedua menu identik ukurannya) */
+#screen-hud .hud-menu-toggle,
+#screen-hud .hud-menu2-toggle {
+  width: 46px; height: 46px; border-radius: 50%; padding: 0;
+  border: 2.5px solid rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #e8f4ea);
+  box-shadow: 0 3px 0 rgba(31, 95, 87, 0.18), 0 6px 14px rgba(31, 95, 87, 0.22);
+  display: grid; place-items: center; overflow: visible; cursor: pointer;
+  transition: transform .12s ease;
+}
+#screen-hud .hud-menu-toggle { top: 8px; right: 10px; }
+#screen-hud .hud-menu-toggle img,
+#screen-hud .hud-menu2-toggle img { width: 30px; height: 30px; object-fit: contain; border-radius: 0; filter: drop-shadow(0 1px 0 rgba(255,255,255,.6)); }
+#screen-hud .hud-menu-toggle:active,
+#screen-hud .hud-menu2-toggle:active { transform: scale(0.93); }
+#screen-hud .hud-menu-toggle[aria-expanded="true"],
+#screen-hud .hud-menu2-toggle[aria-expanded="true"] { background: radial-gradient(circle at 34% 30%, #fff7dc, #f5c64f); }
+
+/* MENU 1 (kanan-atas, turun ke bawah): daftar vertikal dengan emblem + label */
+#screen-hud .hud-game-menu {
+  top: 60px; right: 10px; width: auto; min-width: 150px; padding: 6px; gap: 4px;
+  border-radius: 16px; background: rgba(255, 253, 244, 0.97);
+  box-shadow: 0 10px 26px rgba(20, 60, 54, 0.26);
+}
+#screen-hud .hud-menu-link {
+  display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px;
+  border-radius: 999px; background: var(--mint-2); color: var(--ink);
+  font: 900 11px var(--font); text-align: left; cursor: pointer;
+}
+#screen-hud .hud-menu-link img {
+  width: 30px; height: 30px; padding: 3px; border-radius: 50%;
+  background: #fffdf4; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(31, 95, 87, 0.18);
+}
+#screen-hud .hud-menu-link:active { background: var(--teal-light); transform: scale(.98); }
+
+/* MENU 2 (bawah, membuka ke atas / melebar ke kiri): emblem bulat berlabel di bawah */
+#screen-hud .hud-game-menu2 { gap: 8px; padding: 8px 10px; border-radius: 22px; background: rgba(255, 253, 244, 0.97); box-shadow: 0 10px 26px rgba(20, 60, 54, 0.26); }
+#screen-hud .hud-menu2-link {
+  width: 58px; height: 62px; padding: 3px 2px 2px; border-radius: 16px; border: 0;
+  background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
+}
+#screen-hud .hud-menu2-link img {
+  width: 40px; height: 40px; padding: 5px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #eaf4dd); border: 2px solid #fff;
+  box-shadow: 0 2px 0 rgba(31, 95, 87, 0.16), 0 4px 10px rgba(31, 95, 87, 0.18);
+}
+#screen-hud .hud-menu2-link span { font: 900 8px var(--font); color: var(--ink); white-space: nowrap; }
+#screen-hud .hud-menu2-link:active { transform: scale(0.93); }
+#screen-hud .hud-menu2-link:active img { background: radial-gradient(circle at 34% 30%, #fff7dc, #f5c64f); }
+
+/* Badge angka: kontras di atas emblem krem */
+#screen-hud .menu-badge { top: -4px; right: -4px; min-width: 17px; height: 17px; font: 900 10px/17px var(--font); border: 2px solid #fff; }
+
+/* Panel Misi: emblem kecil di kepala; TIDAK lagi menimpa chip combo (top 150px)
+   dan chip antigen (bottom 86px) — badan misi dibatasi tinggi & bisa digulir */
+#screen-hud .hud-quests { top: 44%; }
+#screen-hud .hud-quests-head img { width: 20px; height: 20px; }
+#screen-hud .hud-quests-body { max-height: 96px; overflow-y: auto; }
+#screen-hud .hud-combo { top: 118px; }
+#screen-hud .hud-antigen { bottom: 74px; }
+@media (max-width: 700px) {
+  #screen-hud .hud-menu-toggle, #screen-hud .hud-menu2-toggle { width: 40px; height: 40px; }
+  #screen-hud .hud-menu-toggle img, #screen-hud .hud-menu2-toggle img { width: 26px; height: 26px; }
+  #screen-hud .hud-game-menu { top: 52px; }
+  #screen-hud .hud-menu2-link { width: 52px; height: 58px; }
+  #screen-hud .hud-menu2-link img { width: 36px; height: 36px; }
+  #screen-hud .hud-quests-body { max-height: 84px; }
 }

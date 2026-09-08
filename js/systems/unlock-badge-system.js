@@ -1,45 +1,83 @@
 /**
- * unlock-badge-system.js — F25: badge angka pada menu gameplay.
+ * unlock-badge-system.js — F25: badge angka pada ikon menu gameplay.
  *
- * Saat bestWave naik melewati syarat gerbang menu yang belum pernah dilihat
- * pemain, ikon menu (☰ kiri-atas & menu Hero/Toko kanan-bawah) menampilkan
- * badge angka ¹ ² … (jumlah unlock baru). Badge hilang saat pemain MEMBUKA
- * menu (menandai sudah dilihat) — queue notif, bukan spam toast.
+ * UI/UX (progressive disclosure): item menu HUD yang belum terbuka TIDAK
+ * dirender. Saat sebuah gerbang (run / gelombang / Antibodi — data/features.json)
+ * terlewati, item baru MUNCUL di menu dan ikon menu terkait menampilkan badge
+ * angka = jumlah pintu baru yang belum pernah dilihat pemain. Badge hilang saat
+ * pemain MEMBUKA menu itu (menandai sudah dilihat) — queue notif, bukan spam toast.
  *
- * Kunci progres tetap `meta.stats.bestWave`; penanda "sudah dilihat" disimpan
- * di `meta.seenUnlockWave` (default 0).
+ * Penanda "sudah dilihat" disimpan di `meta.seenUnlocks` (array kunci
+ * "target:id"). Save lama tanpa field ini diinisialisasi ke semua gerbang yang
+ * SUDAH terbuka saat itu (tanpa badge palsu). Field lama `meta.seenUnlockWave`
+ * tidak dipakai lagi tetapi dibiarkan (kompatibel).
  */
 
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
-import { getFeatures } from '../core/data-store.js';
+import { hudMenuEntries, hudMenuGate, gateDef } from './feature-gate.js';
 
-/** Daftar gerbang yang baru terbuka sejak terakhir dilihat. */
-export function pendingUnlocks() {
-  const best = (STATE.meta && STATE.meta.stats && STATE.meta.stats.bestWave) || 0;
-  const seen = (STATE.meta && STATE.meta.seenUnlockWave) || 0;
-  const gates = (getFeatures() && getFeatures().gates) || [];
-  return gates.filter((g) => g.requireWave > 0 && g.requireWave <= best && g.requireWave > seen);
+const MENUS = [
+  { menu: 'menu1', badge: 'menu1-badge' },
+  { menu: 'menu2', badge: 'menu2-badge' },
+];
+
+const key = (e) => `${e.target}:${e.id}`;
+
+/** Gerbang yang punya syarat (item tanpa syarat = pintu awal, bukan "unlock baru"). */
+function hasRequirement(e) {
+  const g = gateDef(e.target, e.id);
+  return !!(g && (g.requireRuns || g.requireWave || g.requireCurrency));
 }
 
-/** Perbarui badge angka di kedua ikon menu. */
+function unlockedEntries(menu) {
+  return hudMenuEntries(menu).filter((e) => !hudMenuGate(menu, e.screenId).locked && hasRequirement(e));
+}
+
+/** Pastikan `meta.seenUnlocks` ada; save lama → anggap yang sudah terbuka sudah dilihat. */
+function ensureSeen(meta) {
+  if (Array.isArray(meta.seenUnlocks)) return meta.seenUnlocks;
+  const seen = [];
+  for (const { menu } of MENUS) for (const e of unlockedEntries(menu)) seen.push(key(e));
+  meta.seenUnlocks = seen;
+  writeSave(meta);
+  return seen;
+}
+
+/** Daftar item menu yang baru terbuka sejak terakhir dilihat. */
+export function pendingUnlocks(menu) {
+  const meta = STATE.meta;
+  if (!meta) return [];
+  const seen = new Set(ensureSeen(meta));
+  const menus = menu ? [menu] : MENUS.map((m) => m.menu);
+  const out = [];
+  for (const m of menus) for (const e of unlockedEntries(m)) if (!seen.has(key(e))) out.push({ menu: m, ...e });
+  return out;
+}
+
+/** Perbarui badge angka pada kedua ikon menu (per menu). */
 export function renderBadges() {
-  const n = pendingUnlocks().length;
-  for (const id of ['menu1-badge', 'menu2-badge']) {
-    const el = document.getElementById(id);
+  let total = 0;
+  for (const { menu, badge } of MENUS) {
+    const n = pendingUnlocks(menu).length;
+    total += n;
+    const el = document.getElementById(badge);
     if (!el) continue;
     el.textContent = String(n);
     el.classList.toggle('hidden', n === 0);
   }
-  return n;
+  return total;
 }
 
-/** Pemain membuka menu → semua unlock dianggap sudah dilihat. */
-export function markSeen() {
-  if (!STATE.meta) return;
-  const best = (STATE.meta.stats && STATE.meta.stats.bestWave) || 0;
-  if ((STATE.meta.seenUnlockWave || 0) >= best) return;
-  STATE.meta.seenUnlockWave = best;
-  writeSave(STATE.meta);
+/** Pemain membuka menu → item baru di menu itu dianggap sudah dilihat (tanpa arg: semua). */
+export function markSeen(menu) {
+  const meta = STATE.meta;
+  if (!meta) return;
+  const pending = pendingUnlocks(menu);
+  if (!pending.length) return;
+  const seen = new Set(ensureSeen(meta));
+  for (const e of pending) seen.add(key(e));
+  meta.seenUnlocks = [...seen];
+  writeSave(meta);
   renderBadges();
 }

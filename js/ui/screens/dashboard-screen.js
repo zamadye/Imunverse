@@ -25,7 +25,7 @@ import { applyGateVisual, gateFor } from '../../systems/feature-gate.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
-import { getSession, getFactionDef } from '../../systems/account-system.js';
+import { getSession } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
 import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager } from '../screen-manager.js';
@@ -463,13 +463,10 @@ export function show() {
   const imuEl = document.getElementById('dash-imun');
   if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
-  // AKUN + FRAKSI: routing konten per pasukan (layout sama, isi beda)
+  // AKUN: chip nama pemain (UI/UX Task 4: tanpa warna/label fraksi — satu pasukan saja saat ini)
   const session = getSession();
-  const faction = getFactionDef(session ? session.faction : 'imun');
-  document.documentElement.style.setProperty('--faction-color', faction.color);
   const chip = document.getElementById('account-chip');
   if (chip) {
-    chip.style.borderColor = faction.color;
     if (session) {
       chip.classList.remove('hidden');
       chip.querySelector('#account-name').textContent = session.username;

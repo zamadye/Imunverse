@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Perjalanan Penjaga" (toggle menu progres): emblem perisai + sel imun tersenyum.
+       Palet token: teal #2f9c8f / teal-deep #1f7a70 / cream #fffdf4 / sage #a9d795 / coral #f2825c / gold #f5c64f -->
+  <ellipse cx="32" cy="58" rx="16" ry="3" fill="#123f3a" opacity=".14"/>
+  <path d="M32 5 L54 12.5 V29 C54 43 44.5 53.5 32 59 C19.5 53.5 10 43 10 29 V12.5 Z" fill="#1f7a70"/>
+  <path d="M32 9 L50 15.2 V29 C50 40.6 42.5 49.6 32 54.6 C21.5 49.6 14 40.6 14 29 V15.2 Z" fill="#2f9c8f"/>
+  <path d="M32 9 L50 15.2 V22 L32 16 L14 22 V15.2 Z" fill="#fffdf4" opacity=".22"/>
+  <!-- sel imun kecil (wajah kawaii khas Imunverse) -->
+  <circle cx="32" cy="32" r="11.5" fill="#a9d795" stroke="#7cb86a" stroke-width="2"/>
+  <circle cx="27.5" cy="31" r="1.9" fill="#123f3a"/>
+  <circle cx="36.5" cy="31" r="1.9" fill="#123f3a"/>
+  <path d="M27.5 36.2 Q32 40 36.5 36.2" fill="none" stroke="#123f3a" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="24.5" cy="34.5" r="1.7" fill="#f2825c" opacity=".7"/>
+  <circle cx="39.5" cy="34.5" r="1.7" fill="#f2825c" opacity=".7"/>
+  <!-- patogen mengintai di tepi emblem -->
+  <circle cx="50" cy="12" r="4" fill="#f2825c"/>
+  <circle cx="13.5" cy="46" r="3" fill="#f5c64f"/>
+  <circle cx="26" cy="22" r="2.2" fill="#fffdf4" opacity=".6"/>
+</svg>

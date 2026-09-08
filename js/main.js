@@ -13,7 +13,7 @@ import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
-import { loadLang, initSweep, sweepAll } from './systems/i18n.js';
+import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
@@ -24,7 +24,7 @@ import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
-import { gateFor } from './systems/feature-gate.js';
+import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
 import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
 
@@ -153,6 +153,7 @@ function wireUiBridge() {
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
     music.start(); // F23: musik latar prosedural saat bermain
+    applyHudDisclosure(); // UI/UX: item menu terkunci DISEMBUNYIKAN, toggle ikut hilang bila kosong
     renderBadges(); // F25: badge unlock baru pada ikon menu
     renderQuestPanel(); // F25: panel misi harian/mingguan (kiri tengah)
   });
@@ -161,6 +162,31 @@ function wireUiBridge() {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
+  /**
+   * UI/UX — progressive disclosure menu gameplay. Dashboard = launcher 1 tombol
+   * (F24), maka SEMUA destinasi hidup di HUD: item yang belum terbuka tidak
+   * dirender ke pemain (bukan dipajang lalu ditolak), toggle menu tersembunyi
+   * sampai ada minimal 1 item terbuka, panel Misi ikut gerbang `quick/quests`.
+   * Sumber kebenaran tunggal: data/features.json via feature-gate.js.
+   */
+  function applyHudDisclosure() {
+    applyHudMenuGates('menu1', '.hud-menu-link', document.getElementById('hud-menu-toggle'), 'menuScreen');
+    applyHudMenuGates('menu2', '.hud-menu2-link', document.getElementById('hud-menu2-toggle'), 'menu2Screen');
+    const quests = document.getElementById('hud-quests');
+    if (quests) {
+      const g = gateFor('quick', 'quests');
+      const locked = !!(g && g.locked);
+      quests.classList.toggle('gate-hidden', locked);
+      quests.style.display = locked ? 'none' : '';
+    }
+    // menu yang sedang terbuka ditutup — daftar isinya mungkin baru berubah
+    for (const [menuId, toggleId] of [['hud-game-menu', 'hud-menu-toggle'], ['hud-game-menu2', 'hud-menu2-toggle']]) {
+      document.getElementById(menuId)?.classList.add('hidden');
+      document.getElementById(toggleId)?.setAttribute('aria-expanded', 'false');
+    }
+  }
+  window.__IMUNVERSE_applyHudDisclosure = applyHudDisclosure;
+
   function renderQuestPanel() {
     const body = document.getElementById('hud-quests-body');
     const badge = document.getElementById('quests-badge');
@@ -377,7 +403,7 @@ async function boot() {
   hudMenuToggle?.addEventListener('click', () => {
     const open = hudMenu.classList.toggle('hidden') === false;
     hudMenuToggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen(); // F25: badge unlock dianggap dilihat saat menu dibuka
+    if (open) markSeen('menu1'); // F25: badge unlock dianggap dilihat saat menu dibuka
   });
   // F25: MENU 2 — Hero/Collection/Shop/Battle/Squad (pojok kanan-bawah, melebar ke kiri)
   const hudMenu2 = document.getElementById('hud-game-menu2');
@@ -385,32 +411,28 @@ async function boot() {
   hudMenu2Toggle?.addEventListener('click', () => {
     const open = hudMenu2.classList.toggle('hidden') === false;
     hudMenu2Toggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen();
+    if (open) markSeen('menu2');
   });
-  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
-    const gate = gateFor('dock', btn.dataset.menu2Screen);
-    if (gate && gate.locked) {
-      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
+  // UI/UX: satu jalur untuk kedua menu — gerbang fail-closed (item tak terdaftar
+  // = terkunci), item terkunci memang tak terlihat; toast hanya jaga-jaga (mis. klik
+  // programatik) agar tidak pernah ada jalur menuju layar yang belum terbuka.
+  const openHudMenuScreen = (menuId, screenId, menuEl) => {
+    const gate = hudMenuGate(menuId, screenId);
+    if (gate.locked) {
+      showToast({ message: `${t(gate.label || 'Terus bermain')} ${t('untuk membuka!')}` });
       audio.ui();
       return;
     }
     game.pause();
-    hudMenu2?.classList.add('hidden');
-    music.stop();
-    screenManager.show(btn.dataset.menu2Screen);
+    menuEl?.classList.add('hidden');
+    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
+    screenManager.show(screenId);
+  };
+  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
+    openHudMenuScreen('menu2', btn.dataset.menu2Screen, hudMenu2);
   }));
   document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
-    // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
-    const gate = gateFor('secondary', btn.dataset.menuScreen);
-    if (gate && gate.locked) {
-      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
-      audio.ui();
-      return;
-    }
-    game.pause();
-    hudMenu?.classList.add('hidden');
-    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
-    screenManager.show(btn.dataset.menuScreen);
+    openHudMenuScreen('menu1', btn.dataset.menuScreen, hudMenu);
   }));
 
   // Wire tombol modal revive & gameover (sekali saat boot)
@@ -496,6 +518,7 @@ async function boot() {
   const backToContext = (fallback = 'dashboard') => {
     if (game.run && !game.run.ended && game.run.player && game.run.player.alive) {
       screenManager.show('hud');
+      window.__IMUNVERSE_applyHudDisclosure?.(); // stats/currency bisa berubah di layar menu → evaluasi ulang gerbang
       game.resume();
       return;
     }

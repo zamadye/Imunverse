@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=40a" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
+  <link rel="stylesheet" href="styles/main.css?v=41" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=41" />
 </head>
 <body>
   <div id="app">
@@ -341,7 +341,8 @@
         <div class="profile-card card">
           <img id="profile-avatar" class="profile-avatar" src="assets/sprites/portrait_tcd8.png" alt="" />
           <h3 id="profile-name">—</h3>
-          <span id="profile-faction" class="faction-tag">Imun</span>
+          <!-- UI/UX Task 4: tag fraksi dicabut (PvP/fraksi Virus belum ada — jangan menjanjikan) -->
+          <small class="profile-title">Penjaga Tubuh</small>
           <div class="profile-balances">
             <span><img src="assets/sprites/icon_coin.png" alt="" /><b id="profile-currency">0</b><small>Antibodi</small></span>
             <span><img src="assets/sprites/icon_imu.png" alt="" /><b id="profile-imun">0</b><small>Imun Coin</small></span>
@@ -388,21 +389,17 @@
 
         <div class="prep-scroll">
           <div class="prep-main">
-            <!-- LANGKAH 1: pilih hero -->
+            <!-- UI/UX Task 3: SATU keputusan esensial — hero. Mode hanya muncul bila Endless
+                 sudah terbuka (≥1 bab tamat). Fokus Run & Arena TIDAK lagi ditanya: fokus =
+                 seimbang (body-system di-PARK per phase-00), arena kampanye ditentukan bab
+                 (game.getRunArena), arena endless = arena terbuka terbaik. -->
             <h3 class="prep-step"><b>1</b> <span data-i18n="Pilih Hero">Pilih Hero</span></h3>
             <div id="prep-hero-row" class="prep-hero-row"><!-- diisi JS --></div>
 
-            <!-- LANGKAH 2: mode (Klasik / Endless + mutator harian) -->
-            <h3 class="prep-step"><b>2</b> <span data-i18n="Mode">Mode</span> <span class="prep-hint" data-i18n="(Endless = mutator harian)">(Endless = mutator harian)</span></h3>
-            <div id="prep-mode-row" class="prep-chip-row"><!-- diisi JS --></div>
-
-            <!-- LANGKAH 3: fokus run -->
-            <h3 class="prep-step"><b>3</b> <span data-i18n="Fokus Run">Fokus Run</span> <span class="prep-hint" data-i18n="(menentukan sistem tubuh yang dipulihkan)">(menentukan sistem tubuh yang dipulihkan)</span></h3>
-            <div id="prep-focus-row" class="prep-chip-row"><!-- diisi JS --></div>
-
-            <!-- LANGKAH 4: arena -->
-            <h3 class="prep-step"><b>4</b> <span data-i18n="Arena">Arena</span> <span class="prep-hint" data-i18n="(terbuka sesuai progresmu)">(terbuka sesuai progresmu)</span></h3>
-            <div id="prep-arena-row" class="prep-chip-row"><!-- diisi JS --></div>
+            <div id="prep-mode-block" class="prep-mode-block hidden">
+              <h3 class="prep-step"><b>2</b> <span data-i18n="Mode">Mode</span> <span class="prep-hint" data-i18n="(Endless = mutator harian)">(Endless = mutator harian)</span></h3>
+              <div id="prep-mode-row" class="prep-chip-row"><!-- diisi JS --></div>
+            </div>
           </div>
 
           <!-- PANEL LOADOUT ala kartu home (Fase 16) -->
@@ -451,26 +448,29 @@
             <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
           </div>
         </div>
-        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu gameplay" aria-expanded="false"><img src="assets/sprites/enemy_bakteri.png" alt="" /><span id="menu1-badge" class="menu-badge hidden"></span></button>
-        <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu gameplay">
-          <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/sprites/icon_sirkulasi.png" alt="" />Campaign</button>
-          <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/sprites/icon_trophy.png" alt="" />Rank</button>
-          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" />Bio-Pedia</button>
-          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/sprites/icon_bolt.png" alt="" />Battle Pass</button>
+        <!-- UI/UX: MENU 1 — "Perjalanan Penjaga" (kanan-atas): progres & pengetahuan.
+             Item terkunci DISEMBUNYIKAN (progressive disclosure via data/features.json);
+             toggle ikut tersembunyi bila belum ada item terbuka. Ikon = set assets/icons/menu-*.svg -->
+        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu perjalanan" aria-expanded="false"><img src="assets/icons/menu-journey.svg" alt="" /><span id="menu1-badge" class="menu-badge hidden"></span></button>
+        <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu perjalanan">
+          <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Peta Tubuh</span></button>
+          <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/icons/menu-rank.svg" alt="" /><span>Pangkat</span></button>
+          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
+          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Battle Pass</span></button>
         </div>
-        <!-- F25: MENU 2 — pojok kanan-bawah, melebar ke kiri: Hero/Collections/Shop/Battle/Squad -->
-        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu hero &amp; toko" aria-expanded="false"><img src="assets/sprites/portrait_macrophage.png" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
-        <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu hero, koleksi &amp; toko">
-          <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/sprites/icon_heroes.png" alt="" /><span>Heroes</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/sprites/icon_scope.png" alt="" /><span>Collection</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/sprites/icon_shop.png" alt="" /><span>Shop</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="arena"><img src="assets/sprites/icon_play.png" alt="" /><span>Battle</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="upgrade"><img src="assets/sprites/icon_sirkulasi.png" alt="" /><span>Squad</span></button>
+        <!-- UI/UX: MENU 2 — "Regu Hero" (bawah, kiri grid skill; membuka ke atas): hero, koleksi, toko, arena, lab -->
+        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu regu hero" aria-expanded="false"><img src="assets/icons/menu-heroes.svg" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
+        <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu regu hero">
+          <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/icons/menu-heroes.svg" alt="" /><span>Heroes</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Koleksi</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/icons/menu-shop.svg" alt="" /><span>Shop</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="arena"><img src="assets/icons/menu-battle.svg" alt="" /><span>Arena</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="upgrade"><img src="assets/icons/menu-squad.svg" alt="" /><span>Lab Pasukan</span></button>
         </div>
         <!-- F25: panel quest harian/mingguan — kiri tengah; hadiah manual-claim + badge kecil -->
         <div id="hud-quests" class="hud-quests">
           <button id="hud-quests-toggle" class="hud-quests-head" aria-expanded="true">
-            <img src="assets/sprites/icon_trophy.png" alt="" /><span>Misi</span>
+            <img src="assets/icons/menu-quest.svg" alt="" /><span>Misi</span>
             <b id="quests-badge" class="menu-badge hidden"></b>
           </button>
           <div id="hud-quests-body" class="hud-quests-body"><!-- diisi JS --></div>
@@ -660,7 +660,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=40a"></script>
+  <script type="module" src="js/main.js?v=41"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>
