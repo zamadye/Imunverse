@@ -109,6 +109,16 @@ function wireUiBridge() {
     showToast(payload);
   });
 
+  // R4 Modul B: meter fagositosis — fill per telan
+  on('phago', ({ meter, max, enabled }) => {
+    const box = document.getElementById('phago-meter');
+    if (!box) return;
+    if (!enabled) { box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    const fill = document.getElementById('phago-fill');
+    if (fill) fill.style.width = `${Math.round((meter / max) * 100)}%`;
+  });
+
   // R3 Modul A: chip memori antigen di HUD — tipe terdekat tier berikutnya
   on('antigen', ({ near }) => {
     const chip = document.getElementById('hud-antigen');
@@ -136,6 +146,8 @@ function wireUiBridge() {
   on('runstart', () => {
     hudScreen.resetHUD();
     document.getElementById('hud-antigen')?.classList.add('hidden'); // R3: chip reset
+    document.getElementById('phago-meter')?.classList.add('hidden'); // R4: meter reset
+    const pf = document.getElementById('phago-fill'); if (pf) pf.style.width = '0%';
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
     music.start(); // F23: musik latar prosedural saat bermain

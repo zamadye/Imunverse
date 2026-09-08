@@ -9,6 +9,7 @@ import { getData, getGameFeel } from '../core/data-store.js';
 import { buzz } from './haptics.js'; // V2 Phase 1
 import { audio } from './audio-system.js';
 import { emit } from '../core/ui-bridge.js';
+import { tryDevour } from './phagocytosis.js'; // R4: Modul B
 import { t as tr } from '../systems/i18n.js';
 
 export class SkillSystem {
@@ -91,6 +92,21 @@ export class SkillSystem {
           if (fx.stun) e.frozen = Math.max(e.frozen, fx.stun);
           if (died) game.onEnemyKilled(e, null);
         }
+        break;
+      }
+      case 'devour': {
+        // R4 Modul B: TELAN musuh eligible (window <20% HP) — instan jadi
+        // resource; fallback: strike lama bila tak ada target sekarat.
+        if (tryDevour(game, ctx)) break;
+        const t0 = this.#nearest(ctx);
+        if (t0) {
+          const dmg0 = damage * (fx.mult || 4);
+          effects.spawnSwipe(px, py, Math.atan2(t0.y - py, t0.x - px), 90, 2.2, '#ffe082');
+          const died0 = t0.takeDamage(dmg0);
+          game.spawnHitFeedback(t0, dmg0, died0);
+          if (died0) game.onEnemyKilled(t0, null);
+        }
+        if (fx.heal) player.heal(fx.heal);
         break;
       }
       case 'strike': {

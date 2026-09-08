@@ -51,6 +51,11 @@ export class Enemy {
     // Visual
     this.rotation = Math.random() * Math.PI * 2;
     this.hitFlash = 0;
+    // R4 Modul B: window telan (phagocytosis) — diisi phagoUpdateEnemy
+    this.phagoEligible = false;
+    this.phagoWindowT = 0;
+    this.phagoSpent = false;
+    this.devoured = false;
     this.weavePhase = Math.random() * Math.PI * 2;
 
     // Boss: state serangan area berkala

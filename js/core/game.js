@@ -23,6 +23,7 @@ import { applyRunGP } from '../systems/rank-system.js';
 import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
 import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
+import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4: Modul B
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -212,7 +213,8 @@ export const game = {
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
-      luPity: 0,      // V2 Phase 4: counter pity roll rare+
+      luPity: 0,
+      phagoMeter: 0, // R4 Modul B: fuel ultimate dari telan      // V2 Phase 4: counter pity roll rare+
       evoTaken: {},   // V2 Phase 4: evolusi senjata yang sudah diambil run ini
       levelUpQueue: 0,
       currentChoices: null,
@@ -625,7 +627,10 @@ export const game = {
 
     // 3. Update musuh (behavior + boss AOE)
     for (const e of run.enemies) {
-      if (e.alive) e.update(dt, player, run.time, this);
+      if (e.alive) {
+        e.update(dt, player, run.time, this);
+        phagoUpdateEnemy(e, dt); // R4 Modul B: window telan <20% HP
+      }
     }
 
     // 4. Bangun ulang spatial grid dari posisi musuh terkini
@@ -1301,6 +1306,16 @@ export const game = {
     passiveOnKill(run, this); // V2 Phase 3: heal Mako / frenzy Neo
     onAntigenKill(run, enemy, this); // R3 Modul A: memori antigen per tipe
 
+    // R4 Modul B: korban TELAN dikonversi resource (heal+fuel di tryDevour) —
+    // TANPA drop XP/koin/imu normal (combat doc §3.1). Combo/efek tetap.
+    if (enemy.devoured) {
+      run.combo.count += 1;
+      run.combo.timer = getRetention().combo.window;
+      run.effects.spawnBurst(enemy.x, enemy.y, '#ffd93d', getRetention().particles.enemyDeath, 150, 4);
+      audio.kill();
+      return;
+    }
+
     // ---- Fase 17 (trigger 2A): XP per KILL — kecil 5–8, besar 12–15, boss 50 ----
     const killXp = xpForKill(enemy.def.tier, enemy.isBoss);
     this.addXP(killXp);
@@ -1852,6 +1867,19 @@ export const game = {
         if (e.attackSpriteHint) {
           const ca = getCombat().contactAttack;
           shiverX = Math.sin(time * ca.shiverHz * Math.PI * 2 + e.weavePhase) * ca.shiverAmp;
+        }
+        // R4 Modul B: ring TELAN — musuh sekarat berdenyut kuning (window aktif)
+        if (e.phagoEligible) {
+          ground(e.x, e.y + e.radius * 0.9);
+          const wPulse = 0.45 + 0.45 * Math.abs(Math.sin(time * 7));
+          ctx.strokeStyle = '#ffd93d';
+          ctx.globalAlpha = wPulse;
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.35, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
         }
         // V2 Phase 5: aura ELITE — ring warna affix di lantai (terlihat dari jauh)
         if (e.eliteAffix) {

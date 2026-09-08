@@ -6,7 +6,7 @@
       "enabled": true
     },
     "phagocytosis": {
-      "enabled": false
+      "enabled": true
     },
     "inflammationZone": {
       "enabled": false
@@ -33,5 +33,13 @@
       "dmgPct": 0.35
     },
     "upgradeHintPct": 0.7
+  },
+  "phagocytosis": {
+    "hpThreshold": 0.2,
+    "windowSec": 1.8,
+    "range": 160,
+    "healOnDevour": 8,
+    "meterPerDevour": 25,
+    "meterMax": 100
   }
 }
