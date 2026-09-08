@@ -32,6 +32,7 @@ const store = {
   mastery: null,     // data/mastery.json (V2 Phase 6: hero mastery dari bermain)
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
+  characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
 };
 
 import { BUILD } from './version.js';
@@ -69,6 +70,7 @@ export async function loadAllData() {
     mastery: 'data/mastery.json',
     narrative: 'data/narrative.json',
     modules: 'data/modules.json',
+    characterDesigns: 'data/character-designs.json',
   };
 
   const entries = await Promise.all(
@@ -98,6 +100,8 @@ const TRANSLATE_FIELDS = new Set([
   'name', 'description', 'desc', 'label', 'title', 'organ', 'story',
   'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
   'question', 'answer', 'text', 'goal', 'tagline', 'funKid', 'fact',
+  'baseCue', 'anatomy', 'visualCue', 'collectionNote', 'collectionTag',
+  'collectionLabel', 'visualRule',
 ]);
 
 function cloneMaybeTranslate(v, force) {
@@ -235,6 +239,11 @@ export function getNarrative() {
 /** Flag & config 5 modul combat (Antigen Memory, Phagocytosis, dst). */
 export function getModules() {
   return getData().modules;
+}
+
+// ===== Character Agent: equity hero + mutation visual pathogen =====
+export function getCharacterDesigns() {
+  return getData().characterDesigns;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

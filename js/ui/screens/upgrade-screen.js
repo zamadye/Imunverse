@@ -265,9 +265,9 @@ function renderPasukanTab(meta) {
       el('span', { class: 'hl-level ally', text: `Lv ${level}` }),
     ]),
     el('div', { class: 'hl-ally-row' }, [
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_b_idle.png'), alt: 'Sel B' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_nk_idle.png'), alt: 'Sel NK' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_makrofag_idle.png'), alt: 'Makrofag' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_bcell_idle.png'), alt: 'Bella' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_nkcell_idle.png'), alt: 'Nyx' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_macrophage_idle.png'), alt: 'Mako' }),
     ]),
     el('b', { class: 'hl-name', text: 'Pasukan Imun' }),
     el('span', { class: 'hl-title', text: 'Ikut bertarung otomatis — menembak patogen' }),

@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "doc": "Character Agent — design bible runtime untuk hero imun, equity biologis per-stage, dan mutation tier pathogen. Stage 0 = polos/base; stage 1-4 = equity anatomi yang bisa dipakai collection user nanti.",
+  "heroEquityStages": {
+    "0": {
+      "label": "Polos",
+      "collectionNote": "Sel imun dasar: belum memakai equity anatomi tambahan."
+    },
+    "1": {
+      "label": "Equity I",
+      "collectionNote": "Cue anatomi pertama harus terbaca di skala gameplay."
+    },
+    "2": {
+      "label": "Equity II",
+      "collectionNote": "Organ/alat biologis kedua memperjelas peran tempur."
+    },
+    "3": {
+      "label": "Equity III",
+      "collectionNote": "Payoff visual ofensif/defensif makin jelas."
+    },
+    "4": {
+      "label": "Full Equity",
+      "collectionNote": "Siluet akhir: seluruh equity utama aktif dan terbaca."
+    }
+  },
+  "heroes": {
+    "macrophage": {
+      "archetype": "phagocyte",
+      "baseCue": "Tubuh besar hijau polos berbentuk ameba; pseudopodia equity belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "pseudopodia_grip",
+          "name": "Pseudopodia Grip",
+          "anatomy": "Pseudopodia",
+          "visualCue": "lengan membran besar untuk merangkul pathogen",
+          "color": "#72d66b"
+        },
+        {
+          "stage": 2,
+          "id": "phagosome_vault",
+          "name": "Phagosome Vault",
+          "anatomy": "Fagosom",
+          "visualCue": "kantong cerna transparan di perut sel",
+          "color": "#b6f26f"
+        },
+        {
+          "stage": 3,
+          "id": "lysosome_mantle",
+          "name": "Lysosome Mantle",
+          "anatomy": "Lisosom",
+          "visualCue": "granula enzim menyala mengelilingi badan",
+          "color": "#ffd15a"
+        },
+        {
+          "stage": 4,
+          "id": "mhc_display_crown",
+          "name": "MHC Display Crown",
+          "anatomy": "MHC",
+          "visualCue": "mahkota presentasi antigen di kepala",
+          "color": "#ffe082"
+        }
+      ]
+    },
+    "dendritic": {
+      "archetype": "dendritic",
+      "baseCue": "Tubuh oranye polos dengan cabang pendek dasar; dendrite probe besar belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "dendrite_probe",
+          "name": "Dendrite Probe",
+          "anatomy": "Dendrit",
+          "visualCue": "cabang antena besar ke segala arah",
+          "color": "#78f2d0"
+        },
+        {
+          "stage": 2,
+          "id": "antigen_clip",
+          "name": "Antigen Clip",
+          "anatomy": "Antigen presentation",
+          "visualCue": "penjepit antigen di ujung cabang",
+          "color": "#ffd76a"
+        },
+        {
+          "stage": 3,
+          "id": "mhc_flag",
+          "name": "MHC Flag",
+          "anatomy": "MHC-II",
+          "visualCue": "bendera sinyal untuk aktivasi sel T",
+          "color": "#80c7ff"
+        },
+        {
+          "stage": 4,
+          "id": "lymph_node_beacon",
+          "name": "Lymph Node Beacon",
+          "anatomy": "Lymph node homing",
+          "visualCue": "mercusuar sinyal limfa di inti",
+          "color": "#c39bd3"
+        }
+      ]
+    },
+    "neutrophil": {
+      "archetype": "net",
+      "baseCue": "Sel cepat biru tua dengan inti tersegmentasi; NET dan burst oksidatif belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "chemotaxis_feet",
+          "name": "Chemotaxis Feet",
+          "anatomy": "Chemotaxis receptor",
+          "visualCue": "tapak sinyal arah di kaki",
+          "color": "#9be7ff"
+        },
+        {
+          "stage": 2,
+          "id": "net_filament",
+          "name": "NET Filament",
+          "anatomy": "Neutrophil extracellular trap",
+          "visualCue": "jala DNA besar melintang",
+          "color": "#f6fbff"
+        },
+        {
+          "stage": 3,
+          "id": "oxidase_burst",
+          "name": "Oxidase Burst",
+          "anatomy": "Respiratory burst",
+          "visualCue": "percikan oksidatif biru-putih",
+          "color": "#a9e8ff"
+        },
+        {
+          "stage": 4,
+          "id": "segmented_core",
+          "name": "Segmented Core",
+          "anatomy": "Segmented nucleus",
+          "visualCue": "tiga inti terang menjadi pusat bidik",
+          "color": "#ffffff"
+        }
+      ]
+    },
+    "eosinophil": {
+      "archetype": "granule_lance",
+      "baseCue": "Sel merah muda-oranye polos dengan granula kecil internal; kait/parasit lance belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "eosin_granule",
+          "name": "Eosin Granule",
+          "anatomy": "Eosinophilic granule",
+          "visualCue": "granula jingga besar di sisi badan",
+          "color": "#ff9f43"
+        },
+        {
+          "stage": 2,
+          "id": "parasite_hook",
+          "name": "Parasite Hook",
+          "anatomy": "Anti-parasite adhesion",
+          "visualCue": "kait besar untuk menempel ke parasit",
+          "color": "#ff6b81"
+        },
+        {
+          "stage": 3,
+          "id": "ige_tether",
+          "name": "IgE Tether",
+          "anatomy": "IgE binding",
+          "visualCue": "tali antibodi IgE melingkar",
+          "color": "#ffe082"
+        },
+        {
+          "stage": 4,
+          "id": "mbp_lance",
+          "name": "Major Basic Protein Lance",
+          "anatomy": "Major basic protein",
+          "visualCue": "tombak protein dasar utama",
+          "color": "#ffd1dc"
+        }
+      ]
+    },
+    "basophil": {
+      "archetype": "vesicle_cloud",
+      "baseCue": "Sel ungu polos dengan vesikel kecil internal; awan histamin equity belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "histamine_vesicle",
+          "name": "Histamine Vesicle",
+          "anatomy": "Histamine granule",
+          "visualCue": "gelembung histamin ungu besar",
+          "color": "#bb8fce"
+        },
+        {
+          "stage": 2,
+          "id": "ige_receptor_halo",
+          "name": "IgE Receptor Halo",
+          "anatomy": "Fc epsilon receptor",
+          "visualCue": "halo reseptor IgE di membran",
+          "color": "#f7dc6f"
+        },
+        {
+          "stage": 3,
+          "id": "leukotriene_fan",
+          "name": "Leukotriene Fan",
+          "anatomy": "Leukotriene signal",
+          "visualCue": "kipas sinyal inflamasi",
+          "color": "#a569bd"
+        },
+        {
+          "stage": 4,
+          "id": "allergy_brake",
+          "name": "Allergy Brake",
+          "anatomy": "Regulasi inflamasi",
+          "visualCue": "segel penenang reaksi alergi",
+          "color": "#58d68d"
+        }
+      ]
+    },
+    "mastcell": {
+      "archetype": "granule_tank",
+      "baseCue": "Sel besar oranye-merah polos; karung granula eksternal dan katup belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "granule_sac",
+          "name": "Granule Sac",
+          "anatomy": "Mast cell granule",
+          "visualCue": "karung granula besar di punggung",
+          "color": "#ffb347"
+        },
+        {
+          "stage": 2,
+          "id": "fc_lock",
+          "name": "Fc Lock",
+          "anatomy": "Fc receptor",
+          "visualCue": "kunci reseptor Fc di membran",
+          "color": "#f5c64f"
+        },
+        {
+          "stage": 3,
+          "id": "degranulation_valve",
+          "name": "Degranulation Valve",
+          "anatomy": "Degranulation",
+          "visualCue": "katup pelepas granula",
+          "color": "#ff6b6b"
+        },
+        {
+          "stage": 4,
+          "id": "membrane_barricade",
+          "name": "Membrane Barricade",
+          "anatomy": "Barrier signaling",
+          "visualCue": "tameng membran tebal",
+          "color": "#ffd93d"
+        }
+      ]
+    },
+    "tcd8": {
+      "archetype": "cytotoxic",
+      "baseCue": "Sel T pembunuh biru polos; scanner TCR, perforin, dan granzyme belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "tcr_scanner",
+          "name": "TCR Scanner",
+          "anatomy": "T-cell receptor",
+          "visualCue": "scanner reseptor T besar di dahi",
+          "color": "#7fdbff"
+        },
+        {
+          "stage": 2,
+          "id": "perforin_blade",
+          "name": "Perforin Blade",
+          "anatomy": "Perforin",
+          "visualCue": "bilah perforin kembar",
+          "color": "#00d2ff"
+        },
+        {
+          "stage": 3,
+          "id": "granzyme_core",
+          "name": "Granzyme Core",
+          "anatomy": "Granzyme",
+          "visualCue": "inti granzim merah-oranye",
+          "color": "#ff9f43"
+        },
+        {
+          "stage": 4,
+          "id": "apoptosis_seal",
+          "name": "Apoptosis Seal",
+          "anatomy": "Apoptosis signal",
+          "visualCue": "segel target mati terprogram",
+          "color": "#ff5d73"
+        }
+      ]
+    },
+    "tcd4": {
+      "archetype": "helper",
+      "baseCue": "Sel T pembantu emas polos; kompas TCR, MHC-link, dan tongkat sitokin belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "tcr_compass",
+          "name": "TCR Compass",
+          "anatomy": "T-cell receptor",
+          "visualCue": "kompas reseptor membaca antigen",
+          "color": "#ffe082"
+        },
+        {
+          "stage": 2,
+          "id": "mhc_link",
+          "name": "MHC-II Link",
+          "anatomy": "MHC-II recognition",
+          "visualCue": "rantai sinyal MHC-II",
+          "color": "#80c7ff"
+        },
+        {
+          "stage": 3,
+          "id": "cytokine_staff",
+          "name": "Cytokine Staff",
+          "anatomy": "Cytokine",
+          "visualCue": "tongkat sitokin besar",
+          "color": "#f5c64f"
+        },
+        {
+          "stage": 4,
+          "id": "helper_relay",
+          "name": "Helper Relay Halo",
+          "anatomy": "Helper T signaling",
+          "visualCue": "halo komando untuk pasukan imun",
+          "color": "#ffd93d"
+        }
+      ]
+    },
+    "treg": {
+      "archetype": "regulator",
+      "baseCue": "Sel regulator mint polos; segel CTLA-4 dan tameng toleransi belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "ctla4_seal",
+          "name": "CTLA-4 Seal",
+          "anatomy": "CTLA-4",
+          "visualCue": "segel rem imun di depan badan",
+          "color": "#76d7c4"
+        },
+        {
+          "stage": 2,
+          "id": "il10_aura",
+          "name": "IL-10 Aura",
+          "anatomy": "Interleukin-10",
+          "visualCue": "aura penenang hijau",
+          "color": "#7ae582"
+        },
+        {
+          "stage": 3,
+          "id": "tgfb_shield",
+          "name": "TGF-beta Shield",
+          "anatomy": "TGF-beta",
+          "visualCue": "tameng toleransi",
+          "color": "#58d68d"
+        },
+        {
+          "stage": 4,
+          "id": "tolerance_mantle",
+          "name": "Tolerance Mantle",
+          "anatomy": "Immune tolerance",
+          "visualCue": "mantel regulator full equity",
+          "color": "#b8f7d4"
+        }
+      ]
+    },
+    "bcell": {
+      "archetype": "antibody",
+      "baseCue": "Sel B ungu polos; antena BCR dan sayap antibodi-Y belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "bcr_antenna",
+          "name": "BCR Antenna",
+          "anatomy": "B-cell receptor",
+          "visualCue": "antena BCR berbentuk Y",
+          "color": "#d7bde2"
+        },
+        {
+          "stage": 2,
+          "id": "antibody_wings",
+          "name": "Antibody-Y Wings",
+          "anatomy": "Antibody",
+          "visualCue": "sayap antibodi Y besar",
+          "color": "#f5c64f"
+        },
+        {
+          "stage": 3,
+          "id": "plasma_forge",
+          "name": "Plasma Forge",
+          "anatomy": "Plasma cell output",
+          "visualCue": "pabrik antibodi menyala",
+          "color": "#bb8fce"
+        },
+        {
+          "stage": 4,
+          "id": "memory_node",
+          "name": "Memory Node",
+          "anatomy": "Memory B cell",
+          "visualCue": "simpul memori antigen",
+          "color": "#fff3b0"
+        }
+      ]
+    },
+    "nkcell": {
+      "archetype": "nk_spike",
+      "baseCue": "Sel NK gelap polos; scanner missing-self dan cincin perforin belum terbuka.",
+      "equity": [
+        {
+          "stage": 1,
+          "id": "missing_self_scanner",
+          "name": "Missing-Self Scanner",
+          "anatomy": "Missing-self recognition",
+          "visualCue": "mata scanner mencari sel abnormal",
+          "color": "#b39ddb"
+        },
+        {
+          "stage": 2,
+          "id": "perforin_spike_ring",
+          "name": "Perforin Spike Ring",
+          "anatomy": "Perforin",
+          "visualCue": "cincin spike perforin",
+          "color": "#ff8c42"
+        },
+        {
+          "stage": 3,
+          "id": "granzyme_darts",
+          "name": "Granzyme Darts",
+          "anatomy": "Granzyme",
+          "visualCue": "anak panah granzim",
+          "color": "#ff5d73"
+        },
+        {
+          "stage": 4,
+          "id": "stress_ligand_crown",
+          "name": "Stress Ligand Crown",
+          "anatomy": "Stress ligand sensing",
+          "visualCue": "mahkota sensor stress",
+          "color": "#c39bd3"
+        }
+      ]
+    }
+  },
+  "pathogens": {
+    "mutationTiers": [
+      {
+        "tier": 0,
+        "label": "Polos",
+        "visualCue": "bentuk dasar pathogen, belum bermutasi",
+        "color": "#ff6b6b"
+      },
+      {
+        "tier": 1,
+        "label": "Ganas I",
+        "visualCue": "spike tambahan dan aura infeksi tipis",
+        "color": "#ff9f43"
+      },
+      {
+        "tier": 2,
+        "label": "Ganas II",
+        "visualCue": "membran retak, duri lebih panjang",
+        "color": "#ff5d73"
+      },
+      {
+        "tier": 3,
+        "label": "Krisis",
+        "visualCue": "core gelap dan tanda hazard terbaca",
+        "color": "#c0392b"
+      },
+      {
+        "tier": 4,
+        "label": "Apex",
+        "visualCue": "mahkota mutasi dan aura merah-ungu",
+        "color": "#6c3483"
+      }
+    ],
+    "enemyMap": {
+      "bakteri": "bacterium",
+      "bakteri_gp": "armored_bacterium",
+      "bakteri_gn": "toxic_bacterium",
+      "virus": "virus",
+      "virion": "virus",
+      "parasit": "parasite",
+      "spora": "fungus",
+      "sel_kanker": "cancer",
+      "protozoa": "protozoa",
+      "toksin": "toxin",
+      "prion": "crystal",
+      "sel_abnormal": "abnormal_cell",
+      "toksin_raksasa": "toxin_boss"
+    }
+  }
+}
