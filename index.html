@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=26a" />
+  <link rel="stylesheet" href="styles/main.css?v=38a" />
   <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
 </head>
 <body>
@@ -328,9 +328,9 @@
             <button id="auth-submit" class="btn btn-primary btn-xl auth-submit">BUAT AKUN &amp; MULAI</button>
             <div id="auth-resume" class="auth-resume"></div>
           </div>
-          <h3 class="auth-faction-title">Pilih Pasukanmu</h3>
-          <p class="auth-faction-hint">Fraksi menentukan dashboard, hero &amp; pasukanmu — layout sama, sisi berbeda.</p>
-          <div id="auth-factions" class="auth-factions"></div>
+          <!-- R1 (Rebuild): "Pilih Pasukanmu" DICOPOT dari signup (addendum UX) —
+               dikembalikan hanya saat PvP fraksi Virus benar-benar siap. -->
+          <div id="auth-factions" class="auth-factions" style="display:none"></div>
         </div>
       </section>
 
@@ -478,6 +478,10 @@
           <div id="hud-quests-body" class="hud-quests-body"><!-- diisi JS --></div>
         </div>
         <div id="hud-buffs" class="hud-buffs"></div>
+        <!-- R3 Modul A: chip memori antigen — tipe terdekat tier berikutnya -->
+        <div id="hud-antigen" class="hud-antigen hidden" aria-label="Memori antigen"></div>
+        <!-- R4 Modul B: meter fagositosis (fuel ultimate dari telan) -->
+        <div id="phago-meter" class="phago-meter hidden" aria-label="Fuel fagositosis"><div id="phago-fill" class="phago-fill"></div></div>
         <!-- F25b: XP progres pindah ke kanan-atas (konvensi UI game); HP tetap kiri-bawah -->
         <div id="hud-xp-top" class="hud-xp-top" aria-label="Progres XP">
           <img class="hud-xp-ico" src="assets/sprites/icon_star.png" alt="XP" />
@@ -656,7 +660,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=26a"></script>
+  <script type="module" src="js/main.js?v=38a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

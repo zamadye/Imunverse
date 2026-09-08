@@ -71,6 +71,9 @@ const EXTRA_PRELOAD = [
   'assets/sprites/ov_pseudopodia.png',
   'assets/sprites/ov_pedang.png',
   'assets/sprites/ov_inti.png',
+  // R2 (Rebuild): karakter naratif — Dr. Amara (makro) & sinyal RIA (mikro)
+  'assets/sprites/dr_amara.png',
+  'assets/sprites/ria_signal.png',
 ];
 
 /**
@@ -144,11 +147,12 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   // sprite dibuat dengan margin — gambar sesuai rasio aslinya
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
 
-  // Flash putih saat kena hit (overlay lingkaran lembut)
+  // Flash saat kena hit (overlay lingkaran lembut; V2 Phase 5: warna bisa
+  // dioverride — merah utk boss enrage)
   if (opts.flash && opts.flash > 0) {
     ctx.globalAlpha = opts.flash * 0.75;
     ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = opts.flashColor || '#ffffff';
     ctx.beginPath();
     ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
     ctx.fill();

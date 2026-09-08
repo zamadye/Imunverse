@@ -13,6 +13,8 @@ import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
+import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
+import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
 
 let wiringDone = false;
 
@@ -37,6 +39,35 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
+  // R2: 1 baris bark kontekstual RIA — non-blocking (story doc §7.3)
+  const oldBark = document.getElementById('go-ria-bark');
+  if (oldBark) oldBark.remove();
+  const barkText = runEndBark(!!summary.victory, (STATE.meta.stats && STATE.meta.stats.totalRuns) || 0);
+  if (barkText) {
+    const bark = el('div', { id: 'go-ria-bark', class: 'go-ria-bark', style: 'margin:2px auto 4px;font-size:12px;font-weight:800;color:#2f9c8f;max-width:460px;font-style:italic' }, [
+      el('span', { text: barkText }),
+    ]);
+    document.getElementById('gameover-title').insertAdjacentElement('afterend', bark);
+  }
+  // R1 (Rebuild): guest-first — ajakan akun DI LAYAR HASIL, setelah reward
+  // masuk ("sayang kalau hilang"), bukan gate di depan. Non-blocking.
+  const oldSavePrompt = document.getElementById('go-save-prompt');
+  if (oldSavePrompt) oldSavePrompt.remove();
+  if (!hasAccount()) {
+    const box = document.getElementById('screen-gameover').querySelector('.gameover-card') || document.getElementById('screen-gameover');
+    const prompt = el('div', { id: 'go-save-prompt', class: 'go-save-prompt', style: 'margin:6px auto;padding:8px 12px;border-radius:12px;background:rgba(255,217,61,0.16);font-size:12px;font-weight:800;color:#8a6d1a;max-width:420px' }, [
+      el('span', { text: `${tr('Hadiahmu belum tersimpan!')} ` }),
+      el('button', {
+        class: 'btn btn-gold', id: 'btn-go-save-account', style: 'font-size:11px;padding:4px 12px;margin-left:6px',
+        text: tr('SIMPAN PROGRES'),
+      }),
+    ]);
+    prompt.querySelector('#btn-go-save-account').addEventListener('click', () => {
+      screenManager.show('auth');
+    });
+    const titleEl = document.getElementById('gameover-title');
+    titleEl.insertAdjacentElement('afterend', prompt);
+  }
   const title = document.getElementById('gameover-title');
   if (summary.victory) title.textContent = 'MENANG!';
   else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
@@ -125,6 +156,19 @@ export function show(summary) {
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-imu' }, [
       el('img', { src: 'assets/sprites/icon_imu.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${bits.join(' · ')}` }),
+    ]));
+  }
+
+  // V2 Phase 6: HERO MASTERY — hadiah kecil tiap run untuk hero yang DIPAKAI
+  if (summary.mastery) {
+    const mm = summary.mastery;
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-mastery' }, [
+      el('span', { text: '★', style: 'color:#ffd93d;font-weight:900' }),
+      el('span', {
+        text: mm.levelsGained > 0
+          ? ` Mastery ${mm.heroName} +${mm.xp} XP — NAIK Lv ${mm.level}${mm.title ? ` (${mm.title})` : ''}!`
+          : ` Mastery ${mm.heroName} +${mm.xp} XP · Lv ${mm.level}${mm.title ? ` (${mm.title})` : ''}`,
+      }),
     ]));
   }
 

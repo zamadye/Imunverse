@@ -42,7 +42,7 @@ export function createDefaultMeta() {
     selectedHero: 'macrophage',
     selectedArena: 'limfe',
     selectedMode: 'kampanye',
-    selectedChapter: 'bab_mulut',
+    selectedChapter: 'bab_luka',
     campaignCleared: {},
     allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
     heroLevels: {},  // { heroId: level } — level per hero (upgrade antibodi)
@@ -102,6 +102,27 @@ export function mergeMetaDefaults(meta) {
     sel_b: 'bcell', sel_nk: 'nkcell', eosinofil: 'eosinophil',
   };
   const mapId = (id) => HERO_MAP[id] || id;
+  // R2 (Rebuild): remap penuh campaign organ → kondisi (story doc §5)
+  const CH_MAP = {
+    bab_mulut: 'bab_luka', bab_lambung: 'bab_demam', bab_usus: 'bab_racun',
+    bab_paru: 'bab_alergi', bab_limfe: 'bab_kanker', bab_jantung: 'bab_final',
+  };
+  const mapCh = (id) => CH_MAP[id] || id;
+  if (meta.selectedChapter) meta.selectedChapter = mapCh(meta.selectedChapter);
+  if (meta.campaignCleared && typeof meta.campaignCleared === 'object') {
+    const mc = {};
+    for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = v;
+    meta.campaignCleared = mc;
+  }
+  if (meta.cinematicsSeen && typeof meta.cinematicsSeen === 'object') {
+    const ms = {};
+    for (const [k, v] of Object.entries(meta.cinematicsSeen)) {
+      let nk = k;
+      for (const [o, nu] of Object.entries(CH_MAP)) nk = nk.replace(o, nu);
+      ms[nk] = v;
+    }
+    meta.cinematicsSeen = ms;
+  }
   if (Array.isArray(meta.unlockedHeroes)) meta.unlockedHeroes = [...new Set(meta.unlockedHeroes.map(mapId))];
   if (meta.selectedHero) meta.selectedHero = mapId(meta.selectedHero);
   if (meta.heroLevels && typeof meta.heroLevels === 'object') {
@@ -111,7 +132,7 @@ export function mergeMetaDefaults(meta) {
   }
   if (meta.codexSeen && typeof meta.codexSeen === 'object') {
     const mapped = {};
-    for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapId(k)] = v;
+    for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapCh(mapId(k))] = v;
     meta.codexSeen = mapped;
   }
   const merged = deepMerge(base, meta || {});

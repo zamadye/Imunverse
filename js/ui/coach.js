@@ -22,6 +22,7 @@ function ensureLayer() {
   layer.innerHTML = `
     <div id="coach-spot"></div>
     <div id="coach-tip" class="coach-tip">
+      <span class="coach-guide" style="display:block;font-size:10px;font-weight:900;color:#2f9c8f;letter-spacing:0.5px">⚡ RIA — RESPONS IMUN ADAPTIF</span>
       <b id="coach-title"></b>
       <p id="coach-text"></p>
       <div class="coach-actions">

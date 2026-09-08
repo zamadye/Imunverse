@@ -96,7 +96,7 @@ export class SpawnSystem {
     this.waveTimer += dt;
     if (this.waveTimer >= cfg.waveDuration) {
       this.waveClearing = true;
-      this.breakTimer = 2.5;
+      this.breakTimer = cfg.breakDuration; // V2 Phase 2: pacing dari data/waves.json
       events.waveBreak = true;
       return events;
     }
@@ -123,7 +123,7 @@ export class SpawnSystem {
     // ---- Trickle pelan: arena tetap hidup; free-ranger juga punya sarang ----
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * 2.2 / (this.mods.spawnMult || 1);
+      this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * cfg.trickleIntervalMult / (this.mods.spawnMult || 1); // V2 Phase 2: dari data
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
         const enemyId = this.pickEnemyId(this.wave);
         if (enemyId) game.spawnEnemy(enemyId, false, { nest: true, ai });
@@ -138,7 +138,7 @@ export class SpawnSystem {
       (!regularAlive && !bossPending && this.waveTimer >= (ai.minWaveTime || 8))
     ) {
       this.waveClearing = true;
-      this.breakTimer = 2.5;
+      this.breakTimer = cfg.breakDuration; // V2 Phase 2: pacing dari data/waves.json
       events.waveBreak = true;
     }
 
@@ -155,6 +155,12 @@ export class SpawnSystem {
     const nNests = Math.min(ai.nestsMax || 5, (ai.nestsBase || 2) + Math.floor((this.wave - 1) / (ai.nestsAddEveryWaves || 4)));
     const packSize = Math.max(2, Math.round((ai.packSize || 3) + (this.wave - 1) * (ai.packPerWave || 0.45)));
     const baseAngle = Math.random() * Math.PI * 2;
+    // V2 Phase 5: ELITE terencana — mulai startWave, 1..max elite per wave di
+    // sarang JAUH (momen "itu elite!" yang bisa diantisipasi, bukan RNG murni)
+    const ec = cfg.elite || null;
+    let eliteQuota = ec && this.wave >= ec.startWave
+      ? Math.min(ec.max, ec.base + Math.floor((this.wave - ec.startWave) / ec.addEveryWaves))
+      : 0;
     for (let n = 0; n < nNests; n++) {
       const near = n === 0;
       const dist = (near ? ai.nearNestDist || 300 : ai.farNestDist || 620) + (Math.random() - 0.5) * 80;
@@ -173,6 +179,12 @@ export class SpawnSystem {
         e.x = px + Math.cos(sa) * sr;
         e.y = py + Math.sin(sa) * sr;
         e.setNest(px, py, ai);
+        // V2 Phase 5: anggota pertama sarang JAUH dipromosikan jadi elite
+        if (eliteQuota > 0 && !near && m === 0 && !e.isBoss) {
+          const affix = ec.affixes[Math.floor(Math.random() * ec.affixes.length)];
+          e.makeElite(affix, ec);
+          eliteQuota -= 1;
+        }
       }
     }
   }
