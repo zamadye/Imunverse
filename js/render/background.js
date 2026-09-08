@@ -4,16 +4,18 @@
  * terumbu/rumput laut/sel (ASET PNG parallax: prop_reef, prop_weed,
  * prop_cell, prop_dots) dan gelembung prosedural yang naik pelan.
  *
- * ARENA AGENT (data-driven per-organ):
+ * MAP AGENT (data-driven per-map; scope "MAP" = arena + lingkungan):
  *  - Lapisan paling belakang = AMBIENT (sel darah/dust prosedural,
  *    parallax paling lambat, opacity rendah) — TERPISAH dari partikel
  *    combat foreground (effects-system.js) yang hidup di layer dunia.
+ *  - Lapisan ELEMEN KHAS (palette.element): signature visual tiap organ —
+ *    aliran limfe, asam lambung, napas paru, sinyal saraf, detak jantung.
  *  - Ritme DETAK JANTUNG (lub-dub) global mengatur "breathing" latar:
- *    sel, bercak arena, dan glow vignette naik-turun mengikuti denyut.
- *  - Semua parameter motiv-detail (ambient, pulse, organ) dibaca dari
- *    data/arenas.json → palette; kode ini hanya berisi DEFAULT fallback
- *    sehingga entri organ baru cukup tambah data (lihat
- *    docs/arena-environment-schema.md). Tanpa aset baru: murni timer/canvas.
+ *    sel, bercak map, elemen khas, dan glow naik-turun mengikuti denyut.
+ *  - Semua parameter motif-detail (ambient, pulse, element, bubbles, organ)
+ *    dibaca dari data/arenas.json → palette; kode ini hanya berisi DEFAULT
+ *    fallback sehingga map baru cukup tambah data (lihat
+ *    docs/map-environment-schema.md). Tanpa aset baru: murni timer/canvas.
  */
 
 import { drawSprite } from './sprite-loader.js';
@@ -90,6 +92,29 @@ function pulseCfg() {
   return { ...PULSE_DEFAULTS, ...(PALETTE.pulse || {}) };
 }
 
+// DEFAULT elemen khas map (palette.element) — signature visual tiap organ
+// sesuai anatominya. Tipe: flow|acid|breath|spark|pulsering.
+const ELEMENT_DEFAULTS = {
+  type: null,      // null = tak ada lapisan elemen (entri lama)
+  color: '255,255,255',  // triplet rgb utama
+  color2: '255,255,255', // triplet rgb sekunder (inti/sorot)
+  breathSec: 4,    // (breath) durasi satu siklus napas
+  density: 0.5, spacing: 300, size: 30, speed: 10, alpha: 0.15,
+  parallax: 0.3,   // midground — antara reef jauh & dekat
+};
+const BUBBLE_DEFAULTS = {
+  c1: 'rgba(255,255,255,0.10)',
+  c2: 'rgba(255,255,255,0.16)',
+};
+
+function elementCfg() {
+  return { ...ELEMENT_DEFAULTS, ...(PALETTE.element || {}) };
+}
+
+function bubblesCfg() {
+  return { ...BUBBLE_DEFAULTS, ...(PALETTE.bubbles || {}) };
+}
+
 /**
  * Envelope DETAK JANTUNG (lub-dub) 0..1 — motif "Pulse Cell".
  * Dua puncak gaussian per siklus: lub kuat (12% siklus) + dub lemah (34%).
@@ -124,9 +149,12 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   drawCellLayer(ctx, camX, camY, w, h, time, beat);
   const props = PALETTE.props && PALETTE.props.length ? PALETTE.props : ['prop_reef.png', 'prop_weed.png'];
   drawReefLayer(ctx, camX, camY, w, h, 0.22, 820, props[0], 210, time);
-  drawBubbleLayer(ctx, camX, camY, w, h, time, 0.5, 190, 'rgba(255,255,255,0.10)', 5);
+  // ---- LAPISAN ELEMEN KHAS MAP (data-driven: palette.element) ----
+  drawElementLayer(ctx, camX, camY, w, h, time, beat);
+  const bc = bubblesCfg();
+  drawBubbleLayer(ctx, camX, camY, w, h, time, 0.5, 190, bc.c1, 5);
   drawReefLayer(ctx, camX, camY, w, h, 0.4, 620, props[1] || props[0], 170, time);
-  drawBubbleLayer(ctx, camX, camY, w, h, time, 0.72, 130, 'rgba(255,255,255,0.16)', 8);
+  drawBubbleLayer(ctx, camX, camY, w, h, time, 0.72, 130, bc.c2, 8);
 
   // ---- arena heksagon: kini digambar TERPROYEKSI (drawArena3D) dari game.js ----
 
@@ -195,6 +223,128 @@ function drawAmbientLayer(ctx, camX, camY, w, h, time, beat) {
         ctx.arc(wx + s * 0.12, wy - s * 0.1, s * 0.42, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
+  }
+}
+
+/**
+ * Lapisan ELEMEN KHAS map — signature visual tiap organ sesuai anatominya.
+ * Anggaran: grid jarang (±8-12 sel aktif), ≤3 shape/sel, tanpa shadowBlur.
+ * Deterministik (hash-grid + waktu) — tanpa state, tanpa spawn dinamis.
+ */
+function drawElementLayer(ctx, camX, camY, w, h, time, beat) {
+  const e = elementCfg();
+  if (!e.type) return;
+  if (e.type === 'breath') return drawElementBreath(ctx, camX, camY, w, h, time, e);
+  const boost = 1 + beat * 0.2; // denyut global ikut menghidupkan elemen
+  const spacing = e.spacing;
+  const ox = camX * e.parallax, oy = camY * e.parallax;
+  const x0 = Math.floor((ox - w / 2) / spacing) - 1;
+  const x1 = Math.floor((ox + w / 2) / spacing) + 1;
+  const y0 = Math.floor((oy - h / 2) / spacing) - 1;
+  const y1 = Math.floor((oy + h / 2) / spacing) + 1;
+  for (let ix = x0; ix <= x1; ix++) {
+    for (let iy = y0; iy <= y1; iy++) {
+      const r1 = hash2(ix * 29 + 5, iy * 31 - 3);
+      if (r1 > e.density) continue;
+      const r2 = hash2(ix - 77, iy + 51);
+      const wx = ix * spacing + (r1 - 0.5) * spacing * 0.6 - ox + w / 2;
+      const wy = iy * spacing + (r2 - 0.5) * spacing * 0.6 - oy + h / 2;
+      if (e.type === 'flow') elementFlow(ctx, wx, wy, time, r1, r2, e, boost);
+      else if (e.type === 'acid') elementAcid(ctx, wx, wy, time, r1, r2, e, boost);
+      else if (e.type === 'spark') elementSpark(ctx, wx, wy, time, ix, iy, r1, r2, e, boost);
+      else if (e.type === 'pulsering') elementPulseRing(ctx, wx, wy, time, r1, r2, e, boost);
+    }
+  }
+}
+
+/** LIMFE — gumpalan getah bening berdenyut pelan, melayang tenang. */
+function elementFlow(ctx, wx, wy, time, r1, r2, e, boost) {
+  const bob = Math.sin(time * 0.6 + r1 * 9) * 8;
+  const s = e.size * (0.7 + r1 * 0.6) * boost;
+  ctx.fillStyle = `rgba(${e.color},${(e.alpha).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(wx, wy + bob, s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = `rgba(${e.color2},${(e.alpha * 1.2).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(wx - s * 0.25, wy + bob - s * 0.25, s * 0.45, 0, Math.PI * 2); ctx.fill();
+}
+
+/** LAMBUNG — aliran gelembung asam naik berdenyut (kuning-hijau). */
+function elementAcid(ctx, wx, wy, time, r1, r2, e, boost) {
+  const travel = 300;
+  const rise = (time * e.speed + r2 * travel) % travel;
+  const yy = wy + travel / 2 - rise;
+  const xx = wx + Math.sin(time * 2 + r1 * 12) * 12;
+  const fade = Math.sin((rise / travel) * Math.PI); // pudar di ujung jalur
+  const s = e.size * (0.6 + r1 * 0.8) * boost;
+  const a = (e.alpha * 2 * fade).toFixed(3);
+  ctx.fillStyle = `rgba(${e.color},${a})`;
+  ctx.beginPath(); ctx.arc(xx, yy, s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = `rgba(255,255,255,${(e.alpha * 2.2 * fade).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(xx - s * 0.3, yy - s * 0.3, s * 0.28, 0, Math.PI * 2); ctx.fill();
+}
+
+/** SARAF — sambaran sinyal listrik: garis patah menyala-kedip cepat. */
+function elementSpark(ctx, wx, wy, time, ix, iy, r1, r2, e, boost) {
+  const q = Math.floor(time * e.speed + r1 * 8);
+  const flick = hash2(ix * 7 + q * 13, iy * 11 - q * 3);
+  if (flick < 0.45) return; // mayoritas waktu padam → kesan menyambar
+  const segs = 5, len = e.size * (0.8 + r2 * 0.5);
+  ctx.strokeStyle = `rgba(${e.color},${(e.alpha * flick * boost).toFixed(3)})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let k = 0; k <= segs; k++) {
+    const yy = wy - len / 2 + (len * k) / segs;
+    const xx = wx + (hash2(ix * 3 + k, iy * 5 - k) - 0.5) * len * 0.5;
+    if (k === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+  }
+  ctx.stroke();
+  ctx.fillStyle = `rgba(${e.color2},${(e.alpha * flick).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(wx, wy - len / 2, 3, 0, Math.PI * 2); ctx.fill();
+}
+
+/** JANTUNG — gelombang detak: cincin mengembang memudar dari tiap nodus. */
+function elementPulseRing(ctx, wx, wy, time, r1, r2, e, boost) {
+  const span = e.size * 2;
+  const cyc = (time * e.speed + r1 * span) % span;
+  const rad = 10 + cyc;
+  const a = (e.alpha * (1 - cyc / span) * boost).toFixed(3);
+  ctx.strokeStyle = `rgba(${e.color},${a})`;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(wx, wy, rad, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = `rgba(${e.color2},${(e.alpha * 1.5 * (1 - cyc / span)).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(wx, wy, 5, 0, Math.PI * 2); ctx.fill();
+}
+
+/** PARU — napas: kilau mengembang + gugus sakus alveoli (3 gelembung). */
+function drawElementBreath(ctx, camX, camY, w, h, time, e) {
+  const phase = 0.5 - 0.5 * Math.cos((time * Math.PI * 2) / e.breathSec);
+  const br = ctx.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, Math.max(w, h) * 0.7);
+  br.addColorStop(0, `rgba(${e.color},${(e.alpha * phase).toFixed(3)})`);
+  br.addColorStop(1, `rgba(${e.color},0)`);
+  ctx.fillStyle = br;
+  ctx.fillRect(0, 0, w, h);
+  const spacing = e.spacing;
+  const ox = camX * e.parallax, oy = camY * e.parallax;
+  const x0 = Math.floor((ox - w / 2) / spacing) - 1;
+  const x1 = Math.floor((ox + w / 2) / spacing) + 1;
+  const y0 = Math.floor((oy - h / 2) / spacing) - 1;
+  const y1 = Math.floor((oy + h / 2) / spacing) + 1;
+  for (let ix = x0; ix <= x1; ix++) {
+    for (let iy = y0; iy <= y1; iy++) {
+      const r1 = hash2(ix * 29 + 5, iy * 31 - 3);
+      if (r1 > e.density) continue;
+      const r2 = hash2(ix - 77, iy + 51);
+      const wx = ix * spacing + (r1 - 0.5) * spacing * 0.6 - ox + w / 2;
+      const wy = iy * spacing + (r2 - 0.5) * spacing * 0.6 - oy + h / 2;
+      const s = e.size * (0.6 + r1 * 0.6) * (0.8 + 0.35 * phase);
+      const a = (e.alpha * (0.6 + 0.6 * phase)).toFixed(3);
+      const a2 = (e.alpha * 1.2 * (0.6 + 0.6 * phase)).toFixed(3);
+      ctx.fillStyle = `rgba(${e.color},${a})`;
+      ctx.beginPath(); ctx.arc(wx, wy, s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(${e.color2},${a2})`;
+      ctx.beginPath(); ctx.arc(wx + s * 0.9, wy + s * 0.3, s * 0.55, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(${e.color},${a})`;
+      ctx.beginPath(); ctx.arc(wx - s * 0.7, wy + s * 0.6, s * 0.4, 0, Math.PI * 2); ctx.fill();
     }
   }
 }
@@ -329,10 +479,11 @@ export function drawArena3D(ctx, P, time) {
   // culling kasar
   if (c.x < -700 || c.x > w + 700 || c.y < -700 || c.y > h + 900) return;
 
-  // ---- bibir arena (dua ring di bawah → kesan tebal/berdiri) ----
-  ctx.fillStyle = 'rgba(122,186,164,0.9)';
+  // ---- bibir map (dua ring di bawah → kesan tebal/berdiri) ----
+  // Warna per-map dari data (rim/rimLight) agar selaras anatomi organ.
+  ctx.fillStyle = PALETTE.rim || 'rgba(122,186,164,0.9)';
   traceHex3D(ctx, P, 0, 18, 304, 4); ctx.fill();
-  ctx.fillStyle = 'rgba(154,208,186,0.92)';
+  ctx.fillStyle = PALETTE.rimLight || 'rgba(154,208,186,0.92)';
   traceHex3D(ctx, P, 0, 8, 286, 4); ctx.fill();
 
   // ---- lantai arena (warna per arena) ----

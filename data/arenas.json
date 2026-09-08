@@ -1,42 +1,342 @@
 {
-  "schemaVersion": 2,
-  "doc": "ARENA AGENT: skema data-driven per-organ. Menambah organ/lokasi baru = tambah 1 entri di array ini (tanpa sentuh kode render). Kunci palette.ambient & palette.pulse opsional — kode memakai default bila absen (backward compatible). Lihat docs/arena-environment-schema.md.",
+  "schemaVersion": 3,
+  "doc": "MAP AGENT: skema data-driven per-map. Tiap map = 1 organ dengan WARNA ANATOMI + ELEMEN KHASnya sendiri (lihat palette.element). Menambah map baru = tambah 1 entri di array ini (tanpa sentuh kode render). Kunci palette.ambient/.pulse/.element/.bubbles opsional — kode memakai default bila absen (backward compatible). Lihat docs/map-environment-schema.md.",
   "arenas": [
     {
-      "id": "limfe", "name": "Saluran Limfe", "thumb": "assets/sprites/arena_limfe.png",
-      "organ": { "name": "Kelenjar Limfe", "system": "Sistem Limfatik", "condition": "Aliran getah bening yang tenang — markas pertahanan tubuh" },
-      "unlock": { "type": "default", "value": 0 },
-      "bonus": { "desc": "Arena dasar — seimbang", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#2b9284", "mid": "#23857a", "bot": "#1d7268", "hex": "#fdf6e3", "hexEdge": "#e9dfc0", "vignette": "rgba(16,64,58,0.28)", "props": ["prop_reef.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ambient": { "density": 0.55, "spacing": 250, "size": 26, "drift": 9, "opacity": 0.16, "parallax": 0.08, "tint": "255,255,255", "shade": "16,64,58" },
-        "pulse": { "bpm": 64, "strength": 1.0, "glowAlpha": 0.05 } }
+      "id": "limfe",
+      "name": "Saluran Limfe",
+      "thumb": "assets/sprites/arena_limfe.png",
+      "organ": {
+        "name": "Kelenjar Limfe",
+        "system": "Sistem Limfatik",
+        "condition": "Pembuluh getah bening — cairan jernih kehijauan mengalir lambat"
+      },
+      "unlock": {
+        "type": "default",
+        "value": 0
+      },
+      "bonus": {
+        "desc": "Arena dasar — seimbang",
+        "nutrientMult": 1.0,
+        "partMult": 1.0,
+        "speedMult": 1.0,
+        "magnetMult": 1.0
+      },
+      "palette": {
+        "top": "#6fb894",
+        "mid": "#54a180",
+        "bot": "#39705c",
+        "hex": "#f4f8e6",
+        "hexEdge": "#c9d6a8",
+        "vignette": "rgba(24,70,52,0.28)",
+        "props": [
+          "prop_weed.png",
+          "prop_cell.png"
+        ],
+        "cornerWeed": "assets/sprites/deco_weed_big.png",
+        "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": {
+          "density": 0.55,
+          "spacing": 250,
+          "size": 26,
+          "drift": 8,
+          "opacity": 0.16,
+          "parallax": 0.08,
+          "tint": "240,250,235",
+          "shade": "40,110,80"
+        },
+        "pulse": {
+          "bpm": 60,
+          "strength": 0.9,
+          "glowAlpha": 0.05
+        },
+        "bubbles": {
+          "c1": "rgba(255,255,255,0.10)",
+          "c2": "rgba(230,245,230,0.16)"
+        },
+        "element": {
+          "type": "flow",
+          "color": "190,230,190",
+          "color2": "120,180,140",
+          "density": 0.5,
+          "spacing": 300,
+          "size": 34,
+          "speed": 7,
+          "alpha": 0.12,
+          "parallax": 0.3
+        },
+        "rim": "rgba(110,175,140,0.9)",
+        "rimLight": "rgba(150,205,170,0.92)"
+      }
     },
     {
-      "id": "lambung", "name": "Lambung Asam", "thumb": "assets/sprites/arena_lambung.png",
-      "organ": { "name": "Lambung", "system": "Saluran Cerna", "condition": "Dinding lambung saat keracunan — asam mengaduk, gelembung gas naik" },
-      "unlock": { "type": "totalKills", "value": 150 },
-      "bonus": { "desc": "Nutrisi bernilai +15%", "nutrientMult": 1.15, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#d89260", "mid": "#c47f52", "bot": "#96543c", "hex": "#fdf7de", "hexEdge": "#efdfa8", "vignette": "rgba(96,44,20,0.3)", "props": ["prop_asam.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ambient": { "density": 0.6, "spacing": 230, "size": 24, "drift": 16, "opacity": 0.15, "parallax": 0.08, "tint": "255,236,200", "shade": "150,84,40" },
-        "pulse": { "bpm": 76, "strength": 1.1, "glowAlpha": 0.055 } }
+      "id": "lambung",
+      "name": "Lambung Asam",
+      "thumb": "assets/sprites/arena_lambung.png",
+      "organ": {
+        "name": "Lambung",
+        "system": "Saluran Cerna",
+        "condition": "Dinding mukosa merah muda + asam lambung kekuningan yang mengaduk"
+      },
+      "unlock": {
+        "type": "totalKills",
+        "value": 150
+      },
+      "bonus": {
+        "desc": "Nutrisi bernilai +15%",
+        "nutrientMult": 1.15,
+        "partMult": 1.0,
+        "speedMult": 1.0,
+        "magnetMult": 1.0
+      },
+      "palette": {
+        "top": "#c65b4e",
+        "mid": "#a03f36",
+        "bot": "#662420",
+        "hex": "#f7e6cf",
+        "hexEdge": "#e0b183",
+        "vignette": "rgba(90,30,22,0.3)",
+        "props": [
+          "prop_asam.png",
+          "prop_weed.png"
+        ],
+        "cornerWeed": "assets/sprites/deco_weed_big.png",
+        "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": {
+          "density": 0.6,
+          "spacing": 230,
+          "size": 24,
+          "drift": 16,
+          "opacity": 0.15,
+          "parallax": 0.08,
+          "tint": "255,225,190",
+          "shade": "150,70,45"
+        },
+        "pulse": {
+          "bpm": 76,
+          "strength": 1.1,
+          "glowAlpha": 0.055
+        },
+        "bubbles": {
+          "c1": "rgba(225,235,140,0.12)",
+          "c2": "rgba(200,220,110,0.18)"
+        },
+        "element": {
+          "type": "acid",
+          "color": "215,230,120",
+          "color2": "150,180,70",
+          "density": 0.55,
+          "spacing": 260,
+          "size": 16,
+          "speed": 26,
+          "alpha": 0.2,
+          "parallax": 0.3
+        },
+        "rim": "rgba(170,100,85,0.9)",
+        "rimLight": "rgba(200,135,115,0.92)"
+      }
     },
     {
-      "id": "paru", "name": "Paru Kristal", "thumb": "assets/sprites/arena_paru.png",
-      "organ": { "name": "Paru-paru", "system": "Saluran Napas", "condition": "Kantung udara saat demam & alergi — aliran napas naik-turun" },
-      "unlock": { "type": "bestWave", "value": 8 },
-      "bonus": { "desc": "Gerak +8%, magnet +20%", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.08, "magnetMult": 1.2 },
-      "palette": { "top": "#60b0c4", "mid": "#4a92aa", "bot": "#3a7e94", "hex": "#f6fcff", "hexEdge": "#cfe9f2", "vignette": "rgba(20,52,66,0.3)", "props": ["prop_kristal.png", "prop_reef.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ambient": { "density": 0.5, "spacing": 270, "size": 20, "drift": 14, "opacity": 0.13, "parallax": 0.08, "tint": "235,250,255", "shade": "58,126,148" },
-        "pulse": { "bpm": 68, "strength": 0.9, "glowAlpha": 0.045 } }
+      "id": "paru",
+      "name": "Paru Kristal",
+      "thumb": "assets/sprites/arena_paru.png",
+      "organ": {
+        "name": "Paru-paru",
+        "system": "Saluran Napas",
+        "condition": "Jaringan spons merah muda — mengembang-mengempis mengikuti napas"
+      },
+      "unlock": {
+        "type": "bestWave",
+        "value": 8
+      },
+      "bonus": {
+        "desc": "Gerak +8%, magnet +20%",
+        "nutrientMult": 1.0,
+        "partMult": 1.0,
+        "speedMult": 1.08,
+        "magnetMult": 1.2
+      },
+      "palette": {
+        "top": "#d1899c",
+        "mid": "#b4667f",
+        "bot": "#743c55",
+        "hex": "#fbeef0",
+        "hexEdge": "#e3aec0",
+        "vignette": "rgba(90,30,50,0.3)",
+        "props": [
+          "prop_cell.png",
+          "prop_dots.png"
+        ],
+        "cornerWeed": "assets/sprites/deco_weed_big.png",
+        "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": {
+          "density": 0.5,
+          "spacing": 270,
+          "size": 20,
+          "drift": 14,
+          "opacity": 0.13,
+          "parallax": 0.08,
+          "tint": "255,230,238",
+          "shade": "170,90,110"
+        },
+        "pulse": {
+          "bpm": 68,
+          "strength": 1.0,
+          "glowAlpha": 0.045
+        },
+        "bubbles": {
+          "c1": "rgba(255,235,240,0.10)",
+          "c2": "rgba(255,220,230,0.16)"
+        },
+        "element": {
+          "type": "breath",
+          "color": "255,200,215",
+          "color2": "220,130,155",
+          "breathSec": 4,
+          "density": 0.5,
+          "spacing": 280,
+          "size": 22,
+          "speed": 1,
+          "alpha": 0.16,
+          "parallax": 0.3
+        },
+        "rim": "rgba(190,120,140,0.9)",
+        "rimLight": "rgba(215,150,170,0.92)"
+      }
     },
     {
-      "id": "saraf", "name": "Sumbu Saraf", "thumb": "assets/sprites/arena_saraf.png",
-      "organ": { "name": "Jaringan Saraf", "system": "Sistem Saraf", "condition": "Serabut saraf saat klimaks — sinyal berdenyut cepat, tegang" },
-      "unlock": { "type": "bossKills", "value": 2 },
-      "bonus": { "desc": "Drop bagian evolusi +50%", "nutrientMult": 1.0, "partMult": 1.5, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#5e529e", "mid": "#4c4390", "bot": "#342c6e", "hex": "#fcf3d6", "hexEdge": "#e6d7a4", "vignette": "rgba(24,18,54,0.34)", "props": ["prop_kristal.png", "prop_asam.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ambient": { "density": 0.5, "spacing": 260, "size": 22, "drift": 7, "opacity": 0.17, "parallax": 0.08, "tint": "230,225,255", "shade": "52,44,110" },
-        "pulse": { "bpm": 84, "strength": 1.15, "glowAlpha": 0.06 } }
+      "id": "saraf",
+      "name": "Sumbu Saraf",
+      "thumb": "assets/sprites/arena_saraf.png",
+      "organ": {
+        "name": "Jaringan Saraf",
+        "system": "Sistem Saraf",
+        "condition": "Serabut saraf keemasan — sinyal listrik menyambar cepat"
+      },
+      "unlock": {
+        "type": "bossKills",
+        "value": 2
+      },
+      "bonus": {
+        "desc": "Drop bagian evolusi +50%",
+        "nutrientMult": 1.0,
+        "partMult": 1.5,
+        "speedMult": 1.0,
+        "magnetMult": 1.0
+      },
+      "palette": {
+        "top": "#a3904b",
+        "mid": "#7d6f36",
+        "bot": "#4c4322",
+        "hex": "#faf3da",
+        "hexEdge": "#d9c892",
+        "vignette": "rgba(60,50,18,0.32)",
+        "props": [
+          "prop_kristal.png",
+          "prop_dots.png"
+        ],
+        "cornerWeed": "assets/sprites/deco_weed_big.png",
+        "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": {
+          "density": 0.5,
+          "spacing": 260,
+          "size": 22,
+          "drift": 7,
+          "opacity": 0.17,
+          "parallax": 0.08,
+          "tint": "250,240,200",
+          "shade": "130,110,50"
+        },
+        "pulse": {
+          "bpm": 88,
+          "strength": 1.15,
+          "glowAlpha": 0.06
+        },
+        "bubbles": {
+          "c1": "rgba(255,250,220,0.10)",
+          "c2": "rgba(255,240,180,0.16)"
+        },
+        "element": {
+          "type": "spark",
+          "color": "255,240,170",
+          "color2": "255,200,90",
+          "density": 0.4,
+          "spacing": 300,
+          "size": 46,
+          "speed": 3,
+          "alpha": 0.5,
+          "parallax": 0.3
+        },
+        "rim": "rgba(160,145,85,0.9)",
+        "rimLight": "rgba(190,175,115,0.92)"
+      }
+    },
+    {
+      "id": "jantung",
+      "name": "Bilik Jantung",
+      "thumb": "assets/sprites/arena_jantung.png",
+      "organ": {
+        "name": "Jantung",
+        "system": "Sistem Sirkulasi",
+        "condition": "Otot jantung merah tua — pompa darah utama, detak kuat berirama"
+      },
+      "unlock": {
+        "type": "bestWave",
+        "value": 12
+      },
+      "bonus": {
+        "desc": "Darah deras: nutrisi +10%, gerak +5%",
+        "nutrientMult": 1.1,
+        "partMult": 1.0,
+        "speedMult": 1.05,
+        "magnetMult": 1.0
+      },
+      "palette": {
+        "top": "#a52f3d",
+        "mid": "#7c1f2b",
+        "bot": "#4a1118",
+        "hex": "#f6e3d8",
+        "hexEdge": "#d69a86",
+        "vignette": "rgba(70,12,18,0.32)",
+        "props": [
+          "prop_cell.png",
+          "prop_dots.png"
+        ],
+        "cornerWeed": "assets/sprites/deco_weed_big.png",
+        "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": {
+          "density": 0.6,
+          "spacing": 230,
+          "size": 26,
+          "drift": 10,
+          "opacity": 0.17,
+          "parallax": 0.08,
+          "tint": "255,200,190",
+          "shade": "140,40,45"
+        },
+        "pulse": {
+          "bpm": 72,
+          "strength": 1.3,
+          "glowAlpha": 0.06
+        },
+        "bubbles": {
+          "c1": "rgba(255,180,170,0.10)",
+          "c2": "rgba(255,150,140,0.16)"
+        },
+        "element": {
+          "type": "pulsering",
+          "color": "255,150,140",
+          "color2": "255,90,100",
+          "density": 0.4,
+          "spacing": 340,
+          "size": 120,
+          "speed": 90,
+          "alpha": 0.25,
+          "parallax": 0.3
+        },
+        "rim": "rgba(150,70,75,0.9)",
+        "rimLight": "rgba(180,100,105,0.92)"
+      }
     }
   ]
 }
