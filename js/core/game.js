@@ -25,6 +25,7 @@ import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; //
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
 import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4: Modul B
 import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.js'; // R5: Modul C
+import { tagOnHit, cascadeOnDeath } from '../systems/tag-cascade.js'; // R6: Modul D
 import { SkillSystem } from '../systems/skill-system.js';
 
 import { Player } from '../entities/player.js';
@@ -196,6 +197,7 @@ export const game = {
       hazards: [], // Fase 9: genangan toksin (area damage statis)
       pendingBlasts: [], // V2 Phase 5: ledakan tertunda elite VOLATILE (fuse→blast)
       inflamZones: [], // R5 Modul C: zona inflamasi (DoT lantai → cytokine storm)
+      cascadeTimes: [], // R6 Modul D: throttle cascade bersamaan (doc §5.5)
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -985,6 +987,7 @@ export const game = {
   spawnHitFeedback(enemy, damage, died, crit = false) {
     const run = this.run;
     const gf = getGameFeel();
+    tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
     // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
     const dn = gf.damageNumber;
@@ -1310,6 +1313,7 @@ export const game = {
     tutorial.notifyKill();
     passiveOnKill(run, this); // V2 Phase 3: heal Mako / frenzy Neo
     onAntigenKill(run, enemy, this); // R3 Modul A: memori antigen per tipe
+    cascadeOnDeath(this, enemy); // R6 Modul D: tagged mati → rantai opsonisasi
 
     // R4 Modul B: korban TELAN dikonversi resource (heal+fuel di tryDevour) —
     // TANPA drop XP/koin/imu normal (combat doc §3.1). Combo/efek tetap.
@@ -1894,6 +1898,20 @@ export const game = {
         if (e.attackSpriteHint) {
           const ca = getCombat().contactAttack;
           shiverX = Math.sin(time * ca.shiverHz * Math.PI * 2 + e.weavePhase) * ca.shiverAmp;
+        }
+        // R6 Modul D: outline TAG (T1 — feedback lokal saja, tanpa kamera)
+        if (e.cascadeTag) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = '#ffb347';
+          ctx.globalAlpha = 0.55;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.22, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1;
+          ctx.restore();
         }
         // R4 Modul B: ring TELAN — musuh sekarat berdenyut kuning (window aktif)
         if (e.phagoEligible) {

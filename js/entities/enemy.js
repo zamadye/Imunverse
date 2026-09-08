@@ -56,6 +56,10 @@ export class Enemy {
     this.phagoWindowT = 0;
     this.phagoSpent = false;
     this.devoured = false;
+    // R6 Modul D: tag-cascade (opsonisasi) — diisi tagOnHit/cascadeOnDeath
+    this.cascadeTag = false;
+    this.cascadeHopIn = 0;
+    this.cascadeDone = false;
     this.weavePhase = Math.random() * Math.PI * 2;
 
     // Boss: state serangan area berkala

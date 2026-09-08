@@ -12,7 +12,7 @@
       "enabled": true
     },
     "tagCascade": {
-      "enabled": false
+      "enabled": true
     },
     "chemotaxisTrail": {
       "enabled": false
@@ -53,5 +53,17 @@
     "heroSplashDamage": 12,
     "radius": 90,
     "maxZones": 3
+  },
+  "tagCascade": {
+    "radius": 120,
+    "dmgPct": 0.5,
+    "decay": 0.6,
+    "maxHops": 4,
+    "tier3Targets": 3,
+    "hitStopSec": 0.07,
+    "punchZoom": 0.09,
+    "punchDurSec": 0.28,
+    "maxConcurrent": 3,
+    "windowSec": 0.6
   }
 }

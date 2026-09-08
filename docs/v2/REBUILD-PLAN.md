@@ -1,7 +1,7 @@
 # 🔧 IMUNVERSE V2 — REBUILD PLAN
 > Status: 🔄 EKSEKUSI · Basis: BUILD 31a (V2 Phase 0–6 ✅)
 > KEPUTUSAN USER: Q1 = REMAP PENUH campaign ke 6 kondisi kesehatan · Q2 = urutan R1→R2→R3..R7 · Q3 = SEMUA 5 modul dibangun.
-> Progres: R1 ✅ (BUILD 32a) · R2 ✅ (BUILD 33a, e2e-r2 18/18, campaign remap penuh + RIA/Dr. Amara + cutscene dua-lapis) · R3 ✅ (BUILD 34a: Antigen Memory + framework modules.json + telemetry module_trigger) · R4 ✅ (BUILD 35a: Phagocytosis — execute-window HP≤20% 1.8s, telan instan, meter ultimate, e2e-r4 15/15) · R5 ✅ (BUILD 36a: Inflammation Zone — intensity t^1.2, DoT lantai, cytokine storm + splash hero, telegraph kuning→merah, e2e-r5 13/13) · R6 🔜 (Tag-Cascade)
+> Progres: R1 ✅ (BUILD 32a) · R2 ✅ (BUILD 33a, e2e-r2 18/18, campaign remap penuh + RIA/Dr. Amara + cutscene dua-lapis) · R3 ✅ (BUILD 34a: Antigen Memory + framework modules.json + telemetry module_trigger) · R4 ✅ (BUILD 35a: Phagocytosis — execute-window HP≤20% 1.8s, telan instan, meter ultimate, e2e-r4 15/15) · R5 ✅ (BUILD 36a: Inflammation Zone — intensity t^1.2, DoT lantai, cytokine storm + splash hero, telegraph kuning→merah, e2e-r5 13/13) · R6 ✅ (BUILD 37a: Tag-Cascade — tag on-hit, chain 4 hop decay 0.6, T3 hit-stop 70ms + punch-zoom 9% ease-out 280ms, throttle 3/0.6s, e2e-r6 15/15) · R7 🔜 (Chemotaxis Trail)
 > Sumber: `docs/design/imunverse-combat-differentiation-design-doc.md`,
 > `docs/design/imunverse-ux-prioritization-addendum.md`,
 > `docs/design/imunverse-story-narrative-design-doc.md`

@@ -23,6 +23,12 @@ export class Camera {
     this.shakeY = 0;
     this._follows = false;
     this.zoom = 1.16; // Fase 12: karakter lebih besar & jelas di layar
+    // R6 Modul D: layer punch-zoom (doc §5.4) — di ATAS follow/shake,
+    // tidak menggantikan keduanya. punchScale dikalikan ke zoom efektif.
+    this.punchAmp = 0;
+    this.punchDur = 0;
+    this.punchT = 0;
+    this.punchScale = 1;
   }
 
   reset(tx, ty) {
@@ -32,6 +38,9 @@ export class Camera {
     this.shakeX = 0;
     this.shakeY = 0;
     this._follows = true;
+    this.punchAmp = 0;
+    this.punchT = 0;
+    this.punchScale = 1;
   }
 
   /** Follow target dengan exponential smoothing (frame-rate independent). */
@@ -45,6 +54,20 @@ export class Camera {
     const t = 1 - Math.exp(-8 * dt); // smoothing stabil di semua framerate
     this.x += (tx - this.x) * t;
     this.y += (ty - this.y) * t;
+  }
+
+  /**
+   * R6 Modul D (Tag-Cascade): punch-zoom singkat — zoom masuk `amp`
+   * (mis. 0.09 = 9%) lalu meluruh ease-out kembali ke 1 selama `dur` detik
+   * (doc §5.3 T3: 8-10%, 250-300 ms). Punch baru MENIMPA hanya bila lebih
+   * kuat dari sisa punch berjalan (anti mual saat cascade bertumpuk).
+   */
+  punchZoom(amp, dur = 0.28) {
+    const residual = this.punchScale - 1;
+    if (amp <= residual) return;
+    this.punchAmp = amp;
+    this.punchDur = Math.max(0.05, dur);
+    this.punchT = 0;
   }
 
   /**
@@ -66,13 +89,21 @@ export class Camera {
       this.shakeX = 0;
       this.shakeY = 0;
     }
+    // R6: punch-zoom meluruh ease-out kubik → punchScale kembali ke 1
+    if (this.punchAmp > 0) {
+      this.punchT += dt;
+      const pr = Math.min(1, this.punchT / this.punchDur);
+      this.punchScale = 1 + this.punchAmp * Math.pow(1 - pr, 3);
+      if (pr >= 1) { this.punchAmp = 0; this.punchScale = 1; }
+    }
   }
 
   /** Terapkan transform kamera ke ctx (w/h = ukuran viewport CSS px). */
   apply(ctx, w, h) {
     // Fallback transform rata (dipakai layar non-gameplay); gameplay memakai makeProjector().
     ctx.translate(Math.round(w / 2 + this.shakeX), Math.round(h / 2 + this.shakeY));
-    ctx.scale(this.zoom, this.zoom);
+    const z = this.zoom * this.punchScale; // R6: layer punch-zoom
+    ctx.scale(z, z);
     ctx.translate(-this.x, -this.y);
   }
 
@@ -91,7 +122,7 @@ export class Camera {
         const dy = wy - cam.y + cam.shakeY;
         let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
         persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
-        const s = persp * cam.zoom;
+        const s = persp * cam.zoom * cam.punchScale; // R6: layer punch-zoom
         return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS, s, persp };
       },
     };
@@ -107,7 +138,7 @@ export class Camera {
     const dy = wy - this.y + this.shakeY;
     let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
     persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
-    const s = persp * this.zoom;
+    const s = persp * this.zoom * this.punchScale; // R6: layer punch-zoom
     return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS };
   }
 
