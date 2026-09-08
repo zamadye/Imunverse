@@ -5,20 +5,29 @@
  * prop_cell, prop_dots) dan gelembung prosedural yang naik pelan.
  *
  * MAP AGENT (data-driven per-map; scope "MAP" = arena + lingkungan):
- *  - Lapisan paling belakang = AMBIENT (sel darah/dust prosedural,
- *    parallax paling lambat, opacity rendah) — TERPISAH dari partikel
- *    combat foreground (effects-system.js) yang hidup di layer dunia.
- *  - Lapisan ELEMEN KHAS (palette.element): signature visual tiap organ —
- *    aliran limfe, asam lambung, napas paru, sinyal saraf, detak jantung.
- *  - Ritme DETAK JANTUNG (lub-dub) global mengatur "breathing" latar:
- *    sel, bercak map, elemen khas, dan glow naik-turun mengikuti denyut.
- *  - Semua parameter motif-detail (ambient, pulse, element, bubbles, organ)
- *    dibaca dari data/arenas.json → palette; kode ini hanya berisi DEFAULT
- *    fallback sehingga map baru cukup tambah data (lihat
- *    docs/map-environment-schema.md). Tanpa aset baru: murni timer/canvas.
+ *  - Seluruh layar = PERMUKAAN ORGAN tanpa batas (tak ada tambalan/ring):
+ *    dasar jaringan fullscreen + isi anatomi world-anchored mengikuti kamera.
+ *  - Isi tiap organ sesuai anatominya (palette.ground.features): lambung =
+ *    rugae + makanan + kolam asam; paru = bronkiolus + alveoli + kapiler;
+ *    jantung = serat otot + aliran darah; limfe = nodul + limfosit; saraf =
+ *    berkas akson + mielin + sinapsis. Deterministik, tanpa aset baru.
+ *  - Di atas jaringan mengambang materi fluida (ambient/elemen/gelembung) —
+ *    TERPISAH dari partikel combat foreground (effects-system.js).
+ *  - Ritme DETAK JANTUNG (lub-dub) global: glow, bercak, dan isi tanah
+ *    naik-turun mengikuti denyut. Semua parameter motif-detail dibaca dari
+ *    data/arenas.json → palette; kode hanya berisi DEFAULT fallback
+ *    (lihat docs/map-environment-schema.md).
  */
 
 import { drawSprite } from './sprite-loader.js';
+import { PERSP } from './camera.js';
+
+/** Gelapkan/terangkan warna hex "#rrggbb" dengan faktor (clamp 0..255). */
+function hexShade(hex, f) {
+  const n = parseInt(String(hex || '#888888').slice(1), 16);
+  const c = (v) => Math.max(0, Math.min(255, Math.round(v * f)));
+  return `rgb(${c((n >> 16) & 255)},${c((n >> 8) & 255)},${c(n & 255)})`;
+}
 
 function hash2(ix, iy) {
   let h = ix * 374761393 + iy * 668265263;
@@ -56,9 +65,8 @@ function roundHexPath(ctx, cx, cy, R, round) {
 // Palet arena aktif — diganti saat run dimulai lewat setArenaPalette()
 // (dari data/arenas.json). Semua key punya fallback agar aman.
 let PALETTE = {
-  top: '#2b9284', mid: '#23857a', bot: '#1d7268',
-  hex: '#fdf6e3', hexEdge: '#e9dfc0', vignette: 'rgba(16,64,58,0.28)',
-  props: ['prop_reef.png', 'prop_weed.png'],
+  hex: '#e2ecc9', hexEdge: '#b9c795', vignette: 'rgba(24,70,52,0.28)',
+  props: ['prop_weed.png', 'prop_cell.png'],
 };
 
 // DEFAULT fallback bila entri arena di data/arenas.json belum membawa
@@ -115,12 +123,11 @@ function bubblesCfg() {
   return { ...BUBBLE_DEFAULTS, ...(PALETTE.bubbles || {}) };
 }
 
-// DEFAULT tanah clearing (palette.ground) — tint detail tiap organ.
+// DEFAULT tanah organ (palette.ground): bayangan + DAFTAR FITUR anatomi
+// world-anchored. Tipe fitur: blotch|fold|chunk|pool|sacs|thread|flowcell.
 const GROUND_DEFAULTS = {
-  detail: '120,140,120', // triplet rgb sel/serat tanah
-  spotA: '170,205,150',  // triplet rgb bercak tipe 1
-  spotB: '200,220,180',  // triplet rgb bercak tipe 2
-  shade: '50,100,70',    // triplet rgb bayangan + gradasi kedalaman
+  shade: '80,90,80', // triplet rgb bayangan jaringan
+  features: [],      // [] = dasar polos (entri lama tetap jalan)
 };
 
 function groundCfg() {
@@ -140,11 +147,14 @@ export function heartbeat(time, bpm) {
 }
 
 export function drawBackground(ctx, camX, camY, w, h, time) {
-  // ---- dasar gradien air tubuh (warna per arena) ----
+  // ---- dasar JARINGAN ORGAN (fullscreen — tanah tanpa batas) ----
+  // Bukan lagi "dinding + tambalan lantai": seluruh layar = permukaan organ.
+  // Gradien halus memberi kedalaman; isi anatomi (lipatan/makanan/sel)
+  // digambar world-anchored di drawArena3D mengikuti kamera.
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, PALETTE.top);
-  g.addColorStop(0.55, PALETTE.mid);
-  g.addColorStop(1, PALETTE.bot);
+  g.addColorStop(0, hexShade(PALETTE.hex, 1.03));
+  g.addColorStop(0.5, PALETTE.hex || '#e2ecc9');
+  g.addColorStop(1, hexShade(PALETTE.hex, 0.86));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
@@ -445,115 +455,215 @@ function drawBubbleLayer(ctx, camX, camY, w, h, time, parallax, spacing, color, 
 }
 
 /** Arena heksagon cream tempat pertempuran dimulai (pusat dunia = 0,0). */
-/** Sampel titik CLEARING ORGANIK (gumpalan tak beraturan, bukan heksagon). */
-function blobPoints(R, n = 96) {
-  const pts = [];
-  for (let i = 0; i < n; i++) {
-    const t = (i / n) * Math.PI * 2;
-    // wobble deterministik ±8% — bahasa visual "explorer", bukan ring tanding
-    const r = R * (1 + 0.05 * Math.sin(3 * t + 1.7) + 0.03 * Math.sin(5 * t + 0.6));
-    pts.push([Math.cos(t) * r, Math.sin(t) * r]);
-  }
-  return pts;
-}
-
-/** Trace path clearing dunia (cx,cy,R) melewati proyektor P. */
-function traceBlob3D(ctx, P, cx, cy, R) {
-  const pts = blobPoints(R);
-  ctx.beginPath();
-  for (let i = 0; i < pts.length; i++) {
-    const q = P.project(cx + pts[i][0], cy + pts[i][1]);
-    if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
-  }
-  ctx.closePath();
+/** Turunkan posisi kamera dunia dari proyektor (eksak — project mengembalikan s). */
+function cameraOf(P) {
+  const q = P.project(0, 0);
+  return {
+    x: -(q.x - P.w / 2) / q.s,
+    y: -(q.y - P.h / 2) / (q.s * PERSP.YS),
+    s: q.s,
+  };
 }
 
 /**
- * Clearing organik tempat run dimulai (pusat dunia = 0,0) — BUKAN ring
- * arena: gumpalan tanah tak beraturan, tepi berbulu menyatu dinding organ,
- * tanpa dinding/ring keras (eksplorasi bebas — batas gerak memang tak ada).
- * Dipanggil dari game.render SEBELUM entitas, SETELAH latar.
+ * Isi anatomi tanah organ — world-anchored, mengikuti kamera ke mana pun
+ * pemain menjelajah (tak ada tambalan/ring; tanah tak bertepi).
+ * Nama export dipertahankan (dipanggil game.render setelah latar,
+ * sebelum entitas).
  */
 export function drawArena3D(ctx, P, time) {
   const w = P.w, h = P.h;
-  const c = P.project(0, 0);
-  // culling kasar
-  if (c.x < -700 || c.x > w + 700 || c.y < -700 || c.y > h + 900) return;
-  const pcA = pulseCfg();
-  const beatA = heartbeat(time, pcA.bpm) * (pcA.strength || 0);
   const gc = groundCfg();
-
-  // ---- bayangan lembut di bawah clearing (2 lapis offset) ----
-  ctx.fillStyle = `rgba(${gc.shade},0.20)`;
-  traceBlob3D(ctx, P, 0, 30, 296); ctx.fill();
-  ctx.fillStyle = `rgba(${gc.shade},0.22)`;
-  traceBlob3D(ctx, P, 0, 14, 284); ctx.fill();
-
-  // ---- tanah clearing (tint per-map — bukan putih polos) ----
-  ctx.fillStyle = PALETTE.hex || '#faf1dc';
-  traceBlob3D(ctx, P, 0, 0, 270); ctx.fill();
-
-  // ---- isi tanah: ter-clip dalam blob ----
-  ctx.save();
-  traceBlob3D(ctx, P, 0, 0, 270);
-  ctx.clip();
-
-  // gradasi kedalaman: sisi jauh lebih gelap (petunjuk 3D pengganti grid)
-  const far = P.project(0, -260), near = P.project(0, 260);
-  const dg = ctx.createLinearGradient(0, far.y, 0, near.y);
-  dg.addColorStop(0, `rgba(${gc.shade},0.20)`);
-  dg.addColorStop(0.55, `rgba(${gc.shade},0)`);
-  dg.addColorStop(1, 'rgba(255,255,255,0.10)');
-  ctx.fillStyle = dg;
-  ctx.fillRect(0, 0, w, h);
-
-  // bercak organik (tint per-map, bernapas mengikuti denyut)
-  const spots = 26;
-  for (let i = 0; i < spots; i++) {
-    const a = hash2(i * 7 + 1, i * 3 + 2) * Math.PI * 2;
-    const rr = Math.sqrt(hash2(i * 11 + 5, i * 13 + 7)) * (270 * 0.86);
-    const wx = Math.cos(a) * rr, wy = Math.sin(a) * rr;
-    const q = P.project(wx, wy);
-    const srad = 18 + hash2(i + 40, i + 41) * 46;
-    const pulse = 0.75 + 0.25 * Math.sin(time * 0.8 + i * 1.7) + beatA * 0.15;
-    ctx.fillStyle = i % 3 === 0 ? `rgba(${gc.spotA},${(0.16 * pulse).toFixed(3)})` : `rgba(${gc.spotB},${(0.22 * pulse).toFixed(3)})`;
-    ctx.beginPath();
-    ctx.ellipse(q.x, q.y, srad * q.s * pulse, srad * q.s * pulse * 0.58, 0, 0, Math.PI * 2);
-    ctx.fill();
+  const feats = gc.features || [];
+  if (!feats.length) return;
+  const pc = pulseCfg();
+  const beat = heartbeat(time, pc.bpm) * (pc.strength || 0);
+  const cam = cameraOf(P);
+  // kotak pandang dunia + margin (antisipasi variasi perspektif)
+  const mx = (w / 2 + 160) / cam.s;
+  const my = (h / 2 + 160) / (cam.s * PERSP.YS);
+  const vw = { x0: cam.x - mx, x1: cam.x + mx, y0: cam.y - my, y1: cam.y + my };
+  for (let fi = 0; fi < feats.length; fi++) {
+    drawGroundFeature(ctx, P, vw, cam, w, h, time, beat, feats[fi], fi);
   }
+}
 
-  // detail tanah: sel/serat kecil terproyeksi (khas tiap organ)
-  for (let i = 0; i < 44; i++) {
-    const a = hash2(i * 3 + 91, i * 5 - 7) * Math.PI * 2;
-    const rr = Math.sqrt(hash2(i * 7 + 13, i * 11 + 29)) * 250;
-    const q = P.project(Math.cos(a) * rr, Math.sin(a) * rr);
-    const s = (3 + hash2(i + 61, i + 67) * 5) * q.s;
-    ctx.fillStyle = `rgba(${gc.detail},${(0.10 + hash2(i + 71, i + 73) * 0.10).toFixed(3)})`;
-    ctx.beginPath();
-    ctx.ellipse(q.x, q.y, s, s * 0.58, 0, 0, Math.PI * 2);
-    ctx.fill();
+/** Sebar satu definisi fitur ke grid-hash dunia dalam kotak pandang. */
+function drawGroundFeature(ctx, P, vw, cam, w, h, time, beat, f, fi) {
+  if (f.type === 'flowcell') return featFlowField(ctx, P, cam, w, h, time, f, fi);
+  const sp = f.spacing || 300;
+  const dens = f.density == null ? 0.5 : f.density;
+  const ix0 = Math.floor(vw.x0 / sp) - 1, ix1 = Math.floor(vw.x1 / sp) + 1;
+  const iy0 = Math.floor(vw.y0 / sp) - 1, iy1 = Math.floor(vw.y1 / sp) + 1;
+  for (let ix = ix0; ix <= ix1; ix++) {
+    for (let iy = iy0; iy <= iy1; iy++) {
+      const r1 = hash2(ix * 13 + fi * 101 + 7, iy * 17 - fi * 57 - 3);
+      if (r1 > dens) continue;
+      const r2 = hash2(ix * 7 - fi * 31 - 11, iy * 11 + fi * 71 + 5);
+      const r3 = hash2(ix * 5 + fi * 13 + 1, iy * 3 - fi * 17 + 9);
+      const wx = ix * sp + (r1 - 0.5) * sp * 0.7;
+      const wy = iy * sp + (r2 - 0.5) * sp * 0.7;
+      if (f.type === 'blotch') featBlotch(ctx, P, w, h, wx, wy, r1, r2, f, beat);
+      else if (f.type === 'fold') featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
+      else if (f.type === 'chunk') featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
+      else if (f.type === 'pool') featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
+      else if (f.type === 'sacs') featSacs(ctx, P, w, h, wx, wy, time, r1, r2, f);
+      else if (f.type === 'thread') featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f);
+    }
   }
+}
 
-  // tepi berbulu: bayangan dalam lebar (lembut, bukan ring keras)
-  ctx.strokeStyle = `rgba(${gc.shade},0.16)`;
-  ctx.lineWidth = 26;
-  traceBlob3D(ctx, P, 0, 0, 270);
-  ctx.stroke();
-  ctx.restore();
+/** Cek titik layar dalam kanvas + margin (culling murah per fitur). */
+function onScreen(P, w, h, q, m) {
+  return q.x > -m && q.x < w + m && q.y > -m && q.y < h + m;
+}
 
-  // garis napas tepi: tipis + kilau denyut (satu-satunya garis, sangat subtle)
-  ctx.strokeStyle = PALETTE.hexEdge || '#e9dfc0';
-  ctx.globalAlpha = 0.5;
-  ctx.lineWidth = 2;
-  traceBlob3D(ctx, P, 0, 0, 266);
+/** Noda lembut jaringan (mottling dasar). */
+function featBlotch(ctx, P, w, h, wx, wy, r1, r2, f, beat) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 160)) return;
+  const s = (f.size || 70) * (0.6 + r1 * 0.8) * q.s * (1 + beat * 0.1);
+  ctx.fillStyle = `rgba(${r2 > 0.5 ? f.color : (f.color2 || f.color)},${(f.alpha || 0.5).toFixed(3)})`;
+  ctx.beginPath();
+  ctx.ellipse(q.x, q.y, s, s * 0.58, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Lipatan panjang berombak: rugae lambung / serat otot / berkas akson. */
+function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
+  const q0 = P.project(wx, wy);
+  if (!onScreen(P, w, h, q0, 260)) return;
+  const ang = (f.angle || 0) + (r3 - 0.5) * 0.6;
+  const L = f.len || 600, N = 12, amp = f.wave || 70;
+  const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
+  const pts = [];
+  for (let k = 0; k <= N; k++) {
+    const t = k / N - 0.5;
+    const off = Math.sin(t * Math.PI * 2 + r1 * 9) * amp;
+    pts.push(P.project(wx + dx * L * t + nx * off, wy + dy * L * t + ny * off));
+  }
+  const lw = (f.width || 24) * q0.s;
+  ctx.strokeStyle = `rgba(${f.color},${(f.alpha || 0.85).toFixed(3)})`;
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
   ctx.stroke();
-  if (beatA > 0.02) {
-    ctx.globalAlpha = Math.min(0.45, beatA * 0.35);
-    ctx.lineWidth = 5;
-    traceBlob3D(ctx, P, 0, 0, 266);
+  if (f.color2) { // sorot punggung lipatan
+    ctx.strokeStyle = `rgba(${f.color2},0.5)`;
+    ctx.lineWidth = Math.max(1.5, lw * 0.32);
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const x = p.x - lw * 0.18, y = p.y - lw * 0.24;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
     ctx.stroke();
   }
-  ctx.globalAlpha = 1;
+}
+
+/** Gumpalan: makanan / nodul limfe / mielin — 3 lobus + garis tepi + sorot. */
+function featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
+  const bob = Math.sin(time * 1.2 + r1 * 12) * (f.bob || 0);
+  const q = P.project(wx, wy + bob);
+  if (!onScreen(P, w, h, q, 120)) return;
+  const cols = f.colors && f.colors.length ? f.colors : [f.color || '200,200,200'];
+  const col = cols[Math.floor(r3 * cols.length) % cols.length];
+  const s = ((f.size || 28) + (r2 - 0.5) * 2 * (f.var || 0)) * q.s;
+  const sq = 0.72;
+  ctx.fillStyle = `rgba(${col},0.95)`;
+  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(q.x + s * 0.55, q.y + s * 0.2, s * 0.55, s * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(q.x - s * 0.45, q.y + s * 0.3, s * 0.4, s * 0.32, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = `rgba(${f.line || '90,70,60'},0.55)`;
+  ctx.lineWidth = Math.max(1.5, 2.5 * q.s);
+  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * sq, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.ellipse(q.x - s * 0.3, q.y - s * 0.3, s * 0.22, s * 0.16, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+/** Kolam berkilau: asam / darah / cairan — denyut + gelembung mikro. */
+function featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 180)) return;
+  const s = (f.size || 90) * (0.8 + r1 * 0.4) * q.s * (1 + 0.03 * Math.sin(time * 1.5 + r2 * 9));
+  ctx.fillStyle = `rgba(${f.color},0.75)`;
+  ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+  if (f.color2) {
+    ctx.fillStyle = `rgba(${f.color2},0.5)`;
+    ctx.beginPath(); ctx.ellipse(q.x, q.y, s * 0.62, s * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.beginPath(); ctx.ellipse(q.x - s * 0.3, q.y - s * 0.18, s * 0.18, s * 0.08, 0, 0, Math.PI * 2); ctx.fill();
+  if (f.bubbles) {
+    for (let b = 0; b < 3; b++) {
+      const ba = time * (0.6 + r3 * 0.5) + r1 * 6.28 + b * 2.1;
+      const bx = q.x + Math.cos(ba) * s * 0.4, by = q.y + Math.sin(ba) * s * 0.2;
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(bx, by, Math.max(1.5, s * 0.045), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+
+/** Gugus kantung: alveoli paru — 6 gelembung tembus pandang bernapas. */
+function featSacs(ctx, P, w, h, wx, wy, time, r1, r2, f) {
+  const q = P.project(wx, wy);
+  if (!onScreen(P, w, h, q, 120)) return;
+  const n = f.n || 6;
+  const r = (f.size || 26) * q.s * (0.9 + 0.1 * Math.sin(time * 2 + r1 * 7));
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * Math.PI * 2 + r2 * 3;
+    const d = r * (0.5 + hash2(k * 7 + 1, k * 3 + 5) * 0.6);
+    const rr = r * (0.42 + hash2(k * 11 + 2, k * 13 + 7) * 0.3);
+    ctx.fillStyle = k % 2 ? `rgba(${f.color2 || f.color},0.55)` : `rgba(${f.color},0.55)`;
+    ctx.beginPath(); ctx.arc(q.x + Math.cos(a) * d, q.y + Math.sin(a) * d * 0.7, rr, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+/** Serat melengkung: bronkiolus / kapiler / korda — inti + opsional kedip. */
+function featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
+  const q0 = P.project(wx, wy);
+  if (!onScreen(P, w, h, q0, 220)) return;
+  const ang = (f.angle != null ? f.angle : 0.5) + (r3 - 0.5) * 0.8;
+  const L = (f.len || 350) / 2;
+  const dx = Math.cos(ang), dy = Math.sin(ang);
+  const bow = (r2 - 0.5) * L;
+  const p0 = P.project(wx - dx * L, wy - dy * L);
+  const p1 = P.project(wx - dy * bow, wy + dx * bow);
+  const p2 = P.project(wx + dx * L, wy + dy * L);
+  let a = f.alpha || 0.7;
+  if (f.flicker) a *= 0.35 + 0.65 * Math.abs(Math.sin(time * 7 + r1 * 20));
+  const lw = Math.max(1, (f.width || 4) * q0.s);
+  ctx.strokeStyle = `rgba(${f.color},${a.toFixed(3)})`;
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.quadraticCurveTo(p1.x, p1.y, p2.x, p2.y); ctx.stroke();
+  if (f.color2) {
+    ctx.strokeStyle = `rgba(${f.color2},${(a * 0.8).toFixed(3)})`;
+    ctx.lineWidth = Math.max(1, lw * 0.4);
+    ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.quadraticCurveTo(p1.x, p1.y, p2.x, p2.y); ctx.stroke();
+  }
+}
+
+/** Medan sel HANYUT: darah / limfosit / kimus — mengalir searah + pudar tepi. */
+function featFlowField(ctx, P, cam, w, h, time, f, fi) {
+  const N = f.count || 20, sp = f.span || 700;
+  const dl = Math.hypot(f.dx == null ? 1 : f.dx, f.dy == null ? 0.2 : f.dy) || 1;
+  const ux = (f.dx == null ? 1 : f.dx) / dl, uy = (f.dy == null ? 0.2 : f.dy) / dl;
+  // jendela mengikuti kamera (snap) — pola periodik span jadi tak terlihat pop
+  const snx = Math.round(cam.x / sp) * sp, sny = Math.round(cam.y / sp) * sp;
+  for (let k = 0; k < N; k++) {
+    const r1 = hash2(k * 3 + 1, fi * 7 + 2), r2 = hash2(k * 5 + 3, fi * 11 + 4);
+    const u = ((((r1 * sp + time * (f.speed || 20)) % sp) + sp) % sp) - sp / 2;
+    const v = (r2 - 0.5) * sp * 0.8;
+    const fade = Math.sin((Math.PI * (u + sp / 2)) / sp);
+    const av = Math.cos((Math.PI * v) / (sp * 0.8));
+    const a = (f.alpha || 0.8) * Math.max(0, fade) * Math.max(0, av);
+    if (a < 0.03) continue;
+    const q = P.project(snx + ux * u - uy * v, sny + uy * u + ux * v);
+    if (!onScreen(P, w, h, q, 20)) continue;
+    ctx.fillStyle = `rgba(${f.color},${a.toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1.5, (f.size || 6) * q.s * 0.5), 0, Math.PI * 2); ctx.fill();
+  }
 }
 
 
