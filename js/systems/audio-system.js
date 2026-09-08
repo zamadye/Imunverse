@@ -153,6 +153,13 @@ class AudioSystem {
     [523, 659, 784].forEach((f, i) => this._tone(f, 0.12, { type: 'triangle', vol: 0.14, delay: i * 0.07 }));
   }
 
+  /** V2 Phase 1: detak jantung saat HP kritis (<30%) — tensi terasa. */
+  heartbeat() {
+    if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    this._tone(62, 0.1, { type: 'sine', vol: 0.22, slideTo: 44 });
+    this._tone(58, 0.09, { type: 'sine', vol: 0.16, slideTo: 40, delay: 0.16 });
+  }
+
   bossSpawn() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
     this._tone(110, 0.6, { type: 'sawtooth', vol: 0.2, slideTo: 50 });

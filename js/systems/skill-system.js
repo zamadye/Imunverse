@@ -5,9 +5,13 @@
  * dieksekusi executor di bawah — TIDAK ada logika hero yang di-hardcode.
  */
 
-import { getData } from '../core/data-store.js';
+import { getData, getGameFeel } from '../core/data-store.js';
+import { buzz } from './haptics.js'; // V2 Phase 1
 import { audio } from './audio-system.js';
 import { emit } from '../core/ui-bridge.js';
+import { tryDevour } from './phagocytosis.js'; // R4: Modul B
+import { spawnInflamZone } from './inflammation.js'; // R5: Modul C
+import { chemoActivate } from './chemotaxis.js'; // R7: Modul E
 import { t as tr } from '../systems/i18n.js';
 
 export class SkillSystem {
@@ -48,9 +52,21 @@ export class SkillSystem {
     s.cdLeft = s.def.cooldown;
     const run = ctx.game.run;
     for (const fx of s.def.effects) this.#apply(fx, ctx, run);
+    // R7 Modul E: skill gerak/buff-diri meninggalkan jejak sinyal kemotaksis
+    if (s.def.effects.some((fx) => fx.kind === 'dash' || fx.kind === 'buff_self')) {
+      chemoActivate(ctx.game);
+    }
     ctx.player.squash = 0.16;
-    ctx.camera?.addShake(0.2);
-    ctx.game.hitStopRun(0.05);
+    // V2 Phase 1: ULTIMATE cast lebih "berat" — hit-stop & shake dari gamefeel.json
+    if (s.ult) {
+      const gf = getGameFeel();
+      ctx.camera?.addShake(gf.shake.ultCast);
+      ctx.game.hitStopRun(gf.hitStop.ult);
+      buzz('levelup'); // pola selebrasi pendek utk momen ult
+    } else {
+      ctx.camera?.addShake(0.2);
+      ctx.game.hitStopRun(0.05);
+    }
     audio.ability(s.ult ? 'petir' : 'tebasan');
     this.lastBanner = tr(s.def.name);
     emit('abilityBanner', { name: tr(s.def.name), color: s.def.color, ult: s.ult });
@@ -82,6 +98,25 @@ export class SkillSystem {
           if (fx.stun) e.frozen = Math.max(e.frozen, fx.stun);
           if (died) game.onEnemyKilled(e, null);
         }
+        // R5 Modul C: skill area menumpuk INFLAMASI di lantai (bukan di
+        // musuh) — zona DoT yang memanas menuju cytokine storm. Flag OFF
+        // = tidak ada zona (perilaku pra-R5 utuh).
+        spawnInflamZone(game, px, py, fx.radius);
+        break;
+      }
+      case 'devour': {
+        // R4 Modul B: TELAN musuh eligible (window <20% HP) — instan jadi
+        // resource; fallback: strike lama bila tak ada target sekarat.
+        if (tryDevour(game, ctx)) break;
+        const t0 = this.#nearest(ctx);
+        if (t0) {
+          const dmg0 = damage * (fx.mult || 4);
+          effects.spawnSwipe(px, py, Math.atan2(t0.y - py, t0.x - px), 90, 2.2, '#ffe082');
+          const died0 = t0.takeDamage(dmg0);
+          game.spawnHitFeedback(t0, dmg0, died0);
+          if (died0) game.onEnemyKilled(t0, null);
+        }
+        if (fx.heal) player.heal(fx.heal);
         break;
       }
       case 'strike': {

@@ -193,6 +193,15 @@ await page.fill('#auth-username', 'BalanceTester');
   await page.click('#btn-home', { timeout: 4000 });
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 });
   await page.waitForTimeout(600);
+  // R1: progressive disclosure — 4 tile penuh hanya setelah progres cukup;
+  // simulasikan progres penuh lalu render ulang dashboard sebelum cek layout
+  await page.evaluate(() => {
+    const st = window.__IMUNVERSE.STATE.meta.stats;
+    st.totalRuns = Math.max(st.totalRuns, 15); // E1 poin 7: rank kini butuh 15 run
+    st.bestWave = Math.max(st.bestWave, 12);
+    window.__IMUNVERSE.screenManager.show('dashboard');
+  });
+  await page.waitForTimeout(600);
   const layout = await page.evaluate(() => {
     const tiles = [...document.querySelectorAll('#quick-row .quick-tile')];
     const maxH = Math.max(...tiles.map((t) => t.getBoundingClientRect().height));

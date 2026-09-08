@@ -48,7 +48,7 @@ try {
   const cine = await page.evaluate(() => !document.getElementById('cinematic-layer')?.classList.contains('hidden'));
   log('onboarding-cinematic-plays', cine);
   const cineText = await page.evaluate(() => document.getElementById('cine-text')?.textContent || '');
-  log('onboarding-story-text', /Mako|virus/i.test(cineText), cineText.slice(0, 60));
+  log('onboarding-story-text', /RIA|Dr\. Amara|Inang/i.test(cineText), cineText.slice(0, 60));
   await page.click('#cine-skip', { timeout: 3000 });
   await page.waitForTimeout(900);
 
@@ -144,6 +144,8 @@ try {
   log('profile-sound-toggles', snd.musicOn === false && snd.musicLbl === 'MATI' && snd.sfxLbl === 'MATI', JSON.stringify(snd));
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2400);
+  // R2: intro dua-lapis lebih panjang (12.4s) — skip bila muncul agar tidak timeout
+  if (await page.locator('#cine-skip').isVisible().catch(() => false)) { await page.click('#cine-skip'); await page.waitForTimeout(600); }
   await page.waitForFunction(() => (document.querySelector('#screen-dashboard') || document.querySelector('#screen-title'))?.classList.contains('active'), null, { timeout: 10000 });
   if (await page.locator('#screen-title.active').isVisible().catch(() => false)) { await page.click('#btn-title-login', { force: true }); await page.waitForTimeout(500); }
   await page.waitForFunction(() => document.querySelector('#screen-dashboard')?.classList.contains('active'), null, { timeout: 8000 });
@@ -166,7 +168,9 @@ try {
       duo: vis('#duo-evo'), playRow: vis('.play-row'), stats: vis('#dash-stats'),
     };
   });
-  log('home-launcher-clean', launcher.play && launcher.cine && launcher.rank && launcher.account
+  // E1 poin 1+7: minimal-home (totalRuns<3) juga MENYEMBUNYIKAN rank-chip —
+  // fokus feel game dulu; rank muncul lagi setelah pemain berpengalaman.
+  log('home-launcher-clean', launcher.play && launcher.cine && !launcher.rank && launcher.account
     && !launcher.dock && !launcher.quick && !launcher.daily && !launcher.duo && !launcher.playRow && !launcher.stats,
     JSON.stringify(launcher));
   await page.screenshot({ path: 'shots/98-home-launcher.png' });
@@ -209,7 +213,8 @@ try {
     n: document.querySelectorAll('.hud-menu2-link').length,
   }));
   log('menu2-opens-left', m2.open && m2.n === 5, JSON.stringify(m2));
-  // klik Shop (Gel.8 > 3) → toast, tetap di gameplay (tidak pindah layar)
+  // E1 poin 7: gate dinaikkan — di titik ini totalRuns=1: roster TERBUKA
+  // (menu awal), shop (butuh 5 run) tersembunyi/terkunci → klik shop diblokir
   await page.locator('.hud-menu2-link[data-menu2-screen="shop"]').click({ force: true });
   await page.waitForTimeout(600);
   const stillHud = await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'));

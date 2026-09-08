@@ -28,11 +28,25 @@ export function hide() {
  * Data dari run.skills (data/skills.json) — setiap tombol punya overlay
  * cooldown (gelap + angka sisa detik) & label tombol keyboard 1/2/3.
  */
-const KIND_ICON = {
-  strike: 'icon_bolt', area: 'icon_frost', heal: 'icon_heart', shield_self: 'icon_shield',
-  protect_self: 'icon_shield', buff_self: 'icon_sword', buff_allies: 'icon_squad',
-  mark: 'icon_scope', execute: 'icon_skull', annihilate: 'icon_skull', summon_homing: 'icon_multi',
-  instant_hits: 'icon_sword', dash: 'icon_wind', pull: 'icon_magnet',
+// E1 poin 2: GLYPH SVG BERKARAKTER per jenis skill — bukan ikon PNG generik.
+// Setiap glyph digambar khusus: siluet tebal, satu bentuk ikonik per makna,
+// currentColor supaya otomatis mengikuti warna skill (--sk).
+const KIND_GLYPH = {
+  strike: '<svg viewBox="0 0 24 24"><path d="M13.2 1.6 5 13.4h4.6L8.2 22.4l9.4-12.6h-4.8l2.8-8.2z"/></svg>',
+  area: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.2a9.8 9.8 0 0 1 9.8 9.8h-2.6A7.2 7.2 0 0 0 12 4.8zM2.2 12A9.8 9.8 0 0 1 12 2.2v2.6A7.2 7.2 0 0 0 4.8 12zm9.8 9.8A9.8 9.8 0 0 1 2.2 12h2.6A7.2 7.2 0 0 0 12 19.2zm9.8-9.8A9.8 9.8 0 0 1 12 21.8v-2.6A7.2 7.2 0 0 0 19.2 12z"/></svg>',
+  heal: '<svg viewBox="0 0 24 24"><path d="M12 21.4C7 17.2 2.6 13.6 2.6 9.2 2.6 6 5 3.8 7.8 3.8c1.7 0 3.3.8 4.2 2.1a5.2 5.2 0 0 1 4.2-2.1c2.8 0 5.2 2.2 5.2 5.4 0 4.4-4.4 8-9.4 12.2zm-1.2-12h2.4v2.8H16v2.4h-2.8v2.8h-2.4v-2.8H8v-2.4h2.8z"/></svg>',
+  shield_self: '<svg viewBox="0 0 24 24"><path d="M12 1.8 21 5v6.6c0 5.2-3.6 9.5-9 11-5.4-1.5-9-5.8-9-11V5l9-3.2zm0 3-6 2.1v4.7c0 3.8 2.5 7 6 8.3z"/></svg>',
+  protect_self: '<svg viewBox="0 0 24 24"><path d="M12 1.8 21 5v6.6c0 5.2-3.6 9.5-9 11-5.4-1.5-9-5.8-9-11V5l9-3.2zm-1.6 13.4-3-3 1.7-1.7 1.3 1.3 4.5-4.5 1.7 1.7z"/></svg>',
+  buff_self: '<svg viewBox="0 0 24 24"><path d="M12 2 15 8.2l6.8 1-4.9 4.7 1.2 6.8L12 17.5l-6.1 3.2 1.2-6.8L2.2 9.2l6.8-1z"/></svg>',
+  buff_allies: '<svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="3.1"/><circle cx="17" cy="8" r="3.1"/><path d="M1.6 19.4c0-3 2.4-5.4 5.4-5.4s5.4 2.4 5.4 5.4v1H1.6zm10.9 1v-1c0-1.9-.7-3.6-1.8-4.9a5.4 5.4 0 0 1 11.7 4.9v1z"/></svg>',
+  mark: '<svg viewBox="0 0 24 24"><path d="M12 8.4a3.6 3.6 0 1 1 0 7.2 3.6 3.6 0 0 1 0-7.2zM11 1.6h2v4.2h-2zm0 16.6h2v4.2h-2zM1.6 11h4.2v2H1.6zm16.6 0h4.2v2h-4.2z"/></svg>',
+  execute: '<svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 2.9-1.6 5.5-4 6.9V20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-3.1A8 8 0 0 1 12 2zM9 10.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zm6 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/></svg>',
+  annihilate: '<svg viewBox="0 0 24 24"><path d="M12 1.8 14 7l5.2-2.2L17 10l5.2 2-5.2 2 2.2 5.2L14 17l-2 5.2L10 17l-5.2 2.2L7 14l-5.2-2L7 10 4.8 4.8 10 7z"/></svg>',
+  summon_homing: '<svg viewBox="0 0 24 24"><path d="M3 12c5-7 13-7 18 0-5 7-13 7-18 0zm9-3.4a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8z"/></svg>',
+  instant_hits: '<svg viewBox="0 0 24 24"><path d="m3.4 18.9 8.2-8.2 2 2-8.2 8.2H3.4zM14.8 3.2l2.1 2.1L9.6 12.6l-2.1-2.1zm3.5 3.5 2.3 2.3-2.9 2.9-2.3-2.3zM17 15l4 4-1.7 1.7-4-4z"/></svg>',
+  dash: '<svg viewBox="0 0 24 24"><path d="M2 6.6h9.8v2.4H2zm3 4.2h9.8v2.4H5zm3 4.2h9.8v2.4H8zM15 4l7 8-7 8-1.7-1.7L18.6 13H13v-2h5.6l-5.3-5.3z"/></svg>',
+  pull: '<svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 1 9-9h-2.5A6.5 6.5 0 1 0 12 18.5zm0-5.4L7.5 11h3V4.6h3V11h3z"/></svg>',
+  devour: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2zm0 3.4L8.4 12 12 18.6 15.6 12zM7 9.4a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm10 0a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg>',
 };
 
 export function buildAbilityBar() {
@@ -44,14 +58,14 @@ export function buildAbilityBar() {
   views.forEach((view, i) => {
     const def = getData().skills.skills.find((s) => s.id === view.id);
     const iconKind = def && def.effects[0] ? def.effects[0].kind : 'strike';
-    const icon = `assets/sprites/${KIND_ICON[iconKind] || 'icon_bolt'}.png`;
+    const glyph = KIND_GLYPH[iconKind] || KIND_GLYPH.strike;
     const btn = document.createElement('button');
     btn.className = `ability-btn${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
     btn.style.setProperty('--sk', view.color || '#35d0ba');
     btn.setAttribute('aria-label', view.name);
     btn.innerHTML =
-      `<img class="sk-ico" src="${icon}" alt="" />` +
+      `<span class="sk-ico sk-glyph">${glyph}</span>` +
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
       `<span class="cd-num"></span>` +

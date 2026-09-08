@@ -35,18 +35,14 @@
   {
    "id": "devour",
    "name": "Devour",
-   "description": "Melahap mangsa terdekat: damage besar + pulih 30 HP.",
+   "description": "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Ultimate +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.",
    "cooldown": 20,
    "color": "#d4a017",
    "effects": [
     {
-     "kind": "strike",
-     "mult": 4
-    },
-    {
-     "kind": "heal",
-     "amount": 30,
-     "radius": 0
+     "kind": "devour",
+     "mult": 4,
+     "heal": 30
     }
    ]
   },

@@ -22,6 +22,7 @@ function ensureLayer() {
   layer.innerHTML = `
     <div id="coach-spot"></div>
     <div id="coach-tip" class="coach-tip">
+      <span class="coach-guide" style="display:block;font-size:10px;font-weight:900;color:#2f9c8f;letter-spacing:0.5px">⚡ RIA — RESPONS IMUN ADAPTIF</span>
       <b id="coach-title"></b>
       <p id="coach-text"></p>
       <div class="coach-actions">
@@ -43,25 +44,34 @@ function showStep() {
     next();
     return;
   }
-  // Fase 15: highlight SAJA — jangan scrollIntoView (merusak posisi banner home;
-  // user diarahkan lewat sorotan & tombol lanjut, bukan lompatan layout).
-  target.scrollIntoView({ block: 'nearest', behavior: 'instant' in window ? 'instant' : 'auto' });
-  const sc = target.closest('.dash-scroll');
-  if (sc) sc.scrollTop = 0;
-  // Fase 15: geometri DIKUNCI ke viewport (tanpa scrollIntoView agar banner
-  // home tidak bergeser) — sorotan & tooltip selalu terlihat & bisa diklik.
+  // E1 poin 10: target yang DISEMBUNYIKAN (gate progressive disclosure /
+  // minimal-home) dilewati — jangan menunjuk ruang kosong.
+  const cs = window.getComputedStyle(target);
+  const rect0 = target.getBoundingClientRect();
+  if (cs.display === 'none' || cs.visibility === 'hidden' || (rect0.width === 0 && rect0.height === 0)) {
+    next();
+    return;
+  }
+  // E1 poin 10: scroll target ke tengah viewport DULU, lalu ukur ULANG
+  // rect SETELAH layout stabil (rAF ganda) — bug lama: scrollTop di-reset 0
+  // membatalkan scroll + rect diukur sebelum reflow + clamp paksa → sorotan
+  // meleset dari tombol yang dimaksud.
+  target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+  requestAnimationFrame(() => requestAnimationFrame(() => positionStep(target, s, layer)));
+}
+
+function positionStep(target, s, layer) {
   const raw = target.getBoundingClientRect();
   const vw = window.innerWidth, vh = window.innerHeight;
-  const top = Math.max(10, Math.min(vh - 60, raw.top));
-  const left = Math.max(10, Math.min(vw - 60, raw.left));
+  // Rect murni target — TANPA clamp yang menggeser sorotan; hanya dijaga
+  // agar tetap di dalam viewport bila target lebih besar dari layar.
   const r = {
-    top,
-    left,
-    width: Math.min(raw.width, vw - left - 10),
-    height: Math.min(raw.height, vh - top - 10),
-    bottom: 0,
+    top: raw.top,
+    left: raw.left,
+    width: raw.width,
+    height: raw.height,
+    bottom: raw.top + raw.height,
   };
-  r.bottom = r.top + r.height;
   const spot = document.getElementById('coach-spot');
   spot.style.top = `${r.top - 8}px`;
   spot.style.left = `${r.left - 8}px`;

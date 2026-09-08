@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "doc": "R2: layer naratif dua-lapis (story doc). RIA = pemandu mikro (tutorial+story, 1 sistem). Dr. Amara = suara makro (hanya cutscene). Glossary = terjemahan awam istilah biologi (maks 1 istilah teknis per kalimat dialog).",
+  "guide": {
+    "name": "RIA",
+    "full": "Respons Imun Adaptif",
+    "sprite": "assets/sprites/ria_pose_talk.png"
+  },
+  "doctor": {
+    "name": "Dr. Amara",
+    "sprite": "assets/sprites/amara_pose_talk.png"
+  },
+  "glossary": [
+    {
+      "term": "Makrofag",
+      "plain": "si penjaga yang nelan musuh bulat-bulat"
+    },
+    {
+      "term": "Sel dendritik",
+      "plain": "mata-mata yang ngasih tau lokasi musuh ke pasukan lain"
+    },
+    {
+      "term": "Neutrofil",
+      "plain": "pasukan garis depan, paling cepat sampai lokasi"
+    },
+    {
+      "term": "Antibodi",
+      "plain": "label incar yang ditempel ke musuh biar gampang dihabisin bareng-bareng"
+    },
+    {
+      "term": "Sitokin",
+      "plain": "sinyal darurat yang manggil bala bantuan"
+    },
+    {
+      "term": "Sel T sitotoksik",
+      "plain": "eksekutor yang langsung tumpas musuh yang udah ketahuan"
+    },
+    {
+      "term": "Sel memori",
+      "plain": "yang inget musuh lama — ketemu lagi, langsung lebih jago ngelawannya"
+    },
+    {
+      "term": "Peradangan",
+      "plain": "zona panas — ampuh buat musuh, tapi bahaya kalau kamu masih di situ"
+    },
+    {
+      "term": "Autoimun",
+      "plain": "kondisi langka pasukan salah kenali kawan jadi lawan"
+    }
+  ],
+  "bossBarks": {
+    "bab_demam": "RIA: Itu dia biang demamnya! Raja Flu Mutan — tiap gelombang dia makin ganas. Jangan kasih napas!",
+    "bab_racun": "RIA: Ratu Racun muncul dari sisa makanan semalam. Jaga jarak dari cipratannya — gas!",
+    "bab_alergi": "RIA: Alergen Purba! Ini yang bikin pasukan kita ngamuk sendiri. Tenangkan dia... dengan kekerasan secukupnya.",
+    "bab_kanker": "RIA: Itu dia... Bayang Dalam. Dia bagian dari kita yang salah tumbuh. Maaf, kawan — tapi kita nggak punya pilihan.",
+    "bab_final": "RIA: Mahakrisis. Semua yang pernah kita lawan, jadi satu. Untuk Inang — SERBU!",
+    "default": "RIA: Musuh besar terdeteksi! Fokus, jangan serakah — hit and run!"
+  },
+  "winBarks": [
+    "RIA: Kerja bagus! Suhu Inang turun sedikit — itu gara-gara kamu.",
+    "RIA: Area bersih! Di dunia atas, monitor Inang berdetak lebih tenang.",
+    "RIA: Menang! Satu langkah lagi Inang bisa pulang."
+  ],
+  "loseBarks": [
+    "RIA: Kamu tumbang, tapi belum kalah — sel memori mencatat semuanya. Ronde berikutnya kita lebih jago.",
+    "RIA: Mundur dulu! Inang masih bertahan... tapi jangan biarkan dia menunggu lama.",
+    "RIA: Aduh! Nggak apa-apa — pasukan baru sudah diproduksi. Satu run lagi?"
+  ],
+  "hostHints": {
+    "bab_luka": "Di dunia atas: sebuah plester kecil bergambar kartun ditempel pelan-pelan.",
+    "bab_demam": "Di dunia atas: termometer dibacakan dengan suara yang sengaja diceriakan.",
+    "bab_racun": "Di dunia atas: seseorang menyesal mengizinkan jajan sembarangan kemarin.",
+    "bab_alergi": "Di dunia atas: sebuah boneka usang dipeluk erat di ranjang periksa.",
+    "bab_kanker": "Di dunia atas: Dr. Amara memilih kata-katanya dengan sangat hati-hati kepada dua orang tua muda.",
+    "bab_final": "Di dunia atas: lampu kamar rumah sakit menyala sepanjang malam."
+  }
+}

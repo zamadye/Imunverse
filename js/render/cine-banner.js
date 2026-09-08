@@ -109,6 +109,19 @@ export function startBannerCine(canvas) {
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
 
+  // E1 poin 3: AMBIENCE ORGAN — dunia dalam tubuh yang hidup: sel darah
+  // merah mengalir, plasma dots, dinding pembuluh berdenyut ikut detak
+  // jantung. Ini yang membuat panggung terasa "real imun & organ", bukan
+  // lantai pastel kosong.
+  const rbc = []; // red blood cells drift
+  for (let i = 0; i < 9; i++) {
+    rbc.push({ u: Math.random(), v: 0.12 + Math.random() * 0.76, s: 0.5 + Math.random() * 0.7, sp: 0.35 + Math.random() * 0.5, ph: Math.random() * 7 });
+  }
+  const plasma = [];
+  for (let i = 0; i < 22; i++) {
+    plasma.push({ u: Math.random(), v: Math.random(), r: 0.6 + Math.random() * 1.8, sp: 0.15 + Math.random() * 0.3 });
+  }
+
   // Partikel sederhana
   const parts = [];
   const burst = (x, y, color, n, sp) => {
@@ -127,23 +140,70 @@ export function startBannerCine(canvas) {
     const t = ((now - t0) % LOOP) / LOOP; // 0..1
     const T = t * LOOP; // ms dalam loop
 
-    // lantai pastel
+    // E1 poin 3: INTERIOR PEMBULUH DARAH — gradien organ hangat + detak
+    // jantung (seluruh dunia "berdenyut" halus 72 bpm) = hook biologis nyata.
+    const beat = Math.pow(Math.max(0, Math.sin(now / 833 * Math.PI * 2)), 6); // ~72bpm
     const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#d8ecd0');
-    bg.addColorStop(0.55, '#cfe9df');
-    bg.addColorStop(1, '#bfe3d8');
+    bg.addColorStop(0, mix('#f3d9cf', '#f6c9bd', beat * 0.5));
+    bg.addColorStop(0.5, mix('#eecfc4', '#f0bfb3', beat * 0.5));
+    bg.addColorStop(1, mix('#e2bdb2', '#e6aca0', beat * 0.5));
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
-    // blob dekor latar
-    ctx.globalAlpha = 0.16;
-    blob(ctx, W * 0.12, H * 0.2, H * 0.16, '#a9d795');
-    blob(ctx, W * 0.9, H * 0.72, H * 0.2, '#a9d795');
+    // DINDING PEMBULUH atas & bawah — lengkung organik berdenyut
+    ctx.fillStyle = mix('#d89a8c', '#e08a7a', beat * 0.6);
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    for (let x = 0; x <= W; x += W / 14) {
+      ctx.lineTo(x, H * (0.1 + beat * 0.012) + Math.sin(x / W * 6.3 + now / 900) * H * 0.035);
+    }
+    ctx.lineTo(W, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += W / 14) {
+      ctx.lineTo(x, H * (0.9 - beat * 0.012) + Math.sin(x / W * 6.3 + now / 1100 + 2) * H * 0.035);
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
     ctx.globalAlpha = 1;
+    // SEL DARAH MERAH mengalir (donat bikonkaf khas eritrosit)
+    for (const c of rbc) {
+      c.u += c.sp * 0.0016;
+      if (c.u > 1.1) { c.u = -0.1; c.v = 0.12 + Math.random() * 0.76; }
+      const rx = c.u * W, ry = c.v * H + Math.sin(now / 700 + c.ph) * H * 0.02;
+      const rr = H * 0.055 * c.s;
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = '#e0655a';
+      ctx.beginPath(); ctx.ellipse(rx, ry, rr, rr * 0.72, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#c94f45';
+      ctx.beginPath(); ctx.ellipse(rx, ry, rr * 0.45, rr * 0.3, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // plankton plasma halus
+    ctx.fillStyle = 'rgba(255,246,238,0.5)';
+    for (const pp of plasma) {
+      pp.u += pp.sp * 0.0012;
+      if (pp.u > 1.05) pp.u = -0.05;
+      ctx.beginPath(); ctx.arc(pp.u * W, pp.v * H, pp.r * DPR, 0, Math.PI * 2); ctx.fill();
+    }
+    // vignette organik — fokus mata ke tengah panggung
+    const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+    vg.addColorStop(0, 'rgba(120,40,30,0)');
+    vg.addColorStop(1, 'rgba(120,40,30,0.22)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
 
-    // SCREEN SHAKE saat momen epic
+    // SCREEN SHAKE + PUNCH-ZOOM saat momen epic (E1 poin 3: impact terasa)
     const shake = T > 2350 && T < 2550 ? (2550 - T) / 200 : T > 4450 && T < 4700 ? (4700 - T) / 250 : 0;
-    ctx.setTransform(1, 0, 0, 1, (Math.random() - 0.5) * shake * 10 * DPR, (Math.random() - 0.5) * shake * 10 * DPR);
+    const punch = 1 + shake * 0.045;
+    ctx.setTransform(punch, 0, 0, punch,
+      (Math.random() - 0.5) * shake * 10 * DPR - (punch - 1) * W / 2,
+      (Math.random() - 0.5) * shake * 10 * DPR - (punch - 1) * H / 2);
+    // IMPACT FLASH — frame putih 1-2 frame saat ledakan (bahasa film aksi)
+    if ((T > 2350 && T < 2420) || (T > 4550 && T < 4620)) {
+      ctx.fillStyle = `rgba(255,244,230,${T % 100 < 50 ? 0.32 : 0.12})`;
+      ctx.fillRect(-W, -H, W * 3, H * 3);
+    }
 
     const cx = W * 0.5, cy = H * 0.54;
     const pr = H * 0.21; // radius hero — sinematik

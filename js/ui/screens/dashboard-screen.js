@@ -172,14 +172,10 @@ function renderQuickRow(meta) {
     // F21: gerbang bertahap — tile terkunci menampilkan syarat & toast (buka via main)
     const gate = gateFor('quick', tl.key);
     if (gate && gate.locked) {
-      t.classList.add('gated');
-      t.appendChild(el('span', { class: 'gate-lock', text: `🔒 Gel.${gate.requireWave}` }));
-      t.addEventListener('click', () => {
-        emit('toast', { message: `Capai Gelombang ${gate.requireWave} untuk membuka!`, kind: 'gold' });
-      });
-    } else {
-      t.addEventListener('click', tl.act);
+      // R1: progressive disclosure — tile terkunci TIDAK dirender (muncul saat unlock)
+      continue;
     }
+    t.addEventListener('click', tl.act);
     row.appendChild(t);
   }
 }
@@ -477,8 +473,7 @@ export function show() {
     if (session) {
       chip.classList.remove('hidden');
       chip.querySelector('#account-name').textContent = session.username;
-      chip.querySelector('#account-faction').textContent = faction.name.split(' ')[1] || faction.name;
-      chip.querySelector('#account-faction').style.background = faction.color;
+      // E1 poin 6: tag fraksi dicopot — fokus Imun (elemen #account-faction dihapus)
     } else {
       chip.classList.add('hidden');
     }
@@ -552,6 +547,12 @@ export function show() {
   // F13 dipensiunkan (musuh digambar hidup oleh cine-banner.js) ----
   const stageEnemies = document.getElementById('stage-enemies');
   if (stageEnemies) stageEnemies.textContent = '';
+
+  // E1 poin 1+7: MINIMAL HOME — awal game fokus feel: stage + PLAY + 1-2
+  // menu. Kartu sekunder DISEMBUNYIKAN via CSS (bukan dihapus/lock) dan
+  // muncul bertahap begitu trigger unlock tercapai (progressive disclosure).
+  const scr = document.getElementById('screen-dashboard');
+  if (scr) scr.classList.toggle('minimal-home', (meta.stats.totalRuns || 0) < 3);
 
   renderLeaderboardCard(meta);
   renderBanner(meta); // Fase 13: banner carousel

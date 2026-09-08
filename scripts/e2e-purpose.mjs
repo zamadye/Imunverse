@@ -40,6 +40,13 @@ await page.fill('#auth-username', 'RankTester');
   await page.waitForTimeout(600);
 
   // ---- 1) Chip pangkat tampil + pangkat awal ----
+  // E1 poin 1+7: minimal-home (runs<3) menyembunyikan rank-chip — suite ini
+  // menguji sistem pangkat untuk pemain berpengalaman → simulasikan 3 run.
+  await page.evaluate(() => {
+    window.__IMUNVERSE.STATE.meta.stats.totalRuns = Math.max(window.__IMUNVERSE.STATE.meta.stats.totalRuns, 3);
+    window.__IMUNVERSE.screenManager.show('dashboard');
+  });
+  await page.waitForTimeout(500);
   log('rank-chip-visible', await page.locator('#rank-chip').isVisible());
   const chip0 = await page.evaluate(() => ({
     tier: document.getElementById('rank-tier-name').textContent,

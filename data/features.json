@@ -1,116 +1,110 @@
 {
-  "schemaVersion": 1,
-  "doc": "F21: menu dashboard terbuka bertahap berdasar Gelombang terbaik (bestWave). 0 = selalu terbuka.",
+  "schemaVersion": 2,
+  "doc": "R1+E1: progressive disclosure trigger-based. E1 poin 7: awal game HANYA 1-2 menu (Heroes + Misi) — campaign/rank/pass/shop/dll DISEMBUNYIKAN (bukan lock) sampai trigger tercapai; UI tetap ada di kode.",
   "gates": [
     {
       "target": "dock",
-      "id": "roster",
-      "requireWave": 2
+      "id": "roster"
     },
     {
       "target": "dock",
       "id": "bag",
-      "requireWave": 4
+      "requireRuns": 3
     },
     {
       "target": "dock",
       "id": "upgrade",
-      "requireWave": 6
+      "requireRuns": 3,
+      "requireCurrency": 150
     },
     {
       "target": "dock",
       "id": "shop",
-      "requireWave": 8
+      "requireRuns": 5
+    },
+    {
+      "target": "quick",
+      "id": "quests"
     },
     {
       "target": "quick",
       "id": "daily",
-      "requireWave": 0
+      "requireRuns": 2
     },
     {
       "target": "quick",
       "id": "roster",
-      "requireWave": 2
+      "requireRuns": 3
     },
     {
       "target": "quick",
       "id": "rank",
-      "requireWave": 3
-    },
-    {
-      "target": "quick",
-      "id": "quests",
-      "requireWave": 2
+      "requireRuns": 15
     },
     {
       "target": "quick",
       "id": "bag",
-      "requireWave": 4
+      "requireRuns": 3
     },
     {
       "target": "quick",
       "id": "shop",
-      "requireWave": 8
+      "requireRuns": 5
     },
     {
       "target": "quick",
       "id": "codex",
-      "requireWave": 1
+      "requireWave": 10
     },
     {
       "target": "quick",
       "id": "bp",
-      "requireWave": 6
-    },
-    {
-      "target": "secondary",
-      "id": "codex",
-      "requireWave": 1
-    },
-    {
-      "target": "secondary",
-      "id": "bp",
-      "requireWave": 6
+      "requireRuns": 6
     },
     {
       "target": "secondary",
       "id": "campaign",
-      "requireWave": 0
+      "requireRuns": 3
+    },
+    {
+      "target": "secondary",
+      "id": "codex",
+      "requireWave": 10
+    },
+    {
+      "target": "secondary",
+      "id": "bp",
+      "requireRuns": 6
     },
     {
       "target": "secondary",
       "id": "rank",
-      "requireWave": 0
-    },
-    {
-      "target": "side",
-      "id": "home",
-      "requireWave": 0
+      "requireRuns": 15
     },
     {
       "target": "side",
       "id": "campaign",
-      "requireWave": 0
+      "requireRuns": 3
     },
     {
       "target": "side",
       "id": "codex",
-      "requireWave": 1
+      "requireWave": 10
     },
     {
       "target": "side",
       "id": "bp",
-      "requireWave": 6
+      "requireRuns": 6
     },
     {
       "target": "side",
       "id": "records",
-      "requireWave": 3
+      "requireRuns": 15
     },
     {
       "target": "side",
       "id": "body",
-      "requireWave": 2
+      "requireRuns": 4
     }
   ]
 }

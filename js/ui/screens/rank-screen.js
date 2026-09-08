@@ -78,6 +78,6 @@ export function hide() {}
 
 export function wire() {
   document.getElementById('btn-rank-close').addEventListener('click', () => {
-    screenManager.show('dashboard');
+    if (window.__IMUNVERSE_backToContext) window.__IMUNVERSE_backToContext(); else screenManager.show('dashboard'); // E1 poin 4
   });
 }

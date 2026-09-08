@@ -82,12 +82,8 @@ export class Ally {
     const bob = Math.sin(this.wobble * 2) * 1.5;
     ctx.save();
     ctx.translate(this.x, this.y + bob);
-    // Ring tim (biru muda = sekutu)
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius + 3, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(122, 215, 255, 0.75)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // E1 poin 5: ring neon sekutu DIHAPUS — karakter tampil bersih
+    // (identitas kawan cukup dari sprite & posisi; bayangan dari game.js).
     if (img && img.width) {
       ctx.drawImage(img, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
     } else {

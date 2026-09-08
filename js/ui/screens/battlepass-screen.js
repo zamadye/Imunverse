@@ -86,7 +86,7 @@ export function show() {
 
   if (!wired) {
     wired = true;
-    document.getElementById('btn-bp-back').addEventListener('click', () => screenManager.show('dashboard'));
+    document.getElementById('btn-bp-back').addEventListener('click', () => { if (window.__IMUNVERSE_backToContext) window.__IMUNVERSE_backToContext(); else screenManager.show('dashboard'); }); // E1 poin 4
     buyBtn.addEventListener('click', () => {
       const res = buyPremiumPass(meta);
       if (res.ok) {

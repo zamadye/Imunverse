@@ -71,6 +71,11 @@ const EXTRA_PRELOAD = [
   'assets/sprites/ov_pseudopodia.png',
   'assets/sprites/ov_pedang.png',
   'assets/sprites/ov_inti.png',
+  // E1 poin 8: karakter naratif hidup — pose idle/talk (Dr. Amara & RIA)
+  'assets/sprites/amara_pose_idle.png',
+  'assets/sprites/amara_pose_talk.png',
+  'assets/sprites/ria_pose_idle.png',
+  'assets/sprites/ria_pose_talk.png',
 ];
 
 /**
@@ -144,11 +149,12 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   // sprite dibuat dengan margin — gambar sesuai rasio aslinya
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
 
-  // Flash putih saat kena hit (overlay lingkaran lembut)
+  // Flash saat kena hit (overlay lingkaran lembut; V2 Phase 5: warna bisa
+  // dioverride — merah utk boss enrage)
   if (opts.flash && opts.flash > 0) {
     ctx.globalAlpha = opts.flash * 0.75;
     ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = opts.flashColor || '#ffffff';
     ctx.beginPath();
     ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
     ctx.fill();
@@ -181,6 +187,13 @@ export function getTintedSprite(path, color) {
   g.globalAlpha = 0.45;
   g.fillStyle = color;
   g.fillRect(0, 0, c.width, c.height);
+  // E1 poin 5: soft-light mengisi SELURUH kanvas (termasuk piksel transparan)
+  // → muncul "kotak warna neon" di belakang karakter. Clip ulang ke alpha
+  // sprite asli supaya tint hanya menempel di tubuh karakter.
+  g.globalCompositeOperation = 'destination-in';
+  g.globalAlpha = 1;
+  g.drawImage(entry.image, 0, 0);
+  g.globalCompositeOperation = 'source-over';
   tintCache.set(key, c);
   return c;
 }

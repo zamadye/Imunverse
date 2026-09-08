@@ -6,6 +6,7 @@
 
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
+import { emit } from '../core/ui-bridge.js'; // E1 poin 9
 import { spendImun } from './imun-economy.js';
 
 export function getEconomyConfig() {
@@ -146,5 +147,6 @@ export function purchaseHeroUnlock(meta, heroDef) {
   if (!spendImun(meta, cost)) return { ok: false, reason: 'Imun Coin tidak cukup' };
   meta.unlockedHeroes.push(heroDef.id);
   writeSave(meta); // auto-save setelah unlock
+  emit('heroUnlocked', { heroId: heroDef.id }); // E1 poin 9: Amara menjelaskan
   return { ok: true };
 }

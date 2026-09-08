@@ -34,7 +34,7 @@ export function show() {
         if (focusDef.target) markSeen(focusDef.target); // Bio-Pedia: sistem fokus
         writeSave(meta);
         emit('toast', { message: `Fokus run: ${focusDef.name}` });
-        screenManager.show('dashboard');
+        if (window.__IMUNVERSE_backToContext) window.__IMUNVERSE_backToContext(); else screenManager.show('dashboard'); // E1 poin 4
       });
     }
     list.appendChild(item);
