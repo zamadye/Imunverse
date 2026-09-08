@@ -1,28 +1,42 @@
 {
+  "schemaVersion": 2,
+  "doc": "ARENA AGENT: skema data-driven per-organ. Menambah organ/lokasi baru = tambah 1 entri di array ini (tanpa sentuh kode render). Kunci palette.ambient & palette.pulse opsional — kode memakai default bila absen (backward compatible). Lihat docs/arena-environment-schema.md.",
   "arenas": [
     {
       "id": "limfe", "name": "Saluran Limfe", "thumb": "assets/sprites/arena_limfe.png",
+      "organ": { "name": "Kelenjar Limfe", "system": "Sistem Limfatik", "condition": "Aliran getah bening yang tenang — markas pertahanan tubuh" },
       "unlock": { "type": "default", "value": 0 },
       "bonus": { "desc": "Arena dasar — seimbang", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#2b9284", "mid": "#23857a", "bot": "#1d7268", "hex": "#fdf6e3", "hexEdge": "#e9dfc0", "vignette": "rgba(16,64,58,0.28)", "props": ["prop_reef.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+      "palette": { "top": "#2b9284", "mid": "#23857a", "bot": "#1d7268", "hex": "#fdf6e3", "hexEdge": "#e9dfc0", "vignette": "rgba(16,64,58,0.28)", "props": ["prop_reef.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": { "density": 0.55, "spacing": 250, "size": 26, "drift": 9, "opacity": 0.16, "parallax": 0.08, "tint": "255,255,255", "shade": "16,64,58" },
+        "pulse": { "bpm": 64, "strength": 1.0, "glowAlpha": 0.05 } }
     },
     {
       "id": "lambung", "name": "Lambung Asam", "thumb": "assets/sprites/arena_lambung.png",
+      "organ": { "name": "Lambung", "system": "Saluran Cerna", "condition": "Dinding lambung saat keracunan — asam mengaduk, gelembung gas naik" },
       "unlock": { "type": "totalKills", "value": 150 },
       "bonus": { "desc": "Nutrisi bernilai +15%", "nutrientMult": 1.15, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#d89260", "mid": "#c47f52", "bot": "#96543c", "hex": "#fdf7de", "hexEdge": "#efdfa8", "vignette": "rgba(96,44,20,0.3)", "props": ["prop_asam.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+      "palette": { "top": "#d89260", "mid": "#c47f52", "bot": "#96543c", "hex": "#fdf7de", "hexEdge": "#efdfa8", "vignette": "rgba(96,44,20,0.3)", "props": ["prop_asam.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": { "density": 0.6, "spacing": 230, "size": 24, "drift": 16, "opacity": 0.15, "parallax": 0.08, "tint": "255,236,200", "shade": "150,84,40" },
+        "pulse": { "bpm": 76, "strength": 1.1, "glowAlpha": 0.055 } }
     },
     {
       "id": "paru", "name": "Paru Kristal", "thumb": "assets/sprites/arena_paru.png",
+      "organ": { "name": "Paru-paru", "system": "Saluran Napas", "condition": "Kantung udara saat demam & alergi — aliran napas naik-turun" },
       "unlock": { "type": "bestWave", "value": 8 },
       "bonus": { "desc": "Gerak +8%, magnet +20%", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.08, "magnetMult": 1.2 },
-      "palette": { "top": "#60b0c4", "mid": "#4a92aa", "bot": "#3a7e94", "hex": "#f6fcff", "hexEdge": "#cfe9f2", "vignette": "rgba(20,52,66,0.3)", "props": ["prop_kristal.png", "prop_reef.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+      "palette": { "top": "#60b0c4", "mid": "#4a92aa", "bot": "#3a7e94", "hex": "#f6fcff", "hexEdge": "#cfe9f2", "vignette": "rgba(20,52,66,0.3)", "props": ["prop_kristal.png", "prop_reef.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": { "density": 0.5, "spacing": 270, "size": 20, "drift": 14, "opacity": 0.13, "parallax": 0.08, "tint": "235,250,255", "shade": "58,126,148" },
+        "pulse": { "bpm": 68, "strength": 0.9, "glowAlpha": 0.045 } }
     },
     {
       "id": "saraf", "name": "Sumbu Saraf", "thumb": "assets/sprites/arena_saraf.png",
+      "organ": { "name": "Jaringan Saraf", "system": "Sistem Saraf", "condition": "Serabut saraf saat klimaks — sinyal berdenyut cepat, tegang" },
       "unlock": { "type": "bossKills", "value": 2 },
       "bonus": { "desc": "Drop bagian evolusi +50%", "nutrientMult": 1.0, "partMult": 1.5, "speedMult": 1.0, "magnetMult": 1.0 },
-      "palette": { "top": "#5e529e", "mid": "#4c4390", "bot": "#342c6e", "hex": "#fcf3d6", "hexEdge": "#e6d7a4", "vignette": "rgba(24,18,54,0.34)", "props": ["prop_kristal.png", "prop_asam.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+      "palette": { "top": "#5e529e", "mid": "#4c4390", "bot": "#342c6e", "hex": "#fcf3d6", "hexEdge": "#e6d7a4", "vignette": "rgba(24,18,54,0.34)", "props": ["prop_kristal.png", "prop_asam.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png",
+        "ambient": { "density": 0.5, "spacing": 260, "size": 22, "drift": 7, "opacity": 0.17, "parallax": 0.08, "tint": "230,225,255", "shade": "52,44,110" },
+        "pulse": { "bpm": 84, "strength": 1.15, "glowAlpha": 0.06 } }
     }
   ]
 }
