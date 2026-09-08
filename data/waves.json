@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 2,
+  "waveDuration": 25,
+  "spawnIntervalBase": 1.8,
+  "spawnIntervalMin": 0.4,
+  "spawnIntervalWaveDecay": 0.08,
+  "enemyHPScalePerWave": 0.105,
+  "enemySpeedScalePerWave": 0.015,
+  "enemySpeedScaleMax": 1.6,
+  "bossWaveEvery": 5,
+  "bossHPBonusPerBossIndex": 0.35,
+  "maxAliveEnemies": 130,
+  "spawnPadding": 90,
+  "waveMultipliers": [
+    {
+      "wave": 1,
+      "spawn": 0.85
+    },
+    {
+      "wave": 4,
+      "spawn": 1.0
+    },
+    {
+      "wave": 8,
+      "spawn": 1.2
+    },
+    {
+      "wave": 12,
+      "spawn": 1.4
+    },
+    {
+      "wave": 18,
+      "spawn": 1.6
+    },
+    {
+      "wave": 30,
+      "spawn": 1.9
+    }
+  ],
+  "bossRoster": [
+    "sel_kanker",
+    "toksin_raksasa"
+  ],
+  "explore": {
+    "aggroRadius": 190,
+    "leashRadius": 430,
+    "patrolRadius": 80,
+    "nearNestDist": 230,
+    "farNestDist": 620,
+    "nestsBase": 2,
+    "nestsAddEveryWaves": 4,
+    "nestsMax": 5,
+    "packSize": 3,
+    "packPerWave": 0.45,
+    "minWaveTime": 8
+  },
+  "breakDuration": 2.5,
+  "trickleIntervalMult": 2.2,
+  "elite": {
+    "startWave": 3,
+    "base": 1,
+    "addEveryWaves": 4,
+    "max": 3,
+    "hpMult": 2.6,
+    "radiusMult": 1.25,
+    "affixes": [
+      "brute",
+      "swift",
+      "regen",
+      "volatile"
+    ],
+    "affixParams": {
+      "brute": {
+        "dmgMult": 1.5,
+        "color": "#ff6b6b",
+        "label": "BRUTAL"
+      },
+      "swift": {
+        "speedMult": 1.35,
+        "windup": 0.28,
+        "color": "#5ef2ff",
+        "label": "GESIT"
+      },
+      "regen": {
+        "pctPerSec": 0.02,
+        "color": "#7ae582",
+        "label": "REGEN"
+      },
+      "volatile": {
+        "fuse": 0.5,
+        "radius": 90,
+        "damage": 12,
+        "color": "#ffd93d",
+        "label": "LEDAK"
+      }
+    }
+  },
+  "bossEnrage": {
+    "threshold": 0.4,
+    "speedMult": 1.3,
+    "intervalMult": 0.62,
+    "telegraphMult": 0.85
+  }
+}

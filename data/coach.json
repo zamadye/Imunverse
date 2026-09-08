@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "steps": [
+    {
+      "target": "#btn-play",
+      "title": "GERAK, GIH!",
+      "text": "Tombol gede ini langsung nurunin lo ke medan tempur. Lawan gelombang patogen, selamatkan Inang — satu run cuma beberapa menit."
+    },
+    {
+      "target": ".banner-carousel",
+      "title": "LAYAR PANTAU",
+      "text": "Ini jendela ke dalam tubuh Inang: lo bisa lihat pasukan imun kita beraksi. Menu-menu lain bakal kebuka sendiri seiring lo makin jago."
+    },
+    {
+      "target": "#account-chip",
+      "title": "IDENTITAS LO",
+      "text": "Profil, pengaturan suara, dan bahasa ada di sini. Progres lo otomatis kesimpen tiap habis run."
+    }
+  ]
+}

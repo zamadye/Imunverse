@@ -1,0 +1,28 @@
+{
+  "arenas": [
+    {
+      "id": "limfe", "name": "Saluran Limfe", "thumb": "assets/sprites/arena_limfe.png",
+      "unlock": { "type": "default", "value": 0 },
+      "bonus": { "desc": "Arena dasar — seimbang", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
+      "palette": { "top": "#2b9284", "mid": "#23857a", "bot": "#1d7268", "hex": "#fdf6e3", "hexEdge": "#e9dfc0", "vignette": "rgba(16,64,58,0.28)", "props": ["prop_reef.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+    },
+    {
+      "id": "lambung", "name": "Lambung Asam", "thumb": "assets/sprites/arena_lambung.png",
+      "unlock": { "type": "totalKills", "value": 150 },
+      "bonus": { "desc": "Nutrisi bernilai +15%", "nutrientMult": 1.15, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
+      "palette": { "top": "#d89260", "mid": "#c47f52", "bot": "#96543c", "hex": "#fdf7de", "hexEdge": "#efdfa8", "vignette": "rgba(96,44,20,0.3)", "props": ["prop_asam.png", "prop_weed.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+    },
+    {
+      "id": "paru", "name": "Paru Kristal", "thumb": "assets/sprites/arena_paru.png",
+      "unlock": { "type": "bestWave", "value": 8 },
+      "bonus": { "desc": "Gerak +8%, magnet +20%", "nutrientMult": 1.0, "partMult": 1.0, "speedMult": 1.08, "magnetMult": 1.2 },
+      "palette": { "top": "#60b0c4", "mid": "#4a92aa", "bot": "#3a7e94", "hex": "#f6fcff", "hexEdge": "#cfe9f2", "vignette": "rgba(20,52,66,0.3)", "props": ["prop_kristal.png", "prop_reef.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+    },
+    {
+      "id": "saraf", "name": "Sumbu Saraf", "thumb": "assets/sprites/arena_saraf.png",
+      "unlock": { "type": "bossKills", "value": 2 },
+      "bonus": { "desc": "Drop bagian evolusi +50%", "nutrientMult": 1.0, "partMult": 1.5, "speedMult": 1.0, "magnetMult": 1.0 },
+      "palette": { "top": "#5e529e", "mid": "#4c4390", "bot": "#342c6e", "hex": "#fcf3d6", "hexEdge": "#e6d7a4", "vignette": "rgba(24,18,54,0.34)", "props": ["prop_kristal.png", "prop_asam.png"], "cornerWeed": "assets/sprites/deco_weed_big.png", "cornerReef": "assets/sprites/deco_reef_big.png" }
+    }
+  ]
+}

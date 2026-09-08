@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "doc": "R2: REMAP PENUH — 6 bab = 6 kondisi kesehatan Inang (story doc §5). Organ lama tetap jadi LOKASI (arenaId). Mystery hook: identitas Inang terungkap bertahap lewat story/hostHints.",
+  "chapters": [
+    {
+      "id": "bab_luka",
+      "organ": "Luka Kecil",
+      "title": "Goresan Pertama",
+      "arenaId": "limfe",
+      "killQuota": 25,
+      "boss": null,
+      "bossName": null,
+      "reward": 60,
+      "story": "Inang tergores sesuatu — luka kecil, kata Dr. Amara. Tapi dari dalam sini, itu gerbang raksasa yang terbuka. Bakteri sudah menyusup duluan. Kamu yang paling dekat: gerak!",
+      "objective": "Bersihkan 25 patogen dari jaringan luka"
+    },
+    {
+      "id": "bab_demam",
+      "organ": "Demam Pertama",
+      "title": "Suhu Naik",
+      "arenaId": "paru",
+      "killQuota": 30,
+      "boss": {
+        "id": "virus",
+        "name": "Raja Flu Mutan",
+        "hpMult": 1.0
+      },
+      "reward": 90,
+      "story": "Suhu Inang 38.5 — dokter bilang itu normal, tubuh sedang kerja ekstra. Artinya: sinyal darurat sudah dikirim ke seluruh pasukan. Virus flu terus bermutasi tiap gelombang. Siap-siap.",
+      "objective": "Tahan gelombang flu, tumbangkan Raja Flu Mutan"
+    },
+    {
+      "id": "bab_racun",
+      "organ": "Keracunan",
+      "title": "Makanan Semalam",
+      "arenaId": "lambung",
+      "killQuota": 35,
+      "boss": {
+        "id": "toksin_raksasa",
+        "name": "Ratu Racun",
+        "hpMult": 1.3
+      },
+      "reward": 120,
+      "story": "Ada yang tidak beres dengan makanan Inang semalam. Bakteri pencernaan masuk lebih cepat dan acak dari biasanya — Dr. Amara mulai waspada. Kita hajar di Lambung sebelum menyebar.",
+      "objective": "Basmi bakteri pencernaan, kalahkan Ratu Racun"
+    },
+    {
+      "id": "bab_alergi",
+      "organ": "Alergi Parah",
+      "title": "Musuh dalam Selimut",
+      "arenaId": "paru",
+      "killQuota": 40,
+      "boss": {
+        "id": "spora",
+        "name": "Alergen Purba",
+        "hpMult": 1.65,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
+      "reward": 150,
+      "story": "Kali ini aneh: sebagian pasukan kita sendiri bereaksi berlebihan — menyerang hal yang seharusnya tidak berbahaya. RIA menyebutnya 'musuh dalam selimut'. Tenangkan medan sebelum tubuh melukai dirinya sendiri.",
+      "objective": "Redakan reaksi berlebih, taklukkan Alergen Purba"
+    },
+    {
+      "id": "bab_kanker",
+      "organ": "Ancaman Tersembunyi",
+      "title": "Musuh dari Dalam",
+      "arenaId": "limfe",
+      "killQuota": 45,
+      "boss": {
+        "id": "sel_kanker",
+        "name": "Bayang Dalam",
+        "hpMult": 2.1,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
+      "reward": 200,
+      "story": "Ini... beda. Sel ini bukan penyusup dari luar — dia bagian dari kita yang salah tumbuh, menyamar sebagai sel sehat. Di dunia atas, Dr. Amara menahan suaranya di depan keluarga kecil itu. Keluarga kecil? Jadi Inang kita...",
+      "objective": "Buru sel yang menyamar, hancurkan Bayang Dalam"
+    },
+    {
+      "id": "bab_final",
+      "organ": "Pertahanan Terakhir",
+      "title": "Satu Hari Lagi",
+      "arenaId": "saraf",
+      "killQuota": 50,
+      "boss": {
+        "id": "prion",
+        "name": "Mahakrisis",
+        "hpMult": 2.8,
+        "areaAttack": {
+          "triggerRange": 140,
+          "radius": 90,
+          "interval": 6,
+          "telegraphTime": 1.0,
+          "damage": 14
+        }
+      },
+      "reward": 300,
+      "story": "Kondisi kritis. Semua ancaman yang pernah kamu lawan datang bersamaan, dan monitor di dunia atas berbunyi terlalu cepat. Kamu tidak akan pernah bertemu Inang secara langsung — tapi malam ini, hidupnya ada di tanganmu.",
+      "objective": "Bertahan dari segalanya. Tumbangkan Mahakrisis."
+    }
+  ]
+}
