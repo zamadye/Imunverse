@@ -199,12 +199,21 @@ try {
     return { q: !!document.querySelector('#hud-quests-body .hq-row'), center: getComputedStyle(document.querySelector('.hud-center')).display };
   });
   log('hud25-quests-and-notimer', badgeInfo.q && badgeInfo.center === 'none', JSON.stringify(badgeInfo));
-  // AMBIL quest pertama (klik riil) → tombol berubah '…' (aktif, progres berjalan)
-  const btnAmbil = page.locator('#hud-quests-body .hq-act').first();
-  await btnAmbil.click({ force: true });
-  await page.waitForTimeout(500);
-  const qAfter = await page.evaluate(() => document.querySelector('#hud-quests-body .hq-act')?.textContent);
-  log('quest-manual-claim-flow', qAfter === '…' || qAfter === 'KLAIM' || qAfter === '✓', `label=${qAfter}`);
+  // E2 poin 5: quest AUTO-AKTIF — tanpa tombol AMBIL; tombol hanya muncul
+  // sebagai KLAIM saat quest selesai. Verifikasi: tidak ada tombol AMBIL,
+  // dan quest yang dipaksa selesai memunculkan KLAIM yang bisa diklik.
+  const qFlow = await page.evaluate(async () => {
+    const before = [...document.querySelectorAll('#hud-quests-body .hq-act')].map((b) => b.textContent);
+    const meta = window.__IMUNVERSE.STATE.meta;
+    const { getQuestProgress } = await import('/js/systems/mission-system.js');
+    const q = getQuestProgress(meta).find((x) => !x.claimed);
+    if (q) meta.questState.baseline[q.def.id] = -999999; // paksa done
+    window.__IMUNVERSE_renderQuestPanel();
+    await new Promise((r) => setTimeout(r, 300));
+    const after = [...document.querySelectorAll('#hud-quests-body .hq-act')].map((b) => b.textContent);
+    return { noAmbil: !before.includes('AMBIL'), hasKlaim: after.includes('KLAIM') };
+  });
+  log('quest-auto-active-claim-only', qFlow.noAmbil && qFlow.hasKlaim, JSON.stringify(qFlow));
   // menu 2 kanan-bawah melebar ke kiri: 5 pintu terlihat; Heroes terkunci (Gel.2 > bestWave sim 3? — 3≥2 → terbuka; pakai shop Gel.8 utk uji kunci)
   await page.click('#hud-menu2-toggle', { force: true });
   await page.waitForTimeout(400);

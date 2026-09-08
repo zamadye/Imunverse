@@ -649,6 +649,10 @@ export function show() {
   // Daily/weekly quest aktif: pemain memilih quest, lalu claim reward Antibodi.
   const questBox = el('div', { class: 'active-quests' });
   questBox.appendChild(el('b', { class: 'quest-heading', text: 'Quest Pilihan' }));
+  // E2 poin 5: quest auto-aktif — tanpa tombol AMBIL; tombol hanya KLAIM.
+  for (const q0 of getQuestProgress(meta)) {
+    if (!q0.accepted && !q0.claimed) acceptQuest(meta, q0.def.id);
+  }
   for (const q of getQuestProgress(meta).slice(0, 4)) {
     const pct = Math.round((q.value / q.def.target) * 100);
     const row = el('div', { class: `quest-row${q.claimed ? ' claimed' : ''}` }, [
@@ -659,20 +663,19 @@ export function show() {
       el('small', { class: 'quest-desc', text: `${q.def.desc} · ${q.value}/${q.def.target}` }),
       el('div', { class: 'quest-track' }, [el('i', { style: `width:${pct}%` })]),
     ]);
-    const action = el('button', {
-      class: 'btn btn-sm quest-action',
-      text: q.claimed ? '✓' : (q.accepted ? (q.done ? 'KLAIM' : 'AKTIF') : 'AMBIL'),
-      disabled: q.claimed || (q.accepted && !q.done),
-      onclick: () => {
-        if (!q.accepted) acceptQuest(meta, q.def.id);
-        else {
+    if (q.done && !q.claimed) {
+      row.appendChild(el('button', {
+        class: 'btn btn-sm quest-action',
+        text: 'KLAIM',
+        onclick: () => {
           const reward = claimQuest(meta, q.def.id);
           if (reward) emit('toast', { message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
-        }
-        show();
-      },
-    });
-    row.appendChild(action);
+          show();
+        },
+      }));
+    } else if (q.claimed) {
+      row.appendChild(el('span', { class: 'quest-done-mark', text: '✓' }));
+    }
     questBox.appendChild(row);
   }
   list.appendChild(questBox);

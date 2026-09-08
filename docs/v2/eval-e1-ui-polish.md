@@ -57,3 +57,20 @@ navigasi kontekstual, karakter naratif hidup, tutorial presisi.
   benar-benar terlihat di home minimal (PLAY, layar pantau, akun).
 - Screenshot: `shots/review/e1-home-minimal.png`, `e1-gameplay-final.png`,
   `e1-ria-wave.png`, `e1-amara-unlock.png`.
+
+---
+
+## E2 — Polish Lanjutan (6 poin user, 2026-09-08)
+
+| # | Poin user | Solusi |
+|---|---|---|
+| 1 | XP & profil pindah ke atas | `.hud-hero-status` + `.hud-xp-top` → kiri-atas (blok identitas); chip kill geser; koin/pause tetap kanan-atas |
+| 2 | Menu hero pindah ke bawah dekat skill | `.hud-menu2-toggle` → baris aksi bawah-kanan, kiri grid skill, membuka ke atas |
+| 3 | Ikon serang/skill dari serangan imun NYATA | Riset imunologi: SERANG = antibodi-Y (netralisasi); glyph = perforin+granzim, oxidative burst, opsonisasi (Y menandai target), MAC C5b-9 (cincin 8 subunit), NET (jaring neutrofil), fagositosis (pac-man menelan) |
+| 4 | Video home = karakter game asli, sinematik | cine-banner memuat sprite gameplay (hero_macrophage idle/attack + enemy_virus/bakteri/virion) via drawChar; pose attack saat menembak, musuh gemetar saat kena |
+| 5 | Quest: hapus AMBIL, pertahankan KLAIM | Quest auto-aktif (acceptQuest otomatis); tombol hanya KLAIM emas saat selesai (HUD + dashboard) |
+| 6 | Cinematic kemenangan wave penting | `js/ui/wave-cinematic.js`: 3 babak (diserang → melawan & menang → raksasa bermata merah bangkit), letterbox+shake+shockwave, skip-able; selesai → resume → RIA menyambut. Trigger: wave % bossWaveEvery == 0 |
+
+Verifikasi: `scripts/e2e-e2.mjs` **22 PASS 0 FAIL**; regresi 21 suite semua hijau
+(e2e-onboarding disesuaikan: langkah AMBIL → verifikasi auto-aktif+KLAIM).
+Buster 40a. Screenshot: `shots/review/e2-*.png`.

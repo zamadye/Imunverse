@@ -537,3 +537,38 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-hud .fire-btn { width: 84px; height: 84px; min-height: 84px; }
   #screen-hud .fire-btn img { width: 31px; height: 31px; }
 }
+
+/* ================================================================
+   E2 poin 1 — PROFIL + HP + XP KE KIRI-ATAS (konvensi MOBA:
+   identitas & vital di atas, aksi di bawah). Ditaruh di file ini
+   karena dimuat terakhir — menang kaskade atas rule lama.
+   ================================================================ */
+#screen-hud .hud-hero-status{ top:8px; bottom:auto; left:10px; }
+#screen-hud .hud-xp-top{ top:56px; left:12px; right:auto; }
+#screen-hud .hud-xp-top .hud-xp-track{ width:132px; }
+/* chip kill minggir dari profil; koin/pause tetap kanan
+   (width:auto — rule lama width:100% mendorong sisi kanan keluar layar) */
+#screen-hud .hud-top{ left:210px; right:12px; width:auto; max-width:none; }
+/* minimap & buffs kembali rapat kanan-atas (slot XP lama) */
+#screen-hud .hud-minimap{ top:46px; }
+#screen-hud .hud-buffs{ top:46px; }
+/* panel misi turun sedikit — beri ruang blok profil kiri-atas */
+#screen-hud .hud-quests{ top:56%; }
+
+/* ================================================================
+   E2 poin 2 — MENU HERO (menu2) KE BAWAH: duduk di baris aksi
+   bawah-kanan, di kiri grid skill; membuka ke ATAS.
+   ================================================================ */
+#screen-hud .hud-menu2-toggle{ top:auto; bottom:16px; right:258px; }
+#screen-hud .hud-game-menu2{ top:auto; bottom:72px; right:258px; }
+@media (max-width:700px){
+  #screen-hud .hud-hero-status{ top:6px; left:7px; }
+  #screen-hud .hud-xp-top{ top:50px; left:8px; }
+  #screen-hud .hud-top{ left:180px; right:8px; width:auto; }
+  #screen-hud .hud-menu2-toggle{ bottom:12px; right:212px; width:40px; height:40px; }
+  #screen-hud .hud-game-menu2{ bottom:60px; right:212px; }
+}
+@media (max-width:390px){
+  #screen-hud .hud-menu2-toggle{ right:176px; }
+  #screen-hud .hud-game-menu2{ right:176px; }
+}

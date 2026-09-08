@@ -59,6 +59,7 @@ import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
+import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -166,6 +167,11 @@ function wireUiBridge() {
     if (!body) return;
     try {
       const meta = STATE.meta;
+      // E2 poin 5: quest AKTIF OTOMATIS — tombol AMBIL dihapus (langkah ekstra
+      // tanpa makna); pemain cukup bermain, progres jalan sendiri, lalu KLAIM.
+      for (const q0 of getQuestProgress(meta)) {
+        if (!q0.accepted && !q0.claimed) acceptQuest(meta, q0.def.id);
+      }
       const quests = getQuestProgress(meta).filter((q) => !q.claimed).slice(0, 3);
       let claimable = 0;
       body.textContent = '';
@@ -175,23 +181,21 @@ function wireUiBridge() {
         row.className = 'hq-row';
         row.innerHTML = `<div class="hq-top"><b>${q.def.name}</b><span>${q.value}/${q.def.target}</span></div>
           <div class="hq-bar"><i style="width:${pct}%"></i></div>`;
-        const act = document.createElement('button');
-        act.className = `hq-act${q.done && q.accepted ? ' claim' : ''}`;
-        act.textContent = q.claimed ? '✓' : (q.accepted ? (q.done ? 'KLAIM' : '…') : 'AMBIL');
-        act.disabled = q.claimed || (q.accepted && !q.done);
-        act.addEventListener('click', () => {
-          if (!q.accepted) acceptQuest(meta, q.def.id);
-          else {
+        if (q.done) {
+          // hanya quest SELESAI yang punya tombol — KLAIM emas
+          const act = document.createElement('button');
+          act.className = 'hq-act claim';
+          act.textContent = 'KLAIM';
+          act.addEventListener('click', () => {
             const reward = claimQuest(meta, q.def.id);
             if (reward) showToast({ message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
-          }
-          audio.ui();
-          renderQuestPanel();
-        });
-        row.appendChild(act);
+            audio.ui();
+            renderQuestPanel();
+          });
+          row.appendChild(act);
+          claimable += 1;
+        }
         body.appendChild(row);
-        if (q.done && q.accepted) claimable += 1;
-        if (!q.accepted) claimable += 0; // belum diambil tidak dihitung badge (bijak utk anak)
       }
       badge.textContent = String(claimable);
       badge.classList.toggle('hidden', claimable === 0);
@@ -208,6 +212,22 @@ function wireUiBridge() {
 
   on('waveBreak', ({ wave }) => {
     hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
+    // E2 poin 6: WAVE PENTING (kelipatan boss, mis. 5/10/15) → cinematic
+    // kemenangan 3 babak: diserang → melawan & menang → ancaman lebih besar
+    // muncul. Gameplay dipause, selesai → resume → RIA menyambut.
+    const bossEvery = (getData().waves && getData().waves.bossWaveEvery) || 5;
+    if (wave > 0 && wave % bossEvery === 0) {
+      // playWaveCinematic DULU (set flag aktif) baru pause — supaya handler
+      // on('pause') tahu ini cinematic, bukan modal jeda.
+      playWaveCinematic(wave, () => {
+        game.resume();
+        setTimeout(() => showPresenter('ria',
+          `Luar biasa! Wave ${wave} kita menangkan... tapi kurasakan getaran patogen yang JAUH lebih besar mendekat. Bersiaplah — aku di sini bersamamu!`,
+          { duration: 5.5 }), 350);
+      });
+      game.pause();
+      return;
+    }
     // E1 poin 9: RIA muncul TIAP selesai wave — karakter hidup (pose bicara
     // + gestur), teks di samping, auto-hilang cepat agar ritme tak terganggu.
     const riaBarks = [
@@ -235,7 +255,7 @@ function wireUiBridge() {
 
   on('levelup', (payload) => screenManager.show('levelup', payload));
   on('bosschest', (payload) => screenManager.show('bosschest', payload));
-  on('pause', () => screenManager.show('pause'));
+  on('pause', () => { if (!waveCineActive()) screenManager.show('pause'); }); // E2 poin 6: cinematic wave ≠ modal pause
   on('revive', () => screenManager.show('revive'));
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {

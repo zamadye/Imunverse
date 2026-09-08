@@ -92,10 +92,41 @@ function mix(hex, hex2, k) {
 /**
  * Mulai cinematic di elemen canvas. Aman dipanggil ulang.
  */
+// E2 poin 4: SPRITE GAME ASLI di cinematic home — pemain melihat karakter
+// yang sama dengan yang dimainkan (hero Mako + virus/bakteri musuh nyata),
+// bukan lingkaran abstrak. Dimuat sekali, digambar tiap frame.
+const CINE_SPRITES = {};
+function cineImg(path) {
+  if (!CINE_SPRITES[path]) {
+    const im = new Image();
+    im.src = path;
+    CINE_SPRITES[path] = im;
+  }
+  return CINE_SPRITES[path];
+}
+/** Gambar sprite karakter: berdiri di titik (x, y-tengah), tinggi h, squash napas. */
+function drawChar(ctx, img, x, y, h, squash = 1, flip = false, tilt = 0) {
+  if (!img.complete || !img.naturalWidth) return false;
+  const w = h * (img.naturalWidth / img.naturalHeight);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(tilt);
+  ctx.scale((flip ? -1 : 1) / Math.sqrt(squash), Math.sqrt(squash));
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
+  return true;
+}
+
 export function startBannerCine(canvas) {
   if (!canvas) return;
   if (running) stopBannerCine(); // Fase 15: ganti instance — jangan biarkan start dibatalkan diam-diam
   running = true;
+  // pre-load pemain & musuh (sprite gameplay asli)
+  const HERO_IDLE = cineImg('assets/sprites/hero_macrophage_idle.png');
+  const HERO_ATK = cineImg('assets/sprites/hero_macrophage_attack.png');
+  const VIRUS_A = cineImg('assets/sprites/enemy_virus.png');
+  const VIRUS_B = cineImg('assets/sprites/enemy_bakteri.png');
+  const VIRUS_C = cineImg('assets/sprites/enemy_virion.png');
   const ctx = canvas.getContext('2d');
   const DPR = Math.min(2, window.devicePixelRatio || 1);
 
@@ -285,10 +316,15 @@ export function startBannerCine(canvas) {
       ctx.globalAlpha = 1;
     }
 
-    // ---- HERO ----
+    // ---- HERO: sprite Mako asli — pose attack saat menembak/ultimate ----
     const squash = 1 + Math.sin(now / 260) * 0.04;
-    blob(ctx, px, py, pr, TEAL, squash);
-    face(ctx, px, py, pr, 'happy');
+    const heroAttacking = (T > 1500 && T < 2600) || (T > 4300 && T < 5100);
+    const heroImg = heroAttacking ? HERO_ATK : HERO_IDLE;
+    const heroTilt = T > 2900 && T < 3600 ? Math.sin((T - 2900) / 700 * Math.PI) * 0.18 : 0;
+    if (!drawChar(ctx, heroImg, px, py, pr * 2.3, squash, false, heroTilt)) {
+      blob(ctx, px, py, pr, TEAL, squash); // fallback saat sprite belum termuat
+      face(ctx, px, py, pr, 'happy');
+    }
     // aura charge menjelang ultimate
     if (T > 4000 && T < 4600) {
       const k = (T - 4000) / 600;
@@ -299,13 +335,18 @@ export function startBannerCine(canvas) {
       ctx.globalAlpha = 1;
     }
 
-    // ---- VIRUS ----
-    for (const [v, color] of [[va, RED], [vb, PURPLE], [vc, RED]]) {
+    // ---- VIRUS: sprite musuh gameplay asli (virus, bakteri, virion) ----
+    for (const [v, img, color] of [[va, VIRUS_A, RED], [vb, VIRUS_B, PURPLE], [vc, VIRUS_C, RED]]) {
       if (!v.alive) continue;
       const wob = 1 + Math.sin(now / 170 + v.x) * 0.06;
-      spikeRing(ctx, v.x, v.y, v.r, 9, now / 700, mix(color, '#000000', 0.12));
-      blob(ctx, v.x, v.y, v.r, color, wob);
-      face(ctx, v.x, v.y, v.r, v === va && T > 2100 ? 'ouch' : 'angry');
+      const hurt = v === va && T > 2100; // kena tembak → gemetar
+      const shakeX = hurt ? (Math.random() - 0.5) * 4 * DPR : 0;
+      const tilt = Math.sin(now / 300 + v.y) * 0.08 + (hurt ? (Math.random() - 0.5) * 0.2 : 0);
+      if (!drawChar(ctx, img, v.x + shakeX, v.y, v.r * 2.2, wob, true, tilt)) {
+        spikeRing(ctx, v.x, v.y, v.r, 9, now / 700, mix(color, '#000000', 0.12));
+        blob(ctx, v.x, v.y, v.r, color, wob);
+        face(ctx, v.x, v.y, v.r, hurt ? 'ouch' : 'angry');
+      }
     }
 
     // HP mini di atas musuh
