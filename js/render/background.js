@@ -19,7 +19,7 @@
  *    (lihat docs/map-environment-schema.md).
  */
 
-import { drawSprite } from './sprite-loader.js';
+import { drawSprite, getSprite } from './sprite-loader.js';
 import { PERSP } from './camera.js';
 
 /** Gelapkan/terangkan warna hex "#rrggbb" dengan faktor (clamp 0..255). */
@@ -27,6 +27,52 @@ function hexShade(hex, f) {
   const n = parseInt(String(hex || '#888888').slice(1), 16);
   const c = (v) => Math.max(0, Math.min(255, Math.round(v * f)));
   return `rgb(${c((n >> 16) & 255)},${c((n >> 8) & 255)},${c(n & 255)})`;
+}
+
+/** Gambar canvas (hasil tint) dengan transformasi setara drawSprite. */
+function drawCanvasSpr(ctx, cv, x, y, size, rotation = 0, alpha) {
+  const scale = size / Math.max(cv.width, cv.height);
+  const w = cv.width * scale, h = cv.height * scale;
+  ctx.save();
+  ctx.translate(x, y);
+  if (rotation) ctx.rotate(rotation);
+  if (alpha !== undefined) ctx.globalAlpha = alpha;
+  ctx.drawImage(cv, -w / 2, -h / 2, w, h);
+  ctx.restore();
+}
+
+/** Cache recolor sprite per-map: "path|tint" → canvas (prarender sekali). */
+const recolorCache = new Map();
+
+/** Recolor PENUH mengikuti hue organ (composite 'color': hue+sat dari tint,
+ *  terang-gelap dari sprite — siluet gelap pun ikut hangat). Beda dari
+ *  getTintedSprite (skin tint, terlalu halus untuk siluet gelap). */
+function getRecoloredSprite(path, tint) {
+  const key = `${path}|${tint}`;
+  let cv = recolorCache.get(key);
+  if (cv) return cv;
+  const entry = getSprite(path);
+  cv = document.createElement('canvas');
+  cv.width = entry.width;
+  cv.height = entry.height;
+  const g = cv.getContext('2d');
+  g.drawImage(entry.image, 0, 0);
+  g.globalCompositeOperation = 'color';
+  g.fillStyle = tint;
+  g.fillRect(0, 0, cv.width, cv.height);
+  g.globalCompositeOperation = 'destination-in'; // kunci alpha asli
+  g.drawImage(entry.image, 0, 0);
+  g.globalCompositeOperation = 'source-over';
+  if (recolorCache.size > 24) recolorCache.delete(recolorCache.keys().next().value);
+  recolorCache.set(key, cv);
+  return cv;
+}
+
+/** Sprite properti/dekorasi map: di-recolor mengikuti warna organ (data palette.tint). */
+function drawMapSprite(ctx, path, x, y, size, rotation, opts, kind) {
+  const tint = (PALETTE.tint || {})[kind];
+  if (!tint) return drawSprite(ctx, path, x, y, size, rotation, opts);
+  drawCanvasSpr(ctx, getRecoloredSprite(path, tint), x, y, size, rotation, opts && opts.alpha);
 }
 
 function hash2(ix, iy) {
@@ -65,7 +111,7 @@ function roundHexPath(ctx, cx, cy, R, round) {
 // Palet arena aktif — diganti saat run dimulai lewat setArenaPalette()
 // (dari data/arenas.json). Semua key punya fallback agar aman.
 let PALETTE = {
-  hex: '#e2ecc9', hexEdge: '#b9c795', vignette: 'rgba(24,70,52,0.28)',
+  hex: '#e2ecc9', vignette: 'rgba(24,70,52,0.28)',
   props: ['prop_weed.png', 'prop_cell.png'],
 };
 
@@ -390,7 +436,7 @@ function drawCellLayer(ctx, camX, camY, w, h, time, beat = 0) {
       const size = 150 + r1 * 130;
       // napas ganda: ayunan lambat (lama) + denyut jantung (motif Pulse Cell)
       const pulse = 0.8 + 0.2 * Math.sin(time * 0.7 + r1 * 12) + beat * 0.12;
-      drawSprite(ctx, 'assets/sprites/prop_cell.png', wx, wy, size * pulse, r1 * Math.PI, { alpha: 0.35 + r1 * 0.2 });
+      drawMapSprite(ctx, 'assets/sprites/prop_cell.png', wx, wy, size * pulse, r1 * Math.PI, { alpha: 0.35 + r1 * 0.2 }, 'prop');
     }
   }
 }
@@ -414,7 +460,7 @@ function drawReefLayer(ctx, camX, camY, w, h, parallax, spacing, asset, size, ti
       ctx.save();
       ctx.translate(wx, wy);
       ctx.scale(flip, 1);
-      drawSprite(ctx, `assets/sprites/${asset}`, 0, 0, size * (0.8 + r1 * 0.5), sway);
+      drawMapSprite(ctx, `assets/sprites/${asset}`, 0, 0, size * (0.8 + r1 * 0.5), sway, undefined, 'prop');
       ctx.restore();
     }
   }
@@ -761,12 +807,12 @@ function drawCornerDeco(ctx, w, h, time) {
   // konten (40% bawah kanvas PNG) tampak menempel dari tepi bawah.
   ctx.translate(base * 0.14, h - sizeWeed * 0.5 + base * 0.04);
   ctx.rotate(sway);
-  drawSprite(ctx, weedSpr, 0, 0, sizeWeed, 0, {});
+  drawMapSprite(ctx, weedSpr, 0, 0, sizeWeed, 0, {}, 'corner');
   ctx.restore();
   ctx.save();
   ctx.globalAlpha = 0.85;
   ctx.translate(w - base * 0.16, h - sizeReef * 0.5 + base * 0.03);
   ctx.rotate(sway2);
-  drawSprite(ctx, reefSpr, 0, 0, sizeReef, 0, {});
+  drawMapSprite(ctx, reefSpr, 0, 0, sizeReef, 0, {}, 'corner');
   ctx.restore();
 }

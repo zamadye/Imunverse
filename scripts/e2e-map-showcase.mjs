@@ -19,7 +19,7 @@ const page = await browser.newPage({ viewport: { width: 844, height: 390 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push('PAGEERR: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push('CONSOLE: ' + m.text()); });
-const log = (k, v) => console.log(`${v === true ? 'PASS' : v === false ? 'FAIL' : 'INFO'} ${k}${v === true || v === false ? '' : ' ' + v}`);
+const log = (k, v, d) => console.log(`${v === true ? 'PASS' : v === false ? 'FAIL' : 'INFO'} ${k}${d !== undefined ? ' ' + d : v === true || v === false ? '' : ' ' + v}`);
 const active = (id) => page.evaluate((s) => document.querySelector(s)?.classList.contains('active') || false, id);
 
 async function bootToDashboard() {
@@ -72,6 +72,33 @@ try {
     const got = await page.evaluate(() => window.__IMUNVERSE.game.run.arena.id);
     log(`map-arena-${id}`, got === id, `run.arena=${got}`);
     await page.screenshot({ path: `shots/review/map-${id}.png` });
+    // ---- jelajah jauh: teleport + kamera menyusul, tanah harus ikut ----
+    await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.x += 650; p.y += 420; });
+    await page.waitForTimeout(900);
+    await page.screenshot({ path: `shots/review/map-${id}-roam.png` });
+    const ground = await page.evaluate(() => {
+      const I = window.__IMUNVERSE;
+      const hex = I.game.run.arena.palette.hex || '#e2ecc9';
+      const n = parseInt(hex.slice(1), 16);
+      const base = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      const cv = document.getElementById('game');
+      const g = cv.getContext('2d');
+      const sx = cv.width / 844, sy = cv.height / 390;
+      let ok = 0;
+      for (const [x, y] of [[282, 115], [562, 115], [282, 275], [562, 275]]) {
+        const d = g.getImageData(Math.round(x * sx), Math.round(y * sy), 1, 1).data;
+        if (Math.hypot(d[0] - base[0], d[1] - base[1], d[2] - base[2]) < 70) ok++;
+      }
+      return { ok, hex };
+    });
+    log(`map-roam-ground-${id}`, ground.ok >= 3, `${ground.ok}/4 ~ ${ground.hex}`);
+    // ---- performa: rata-rata frame < 33ms (batas low-end) ----
+    const ms = await page.evaluate(() => new Promise((res) => {
+      const N = 90; let last = performance.now(), sum = 0, n = 0;
+      const fr = (t) => { if (n > 0) sum += t - last; last = t; if (++n < N) requestAnimationFrame(fr); else res(sum / (N - 1)); };
+      requestAnimationFrame(fr);
+    }));
+    log(`map-perf-${id}`, ms < 33, `${ms.toFixed(1)}ms`);
   }
   log('zero-pageerror', errors.length === 0, errors.join(' | ').slice(0, 300));
 } finally {

@@ -60,6 +60,9 @@ const EXTRA_PRELOAD = [
   'assets/sprites/prop_cell.png',
   'assets/sprites/prop_reef.png',
   'assets/sprites/prop_weed.png',
+  'assets/sprites/prop_asam.png', // MAP: properti lambung (data arenas.json)
+  'assets/sprites/prop_kristal.png', // MAP: properti saraf (data arenas.json)
+  'assets/sprites/prop_dots.png', // MAP: properti paru/saraf/jantung (data arenas.json)
   'assets/sprites/fx_hit.png',
   'assets/sprites/fx_joystick_base.png',
   'assets/sprites/fx_joystick_knob.png',

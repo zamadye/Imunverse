@@ -1,7 +1,7 @@
 # Skema Lingkungan Map — data-driven per-map (MAP AGENT)
 
 **Pemilik:** MAP agent (scope "MAP" = arena + lingkungan; nama scope dibedakan dari nama branch) ·
-**Kode:** `js/render/background.js` · **Data:** `data/arenas.json` (`schemaVersion: 5`)
+**Kode:** `js/render/background.js` · **Data:** `data/arenas.json` (`schemaVersion: 6`)
 **Status:** berlaku — menambah map baru = tambah 1 entri JSON, tanpa sentuh kode render.
 
 **Prinsip visual:** seluruh layar = permukaan organ TANPA BATAS. Tak ada tambalan
@@ -17,7 +17,6 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
   "bonus":  { "desc": "…", "nutrientMult": 1.15, "partMult": 1.0, "speedMult": 1.0, "magnetMult": 1.0 },
   "palette": {
     "hex": "#…",                                  // warna dasar jaringan (fullscreen)
-    "hexEdge": "#…",                              // (cadangan) aksen tepi — saat ini tak dipakai
     "vignette": "rgba(…)",                        // vignette layar
     "props": ["prop_asam.png", "prop_weed.png"],  // siluet melayang dalam fluida
     "cornerWeed": "assets/sprites/…",             // dekorasi sudut kiri-bawah
@@ -34,6 +33,7 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
                  "tint": "255,225,190", "shade": "150,70,45" },
     "pulse":   { "bpm": 76, "strength": 1.1, "glowAlpha": 0.055 },
     "bubbles": { "c1": "rgba(…)", "c2": "rgba(…)" },   // tint 2 lapis gelembung
+    "tint": { "prop": "#…", "corner": "#…" },      // tint sprite properti & dekorasi sudut
     "element": { "type": "acid", "color": "215,230,120", "color2": "150,180,70",
                  "density": 0.55, "spacing": 260, "size": 16, "speed": 26,
                  "alpha": 0.2, "parallax": 0.3 }
@@ -41,7 +41,7 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
 }
 ```
 
-**Backward compatible:** `ground`/`ambient`/`pulse`/`element`/`bubbles`/`hexEdge`/
+**Backward compatible:** `ground`/`ambient`/`pulse`/`element`/`bubbles`/`tint`/
 `cornerWeed`/`cornerReef`/`organ` semuanya opsional — kode memakai default bila absen.
 
 ## 2. Lima map: anatomi + isi tanah
@@ -90,6 +90,14 @@ Melayang DI ATAS jaringan (parallax ±0.3), hash-grid deterministik, ≤ ~12 sel
 | `type` | `flow` (limfe) · `acid` (lambung) · `breath` (paru) · `spark` (saraf) · `pulsering` (jantung) · `null` = mati | — |
 | `color` / `color2` | warna utama & sekunder, format `"r,g,b"` | senada map |
 | `density` / `spacing` / `size` / `speed` / `alpha` / `parallax` / `breathSec` | lihat §2.1 + data | alpha ≤ 0.25 |
+
+### Tint sprite properti & dekorasi
+
+`tint = { "prop": "#…", "corner": "#…" }` mewarnai sprite PNG (properti jauh
++ dekorasi sudut) mengikuti warna organ via cache tint `sprite-loader`
+(prarender sekali per map — tanpa biaya per-frame). Absen = sprite original.
+Catatan: `prop_asam`/`prop_kristal`/`prop_dots` wajib di `EXTRA_PRELOAD`
+(`sprite-loader.js`) agar tak jatuh ke placeholder dev.
 
 ## 4. Blok `ambient` — partikel latar prosedural
 
