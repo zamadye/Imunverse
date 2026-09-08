@@ -5,7 +5,9 @@
  */
 
 const MAX_PARTICLES = 400;
-const MAX_EFFECTS = 80;
+// Naik tipis karena setiap hit kini punya impact pulse murah (shape-only),
+// tetap di-cap agar wave padat tidak menekan GC/frame budget.
+const MAX_EFFECTS = 110;
 const MAX_NUMBERS = 40;
 
 export class EffectsSystem {
@@ -86,6 +88,62 @@ export class EffectsSystem {
   spawnSpark(x, y, big = false) {
     if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
     this.effects.push({ type: 'spark', x, y, rot: Math.random() * Math.PI, big, life: 0.16, maxLife: 0.16 });
+  }
+
+  /**
+   * Impact pulse per hit landing: ring + garis radial shape-only.
+   * Tujuan: hit biasa tetap terasa tanpa menunggu kill-pop. Murah untuk
+   * frame budget karena tidak menambah sprite baru atau partikel per objek.
+   */
+  spawnImpact(x, y, color = '#ffffff', opts = {}) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    const big = !!opts.big;
+    const life = big ? 0.24 : 0.18;
+    this.effects.push({
+      type: 'impact', x, y, color,
+      big,
+      crit: !!opts.crit,
+      absorbed: !!opts.absorbed,
+      rot: opts.angle ?? Math.random() * Math.PI * 2,
+      life,
+      maxLife: life,
+    });
+  }
+
+  /**
+   * Micro-buildup skill aktif: ring kontraksi + glyph arc di badan hero.
+   * Sprite hero hanya punya 1 frame idle + 1 frame attack; buildup dibuat
+   * procedural agar tidak berpura-pura ada sprite sheet yang belum diproduksi.
+   */
+  spawnAbilityCharge(x, y, color = '#ffd93d', opts = {}) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    const ult = !!opts.ult;
+    const life = ult ? 0.3 : 0.22;
+    this.effects.push({
+      type: 'abilityCharge', x, y, color,
+      ult,
+      radius: opts.radius || (ult ? 78 : 52),
+      seed: Math.random() * Math.PI * 2,
+      life,
+      maxLife: life,
+    });
+  }
+
+  /** Payoff skill aktif: ring ekspansi + burst kecil di titik cast. */
+  spawnAbilityPayoff(x, y, color = '#ffd93d', opts = {}) {
+    if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
+    const ult = !!opts.ult;
+    const life = ult ? 0.42 : 0.28;
+    this.effects.push({
+      type: 'abilityPayoff', x, y, color,
+      ult,
+      kind: opts.kind || 'skill',
+      radius: opts.radius || (ult ? 112 : 72),
+      seed: Math.random() * Math.PI * 2,
+      life,
+      maxLife: life,
+    });
+    this.spawnBurst(x, y, color, ult ? 18 : 8, ult ? 260 : 150, ult ? 4.8 : 3.2);
   }
 
   /**

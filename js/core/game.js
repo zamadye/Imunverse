@@ -69,7 +69,7 @@ import { drawBackground, drawArena3D, setArenaPalette } from '../render/backgrou
 import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
-  drawKillFx,
+  drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
@@ -991,13 +991,34 @@ export const game = {
   },
 
   /**
-   * Feedback visual per hit: bintang aset fx_hit.png + angka damage mengambang.
+   * Feedback visual per hit: flash sprite + spark + impact pulse + angka.
+   * Kill tetap punya death-pop sendiri; hit biasa kini dapat micro-shake
+   * ter-throttle supaya landing terasa tanpa membuat kamera mual di wave padat.
    */
   spawnHitFeedback(enemy, damage, died, crit = false) {
     const run = this.run;
     const gf = getGameFeel();
     tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
+    const absorbed = !!enemy.lastHitAbsorbed;
+    if (crit && enemy.hitFlash !== undefined) enemy.hitFlash = Math.max(enemy.hitFlash, 0.18);
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
+    run.effects.spawnImpact(enemy.x, enemy.y - enemy.radius * 0.18, absorbed ? '#cfd8e3' : (crit ? gf.crit.color : (enemy.def.color || '#ffffff')), {
+      big: died || crit || enemy.isBoss,
+      crit,
+      absorbed,
+    });
+
+    // Micro shake khusus hit yang BELUM kill. Kill/elite/boss tetap ditangani
+    // di onEnemyKilled agar intensitasnya tidak dobel.
+    if (!died && !absorbed && run.camera && gf.shake) {
+      const now = run.time || 0;
+      const throttle = gf.shake.hitThrottleSec ?? 0.055;
+      if (now - (run.lastHitShakeAt ?? -999) >= throttle) {
+        run.lastHitShakeAt = now;
+        run.camera.addShake(crit ? (gf.shake.critHit ?? 0.09) : (gf.shake.hit ?? 0.035));
+      }
+    }
+
     // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
     const dn = gf.damageNumber;
     let size = dn.base + Math.min(dn.maxBonus, damage * dn.perDamage);
@@ -2112,6 +2133,9 @@ export const game = {
       if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
+      else if (fx.type === 'impact') drawImpactPulse(ctx, fx);
+      else if (fx.type === 'abilityCharge') drawAbilityCharge(ctx, fx, time);
+      else if (fx.type === 'abilityPayoff') drawAbilityPayoff(ctx, fx, time);
       else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
       else if (fx.type === 'killpop') {
         // V2 Phase 1 death pop: sprite musuh membesar 1→scaleTo lalu memudar

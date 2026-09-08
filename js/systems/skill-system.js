@@ -51,7 +51,14 @@ export class SkillSystem {
     if (!s || s.cdLeft > 0) return false;
     s.cdLeft = s.def.cooldown;
     const run = ctx.game.run;
+    const primaryKind = (s.def.effects && s.def.effects[0] && s.def.effects[0].kind) || 'skill';
+    const castColor = s.def.color || ctx.player.heroDef?.color || '#ffd93d';
+    // Frame budget aset: setiap hero hanya punya 1 idle PNG + 1 attack PNG.
+    // Jadi buildup/payoff dibuat sebagai VFX shape procedural singkat, bukan
+    // berpura-pura ada sprite-sheet charge yang belum diproduksi tim art.
+    ctx.effects?.spawnAbilityCharge(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind });
     for (const fx of s.def.effects) this.#apply(fx, ctx, run);
+    ctx.effects?.spawnAbilityPayoff(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind });
     // R7 Modul E: skill gerak/buff-diri meninggalkan jejak sinyal kemotaksis
     if (s.def.effects.some((fx) => fx.kind === 'dash' || fx.kind === 'buff_self')) {
       chemoActivate(ctx.game);

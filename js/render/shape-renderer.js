@@ -237,6 +237,125 @@ export function drawHitSpark(ctx, fx, drawImageFn) {
 }
 
 /**
+ * Impact pulse: ring kompresi per hit landing + 6 garis radial pendek.
+ * Shape-only agar aman pada 100+ entity; memberi "landing moment" sebelum
+ * musuh mati, berbeda dari death-pop/kill-fx.
+ */
+export function drawImpactPulse(ctx, fx) {
+  const t = 1 - fx.life / fx.maxLife;
+  const alpha = Math.max(0, fx.life / fx.maxLife);
+  const big = fx.big || fx.crit;
+  const base = big ? 28 : 19;
+  const r = base * (0.55 + t * (big ? 1.4 : 1.05));
+  const col = fx.absorbed ? '#cfd8e3' : (fx.crit ? '#ff9f43' : fx.color);
+
+  // inner snap flash
+  ctx.globalAlpha = alpha * (big ? 0.42 : 0.26);
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r * 0.34, 0, Math.PI * 2);
+  ctx.fill();
+
+  // expanding ring
+  ctx.globalAlpha = alpha * (big ? 0.95 : 0.72);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = (big ? 4.5 : 3) * alpha + 0.8;
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // radial ticks — terbaca sebagai benturan, bukan sekadar glow statis
+  const ticks = big ? 8 : 6;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = big ? 2.5 : 1.8;
+  for (let i = 0; i < ticks; i++) {
+    const a = fx.rot + (Math.PI * 2 * i) / ticks;
+    const r1 = r * 0.92;
+    const r2 = r * (1.22 + 0.24 * t);
+    ctx.beginPath();
+    ctx.moveTo(fx.x + Math.cos(a) * r1, fx.y + Math.sin(a) * r1);
+    ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/**
+ * Skill charge micro-buildup: cincin mengecil ke badan hero dan arc berputar.
+ * Efek ini menggantikan kebutuhan frame tambahan karena aset sekarang hanya
+ * punya 1 idle PNG + 1 attack PNG per hero.
+ */
+export function drawAbilityCharge(ctx, fx) {
+  const t = 1 - fx.life / fx.maxLife;
+  const alpha = Math.max(0, fx.life / fx.maxLife);
+  const r = fx.radius * (1.08 - t * 0.42);
+  const col = fx.color || '#ffd93d';
+  const pulse = 0.5 + 0.5 * Math.sin((t * 18 + fx.seed) * Math.PI);
+
+  // soft aura menuju pusat
+  const g = ctx.createRadialGradient(fx.x, fx.y, 0, fx.x, fx.y, r * 1.9);
+  g.addColorStop(0, colorWithAlpha(col, (fx.ult ? 0.24 : 0.16) * alpha));
+  g.addColorStop(1, colorWithAlpha(col, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r * 1.9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ring kontraksi
+  ctx.globalAlpha = alpha * (fx.ult ? 0.95 : 0.78);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = fx.ult ? 4 : 2.6;
+  ctx.setLineDash([10, 7]);
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r, fx.seed + t * 3.2, fx.seed + t * 3.2 + Math.PI * 1.72);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // inti putih kecil saat hampir trigger
+  ctx.globalAlpha = alpha * pulse * (fx.ult ? 0.55 : 0.38);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, Math.max(2, r * 0.12), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/** Skill payoff: cincin ekspansi + rays setelah skill aktif terpicu. */
+export function drawAbilityPayoff(ctx, fx) {
+  const t = 1 - fx.life / fx.maxLife;
+  const alpha = Math.max(0, fx.life / fx.maxLife);
+  const col = fx.color || '#ffd93d';
+  const r = fx.radius * (0.25 + t * 0.92);
+
+  ctx.globalAlpha = alpha * (fx.ult ? 0.86 : 0.6);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = (fx.ult ? 7 : 4) * alpha + 1;
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  const rays = fx.ult ? 12 : 8;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = fx.ult ? 3 : 2;
+  for (let i = 0; i < rays; i++) {
+    const a = fx.seed + (Math.PI * 2 * i) / rays + t * (fx.ult ? 0.8 : 0.35);
+    const r1 = r * 0.58;
+    const r2 = r * (0.92 + 0.16 * alpha);
+    ctx.beginPath();
+    ctx.moveTo(fx.x + Math.cos(a) * r1, fx.y + Math.sin(a) * r1);
+    ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha = alpha * (fx.ult ? 0.22 : 0.13);
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.arc(fx.x, fx.y, r * 0.72, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/**
  * Panah penunjuk arah boss di tepi layar bila boss di luar pandangan.
  * camX/camY = posisi kamera; w/h = ukuran viewport CSS.
  */
