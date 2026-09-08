@@ -5,9 +5,62 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getCharacterDesigns, getHero } from '../../core/data-store.js';
 import { getNextEvoStageDef, canEvolve } from '../../systems/evolution-system.js';
 import { el } from '../screen-manager.js';
+
+function appendDesignCollection(evoBox, meta) {
+  const selectedHero = getHero(meta.selectedHero) || getData().heroes.heroes[0];
+  const heroDesign = getCharacterDesigns()?.heroes?.[selectedHero.id];
+  if (!selectedHero || !heroDesign) return;
+  const stages = getData().evolutions.stages || [];
+  const current = Math.max(0, Math.min(4, meta.evoStage || 0));
+  const equityRows = [
+    {
+      stage: 0,
+      label: stages.find((s) => s.stage === 0)?.collectionLabel || 'Stage 0 Polos',
+      name: 'Base Polos',
+      cue: heroDesign.baseCue,
+      color: stages.find((s) => s.stage === 0)?.tierColor || '#9db1a8',
+      cost: {},
+    },
+    ...(heroDesign.equity || []).map((item) => {
+      const st = stages.find((s) => s.stage === item.stage) || {};
+      return {
+        stage: item.stage,
+        label: st.collectionLabel || `Equity ${item.stage}`,
+        name: item.name,
+        cue: item.visualCue,
+        color: item.color || st.tierColor || selectedHero.color,
+        cost: st.cost || {},
+      };
+    }),
+  ];
+
+  evoBox.appendChild(el('div', { class: 'bag-design-panel' }, [
+    el('div', { class: 'bag-design-head' }, [
+      el('span', { class: 'bag-design-kicker', text: 'Character Design Collection' }),
+      el('b', { text: `${selectedHero.name} — Jalur Equity` }),
+      el('small', { text: 'Inventori part di atas sekarang punya konteks visual untuk tiap stage hero.' }),
+    ]),
+    el('div', { class: 'bag-design-list' }, equityRows.map((row) => el('div', {
+      class: `bag-design-row${row.stage === current ? ' active' : ''}${row.stage < current ? ' done' : ''}`,
+      style: `--eq:${row.color};`,
+    }, [
+      el('span', { class: 'bag-design-node', text: String(row.stage) }),
+      el('div', { class: 'bag-design-copy' }, [
+        el('b', { text: `${row.label} · ${row.name}` }),
+        el('span', { text: row.cue || 'Cue visual equity.' }),
+        Object.keys(row.cost).length
+          ? el('small', { text: Object.entries(row.cost).map(([part, need]) => {
+            const partDef = getData().evolutions.parts.find((p) => p.id === part);
+            return `${need}× ${partDef ? partDef.name : part}`;
+          }).join(' + ') })
+          : el('small', { text: 'tanpa part — bentuk dasar/polos' }),
+      ]),
+    ]))),
+  ]));
+}
 
 export function show() {
   const meta = STATE.meta;
@@ -76,6 +129,7 @@ export function show() {
   } else {
     evoBox.appendChild(el('b', { text: 'Evolusi maksimal — Imun Legenda sejati!' }));
   }
+  appendDesignCollection(evoBox, meta);
 }
 
 export function hide() {}

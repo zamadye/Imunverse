@@ -4,7 +4,7 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { getHeroStatus, isPurchasable } from '../../systems/unlock-system.js';
 import { purchaseHeroUnlock } from '../../systems/economy-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
@@ -22,6 +22,47 @@ const PATTERN_LABEL = {
   ranged_pierce: 'Penembus',
   ranged_homing: 'Penjejak',
 };
+
+function rosterEquityCue(heroId, stage) {
+  const designs = getCharacterDesigns();
+  const heroDesign = designs?.heroes?.[heroId];
+  if (!heroDesign) return null;
+  if (stage <= 0) return {
+    stage: 0,
+    color: '#9db1a8',
+    label: 'Polos',
+    cue: heroDesign.baseCue,
+  };
+  const item = (heroDesign.equity || []).find((e) => e.stage === stage)
+    || (heroDesign.equity || [])[Math.max(0, Math.min(stage - 1, (heroDesign.equity || []).length - 1))];
+  const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+  return item ? {
+    stage,
+    color: item.color || stageDef?.tierColor || '#35d0ba',
+    label: stageDef?.collectionLabel || `Equity ${stage}`,
+    cue: item.visualCue || item.name,
+  } : null;
+}
+
+function rosterEquityMini(heroDef, meta) {
+  const stage = Math.max(0, Math.min(4, meta.evoStage || 0));
+  const cue = rosterEquityCue(heroDef.id, stage);
+  if (!cue) return null;
+  const dots = [];
+  for (let i = 1; i <= 4; i++) {
+    const dotCue = rosterEquityCue(heroDef.id, i);
+    dots.push(el('span', {
+      class: `roster-eq-dot${i <= stage ? ' on' : ''}${i === stage ? ' active' : ''}`,
+      style: `--eq:${dotCue?.color || heroDef.color};`,
+      title: dotCue ? `${dotCue.label}: ${dotCue.cue}` : `Equity ${i}`,
+    }));
+  }
+  return el('div', { class: 'roster-equity', title: cue.cue }, [
+    el('span', { class: 'roster-eq-chip', style: `--eq:${cue.color};`, text: cue.label }),
+    el('span', { class: 'roster-eq-dots' }, dots),
+    el('small', { text: cue.cue }),
+  ]);
+}
 
 /** Ubah '#rrggbb' → 'rgba(r,g,b,a)'. */
 function hexAlpha(hex, a) {
@@ -79,6 +120,8 @@ export function show() {
         el('span', { text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }),
         el('span', { class: 'hero-lvl-chip', text: heroLevelBadge(meta, heroDef.id) }),
       ]));
+      const equity = rosterEquityMini(heroDef, meta);
+      if (equity) children.push(equity);
     } else {
       // Badge gembok aset PNG di lingkaran (ala mockup)
       avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));

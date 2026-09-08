@@ -8,7 +8,7 @@
 let wired = false;
 
 import { STATE } from '../../core/state-manager.js';
-import { getData, getHero } from '../../core/data-store.js';
+import { getData, getHero, getCharacterDesigns } from '../../core/data-store.js';
 import { el } from '../screen-manager.js';
 import { isSeen, progress } from '../../systems/codex-system.js';
 import { audio } from '../../systems/audio-system.js';
@@ -52,6 +52,93 @@ function entryById(id) {
   return (getData().codex.entries || []).find((e) => e.id === id);
 }
 
+function enemyFamilyDesign(enemyId) {
+  const designs = getCharacterDesigns();
+  const def = (getData().enemies.enemies || []).find((x) => x.id === enemyId);
+  const family = def?.visualFamily || designs?.pathogens?.enemyMap?.[enemyId] || enemyId;
+  return {
+    family,
+    def,
+    design: designs?.pathogens?.families?.[family] || null,
+    tiers: designs?.pathogens?.mutationTiers || [],
+  };
+}
+
+function appendHeroEquityDesign(box, heroId) {
+  const hero = getHero(heroId);
+  const heroDesign = getCharacterDesigns()?.heroes?.[heroId];
+  if (!hero || !heroDesign) return;
+  const stages = getData().evolutions.stages || [];
+  const rows = [
+    {
+      stage: 0,
+      label: stages.find((s) => s.stage === 0)?.collectionLabel || 'Stage 0 Polos',
+      name: 'Base Polos',
+      cue: heroDesign.baseCue,
+      color: stages.find((s) => s.stage === 0)?.tierColor || '#9db1a8',
+    },
+    ...(heroDesign.equity || []).map((item) => {
+      const st = stages.find((s) => s.stage === item.stage) || {};
+      return {
+        stage: item.stage,
+        label: st.collectionLabel || `Equity ${item.stage}`,
+        name: item.name,
+        cue: `${item.visualCue} · ${item.anatomy}`,
+        color: item.color || st.tierColor || hero.color,
+      };
+    }),
+  ];
+  box.appendChild(el('div', { class: 'cxd-kicker', text: 'Design Equity Hero' }));
+  box.appendChild(el('div', { class: 'cxd-mutation-panel cxd-equity-panel' }, [
+    el('div', { class: 'cxd-family-head' }, [
+      el('b', { text: `${hero.name} — ${heroDesign.archetype || 'immune cell'}` }),
+      el('span', { text: 'Koleksi Bio-Pedia menampilkan bentuk polos sampai Full Equity supaya identitas biologis hero tetap terbaca di luar arena.' }),
+    ]),
+    el('div', { class: 'cxd-tier-grid' }, rows.map((row) => el('div', {
+      class: 'cxd-tier-chip cxd-equity-chip',
+      style: `--tier:${row.color};`,
+      title: row.cue,
+    }, [
+      el('span', { class: 'cxd-tier-no', text: String(row.stage) }),
+      el('b', { text: row.label }),
+      el('small', { text: row.name }),
+      el('em', { text: row.cue }),
+    ]))),
+  ]));
+}
+
+function appendEnemyMutationDesign(box, enemyId) {
+  const { family, design, tiers } = enemyFamilyDesign(enemyId);
+  if (!design || !tiers.length) return;
+  box.appendChild(el('div', { class: 'cxd-kicker', text: 'Design Mutasi Pathogen' }));
+  box.appendChild(el('div', { class: 'cxd-mutation-panel' }, [
+    el('div', { class: 'cxd-family-head' }, [
+      el('b', { text: design.label || family }),
+      el('span', { text: design.baseCue || '' }),
+    ]),
+    el('p', { class: 'cxd-mutation-focus', text: design.mutationFocus || '' }),
+    el('div', { class: 'cxd-tier-grid' }, tiers.map((tier) => {
+      const cue = (design.tierCues || [])[tier.tier] || tier.visualRule || '';
+      return el('div', {
+        class: `cxd-tier-chip tier-${tier.tier}`,
+        style: `--tier:${tier.color || '#ff5d73'};`,
+        title: cue,
+      }, [
+        el('span', { class: 'cxd-tier-no', text: tier.tier === 0 ? '0' : String(tier.tier) }),
+        el('b', { text: tier.label }),
+        el('small', { text: tier.tier <= 0 ? 'base/polos' : `mulai wave ${tier.fromWave || (tier.tier * 4 + 1)}` }),
+        el('em', { text: cue }),
+      ]);
+    })),
+  ]));
+}
+
+function entryDesignTag(e) {
+  if (e.category === 'hero') return 'EQUITY 0–4';
+  if (e.category === 'enemy') return 'MUTASI 0–4';
+  return '';
+}
+
 function renderGrid() {
   const box = document.getElementById('codex-grid');
   if (!box) return;
@@ -72,6 +159,8 @@ function renderGrid() {
       if (seen && src) {
         card.appendChild(el('img', { class: 'codex-img', src: src.img, alt: '' }));
         card.appendChild(el('span', { class: 'codex-name', text: src.name }));
+        const tag = entryDesignTag(e);
+        if (tag) card.appendChild(el('span', { class: 'codex-design-tag', text: tag }));
       } else {
         card.appendChild(el('span', { class: 'codex-q', text: '?' }));
         card.appendChild(el('span', { class: 'codex-name', text: 'Belum ditemukan' }));
@@ -99,6 +188,8 @@ function showDetail(id) {
   box.appendChild(el('p', { class: 'cxd-kid', text: e.funKid || '' }));
   box.appendChild(el('div', { class: 'cxd-kicker', text: 'Tahukah kamu?' }));
   box.appendChild(el('p', { class: 'cxd-fact', text: e.fact || '' }));
+  if (e.category === 'hero') appendHeroEquityDesign(box, id);
+  if (e.category === 'enemy') appendEnemyMutationDesign(box, id);
   // R3 Modul A: encounter record — tier memori antigen tertinggi (collection)
   const agTier = (STATE.meta.antigenRecords || {})[e.id] || 0;
   if (agTier > 0) {

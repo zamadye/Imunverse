@@ -101,7 +101,7 @@ const TRANSLATE_FIELDS = new Set([
   'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
   'question', 'answer', 'text', 'goal', 'tagline', 'funKid', 'fact',
   'baseCue', 'anatomy', 'visualCue', 'collectionNote', 'collectionTag',
-  'collectionLabel', 'visualRule',
+  'collectionLabel', 'visualRule', 'mutationFocus',
 ]);
 
 function cloneMaybeTranslate(v, force) {

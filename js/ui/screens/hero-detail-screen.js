@@ -8,7 +8,7 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el, screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
@@ -19,6 +19,63 @@ import { t as tr } from '../../systems/i18n.js';
 import { masteryInfo } from '../../systems/mastery-system.js'; // V2 Phase 6
 
 let heroId = null;
+
+function renderEquityPathCard(heroDef, currentStage) {
+  const designs = getCharacterDesigns();
+  const heroDesign = designs?.heroes?.[heroDef.id];
+  if (!heroDesign) return null;
+  const evoStages = getData().evolutions.stages || [];
+  const stageMeta = new Map(evoStages.map((s) => [s.stage, s]));
+  const rows = [
+    {
+      stage: 0,
+      label: stageMeta.get(0)?.collectionLabel || 'Stage 0 Polos',
+      name: 'Base Polos',
+      anatomy: 'silhouette dasar',
+      visualCue: heroDesign.baseCue,
+      color: stageMeta.get(0)?.tierColor || '#9db1a8',
+    },
+    ...(heroDesign.equity || []).map((item) => ({
+      ...item,
+      label: stageMeta.get(item.stage)?.collectionLabel || `Equity ${item.stage}`,
+    })),
+  ];
+
+  return el('div', {
+    class: 'card hero-lab-card hl-equity-card',
+    style: `--hero-color:${heroDef.color};`,
+  }, [
+    el('div', { class: 'hl-equity-head' }, [
+      el('div', { class: 'hl-equity-titlewrap' }, [
+        el('b', { class: 'hl-equity-title', text: 'Jalur Design Equity' }),
+        el('span', {
+          class: 'hl-equity-sub',
+          text: 'Stage 0 tetap polos; Equity I–Full Equity membuka cue anatomi unik hero ini.',
+        }),
+      ]),
+      el('span', {
+        class: 'hl-equity-current',
+        text: `Aktif: ${stageMeta.get(currentStage)?.collectionLabel || stageMeta.get(currentStage)?.name || `Stage ${currentStage}`}`,
+      }),
+    ]),
+    el('div', { class: 'hl-equity-ladder' }, rows.map((item) => {
+      const stateClass = item.stage === currentStage ? ' active' : (item.stage < currentStage ? ' done' : ' locked');
+      return el('div', {
+        class: `hl-equity-step${stateClass}`,
+        style: `--eq:${item.color || heroDef.color};`,
+        title: `${item.label}: ${item.visualCue}`,
+      }, [
+        el('span', { class: 'hl-equity-node', text: item.stage === 0 ? '0' : String(item.stage) }),
+        el('span', { class: 'hl-equity-line' }),
+        el('div', { class: 'hl-equity-copy' }, [
+          el('b', { text: item.label }),
+          el('small', { text: `${item.name} · ${item.anatomy}` }),
+          el('em', { text: item.visualCue }),
+        ]),
+      ]);
+    })),
+  ]);
+}
 
 function selectHero() {
   const meta = STATE.meta;
@@ -129,6 +186,9 @@ function selectHero() {
     const res = purchaseHeroLevel(meta, heroId);
     if (res.ok) show();
   });
+
+  const equityCard = renderEquityPathCard(heroDef, stageDef.stage || 0);
+  if (equityCard) box.appendChild(equityCard);
 
   // ---------- Panel PASUKAN ----------
   const aLvl = meta.allyLevel || 0;

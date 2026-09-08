@@ -376,6 +376,13 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 .hero-sprite { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(31, 74, 66, 0.25)); }
 .hero-name { font-weight: 900; font-size: 14px; text-align: center; color: var(--ink); }
 .hero-pattern { font-size: 10.5px; color: var(--ink-soft); font-weight: 800; text-align: center; }
+.roster-equity{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:1px}
+.roster-eq-chip{font-size:8.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#123f3a;background:color-mix(in srgb,var(--eq) 24%,#fffdf7);border:1.4px solid color-mix(in srgb,var(--eq) 72%,#fff 28%);border-radius:999px;padding:2px 8px;max-width:94%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.roster-eq-dots{display:flex;gap:4px;justify-content:center}
+.roster-eq-dot{width:7px;height:7px;border-radius:50%;background:#d8cfbd;border:1px solid #fff;box-shadow:0 0 0 1px rgba(18,63,58,.08)}
+.roster-eq-dot.on{background:var(--eq);box-shadow:0 0 0 1px color-mix(in srgb,var(--eq) 70%,#fff 30%)}
+.roster-eq-dot.active{transform:scale(1.32);box-shadow:0 0 0 1px #fff,0 0 7px color-mix(in srgb,var(--eq) 65%,transparent)}
+.roster-equity small{font-size:8.5px;line-height:1.15;color:#6c8179;font-weight:800;text-align:center;max-width:112px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* Hero terkunci: siluet redup + badge gembok (ala mockup) */
 .hero-card.locked { cursor: default; }
@@ -1216,6 +1223,20 @@ img.lock-badge {
 .bag-evo-next b { color: var(--ink); }
 .bag-evo-next p { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin: 0; }
 .bag-evo-next .bag-ready { color: var(--teal); font-weight: 800; }
+.bag-design-panel{margin-top:9px;padding-top:10px;border-top:2px dashed rgba(53,208,186,.35);display:flex;flex-direction:column;gap:9px}
+.bag-design-head{display:flex;flex-direction:column;gap:2px}
+.bag-design-kicker{width:max-content;font-size:8.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#0f5f56;background:#dff3ec;border-radius:999px;padding:2px 8px;border:1px solid rgba(53,208,186,.55)}
+.bag-design-head b{font-size:13px;color:#123f3a}
+.bag-design-head small{font-size:10.5px;color:#5b7d74;font-weight:800;line-height:1.3}
+.bag-design-list{display:flex;flex-direction:column;gap:6px}
+.bag-design-row{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:flex-start;border:1.5px solid #e8dfc8;background:#fff8ea;border-radius:14px;padding:8px}
+.bag-design-row.done,.bag-design-row.active{border-color:color-mix(in srgb,var(--eq) 68%,#fff 32%);background:linear-gradient(90deg,#fffdf7,color-mix(in srgb,var(--eq) 12%,#fffdf7))}
+.bag-design-row.active{box-shadow:0 0 0 2px color-mix(in srgb,var(--eq) 38%,transparent)}
+.bag-design-node{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--eq);color:#fffdf4;font-size:11px;font-weight:900;border:2px solid #fff;box-shadow:0 1px 5px rgba(35,30,22,.18)}
+.bag-design-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bag-design-copy b{font-size:11.5px;color:#123f3a}
+.bag-design-copy span{font-size:10.5px;line-height:1.3;color:#526e66;font-weight:800}
+.bag-design-copy small{font-size:9.5px;color:#8b6e32;font-weight:900}
 
 .back-btn img { width: 20px; height: 20px; }
 
@@ -1710,6 +1731,26 @@ img.lock-badge {
 .hero-detail-body { padding: 10px 18px 24px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; height: 100%; }
 .btn-hl-lab { background: #fffdf7; color: #1f5f57; border: 2.5px solid var(--teal, #2f9c8f); font-size: 12px; padding: 11px; }
 
+/* Character Agent: jalur equity terlihat di detail hero, bukan cuma di arena. */
+.hl-equity-card{align-items:stretch;border:2.5px solid rgba(53,208,186,.35);background:linear-gradient(180deg,rgba(53,208,186,.13),#fffdf7 44%);gap:10px}
+.hl-equity-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%}
+.hl-equity-titlewrap{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hl-equity-title{font-size:14px;color:#123f3a;letter-spacing:.02em}
+.hl-equity-sub{font-size:10.5px;line-height:1.35;color:#5b7d74;font-weight:800}
+.hl-equity-current{flex:0 0 auto;border-radius:999px;background:linear-gradient(180deg,#fff1b8,#f5c64f);color:#6a4b00;font-size:9.5px;font-weight:900;padding:4px 9px;border:1.5px solid rgba(185,138,32,.3);max-width:118px;text-align:center}
+.hl-equity-ladder{display:grid;grid-template-columns:1fr;gap:7px;width:100%}
+.hl-equity-step{display:grid;grid-template-columns:30px 12px 1fr;align-items:center;gap:7px;padding:7px 9px;border-radius:14px;background:#f6efe2;border:1.8px solid #e3dcc6;position:relative;overflow:hidden}
+.hl-equity-step.done,.hl-equity-step.active{background:linear-gradient(90deg,rgba(255,253,247,.96),rgba(53,208,186,.1));border-color:color-mix(in srgb,var(--eq) 65%,#fff 35%)}
+.hl-equity-step.locked{opacity:.72;filter:saturate(.68)}
+.hl-equity-step.active{box-shadow:0 0 0 2px rgba(255,253,247,.95),0 0 0 4px color-mix(in srgb,var(--eq) 45%,transparent);transform:translateX(1px)}
+.hl-equity-node{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--eq);color:#123f3a;font-size:12px;font-weight:900;border:2px solid rgba(255,253,247,.9);box-shadow:0 2px 6px rgba(35,30,22,.18)}
+.hl-equity-step.active .hl-equity-node{color:#fffdf4;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.hl-equity-line{width:8px;height:2px;border-radius:999px;background:var(--eq);opacity:.7}
+.hl-equity-copy{display:flex;flex-direction:column;gap:1px;min-width:0}
+.hl-equity-copy b{font-size:11.5px;color:#123f3a}
+.hl-equity-copy small{font-size:9.5px;color:#2f7d73;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl-equity-copy em{font-size:9.5px;line-height:1.25;color:#6f7f79;font-style:normal;font-weight:700}
+
 /* ==== Fase 8.4: chip buff tempur di HUD (dokumen entitas) ==== */
 .hud-buffs{position:absolute;top:124px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:6}
 .hud-buff-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(18,42,40,.82);color:#fff8ea;border:2px solid #35d0ba;border-radius:999px;padding:2px 9px 2px 3px;font-size:11px;font-weight:800;letter-spacing:.02em;box-shadow:0 2px 6px rgba(20,40,38,.25)}
@@ -1743,6 +1784,21 @@ img.lock-badge {
 .cxd-kicker{font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#35d0ba;margin-top:8px}
 .cxd-kid{font-size:14px;font-weight:600;color:#2f5a52;margin:4px 0 0}
 .cxd-fact{font-size:13px;color:#41625b;margin:4px 0 0}
+.codex-design-tag{font-size:8px;font-weight:900;letter-spacing:.08em;color:#0f5f56;background:#dff3ec;border:1px solid rgba(53,208,186,.55);border-radius:999px;padding:2px 7px;margin-top:1px}
+.cxd-mutation-panel{margin-top:6px;background:linear-gradient(180deg,#f5fff9,#fff6e5);border:2px solid rgba(53,208,186,.35);border-radius:16px;padding:11px;display:flex;flex-direction:column;gap:8px}
+.cxd-family-head{display:flex;flex-direction:column;gap:2px}
+.cxd-family-head b{font-size:13px;color:#123f3a}
+.cxd-family-head span{font-size:11px;line-height:1.35;color:#4f7068;font-weight:800}
+.cxd-mutation-focus{margin:0;font-size:11px;line-height:1.45;color:#87513f;background:rgba(255,233,215,.72);border-radius:11px;padding:7px 9px;font-weight:800}
+.cxd-tier-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.cxd-tier-chip{min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:13px;background:#fffdf7;border:1.8px solid color-mix(in srgb,var(--tier) 62%,#fff 38%);padding:7px 5px;box-shadow:0 2px 5px rgba(35,30,22,.06)}
+.cxd-tier-chip .cxd-tier-no{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--tier);color:#fffdf4;font-size:11px;font-weight:900;box-shadow:0 1px 4px rgba(35,30,22,.18)}
+.cxd-tier-chip b{font-size:8.5px;color:#123f3a;text-align:center;line-height:1.1;text-transform:uppercase}
+.cxd-tier-chip small{font-size:8px;color:#7b8c86;font-weight:900;text-align:center;line-height:1.1}
+.cxd-tier-chip em{font-size:8.5px;line-height:1.2;color:#4e625d;font-style:normal;text-align:center;font-weight:700;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cxd-equity-panel{background:linear-gradient(180deg,#f8fff9,#fff8e8);border-color:rgba(245,198,79,.38)}
+.cxd-equity-chip .cxd-tier-no{color:#123f3a;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+@media (max-width:390px){.cxd-tier-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hl-equity-head{flex-direction:column}.hl-equity-current{max-width:none}}
 
 /* Fase 12: chip skill hero di ringkasan prep */
 .ps-abilities{display:flex;gap:5px;align-items:center}
@@ -1785,6 +1841,7 @@ img.lock-badge {
 #screen-hud .avatar-wrap{position:relative;width:56px;height:56px;flex:0 0 56px}
 #screen-hud .hud-portrait{width:56px;height:56px;border-radius:50%;border:3px solid #fff;background:#eaf6f2;box-shadow:0 0 0 2.5px #f0c04f,0 3px 8px rgba(31,95,87,.22);object-fit:cover}
 #screen-hud .level-badge{position:absolute;bottom:-5px;right:-9px;background:linear-gradient(180deg,#ffdf7e,#f0b428);color:#5a3d00;font-size:9px;font-weight:900;padding:2px 7px;border-radius:10px;border:1.5px solid #fff;white-space:nowrap;box-shadow:0 1px 4px rgba(160,110,20,.4)}
+#screen-hud .hud-equity-stage{position:absolute;left:50%;top:-9px;transform:translateX(-50%);max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(180deg,#fffdf7,color-mix(in srgb,var(--eq,#35d0ba) 24%,#fffdf7));border:1.5px solid color-mix(in srgb,var(--eq,#35d0ba) 70%,#fff 30%);color:#123f3a;border-radius:999px;padding:1px 7px;font-size:7.8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 2px 6px rgba(35,30,22,.16)}
 #screen-hud .status-bars{width:168px;display:flex;flex-direction:column;gap:5px}
 #screen-hud .hp-row{display:flex;align-items:center;gap:6px}
 #screen-hud .hp-row .heart{width:14px;height:14px}

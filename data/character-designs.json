@@ -449,31 +449,36 @@
         "tier": 0,
         "label": "Polos",
         "visualCue": "bentuk dasar pathogen, belum bermutasi",
-        "color": "#ff6b6b"
+        "color": "#ff6b6b",
+        "fromWave": 1
       },
       {
         "tier": 1,
         "label": "Ganas I",
         "visualCue": "spike tambahan dan aura infeksi tipis",
-        "color": "#ff9f43"
+        "color": "#ff9f43",
+        "fromWave": 5
       },
       {
         "tier": 2,
         "label": "Ganas II",
         "visualCue": "membran retak, duri lebih panjang",
-        "color": "#ff5d73"
+        "color": "#ff5d73",
+        "fromWave": 9
       },
       {
         "tier": 3,
         "label": "Krisis",
         "visualCue": "core gelap dan tanda hazard terbaca",
-        "color": "#c0392b"
+        "color": "#c0392b",
+        "fromWave": 13
       },
       {
         "tier": 4,
         "label": "Apex",
         "visualCue": "mahkota mutasi dan aura merah-ungu",
-        "color": "#6c3483"
+        "color": "#6c3483",
+        "fromWave": 17
       }
     ],
     "enemyMap": {
@@ -490,6 +495,152 @@
       "prion": "crystal",
       "sel_abnormal": "abnormal_cell",
       "toksin_raksasa": "toxin_boss"
+    },
+    "families": {
+      "bacterium": {
+        "label": "Bakteri Dasar",
+        "baseCue": "Kapsul merah dengan flagela samping dan garis pembelahan di badan.",
+        "mutationFocus": "Flagela bertambah, membran retak, dan aura infeksi makin merah.",
+        "tierCues": [
+          "Polos: kapsul bersih dan satu garis pembelahan.",
+          "Ganas I: flagela tampak lebih panjang.",
+          "Ganas II: cincin retak mulai membelah membran.",
+          "Krisis: core infeksi menyala di tengah.",
+          "Apex: mahkota mutasi di atas kapsul."
+        ]
+      },
+      "armored_bacterium": {
+        "label": "Bakteri Gram Positif",
+        "baseCue": "Kapsul ungu dengan dinding peptidoglikan tebal seperti perisai.",
+        "mutationFocus": "Armor menebal menjadi ring berlapis dan duri pendek.",
+        "tierCues": [
+          "Polos: satu lapis armor tebal.",
+          "Ganas I: ring armor menyala.",
+          "Ganas II: retakan putih pada armor.",
+          "Krisis: core infeksi menekan dari balik armor.",
+          "Apex: armor berduri dan mahkota mutasi."
+        ]
+      },
+      "toxic_bacterium": {
+        "label": "Bakteri Gram Negatif",
+        "baseCue": "Kapsul membran ganda dengan gelembung endotoksin hijau.",
+        "mutationFocus": "Endotoksin menjadi tetes racun dan cincin bahaya.",
+        "tierCues": [
+          "Polos: membran ganda tipis.",
+          "Ganas I: gelembung toksin muncul.",
+          "Ganas II: membran luar retak.",
+          "Krisis: core racun menyala.",
+          "Apex: aura racun + mahkota mutasi."
+        ]
+      },
+      "virus": {
+        "label": "Virus / Virion",
+        "baseCue": "Bola kapsid hijau berduri protein spike.",
+        "mutationFocus": "Spike protein bertambah panjang dan kapsid membuka core bahaya.",
+        "tierCues": [
+          "Polos: kapsid bulat dengan spike pendek.",
+          "Ganas I: spike tambahan di seluruh tubuh.",
+          "Ganas II: kapsid retak.",
+          "Krisis: core replikasi menyala.",
+          "Apex: spike panjang + mahkota mutasi."
+        ]
+      },
+      "parasite": {
+        "label": "Parasit",
+        "baseCue": "Tubuh cacing bersegmen dengan kepala kait.",
+        "mutationFocus": "Kait dan rambut penempel tumbuh makin agresif.",
+        "tierCues": [
+          "Polos: segmen cacing jelas.",
+          "Ganas I: rambut penempel muncul.",
+          "Ganas II: duri pendek di setiap segmen.",
+          "Krisis: core parasit merah.",
+          "Apex: kepala berkait dengan mahkota mutasi."
+        ]
+      },
+      "fungus": {
+        "label": "Spora Jamur",
+        "baseCue": "Spora kuning tebal berlapis kitin dan bintik spora kecil.",
+        "mutationFocus": "Lapisan kitin menebal, bintik spora berubah jadi duri.",
+        "tierCues": [
+          "Polos: spora bulat berlapis.",
+          "Ganas I: lapisan kitin menyala.",
+          "Ganas II: bintik spora menjadi tajam.",
+          "Krisis: core jamur gelap.",
+          "Apex: cincin spora tajam di luar tubuh."
+        ]
+      },
+      "cancer": {
+        "label": "Sel Kanker",
+        "baseCue": "Sel besar merah asimetris dengan pseudopod/tentakel ganas.",
+        "mutationFocus": "Tentakel memanjang, nukleus gelap, dan mahkota abnormal muncul.",
+        "tierCues": [
+          "Polos: bentuk sel abnormal raksasa.",
+          "Ganas I: tentakel luar tumbuh.",
+          "Ganas II: membran retak dan lebih bergerigi.",
+          "Krisis: nukleus gelap menyala merah.",
+          "Apex: mahkota mutan di atas nukleus."
+        ]
+      },
+      "protozoa": {
+        "label": "Protozoa",
+        "baseCue": "Sel lonjong bersilia yang bergerak zig-zag.",
+        "mutationFocus": "Silia menjadi cambuk berbahaya dan ring gerak makin jelas.",
+        "tierCues": [
+          "Polos: silia halus mengelilingi badan.",
+          "Ganas I: silia lebih panjang.",
+          "Ganas II: membran lonjong retak.",
+          "Krisis: inti protozoa menyala.",
+          "Apex: cambuk silia + mahkota mutasi."
+        ]
+      },
+      "toxin": {
+        "label": "Toksin",
+        "baseCue": "Tetes/genangan racun hijau dengan gelembung asam.",
+        "mutationFocus": "Gelembung racun makin besar dan bercahaya.",
+        "tierCues": [
+          "Polos: tetes racun stabil.",
+          "Ganas I: gelembung racun bertambah.",
+          "Ganas II: permukaan genangan retak.",
+          "Krisis: core racun putih-hijau menyala.",
+          "Apex: aura racun ungu-hijau."
+        ]
+      },
+      "crystal": {
+        "label": "Prion Kristal",
+        "baseCue": "Kristal salah lipat berfaset ungu abu-abu.",
+        "mutationFocus": "Faset kristal memanjang seperti pecahan protein salah lipat.",
+        "tierCues": [
+          "Polos: kristal tunggal berfaset.",
+          "Ganas I: garis faset bertambah.",
+          "Ganas II: retak putih menyebar.",
+          "Krisis: core kristal menyala.",
+          "Apex: mahkota kristal salah lipat."
+        ]
+      },
+      "abnormal_cell": {
+        "label": "Sel Abnormal",
+        "baseCue": "Sel penyamar hijau-mint dengan distorsi/glitch dan inti samar.",
+        "mutationFocus": "Distorsi makin kuat sampai identitas abnormal terbuka.",
+        "tierCues": [
+          "Polos: sel penyamar samar.",
+          "Ganas I: garis glitch tipis.",
+          "Ganas II: membran retak saat tersorot.",
+          "Krisis: inti abnormal menyala.",
+          "Apex: mahkota stress-ligand untuk ditangkap NK."
+        ]
+      },
+      "toxin_boss": {
+        "label": "Toksin Raksasa",
+        "baseCue": "Boss racun hijau besar berduri dengan kantong asam.",
+        "mutationFocus": "Kantong racun membesar, duri menebal, aura sistemik muncul.",
+        "tierCues": [
+          "Polos: massa racun besar.",
+          "Ganas I: kantong racun tumbuh.",
+          "Ganas II: duri tepi memanjang.",
+          "Krisis: core racun sistemik menyala.",
+          "Apex: crown boss racun dan aura ungu."
+        ]
+      }
     }
   }
 }

@@ -10,7 +10,8 @@ let hintTimer = null;
 let xpGhost = 0;      // trail putih yang "mengejar" fill XP (efek kejar)
 let lastXpPct = 0;
 
-import { getData } from '../../core/data-store.js';
+import { STATE } from '../../core/state-manager.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
 
@@ -128,6 +129,20 @@ export function resetHUD() {
   const portrait = document.getElementById('hud-portrait');
   const getter = window.__IMUNVERSE_getHeroPortrait;
   if (portrait && getter) portrait.src = getter();
+
+  // Character Agent: chip equity stage langsung di portrait HUD gameplay.
+  const eqNode = document.getElementById('hud-equity-stage');
+  if (eqNode) {
+    const heroDef = game.run?.heroDef || getData().heroes.heroes.find((h) => h.id === STATE.meta.selectedHero);
+    const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+    const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+    const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+    const cue = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+    const color = cue?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba';
+    eqNode.textContent = stageDef?.collectionLabel || stageDef?.name || (stage > 0 ? `Equity ${stage}` : 'Polos');
+    eqNode.title = stage > 0 ? `${cue?.name || eqNode.textContent}: ${cue?.visualCue || ''}` : (design?.baseCue || 'Stage 0 polos');
+    eqNode.style.setProperty('--eq', color);
+  }
 
   // Hint kontrol (hilang sendiri setelah 8 detik)
   const hint = document.getElementById('hud-hint');
