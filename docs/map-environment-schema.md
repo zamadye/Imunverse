@@ -15,8 +15,9 @@
   "palette": {
     "top": "#…", "mid": "#…", "bot": "#…",       // gradien dinding organ (atas→bawah)
     "hex": "#…",                                  // lantai hexagon
-    "hexEdge": "#…",                              // garis tepi lantai (denyut mengikuti detak)
-    "rim": "rgba(…)", "rimLight": "rgba(…)",        // bibir map (dua ring tebal)
+    "hexEdge": "#…",                              // garis napas tepi clearing (denyut mengikuti detak)
+    "ground": { "detail": "…", "spotA": "…",        // tint tanah: sel tanah,
+                "spotB": "…", "shade": "…" },       //  bercak ×2, bayangan+gradasi
     "vignette": "rgba(…)",                        // vignette layar
     "props": ["prop_cell.png", "prop_dots.png"],  // sprite properti map
     "cornerWeed": "assets/sprites/…",             // dekorasi sudut kiri-bawah
@@ -33,7 +34,7 @@
 }
 ```
 
-**Backward compatible:** `ambient`/`pulse`/`element`/`bubbles`/`hexEdge`/`rim`/`rimLight`/`cornerWeed`/`cornerReef`/`organ`
+**Backward compatible:** `ambient`/`pulse`/`element`/`bubbles`/`ground`/`hexEdge`/`cornerWeed`/`cornerReef`/`organ`
 semuanya opsional — kode memakai default bila kunci absen.
 
 ## 2. Lima map: warna anatomi + elemen khas
@@ -106,7 +107,7 @@ sel latar `prop_cell` · motes ambient · **elemen khas §3** (boost ±20%).
 | 3 | properti jauh | `drawReefLayer` | 0.22 |
 | 4 | **elemen khas map** (§3) | `drawElementLayer` | `element.parallax` (≈0.3) |
 | 5 | properti dekat + 2 lapis gelembung (tint per-map) | `drawReefLayer`/`drawBubbleLayer` | 0.4 / 0.5 / 0.72 |
-| 6 | lantai hexagon 3D + bercak + tepi | `drawArena3D` | dunia (via proyeksi) |
+| 6 | clearing organik + bercak + detail tanah + tepi | `drawArena3D` | dunia (via proyeksi) |
 | 7 | dekorasi sudut | `drawCornerDeco` | menempel layar |
 | 8 | lapisan napas fullscreen | `drawBackground` | menempel layar |
 
