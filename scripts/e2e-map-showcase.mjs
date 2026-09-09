@@ -126,6 +126,47 @@ try {
   const campArena = await page.evaluate(() => window.__IMUNVERSE.game.run.arena.id);
   log('map-campaign-chip-wins', campArena === 'jantung', `run.arena=${campArena}`);
   await page.screenshot({ path: 'shots/review/map-campaign-jantung.png' });
+  // ---- 4) epic zoom zona: boss dekat → zoom, boss mati → pulih; zona bahaya ----
+  await bootToDashboard();
+  await page.evaluate(() => {
+    const I = window.__IMUNVERSE;
+    I.STATE.meta.selectedMode = 'endless';
+    I.STATE.meta.selectedArena = 'limfe';
+  });
+  await page.click('#btn-play', { timeout: 8000, force: true });
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.maxHP = 50000; p.hp = 50000; p.iframes = 99999; });
+  await page.waitForFunction(() => window.__IMUNVERSE.game.run.enemies.length > 0, null, { timeout: 12000 }).catch(() => {});
+  // boss: pinjam musuh asli → tandai boss → dekatkan ke player
+  // (HP 1e9: boss pinjaman tak boleh mati → peti boss mem-pause run)
+  await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    const e = g.run.enemies.find((x) => x.alive) || g.run.enemies[0];
+    e.isBoss = true;
+    e.maxHP = 1e9; e.hp = 1e9;
+    e.x = g.run.player.x + 120; e.y = g.run.player.y + 40;
+    window.__zTestBoss = e;
+  });
+  await page.waitForTimeout(2500);
+  const zin = await page.evaluate(() => window.__IMUNVERSE.game.run.camera.zoneScale);
+  log('map-zoomboss-in', zin > 1.12, `zoneScale=${zin.toFixed(3)}`);
+  await page.screenshot({ path: 'shots/review/map-zoomboss.png' });
+  await page.evaluate(() => { window.__zTestBoss.isBoss = false; });
+  await page.waitForTimeout(1500);
+  const zout = await page.evaluate(() => window.__IMUNVERSE.game.run.camera.zoneScale);
+  log('map-zoomboss-out', zout < 1.03, `zoneScale=${zout.toFixed(3)}`);
+  // danger: genangan di kaki player → zoom 1.1 → angkat → pulih
+  await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    g.run.hazards.push({ x: g.run.player.x, y: g.run.player.y, r: 60, dps: 0, life: 60, tick: 0 });
+  });
+  await page.waitForTimeout(2500);
+  const din = await page.evaluate(() => window.__IMUNVERSE.game.run.camera.zoneScale);
+  log('map-zonedanger-in', din > 1.06 && din < 1.14, `zoneScale=${din.toFixed(3)}`);
+  await page.evaluate(() => { window.__IMUNVERSE.game.run.hazards.length = 0; });
+  await page.waitForTimeout(1500);
+  const dout = await page.evaluate(() => window.__IMUNVERSE.game.run.camera.zoneScale);
+  log('map-zonedanger-out', dout < 1.03, `zoneScale=${dout.toFixed(3)}`);
   log('zero-pageerror', errors.length === 0, errors.join(' | ').slice(0, 300));
 } finally {
   await browser.close();

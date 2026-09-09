@@ -64,7 +64,7 @@ import { audio } from '../systems/audio-system.js';
 import { Ally } from '../entities/ally.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
-import { Camera, PERSP } from '../render/camera.js';
+import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
 import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
@@ -178,7 +178,7 @@ export const game = {
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
-    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=49a`);
+    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=50a`);
 
     // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
     const focusId = meta.focusRun || 'seimbang';
@@ -346,6 +346,26 @@ export const game = {
     stats.bodyNutrientMult = mods.nutrientMult !== undefined ? mods.nutrientMult : 1;
     stats.bodyEnemySpeedMult = mods.enemySpeedMult !== undefined ? mods.enemySpeedMult : 1;
     return stats;
+  },
+
+  /**
+   * MAP: target epic zoom kamera dari zona (dipanggil tiap frame).
+   * Boss hidup dalam jangkauan → zoom BOSS; player di dalam genangan
+   * toksin / zona inflamasi → zoom DANGER; selain itu normal (1).
+   * Murah: loop musuh + zona hanya saat run berjalan (hypot per entitas).
+   */
+  computeZoneZoomTarget(run, player) {
+    for (const e of run.enemies) {
+      if (!e.isBoss || !e.alive) continue;
+      if (Math.hypot(e.x - player.x, e.y - player.y) < ZONE_ZOOM.BOSS_RANGE) return ZONE_ZOOM.BOSS;
+    }
+    for (const hz of run.hazards) {
+      if (Math.hypot(hz.x - player.x, hz.y - player.y) < (hz.r || 40) + ZONE_ZOOM.DANGER_PAD) return ZONE_ZOOM.DANGER;
+    }
+    for (const z of run.inflamZones || []) {
+      if (Math.hypot(z.x - player.x, z.y - player.y) < (z.radius || 90) + ZONE_ZOOM.DANGER_PAD) return ZONE_ZOOM.DANGER;
+    }
+    return 1;
   },
 
   /**
@@ -720,6 +740,8 @@ export const game = {
     // 11. Kamera follow + shake decay
     run.camera.follow(player.x, player.y, dt);
     run.camera.update(dt);
+    // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
+    run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
 
     // Tutorial langkah "bergerak": akumulasi jarak pemain
     const mv = this.input.getMoveVector();
