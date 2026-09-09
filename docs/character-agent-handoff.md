@@ -27,7 +27,7 @@ Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubaha
 - `npm run check` tetap lulus.
 - Console browser: 0 error fatal, 0 404 asset.
 - Mobile viewport minimal 390×844 tidak overflow buruk.
-- Screenshot baru disimpan di `shots/review/` dengan nama yang jelas.
+- Screenshot baru disimpan di `shots/review/` dengan nama yang jelas; saat ini branch hanya menyimpan bukti Character terkini `shots/review/character-agent-final-review.png` setelah cleanup screenshot lama.
 - Jangan mengubah combat damage/balance.
 - Jangan mengubah arena/background.
 
@@ -74,6 +74,7 @@ Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubaha
 
 - Progress map utama: `docs/character-agent-progress-map.md`
 - Skill audit: `docs/character-skill-visual-audit.md`
+- Screenshot review terkini: `shots/review/character-agent-final-review.png`
 - Renderer gameplay: `js/render/character-visuals.js`
 - Preview runtime UI: `js/render/character-preview.js`
 - Data Character: `data/character-designs.json`

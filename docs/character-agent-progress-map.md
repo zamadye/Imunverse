@@ -22,7 +22,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Bag/inventory UI | ✅ | `js/ui/screens/bag-screen.js` menghubungkan part evolusi dengan konteks visual jalur Equity hero terpilih. |
 | Codex/Bio-Pedia UI | ✅ | `js/ui/screens/codex-screen.js` menampilkan tag Equity/Mutation dan detail panel design hero/enemy. |
 | HUD gameplay | ✅ | `index.html` + `js/ui/screens/hud-screen.js` menampilkan badge Equity stage aktif di portrait hero. |
-| Screenshot review terbaru | ✅ | Ada 4 screenshot review di `shots/review/`, termasuk gameplay equity 11 hero dan UI showcase. |
+| Screenshot review terbaru | ✅ | Screenshot lama di `shots/review/` sudah dibersihkan; bukti visual terkini dikonsolidasikan ke `shots/review/character-agent-final-review.png`. |
 | Browser walkthrough semua screen Character UI | 🟡 | Runtime data/import sudah hijau. Screenshot UI terbaru berupa static review sheet dari data/assets; perlu capture DOM interaktif jika ingin QA visual per screen secara ketat. |
 | Runtime mini renderer collection | ✅ | `js/render/character-preview.js` membuat mini canvas memakai `drawHeroEquity()`/`drawPathogenMutation()` yang sama dengan gameplay; dipakai di roster, detail, bag, dan codex. |
 | Active skill visual per hero/state | ✅ | Audit skill selesai; HUD button dan gameplay cast/payoff VFX kini punya accent archetype/equity visual-only. Screenshot browser multi-hero tetap masuk QA handoff. |
@@ -53,7 +53,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | CSS presentation | `styles/main.css` | Styling khusus chip, ladder, panel, badge Character UI, preview canvas, dan skill accent. |
 | Skill audit | `docs/character-skill-visual-audit.md` | Mapping 11 hero × skill → effect kind → status visual. |
 | Handoff agent lain | `docs/character-agent-handoff.md` | Daftar koordinasi QA/E2E, Arena, Combat, i18n/copy yang di luar atau lintas scope saya. |
-| Review screenshots | `shots/review/*.png` | Bukti visual hasil pass Character Agent. |
+| Review screenshots | `shots/review/character-agent-final-review.png` | Bukti visual terkini hasil pass Character Agent setelah cleanup screenshot lama. |
 
 ---
 
@@ -65,7 +65,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `8cfcc9c Add arena equity showcase screenshot` | ✅ | Screenshot arena gameplay sheet 11 hero × 4 Equity stage. |
 | `54d9c91 Extend character collection design surfaces` | ✅ | Roster, hero detail, bag, codex, HUD badge, pathogen family metadata, screenshot UI + atlas pathogen. |
 | `268f610 Complete character preview and skill visual scope` | ✅ | Mini preview canvas memakai renderer gameplay, HUD skill accent per archetype/equity, skill visual audit, i18n label Character. |
-| Skill archetype VFX + full Character i18n pass | ✅ | Gameplay cast/payoff motif per archetype/equity, `tierCues` translation support, full Character cue EN coverage, skill VFX screenshot. |
+| `de4149a Add character skill archetype VFX` | ✅ | Gameplay cast/payoff motif per archetype/equity, `tierCues` translation support, full Character cue EN coverage, skill VFX screenshot. |
 
 ---
 
@@ -104,23 +104,22 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 
 | File | Status | Isi |
 |---|---:|---|
-| `shots/review/character-redesign-gameplay.png` | ✅ | Arena gameplay B-cell/Bella Full Equity + contoh pathogen. |
-| `shots/review/character-equity-11heroes-arena.png` | ✅ | 11 hero × Equity I–Full Equity dari arena gameplay canvas. |
-| `shots/review/character-pathogen-mutation-atlas.png` | ✅ | Atlas 13 pathogen × tier 0–4 memakai sprite aktual + metadata mutation. |
-| `shots/review/character-collection-ui-showcase.png` | ✅ | Showcase Roster, Hero Detail, Bag, HUD, Bio-Pedia setelah design lanjutan. |
-| `shots/review/character-skill-archetype-vfx.png` | ✅ | 11 hero × skill set + archetype cast/payoff VFX map, visual-only. |
+| `shots/review/character-agent-final-review.png` | ✅ | Bukti visual fresh terkonsolidasi setelah cleanup: hero equity 11 hero, pathogen mutation atlas, collection/HUD UI showcase, dan skill archetype VFX map. |
+| Screenshot lama Character di `shots/review/` | ✅ dibersihkan | File standalone lama (`character-redesign-gameplay.png`, `character-equity-11heroes-arena.png`, `character-pathogen-mutation-atlas.png`, `character-collection-ui-showcase.png`, `character-skill-archetype-vfx.png`) sudah dihapus dari branch supaya bukti review tidak bercampur versi lama. |
 
 ---
 
 ## 5. Verifikasi terakhir
 
-Perintah yang sudah dipakai:
+Perintah terakhir yang sudah dipakai setelah cleanup screenshot:
 
 ```bash
+git diff --check
+node --check js/core/data-store.js js/systems/skill-system.js js/systems/effects-system.js js/render/shape-renderer.js
 npm run check
 ```
 
-Hasil terakhir: ✅ semua import, JSON, sprite path, dan referensi `index.html` lolos.
+Hasil terakhir: ✅ whitespace diff, syntax JS, semua import, JSON, sprite path, dan referensi `index.html` lolos.
 
 Verifikasi data Character:
 
@@ -165,7 +164,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 | Audit skill actual per hero | ✅ | `docs/character-skill-visual-audit.md` memetakan hero → skill ids → effect kind → visual status. |
 | Tentukan apakah perlu skill FX unik per archetype | 🟡 | HUD accent sudah cukup untuk UI; gameplay impact/trail unik masih perlu keputusan/QA. |
 | Implement visual-only skill accent per hero/archetype | ✅ | `hud-screen.js`, `skill-system.js`, `effects-system.js`, `shape-renderer.js`, dan `styles/main.css` memberi accent button + cast/payoff VFX berdasarkan archetype dan warna Equity aktif, tanpa mengubah damage/cooldown. |
-| Screenshot skill state | ⬜ | Minimal 3 hero archetype berbeda dengan skill ready/cooldown/trigger; cocok dikerjakan QA/browser agent. |
+| Screenshot skill state | 🟡 | Static final review sudah memuat skill archetype VFX map; browser capture trigger/cooldown minimal 3 hero archetype tetap perlu QA interaktif. |
 
 ### Prioritas C — Runtime preview renderer untuk collection
 
@@ -181,7 +180,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 |---|---:|---|
 | Copy review semua `visualCue`, `baseCue`, `mutationFocus` | ✅ | Bahasa ID tetap konsisten dan semua cue Character penting sudah punya pasangan EN di `data/lang.json`. |
 | i18n English untuk field baru | ✅ | `data-store.js` kini menerjemahkan `tierCues` array; `data/lang.json` mencakup field Character `baseCue`, `visualCue`, `mutationFocus`, `tierCues`, label, dan anatomy. |
-| Dense screenshot label cleanup | 🟡 | Screenshot atlas/large sheet cukup untuk review; jika dipakai publik perlu padding/label lebih besar. |
+| Dense screenshot label cleanup | ✅ | Screenshot lama dikonsolidasikan ke `character-agent-final-review.png`; tetap bukan pengganti DOM/browser QA. |
 
 ### Prioritas E — Konten/logic di luar Character visual pass
 
@@ -208,8 +207,8 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 ## 8. Known issues / risiko
 
-1. **Screenshot UI showcase terbaru bukan capture DOM interaktif.**  
-   File `character-collection-ui-showcase.png` dibuat dari data/assets aktual untuk merangkum design state, tetapi QA final tetap sebaiknya melakukan browser walkthrough per screen.
+1. **Screenshot final review bukan capture DOM interaktif.**
+   File `shots/review/character-agent-final-review.png` adalah bukti visual terkonsolidasi dari data/assets/screenshot pass sebelumnya. QA final tetap sebaiknya melakukan browser walkthrough per screen.
 
 2. **Global evolution stage berlaku untuk semua hero.**  
    UI menampilkan stage equity berdasarkan `STATE.meta.evoStage`, bukan stage per hero. Ini mengikuti sistem existing; jangan klaim tiap hero punya progress stage individual kecuali sistem save diubah.
@@ -240,7 +239,7 @@ Sebuah subtask Character dianggap selesai jika memenuhi semua poin ini:
 
 Jika lanjut dari sini, urutan paling aman:
 
-1. **QA visual interaktif oleh QA/browser agent**: capture Roster, Hero Detail, Bag, Codex, HUD setelah perubahan terakhir.
-2. **Copy/i18n polish**: rapikan istilah Indonesia/English untuk semua cue Character.
-3. **Putuskan gameplay skill trail/impact**: bila disetujui, kerjakan sebagai visual-only pass terpisah dengan screenshot multi-hero.
+1. **QA visual interaktif oleh QA/browser agent**: capture Roster, Hero Detail, Bag, Codex, HUD, plus trigger/cooldown skill minimal 3 hero archetype setelah perubahan terakhir.
+2. **Editorial i18n polish opsional**: review tone Indonesia/English di browser bila target publik butuh copy lebih halus.
+3. **Putuskan gameplay per-target trail/impact**: hanya bila user menyetujui pass visual-only terpisah; jangan campur dengan combat math.
 4. **Update progress map lagi** setelah tiap milestone selesai.

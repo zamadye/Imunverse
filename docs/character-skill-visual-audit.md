@@ -10,6 +10,7 @@
 - Pass terbaru menambah accent visual skill berdasarkan `archetype` dan warna Equity aktif dari `data/character-designs.json`.
 - Gameplay cast/payoff VFX juga membawa motif biologis per archetype lewat `skill-system.js` → `effects-system.js` → `shape-renderer.js`.
 - Semua perubahan skill tetap visual-only: tidak mengubah damage, cooldown, radius, atau efek gameplay.
+- Bukti visual terkini ada di panel D `shots/review/character-agent-final-review.png`; screenshot standalone lama sudah dibersihkan dari branch.
 
 ## Mapping hero → archetype → skill visual saat ini
 
@@ -68,5 +69,5 @@
 |---|---:|---|
 | Cast/payoff gameplay motif per archetype | ✅ | Implementasi visual-only di `effects-system`/`shape-renderer`; opsi damage/cooldown tidak disentuh. |
 | Per-target trail/impact unik setiap hit | ⬜ | Belum dikerjakan agar tidak menambah noise/perf cost tanpa QA khusus; bila perlu, kerjakan sebagai pass terpisah. |
-| Screenshot skill trigger multi-hero | ⬜ | Butuh browser capture per hero atau QA agent dengan screenshot runner. |
+| Screenshot skill trigger multi-hero | 🟡 | Static map ada di `character-agent-final-review.png`; browser capture trigger/cooldown minimal 3 archetype tetap perlu QA agent. |
 | Copy tooltip bilingual untuk semua skill accent | ✅ | Tooltip stage + field Character penting sudah punya entry/rule di `data/lang.json`. |
