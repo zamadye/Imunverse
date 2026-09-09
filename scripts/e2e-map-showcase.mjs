@@ -100,6 +100,28 @@ try {
     }));
     log(`map-perf-${id}`, ms < 33, `${ms.toFixed(1)}ms`);
   }
+  // ---- 3) regresi: pilihan arena MENANG di mode kampanye (issue merge main) ----
+  await bootToDashboard();
+  await page.evaluate(() => {
+    const I = window.__IMUNVERSE;
+    I.STATE.meta.selectedMode = 'kampanye';
+    I.STATE.meta.selectedChapter = 'bab_luka';
+    I.STATE.meta.cinematicsSeen = { ...I.STATE.meta.cinematicsSeen, brief_bab_luka: true }; // lewati briefing
+    I.screenManager.show('prep');
+  });
+  await page.waitForTimeout(500);
+  const presel = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.selectedArena);
+  log('map-campaign-default-limfe', presel === 'limfe', `presel=${presel}`);
+  await page.evaluate(() => {
+    const chips = Array.from(document.querySelectorAll('#prep-arena-row .prep-chip'));
+    chips[chips.length - 1].click(); // Bilik Jantung
+  });
+  await page.waitForTimeout(300);
+  await page.click('#btn-prep-start');
+  await page.waitForTimeout(2000);
+  const campArena = await page.evaluate(() => window.__IMUNVERSE.game.run.arena.id);
+  log('map-campaign-chip-wins', campArena === 'jantung', `run.arena=${campArena}`);
+  await page.screenshot({ path: 'shots/review/map-campaign-jantung.png' });
   log('zero-pageerror', errors.length === 0, errors.join(' | ').slice(0, 300));
 } finally {
   await browser.close();
