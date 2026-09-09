@@ -207,9 +207,12 @@ await page.evaluate(() => { window.__IMUNVERSE.game.input.joystick.active = fals
 // ---------- tutorial langkah 2: jari di atas tombol SERANG ----------
 const step2 = await page.evaluate(async () => {
   const tut = await import('/js/systems/tutorial-system.js');
-  tut.onRunStart();        // ulang dari langkah 1 (uji di atas sudah memajukan tutorial lewat gerak & kill nyata)
-  tut.notifyMoved(1e9, 1); // paksa langkah gerak selesai → langkah SERANG
-  await new Promise((r) => setTimeout(r, 50));
+  // Bila gameplay nyata di atas sempat menyelesaikan seluruh tutorial (kill + ambil nutrisi
+  // acak), meta.tutorialDone = true → onRunStart() tidak merender ulang dan DOM menyimpan
+  // gelembung lama "Ambil nutrisi" (sumber flake lama). Reset syarat tutorial dulu.
+  const meta = window.__IMUNVERSE.STATE.meta; meta.tutorialDone = false; meta.stats.totalRuns = 0;
+  tut.onRunStart();        // ulang dari langkah 1
+  tut.notifyMoved(1e9, 1); // paksa langkah gerak selesai → langkah SERANG (renderStep sinkron)
   const finger = document.querySelector('.tut-finger.tut-attack');
   const bubble = document.querySelector('.tut-bubble')?.textContent || '';
   if (!finger) return { finger: false, bubble };

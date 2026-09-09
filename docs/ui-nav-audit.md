@@ -250,6 +250,10 @@ Verifikasi: `e2e-ui-nav` 21/21, `onboarding` 16/16, `controls` 23/23, `e1` 32/32
 | 2 | Handler `#btn-codex` (elemen tidak ada) dihapus; handler ganda `#rank-chip` di `main.js` dihapus — `dashboard-screen.js` sudah memasang `onclick` (diverifikasi: klik chip → `screen-rank`, chip akun → `screen-profile`). | `js/main.js` |
 | 3 | Modal Pilih Arena: gembok baris terkunci membesar 56 px karena `.arena-item img` mengalahkan `.lock-ico` (13 px) → selektor `.arena-item img.lock-ico` 15 px; baris syarat kembali satu garis. | `styles/main.css` |
 
-Belum disentuh (butuh keputusan/lintas scope): `.hud-quests` vs `.hud-combo`/`.hud-antigen` (tumpang tindih hanya bila
-combo & antigen aktif bersamaan — perlu uji mid-run nyata), label liveops.
-Verifikasi: `e2e-ui-nav` 21/21, `progression` 18/18, `retention` 20/20, `purpose` 13/13, `v2phase6` 15/15, `r1` 14/14; `check-imports` lolos.
+| 4 | HUD: panel Misi **terbuka** (top 44%, berpusat via `translateY(-50%)`, tinggi 134 px) menutupi chip COMBO (top 118 px) sepenuhnya — diverifikasi mid-run (`/tmp/hudovl.mjs`: `qc:true`). Panel kini ditambatkan dari atas `top:152px` (tepat di bawah combo) dan tumbuh ke bawah; badan 96 px → bawah panel 286 px < antigen 295 px. Layar ≥ 500 px kembali berpusat 40%. | `styles/dashboard-focus.css` |
+| 5 | `e2e-controls` flake `tut-attack-*` (±1/3 run): gameplay nyata sebelumnya bisa menuntaskan seluruh tutorial → `tutorialDone=true` → `onRunStart()` tidak merender ulang dan DOM menyimpan gelembung lama. Suite kini me-reset syarat tutorial sebelum langkah 2 (4/4 lulus). | `scripts/e2e-controls.mjs` |
+
+Belum disentuh: label liveops (bukan UI kritis).
+Verifikasi: `e2e-ui-nav` 21/21, `progression` 18/18, `retention` 20/20, `purpose` 13/13, `v2phase6` 15/15, `r1` 14/14,
+`controls` 23/23 ×4, `e1` 32/32, `e2` 22/22, `mlbb` 20/20, `r3` 18/18, `r6` 15/15; `check-imports` lolos.
+Bukti: `shots/ui-nav/hud-quests-open-45.png` (panel Misi terbuka, combo & antigen bebas).

@@ -633,11 +633,15 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 
 /* Panel Misi: emblem kecil di kepala; TIDAK lagi menimpa chip combo (top 150px)
    dan chip antigen (bottom 86px) — badan misi dibatasi tinggi & bisa digulir */
-#screen-hud .hud-quests { top: 44%; }
+/* Panel ditambatkan dari ATAS (bukan berpusat) tepat di bawah chip combo (top 118px + 26px),
+   sehingga saat dibuka ia tumbuh ke BAWAH — combo tak tertutup, antigen (bottom 74px) tetap bebas
+   karena badan dibatasi 96px: 152 + 32 kepala + 6 + 96 = 286px < 390 − 74 − 21 = 295px. */
+#screen-hud .hud-quests { top: 152px; transform: none; }
 #screen-hud .hud-quests-head img { width: 20px; height: 20px; }
 #screen-hud .hud-quests-body { max-height: 96px; overflow-y: auto; }
 #screen-hud .hud-combo { top: 118px; }
 #screen-hud .hud-antigen { bottom: 74px; }
+@media (min-height: 500px) { #screen-hud .hud-quests { top: 40%; transform: translateY(-50%); } }
 @media (max-width: 700px) {
   #screen-hud .hud-menu-toggle, #screen-hud .hud-menu2-toggle { width: 40px; height: 40px; }
   #screen-hud .hud-menu-toggle img, #screen-hud .hud-menu2-toggle img { width: 26px; height: 26px; }
