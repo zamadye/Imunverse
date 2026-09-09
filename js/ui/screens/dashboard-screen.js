@@ -158,10 +158,10 @@ function renderQuickRow(meta) {
   const row = document.getElementById('quick-row');
   row.textContent = '';
   const tiles = [
-    { key: 'roster', ico: 'assets/sprites/icon_heroes.png', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
-    { key: 'shop', ico: 'assets/sprites/icon_shop.png', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
-    { key: 'codex', ico: 'assets/sprites/icon_scope.png', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
-    { key: 'rank', ico: 'assets/sprites/icon_trophy.png', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
+    { key: 'roster', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
+    { key: 'shop', ico: 'assets/icons/menu-shop.svg', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
+    { key: 'codex', ico: 'assets/icons/menu-codex.svg', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
+    { key: 'rank', ico: 'assets/icons/menu-rank.svg', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
   ];
   for (const tl of tiles) {
     const t = el('button', { class: 'quick-tile', title: tl.label }, [
@@ -196,7 +196,7 @@ function renderCampaignCard(meta) {
   card.appendChild(el('span', { class: 'cc-title', text: ch.title }));
   card.appendChild(el('span', { class: 'cc-obj', text: ch.objective }));
   const play = el('button', { id: 'btn-play-big', class: 'btn-play-big', 'aria-label': 'Mulai — persiapan pertempuran' }, [
-    el('img', { src: 'assets/sprites/icon_play.png', alt: '' }),
+    el('img', { src: 'assets/icons/ui-play.svg', alt: '' }),
     el('span', { text: 'MULAI' }),
     el('small', { id: 'play-big-sub', text: ch.organ }),
   ]);
@@ -229,7 +229,7 @@ function renderModeStack(meta) {
 
   const lab = document.getElementById('mode-lab');
   lab.textContent = '';
-  lab.appendChild(el('img', { class: 'mc-ico', src: 'assets/sprites/icon_squad.png', alt: '' }));
+  lab.appendChild(el('img', { class: 'mc-ico', src: 'assets/icons/menu-squad.svg', alt: '' }));
   lab.appendChild(el('div', { class: 'mc-body' }, [
     el('b', { text: 'Lab Pasukan' }),
     el('span', { text: allyLevelBadge(meta) }),
@@ -328,7 +328,7 @@ function renderLeaderboardCard(meta) {
   card.textContent = '';
   const runs = getLeaderboard(meta, 'normal').slice(0, 3);
   card.appendChild(el('h3', { class: 'card-title ico-title' }, [
-    el('img', { class: 't-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }),
+    el('img', { class: 't-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
     el('span', { text: 'Papan Rekor — Klasik' }),
   ]));
   if (!runs.length) {
@@ -516,14 +516,14 @@ export function show() {
   }
   const badge = document.getElementById('dash-best-badge');
   badge.textContent = '';
-  badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
+  badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/icons/ui-star.svg', alt: '' }));
   badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
 
   // LEVEL HERO & PASUKAN terhubung: chip di panggung (klik → Lab)
   const lvlBadge = document.getElementById('dash-level-badge');
   if (lvlBadge) {
     lvlBadge.textContent = '';
-    lvlBadge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_sword.png', alt: '' }));
+    lvlBadge.appendChild(el('img', { class: 'badge-ico', src: 'assets/icons/menu-squad.svg', alt: '' }));
     lvlBadge.appendChild(el('span', { text: `${heroDef ? heroLevelBadge(meta, heroDef.id) : 'Lv 0'} · Pasukan ${allyLevelBadge(meta)}` }));
     lvlBadge.onclick = () => { audio.ui(); screenManager.show('upgrade'); };
   }

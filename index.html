@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=44" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=44" />
+  <link rel="stylesheet" href="styles/main.css?v=45" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=45" />
 </head>
 <body>
   <div id="app">
@@ -53,7 +53,7 @@
             <p class="title-tag" data-i18n="Sel Imun vs Patogen — Selamatkan Tubuh!">Sel Imun vs Patogen — Selamatkan Tubuh!</p>
           </div>
           <button id="btn-title-start" class="btn btn-primary btn-xl title-start">
-            <img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />
+            <img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />
             <span data-i18n="MULAI">MULAI</span>
           </button>
           <button id="btn-title-login" class="btn btn-ghost title-login" data-i18n="Sudah punya akun? Masuk">Sudah punya akun? Masuk</button>
@@ -88,22 +88,22 @@
           <!-- ===== SIDEBAR NAV (kiri, ala MLBB) ===== -->
           <nav class="side-nav" aria-label="Navigasi fitur">
             <button class="side-btn active" id="side-home" title="Beranda">
-              <img src="assets/sprites/icon_home.png" alt="" /><span>Home</span>
+              <img src="assets/icons/ui-home.svg" alt="" /><span>Home</span>
             </button>
             <button class="side-btn" id="side-campaign" title="Peta Tubuh — Kampanye">
-              <img src="assets/sprites/icon_sirkulasi.png" alt="" /><span>Kampanye</span>
+              <img src="assets/icons/menu-campaign.svg" alt="" /><span>Kampanye</span>
             </button>
             <button class="side-btn" id="side-codex" title="Bio-Pedia">
-              <img src="assets/sprites/icon_scope.png" alt="" /><span>Bio</span>
+              <img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span>
             </button>
             <button class="side-btn" id="side-bp" title="Battle Pass">
-              <img src="assets/sprites/icon_bolt.png" alt="" /><span>Pass</span>
+              <img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span>
             </button>
             <button class="side-btn" id="side-records" title="Papan Rekor">
-              <img src="assets/sprites/icon_trophy.png" alt="" /><span>Rekor</span>
+              <img src="assets/icons/menu-rank.svg" alt="" /><span>Rekor</span>
             </button>
             <button class="side-btn" id="side-body" title="Kondisi Tubuh">
-              <img src="assets/sprites/icon_heart.png" alt="" /><span>Tubuh</span>
+              <img src="assets/icons/ui-heart.svg" alt="" /><span>Tubuh</span>
             </button>
           </nav>
 
@@ -155,7 +155,7 @@
             <div class="duo-row" id="duo-evo">
               <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
               <div class="card missions-card">
-                <h3 class="card-title ico-title"><img class="t-ico" src="assets/sprites/icon_trophy.png" alt="" /><span>Misi &amp; Prestasi</span></h3>
+                <h3 class="card-title ico-title"><img class="t-ico" src="assets/icons/menu-quest.svg" alt="" /><span>Misi &amp; Prestasi</span></h3>
                 <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
               </div>
             </div>
@@ -169,20 +169,20 @@
 
         <!-- CTA utama dipisah dari navigasi utilitas agar fokus visual tidak bercampur. -->
         <button class="dashboard-play" id="btn-play" aria-label="Mulai run">
-          <span class="dashboard-play-icon"><img src="assets/sprites/icon_play.png" alt="" /></span>
+          <span class="dashboard-play-icon"><img src="assets/icons/ui-play.svg" alt="" /></span>
           <span class="dashboard-play-copy"><b>PLAY</b><small>Mulai run sekarang</small></span>
         </button>
         <!-- Dock navigasi utilitas -->
         <nav class="dock">
           <button class="dock-btn" data-nav="roster" aria-label="Roster hero">
             <span class="dock-ico">
-              <img src="assets/sprites/icon_heroes.png" alt="" />
+              <img src="assets/icons/menu-heroes.svg" alt="" />
             </span>
             <span>Heroes</span>
           </button>
           <button class="dock-btn" data-nav="bag" aria-label="Tas & inventaris">
             <span class="dock-ico">
-              <img src="assets/sprites/icon_bag.png" alt="" />
+              <img src="assets/icons/sec-item.svg" alt="" />
             </span>
             <span>Bag</span>
           </button>
@@ -194,17 +194,17 @@
           </button>
           <button class="dock-btn" data-nav="shop" aria-label="Toko">
             <span class="dock-ico">
-              <img src="assets/sprites/icon_shop.png" alt="" />
+              <img src="assets/icons/menu-shop.svg" alt="" />
             </span>
             <span>Shop</span>
           </button>
         </nav>
         <!-- Fitur sekunder tetap tersedia tanpa mengambil fokus dari Play. -->
         <nav class="secondary-dock" aria-label="Fitur sekunder">
-          <button data-nav="campaign" title="Kampanye"><img src="assets/sprites/icon_sirkulasi.png" alt="" /><span>Campaign</span></button>
-          <button data-nav="bp" title="Battle Pass"><img src="assets/sprites/icon_bolt.png" alt="" /><span>Pass</span></button>
-          <button data-nav="codex" title="Bio-Pedia"><img src="assets/sprites/icon_scope.png" alt="" /><span>Bio</span></button>
-          <button data-nav="rank" title="Pangkat"><img src="assets/sprites/icon_trophy.png" alt="" /><span>Rank</span></button>
+          <button data-nav="campaign" title="Kampanye"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Campaign</span></button>
+          <button data-nav="bp" title="Battle Pass"><img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span></button>
+          <button data-nav="codex" title="Bio-Pedia"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span></button>
+          <button data-nav="rank" title="Pangkat"><img src="assets/icons/menu-rank.svg" alt="" /><span>Rank</span></button>
         </nav>
       </section>
 
@@ -445,11 +445,11 @@
         <!-- TOP MLBB: kiri kill stat | tengah wave+timer | kanan currency -->
         <div class="hud-top">
           <div class="hud-stat-left glass">
-            <div class="hud-kills"><img src="assets/sprites/icon_skull.png" alt="" /><span id="hud-kills">0</span></div>
+            <div class="hud-kills"><img src="assets/icons/ui-kill.svg" alt="" /><span id="hud-kills">0</span></div>
           </div>
           <div class="hud-center glass">
             <div id="hud-wave" class="wave-pill">WAVE 1</div>
-            <div id="hud-timer" class="timer-chip"><img src="assets/sprites/icon_timer.png" alt="" /><span id="hud-timer-text">00:00</span></div>
+            <div id="hud-timer" class="timer-chip"><img src="assets/icons/ui-timer.svg" alt="" /><span id="hud-timer-text">00:00</span></div>
             <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
               <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
               <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
@@ -458,7 +458,7 @@
           <div class="hud-stat-right glass">
             <div class="hud-currency-run"><img src="assets/icons/cur-antibodi.svg" alt="" /><span id="hud-currency">0</span></div>
             <div class="hud-currency-run hud-imu-run" id="hud-imu-chip"><img src="assets/icons/cur-imun.svg" alt="" /><span id="hud-imu">0</span></div>
-            <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/sprites/icon_pause.png" alt="" /></button>
+            <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/icons/ui-pause.svg" alt="" /></button>
           </div>
         </div>
         <!-- UI/UX: MENU 1 — "Perjalanan Penjaga" (kanan-atas): progres & pengetahuan.
@@ -520,7 +520,7 @@
           </div>
           <div class="status-bars">
             <div class="hp-row">
-              <img class="heart" src="assets/sprites/icon_heart.png" alt="" />
+              <img class="heart" src="assets/icons/ui-heart.svg" alt="" />
               <div class="hud-hp-track"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
               <span id="hud-hp-text" class="hud-hp-text">100</span>
             </div>
@@ -563,7 +563,7 @@
       <!-- ============ PETI BOSS (modal natural break) ============ -->
       <section id="screen-bosschest" class="screen modal" data-screen="bosschest">
         <div class="modal-box chest-box">
-          <img class="chest-img" src="assets/sprites/deco_chest.png" alt="Peti Boss" />
+          <img class="chest-img" src="assets/icons/ui-chest.svg" alt="Peti Boss" />
           <h2 class="modal-title coral">Peti Boss!</h2>
           <div id="chest-loot" class="chest-loot"><!-- diisi JS --></div>
           <button id="btn-chest-ad" class="btn btn-gold btn-xl">TONTON IKLAN — 2X LOOT</button>
@@ -590,8 +590,8 @@
           <div id="pause-summary" class="pause-summary"><!-- diisi JS --></div>
           <button id="btn-sound-pause" class="btn btn-ghost btn-sm-sound">Suara: AKTIF</button>
           <button id="btn-lang-pause" class="lang-pill lang-pill-pause" title="Language / Bahasa">EN</button>
-          <button id="btn-resume" class="btn btn-primary btn-xl"><img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Lanjutkan</button>
-          <button id="btn-quit-run" class="btn btn-danger"><img class="btn-ico" src="assets/sprites/icon_skull.png" alt="" />Akhiri Run</button>
+          <button id="btn-resume" class="btn btn-primary btn-xl"><img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />Lanjutkan</button>
+          <button id="btn-quit-run" class="btn btn-danger"><img class="btn-ico" src="assets/icons/ui-flag.svg" alt="" />Akhiri Run</button>
         </div>
       </section>
 
@@ -652,12 +652,12 @@
           <div class="summary-reward">
             <span>Antibodi didapat:</span>
             <strong id="gameover-currency"><img class="coin-sm" src="assets/icons/cur-antibodi.svg" alt="" /><span id="gameover-currency-num">0</span></strong>
-            <img class="go-chest" src="assets/sprites/deco_chest.png" alt="" />
+            <img class="go-chest" src="assets/icons/ui-chest.svg" alt="" />
           </div>
           <button id="btn-double-currency" class="btn btn-gold">Tonton Iklan → 2x Antibodi</button>
           <div class="btn-row">
-            <button id="btn-retry" class="btn btn-primary"><img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Main Lagi</button>
-            <button id="btn-home" class="btn"><img class="btn-ico" src="assets/sprites/icon_home.png" alt="" />Dashboard</button>
+            <button id="btn-retry" class="btn btn-primary"><img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />Main Lagi</button>
+            <button id="btn-home" class="btn"><img class="btn-ico" src="assets/icons/ui-home.svg" alt="" />Dashboard</button>
           </div>
         </div>
       </section>
@@ -675,7 +675,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=44"></script>
+  <script type="module" src="js/main.js?v=45"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

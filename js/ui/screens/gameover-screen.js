@@ -212,7 +212,7 @@ export function show(summary) {
     retryBtn.textContent = 'Bab Berikutnya ✓';
     homeBtn.lastChild.textContent = 'Peta Tubuh';
   } else {
-    retryBtn.innerHTML = '<img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Main Lagi';
+    retryBtn.innerHTML = '<img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />Main Lagi';
     homeBtn.lastChild.textContent = 'Dashboard';
   }
 

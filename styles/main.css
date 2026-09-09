@@ -1749,7 +1749,7 @@ img.lock-badge {
 #screen-hud .hud-currency-run{display:flex;align-items:center;gap:4px;font-weight:900;color:#c99013;font-size:14px}
 #screen-hud .hud-currency-run img{width:15px;height:15px}
 #screen-hud .btn-pause{background:linear-gradient(180deg,#2fb3a2,#1f7a70);border:none;width:clamp(40px,9.5vh,48px);height:clamp(40px,9.5vh,48px);min-height:clamp(40px,9.5vh,48px);border-radius:13px;box-shadow:0 3px 8px rgba(31,122,112,.3);flex:0 0 auto}
-#screen-hud .btn-pause img{filter:brightness(0) invert(1)}
+#screen-hud .btn-pause img{filter:none}
 #screen-hud .hud-minimap{top:96px;right:12px;border-color:#fff;width:84px;height:84px;background:rgba(20,88,79,.5)}
 #screen-hud .hud-buffs{top:84px}
 #screen-hud .hud-lvls{flex-direction:column;gap:3px;align-items:flex-start}

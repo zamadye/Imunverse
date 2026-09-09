@@ -224,3 +224,20 @@ Verifikasi: 23 suite e2e = **410 PASS / 0 FAIL** (`e2e-controls` 23/23 ×2, `e2e
 (issue #1), `e2e-r7 segments-emit-on-move-only`, `e2e-v2phase35 p3/p5-*` (simulasi combat acak). `node scripts/check-imports.mjs` lolos.
 Bukti visual: `shots/ui-nav/menu-icons-44.png` (semua ikon baru), `shop-44.png`, `roster-44.png`, `lab-44.png`, `others-44.png`
 (detail hero, Bio-Pedia, Battle Pass, Tas).
+
+## 10. BUILD 45 — sisa PNG generik di HUD / jeda / game over / judul / dashboard
+
+Temuan (runtime, `/tmp/vis.mjs` mendaftar semua `<img src="assets/sprites/…">` yang tampak per layar):
+`icon_play` (judul, PLAY dashboard, Lanjutkan, Main Lagi), `icon_home`, `icon_skull` (HUD kill **dan** Akhiri Run),
+`icon_timer`, `icon_pause`, `icon_heart` (HP), `deco_chest` (Peti Boss, ringkasan) — semua flat satu warna, ukuran
+9–32 px, tanpa outline; tombol PLAY/Jeda memakai `filter: brightness(0) invert(1)` agar putih.
+
+Perubahan: 8 ikon SVG baru (`ui-play/home/flag/kill/timer/pause/heart/chest`) satu bahasa dengan set BUILD 43–44;
+`filter` putih dihapus (SVG sudah krem/ink); `icon_skull` dipisah menjadi **`ui-kill`** (hitung patogen: virus bermata
+silang + centang) dan **`ui-flag`** (Akhiri Run — bendera, bukan tengkorak); dock/quick-tile/side-nav dashboard yang
+disembunyikan `dashboard-focus.css` tetap diseragamkan ke `menu-*.svg` agar tidak ada jalur PNG lama tersisa.
+Hasil: `index.html` **0** referensi `assets/sprites/icon_*.png` (sebelumnya 24); layar menu/HUD/jeda/game over hanya
+memuat sprite in-game (`portrait_*`, `hero_*`, `part_*`, `deco_aura`) — bukan ikon UI.
+
+Verifikasi: `e2e-ui-nav` 21/21, `onboarding` 16/16, `controls` 23/23, `e1` 32/32, `mlbb` 20/20 (×2), `r1` 14/14,
+`v2phase1` 15/15, `purpose` 13/13; `check-imports` lolos. Bukti: `shots/ui-nav/hud-pause-go-45.png`.

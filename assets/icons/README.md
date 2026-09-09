@@ -45,6 +45,14 @@ Ikon **file SVG** untuk header, mata uang, kunci, peran hero, dan bagian Toko (d
 | `sec-premium.svg` | Toko › Paket Premium, aksesori Mahkota | peti teal berpita emas + mahkota bertatah permata Imun |
 | `sec-suplemen.svg` | Toko › Suplemen Sistem Tubuh | kapsul teal/sage + hati koral |
 | `sec-gratis.svg` | Toko › Dapatkan Imun Gratis | kotak hadiah teal berpita koral |
+| `ui-play.svg` | MULAI (judul), PLAY (dashboard), Lanjutkan (jeda), Main Lagi (game over) | segitiga play krem ber-outline teal-deep + kilau emas — terbaca di tombol teal/koral/krem |
+| `ui-home.svg` | Dashboard (game over), side-nav Home | rumah sel: atap teal gemuk, jendela heksagon Imun, pintu koral |
+| `ui-flag.svg` | Akhiri Run (jeda) | bendera krem bergaris teal-light di tiang teal-deep berpucuk emas — "menyerah/selesai", bukan tengkorak |
+| `ui-kill.svg` | hitung patogen dibersihkan (HUD) | virus koral bermata silang + lencana centang sage |
+| `ui-timer.svg` | waktu run (HUD, ringkasan jeda) | stopwatch krem, tombol emas, jarum koral |
+| `ui-pause.svg` | tombol Jeda (HUD) | dua batang krem bersudut bulat ber-outline teal-deep |
+| `ui-heart.svg` | HP (HUD), side-nav Tubuh | hati koral bergaris detak krem |
+| `ui-chest.svg` | Peti Boss, ringkasan run | peti teal berpita emas + gembok emas + kilau |
 
 Ikon **SVG inline** (`js/ui/menu-icons.js`, pola sama dengan `skill-icons.js`) untuk baris upgrade Lab Pasukan,
 kartu item Toko, chip stat detail hero, pilihan level-up, dan Tas — pemetaan `id → ikon` hidup di sisi UI
