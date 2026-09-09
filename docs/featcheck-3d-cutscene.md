@@ -77,10 +77,10 @@
 | `ria_boss_reveal_ch5.mp3` (6.3) | 57.8 KB | 22.1 dtk |
 | `amara_epilog.mp3` (6.4) | 34.8 KB | 13.3 dtk |
 | `ria_epilog.mp3` (6.4) | 40.9 KB | 15.6 dtk |
-| `ria_bark_bab_demam/racun/alergi/kanker.mp3` (R2) | 25–39 KB | 9.5–15.0 dtk |
-| *(pending, next turn)* `ria_bark_bab_final/default.mp3` + 4× `ria_nft_*.mp3` (Task 4) | ±230 KB | ±60 dtk |
+| `ria_bark_bab_demam/racun/alergi/kanker/final/default.mp3` (R2) | 24–39 KB | 8.8–15.0 dtk |
+| `ria_nft_move/levelup/skill/revive.mp3` (Task 4) | 27–36 KB | 10.1–13.5 dtk |
 
-Semua di `assets/audio/narration/`, dimuat on-demand + ducking otomatis (musik turun saat VO bicara).
+**18 file VO lengkap** di `assets/audio/narration/` (total 0.64 MB raw / 0.62 MB gz), dimuat on-demand + ducking otomatis (musik turun saat VO bicara).
 
 ---
 
@@ -200,15 +200,17 @@ Bukti existing jalur 2D: game sudah render **151 musuh + efek @16.6 ms/frame vsy
 | Presenter + VO (auto-dismiss ikut durasi VO) | `js/ui/presenter.js` | ✅ ekstensif |
 | Trigger titik jeda 7.3: pembuka (title→run), transisi bab (prep), reveal boss ch5 (bossSpawn, sekali), epilog (victory bab_final, 2 tombol) | `main.js`, `title-screen.js`, `prep-screen.js`, `gameover-screen.js` | ✅ wiring |
 | Task 4: 4 hook first-time (move/levelup/skill/revive) + meta flags | `game.js` (observasi-only), `main.js`, `state-manager.js` | ✅ wiring |
-| Bark boss + VO (6 bark R2; 4 tergenerate) | `narrative-system` (tanpa perubahan) + `main.js` | ✅ 4/6 VO |
+| Bark boss + VO (6 bark R2) | `narrative-system` (tanpa perubahan) + `main.js` | ✅ 6/6 VO |
+| 4 VO first-time RIA (Task 4) — teks dipendekkan 1× agar 10–13 s (non-blocking) | `assets/audio/narration/ria_nft_*.mp3` + `data/cutscenes.json` | ✅ 4/4 VO |
 
-**Pending (next turn):** 6 VO belum tergenerate (limit 10/turn): `ria_bark_bab_final`, `ria_bark_default`, `ria_nft_move/levelup/skill/revive`. Sistem sudah tolerant (VO gagal = teks saja, tidak error).
+**Koordinasi lintas-agent (issue sudah dibuat):**
+- **#26 → Character Agent**: referensi & swap-in point model 3D (non-blocking; billboard sprite sekarang)
+- **#27 → Arena Agent**: antarmuka ambient per arena vs lapisan musik/VO cutscene (pola ducking `vo-system.js`)
 
 **Pending (perlu device/owner):**
 1. **Gate 3D di device low-end** (syarat D1): jalankan `tools/featcheck/benchmark.html` (Mode A) di device uji Audit Agent — lolos bila long task < 5 s, rAF p95 ≤ 33 ms, tanpa error WebGL. Jika TIDAK lolos → player sudah otomatis fallback 2D (pembuka/epilog tetap jalan).
-2. **Review 4 draft naskah Task 4** (first-time RIA) — teks baru (bukan naskah final 6.x), nada RIA bersemangat/jenaka: ada di `data/cutscenes.json` → `nft.*.text`.
+2. **Review 4 draft naskah Task 4** (first-time RIA) — teks baru (bukan naskah final 6.x), nada RIA bersemangat/jenaka, bisa di-tap skip: `data/cutscenes.json` → `nft.*.text`.
 3. **Durasi transisi vs spec 15–20 s**: naskah final 6.2 (11.6 s + 19.0 s) & 6.3 (12.0 s + 22.1 s) menghasilkan scene ±29–34 s dengan overlap — **naskah final menang atas estimasi durasi di 7.3** (dialog tak boleh dipotong/ditulis ulang). Flag untuk Audit Agent.
-4. Ambient per arena = scope Arena Agent — antarmuka VO/musik sudah siap (satu rantai master); koordinasi via issue.
 
 ## 10. Yang TIDAK saya sentuh (di luar scope / butuh owner keputusan)
 

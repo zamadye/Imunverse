@@ -227,13 +227,13 @@
   },
   "nft": {
     "move": { "vo": "assets/audio/narration/ria_nft_move.mp3",
-      "text": "Gue lihat lo gerak! Nah, gitu dong. Lo ini sel makrofag — penjaga yang nelan musuh bulat-bulat. Geser lo ke dekat musuh, gih!" },
+      "text": "Nah, gitu dong! Lo sel makrofag — si nelam musuh. Geser ke deket musuh, gih!" },
     "levelup": { "vo": "assets/audio/narration/ria_nft_levelup.mp3",
-      "text": "Level up! Lo barusan jadi versi yang lebih gede dan lebih kerasa nampolnya. Kayak sel yang lagi makan — makin kenyang, makin bugar. Gas lagi!" },
+      "text": "Level up! Lo makin gede, makin kerasa nampolnya. Gas lagi, jangan rem!" },
     "skill": { "vo": "assets/audio/narration/ria_nft_skill.mp3",
-      "text": "Nah, itu skill lo! Sekali pakai, efeknya gede. Tapi kayak sprint: ada jeda sebelum lo bisa pakai lagi. Pilih waktunya dengan jitu, ya." },
+      "text": "Nah, itu skill lo! Efeknya gede, tapi ada jeda sebelum bisa dipakai lagi. Pilih waktu yang jitu, ya." },
     "revive": { "vo": "assets/audio/narration/ria_nft_revive.mp3",
-      "text": "Duh, lo rebahan! Tapi tenang — masih ada sel penjaga yang nge-charge lo. Berdiri lagi, kali ini lebih waspada, gih?" }
+      "text": "Duh, rebahan! Tapi masih ada sel penjaga yang nge-charge lo. Berdiri lagi — kali ini lebih waspada, gih?" }
   },
   "bossVo": {
     "bab_demam": "assets/audio/narration/ria_bark_bab_demam.mp3",
