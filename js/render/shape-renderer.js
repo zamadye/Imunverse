@@ -280,6 +280,178 @@ export function drawImpactPulse(ctx, fx) {
   ctx.globalAlpha = 1;
 }
 
+function drawSkillYGlyph(ctx, x, y, len, color, rot = 0, width = 2.2) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, len * 0.42);
+  ctx.lineTo(0, -len * 0.08);
+  ctx.lineTo(-len * 0.33, -len * 0.44);
+  ctx.moveTo(0, -len * 0.08);
+  ctx.lineTo(len * 0.33, -len * 0.44);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawSkillShieldGlyph(ctx, x, y, r, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(2, r * 0.08);
+  ctx.beginPath();
+  ctx.moveTo(x, y - r);
+  ctx.quadraticCurveTo(x + r * 0.86, y - r * 0.42, x + r * 0.52, y + r * 0.62);
+  ctx.quadraticCurveTo(x, y + r * 0.98, x - r * 0.52, y + r * 0.62);
+  ctx.quadraticCurveTo(x - r * 0.86, y - r * 0.42, x, y - r);
+  ctx.stroke();
+}
+
+/**
+ * Character Agent skill signature: motif biologis per archetype hero.
+ * Murni VFX cast/payoff; tidak mengubah efek/damage/cooldown skill.
+ */
+function drawCharacterSkillSignature(ctx, fx, r, t, alpha, mode = 'charge') {
+  const archetype = fx.archetype || 'generic';
+  const col = fx.equityColor || fx.color || '#ffd93d';
+  const hero = fx.heroColor || fx.color || '#35d0ba';
+  const seed = fx.seed || 0;
+  const spin = seed + t * (mode === 'payoff' ? 2.4 : 1.25);
+  const x = fx.x;
+  const y = fx.y;
+  const count = fx.ult ? 12 : 8;
+
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (archetype === 'antibody') {
+    const n = fx.ult ? 5 : 3;
+    ctx.globalAlpha = alpha * (mode === 'payoff' ? 0.82 : 0.62);
+    for (let i = 0; i < n; i++) {
+      const a = spin + (Math.PI * 2 * i) / n;
+      const rr = r * (mode === 'payoff' ? 0.62 + t * 0.18 : 0.52);
+      drawSkillYGlyph(ctx, x + Math.cos(a) * rr, y + Math.sin(a) * rr, r * 0.34, col, a + Math.PI / 2, fx.ult ? 3 : 2.1);
+    }
+  } else if (archetype === 'phagocyte') {
+    ctx.globalAlpha = alpha * 0.72;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = fx.ult ? 7 : 5;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(x + side * r * 0.12, y + r * 0.1);
+      ctx.quadraticCurveTo(x + side * r * (0.55 + 0.2 * t), y + r * (0.38 - 0.18 * t), x + side * r * 0.95, y - r * 0.18);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha * 0.22;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(x, y, r * (0.28 + t * 0.1), 0, Math.PI * 2);
+    ctx.fill();
+  } else if (archetype === 'dendritic' || archetype === 'net') {
+    ctx.globalAlpha = alpha * 0.66;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = fx.ult ? 3.2 : 2.3;
+    for (let i = 0; i < count; i++) {
+      const a = spin + (Math.PI * 2 * i) / count;
+      const r1 = r * 0.18;
+      const r2 = r * (0.62 + 0.22 * t);
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1);
+      ctx.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2);
+      if (archetype === 'dendritic') {
+        const bx = x + Math.cos(a) * r2 * 0.72;
+        const by = y + Math.sin(a) * r2 * 0.72;
+        ctx.moveTo(bx, by);
+        ctx.lineTo(x + Math.cos(a + 0.42) * r2, y + Math.sin(a + 0.42) * r2);
+      }
+      ctx.stroke();
+    }
+    if (archetype === 'net') {
+      ctx.globalAlpha = alpha * 0.38;
+      for (let i = -2; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - r * 0.65, y + i * r * 0.16);
+        ctx.quadraticCurveTo(x, y - r * 0.5 + i * 3, x + r * 0.65, y - i * r * 0.16);
+        ctx.stroke();
+      }
+    }
+  } else if (archetype === 'cytotoxic' || archetype === 'nk_spike' || archetype === 'granule_lance') {
+    ctx.globalAlpha = alpha * 0.72;
+    ctx.strokeStyle = col;
+    ctx.fillStyle = col;
+    ctx.lineWidth = fx.ult ? 4 : 2.5;
+    const n = fx.ult ? 12 : 8;
+    for (let i = 0; i < n; i++) {
+      const a = spin + (Math.PI * 2 * i) / n;
+      const r1 = r * 0.38;
+      const r2 = r * (0.78 + 0.22 * t);
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1);
+      ctx.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2);
+      ctx.stroke();
+      if (archetype === 'granule_lance' && i % 2 === 0) {
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(a) * r2, y + Math.sin(a) * r2, fx.ult ? 3.4 : 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  } else if (archetype === 'vesicle_cloud' || archetype === 'granule_tank') {
+    ctx.globalAlpha = alpha * 0.68;
+    ctx.fillStyle = col;
+    const n = fx.ult ? 10 : 6;
+    for (let i = 0; i < n; i++) {
+      const a = spin + (Math.PI * 2 * i) / n;
+      const rr = r * (0.38 + (i % 3) * 0.08 + t * 0.16);
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(a) * rr, y + Math.sin(a) * rr, fx.ult ? 4.4 : 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = alpha * 0.26;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(a) * rr - 1.2, y + Math.sin(a) * rr - 1.2, fx.ult ? 1.8 : 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = alpha * 0.68;
+      ctx.fillStyle = col;
+    }
+  } else if (archetype === 'helper') {
+    ctx.globalAlpha = alpha * 0.74;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = fx.ult ? 4.4 : 3;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r * 0.58);
+    ctx.lineTo(x, y - r * (0.62 + t * 0.22));
+    ctx.stroke();
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(x, y - r * (0.72 + t * 0.18), fx.ult ? 7 : 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = hero;
+    ctx.globalAlpha = alpha * 0.42;
+    ctx.beginPath();
+    ctx.arc(x, y, r * (0.62 + t * 0.2), 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (archetype === 'regulator') {
+    ctx.globalAlpha = alpha * 0.72;
+    drawSkillShieldGlyph(ctx, x, y, r * (0.48 + t * 0.16), col);
+    ctx.globalAlpha = alpha * 0.36;
+    drawSkillShieldGlyph(ctx, x, y, r * (0.66 + t * 0.18), hero);
+  } else {
+    ctx.globalAlpha = alpha * 0.46;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = fx.ult ? 3 : 2;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath();
+    ctx.arc(x, y, r * (0.54 + t * 0.2), spin, spin + Math.PI * 1.7);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.restore();
+}
+
 /**
  * Skill charge micro-buildup: cincin mengecil ke badan hero dan arc berputar.
  * Efek ini menggantikan kebutuhan frame tambahan karena aset sekarang hanya
@@ -310,6 +482,8 @@ export function drawAbilityCharge(ctx, fx) {
   ctx.arc(fx.x, fx.y, r, fx.seed + t * 3.2, fx.seed + t * 3.2 + Math.PI * 1.72);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  drawCharacterSkillSignature(ctx, fx, r, t, alpha, 'charge');
 
   // inti putih kecil saat hampir trigger
   ctx.globalAlpha = alpha * pulse * (fx.ult ? 0.55 : 0.38);
@@ -346,6 +520,8 @@ export function drawAbilityPayoff(ctx, fx) {
     ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
     ctx.stroke();
   }
+
+  drawCharacterSkillSignature(ctx, fx, r, t, alpha, 'payoff');
 
   ctx.globalAlpha = alpha * (fx.ult ? 0.22 : 0.13);
   ctx.fillStyle = col;

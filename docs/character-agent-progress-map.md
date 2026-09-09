@@ -25,7 +25,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Screenshot review terbaru | ✅ | Ada 4 screenshot review di `shots/review/`, termasuk gameplay equity 11 hero dan UI showcase. |
 | Browser walkthrough semua screen Character UI | 🟡 | Runtime data/import sudah hijau. Screenshot UI terbaru berupa static review sheet dari data/assets; perlu capture DOM interaktif jika ingin QA visual per screen secara ketat. |
 | Runtime mini renderer collection | ✅ | `js/render/character-preview.js` membuat mini canvas memakai `drawHeroEquity()`/`drawPathogenMutation()` yang sama dengan gameplay; dipakai di roster, detail, bag, dan codex. |
-| Active skill visual per hero/state | 🟡 | Audit skill selesai dan HUD button kini punya accent archetype/equity visual-only; gameplay impact/trail unik per hero masih backlog. |
+| Active skill visual per hero/state | ✅ | Audit skill selesai; HUD button dan gameplay cast/payoff VFX kini punya accent archetype/equity visual-only. Screenshot browser multi-hero tetap masuk QA handoff. |
 | Combat damage/balance changes | 🚫 | Tidak disentuh sesuai instruksi; desain visual tidak mengubah math damage. |
 | Arena/background systems | 🚫 | Tidak disentuh untuk scope Character Agent. |
 
@@ -49,6 +49,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Codex/Bio-Pedia | `js/ui/screens/codex-screen.js` | Panel detail equity hero dan mutation pathogen. |
 | HUD | `index.html`, `js/ui/screens/hud-screen.js`, `styles/main.css` | Badge stage equity pada portrait saat gameplay + accent skill archetype/equity. |
 | Runtime mini previews | `js/render/character-preview.js` | Membuat canvas preview hero/pathogen dari renderer gameplay agar UI collection konsisten. |
+| Skill VFX runtime | `js/systems/skill-system.js`, `js/systems/effects-system.js`, `js/render/shape-renderer.js` | Mengirim dan menggambar motif cast/payoff per archetype/equity, visual-only. |
 | CSS presentation | `styles/main.css` | Styling khusus chip, ladder, panel, badge Character UI, preview canvas, dan skill accent. |
 | Skill audit | `docs/character-skill-visual-audit.md` | Mapping 11 hero × skill → effect kind → status visual. |
 | Handoff agent lain | `docs/character-agent-handoff.md` | Daftar koordinasi QA/E2E, Arena, Combat, i18n/copy yang di luar atau lintas scope saya. |
@@ -63,7 +64,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `c9b7cdb Redesign immune equity and pathogen visuals` | ✅ | Data desain 11 hero × 4 equity, renderer equity/pathogen, part icon equity, gameplay screenshot awal. |
 | `8cfcc9c Add arena equity showcase screenshot` | ✅ | Screenshot arena gameplay sheet 11 hero × 4 Equity stage. |
 | `54d9c91 Extend character collection design surfaces` | ✅ | Roster, hero detail, bag, codex, HUD badge, pathogen family metadata, screenshot UI + atlas pathogen. |
-| Runtime preview + skill accent pass | ✅ | Mini preview canvas memakai renderer gameplay, HUD skill accent per archetype/equity, skill visual audit, i18n label Character. |
+| `268f610 Complete character preview and skill visual scope` | ✅ | Mini preview canvas memakai renderer gameplay, HUD skill accent per archetype/equity, skill visual audit, i18n label Character. |
+| Skill archetype VFX + full Character i18n pass | ✅ | Gameplay cast/payoff motif per archetype/equity, `tierCues` translation support, full Character cue EN coverage, skill VFX screenshot. |
 
 ---
 
@@ -106,6 +108,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `shots/review/character-equity-11heroes-arena.png` | ✅ | 11 hero × Equity I–Full Equity dari arena gameplay canvas. |
 | `shots/review/character-pathogen-mutation-atlas.png` | ✅ | Atlas 13 pathogen × tier 0–4 memakai sprite aktual + metadata mutation. |
 | `shots/review/character-collection-ui-showcase.png` | ✅ | Showcase Roster, Hero Detail, Bag, HUD, Bio-Pedia setelah design lanjutan. |
+| `shots/review/character-skill-archetype-vfx.png` | ✅ | 11 hero × skill set + archetype cast/payoff VFX map, visual-only. |
 
 ---
 
@@ -136,6 +139,7 @@ Hasil terakhir:
 
 ```text
 VERIFY hero11x4=true pathogenFamilies=12 enemyFamilyMissing=none
+CHARACTER_TRANSLATION_MISSING 0
 ```
 
 ---
@@ -160,7 +164,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 |---|---:|---|
 | Audit skill actual per hero | ✅ | `docs/character-skill-visual-audit.md` memetakan hero → skill ids → effect kind → visual status. |
 | Tentukan apakah perlu skill FX unik per archetype | 🟡 | HUD accent sudah cukup untuk UI; gameplay impact/trail unik masih perlu keputusan/QA. |
-| Implement visual-only skill accent per hero/archetype | ✅ | `hud-screen.js` + `styles/main.css` memberi accent button berdasarkan archetype dan warna Equity aktif, tanpa mengubah damage/cooldown. |
+| Implement visual-only skill accent per hero/archetype | ✅ | `hud-screen.js`, `skill-system.js`, `effects-system.js`, `shape-renderer.js`, dan `styles/main.css` memberi accent button + cast/payoff VFX berdasarkan archetype dan warna Equity aktif, tanpa mengubah damage/cooldown. |
 | Screenshot skill state | ⬜ | Minimal 3 hero archetype berbeda dengan skill ready/cooldown/trigger; cocok dikerjakan QA/browser agent. |
 
 ### Prioritas C — Runtime preview renderer untuk collection
@@ -175,8 +179,8 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 | Task | Status | Acceptance criteria |
 |---|---:|---|
-| Copy review semua `visualCue`, `baseCue`, `mutationFocus` | 🔄 | Bahasa ID sudah konsisten untuk pass visual; review istilah publik/anak masih bisa dipoles. |
-| i18n English untuk field baru | 🟡 | Label/rule UI Character baru sudah ditambah di `data/lang.json`; terjemahan mendalam untuk seluruh `baseCue`/`visualCue` data masih backlog bila target bilingual strict. |
+| Copy review semua `visualCue`, `baseCue`, `mutationFocus` | ✅ | Bahasa ID tetap konsisten dan semua cue Character penting sudah punya pasangan EN di `data/lang.json`. |
+| i18n English untuk field baru | ✅ | `data-store.js` kini menerjemahkan `tierCues` array; `data/lang.json` mencakup field Character `baseCue`, `visualCue`, `mutationFocus`, `tierCues`, label, dan anatomy. |
 | Dense screenshot label cleanup | 🟡 | Screenshot atlas/large sheet cukup untuk review; jika dipakai publik perlu padding/label lebih besar. |
 
 ### Prioritas E — Konten/logic di luar Character visual pass

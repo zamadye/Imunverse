@@ -8,7 +8,8 @@
 - Semua 11 hero memiliki 3 skill aktif di `data/heroes.json`.
 - HUD sudah memakai glyph mekanisme imun dari `js/ui/screens/hud-screen.js`.
 - Pass terbaru menambah accent visual skill berdasarkan `archetype` dan warna Equity aktif dari `data/character-designs.json`.
-- FX gameplay unik per hero/archetype masih backlog terpisah karena perlu QA animasi dan tidak boleh menyentuh damage math.
+- Gameplay cast/payoff VFX juga membawa motif biologis per archetype lewat `skill-system.js` → `effects-system.js` → `shape-renderer.js`.
+- Semua perubahan skill tetap visual-only: tidak mengubah damage, cooldown, radius, atau efek gameplay.
 
 ## Mapping hero → archetype → skill visual saat ini
 
@@ -56,12 +57,16 @@
 | `data/skills.json` | Definisi effect kind, color, cooldown/damage existing. |
 | `data/character-designs.json` | Archetype hero + warna/cue Equity aktif. |
 | `js/ui/screens/hud-screen.js` | Build ability button: glyph, `data-archetype`, `--hero`, `--eq`, tooltip stage. |
+| `js/systems/skill-system.js` | Mengirim metadata archetype/equity ke VFX saat skill dipakai. |
+| `js/systems/effects-system.js` | Menyimpan metadata Character pada efek `abilityCharge`/`abilityPayoff`. |
+| `js/render/shape-renderer.js` | Menggambar motif biologis cast/payoff per archetype. |
 | `styles/main.css` | Accent CSS per archetype: antibody Y, dendritic/net grid, phagocyte crescent, cytotoxic/spike ring. |
 
 ## Belum dikerjakan dalam skill visual
 
 | Task | Status | Catatan |
 |---|---:|---|
-| Impact/trail gameplay unik per archetype | ⬜ | Bisa dibuat visual-only di `effects-system`/renderer, tapi perlu QA agar tidak mengubah damage/cooldown. |
+| Cast/payoff gameplay motif per archetype | ✅ | Implementasi visual-only di `effects-system`/`shape-renderer`; opsi damage/cooldown tidak disentuh. |
+| Per-target trail/impact unik setiap hit | ⬜ | Belum dikerjakan agar tidak menambah noise/perf cost tanpa QA khusus; bila perlu, kerjakan sebagai pass terpisah. |
 | Screenshot skill trigger multi-hero | ⬜ | Butuh browser capture per hero atau QA agent dengan screenshot runner. |
-| Copy tooltip bilingual untuk semua skill accent | 🟡 | Tooltip stage sudah ada; EN copy bisa dilengkapi di pass i18n. |
+| Copy tooltip bilingual untuk semua skill accent | ✅ | Tooltip stage + field Character penting sudah punya entry/rule di `data/lang.json`. |

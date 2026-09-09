@@ -21,7 +21,7 @@ Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubaha
 3. `bag` — cek part evolusi + design collection preview.
 4. `codex` hero detail — cek panel Design Equity Hero.
 5. `codex` enemy detail — cek panel Design Mutasi Pathogen tier 0–4.
-6. `hud` gameplay — cek badge equity portrait + skill accent archetype/equity.
+6. `hud` gameplay — cek badge equity portrait, skill button accent, dan cast/payoff VFX archetype/equity saat skill dipakai.
 
 ### Acceptance criteria
 - `npm run check` tetap lulus.
@@ -57,15 +57,16 @@ Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubaha
 
 ## 4. i18n / Copy Agent
 
-**Status:** sebagian sudah dikerjakan oleh Character Agent.
+**Status:** dasar teknis dan terjemahan Character sudah dikerjakan oleh Character Agent; review editorial tetap bisa diambil copy agent bila ingin polish publik.
 
 ### Sudah
 - Label/rule UI Character baru ditambah ke `data/lang.json`.
-- `data-store.js` sudah memasukkan `mutationFocus` sebagai field yang bisa diterjemahkan.
+- `data-store.js` menerjemahkan `mutationFocus` dan `tierCues` array.
+- Entry English untuk `baseCue`, `visualCue`, `tierCues`, `mutationFocus`, label, dan anatomy utama Character sudah ditambahkan.
 
-### Belum
-- Terjemahan English mendalam untuk seluruh `baseCue`, `visualCue`, `tierCues`, dan `mutationFocus` di `data/character-designs.json`.
-- Review bahasa publik agar istilah imunologi tetap benar tetapi ramah anak.
+### Belum opsional
+- Review editorial tone-of-voice publik agar istilah imunologi tetap benar tetapi ramah anak.
+- QA bilingual langsung di browser setelah language toggle EN.
 
 ---
 

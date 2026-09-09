@@ -101,8 +101,14 @@ const TRANSLATE_FIELDS = new Set([
   'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
   'question', 'answer', 'text', 'goal', 'tagline', 'funKid', 'fact',
   'baseCue', 'anatomy', 'visualCue', 'collectionNote', 'collectionTag',
-  'collectionLabel', 'visualRule', 'mutationFocus',
+  'collectionLabel', 'visualRule', 'mutationFocus', 'tierCues',
 ]);
+
+function translateFieldValue(v, force) {
+  if (typeof v === 'string') return t(v);
+  if (Array.isArray(v)) return v.map((x) => (typeof x === 'string' ? t(x) : cloneMaybeTranslate(x, force)));
+  return cloneMaybeTranslate(v, force);
+}
 
 function cloneMaybeTranslate(v, force) {
   if (typeof v === 'string') return v;
@@ -111,7 +117,7 @@ function cloneMaybeTranslate(v, force) {
     const o = {};
     for (const k of Object.keys(v)) {
       const val = v[k];
-      o[k] = (force && TRANSLATE_FIELDS.has(k) && typeof val === 'string') ? t(val) : cloneMaybeTranslate(val, force);
+      o[k] = (force && TRANSLATE_FIELDS.has(k)) ? translateFieldValue(val, force) : cloneMaybeTranslate(val, force);
     }
     return o;
   }
