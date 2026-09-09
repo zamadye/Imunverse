@@ -8,6 +8,7 @@ import { screenManager } from '../screen-manager.js';
 import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { playOnce } from '../cinematic.js';
+import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): pembuka 6.1
 import { game } from '../../core/game.js';
 import { audio } from '../../systems/audio-system.js';
 import { writeSave } from '../../save/save-manager.js';
@@ -33,8 +34,16 @@ function startOnboardingRun() {
     meta.selectedMode = 'kampanye';
   }
   writeSave(meta);
-  // Sinematik onboarding (dapat di-skip) → LANGSUNG gameplay
-  playOnce('onboarding', () => game.startRun(starter.id));
+  // R3 (Narrative-Cinematic): CUTSCENE PEMBUKA (naskah final 6.1 — 3D dgn
+  // fallback 2D otomatis, dapat di-skip) → LANGSUNG gameplay (tanpa loading
+  // screen — story doc 7.2#5). V2 onboarding lama (teks) tetap jadi cadangan
+  // bila data/cutscenes.json tak tersedia.
+  const cs = getData().cutscenes;
+  if (cs && cs.scenes && cs.scenes.pembuka) {
+    playCutscene('pembuka', () => game.startRun(starter.id));
+  } else {
+    playOnce('onboarding', () => game.startRun(starter.id));
+  }
 }
 
 export function wire() {

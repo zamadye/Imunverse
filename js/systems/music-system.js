@@ -15,18 +15,27 @@ import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 import { audio } from './audio-system.js';
 
-const BPM = 112;
-const STEP = 60 / BPM / 2; // 8th note
-
 // Nada yang dipakai (Hz dihitung dari A4=440)
 const NOTE_OFFSET = { C: -9, D: -7, E: -5, F: -4, G: -2, A: 0, B: 2 };
-function freq(note) {
+function freq(note, shift = 0) {
   if (!note) return 0;
   const m = /^([A-G])(\d)$/.exec(note);
   if (!m) return 0;
-  const semi = NOTE_OFFSET[m[1]] + (Number(m[2]) - 4) * 12;
+  const semi = NOTE_OFFSET[m[1]] + (Number(m[2]) - 4) * 12 + shift;
   return 440 * Math.pow(2, semi / 12);
 }
+
+// R3 (Narrative-Cinematic): tema musikal per chapter — PROSEDURAL (0 KB, D3).
+// Semua tema dibangun dari progresi dasar yang sama (transposisi + warna
+// minor utk bab gelap) → konsisten dgn identitas audio game, beda suasana.
+const THEMES = {
+  luka:   { bpm: 112, shift: 0,  minor: false },
+  demam:  { bpm: 118, shift: 2,  minor: false },
+  racun:  { bpm: 122, shift: 4,  minor: false },
+  alergi: { bpm: 116, shift: -3, minor: false },
+  kanker: { bpm: 96,  shift: -5, minor: true },
+  final:  { bpm: 126, shift: 1,  minor: true },
+};
 
 // Progresi ceria: C – G – Am – F ×2 (1 bar per akor, 8 bar)
 const CHORDS = [
@@ -34,6 +43,12 @@ const CHORDS = [
   ['C4', 'E4', 'G4'], ['G3', 'B3', 'D4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4'],
 ];
 const BASS = ['C3', 'G2', 'A2', 'F2', 'C3', 'G2', 'F2', 'G2'];
+// Warna minor (bab gelap: kanker/final) — Fm–Dm–Am–C ×2
+const MINOR_CHORDS = [
+  ['F3', 'A3', 'C4'], ['D3', 'F3', 'A3'], ['A2', 'C3', 'E3'], ['C3', 'E3', 'G3'],
+  ['F3', 'A3', 'C4'], ['D3', 'F3', 'A3'], ['C3', 'E3', 'G3'], ['D3', 'F3', 'A3'],
+];
+const MINOR_BASS = ['F2', 'D2', 'A2', 'C2', 'F2', 'D2', 'C2', 'D2'];
 
 // Motif pentatonik penyahut (null = Istirahat) — 8 bar × 8 langkah
 const MELODY = [
@@ -55,6 +70,21 @@ class MusicSystem {
     this.gain = null;
     this.step = 0;
     this.nextT = 0;
+    this.themeKey = 'luka'; // R3: tema chapter (default = progresi lama)
+    this._theme = THEMES.luka;
+    this.stepDur = 60 / this._theme.bpm / 2;
+  }
+
+  /** R3: pilih tema chapter (dipanggil sebelum start: runstart & cutscene). */
+  setTheme(key) {
+    this.themeKey = THEMES[key] ? key : 'luka';
+    this._theme = THEMES[this.themeKey];
+    this.stepDur = 60 / this._theme.bpm / 2;
+    // bila sedang berputar: jadwal ulang tempo mulai langkah berikutnya
+    if (this.timer) { this.step = 0; this.nextT = this._freshNextT(); }
+  }
+  _freshNextT() {
+    return audio.ctx ? audio.ctx.currentTime + 0.35 : this.nextT;
   }
 
   /** Musik aktif bila meta.musicOn !== false (default AKTIF). */
@@ -86,6 +116,8 @@ class MusicSystem {
     if (!audio.unlock()) return;
     if (!this.ensureGain()) return;
     if (this.timer) return;
+    this._theme = THEMES[this.themeKey] || THEMES.luka;
+    this.stepDur = 60 / this._theme.bpm / 2;
     this.step = 0;
     this.nextT = audio.ctx.currentTime + 0.1;
     this.timer = setInterval(() => this.schedule(), 90);
@@ -105,7 +137,7 @@ class MusicSystem {
     while (this.nextT < ctx.currentTime + 0.35) {
       this.playStep(this.step, this.nextT);
       this.step = (this.step + 1) % TOTAL_STEPS;
-      this.nextT += STEP;
+      this.nextT += this.stepDur;
     }
   }
 

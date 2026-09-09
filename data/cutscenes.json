@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "doc": "R3 (Narrative-Cinematic): cutscene produksi — naskah FINAL story doc 6.1–6.4 verbatim; transisi bab lain memakai teks R2 existing (diformat ulang, bukan ditulis ulang). render: '3d' = three.js (js/vendor) dengan fallback otomatis '2d'. Durasi VO terukur dari file (tag Xing). Titik jeda: story doc 7.3.",
+  "speakers": {
+    "amara": { "name": "DR. AMARA", "accent": "#a9d795", "sprite": "assets/sprites/amara_pose_talk.png" },
+    "ria": { "name": "RIA", "accent": "#7dffb8", "sprite": "assets/sprites/ria_pose_talk.png" }
+  },
+  "scenes": {
+    "pembuka": {
+      "seenKey": "cutscene_pembuka",
+      "music": "luka",
+      "shots3d": [
+        { "id": "ruang_estab", "t0": 0, "t1": 7.2, "env": "ruang",
+          "cam": { "from": [0, 0.3, 6.4], "to": [0, 0.35, 6.0], "lookFrom": [0, 0.1, 0], "lookTo": [0.1, 0.0, 0] },
+          "actors": [ { "who": "amara", "x": -1.7, "y": 0.25, "z": 0.4, "s": 1.15 } ],
+          "props": [ { "type": "bed" }, { "type": "wound", "tFrom": 6.4 } ] },
+        { "id": "close_luka", "t0": 7.2, "t1": 14.0, "env": "ruang",
+          "cam": { "from": [0, 0.35, 6.0], "to": [0.55, 0.12, 0.5], "lookFrom": [0.1, 0.0, 0], "lookTo": [0.55, 0.02, 0.25] },
+          "actors": [], "props": [ { "type": "bed" }, { "type": "wound", "pulse": true } ] },
+        { "id": "matchcut", "t0": 14.0, "t1": 17.0, "env": "mikro", "matchcut": true,
+          "cam": { "from": [0, 0, 3.5], "to": [0, 0, -9], "lookFrom": [0, 0, -4], "lookTo": [0, 0, -18] },
+          "actors": [], "props": [] },
+        { "id": "ria_sinyal", "t0": 17.0, "t1": 25.0, "env": "mikro", "riaOn": 18.5,
+          "cam": { "from": [0, 0, -9], "to": [0.6, 0.3, -1.5], "lookFrom": [0, 0, -18], "lookTo": [0, 0, -3.5] },
+          "actors": [ { "who": "mako", "x": 0, "y": -0.35, "z": -3.5, "s": 1.3 } ],
+          "props": [ { "type": "virionAhead" } ] },
+        { "id": "mikro_estab", "t0": 25.0, "t1": 48.0, "env": "mikro", "riaOn": 18.5,
+          "cam": { "from": [0.6, 0.3, -1.5], "to": [0, 0.4, 7.5], "lookFrom": [0, 0, -3.5], "lookTo": [0, 0, -2.5] },
+          "actors": [ { "who": "mako", "x": 0, "y": -0.35, "z": -3.5, "s": 1.3 } ],
+          "props": [] }
+      ],
+      "shots2d": [
+        { "id": "ruang_estab", "t0": 0, "t1": 7.2, "env": "ruang",
+          "cam": { "zoom": [0.92, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.24, "y": 0.55, "s": 0.5 } ],
+          "props": [ { "type": "bed" }, { "type": "hand", "tFrom": 6.4 } ] },
+        { "id": "close_luka", "t0": 7.2, "t1": 14.0, "env": "ruang",
+          "cam": { "zoom": [1.0, 2.3], "pan": [0, 0, 0.06, -0.05] },
+          "actors": [], "props": [ { "type": "bed", "big": true }, { "type": "wound2d", "pulse": true } ] },
+        { "id": "matchcut", "t0": 14.0, "t1": 17.0, "env": "mikro", "matchcut": true,
+          "cam": { "zoom": [1.6, 1.0] }, "actors": [], "props": [] },
+        { "id": "ria_sinyal", "t0": 17.0, "t1": 25.0, "env": "mikro", "riaOn": 18.5,
+          "cam": { "zoom": [1.0, 1.08] },
+          "actors": [ { "who": "mako", "x": 0.5, "y": 0.52, "s": 0.42 } ],
+          "props": [ { "type": "virionAhead" } ] },
+        { "id": "mikro_estab", "t0": 25.0, "t1": 48.0, "env": "mikro", "riaOn": 18.5,
+          "cam": { "zoom": [1.08, 0.85] },
+          "actors": [ { "who": "mako", "x": 0.5, "y": 0.52, "s": 0.42 } ],
+          "props": [] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 20.8,
+          "vo": "assets/audio/narration/amara_cutscene_pembuka.mp3",
+          "text": "Cuma luka gores kok, tapi tetap harus diperhatikan — kalau kotor sedikit saja, bisa infeksi. Untungnya tubuh kita udah ada pasukan sendiri yang langsung siaga begitu ada luka." },
+        { "t": 18.5, "who": "ria", "dur": 15.3,
+          "vo": "assets/audio/narration/ria_cutscene_pembuka.mp3",
+          "text": "Woy, bangun! Ada celah masuk di lengan sebelah sini, dan bakteri udah mulai nyusup duluan. Lo satu-satunya yang deket lokasi — gerak sekarang, gih!" }
+      ]
+    },
+    "transisi_bab_demam": {
+      "seenKey": "cutscene_transisi_bab_demam",
+      "music": "demam",
+      "layout": "split",
+      "shots2d": [
+        { "id": "p1", "t0": 0, "t1": 11.0, "env": "ruang",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.52 } ],
+          "props": [] },
+        { "id": "p2", "t0": 11.0, "t1": 19.5, "env": "mikro",
+          "cam": { "zoom": [1.0, 1.1] },
+          "actors": [], "props": [ { "type": "heatShimmer" } ] },
+        { "id": "p3", "t0": 19.5, "t1": 30.5, "env": "mikro",
+          "cam": { "zoom": [1.1, 1.25] },
+          "actors": [ { "who": "mako", "x": 0.62, "y": 0.55, "s": 0.4 } ],
+          "props": [ { "type": "heatShimmer" } ] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 11.6,
+          "vo": "assets/audio/narration/amara_transisi_ch2.mp3",
+          "text": "Suhunya naik jadi 38.5, tapi ini normal kok — badan lagi kerja ekstra ngelawan virus flu-nya." },
+        { "t": 10.5, "who": "ria", "dur": 19.0,
+          "vo": "assets/audio/narration/ria_transisi_ch2.mp3",
+          "text": "Denger itu? Suhu naik artinya sinyal bahaya baru aja dikirim ke seluruh badan. Bentar lagi bala bantuan bakal lebih banyak yang dateng — tapi musuhnya juga makin ganas. Siap-siap." }
+      ]
+    },
+    "transisi_bab_racun": {
+      "seenKey": "cutscene_transisi_bab_racun",
+      "music": "racun",
+      "layout": "split",
+      "shots2d": [
+        { "id": "p1", "t0": 0, "t1": 8.0, "env": "ruang",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.52 } ], "props": [] },
+        { "id": "p2", "t0": 8.0, "t1": 16.0, "env": "mikro",
+          "cam": { "zoom": [1.0, 1.12] },
+          "actors": [ { "who": "mako", "x": 0.62, "y": 0.55, "s": 0.4 } ],
+          "props": [ { "type": "toxicDrift" } ] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 6.5,
+          "text": "Sepertinya ada yang tidak beres dengan makanannya semalam. Kita bantu tubuhnya membersihkan diri." },
+        { "t": 8.5, "who": "ria", "dur": 7.0,
+          "text": "Racun ikut masuk bareng makanan! Musuh datang lebih cepat dan acak — hajar di Lambung sebelum menyebar!" }
+      ]
+    },
+    "transisi_bab_alergi": {
+      "seenKey": "cutscene_transisi_bab_alergi",
+      "music": "alergi",
+      "layout": "split",
+      "shots2d": [
+        { "id": "p1", "t0": 0, "t1": 8.0, "env": "ruang",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.52 } ], "props": [] },
+        { "id": "p2", "t0": 8.0, "t1": 16.0, "env": "mikro",
+          "cam": { "zoom": [1.0, 1.12] },
+          "actors": [ { "who": "mako", "x": 0.62, "y": 0.55, "s": 0.4 } ],
+          "props": [ { "type": "staticFuzz" } ] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 6.5,
+          "text": "Reaksi alerginya cukup kuat — tubuhnya menyerang sesuatu yang sebenarnya tidak berbahaya." },
+        { "t": 8.5, "who": "ria", "dur": 7.0,
+          "text": "Aneh... sebagian pasukan kita ngamuk sendiri. Musuh dalam selimut! Tenangkan medan, jangan sampai tubuh melukai dirinya sendiri." }
+      ]
+    },
+    "transisi_bab_final": {
+      "seenKey": "cutscene_transisi_bab_final",
+      "music": "final",
+      "layout": "split",
+      "shots2d": [
+        { "id": "p1", "t0": 0, "t1": 8.0, "env": "ruang_malam",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.52 } ], "props": [] },
+        { "id": "p2", "t0": 8.0, "t1": 16.0, "env": "mikro",
+          "cam": { "zoom": [1.0, 1.15] },
+          "actors": [ { "who": "mako", "x": 0.62, "y": 0.55, "s": 0.4 } ],
+          "props": [ { "type": "stormDrift" } ] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 6.5,
+          "text": "Malam ini penentuan. Aku di sini — dan 'pasukan' di dalam sana juga tidak akan menyerah." },
+        { "t": 8.5, "who": "ria", "dur": 7.0,
+          "text": "Semua ancaman yang pernah kita lawan, datang bersamaan. Satu malam. Satu tubuh. Satu kesempatan. Untuk Inang!" }
+      ]
+    },
+    "boss_reveal_bab_kanker": {
+      "seenKey": "cutscene_boss_reveal_bab_kanker",
+      "music": "kanker",
+      "layout": "split",
+      "shots2d": [
+        { "id": "p1", "t0": 0, "t1": 12.5, "env": "ruang_malam",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.52 } ], "props": [] },
+        { "id": "p2", "t0": 12.5, "t1": 21.5, "env": "mikro_gelap",
+          "cam": { "zoom": [1.0, 1.15] },
+          "actors": [], "props": [ { "type": "shadowMass" } ] },
+        { "id": "p3", "t0": 21.5, "t1": 34.0, "env": "mikro_gelap",
+          "cam": { "zoom": [1.15, 1.3] },
+          "actors": [ { "who": "mako", "x": 0.62, "y": 0.55, "s": 0.4 } ],
+          "props": [ { "type": "shadowMass" } ] }
+      ],
+      "dialog": [
+        { "t": 1.0, "who": "amara", "dur": 12.0,
+          "vo": "assets/audio/narration/amara_boss_reveal_ch5.mp3",
+          "text": "Ada hasil yang perlu kita perhatikan lebih lanjut. Bukan berarti hal terburuk — tapi kita perlu waktu untuk memastikan." },
+        { "t": 11.5, "who": "ria", "dur": 22.1,
+          "vo": "assets/audio/narration/ria_boss_reveal_ch5.mp3",
+          "text": "Ini... ini beda. Sel ini bukan penyusup dari luar. Dia... dia bagian dari kita yang somehow salah tumbuh. Gue nggak yakin gimana cara ngenalinnya sebagai musuh, tapi kita nggak punya pilihan lain." }
+      ]
+    },
+    "epilog": {
+      "seenKey": "cutscene_epilog",
+      "music": "final",
+      "shots3d": [
+        { "id": "kamar_estab", "t0": 0, "t1": 12.0, "env": "kamar_rs",
+          "cam": { "from": [0, 0.4, 6.8], "to": [0.2, 0.45, 5.6], "lookFrom": [0, 0.1, 0], "lookTo": [0.2, 0.1, 0] },
+          "actors": [ { "who": "amara", "x": -2.6, "y": 0.2, "z": 0.4, "s": 1.1, "walkTo": { "x": -1.4, "tFrom": 2.0, "tTo": 6.0 } } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang" }, { "type": "sunbeam" } ] },
+        { "id": "amara_line", "t0": 12.0, "t1": 27.0, "env": "kamar_rs",
+          "cam": { "from": [0.2, 0.45, 5.6], "to": [-0.9, 0.5, 3.4], "lookFrom": [0.2, 0.1, 0], "lookTo": [-1.3, 0.3, 0.4] },
+          "actors": [ { "who": "amara", "x": -1.4, "y": 0.2, "z": 0.4, "s": 1.1 } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang" }, { "type": "sunbeam" } ] },
+        { "id": "inang_reveal", "t0": 27.0, "t1": 35.0, "env": "kamar_rs",
+          "cam": { "from": [-0.9, 0.5, 3.4], "to": [0.75, 0.18, 1.6], "lookFrom": [-1.3, 0.3, 0.4], "lookTo": [0.8, 0.05, 0.2] },
+          "actors": [],
+          "props": [ { "type": "bed_rs" }, { "type": "inang", "pulse": true }, { "type": "sunbeam" } ] },
+        { "id": "ria_line", "t0": 35.0, "t1": 52.0, "env": "kamar_rs", "riaOn": 36.0,
+          "cam": { "from": [0.75, 0.18, 1.6], "to": [0.2, 0.3, 3.6], "lookFrom": [0.8, 0.05, 0.2], "lookTo": [0.3, 0.15, 0.1] },
+          "actors": [ { "who": "amara", "x": -1.4, "y": 0.2, "z": 0.4, "s": 1.05 } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang" }, { "type": "sunbeam" } ] },
+        { "id": "hold_final", "t0": 52.0, "t1": 60.0, "env": "kamar_rs", "riaOn": 36.0, "fadeWhite": true,
+          "cam": { "from": [0.2, 0.3, 3.6], "to": [0, 0.3, 4.4], "lookFrom": [0.3, 0.15, 0.1], "lookTo": [0, 0.1, 0] },
+          "actors": [],
+          "props": [ { "type": "bed_rs" }, { "type": "inang" }, { "type": "sunbeam" } ] }
+      ],
+      "shots2d": [
+        { "id": "kamar_estab", "t0": 0, "t1": 12.0, "env": "kamar_rs",
+          "cam": { "zoom": [0.9, 1.0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.5, "walkFrom": 0.1 } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang2d" }, { "type": "sunbeam2d" } ] },
+        { "id": "amara_line", "t0": 12.0, "t1": 27.0, "env": "kamar_rs",
+          "cam": { "zoom": [1.0, 1.12], "pan": [0, 0, -0.08, 0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.5 } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang2d" }, { "type": "sunbeam2d" } ] },
+        { "id": "inang_reveal", "t0": 27.0, "t1": 35.0, "env": "kamar_rs",
+          "cam": { "zoom": [1.12, 1.7], "pan": [-0.08, 0, 0.06, -0.04] },
+          "actors": [],
+          "props": [ { "type": "bed_rs" }, { "type": "inang2d", "pulse": true }, { "type": "sunbeam2d" } ] },
+        { "id": "ria_line", "t0": 35.0, "t1": 52.0, "env": "kamar_rs", "riaOn": 36.0,
+          "cam": { "zoom": [1.7, 1.05], "pan": [0.06, -0.04, -0.04, 0] },
+          "actors": [ { "who": "amara", "x": 0.3, "y": 0.55, "s": 0.45 } ],
+          "props": [ { "type": "bed_rs" }, { "type": "inang2d" }, { "type": "sunbeam2d" } ] },
+        { "id": "hold_final", "t0": 52.0, "t1": 60.0, "env": "kamar_rs", "riaOn": 36.0, "fadeWhite": true,
+          "cam": { "zoom": [1.05, 1.15] },
+          "actors": [],
+          "props": [ { "type": "bed_rs" }, { "type": "inang2d" }, { "type": "sunbeam2d" } ] }
+      ],
+      "dialog": [
+        { "t": 13.0, "who": "amara", "dur": 13.3,
+          "vo": "assets/audio/narration/amara_epilog.mp3",
+          "text": "Selamat, bertahan dengan baik. Sekarang tinggal istirahat, biar 'pasukan' di dalam sana yang lanjutin kerjanya." },
+        { "t": 36.0, "who": "ria", "dur": 15.6,
+          "vo": "assets/audio/narration/ria_epilog.mp3",
+          "text": "Kerja bagus. Lo nggak akan pernah ketemu dia secara langsung, tapi... dia baru aja dapet satu hari lagi buat hidup, gara-gara lo." }
+      ]
+    }
+  },
+  "nft": {
+    "move": { "vo": "assets/audio/narration/ria_nft_move.mp3",
+      "text": "Gue lihat lo gerak! Nah, gitu dong. Lo ini sel makrofag — penjaga yang nelan musuh bulat-bulat. Geser lo ke dekat musuh, gih!" },
+    "levelup": { "vo": "assets/audio/narration/ria_nft_levelup.mp3",
+      "text": "Level up! Lo barusan jadi versi yang lebih gede dan lebih kerasa nampolnya. Kayak sel yang lagi makan — makin kenyang, makin bugar. Gas lagi!" },
+    "skill": { "vo": "assets/audio/narration/ria_nft_skill.mp3",
+      "text": "Nah, itu skill lo! Sekali pakai, efeknya gede. Tapi kayak sprint: ada jeda sebelum lo bisa pakai lagi. Pilih waktunya dengan jitu, ya." },
+    "revive": { "vo": "assets/audio/narration/ria_nft_revive.mp3",
+      "text": "Duh, lo rebahan! Tapi tenang — masih ada sel penjaga yang nge-charge lo. Berdiri lagi, kali ini lebih waspada, gih?" }
+  },
+  "bossVo": {
+    "bab_demam": "assets/audio/narration/ria_bark_bab_demam.mp3",
+    "bab_racun": "assets/audio/narration/ria_bark_bab_racun.mp3",
+    "bab_alergi": "assets/audio/narration/ria_bark_bab_alergi.mp3",
+    "bab_kanker": "assets/audio/narration/ria_bark_bab_kanker.mp3",
+    "bab_final": "assets/audio/narration/ria_bark_bab_final.mp3",
+    "default": "assets/audio/narration/ria_bark_default.mp3"
+  }
+}

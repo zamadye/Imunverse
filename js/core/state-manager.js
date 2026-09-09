@@ -50,6 +50,10 @@ export function createDefaultMeta() {
     coachDone: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     cinematicsSeen: {},
+    // R3 (Narrative-Cinematic): penanda momen "first-time experience" (Task 4)
+    // — masing-masing diputar SEKALI SEJAK PERNAH (VO + presenter, non-blocking)
+    nft: { move: false, levelup: false, skill: false, revive: false },
+    bossRevealSeen: false, // reveal boss bab kanker (cutscene 6.3) — sekali
     leaderboard: [],
     evoStage: 0,
     evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
@@ -114,6 +118,9 @@ export function mergeMetaDefaults(meta) {
     for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = v;
     meta.campaignCleared = mc;
   }
+  // R3: merge penanda naratif baru (save lama aman)
+  meta.nft = { ...base.nft, ...(meta.nft && typeof meta.nft === 'object' ? meta.nft : {}) };
+  if (typeof meta.bossRevealSeen !== 'boolean') meta.bossRevealSeen = false;
   if (meta.cinematicsSeen && typeof meta.cinematicsSeen === 'object') {
     const ms = {};
     for (const [k, v] of Object.entries(meta.cinematicsSeen)) {
