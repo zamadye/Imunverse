@@ -10,6 +10,7 @@
 - Pass terbaru menambah accent visual skill berdasarkan `archetype` dan warna Equity aktif dari `data/character-designs.json`.
 - Gameplay cast/payoff VFX juga membawa motif biologis per archetype lewat `skill-system.js` → `effects-system.js` → `shape-renderer.js`.
 - Semua perubahan skill tetap visual-only: tidak mengubah damage, cooldown, radius, atau efek gameplay.
+- Pass approved berikutnya menambah per-target hit impact/trail kecil di impact pulse existing (`game.js` → `effects-system.js` → `shape-renderer.js`) sehingga hit Mako, Bella, dan T-Bolt punya signature berbeda tanpa extra damage/cooldown.
 - Bukti visual terkini ada di panel D `shots/review/character-agent-final-review.png`; QA browser trigger skill ada di `shots/review/character-browser-skill-*.png`.
 
 ## Mapping hero → archetype → skill visual saat ini
@@ -60,7 +61,7 @@
 | `js/ui/screens/hud-screen.js` | Build ability button: glyph, `data-archetype`, `--hero`, `--eq`, tooltip stage. |
 | `js/systems/skill-system.js` | Mengirim metadata archetype/equity ke VFX saat skill dipakai. |
 | `js/systems/effects-system.js` | Menyimpan metadata Character pada efek `abilityCharge`/`abilityPayoff`. |
-| `js/render/shape-renderer.js` | Menggambar motif biologis cast/payoff per archetype. |
+| `js/render/shape-renderer.js` | Menggambar motif biologis cast/payoff dan per-target hit impact/trail per archetype. |
 | `styles/main.css` | Accent CSS per archetype: antibody Y, dendritic/net grid, phagocyte crescent, cytotoxic/spike ring. |
 
 ## Belum dikerjakan dalam skill visual
@@ -68,6 +69,6 @@
 | Task | Status | Catatan |
 |---|---:|---|
 | Cast/payoff gameplay motif per archetype | ✅ | Implementasi visual-only di `effects-system`/`shape-renderer`; opsi damage/cooldown tidak disentuh. |
-| Per-target trail/impact unik setiap hit | ⬜ | Belum dikerjakan agar tidak menambah noise/perf cost tanpa QA khusus; bila perlu, kerjakan sebagai pass terpisah. |
-| Screenshot skill trigger multi-hero | ✅ | Browser capture trigger/cooldown/VFX untuk Mako/phagocyte, Bella/antibody, dan T-Bolt/cytotoxic ada di `shots/review/character-browser-skill-*.png`. |
+| Per-target trail/impact unik setiap hit | ✅ | Disetujui user; implementasi visual-only di impact pulse existing. Assert browser: impact metadata phagocyte/antibody/cytotoxic muncul. |
+| Screenshot skill trigger multi-hero | ✅ | Browser capture trigger/cooldown/VFX + per-target impact untuk Mako/phagocyte, Bella/antibody, dan T-Bolt/cytotoxic ada di `shots/review/character-browser-skill-*.png` dan `shots/review/character-hit-impact-vfx.png`. |
 | Copy tooltip bilingual untuk semua skill accent | ✅ | Tooltip stage + field Character penting sudah punya entry/rule di `data/lang.json`. |

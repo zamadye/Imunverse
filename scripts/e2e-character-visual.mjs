@@ -222,13 +222,13 @@ async function captureHudAndSkills() {
   await screenshot('character-browser-hud.png');
 
   const heroes = [
-    ['macrophage', 'mako-phagocyte'],
-    ['bcell', 'bella-antibody'],
-    ['tcd8', 'tbolt-cytotoxic'],
+    ['macrophage', 'mako-phagocyte', 2, 'phagocyte'],
+    ['bcell', 'bella-antibody', 2, 'antibody'],
+    ['tcd8', 'tbolt-cytotoxic', 0, 'cytotoxic'],
   ];
-  for (const [heroId, label] of heroes) {
+  for (const [heroId, label, slotIndex, expectedArchetype] of heroes) {
     await startHeroRun(heroId);
-    await page.evaluate(() => {
+    await page.evaluate((slotIndex) => {
       const app = window.__IMUNVERSE;
       const { game, STATE } = app;
       const p = game.run.player;
@@ -245,19 +245,30 @@ async function captureHudAndSkills() {
         }
       });
       game.run.skills.slots.forEach((slot) => { if (slot) { slot.unlocked = true; slot.cdLeft = 0; } });
-      game.useAbilityBySlot(0);
+      game.useAbilityBySlot(slotIndex);
       for (const fx of game.run.effects.effects) {
         if (fx.type === 'abilityCharge') fx.life = fx.maxLife * 0.52;
         if (fx.type === 'abilityPayoff') fx.life = fx.maxLife * 0.62;
+        if (fx.type === 'impact') fx.life = fx.maxLife * 0.62;
       }
       STATE.paused = true; // keep VFX/cooldown frame stable while render continues
       document.getElementById('tutorial-layer')?.classList.add('hidden');
       document.querySelectorAll('.presenter, .toast').forEach((el) => el.remove());
-    });
+    }, slotIndex);
     await page.waitForTimeout(140);
-    const archetype = await page.locator('#ability-bar .ability-btn').first().getAttribute('data-archetype');
+    const archetype = await page.locator('#ability-bar .ability-btn').nth(slotIndex).getAttribute('data-archetype');
     log(`skill-${label}-archetype`, archetype || false);
-    if (!archetype) fail(`archetype button kosong untuk ${label}`);
+    if (archetype !== expectedArchetype) fail(`archetype button salah untuk ${label}: ${archetype}`);
+    const impactMeta = await page.evaluate((expectedArchetype) => {
+      const impacts = window.__IMUNVERSE.game.run.effects.effects.filter((fx) => fx.type === 'impact');
+      return {
+        count: impacts.length,
+        archetypes: [...new Set(impacts.map((fx) => fx.archetype || ''))],
+        hasExpected: impacts.some((fx) => fx.archetype === expectedArchetype && fx.equityStage === 4),
+      };
+    }, expectedArchetype);
+    log(`skill-${label}-impact-meta`, impactMeta.hasExpected ? `count=${impactMeta.count} archetypes=${impactMeta.archetypes.join(',')}` : false);
+    if (!impactMeta.hasExpected) fail(`impact Character metadata tidak muncul untuk ${label}`);
     await screenshot(`character-browser-skill-${label}.png`);
   }
 }

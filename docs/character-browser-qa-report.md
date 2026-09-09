@@ -6,7 +6,7 @@
 
 ## Ringkasan
 
-QA browser headless sudah dijalankan untuk surface Character yang sebelumnya masih backlog: Roster, Hero Detail, Bag, Codex hero/enemy, HUD gameplay, dan trigger skill 3 archetype hero.
+QA browser headless sudah dijalankan untuk surface Character yang sebelumnya masih backlog: Roster, Hero Detail, Bag, Codex hero/enemy, HUD gameplay, trigger skill 3 archetype hero, dan per-target hit impact metadata.
 
 - Runner: `scripts/e2e-character-visual.mjs`
 - Viewport: `844×390` landscape mobile, sesuai constraint game landscape-only.
@@ -37,9 +37,9 @@ python3 -m http.server 8000 --bind 0.0.0.0
 | Codex hero | panel `.cxd-equity-panel` + 5 chip equity | ✅ |
 | Codex enemy | panel mutation + 5 chip tier pathogen | ✅ |
 | HUD | 3 ability button + badge `Full Equity` terbaca | ✅ |
-| Skill Mako | `data-archetype="phagocyte"` + trigger/cooldown/VFX screenshot | ✅ |
-| Skill Bella | `data-archetype="antibody"` + trigger/cooldown/VFX screenshot | ✅ |
-| Skill T-Bolt | `data-archetype="cytotoxic"` + trigger/cooldown/VFX screenshot | ✅ |
+| Skill Mako | `data-archetype="phagocyte"` + trigger/cooldown/VFX screenshot + impact metadata `phagocyte` | ✅ |
+| Skill Bella | `data-archetype="antibody"` + trigger/cooldown/VFX screenshot + impact metadata `antibody` | ✅ |
+| Skill T-Bolt | `data-archetype="cytotoxic"` + trigger/cooldown/VFX screenshot + impact metadata `cytotoxic` | ✅ |
 | Console browser | 0 pageerror / console error fatal | ✅ |
 | HTTP response lokal | 0 HTTP 404/5xx asset/data | ✅ |
 
@@ -47,7 +47,8 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 | File | Isi |
 |---|---|
-| `shots/review/character-browser-qa-review.png` | Montage QA browser/DOM 9 capture runtime. |
+| `shots/review/character-browser-qa-review.png` | Montage QA browser/DOM 9 capture runtime, versi terbaru termasuk per-hit impact pass. |
+| `shots/review/character-hit-impact-vfx.png` | Montage khusus hit impact/trail per-target untuk 3 archetype. |
 | `shots/review/character-browser-roster.png` | Roster: chip equity + mini preview canvas. |
 | `shots/review/character-browser-hero-detail.png` | Hero Detail: ladder Stage 0–4. |
 | `shots/review/character-browser-bag.png` | Bag: context part evolusi + design path. |
@@ -62,4 +63,4 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 - Capture dilakukan di landscape karena game sengaja menampilkan overlay `Putar HP-mu` pada portrait.
 - QA ini membuktikan DOM/runtime visual muncul dan tidak ada error fatal; manual QA di device nyata tetap opsional menjelang rilis.
-- Per-target trail/impact unik setiap hit tetap tidak dikerjakan di pass ini karena perlu keputusan terpisah terkait noise/performance.
+- Per-target trail/impact unik sudah dikerjakan setelah approval user, tetapi tetap dibatasi sebagai visual-only di object `impact` existing agar tidak menambah tekanan object/particle budget.

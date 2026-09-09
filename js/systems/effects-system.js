@@ -92,19 +92,28 @@ export class EffectsSystem {
 
   /**
    * Impact pulse per hit landing: ring + garis radial shape-only.
-   * Tujuan: hit biasa tetap terasa tanpa menunggu kill-pop. Murah untuk
-   * frame budget karena tidak menambah sprite baru atau partikel per objek.
+   * Character Agent: metadata archetype/equity ikut disimpan di object yang
+   * sama supaya per-target hit trail/impact unik tidak menambah efek ekstra.
    */
   spawnImpact(x, y, color = '#ffffff', opts = {}) {
     if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
     const big = !!opts.big;
     const life = big ? 0.24 : 0.18;
+    const angle = opts.hitAngle ?? opts.angle ?? Math.random() * Math.PI * 2;
     this.effects.push({
       type: 'impact', x, y, color,
       big,
       crit: !!opts.crit,
       absorbed: !!opts.absorbed,
-      rot: opts.angle ?? Math.random() * Math.PI * 2,
+      archetype: opts.archetype || 'generic',
+      heroId: opts.heroId || '',
+      heroColor: opts.heroColor || color,
+      equityColor: opts.equityColor || color,
+      equityStage: opts.equityStage || 0,
+      sourceKind: opts.sourceKind || 'hit',
+      targetRadius: opts.targetRadius || 18,
+      rot: angle,
+      hitAngle: angle,
       life,
       maxLife: life,
     });

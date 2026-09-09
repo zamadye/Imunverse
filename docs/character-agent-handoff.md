@@ -22,7 +22,7 @@ Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Charac
 4. `codex` hero detail — `shots/review/character-browser-codex-hero.png`.
 5. `codex` enemy detail — `shots/review/character-browser-codex-enemy.png`.
 6. `hud` gameplay — `shots/review/character-browser-hud.png`.
-7. skill trigger 3 archetype — `character-browser-skill-mako-phagocyte.png`, `character-browser-skill-bella-antibody.png`, `character-browser-skill-tbolt-cytotoxic.png`.
+7. skill trigger + per-target hit impact 3 archetype — `character-browser-skill-mako-phagocyte.png`, `character-browser-skill-bella-antibody.png`, `character-browser-skill-tbolt-cytotoxic.png`, dan montage `character-hit-impact-vfx.png`.
 
 ### Acceptance criteria
 - `npm run check` tetap lulus.
@@ -51,7 +51,7 @@ Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Charac
 **Status:** di luar scope Character Agent kecuali ada task eksplisit.
 
 ### Catatan integrasi
-- Character pass ini visual-only untuk pathogen mutation dan skill accent.
+- Character pass ini visual-only untuk pathogen mutation, skill accent, cast/payoff VFX, dan per-target hit impact/trail.
 - Jangan menganggap warna/tier mutasi sebagai perubahan stat.
 - Jika ingin enemy behavior baru seperti drain parasit, hazard toxin, atau conversion prion, buat task combat tersendiri dengan benchmark balancing.
 
@@ -78,6 +78,7 @@ Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Charac
 - Skill audit: `docs/character-skill-visual-audit.md`
 - Screenshot review terkini: `shots/review/character-agent-final-review.png`
 - Browser QA montage: `shots/review/character-browser-qa-review.png`
+- Hit impact montage: `shots/review/character-hit-impact-vfx.png`
 - Browser QA report: `docs/character-browser-qa-report.md`
 - Browser QA runner: `scripts/e2e-character-visual.mjs`
 - Renderer gameplay: `js/render/character-visuals.js`

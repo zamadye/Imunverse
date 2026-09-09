@@ -277,6 +277,8 @@ export function drawImpactPulse(ctx, fx) {
     ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
     ctx.stroke();
   }
+
+  drawCharacterHitSignature(ctx, fx, r, t, alpha, col);
   ctx.globalAlpha = 1;
 }
 
@@ -307,6 +309,160 @@ function drawSkillShieldGlyph(ctx, x, y, r, color) {
   ctx.quadraticCurveTo(x, y + r * 0.98, x - r * 0.52, y + r * 0.62);
   ctx.quadraticCurveTo(x - r * 0.86, y - r * 0.42, x, y - r);
   ctx.stroke();
+}
+
+/**
+ * Per-target Character hit signature: trail/impact kecil per archetype.
+ * Digambar di dalam impact pulse yang sudah ada supaya setiap hit punya
+ * identitas biologis tanpa menambah object VFX tambahan atau biaya partikel.
+ */
+function drawCharacterHitSignature(ctx, fx, r, t, alpha, impactColor) {
+  const archetype = fx.archetype || 'generic';
+  const col = fx.absorbed ? impactColor : (fx.equityColor || impactColor || '#ffd93d');
+  const hero = fx.heroColor || impactColor || '#35d0ba';
+  const x = fx.x;
+  const y = fx.y;
+  const angle = Number.isFinite(fx.hitAngle) ? fx.hitAngle : (fx.rot || 0);
+  const trail = Math.max(r * 0.72, (fx.targetRadius || 18) * 0.42);
+
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.translate(-x, -y);
+
+  // Arah lokal: +X = arah datang hit menuju target, -X = jejak masuk.
+  if (archetype === 'antibody') {
+    ctx.globalAlpha = alpha * 0.8;
+    for (const off of [-0.42, 0.42]) {
+      drawSkillYGlyph(ctx, x - trail * 0.32, y + off * r * 0.46, r * 0.5, col, Math.PI / 2, 2.2);
+    }
+    ctx.globalAlpha = alpha * 0.34;
+    ctx.strokeStyle = hero;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - trail * 1.05, y);
+    ctx.quadraticCurveTo(x - trail * 0.55, y - r * 0.28, x + r * 0.28, y);
+    ctx.stroke();
+  } else if (archetype === 'phagocyte') {
+    ctx.globalAlpha = alpha * 0.76;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 4.2;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(x - trail * 0.78, y + side * r * 0.48);
+      ctx.quadraticCurveTo(x - trail * 0.18, y + side * r * (0.88 - t * 0.28), x + r * 0.4, y + side * r * 0.2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha * 0.24;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(x - r * 0.1, y, r * (0.42 + t * 0.12), 0, Math.PI * 2);
+    ctx.fill();
+  } else if (archetype === 'dendritic' || archetype === 'net') {
+    ctx.globalAlpha = alpha * 0.66;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = archetype === 'net' ? 1.9 : 2.3;
+    for (const off of [-0.52, 0, 0.52]) {
+      ctx.beginPath();
+      ctx.moveTo(x - trail * 1.15, y + off * r * 0.5);
+      ctx.lineTo(x + r * 0.42, y - off * r * 0.18);
+      if (archetype === 'dendritic') {
+        ctx.moveTo(x - trail * 0.4, y + off * r * 0.18);
+        ctx.lineTo(x - trail * 0.05, y + off * r * 0.72);
+      }
+      ctx.stroke();
+    }
+    if (archetype === 'net') {
+      ctx.globalAlpha = alpha * 0.36;
+      ctx.setLineDash([3, 4]);
+      for (const off of [-0.32, 0.32]) {
+        ctx.beginPath();
+        ctx.moveTo(x - trail * 0.9, y + off * r);
+        ctx.quadraticCurveTo(x - trail * 0.2, y - off * r * 0.9, x + r * 0.48, y + off * r * 0.42);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+  } else if (archetype === 'cytotoxic' || archetype === 'nk_spike' || archetype === 'granule_lance') {
+    ctx.globalAlpha = alpha * 0.82;
+    ctx.strokeStyle = col;
+    ctx.fillStyle = col;
+    ctx.lineWidth = archetype === 'granule_lance' ? 3.4 : 2.8;
+    for (const off of [-0.36, 0, 0.36]) {
+      ctx.beginPath();
+      ctx.moveTo(x - trail * 1.22, y + off * r * 0.62);
+      ctx.lineTo(x + r * (0.62 + t * 0.22), y);
+      ctx.stroke();
+    }
+    const spikes = archetype === 'nk_spike' ? 5 : 3;
+    for (let i = 0; i < spikes; i++) {
+      const px = x - trail * (0.82 - i * 0.22);
+      ctx.beginPath();
+      ctx.moveTo(px, y - r * 0.32);
+      ctx.lineTo(px + r * 0.26, y);
+      ctx.lineTo(px, y + r * 0.32);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (archetype === 'vesicle_cloud' || archetype === 'granule_tank') {
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.fillStyle = col;
+    const n = archetype === 'granule_tank' ? 7 : 6;
+    for (let i = 0; i < n; i++) {
+      const px = x - trail * (0.92 - (i % 3) * 0.28);
+      const py = y + (i - (n - 1) / 2) * r * 0.18;
+      ctx.beginPath();
+      ctx.arc(px, py, 2.4 + (i % 2) * 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = alpha * 0.42;
+    ctx.strokeStyle = hero;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.66, -Math.PI * 0.45, Math.PI * 0.45);
+    ctx.stroke();
+  } else if (archetype === 'helper') {
+    ctx.globalAlpha = alpha * 0.72;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2.8;
+    ctx.beginPath();
+    ctx.moveTo(x - trail * 0.92, y);
+    ctx.lineTo(x + r * 0.56, y);
+    ctx.moveTo(x - r * 0.12, y - r * 0.45);
+    ctx.lineTo(x - r * 0.12, y + r * 0.45);
+    ctx.stroke();
+    ctx.fillStyle = hero;
+    for (const off of [-0.45, 0.45]) {
+      ctx.beginPath();
+      ctx.arc(x - trail * 0.48, y + off * r * 0.5, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (archetype === 'regulator') {
+    ctx.globalAlpha = alpha * 0.75;
+    drawSkillShieldGlyph(ctx, x, y, r * 0.62, col);
+    ctx.globalAlpha = alpha * 0.38;
+    ctx.strokeStyle = hero;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(x - trail * 0.92, y - r * 0.38);
+    ctx.lineTo(x - trail * 0.22, y);
+    ctx.lineTo(x - trail * 0.92, y + r * 0.38);
+    ctx.stroke();
+  } else {
+    ctx.globalAlpha = alpha * 0.4;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x - trail, y);
+    ctx.lineTo(x + r * 0.42, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.restore();
 }
 
 /**

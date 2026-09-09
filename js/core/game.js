@@ -675,7 +675,11 @@ export const game = {
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       // V2 Phase 1: knockback mikro searah proyektil (boss imun)
       this.applyHitKnockback(enemy, proj.vx, proj.vy, getGameFeel().knockback.projectile);
-      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit);
+      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit, {
+        dirX: proj.vx,
+        dirY: proj.vy,
+        sourceKind: 'projectile',
+      });
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
@@ -962,7 +966,11 @@ export const game = {
       if (!e.lastHitAbsorbed) passiveOnHit(run, e, dmg);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.applyHitKnockback(e, dx, dy, getGameFeel().knockback.melee);
-      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit);
+      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit, {
+        dirX: dx,
+        dirY: dy,
+        sourceKind: 'melee',
+      });
       if (!e.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(e, null);
     });
@@ -991,22 +999,49 @@ export const game = {
     enemy.vy += (dirY / len) * force;
   },
 
+  /** Metadata visual Character untuk impact hit; visual-only, bukan balance. */
+  characterHitVisual(enemy, opts = {}) {
+    const run = this.run;
+    const heroDef = run?.heroDef || run?.player?.heroDef || null;
+    const designs = getData().characterDesigns;
+    const heroDesign = heroDef ? designs?.heroes?.[heroDef.id] : null;
+    const stageRaw = run?.evoStage?.stage ?? STATE.meta?.evoStage ?? 0;
+    const stage = Math.max(0, Math.min(4, stageRaw || 0));
+    const eq = stage > 0 ? (heroDesign?.equity || []).find((e) => e.stage === stage) : null;
+    const dirX = Number.isFinite(opts.dirX) ? opts.dirX : ((enemy && run?.player) ? enemy.x - run.player.x : 1);
+    const dirY = Number.isFinite(opts.dirY) ? opts.dirY : ((enemy && run?.player) ? enemy.y - run.player.y : 0);
+    const fallbackAngle = Math.abs(dirX) + Math.abs(dirY) > 0.001 ? Math.atan2(dirY, dirX) : 0;
+    return {
+      heroId: heroDef?.id || '',
+      archetype: heroDesign?.archetype || 'generic',
+      heroColor: heroDef?.color || enemy?.def?.color || '#35d0ba',
+      equityColor: eq?.color || run?.evoStage?.tierColor || heroDef?.color || '#35d0ba',
+      equityStage: stage,
+      hitAngle: Number.isFinite(opts.hitAngle) ? opts.hitAngle : (Number.isFinite(opts.angle) ? opts.angle : fallbackAngle),
+      sourceKind: opts.sourceKind || 'hit',
+      targetRadius: enemy?.radius || 18,
+    };
+  },
+
   /**
    * Feedback visual per hit: flash sprite + spark + impact pulse + angka.
    * Kill tetap punya death-pop sendiri; hit biasa kini dapat micro-shake
    * ter-throttle supaya landing terasa tanpa membuat kamera mual di wave padat.
    */
-  spawnHitFeedback(enemy, damage, died, crit = false) {
+  spawnHitFeedback(enemy, damage, died, crit = false, opts = {}) {
+    if (crit && typeof crit === 'object') { opts = crit; crit = !!opts.crit; }
     const run = this.run;
     const gf = getGameFeel();
     tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
     const absorbed = !!enemy.lastHitAbsorbed;
+    const hitVisual = this.characterHitVisual(enemy, opts);
     if (crit && enemy.hitFlash !== undefined) enemy.hitFlash = Math.max(enemy.hitFlash, 0.18);
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
     run.effects.spawnImpact(enemy.x, enemy.y - enemy.radius * 0.18, absorbed ? '#cfd8e3' : (crit ? gf.crit.color : (enemy.def.color || '#ffffff')), {
       big: died || crit || enemy.isBoss,
       crit,
       absorbed,
+      ...hitVisual,
     });
 
     // Micro shake khusus hit yang BELUM kill. Kill/elite/boss tetap ditangani
@@ -1305,7 +1340,7 @@ export const game = {
       hitEnemy: (enemy, dmg) => {
         // Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion)
         const died = enemy.takeDamageRaw ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
-        this.spawnHitFeedback(enemy, dmg, died);
+        this.spawnHitFeedback(enemy, dmg, died, false, { sourceKind: 'skill' });
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
