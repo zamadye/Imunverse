@@ -170,3 +170,28 @@ ketik di form tidak diblokir; WASD/panah jalan; blur/pause melepas tombol; tap S
 tahan+tarik = aim −135° + `.aiming` + `--aim`; touch keluar tombol tetap menembak; lepas = berhenti; umpan balik
 joystick 10 568 px berubah; jari & copy tutorial benar). Regresi: 23 suite e2e = **410 PASS / 0 FAIL**.
 Bukti visual: `shots/ui-nav/controls-aim.png`, `shots/ui-nav/controls-joystick.png`.
+
+## 8. BUILD 43 — ikon SERANG & skill dalam bahasa visual game (work order #2)
+
+Temuan runtime (844×390, `shots/ui-nav/skills-*.png` sebelum diubah):
+
+| # | Temuan (sebelum) | Bukti |
+|---|---|---|
+| 1 | Ikon skill = 15 glyph **mono generik per jenis efek** (target, panah, tengkorak, bintang) 26 px, diwarnai `--sk` (Shadowstep `#1c1c1c`, Backstab `#4a235a` nyaris hitam di ubin krem) — tidak satu bahasa dengan set `assets/icons/menu-*.svg` (blob kawaii, outline ink, palet token). 3 hero memakai jenis efek sama 3× (Baso `area×3`, Helia `buff_allies×3`, Eos `strike×2`) → **tiga tombol berikon identik**. | `KIND_GLYPH` lama di `hud-screen.js`; `data/skills.json` |
+| 2 | Label nama skill di **dalam** hex (`clip-path`) terpotong: "SIKAP BERTAHA", "OCK ON", "NIHILAT". | `.sk-name` 7,5 px di hex 42 px |
+| 3 | SERANG: piktogram Y putih 27 px di atas cincin gerigi koral berputar + sunburst teal → ikon tenggelam; tombol SERANG berposisi absolut (`bottom:14px`) dan **menimpa pelat ULT**. | `shots/ui-nav/skills-4.png` |
+| 4 | Prep & detail hero menampilkan skill hanya sebagai **titik warna** — tidak ada kaitan visual dengan tombol di HUD. | `.ps-skill-dot`, `.hl-skill-dot` |
+
+Perubahan (UI murni — `skill-system.js`, combat, spawner tidak disentuh):
+
+| # | Perubahan | Berkas |
+|---|---|---|
+| 1 | **33 ikon per-skill** digambar khusus (SVG inline, viewBox 64, palet token, wajah kawaii, outline ink, bayangan lantai) + `KIND_FALLBACK` untuk skill baru. Konsep per hero didokumentasikan di `assets/icons/README.md`. | `js/ui/skill-icons.js` (baru) |
+| 2 | **Pelat hex SVG** (`skillPlateSvg()`: outline ink → rim warna skill → muka krem + kilau; ULT rim emas) menggantikan `clip-path`; glow "siap" mengikuti bentuk hex; cooldown konik dipotong hex; chip nomor tombol 1/2/3 tetap. | `js/ui/screens/hud-screen.js`, `styles/dashboard-focus.css` (blok BUILD 43), `styles/main.css` (blok E1 dihapus) |
+| 3 | **Label di bawah pelat** (tidak lagi dipotong hex), tampil hanya bila tinggi layar ≥ 500 px (landscape HP: ikon + banner nama saat cast sudah cukup; landscape tablet/desktop: label 1 baris penuh). Hint kontrol dinaikkan mengikuti tinggi grid. | `styles/dashboard-focus.css` |
+| 4 | **SERANG** = `assets/icons/hud-serang.svg` (antibodi-Y krem ber-outline ink menghantam virus koral mungil + bintang benturan emas) 44 px; cincin gerigi & offset absolut dibuang → tombol tidak menimpa ULT lagi. | `index.html`, `assets/icons/hud-serang.svg` (baru), `styles/dashboard-focus.css` |
+| 5 | Prep & detail hero memakai **chip hex + ikon yang sama** (`skillChip()`), tooltip = deskripsi skill. | `js/ui/screens/prep-screen.js`, `js/ui/screens/hero-detail-screen.js` |
+
+Verifikasi: `scripts/e2e-e1.mjs` (poin 2 → pelat hex SVG + ikon SERANG), `scripts/e2e-e2.mjs` (poin 3 → sumber ikon
+`skill-icons.js`), `e2e-mlbb.mjs` (3 tombol, 1 ULT, klik memicu cooldown), `e2e-controls.mjs`, `e2e-ui-nav.mjs`.
+Bukti visual: `shots/ui-nav/skills-4.png` (4 hero), `shots/ui-nav/skill-icons-64.png` (33 ikon), `shots/ui-nav/hud-land.png`.

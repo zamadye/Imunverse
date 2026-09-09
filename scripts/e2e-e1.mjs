@@ -96,19 +96,21 @@ try {
   await page.waitForTimeout(900);
 
   // ---- POIN 2: hex glyph + fire claw ----
+  // UI/UX BUILD 43: hex = pelat SVG (.sk-plate polygon), ikon per-skill (js/ui/skill-icons.js),
+  // SERANG = img assets/icons/hud-serang.svg (cincin gerigi ::before dibuang)
   const btns = await page.evaluate(() => {
-    const ab = document.querySelector('#screen-hud .ability-btn');
     const glyphs = document.querySelectorAll('#screen-hud .ability-btn .sk-glyph svg').length;
-    const claw = document.querySelector('#screen-hud .fire-btn .fire-claw svg');
-    const clip = ab ? getComputedStyle(ab).clipPath : '';
-    const gear = document.querySelector('#screen-hud .fire-btn');
-    const gearAnim = gear ? getComputedStyle(gear, '::before').animationName : '';
-    return { glyphs, claw: !!claw, hex: clip.includes('polygon'), gearAnim };
+    const plates = document.querySelectorAll('#screen-hud .ability-btn .sk-plate polygon.pl-face').length;
+    const fireImg = document.querySelector('#screen-hud .fire-btn .fire-claw img');
+    const fireOk = !!fireImg && /hud-serang\.svg/.test(fireImg.getAttribute('src') || '') && fireImg.complete && fireImg.naturalWidth > 0;
+    const fire = document.querySelector('#screen-hud .fire-btn');
+    const gearBefore = fire ? getComputedStyle(fire, '::before').content : '';
+    return { glyphs, plates, fireOk, gearBefore };
   });
   log('p2-skill-glyph-svg', btns.glyphs >= 3, `glyphs=${btns.glyphs}`);
-  log('p2-hex-clip-path', btns.hex === true);
-  log('p2-fire-claw', btns.claw === true);
-  log('p2-fire-gear-anim', btns.gearAnim === 'fireGear', btns.gearAnim);
+  log('p2-hex-plate-svg', btns.plates >= 3, `plates=${btns.plates}`);
+  log('p2-fire-serang-icon', btns.fireOk === true);
+  log('p2-fire-no-gear-ring', btns.gearBefore === 'none', btns.gearBefore);
 
   // ---- POIN 5: tintSprite ter-clip ke alpha (sudut kanvas transparan) ----
   const tint = await page.evaluate(async () => {

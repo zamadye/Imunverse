@@ -2649,59 +2649,12 @@ img.lock-badge {
 .phago-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffd93d, #ffb300); border-radius: 4px; transition: width 0.25s ease; }
 
 /* ============================================================
-   E1 poin 2 — TOMBOL BERKARAKTER (skill hex MOBA + fire claw)
+   E1 poin 2 — TOMBOL BERKARAKTER → digantikan UI/UX BUILD 43
+   (pelat HEX SVG + ikon per-skill + SERANG antibodi-Y). Rule-nya
+   ada di styles/dashboard-focus.css blok "BUILD 43" (dimuat terakhir).
    ============================================================ */
-/* Skill: bentuk HEX ala MOBA + glyph SVG warna skill + rim dalam */
-#screen-hud .ability-btn{
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  border-radius: 0; border: none;
-  background:
-    linear-gradient(165deg, rgba(255,255,255,.94), rgba(214,240,233,.9)) padding-box;
-  box-shadow: inset 0 0 0 3px var(--sk,#35d0ba), inset 0 0 14px rgba(18,63,58,.14);
-}
-#screen-hud .ability-btn::before{
-  content:""; position:absolute; inset:4px; z-index:0;
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  background: radial-gradient(circle at 50% 26%, color-mix(in srgb, var(--sk,#35d0ba) 26%, transparent), transparent 72%);
-}
-#screen-hud .ability-btn.ready{box-shadow: inset 0 0 0 3px var(--sk,#35d0ba), inset 0 0 18px color-mix(in srgb, var(--sk,#35d0ba) 38%, transparent), 0 0 12px color-mix(in srgb, var(--sk,#35d0ba) 45%, transparent)}
-#screen-hud .ability-btn .sk-glyph{display:flex;align-items:center;justify-content:center}
-#screen-hud .ability-btn .sk-glyph svg{width:26px;height:26px;fill:var(--sk,#35d0ba);filter:drop-shadow(0 1.5px 0 rgba(18,63,58,.28))}
-#screen-hud .ability-btn.ult .sk-glyph svg{width:31px;height:31px}
-/* ULT: hex emas dengan mahkota rim ganda — slot paling penting terlihat beda */
-#screen-hud .ability-btn.ult{
-  box-shadow: inset 0 0 0 3px #e8b40c, inset 0 0 0 6px rgba(255,217,61,.35), inset 0 0 16px rgba(232,180,12,.22);
-}
-#screen-hud .ability-btn.ult.ready{
-  box-shadow: inset 0 0 0 3px #e8b40c, inset 0 0 0 6px rgba(255,217,61,.5), 0 0 16px rgba(255,196,10,.55);
-}
-#screen-hud .ability-btn.ult .sk-glyph svg{fill:#c98d00}
-#screen-hud .ability-btn .key-tag{z-index:3}
-#screen-hud .ability-btn .sk-name{bottom:8px}
-
-/* FIRE: cakar serang — ring bergerigi + 3 goresan claw (bukan lingkaran polos) */
-#screen-hud .fire-btn{ position:relative; overflow:visible; } /* kalahkan position:static :1815 */
-#screen-hud .fire-btn::before{
-  content:""; position:absolute; inset:-7px; border-radius:50%; z-index:-1;
-  background: conic-gradient(from 12deg,
-    #c46a4a 0deg 18deg, transparent 18deg 30deg,
-    #c46a4a 30deg 48deg, transparent 48deg 60deg,
-    #c46a4a 60deg 78deg, transparent 78deg 90deg,
-    #c46a4a 90deg 108deg, transparent 108deg 120deg,
-    #c46a4a 120deg 138deg, transparent 138deg 150deg,
-    #c46a4a 150deg 168deg, transparent 168deg 180deg,
-    #c46a4a 180deg 198deg, transparent 198deg 210deg,
-    #c46a4a 210deg 228deg, transparent 228deg 240deg,
-    #c46a4a 240deg 258deg, transparent 258deg 270deg,
-    #c46a4a 270deg 288deg, transparent 288deg 300deg,
-    #c46a4a 300deg 318deg, transparent 318deg 330deg,
-    #c46a4a 330deg 348deg, transparent 348deg 360deg);
-  opacity:.5; animation: fireGear 9s linear infinite;
-}
-@keyframes fireGear{ to{ transform: rotate(360deg); } }
-#screen-hud .fire-btn .fire-claw{position:relative;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#screen-hud .fire-btn .fire-claw svg{width:32px;height:32px;fill:#fff;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22))}
-#screen-hud .fire-btn img{display:none} /* ikon lama diganti claw svg */
+#screen-hud .fire-btn{ position:relative; overflow:visible; } /* kalahkan position:static di atas */
+#screen-hud .fire-btn img{display:none} /* ikon lama (img) diganti svg inline .fire-claw */
 
 /* ============================================================
    E1 poin 1+7 — MINIMAL HOME (fokus feel: stage + PLAY + 1-2 menu)

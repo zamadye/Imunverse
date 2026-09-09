@@ -25,6 +25,7 @@ import { heroLevelBadge } from '../../systems/economy-system.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
+import { skillChip } from '../skill-icons.js';
 
 let heroRowWired = false;
 
@@ -131,12 +132,9 @@ function renderSummary(meta) {
   const mid = el('div', { class: 'ps-mid' }, [
     el('b', { text: heroDef.name }),
     el('span', { class: 'ps-tier', style: `color:${stageDef.tierColor}`, text: `${stageDef.name} · ${stageDef.tier}` }),
+    // UI/UX BUILD 43: chip hex + ikon per-skill yang sama dengan HUD (js/ui/skill-icons.js)
     el('span', { class: 'ps-abilities' }, skillDefs.length
-      ? skillDefs.map((s, i) => el('span', {
-          class: `ps-skill-dot${i === 2 ? ' ult' : ''}`,
-          style: `background:${s.color}`,
-          title: `${s.name} (tombol ${i + 1})`,
-        }))
+      ? skillDefs.map((s, i) => skillChip(s, { ult: i === 2, cls: 'ps-skill-chip', title: `${s.name} (tombol ${i + 1}) — ${s.description}` }))
       : [el('span', { class: 'ps-noab', text: 'Kemampuan terbuka lewat evolusi' })]),
   ]);
   box.appendChild(mid);

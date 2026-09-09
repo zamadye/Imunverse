@@ -11,6 +11,7 @@ import { STATE } from '../../core/state-manager.js';
 import { getData } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el, screenManager } from '../screen-manager.js';
+import { skillChip } from '../skill-icons.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
@@ -67,9 +68,10 @@ function selectHero() {
       el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
       el('button', { class: 'hl-arrow', 'aria-label': 'Hero berikutnya', text: '❯', onclick: () => stepHero(1) }),
       el('div', { class: 'hl-skill-col' }, skillDefs.map((sk, i) =>
-        el('div', { class: 'hl-skill' + (i === 2 ? ' ult' : ''), title: `${sk.name} — tombol ${i + 1}` }, [
+        el('div', { class: 'hl-skill' + (i === 2 ? ' ult' : ''), title: `${sk.name} — tombol ${i + 1}: ${sk.description}` }, [
           el('span', { class: 'hl-skill-key', text: i === 2 ? 'ULT' : String(i + 1) }),
-          el('span', { class: 'hl-skill-dot', style: `background:${sk.color}` }),
+          // UI/UX BUILD 43: chip hex + ikon per-skill (sama dengan HUD & Prep)
+          skillChip(sk, { ult: i === 2, cls: 'hl-skill-chip' }),
         ])
       )),
     ]),
