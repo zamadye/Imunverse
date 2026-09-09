@@ -656,3 +656,51 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-hud .hud-menu2-link img { width: 36px; height: 36px; }
   #screen-hud .hud-quests-body { max-height: 84px; }
 }
+
+/* ================================================================
+   UI/UX BUILD 42 — ARAH & KONTROL (bug "arah tidak berfungsi")
+   Diagnosis runtime (scripts/e2e-controls.mjs):
+   - 42% layar kanan dulunya "aim stick" tak kasatmata → tarik di sana hero diam;
+   - badan panel Misi (168×134 px, pointer-events:auto) menelan tarikan di kiri;
+   - jari tutorial gerak menunjuk ke dalam panel itu; copy tutorial "TEMBAK" ≠ label "SERANG".
+   Perbaikan: joystick mengambang di mana saja; aim = TAHAN + TARIK tombol SERANG;
+   panel Misi mulai terlipat; jari tutorial menunjuk lantai kosong & tombol SERANG.
+   ================================================================ */
+/* Panel Misi terlipat: hanya kepala (pill kecil) yang menerima sentuhan */
+#screen-hud .hud-quests.collapsed { width: auto; }
+#screen-hud .hud-quests { pointer-events: none; }               /* pembungkus tembus */
+#screen-hud .hud-quests-head, #screen-hud .hud-quests-body { pointer-events: auto; } /* isi tetap bisa disentuh */
+#screen-hud .hud-quests-head { touch-action: manipulation; }
+
+/* Tombol SERANG: mode TAHAN (held) & mode ARAH (aiming) */
+#screen-hud .fire-btn { touch-action: none; }
+#screen-hud .fire-btn.held { transform: scale(0.94); }
+#screen-hud .fire-btn .fire-aim {                    /* poros: berputar mengikuti --aim */
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none;
+  transform: rotate(var(--aim, 0rad)); opacity: 0; transition: opacity .12s ease;
+}
+#screen-hud .fire-btn.aiming .fire-aim { opacity: 1; }
+#screen-hud .fire-btn .fire-aim::before {            /* garis arah dari pusat tombol */
+  content: ""; position: absolute; left: 0; top: -2px; height: 4px; width: calc(var(--fire-r, 42px) + 22px);
+  border-radius: 2px; background: linear-gradient(90deg, rgba(255,253,244,0), #fffdf4 40%, #f5c64f);
+  box-shadow: 0 0 8px rgba(245,198,79,.7);
+}
+#screen-hud .fire-btn .fire-aim::after {             /* mata panah di ujung */
+  content: ""; position: absolute; left: calc(var(--fire-r, 42px) + 20px); top: -7px; width: 0; height: 0;
+  border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 12px solid #f5c64f;
+  filter: drop-shadow(0 0 4px rgba(245,198,79,.8));
+}
+#screen-hud .fire-btn.aiming { box-shadow: 0 0 0 4px rgba(245,198,79,.55), 0 5px 14px rgba(26,140,125,.42); }
+
+/* Jari tutorial: langkah GERAK menunjuk lantai kosong tengah-kiri (bukan panel Misi),
+   langkah SERANG menunjuk tombol SERANG di kanan-bawah */
+#screen-hud .tut-finger.tut-move { left: 36%; top: 60%; bottom: auto; }
+#screen-hud .tut-finger.tut-attack { left: auto; right: 46px; top: auto; bottom: 46px; }
+@media (max-width: 700px) {
+  #screen-hud .tut-finger.tut-attack { right: 30px; bottom: 30px; }
+}
+
+/* Hint kontrol: naik di atas grid skill (dulu bottom 92px menabrak kolom skill kiri
+   di 844×390 & 667×375) dan lebar dibatasi ruang antara panel kiri & grid skill */
+#screen-hud .hud-hint { bottom: 122px; max-width: min(74vw, 600px); white-space: normal; text-align: center; line-height: 1.35; }
+@media (max-width: 700px) { #screen-hud .hud-hint { bottom: 116px; max-width: 70vw; } }

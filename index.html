@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#fdf6e3" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=41" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=41" />
+  <link rel="stylesheet" href="styles/main.css?v=42" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=42" />
 </head>
 <body>
   <div id="app">
@@ -521,6 +521,8 @@
                  imun paling ikonik (imunoglobulin bentuk Y menempel patogen) -->
             <span class="fire-claw"><svg viewBox="0 0 48 48"><path d="M24 27.5c-1.6 0-2.9-1.1-3.3-2.6l-7.4-9.9 3.7-2.8 6 8h2l6-8 3.7 2.8-7.4 9.9c-.4 1.5-1.7 2.6-3.3 2.6zm-2.3 2.2h4.6V44h-4.6z"/><path d="M9.5 5.5l2.4 1.2-1.2 2.4-2.4-1.2zM38.5 5.5l1.2 2.4-2.4 1.2-1.2-2.4zM24 1.6l1.3 2.3-2.6.1z" opacity=".7"/><circle cx="24" cy="24.4" r="2.5"/></svg></span>
             <span>SERANG</span>
+            <!-- UI/UX BUILD 42: indikator arah saat TAHAN + TARIK (aim stick di tombol) -->
+            <span class="fire-aim" aria-hidden="true"></span>
           </button>
         </div>
       </section>
@@ -660,7 +662,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=41"></script>
+  <script type="module" src="js/main.js?v=42"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

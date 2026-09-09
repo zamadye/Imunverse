@@ -156,6 +156,7 @@ function wireUiBridge() {
     applyHudDisclosure(); // UI/UX: item menu terkunci DISEMBUNYIKAN, toggle ikut hilang bila kosong
     renderBadges(); // F25: badge unlock baru pada ikon menu
     renderQuestPanel(); // F25: panel misi harian/mingguan (kiri tengah)
+    setQuestPanelOpen(false); // UI/UX BUILD 42: mulai TERLIPAT — badan panel 168×134 px menelan tarikan joystick di sisi kiri
   });
 
   on('wave', ({ wave, isBoss }) => {
@@ -229,10 +230,19 @@ function wireUiBridge() {
   }
   window.__IMUNVERSE_renderQuestPanel = renderQuestPanel;
 
+  /** Buka/lipat badan panel Misi (kepala tetap terlihat; badge KLAIM tetap tampil saat terlipat). */
+  function setQuestPanelOpen(open) {
+    const body = document.getElementById('hud-quests-body');
+    const head = document.getElementById('hud-quests-toggle');
+    if (!body || !head) return;
+    body.classList.toggle('hidden', !open);
+    head.setAttribute('aria-expanded', String(open));
+    document.getElementById('hud-quests')?.classList.toggle('collapsed', !open);
+  }
+  window.__IMUNVERSE_setQuestPanelOpen = setQuestPanelOpen;
   document.getElementById('hud-quests-toggle')?.addEventListener('click', () => {
     const body = document.getElementById('hud-quests-body');
-    const open = body.classList.toggle('hidden') === false;
-    document.getElementById('hud-quests-toggle').setAttribute('aria-expanded', String(open));
+    setQuestPanelOpen(body.classList.contains('hidden'));
     audio.ui();
   });
 
@@ -314,6 +324,9 @@ async function boot() {
 
   // Input: virtual joystick (touch) + WASD/arrow (desktop)
   const input = new InputHandler(canvas);
+  // Keyboard gerak HANYA saat gameplay (layar HUD / modal jeda). Di dashboard,
+  // form akun, dsb. tombol W/A/S/D/Spasi dibiarkan ke browser (bisa mengetik).
+  input.isActive = () => STATE.screen === 'gameplay';
   input.onPauseKey = () => {
     const cur = screenManager.getCurrentId();
     if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
@@ -471,17 +484,20 @@ async function boot() {
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
-  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons
+  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons.
+  // UI/UX BUILD 42: TAHAN + TARIK tombol ini = mengarahkan serangan (aim stick ala
+  // MLBB) — menggantikan zona aim tak kasatmata di kanan layar. Pointer di-capture
+  // oleh InputHandler (jari meleset keluar tombol tidak memutus tembakan).
   const fireBtn = document.getElementById('btn-fire');
-  const stopFire = () => input.setFire(false);
-  fireBtn.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    input.setFire(true);
-    audio.unlock();
-    game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
+  input.bindFireButton(fireBtn, {
+    onPress: () => {
+      audio.unlock();
+      game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
+    },
   });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => fireBtn.addEventListener(ev, stopFire));
-  window.addEventListener('blur', stopFire);
+  // Pindah layar saat run hidup (menu HUD, level-up, jeda) → lepas semua input
+  // supaya tombol/joystick yang tertahan tidak "menyangkut" saat kembali.
+  on('pause', () => input.releaseAll());
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
   document.getElementById('account-chip').addEventListener('click', () => screenManager.show('profile'));

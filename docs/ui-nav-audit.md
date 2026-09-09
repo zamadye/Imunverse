@@ -140,3 +140,33 @@ Tidak diubah (di luar scope / perlu keputusan lain): ambang angka di `features.j
   kini exit 1 saat ada FAIL (poin acceptance #6 terpenuhi untuk suite ini).
 - Dead UI dashboard (side-nav/dock/quick-row/kartu) masih dirender lalu disembunyikan CSS — dibiarkan
   karena pemilik menyatakan dashboard opsional; kandidat pembersihan terpisah bila F24 dipermanenkan.
+
+## 7. BUILD 42 — bug krusial "arah tidak berfungsi" (kontrol gerak & arah)
+
+Reproduksi runtime (bukan asumsi) di 844×390, touch + mouse + keyboard, sebelum diubah apa pun:
+
+| # | Temuan (sebelum) | Bukti terukur |
+|---|---|---|
+| 1 | **42 % layar kanan (x > 58 % lebar) adalah "aim stick" tak kasatmata** — tarik di sana hero **diam**, hanya chevron kecil berputar. Hint HUD justru berbunyi "Sentuh & tarik **di mana saja**". | touch 600→660 px: `dx=0, aim=true`; touch 420→480: `dx=71` |
+| 2 | **Badan panel Misi** (168×134 px, kiri-tengah, `pointer-events:auto`, terbuka sejak detik pertama) menelan tarikan; jari tutorial "gerak" (70,214) berada **di dalam** panel itu. | touch 80→140 di y=200: `dx=4`, `hit=hq-top` |
+| 3 | Sprite dasar joystick (alpha maks 0,69, teal muda) nyaris lenyap di lantai krem → tidak ada umpan balik arah. | piksel berubah saat joystick aktif = 2 167 px (hanya knob) |
+| 4 | `InputHandler` mem-`preventDefault` W/A/S/D/K/Spasi/panah **global** → di form akun huruf itu tidak bisa diketik. | ketik `was d` + ← + `X` → nilai input `"X"` |
+| 5 | Tutorial langkah 2: "Tekan tombol **TEMBAK!**" padahal label tombol **SERANG**; jari menunjuk tengah layar. | copy `tutorial-system.js` vs `#btn-fire` |
+| 6 | Tombol yang ditahan saat pindah tab/pause tersangkut (hero jalan sendiri). | `blur` → `keys=["up"]` |
+
+Perbaikan (semua di lapisan input/UI — logika combat/spawner tidak disentuh):
+
+| # | Perubahan | Berkas |
+|---|---|---|
+| 1 | Joystick mengambang **di mana saja** di canvas (zona aim dihapus). Aim = **TAHAN + TARIK tombol SERANG** (ala MLBB): tap < 12 px = menembak biasa; tarik > 12 px = aim aktif, sudut dari titik tekan; pointer di-*capture* (jari meleset keluar tombol tidak memutus tembakan); lepas = auto-aim lagi. Indikator arah (garis + mata panah emas) berputar di tombol. | `js/input/input-handler.js` (`bindFireButton`), `js/main.js`, `index.html` (`.fire-aim`), `styles/dashboard-focus.css` |
+| 2 | Panel Misi **mulai terlipat** (kepala + badge KLAIM tetap tampil); pembungkus `pointer-events:none`, hanya kepala/badan yang menerima sentuhan. | `js/main.js` (`setQuestPanelOpen`), `styles/dashboard-focus.css` |
+| 3 | Joystick: cincin dasar kontras + panah arah di tepi cincin (sprite lama tetap dipakai). | `js/render/shape-renderer.js` |
+| 4 | Keyboard gerak hanya ditangkap saat `STATE.screen === 'gameplay'` dan bukan di `<input>/<textarea>`; `keyup` selalu melepas. | `js/input/input-handler.js`, `js/main.js` |
+| 5 | Copy tutorial & hint = perilaku nyata dan nama tombol nyata ("SERANG"); jari tutorial gerak → lantai kosong (36 %, 60 %), jari serang → di atas tombol SERANG. | `js/systems/tutorial-system.js`, `js/ui/screens/hud-screen.js`, `data/lang.json`, `styles/dashboard-focus.css` |
+| 6 | `releaseAll()` pada `blur`, `visibilitychange`, dan event `pause` (menu HUD/level-up/jeda). | `js/input/input-handler.js`, `js/main.js` |
+
+Verifikasi: `scripts/e2e-controls.mjs` — 23 asersi PASS (tarik kanan/tengah/kiri touch & mouse menggerakkan hero;
+ketik di form tidak diblokir; WASD/panah jalan; blur/pause melepas tombol; tap SERANG = tembak tanpa aim;
+tahan+tarik = aim −135° + `.aiming` + `--aim`; touch keluar tombol tetap menembak; lepas = berhenti; umpan balik
+joystick 10 568 px berubah; jari & copy tutorial benar). Regresi: 23 suite e2e = **410 PASS / 0 FAIL**.
+Bukti visual: `shots/ui-nav/controls-aim.png`, `shots/ui-nav/controls-joystick.png`.

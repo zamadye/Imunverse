@@ -106,9 +106,11 @@ export function updateAbilityBar(abilities) {
 /** Hint kontrol adaptif per perangkat (touch vs keyboard). */
 function controlHintText() {
   const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
+  // UI/UX BUILD 42: copy = perilaku nyata (joystick mengambang di lantai arena;
+  // SERANG = nama tombol yang terlihat; tarik SERANG = mengarahkan)
   return isTouch
-    ? 'Sentuh & tarik di mana saja untuk bergerak'
-    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / panah / tarik mouse · Tembak: <span class="k">tahan tombol / Spasi</span> · Jeda: <span class="k">Esc</span>';
+    ? 'Tarik di lantai arena untuk bergerak · Tahan <span class="k">SERANG</span>, tarik untuk mengarahkan'
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · Serang: <span class="k">Spasi</span> / tahan <span class="k">SERANG</span> (tarik = arah) · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */
