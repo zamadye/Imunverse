@@ -178,6 +178,7 @@ export const game = {
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
+    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=47a`);
 
     // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
     const focusId = meta.focusRun || 'seimbang';
@@ -354,14 +355,17 @@ export const game = {
   getRunArena() {
     const meta = STATE.meta;
     const list = getData().arenas.arenas;
-    // Kampanye: organ bab menentukan arena (palet = jaringan tubuh bab)
+    // MAP: pilihan pemain (prep/arena-screen) MENANG bila terbuka — di SEMUA
+    // mode termasuk kampanye. selectedArena menentukan environment render.
+    const chosen = list.find((a) => a.id === meta.selectedArena);
+    if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
+    // Kampanye: organ bab menentukan arena (DEFAULT bila pilihan terkunci /
+    // tak dikenal; prep-screen me-default-kan picker ke organ bab).
     if (meta.selectedMode === 'kampanye' && getData().campaign) {
       const ch = getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0];
       const chArena = list.find((a) => a.id === ch.arenaId);
       if (chArena) return chArena;
     }
-    const chosen = list.find((a) => a.id === meta.selectedArena);
-    if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
     const fallback = list.find((a) => arenaUnlockStatus(a, meta).unlocked);
     if (chosen || !fallback) {
       meta.selectedArena = (fallback || list[0]).id;

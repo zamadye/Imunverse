@@ -182,6 +182,7 @@ function renderAll() {
 }
 
 export function show() {
+  syncCampaignArenaDefault(); // MAP: default picker = organ bab
   renderAll();
   if (!heroRowWired) {
     heroRowWired = true;
@@ -201,6 +202,17 @@ export function show() {
       }
     });
   }
+}
+
+// MAP: di mode kampanye, default-kan pilihan arena ke organ bab aktif agar
+// penceritaan bab (organ sakit) selaras dengan map ter-render. Pemain tetap
+// bebas memilih organ lain — getRunArena menghormati pilihan yang terbuka.
+function syncCampaignArenaDefault() {
+  const meta = STATE.meta;
+  if (meta.selectedMode !== 'kampanye' || !getData().campaign) return;
+  const chs = getData().campaign.chapters;
+  const ch = chs.find((c) => c.id === meta.selectedChapter) || chs[0];
+  if (ch && ch.arenaId && meta.selectedArena !== ch.arenaId) meta.selectedArena = ch.arenaId;
 }
 
 export function hide() {}
