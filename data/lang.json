@@ -912,7 +912,55 @@
     "Pseudopodia": "Pseudopodia",
     "MHC": "MHC",
     "MHC-II": "MHC-II",
-    "CTLA-4": "CTLA-4"
+    "CTLA-4": "CTLA-4",
+    "Penembus": "Piercing",
+    "Penjejak": "Homing",
+    "Tebasan Area": "Area Slash",
+    "MUTASI 0–4": "MUTATION 0–4",
+    "LEVEL MAKSIMAL ✓": "MAX LEVEL ✓",
+    "jumlah sel bertambah tiap bab kampanye bersih": "cell count increases as campaign chapters are cleared",
+    "Fagositosis": "Phagocytosis",
+    "Melahap sisa musuh: tiap kill memulihkan 2 HP.": "Cleans up defeated enemies: each kill restores 2 HP.",
+    "Presentasi Antigen": "Antigen Presentation",
+    "Serangan menandai musuh: damage yang diterimanya +10% selama 3 dtk.": "Attacks mark enemies: they take +10% damage for 3 seconds.",
+    "Amukan Granula": "Granule Frenzy",
+    "Setelah kill: kecepatan serang +25% selama 3 dtk.": "After a kill: attack speed +25% for 3 seconds.",
+    "Granula Toksik": "Toxic Granules",
+    "Serangan meracuni musuh: 30% damage per detik selama 2 dtk.": "Attacks poison enemies for 30% damage per second over 2 seconds.",
+    "Awan Histamin": "Histamine Cloud",
+    "Musuh di dekatmu melambat 15%.": "Nearby enemies are slowed by 15%.",
+    "Degranulasi": "Degranulation",
+    "Saat terpukul: ledakan kimia 12 damage ke musuh sekitar.": "When hit: release a chemical burst that deals 12 damage to nearby enemies.",
+    "Sitotoksik": "Cytotoxic Strike",
+    "+30% damage ke musuh ber-HP di bawah 25%.": "+30% damage to enemies below 25% HP.",
+    "Komando Sitokin": "Cytokine Command",
+    "Cooldown semua skill berkurang 15%.": "All skill cooldowns are reduced by 15%.",
+    "Toleransi": "Tolerance",
+    "Memulihkan 0.8 HP per detik.": "Restores 0.8 HP per second.",
+    "Memori Antibodi": "Antibody Memory",
+    "Peluang critical +6%.": "Critical chance +6%.",
+    "Sensor Sitolitik": "Cytolytic Sensor",
+    "Sensor berkala mengungkap musuh yang menyamar.": "Periodic scans reveal disguised enemies.",
+    "Selesaikan 15 run": "Complete 15 runs",
+    "Kalahkan 2 Bos + 260 Imun Coin": "Defeat 2 bosses + 260 Immun Coins",
+    "Kalahkan 500 patogen + 700 Imun Coin": "Defeat 500 pathogens + 700 Immun Coins",
+    "Kalahkan 500 patogen (total)": "Defeat 500 pathogens total",
+    "Kalahkan 300 patogen + 700 Imun Coin": "Defeat 300 pathogens + 700 Immun Coins",
+    "Capai Gel. 8 + 350 Imun Coin": "Reach Wave 8 + 350 Immun Coins",
+    "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Ultimate +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.": "Swallow a dying enemy whole when it pulses yellow: Ultimate fuel +25 and recover 8 HP. Without a dying target: bite for 4x damage and recover 30 HP.",
+    "DAM": "DMG",
+    "tempo": "speed",
+    "phagocyte": "Phagocyte",
+    "dendritic": "Dendritic Scout",
+    "net": "NET Trapper",
+    "granule_lance": "Granule Lance",
+    "vesicle_cloud": "Vesicle Cloud",
+    "granule_tank": "Granule Tank",
+    "cytotoxic": "Cytotoxic Cell",
+    "helper": "Helper Signal",
+    "regulator": "Regulatory Cell",
+    "antibody": "Antibody Specialist",
+    "nk_spike": "Natural Killer Spike"
   },
   "rules": [
     {
@@ -1254,6 +1302,26 @@
     {
       "pattern": "^(.+?) · (.+?)$",
       "replace": "$1 · $2"
+    },
+    {
+      "pattern": "^UPGRADE — ([\\d.,]+) antibodi$",
+      "replace": "UPGRADE — $1 antibodies"
+    },
+    {
+      "pattern": "^BUKA — ([\\d.,]+) Imun$",
+      "replace": "UNLOCK — $1 Immun"
+    },
+    {
+      "pattern": "^(.+?) antibodi$",
+      "replace": "$1 antibodies"
+    },
+    {
+      "pattern": "^MULAI — (.+)$",
+      "replace": "START — $1"
+    },
+    {
+      "pattern": "^(.+?) — (phagocyte|dendritic|net|granule_lance|vesicle_cloud|granule_tank|cytotoxic|helper|regulator|antibody|nk_spike)$",
+      "replace": "$1 — $2"
     }
   ],
   "Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan namamu sendiri.": "Create your account — progress, hero levels & purchases stay safe under your own name.",

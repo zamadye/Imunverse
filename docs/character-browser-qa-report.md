@@ -59,6 +59,10 @@ python3 -m http.server 8000 --bind 0.0.0.0
 | `shots/review/character-browser-skill-bella-antibody.png` | Trigger skill Bella/antibody. |
 | `shots/review/character-browser-skill-tbolt-cytotoxic.png` | Trigger skill T-Bolt/cytotoxic. |
 
+## Character i18n polish companion
+
+Editorial EN/copy QA dijalankan terpisah di `docs/character-i18n-polish-report.md` dengan montage `shots/review/character-i18n-en-polish.png`.
+
 ## Catatan batasan
 
 - Capture dilakukan di landscape karena game sengaja menampilkan overlay `Putar HP-mu` pada portrait.

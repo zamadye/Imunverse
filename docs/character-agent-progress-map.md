@@ -22,8 +22,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Bag/inventory UI | ✅ | `js/ui/screens/bag-screen.js` menghubungkan part evolusi dengan konteks visual jalur Equity hero terpilih. |
 | Codex/Bio-Pedia UI | ✅ | `js/ui/screens/codex-screen.js` menampilkan tag Equity/Mutation dan detail panel design hero/enemy. |
 | HUD gameplay | ✅ | `index.html` + `js/ui/screens/hud-screen.js` menampilkan badge Equity stage aktif di portrait hero. |
-| Screenshot review terbaru | ✅ | Screenshot lama sudah dibersihkan. Bukti terkini: `character-agent-final-review.png`, montage browser QA `character-browser-qa-review.png`, capture DOM per screen, dan `character-hit-impact-vfx.png`. |
-| Browser walkthrough semua screen Character UI | ✅ | Playwright headless menangkap Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 trigger skill archetype; console error 0 dan HTTP 404/5xx 0. |
+| Screenshot review terbaru | ✅ | Screenshot lama sudah dibersihkan. Bukti terkini: `character-agent-final-review.png`, `character-browser-qa-review.png`, `character-hit-impact-vfx.png`, dan `character-i18n-en-polish.png`. |
+| Browser walkthrough semua screen Character UI | ✅ | Playwright headless menangkap Roster, Hero Detail, Bag, Codex hero/enemy, HUD, 3 trigger skill archetype, dan EN i18n polish; console error 0 dan HTTP 404/5xx 0. |
 | Runtime mini renderer collection | ✅ | `js/render/character-preview.js` membuat mini canvas memakai `drawHeroEquity()`/`drawPathogenMutation()` yang sama dengan gameplay; dipakai di roster, detail, bag, dan codex. |
 | Active skill visual per hero/state | ✅ | Audit skill selesai; HUD button dan gameplay cast/payoff VFX kini punya accent archetype/equity visual-only. Screenshot browser multi-hero tetap masuk QA handoff. |
 | Combat damage/balance changes | 🚫 | Tidak disentuh sesuai instruksi; desain visual tidak mengubah math damage. |
@@ -54,7 +54,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Skill audit | `docs/character-skill-visual-audit.md` | Mapping 11 hero × skill → effect kind → status visual. |
 | Handoff agent lain | `docs/character-agent-handoff.md` | Koordinasi Arena, Combat, i18n/copy, plus catatan QA browser yang sudah dijalankan. |
 | Browser QA runner | `scripts/e2e-character-visual.mjs` | Playwright headless capture untuk Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 skill trigger archetype. |
-| Review screenshots | `shots/review/character-agent-final-review.png`, `shots/review/character-browser-qa-review.png`, `shots/review/character-hit-impact-vfx.png`, `shots/review/character-browser-*.png` | Bukti visual terkini hasil pass Character Agent setelah cleanup screenshot lama + QA browser/DOM + hit impact. |
+| i18n QA runner | `scripts/e2e-character-i18n.mjs` | Playwright headless EN toggle QA untuk Character-facing labels, passive copy, buttons/rules, Codex mutation tags, Bag copy, dan HUD badge. |
+| Review screenshots | `shots/review/character-agent-final-review.png`, `shots/review/character-browser-qa-review.png`, `shots/review/character-hit-impact-vfx.png`, `shots/review/character-i18n-en-polish.png`, `shots/review/character-browser-*.png`, `shots/review/character-i18n-en-*.png` | Bukti visual terkini hasil pass Character Agent setelah cleanup screenshot lama + QA browser/DOM + hit impact + i18n polish. |
 
 ---
 
@@ -70,6 +71,7 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `0b12d90 Clean character review screenshots` | ✅ | Screenshot lama Character dihapus dan diringkas ke final review fresh. |
 | Browser DOM QA pass | ✅ | Script `scripts/e2e-character-visual.mjs` + screenshot browser runtime Roster/Detail/Bag/Codex/HUD/skill trigger. |
 | Per-target hit impact VFX | ✅ | Impact pulse per hit kini membawa metadata Character dan menggambar signature archetype kecil; tidak menambah object efek ekstra dan tidak mengubah damage/cooldown. |
+| Editorial i18n polish | ✅ | Character-facing EN labels/copy/rules dipoles dan diverifikasi browser: pattern labels, passive copy, archetype label, upgrade button, Codex mutation tag, Bag copy, HUD badge. |
 
 ---
 
@@ -111,6 +113,13 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `shots/review/character-agent-final-review.png` | ✅ | Bukti visual fresh terkonsolidasi setelah cleanup: hero equity 11 hero, pathogen mutation atlas, collection/HUD UI showcase, dan skill archetype VFX map. |
 | `shots/review/character-browser-qa-review.png` | ✅ | Montage QA browser/DOM dari 9 capture runtime: Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 skill trigger archetype; versi terbaru juga mengassert metadata impact per-target. |
 | `shots/review/character-hit-impact-vfx.png` | ✅ | Montage khusus per-target hit impact: Mako/phagocyte, Bella/antibody, dan T-Bolt/cytotoxic. |
+| `shots/review/character-i18n-en-polish.png` | ✅ | Montage browser EN setelah editorial polish: Roster, Hero Detail, Bag, Codex hero/enemy, HUD, plus assertion summary. |
+| `shots/review/character-i18n-en-roster.png` | ✅ | Capture EN Roster: pattern labels sudah `Piercing`/`Homing`/`Area Slash`, tombol `START`. |
+| `shots/review/character-i18n-en-hero-detail.png` | ✅ | Capture EN Hero Detail: passive `Antibody Memory`, upgrade button `antibodies`, dan squad copy sudah EN. |
+| `shots/review/character-i18n-en-bag.png` | ✅ | Capture EN Bag: part/design copy tidak lagi memakai frasa ID `tanpa part`. |
+| `shots/review/character-i18n-en-codex-hero.png` | ✅ | Capture EN Codex hero: archetype label tampil sebagai `Bella — Antibody Specialist`. |
+| `shots/review/character-i18n-en-codex-enemy.png` | ✅ | Capture EN Codex enemy: tag `MUTATION 0–4` dan tier threat copy. |
+| `shots/review/character-i18n-en-hud.png` | ✅ | Capture EN HUD: badge `FULL EQUITY` tetap terbaca. |
 | `shots/review/character-browser-roster.png` | ✅ | Capture browser langsung Roster: 11 chip equity + 11 mini preview canvas. |
 | `shots/review/character-browser-hero-detail.png` | ✅ | Capture browser langsung Hero Detail: ladder Stage 0–4. |
 | `shots/review/character-browser-bag.png` | ✅ | Capture browser langsung Bag: part evolusi + panel design path hero. |
@@ -126,16 +135,17 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 
 ## 5. Verifikasi terakhir
 
-Perintah terakhir yang sudah dipakai setelah cleanup screenshot:
+Perintah terakhir yang sudah dipakai setelah editorial i18n polish:
 
 ```bash
 git diff --check
-node --check js/core/data-store.js js/systems/skill-system.js js/systems/effects-system.js js/render/shape-renderer.js scripts/e2e-character-visual.mjs
+node --check js/core/data-store.js js/systems/skill-system.js js/systems/effects-system.js js/render/shape-renderer.js scripts/e2e-character-visual.mjs scripts/e2e-character-i18n.mjs
 npm run check
 PW_PATH=/tmp/pw-character/node_modules/playwright CHROMIUM_PATH=/tmp/chromium node scripts/e2e-character-visual.mjs
+PW_PATH=/tmp/pw-character/node_modules/playwright CHROMIUM_PATH=/tmp/chromium node scripts/e2e-character-i18n.mjs
 ```
 
-Hasil terakhir: ✅ whitespace diff, syntax JS, semua import, JSON, sprite path, referensi `index.html`, dan browser/DOM Character QA lolos.
+Hasil terakhir: ✅ whitespace diff, syntax JS, semua import, JSON, sprite path, referensi `index.html`, browser/DOM Character QA, dan EN i18n Character QA lolos.
 
 Verifikasi data Character:
 
@@ -144,9 +154,22 @@ node - <<'NODE'
 const fs=require('fs');
 const d=JSON.parse(fs.readFileSync('data/character-designs.json','utf8'));
 const enemies=JSON.parse(fs.readFileSync('data/enemies.json','utf8')).enemies;
+const lang=JSON.parse(fs.readFileSync('data/lang.json','utf8')).strings;
 const heroOk=Object.keys(d.heroes).length===11 && Object.values(d.heroes).every(h=>h.equity.map(e=>e.stage).join(',')==='1,2,3,4');
-const missing=enemies.filter(e=>!d.pathogens.families[e.visualFamily || d.pathogens.enemyMap[e.id]]).map(e=>e.id);
-console.log(`VERIFY hero11x4=${heroOk} pathogenFamilies=${Object.keys(d.pathogens.families).length} enemyFamilyMissing=${missing.length?missing.join(','):'none'}`);
+const missingEnemy=enemies.filter(e=>!d.pathogens.families[e.visualFamily || d.pathogens.enemyMap[e.id]]).map(e=>e.id);
+const keys=new Set();
+for (const hero of Object.values(d.heroes||{})) {
+  ['archetype','baseCue','baseRule'].forEach(k=>{ if(hero[k]) keys.add(hero[k]); });
+  for (const e of hero.equity||[]) ['label','visualCue','anatomy'].forEach(k=>{ if(e[k]) keys.add(e[k]); });
+}
+for (const fam of Object.values(d.pathogens?.families||{})) {
+  ['name','baseCue','mutationFocus'].forEach(k=>{ if(fam[k]) keys.add(fam[k]); });
+  for (const tier of fam.tierCues||[]) ['label','fromWave','cue'].forEach(k=>{ if(tier[k]) keys.add(tier[k]); });
+}
+const missingLang=[...keys].filter(k=>!lang[k]);
+console.log(`VERIFY hero11x4=${heroOk} pathogenFamilies=${Object.keys(d.pathogens.families).length} enemyFamilyMissing=${missingEnemy.length?missingEnemy.join(','):'none'}`);
+console.log(`CHARACTER_TRANSLATION_MISSING ${missingLang.length}`);
+if (missingLang.length) process.exit(1);
 NODE
 ```
 
@@ -160,9 +183,15 @@ PASS http-bad-responses
 INFO skill-mako-phagocyte-impact-meta count=1 archetypes=phagocyte
 INFO skill-bella-antibody-impact-meta count=10 archetypes=antibody
 INFO skill-tbolt-cytotoxic-impact-meta count=1 archetypes=cytotoxic
+PASS en-roster-no-Penembus
+PASS en-detail-no-Memori Antibodi
+PASS en-codex-no-mutasi-tag
+INFO en-codex-hero-archetype-label Bella — Antibody Specialist
+INFO en-detail-upgrade-button UPGRADE — 150 antibodies
+INFO en-codex-mutation-tag MUTATION 0–4
 ```
 
-Detail QA browser ada di `docs/character-browser-qa-report.md`.
+Detail QA browser ada di `docs/character-browser-qa-report.md`; detail i18n polish ada di `docs/character-i18n-polish-report.md`.
 
 ---
 
@@ -203,6 +232,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 |---|---:|---|
 | Copy review semua `visualCue`, `baseCue`, `mutationFocus` | ✅ | Bahasa ID tetap konsisten dan semua cue Character penting sudah punya pasangan EN di `data/lang.json`. |
 | i18n English untuk field baru | ✅ | `data-store.js` kini menerjemahkan `tierCues` array; `data/lang.json` mencakup field Character `baseCue`, `visualCue`, `mutationFocus`, `tierCues`, label, dan anatomy. |
+| Editorial i18n/copy polish | ✅ | Pattern label (`Piercing`/`Homing`/`Area Slash`), passive copy, archetype labels, unlock labels, dynamic upgrade button, `MUTATION 0–4`, `MAX LEVEL`, dan squad copy tercakup di `data/lang.json` dan browser EN QA. |
 | Dense screenshot label cleanup | ✅ | Screenshot lama dikonsolidasikan ke `character-agent-final-review.png`, lalu dilengkapi capture DOM/browser fresh. |
 
 ### Prioritas E — Konten/logic di luar Character visual pass
@@ -262,6 +292,6 @@ Sebuah subtask Character dianggap selesai jika memenuhi semua poin ini:
 
 Jika lanjut dari sini, urutan paling aman:
 
-1. **Editorial i18n polish opsional**: review tone Indonesia/English di browser bila target publik butuh copy lebih halus.
-2. **Manual device QA/release polish**: opsional menjelang rilis, di luar implementasi Character core.
-3. **Koordinasikan out-of-scope**: Combat damage/balance, arena/background, enemy behavior, dan hero baru ke agent terkait.
+1. **Manual device QA/release polish**: opsional menjelang rilis, di luar implementasi Character core.
+2. **Koordinasikan out-of-scope**: Combat damage/balance, arena/background, enemy behavior, dan hero baru ke agent terkait.
+3. **Jika ada permintaan baru**: lanjutkan hanya dengan task Character-scoped baru yang eksplisit.

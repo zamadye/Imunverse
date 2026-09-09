@@ -59,16 +59,18 @@ Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Charac
 
 ## 4. i18n / Copy Agent
 
-**Status:** dasar teknis dan terjemahan Character sudah dikerjakan oleh Character Agent; review editorial tetap bisa diambil copy agent bila ingin polish publik.
+**Status:** editorial EN polish Character sudah dikerjakan dan diverifikasi browser; copy agent hanya perlu final brand/legal review jika menjelang release publik.
 
 ### Sudah
 - Label/rule UI Character baru ditambah ke `data/lang.json`.
 - `data-store.js` menerjemahkan `mutationFocus` dan `tierCues` array.
 - Entry English untuk `baseCue`, `visualCue`, `tierCues`, `mutationFocus`, label, dan anatomy utama Character sudah ditambahkan.
+- Editorial polish tambahan mencakup Character-facing pattern labels, passive copy, archetype labels, unlock labels, skill copy, dynamic upgrade/Imun rules, Codex `MUTATION 0–4`, `MAX LEVEL`, `DMG`, dan `speed`.
+- QA bilingual langsung di browser sudah dijalankan via `scripts/e2e-character-i18n.mjs`.
 
-### Belum opsional
-- Review editorial tone-of-voice publik agar istilah imunologi tetap benar tetapi ramah anak.
-- QA bilingual langsung di browser setelah language toggle EN.
+### Opsional release-only
+- Final brand/legal tone review jika teks EN akan dipakai publik/marketing.
+- Manual device QA bahasa EN di perangkat nyata; headless browser sudah hijau.
 
 ---
 
@@ -79,8 +81,11 @@ Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Charac
 - Screenshot review terkini: `shots/review/character-agent-final-review.png`
 - Browser QA montage: `shots/review/character-browser-qa-review.png`
 - Hit impact montage: `shots/review/character-hit-impact-vfx.png`
+- i18n EN polish montage: `shots/review/character-i18n-en-polish.png`
 - Browser QA report: `docs/character-browser-qa-report.md`
+- i18n polish report: `docs/character-i18n-polish-report.md`
 - Browser QA runner: `scripts/e2e-character-visual.mjs`
+- i18n QA runner: `scripts/e2e-character-i18n.mjs`
 - Renderer gameplay: `js/render/character-visuals.js`
 - Preview runtime UI: `js/render/character-preview.js`
 - Data Character: `data/character-designs.json`
