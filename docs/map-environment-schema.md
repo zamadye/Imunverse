@@ -61,6 +61,9 @@ pseudo-3D, ter-cull di luar layar). Penempatan deterministik — stabil tiap fra
 Kotak kandidat dihitung KONSERVATIF dari frustum aktual (#12): skala minimum
 global `MIN·zoom·punch` + margin culling + jangkauan dunia per tipe — tak ada
 fitur visible yang terlewat saat menjelajah (bukti: `scripts/test-map-culling.mjs`).
+Gubernur kualitas adaptif menjaga rasa responsif: bila EMA biaya render latar
+>7ms, dekorasi dijarangkan separuh + napas layar dimatikan; pulih otomatis
+di <3ms (histeresis, keputusan tiap ±1 dtk). Visual inti tak pernah dimatikan.
 
 | Tipe | Wujud | Kunci utama |
 |---|---|---|

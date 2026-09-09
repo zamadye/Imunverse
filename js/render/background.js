@@ -133,6 +133,30 @@ const PULSE_DEFAULTS = {
   glowAlpha: 0.05, // alpha puncak overlay napas layar-penuh
 };
 
+// ---- Gubernur kualitas adaptif: jaga rasa responsif di perangkat lemah ----
+// Mengukur EMA biaya render latar per-frame; bila satu lapis latar konsisten
+// memakan budget (>7ms), turun ke mode hemat (partikel jarang + napas layar
+// mati); pulih otomatis saat ringan (<3ms). Keputusan tiap 120 observasi
+// (~1 dtk) + histeresis → tak ada osilasi. Visual inti (wash, anatomi,
+// sudut) TIDAK PERNAH dimatikan — hanya dekorasi jarang yang dikurangi.
+let govEMA = 0, govLevel = 1, govTick = 0;
+const GOV = { SLOW: 7, FAST: 3, EVERY: 120 };
+/** Catat biaya satu lapis latar (ms). Diekspor utk tes. */
+export function mapGovObserve(ms) {
+  govEMA = govEMA === 0 ? ms : govEMA * 0.95 + ms * 0.05;
+  if (++govTick < GOV.EVERY) return;
+  govTick = 0;
+  if (govLevel === 1 && govEMA > GOV.SLOW) {
+    govLevel = 0.5;
+    console.info(`[MAP] kualitas latar hemat (EMA ${govEMA.toFixed(1)}ms)`);
+  } else if (govLevel === 0.5 && govEMA < GOV.FAST) {
+    govLevel = 1;
+    console.info(`[MAP] kualitas latar penuh (EMA ${govEMA.toFixed(1)}ms)`);
+  }
+}
+/** Level kualitas latar aktif (1 = penuh, 0.5 = hemat). Diekspor utk tes. */
+export function mapQuality() { return govLevel; }
+
 /** Set palet arena (dipanggil game.js saat run dimulai). */
 export function setArenaPalette(p) {
   PALETTE = { ...PALETTE, ...p };
@@ -193,6 +217,7 @@ export function heartbeat(time, bpm) {
 }
 
 export function drawBackground(ctx, camX, camY, w, h, time) {
+  const gT0 = performance.now(); // gubernur kualitas
   // ---- dasar JARINGAN ORGAN (fullscreen — tanah tanpa batas) ----
   // Bukan lagi "dinding + tambalan lantai": seluruh layar = permukaan organ.
   // Gradien halus memberi kedalaman; isi anatomi (lipatan/makanan/sel)
@@ -232,7 +257,7 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
 
   // ---- NAPAS LAYAR: glow radial mengikuti denyut (brand Pulse Cell) ----
   // Satu gradient + satu fill per frame; alpha puncak kecil (default 0.05).
-  if (pc.glowAlpha > 0 && beat > 0.01) {
+  if (govLevel === 1 && pc.glowAlpha > 0 && beat > 0.01) {
     const br = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.7);
     br.addColorStop(0, `rgba(255,255,255,${(pc.glowAlpha * beat).toFixed(3)})`);
     br.addColorStop(1, 'rgba(255,255,255,0)');
@@ -246,6 +271,7 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   vg.addColorStop(1, PALETTE.vignette);
   ctx.fillStyle = vg;
   ctx.fillRect(0, 0, w, h);
+  mapGovObserve(performance.now() - gT0);
 }
 
 /**
@@ -270,7 +296,7 @@ function drawAmbientLayer(ctx, camX, camY, w, h, time, beat) {
   for (let ix = x0; ix <= x1; ix++) {
     for (let iy = y0; iy <= y1; iy++) {
       const r1 = hash2(ix * 13 + 71, iy * 17 - 43);
-      if (r1 > a.density) continue;
+      if (r1 > a.density * govLevel) continue; // hemat: jarang separuh
       const r2 = hash2(ix - 31, iy + 57);
       const wx = ix * spacing + (r1 - 0.5) * spacing * 0.7 - ox + w / 2
         + Math.sin(time * 0.5 + r2 * 9) * 10; // goyang horizontal pelan
@@ -564,12 +590,14 @@ export function drawArena3D(ctx, P, time) {
   const gc = groundCfg();
   const feats = gc.features || [];
   if (!feats.length) return;
+  const aT0 = performance.now(); // gubernur kualitas
   const pc = pulseCfg();
   const beat = heartbeat(time, pc.bpm) * (pc.strength || 0);
   const cam = cameraOf(P);
   for (let fi = 0; fi < feats.length; fi++) {
     drawGroundFeature(ctx, P, cam, w, h, time, beat, feats[fi], fi);
   }
+  mapGovObserve(performance.now() - aT0);
 }
 
 /** Sebar satu definisi fitur ke grid-hash dunia dalam kotak pandang. */
@@ -580,7 +608,7 @@ function drawGroundFeature(ctx, P, cam, w, h, time, beat, f, fi) {
   const B = featBounds(f, cam.sMin);
   const vw = worldViewBox(cam, w, h, B.m, B.reach);
   const sp = f.spacing || 300;
-  const dens = f.density == null ? 0.5 : f.density;
+  const dens = (f.density == null ? 0.5 : f.density) * govLevel; // hemat: jarang
   const ix0 = Math.floor(vw.x0 / sp) - 1, ix1 = Math.floor(vw.x1 / sp) + 1;
   const iy0 = Math.floor(vw.y0 / sp) - 1, iy1 = Math.floor(vw.y1 / sp) + 1;
   for (let ix = ix0; ix <= ix1; ix++) {

@@ -178,7 +178,7 @@ export const game = {
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
-    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=48a`);
+    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=49a`);
 
     // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
     const focusId = meta.focusRun || 'seimbang';

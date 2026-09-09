@@ -7,7 +7,7 @@
  * Jalankan: node scripts/test-map-culling.mjs */
 import { readFileSync } from 'node:fs';
 import { Camera } from '../js/render/camera.js';
-import { cameraOf, worldViewBox, featBounds, setArenaPalette, drawArena3D } from '../js/render/background.js';
+import { cameraOf, worldViewBox, featBounds, setArenaPalette, drawArena3D, mapGovObserve, mapQuality } from '../js/render/background.js';
 
 const arenas = JSON.parse(readFileSync('data/arenas.json', 'utf8')).arenas;
 let fails = 0, checks = 0, scanned = 0;
@@ -103,5 +103,14 @@ for (const arena of arenas) {
     }
   log('cull-negcontrol-oldbox-fails', miss > 0, `titik-terlewat-formula-lama=${miss}`);
 }
+// ---- gubernur kualitas: degradasi / pulih / histeresis ----
+for (let i = 0; i < 240; i++) mapGovObserve(10);
+log('gov-degrade', mapQuality() === 0.5, `q=${mapQuality()}`);
+for (let i = 0; i < 240; i++) mapGovObserve(5);
+log('gov-hyst-low', mapQuality() === 0.5, `q=${mapQuality()}`);
+for (let i = 0; i < 240; i++) mapGovObserve(1);
+log('gov-recover', mapQuality() === 1, `q=${mapQuality()}`);
+for (let i = 0; i < 240; i++) mapGovObserve(5);
+log('gov-hyst-high', mapQuality() === 1, `q=${mapQuality()}`);
 console.log(`--- ${checks - fails}/${checks} PASS ---`);
 process.exitCode = fails ? 1 : 0;
