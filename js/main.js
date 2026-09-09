@@ -53,7 +53,6 @@ import { signUp, hasAccount } from './systems/account-system.js';
 import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
-import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
@@ -390,7 +389,6 @@ async function boot() {
   screenManager.registerScreen('revive', reviveScreen);
   screenManager.registerScreen('gameover', gameoverScreen);
   screenManager.registerScreen('arena', arenaScreen);
-  screenManager.registerScreen('focus', focusScreen);
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('codex', codexScreen);
@@ -452,7 +450,6 @@ async function boot() {
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => backToContext());
-  document.getElementById('btn-focus-close').addEventListener('click', () => backToContext());
   // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
   // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
   // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
@@ -501,8 +498,7 @@ async function boot() {
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
   document.getElementById('account-chip').addEventListener('click', () => screenManager.show('profile'));
-  // Fase 19: chip pangkat → modal PANGKAT PENJAGA (klik riil)
-  document.getElementById('rank-chip')?.addEventListener('click', () => screenManager.show('rank'));
+  // Chip pangkat: handler dipasang di dashboard-screen.js (rankChip.onclick) — jangan digandakan di sini
 
   // ---- AUDIO: unlock di gesture pertama (kebijakan autoplay browser) ----
   const unlockAudio = () => audio.unlock();
@@ -617,8 +613,6 @@ async function boot() {
     (dt, time) => game.render(dt, time)
   );
 
-    // Bio-Pedia: tombol dashboard -> layar kodex
-  document.getElementById('btn-codex')?.addEventListener('click', () => screenManager.show('codex'));
 
 // Toggle bahasa ID/EN satu-klik (seluruh UI + data, tanpa reload)
   const updateLangButtons = () => {

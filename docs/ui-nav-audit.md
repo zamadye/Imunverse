@@ -241,3 +241,15 @@ memuat sprite in-game (`portrait_*`, `hero_*`, `part_*`, `deco_aura`) — bukan 
 
 Verifikasi: `e2e-ui-nav` 21/21, `onboarding` 16/16, `controls` 23/23, `e1` 32/32, `mlbb` 20/20 (×2), `r1` 14/14,
 `v2phase1` 15/15, `purpose` 13/13; `check-imports` lolos. Bukti: `shots/ui-nav/hud-pause-go-45.png`.
+
+## 11. BUILD 45 (lanjutan) — pembersihan dead UI dari §4 + modal Arena
+
+| # | Perubahan | Berkas |
+|---|---|---|
+| 1 | `focus-screen` **dihapus** (modal "Fokus Run" tidak pernah ditampilkan sejak alur pra-run disederhanakan — `show('focus')` tidak ada di mana pun; `meta.focusRun` tetap dipakai body-system dan di-reset `seimbang` oleh prep). Section HTML, import/register, handler `#btn-focus-close`, dan CSS `.focus-*`/`.fi-*` ikut dihapus. | `js/ui/screens/focus-screen.js` (hapus), `js/main.js`, `index.html`, `styles/main.css` |
+| 2 | Handler `#btn-codex` (elemen tidak ada) dihapus; handler ganda `#rank-chip` di `main.js` dihapus — `dashboard-screen.js` sudah memasang `onclick` (diverifikasi: klik chip → `screen-rank`, chip akun → `screen-profile`). | `js/main.js` |
+| 3 | Modal Pilih Arena: gembok baris terkunci membesar 56 px karena `.arena-item img` mengalahkan `.lock-ico` (13 px) → selektor `.arena-item img.lock-ico` 15 px; baris syarat kembali satu garis. | `styles/main.css` |
+
+Belum disentuh (butuh keputusan/lintas scope): `.hud-quests` vs `.hud-combo`/`.hud-antigen` (tumpang tindih hanya bila
+combo & antigen aktif bersamaan — perlu uji mid-run nyata), label liveops.
+Verifikasi: `e2e-ui-nav` 21/21, `progression` 18/18, `retention` 20/20, `purpose` 13/13, `v2phase6` 15/15, `r1` 14/14; `check-imports` lolos.
