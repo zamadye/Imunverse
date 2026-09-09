@@ -27,6 +27,46 @@ outline gelap tipis, bayangan lantai lembut. Palet **hanya** dari token `styles/
 | `menu-quest.svg` | panel Misi | penanda quest — gelembung sinyal koral + seru emas |
 | `hud-serang.svg` | tombol SERANG (HUD) | antibodi-Y krem ber-outline ink menghantam virus koral mungil (mata silang) + bintang benturan emas — untuk latar teal |
 
+## Ikon UI menu (BUILD 44 — work order #3)
+
+Ikon **file SVG** untuk header, mata uang, kunci, peran hero, dan bagian Toko (dipakai lewat `<img>`):
+
+| file | pemakaian | makna |
+|---|---|---|
+| `ui-back.svg` | tombol kembali semua layar menu (`.btn-back`) | panah pseudopodia teal gemuk |
+| `cur-antibodi.svg` | chip Antibodi (header, harga, HUD, ringkasan run) | koin emas berelief antibodi-Y |
+| `cur-imun.svg` | chip Imun Coin (header, harga, misi, BP) | permata heksagonal teal (bahasa pelat hex skill) |
+| `ui-lock.svg` | hero/arena/bab/BP terkunci | gembok krem ber-outline teal-dark (terbaca di latar terang & teal) |
+| `ui-star.svg` / `ui-star-empty.svg` | XP HUD, bintang level-up, rating run, klaim BP | bintang emas gemuk / siluet krem |
+| `ui-virus.svg` | cadangan penanda "musuh/patogen" | virus koral berduri tumpul, alis nakal |
+| `role-tank.svg` / `role-damage.svg` / `role-support.svg` | badge peran hero (roster, toko, detail hero) | perisai + sel tenang / ledakan koral + antibodi-Y bersilang / hati biru neutrofil + tanda tambah |
+| `sec-item.svg` | Toko › Bekal Run, header Tas | tas selempang koral berkancing antibodi-Y |
+| `sec-skin.svg` | Toko › Skin & Gaya | sel sage + tiga cipratan cat + kuas |
+| `sec-premium.svg` | Toko › Paket Premium, aksesori Mahkota | peti teal berpita emas + mahkota bertatah permata Imun |
+| `sec-suplemen.svg` | Toko › Suplemen Sistem Tubuh | kapsul teal/sage + hati koral |
+| `sec-gratis.svg` | Toko › Dapatkan Imun Gratis | kotak hadiah teal berpita koral |
+
+Ikon **SVG inline** (`js/ui/menu-icons.js`, pola sama dengan `skill-icons.js`) untuk baris upgrade Lab Pasukan,
+kartu item Toko, chip stat detail hero, pilihan level-up, dan Tas — pemetaan `id → ikon` hidup di sisi UI
+(`iconFor(def)`), data JSON **tidak diubah**; id tanpa ikon khusus jatuh ke `def.icon` lama:
+
+| kunci | makna | dipakai oleh id |
+|---|---|---|
+| `damage` | bintang benturan koral + inti emas | `sq_damage`, `g_damage`, `damage` (level-up) |
+| `vitality` | hati koral + tanda tambah | `sq_vitality`, `g_vitality`, `maxHP` |
+| `weapon` | antibodi-Y di pelat teal | `sq_weapon` |
+| `jurus` | petir emas | `sq_jurus` |
+| `armor` | perisai teal | `sq_armor` |
+| `swift` | sel sage melesat | `sq_swift`, `g_swift`, `moveSpeed` |
+| `attack` | rentetan tiga antibodi-Y | `sq_attack`, `g_rapid`, `attackSpeed` |
+| `range` | cincin reseptor + bidik | `sq_range`, `g_range` (menutup issue #7), `attackRange` |
+| `nutrition` | heksagon glukosa emas berwajah | `sq_nutrition` |
+| `steal` | hati + tetes terserap | `g_steal`, `lifeSteal` |
+| `multi` | tiga antibodi menyebar | `projectileCount` |
+| `pierce` / `crit` / `magnet` / `antigen` / `evo` | tembus, titik lemah, medan kemotaksis, kartu memori, sel bermetamorfosis | `pierce`, `critChance`, `magnet`, `antigen_boost`, `evo_*` |
+| `serum_awal` / `vaksin_awal` / `kopi_limfa` / `pelindung_lendir` / `koin_ganda` | item bekal run | `shopItems` |
+| `TAB_ICONS.hero/global/pasukan/tim` | tab Lab Pasukan | `#upg-tabs` |
+
 ## Ikon skill (33) — `js/ui/skill-icons.js`
 
 Ikon **per-skill** (bukan per-jenis efek) untuk tombol skill HUD, chip skill di Prep, dan detail hero

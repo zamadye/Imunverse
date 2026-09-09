@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Imun Gratis" (offerwall): kotak hadiah teal berpita koral, permata Imun hex mengintip dari tutup + kilau. -->
+  <ellipse cx="32" cy="59" rx="18" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <rect x="13" y="30" width="38" height="26" rx="6" fill="#2f9c8f" stroke="#1f7a70" stroke-width="2.4"/>
+  <rect x="9" y="22" width="46" height="12" rx="5" fill="#7fd8c8" stroke="#1f7a70" stroke-width="2.4"/>
+  <path d="M32 22 V56" stroke="#f2825c" stroke-width="6" stroke-linecap="round"/>
+  <path d="M32 22 V56" stroke="#e96a4c" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+  <path d="M32 22 C26 20 22 15 25 11 C28 8 32 13 32 19 C32 13 36 8 39 11 C42 15 38 20 32 22 Z" fill="#f2825c" stroke="#e96a4c" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M50 8 L51.6 12.6 L56.2 14.2 L51.6 15.8 L50 20.4 L48.4 15.8 L43.8 14.2 L48.4 12.6 Z" fill="#f5c64f"/>
+</svg>

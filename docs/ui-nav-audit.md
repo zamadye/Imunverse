@@ -195,3 +195,32 @@ Perubahan (UI murni — `skill-system.js`, combat, spawner tidak disentuh):
 Verifikasi: `scripts/e2e-e1.mjs` (poin 2 → pelat hex SVG + ikon SERANG), `scripts/e2e-e2.mjs` (poin 3 → sumber ikon
 `skill-icons.js`), `e2e-mlbb.mjs` (3 tombol, 1 ULT, klik memicu cooldown), `e2e-controls.mjs`, `e2e-ui-nav.mjs`.
 Bukti visual: `shots/ui-nav/skills-4.png` (4 hero), `shots/ui-nav/skill-icons-64.png` (33 ikon), `shots/ui-nav/hud-land.png`.
+
+## 9. BUILD 44 — ikon & halaman menu (Toko, Heroes, Lab Pasukan, dll.) satu bahasa visual (work order #3)
+
+Temuan runtime (844×390, seed 15 run, sebelum diubah):
+
+| # | Temuan (sebelum) | Bukti |
+|---|---|---|
+| 1 | Menu memakai **±30 PNG generik** (`icon_back/coin/imu/lock/sword/heart/bolt/star/boot/shield…`) dari era sebelum set `menu-*.svg` — gaya flat lain, ukuran & outline tidak konsisten dengan ikon HUD/skill BUILD 43. Toko memakai **sprite item** (`item_glukosa/antibodi/vitamin_c.png`) sebagai *hiasan sudut* header, bukan sebagai item. | `git grep icon_ js/ui/screens` (sebelum) |
+| 2 | Ikon upgrade dipetakan **per PNG generik**: 6 baris Lab Pasukan / 11 pilihan level-up berbagi 5 gambar (`icon_heart` untuk `maxHP` *dan* `lifeSteal`; `icon_scope` untuk `attackRange` *dan* `pierce`; `fx_spark` untuk `damage` *dan* `critChance`). `g_range` menunjuk `icon_crosshair.png` yang tidak ada (issue #7). | `data/upgrades.json` |
+| 3 | Header 9 layar menu **berbeda-beda** (`.topbar` vs `.screen-header` vs `.hd-top`, tombol back 2 ukuran, chip mata uang 3 varian). Toko = satu halaman panjang 6 bagian tanpa navigasi; judul bagian `<h3>` ganda (statis di HTML + dari JS). Heroes: footer MULAI **menutupi baris kartu terakhir** (tombol BUKA hero baris bawah tak bisa ditekan). | `shots/ui-nav/roster-44.png` (sesudah) |
+| 4 | Badge peran hero hanya teks; kartu terkunci memakai `aria-disabled` pada kartu → tombol BUKA di dalamnya ikut dianggap nonaktif (a11y & Playwright). | `roster-screen.js` |
+
+Perubahan (UI murni — data JSON, combat, spawner, ekonomi tidak disentuh):
+
+| # | Perubahan | Berkas |
+|---|---|---|
+| 1 | **15 ikon SVG baru** satu bahasa dengan `menu-*.svg`/`hud-serang.svg`: `ui-back`, `ui-lock`, `ui-star(-empty)`, `ui-virus`, `cur-antibodi`, `cur-imun`, `role-tank/damage/support`, `sec-item/skin/premium/suplemen/gratis`. Konsep tiap ikon di `assets/icons/README.md`. | `assets/icons/*.svg` |
+| 2 | **`js/ui/menu-icons.js`** (pola `skill-icons.js`): 21 ikon stat/item inline + 4 ikon tab, pemetaan `id → ikon` per **id upgrade** (bukan per PNG) → `maxHP`≠`lifeSteal`, `attackRange`≠`pierce`, `damage`≠`critChance`; `g_range` tertutup (issue #7) tanpa mengubah `upgrades.json`. Dipakai Lab Pasukan, Toko, level-up, chip stat detail hero, Tas. | `menu-icons.js`, `upgrade-screen.js`, `shop-screen.js`, `levelup-screen.js`, `hero-detail-screen.js`, `bag-screen.js` |
+| 3 | **Header seragam `.ui-head`** (back 44 px + emblem layar + judul + chip mata uang kanan) untuk Heroes, Lab Pasukan, Toko, Bio-Pedia, Battle Pass, Detail Hero, Profil, Kampanye, Siap Tempur, Tas. Semua PNG generik di layar menu, pause, gameover, arena, rank, bosschest, auth, dashboard diganti SVG baru. | `index.html`, `styles/main.css` (blok BUILD 44), `js/ui/screens/*.js` |
+| 4 | **Toko** disusun ulang: nav chip *sticky* (`#shop-nav`, scroll-spy) → BEKAL RUN → BUKA HERO → SKIN & GAYA → SUPLEMEN → IMUN GRATIS → PAKET PREMIUM; tiap bagian ber-emblem `sec-*.svg` + subjudul 1 baris; kartu item pakai ikon inline; tombol premium berwarna; judul ganda dihapus. | `shop-screen.js`, `index.html`, `main.css`, `dashboard-focus.css` |
+| 5 | **Heroes**: emblem peran `role-*.svg` di kartu, gembok krem terbaca (padding piksel tetap — padding % relatif lebar avatar membuat SVG hilang), grid diberi ruang bawah 78 px + footer `pointer-events:none` (tombol saja yang menerima sentuhan) → baris terakhir tak lagi tertutup. `aria-disabled` dipindah dari kartu (tombol BUKA aktif untuk AT). | `roster-screen.js`, `main.css`, `dashboard-focus.css` |
+| 6 | **Lab Pasukan**: tab HERO/GLOBAL/PASUKAN/TIM ber-ikon, tombol LEVEL UP dengan harga ber-ikon mata uang; **Level-up in-run**: ikon pilihan dari `menu-icons.js` (11 id berbeda). | `upgrade-screen.js`, `levelup-screen.js` |
+| 7 | i18n: 21 string EN baru + 2 rule untuk label/subjudul baru. | `data/lang.json` |
+
+Verifikasi: 23 suite e2e = **410 PASS / 0 FAIL** (`e2e-controls` 23/23 ×2, `e2e-retention` 20/20 setelah perbaikan #5,
+`e2e-ui-nav` 21/21, `e2e-mlbb` 20/20). Flaky lama yang tidak terkait UI (lulus saat diulang): `e2e-r5 hero-splash-inside-zone`
+(issue #1), `e2e-r7 segments-emit-on-move-only`, `e2e-v2phase35 p3/p5-*` (simulasi combat acak). `node scripts/check-imports.mjs` lolos.
+Bukti visual: `shots/ui-nav/menu-icons-44.png` (semua ikon baru), `shop-44.png`, `roster-44.png`, `lab-44.png`, `others-44.png`
+(detail hero, Bio-Pedia, Battle Pass, Tas).

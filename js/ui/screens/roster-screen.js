@@ -16,6 +16,7 @@ import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
 import { heroLevelBadge } from '../../systems/economy-system.js';
 import { screenManager as sm } from '../screen-manager.js';
+import { roleIconSrc, roleTint } from '../menu-icons.js';
 
 const PATTERN_LABEL = {
   melee_swipe: 'Tebasan Area',
@@ -35,6 +36,8 @@ export function show() {
   const meta = STATE.meta;
   const grid = document.getElementById('roster-grid');
   grid.textContent = '';
+  const imuEl = document.getElementById('roster-imun');
+  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   // Fase 13.1: chip progres koleksi di subtitle (x/11 terbuka)
   const heroesAll = getData().heroes.heroes;
@@ -59,6 +62,11 @@ export function show() {
       el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
     ]);
 
+    // UI/UX work order #3: badge PERAN (Tank/Damage/Support) di lingkaran avatar —
+    // ikon bespoke assets/icons/role-*.svg, bahasa sama dengan Shop & Detail Hero.
+    const roleSrc = roleIconSrc(heroDef.role);
+    if (roleSrc) avatar.appendChild(el('img', { class: 'role-badge', src: roleSrc, alt: heroDef.role, title: heroDef.role, style: `--role:${roleTint(heroDef.role)}` }));
+
     const children = [avatar];
 
     // Fase 20: TIER SEJAK AWAL (common–legend) — ditentukan saat dapat hero,
@@ -81,7 +89,7 @@ export function show() {
       ]));
     } else {
       // Badge gembok aset PNG di lingkaran (ala mockup)
-      avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
+      avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: tr(status.conditionLabel) }));
       // Fase 17 (trigger 1B): hero jalur Imun Coin bisa DIBUKA langsung di roster
@@ -107,15 +115,18 @@ export function show() {
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
-      role: status.unlocked ? 'button' : undefined,
       title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
-      role: 'button',
+      // Kartu terkunci BUKAN tombol (tetapi tombol BUKA di dalamnya tetap aktif —
+      // jangan pakai aria-disabled di kartu: itu menonaktifkan keturunannya bagi AT)
+      role: status.unlocked ? 'button' : undefined,
       tabindex: status.unlocked ? '0' : '-1',
+      // SATU handler: pilih hero (tersimpan) lalu buka detail — sebelumnya dua listener
+      // (onclick pilih + listener detail) membuat render ulang grid tepat sebelum navigasi.
       onclick: () => {
         if (!status.unlocked) return;
         meta.selectedHero = heroDef.id;
         writeSave(meta);
-        show(); // render ulang highlight
+        sm.show('herodetail', { heroId: heroDef.id });
       },
     }, children);
 
@@ -128,7 +139,6 @@ export function show() {
     });
 
     grid.appendChild(card);
-    if (status.unlocked) card.addEventListener('click', () => sm.show('herodetail', { heroId: heroDef.id }));
   }
 
   // Tombol mulai aktif hanya bila hero terpilih terbuka

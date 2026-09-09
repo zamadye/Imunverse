@@ -110,7 +110,7 @@ function renderHeroRow(meta) {
       el('span', { class: 'ph-name', text: heroDef.name.split(' ').slice(0, 2).join(' ') }),
       status.unlocked
         ? el('span', { class: 'ph-stage', style: `background:${stageDef.tierColor}`, text: `T${stageDef.stage + 1} · ${heroLevelBadge(meta, heroDef.id)}` })
-        : el('img', { class: 'ph-lock', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }),
+        : el('img', { class: 'ph-lock', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }),
     ]);
     if (status.unlocked) item.addEventListener('click', () => selectHero(heroDef.id));
     row.appendChild(item);

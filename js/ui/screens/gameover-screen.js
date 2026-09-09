@@ -95,10 +95,10 @@ export function show(summary) {
   const stars = starsFor(summary);
   document.querySelectorAll('#gameover-stars .star').forEach((s, i) => {
     s.classList.remove('on');
-    s.src = 'assets/sprites/icon_star_empty.png';
+    s.src = 'assets/icons/ui-star-empty.svg';
     if (i < stars) {
       setTimeout(() => {
-        s.src = 'assets/sprites/icon_star.png';
+        s.src = 'assets/icons/ui-star.svg';
         s.classList.add('on');
       }, 250 + i * 260);
     }
@@ -158,7 +158,7 @@ export function show(summary) {
     if (summary.bpFrom !== null && summary.bpTo > summary.bpFrom) bits.push(`Battle Pass Lv ${summary.bpFrom} → ${summary.bpTo}`);
     else if (summary.bpFrom !== null) bits.push(`Battle Pass Lv ${summary.bpTo}`);
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-imu' }, [
-      el('img', { src: 'assets/sprites/icon_imu.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
+      el('img', { src: 'assets/icons/cur-imun.svg', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${bits.join(' · ')}` }),
     ]));
   }

@@ -18,7 +18,7 @@ export function show() {
       el('span', { text: ` ${s.time} · ${s.kills} patogen` }),
     ]));
     box.appendChild(el('div', { class: 'pause-line' }, [
-      el('img', { class: 'pause-ico', src: 'assets/sprites/icon_coin.png', alt: '' }),
+      el('img', { class: 'pause-ico', src: 'assets/icons/cur-antibodi.svg', alt: '' }),
       el('span', { text: ` ${s.currency} antibodi terkumpul (dibawa pulang saat run diakhiri)` }),
     ]));
   }

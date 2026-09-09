@@ -12,6 +12,7 @@ import { getData } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { el, screenManager } from '../screen-manager.js';
 import { skillChip } from '../skill-icons.js';
+import { namedIconEl, roleIconSrc, roleTint } from '../menu-icons.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
@@ -54,7 +55,10 @@ function selectHero() {
   box.appendChild(el('div', { class: 'card hero-lab-card hl-hero-panel', style: `background:linear-gradient(180deg,${heroDef.color}22,var(--card) 62%)` }, [
     // Banner nama ala kartu hero game: emblem peran + nama + tier
     el('div', { class: 'hl-banner' }, [
-      el('span', { class: 'hl-banner-role', style: `background:${heroDef.roleColor || heroDef.color}`, text: (heroDef.role || heroDef.name).slice(0, 3).toUpperCase() }),
+      // UI/UX work order #3: emblem peran = ikon bespoke (role-*.svg), bukan singkatan teks
+      roleIconSrc(heroDef.role)
+        ? el('span', { class: 'hl-banner-role', style: `background:${roleTint(heroDef.role)}`, title: heroDef.role }, [el('img', { src: roleIconSrc(heroDef.role), alt: heroDef.role })])
+        : el('span', { class: 'hl-banner-role', style: `background:${heroDef.roleColor || heroDef.color}`, text: (heroDef.role || heroDef.name).slice(0, 3).toUpperCase() }),
       el('b', { class: 'hl-banner-name', text: heroDef.name }),
       // Fase 20: tier = RARITY hero sejak awal (bukan evolusi — evolusi hanya tingkat kekuatan)
       el('span', { class: 'hl-banner-tier', style: `background:${((getData().heroes.tiers || {})[heroDef.tier] || {}).color || stageDef.tierColor}`, text: ((getData().heroes.tiers || {})[heroDef.tier] || {}).label || stageDef.tier }),
@@ -106,12 +110,12 @@ function selectHero() {
     // Stat chips (damage merah / HP hijau) — gaya kartu game modern
     el('div', { class: 'hl-chips' }, [
       el('span', { class: 'hl-chip atk' }, [
-        el('img', { src: 'assets/sprites/icon_sword.png', alt: '' }),
+        namedIconEl('damage'),
         el('b', { text: `${Math.round(nowDamage)}` }),
         el('i', { text: `+${Math.round((nextDamage - nowDamage) * 10) / 10}` }),
       ]),
       el('span', { class: 'hl-chip hp' }, [
-        el('img', { src: 'assets/sprites/icon_heart.png', alt: '' }),
+        namedIconEl('vitality'),
         el('b', { text: `${nowHP}` }),
         el('i', { text: `+${nextHP - nowHP}` }),
       ]),
@@ -158,12 +162,12 @@ function selectHero() {
     el('b', { class: 'hl-name', text: 'Pasukan Imun' }),
     el('div', { class: 'hl-chips' }, [
       el('span', { class: 'hl-chip atk' }, [
-        el('img', { src: 'assets/sprites/icon_sword.png', alt: '' }),
+        namedIconEl('damage'),
         el('b', { text: `+${Math.round(allyCfg.dmgPerLevel * aLvl * 100)}%` }),
         el('i', { text: 'damage' }),
       ]),
       el('span', { class: 'hl-chip spd' }, [
-        el('img', { src: 'assets/sprites/icon_bolt.png', alt: '' }),
+        namedIconEl('attack'),
         el('b', { text: `+${Math.round(((0.95 - Math.max(0.55, 0.95 - allyCfg.speedPerLevel * aLvl)) / 0.95) * 100)}%` }),
         el('i', { text: 'tempo' }),
       ]),

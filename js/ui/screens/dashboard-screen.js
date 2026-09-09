@@ -435,7 +435,7 @@ function renderArenaCard(meta) {
     status.unlocked
       ? el('span', { text: 'Terbuka ✓' })
       : el('span', { class: 'lock-line' }, [
-          el('img', { class: 'lock-ico', src: 'assets/sprites/icon_lock.png', alt: '' }),
+          el('img', { class: 'lock-ico', src: 'assets/icons/ui-lock.svg', alt: '' }),
           el('span', { text: ` ${status.text}` }),
         ]),
   ]));
@@ -588,12 +588,12 @@ export function show() {
   const claimable = livesAvailable && canClaimDailyReward(meta);
   const info = el('div', { class: 'daily-info' }, [
     el('b', { class: 'ico-title' }, [
-      el('img', { class: 't-ico', src: 'assets/sprites/icon_star.png', alt: '' }),
+      el('img', { class: 't-ico', src: 'assets/icons/ui-star.svg', alt: '' }),
       el('span', { text: 'Bonus Harian' }),
     ]),
     el('span', { class: 'claim-line' }, claimable ? [
       el('b', { text: `${getData().upgrades.economy.dailyReward}` }),
-      el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: 'antibodi' }),
+      el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'antibodi' }),
       el('span', { text: ' menantimu — klaim sekarang!' }),
     ] : [el('span', { text: 'Sudah diklaim hari ini. Kembali besok.' })]),
   ]);
@@ -625,7 +625,7 @@ export function show() {
         el('span', { class: 'm-name', text: m.def.name }),
         el('span', { class: 'm-reward' }, [
         el('span', { text: `+${m.def.reward}` }),
-        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_imu.png', alt: 'Imun Coin', title: 'Imun Coin' }),
+        el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: 'Imun Coin', title: 'Imun Coin' }),
       ]),
       ]),
       el('div', { class: 'm-row' }, [
