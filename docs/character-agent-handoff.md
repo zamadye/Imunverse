@@ -1,7 +1,7 @@
 # Character Agent Handoff / Koordinasi Agent Lain
 
-> Dibuat: 2026-09-09  
-> Dari: Character Agent  
+> Dibuat: 2026-09-09
+> Dari: Character Agent
 > Branch: `arena/01a08106-imunverse`
 
 Dokumen ini memisahkan pekerjaan yang **di luar scope Character Agent** supaya agent lain bisa mengambil tanpa mengganggu pekerjaan karakter.
@@ -10,24 +10,26 @@ Dokumen ini memisahkan pekerjaan yang **di luar scope Character Agent** supaya a
 
 ## 1. QA / E2E Visual Agent
 
-**Status:** perlu dikerjakan oleh QA/browser agent.
+**Status:** selesai untuk headless browser/DOM QA; manual device QA opsional menjelang release.
 
 ### Target
-Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubahan Character UI benar-benar tampil di runtime.
+Capture langsung dari browser/DOM sudah dibuat untuk memastikan perubahan Character UI benar-benar tampil di runtime.
 
-### Screen yang perlu dicapture
-1. `roster` — cek canvas preview hero stage aktif + chip/dots equity.
-2. `herodetail` — cek ladder Stage 0 → Full Equity + mini preview per row.
-3. `bag` — cek part evolusi + design collection preview.
-4. `codex` hero detail — cek panel Design Equity Hero.
-5. `codex` enemy detail — cek panel Design Mutasi Pathogen tier 0–4.
-6. `hud` gameplay — cek badge equity portrait, skill button accent, dan cast/payoff VFX archetype/equity saat skill dipakai.
+### Screen yang sudah dicapture
+1. `roster` — `shots/review/character-browser-roster.png`.
+2. `herodetail` — `shots/review/character-browser-hero-detail.png`.
+3. `bag` — `shots/review/character-browser-bag.png`.
+4. `codex` hero detail — `shots/review/character-browser-codex-hero.png`.
+5. `codex` enemy detail — `shots/review/character-browser-codex-enemy.png`.
+6. `hud` gameplay — `shots/review/character-browser-hud.png`.
+7. skill trigger 3 archetype — `character-browser-skill-mako-phagocyte.png`, `character-browser-skill-bella-antibody.png`, `character-browser-skill-tbolt-cytotoxic.png`.
 
 ### Acceptance criteria
 - `npm run check` tetap lulus.
-- Console browser: 0 error fatal, 0 404 asset.
-- Mobile viewport minimal 390×844 tidak overflow buruk.
-- Screenshot baru disimpan di `shots/review/` dengan nama yang jelas; saat ini branch hanya menyimpan bukti Character terkini `shots/review/character-agent-final-review.png` setelah cleanup screenshot lama.
+- Console browser: 0 error fatal.
+- HTTP lokal: 0 404/5xx asset/data.
+- Mobile landscape viewport `844×390` tidak overflow buruk untuk target Character yang dicapture.
+- Screenshot baru disimpan di `shots/review/` dengan nama yang jelas.
 - Jangan mengubah combat damage/balance.
 - Jangan mengubah arena/background.
 
@@ -75,6 +77,9 @@ Capture langsung dari browser/DOM, bukan static sheet, untuk memastikan perubaha
 - Progress map utama: `docs/character-agent-progress-map.md`
 - Skill audit: `docs/character-skill-visual-audit.md`
 - Screenshot review terkini: `shots/review/character-agent-final-review.png`
+- Browser QA montage: `shots/review/character-browser-qa-review.png`
+- Browser QA report: `docs/character-browser-qa-report.md`
+- Browser QA runner: `scripts/e2e-character-visual.mjs`
 - Renderer gameplay: `js/render/character-visuals.js`
 - Preview runtime UI: `js/render/character-preview.js`
 - Data Character: `data/character-designs.json`

@@ -1,7 +1,7 @@
 # Character Agent Progress Map
 
-> Dibuat: 2026-09-09  
-> Branch kerja: `arena/01a08106-imunverse`  
+> Dibuat: 2026-09-09
+> Branch kerja: `arena/01a08106-imunverse`
 > Tujuan dokumen: menjadi peta progres supaya jelas **sudah sampai mana development Character Agent**, bukti/verifikasi apa yang ada, dan **apa saja yang belum** sebelum lanjut ke task berikutnya.
 
 Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dikerjakan berikutnya · ⬜ belum mulai · 🚫 sengaja di luar scope
@@ -22,8 +22,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Bag/inventory UI | ✅ | `js/ui/screens/bag-screen.js` menghubungkan part evolusi dengan konteks visual jalur Equity hero terpilih. |
 | Codex/Bio-Pedia UI | ✅ | `js/ui/screens/codex-screen.js` menampilkan tag Equity/Mutation dan detail panel design hero/enemy. |
 | HUD gameplay | ✅ | `index.html` + `js/ui/screens/hud-screen.js` menampilkan badge Equity stage aktif di portrait hero. |
-| Screenshot review terbaru | ✅ | Screenshot lama di `shots/review/` sudah dibersihkan; bukti visual terkini dikonsolidasikan ke `shots/review/character-agent-final-review.png`. |
-| Browser walkthrough semua screen Character UI | 🟡 | Runtime data/import sudah hijau. Screenshot UI terbaru berupa static review sheet dari data/assets; perlu capture DOM interaktif jika ingin QA visual per screen secara ketat. |
+| Screenshot review terbaru | ✅ | Screenshot lama sudah dibersihkan. Bukti terkini: `character-agent-final-review.png`, montage browser QA `character-browser-qa-review.png`, dan capture DOM per screen di `shots/review/character-browser-*.png`. |
+| Browser walkthrough semua screen Character UI | ✅ | Playwright headless menangkap Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 trigger skill archetype; console error 0 dan HTTP 404/5xx 0. |
 | Runtime mini renderer collection | ✅ | `js/render/character-preview.js` membuat mini canvas memakai `drawHeroEquity()`/`drawPathogenMutation()` yang sama dengan gameplay; dipakai di roster, detail, bag, dan codex. |
 | Active skill visual per hero/state | ✅ | Audit skill selesai; HUD button dan gameplay cast/payoff VFX kini punya accent archetype/equity visual-only. Screenshot browser multi-hero tetap masuk QA handoff. |
 | Combat damage/balance changes | 🚫 | Tidak disentuh sesuai instruksi; desain visual tidak mengubah math damage. |
@@ -52,8 +52,9 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | Skill VFX runtime | `js/systems/skill-system.js`, `js/systems/effects-system.js`, `js/render/shape-renderer.js` | Mengirim dan menggambar motif cast/payoff per archetype/equity, visual-only. |
 | CSS presentation | `styles/main.css` | Styling khusus chip, ladder, panel, badge Character UI, preview canvas, dan skill accent. |
 | Skill audit | `docs/character-skill-visual-audit.md` | Mapping 11 hero × skill → effect kind → status visual. |
-| Handoff agent lain | `docs/character-agent-handoff.md` | Daftar koordinasi QA/E2E, Arena, Combat, i18n/copy yang di luar atau lintas scope saya. |
-| Review screenshots | `shots/review/character-agent-final-review.png` | Bukti visual terkini hasil pass Character Agent setelah cleanup screenshot lama. |
+| Handoff agent lain | `docs/character-agent-handoff.md` | Koordinasi Arena, Combat, i18n/copy, plus catatan QA browser yang sudah dijalankan. |
+| Browser QA runner | `scripts/e2e-character-visual.mjs` | Playwright headless capture untuk Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 skill trigger archetype. |
+| Review screenshots | `shots/review/character-agent-final-review.png`, `shots/review/character-browser-qa-review.png`, `shots/review/character-browser-*.png` | Bukti visual terkini hasil pass Character Agent setelah cleanup screenshot lama + QA browser/DOM. |
 
 ---
 
@@ -66,6 +67,8 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | `54d9c91 Extend character collection design surfaces` | ✅ | Roster, hero detail, bag, codex, HUD badge, pathogen family metadata, screenshot UI + atlas pathogen. |
 | `268f610 Complete character preview and skill visual scope` | ✅ | Mini preview canvas memakai renderer gameplay, HUD skill accent per archetype/equity, skill visual audit, i18n label Character. |
 | `de4149a Add character skill archetype VFX` | ✅ | Gameplay cast/payoff motif per archetype/equity, `tierCues` translation support, full Character cue EN coverage, skill VFX screenshot. |
+| `0b12d90 Clean character review screenshots` | ✅ | Screenshot lama Character dihapus dan diringkas ke final review fresh. |
+| Browser DOM QA pass | ✅ | Script `scripts/e2e-character-visual.mjs` + screenshot browser runtime Roster/Detail/Bag/Codex/HUD/skill trigger. |
 
 ---
 
@@ -105,6 +108,16 @@ Legenda status: ✅ selesai · 🟡 sebagian/perlu QA lanjutan · 🔄 siap dike
 | File | Status | Isi |
 |---|---:|---|
 | `shots/review/character-agent-final-review.png` | ✅ | Bukti visual fresh terkonsolidasi setelah cleanup: hero equity 11 hero, pathogen mutation atlas, collection/HUD UI showcase, dan skill archetype VFX map. |
+| `shots/review/character-browser-qa-review.png` | ✅ | Montage QA browser/DOM dari 9 capture runtime: Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 skill trigger archetype. |
+| `shots/review/character-browser-roster.png` | ✅ | Capture browser langsung Roster: 11 chip equity + 11 mini preview canvas. |
+| `shots/review/character-browser-hero-detail.png` | ✅ | Capture browser langsung Hero Detail: ladder Stage 0–4. |
+| `shots/review/character-browser-bag.png` | ✅ | Capture browser langsung Bag: part evolusi + panel design path hero. |
+| `shots/review/character-browser-codex-hero.png` | ✅ | Capture browser langsung Codex hero: panel Design Equity Hero. |
+| `shots/review/character-browser-codex-enemy.png` | ✅ | Capture browser langsung Codex enemy: tier mutasi pathogen 0–4. |
+| `shots/review/character-browser-hud.png` | ✅ | Capture browser langsung HUD gameplay: badge Full Equity + skill button accent. |
+| `shots/review/character-browser-skill-mako-phagocyte.png` | ✅ | Trigger skill Mako/phagocyte dengan cooldown/VFX terlihat. |
+| `shots/review/character-browser-skill-bella-antibody.png` | ✅ | Trigger skill Bella/antibody dengan cooldown/VFX terlihat. |
+| `shots/review/character-browser-skill-tbolt-cytotoxic.png` | ✅ | Trigger skill T-Bolt/cytotoxic dengan cooldown/VFX terlihat. |
 | Screenshot lama Character di `shots/review/` | ✅ dibersihkan | File standalone lama (`character-redesign-gameplay.png`, `character-equity-11heroes-arena.png`, `character-pathogen-mutation-atlas.png`, `character-collection-ui-showcase.png`, `character-skill-archetype-vfx.png`) sudah dihapus dari branch supaya bukti review tidak bercampur versi lama. |
 
 ---
@@ -115,11 +128,12 @@ Perintah terakhir yang sudah dipakai setelah cleanup screenshot:
 
 ```bash
 git diff --check
-node --check js/core/data-store.js js/systems/skill-system.js js/systems/effects-system.js js/render/shape-renderer.js
+node --check js/core/data-store.js js/systems/skill-system.js js/systems/effects-system.js js/render/shape-renderer.js scripts/e2e-character-visual.mjs
 npm run check
+PW_PATH=/tmp/pw-character/node_modules/playwright CHROMIUM_PATH=/tmp/chromium node scripts/e2e-character-visual.mjs
 ```
 
-Hasil terakhir: ✅ whitespace diff, syntax JS, semua import, JSON, sprite path, dan referensi `index.html` lolos.
+Hasil terakhir: ✅ whitespace diff, syntax JS, semua import, JSON, sprite path, referensi `index.html`, dan browser/DOM Character QA lolos.
 
 Verifikasi data Character:
 
@@ -139,7 +153,11 @@ Hasil terakhir:
 ```text
 VERIFY hero11x4=true pathogenFamilies=12 enemyFamilyMissing=none
 CHARACTER_TRANSLATION_MISSING 0
+PASS browser-console-errors
+PASS http-bad-responses
 ```
+
+Detail QA browser ada di `docs/character-browser-qa-report.md`.
 
 ---
 
@@ -151,11 +169,11 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 | Task | Status | Acceptance criteria |
 |---|---:|---|
-| Capture DOM screenshot Roster setelah chip equity | 🔄 | Screenshot langsung dari browser, bukan hanya static sheet; tidak ada console error/404. |
-| Capture DOM screenshot Hero Detail ladder | 🔄 | Semua row Stage 0–4 terbaca; scroll tidak memotong CTA penting. |
-| Capture DOM screenshot Bag design collection | 🔄 | Part card + design panel terbaca di mobile viewport. |
-| Capture DOM screenshot Codex hero/enemy detail | 🔄 | Panel equity/mutation terbaca dan tidak overflow buruk. |
-| Capture HUD gameplay badge equity | 🔄 | Badge stage terlihat di portrait tapi tidak menutup HP/controls. |
+| Capture DOM screenshot Roster setelah chip equity | ✅ | `character-browser-roster.png`; 11 chip equity + 11 preview canvas, console error/404 nihil. |
+| Capture DOM screenshot Hero Detail ladder | ✅ | `character-browser-hero-detail.png`; 5 row Stage 0–4 terbaca setelah scroll ke ladder. |
+| Capture DOM screenshot Bag design collection | ✅ | `character-browser-bag.png`; part card + design panel terbaca di viewport mobile landscape. |
+| Capture DOM screenshot Codex hero/enemy detail | ✅ | `character-browser-codex-hero.png` dan `character-browser-codex-enemy.png`; panel equity/mutation terbaca. |
+| Capture HUD gameplay badge equity | ✅ | `character-browser-hud.png`; badge Full Equity terlihat di portrait dan tidak menutup HP/controls. |
 
 ### Prioritas B — Skill/ability visual identity per hero
 
@@ -164,7 +182,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 | Audit skill actual per hero | ✅ | `docs/character-skill-visual-audit.md` memetakan hero → skill ids → effect kind → visual status. |
 | Tentukan apakah perlu skill FX unik per archetype | 🟡 | HUD accent sudah cukup untuk UI; gameplay impact/trail unik masih perlu keputusan/QA. |
 | Implement visual-only skill accent per hero/archetype | ✅ | `hud-screen.js`, `skill-system.js`, `effects-system.js`, `shape-renderer.js`, dan `styles/main.css` memberi accent button + cast/payoff VFX berdasarkan archetype dan warna Equity aktif, tanpa mengubah damage/cooldown. |
-| Screenshot skill state | 🟡 | Static final review sudah memuat skill archetype VFX map; browser capture trigger/cooldown minimal 3 hero archetype tetap perlu QA interaktif. |
+| Screenshot skill state | ✅ | Browser capture trigger/cooldown/VFX untuk 3 archetype: Mako phagocyte, Bella antibody, T-Bolt cytotoxic. |
 
 ### Prioritas C — Runtime preview renderer untuk collection
 
@@ -180,7 +198,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 |---|---:|---|
 | Copy review semua `visualCue`, `baseCue`, `mutationFocus` | ✅ | Bahasa ID tetap konsisten dan semua cue Character penting sudah punya pasangan EN di `data/lang.json`. |
 | i18n English untuk field baru | ✅ | `data-store.js` kini menerjemahkan `tierCues` array; `data/lang.json` mencakup field Character `baseCue`, `visualCue`, `mutationFocus`, `tierCues`, label, dan anatomy. |
-| Dense screenshot label cleanup | ✅ | Screenshot lama dikonsolidasikan ke `character-agent-final-review.png`; tetap bukan pengganti DOM/browser QA. |
+| Dense screenshot label cleanup | ✅ | Screenshot lama dikonsolidasikan ke `character-agent-final-review.png`, lalu dilengkapi capture DOM/browser fresh. |
 
 ### Prioritas E — Konten/logic di luar Character visual pass
 
@@ -197,7 +215,7 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 | Area | Agent yang cocok | Status koordinasi | Catatan handoff |
 |---|---|---:|---|
-| Browser QA visual interaktif | QA / E2E agent | 🔄 perlu dikerjakan | Capture DOM Roster, Hero Detail, Bag, Codex, HUD; cek console error/404 dan overflow mobile. Character code sudah siap, tetapi perlu runner browser yang stabil. |
+| Browser QA visual interaktif | Character/QA pass | ✅ selesai headless | Capture DOM Roster, Hero Detail, Bag, Codex hero/enemy, HUD, dan 3 skill trigger sudah ada; console error 0, HTTP 404/5xx 0. Manual device QA tetap boleh menjelang release. |
 | Arena/background redesign | Arena/Environment agent | 🚫 luar scope saya | Jangan dikerjakan di Character Agent; perubahan background harus menjaga renderer Character tidak tertutup. |
 | Combat damage/balance | Combat/Balance agent | 🚫 luar scope saya | Jangan mengubah damage math dari pass Character; kalau diperlukan, buat task eksplisit dengan benchmark balance. |
 | Monetisasi SDK/release | Monetization/Release agent | 🚫 luar scope saya | Hooks ada di roadmap umum, bukan scope Character visual. |
@@ -207,17 +225,17 @@ Urutan di bawah disusun supaya tidak lompat scope dan tetap mudah diverifikasi.
 
 ## 8. Known issues / risiko
 
-1. **Screenshot final review bukan capture DOM interaktif.**
-   File `shots/review/character-agent-final-review.png` adalah bukti visual terkonsolidasi dari data/assets/screenshot pass sebelumnya. QA final tetap sebaiknya melakukan browser walkthrough per screen.
+1. **QA browser sudah headless, bukan manual device lab.**
+   File `character-browser-*.png` berasal dari Playwright headless di viewport 844×390 landscape. Untuk release publik, manual device QA masih boleh ditambahkan, terutama rotasi/orientasi HP nyata.
 
-2. **Global evolution stage berlaku untuk semua hero.**  
+2. **Global evolution stage berlaku untuk semua hero.**
    UI menampilkan stage equity berdasarkan `STATE.meta.evoStage`, bukan stage per hero. Ini mengikuti sistem existing; jangan klaim tiap hero punya progress stage individual kecuali sistem save diubah.
 
-3. **Beberapa detail kecil hilang di gameplay scale.**  
+3. **Beberapa detail kecil hilang di gameplay scale.**
    Equity overlay sudah dibuat besar/siluet-readable, tetapi detail mikro bisa tetap berkurang saat kamera jauh. Screenshot gameplay harus tetap jadi patokan.
 
-4. **Browser/visual QA harus cek overflow mobile.**  
-   Ladder dan tier chips panjang; CSS memakai clamp/line-clamp, tapi perlu capture di viewport kecil sebelum disebut final-polish.
+4. **Viewport QA mengikuti game landscape-only.**
+   Capture dilakukan di 844×390 landscape; mode portrait memang menampilkan overlay `Putar HP-mu`, jadi bukan target utama Character DOM capture.
 
 ---
 
@@ -239,7 +257,7 @@ Sebuah subtask Character dianggap selesai jika memenuhi semua poin ini:
 
 Jika lanjut dari sini, urutan paling aman:
 
-1. **QA visual interaktif oleh QA/browser agent**: capture Roster, Hero Detail, Bag, Codex, HUD, plus trigger/cooldown skill minimal 3 hero archetype setelah perubahan terakhir.
-2. **Editorial i18n polish opsional**: review tone Indonesia/English di browser bila target publik butuh copy lebih halus.
-3. **Putuskan gameplay per-target trail/impact**: hanya bila user menyetujui pass visual-only terpisah; jangan campur dengan combat math.
-4. **Update progress map lagi** setelah tiap milestone selesai.
+1. **Editorial i18n polish opsional**: review tone Indonesia/English di browser bila target publik butuh copy lebih halus.
+2. **Putuskan gameplay per-target trail/impact**: hanya bila user menyetujui pass visual-only terpisah; jangan campur dengan combat math.
+3. **Manual device QA/release polish**: opsional menjelang rilis, di luar implementasi Character core.
+4. **Koordinasikan out-of-scope**: Combat damage/balance, arena/background, enemy behavior, dan hero baru ke agent terkait.
