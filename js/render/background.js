@@ -501,14 +501,56 @@ function drawBubbleLayer(ctx, camX, camY, w, h, time, parallax, spacing, color, 
 }
 
 /** Arena heksagon cream tempat pertempuran dimulai (pusat dunia = 0,0). */
-/** Turunkan posisi kamera dunia dari proyektor (eksak — project mengembalikan s). */
-function cameraOf(P) {
+/** Turunkan posisi kamera dunia dari proyektor (eksak — project mengembalikan s).
+ *  sMin = skala MINIMUM di seluruh frustum (#12): persp origin diturunkan
+ *  eksak dari dy origin → zoom·punch = q.s/persp0 → sMin = MIN·zoom·punch
+ *  (clamp MIN berlaku global, jadi tak ada titik visible berskala < sMin). */
+export function cameraOf(P) {
   const q = P.project(0, 0);
-  return {
-    x: -(q.x - P.w / 2) / q.s,
-    y: -(q.y - P.h / 2) / (q.s * PERSP.YS),
-    s: q.s,
-  };
+  const camX = -(q.x - P.w / 2) / q.s;
+  const camY = -(q.y - P.h / 2) / (q.s * PERSP.YS);
+  const dy0 = -camY; // dy origin thd kamera efektif (shake sudah termasuk)
+  let persp0 = PERSP.F / (PERSP.F - dy0 * PERSP.K);
+  persp0 = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp0));
+  const zp = q.s / persp0; // zoom·punchScale (selalu > 0)
+  return { x: camX, y: camY, s: q.s, sMin: PERSP.MIN * zp };
+}
+
+/** Margin culling layar (px) per tipe fitur — dipakai BAIK oleh onScreen
+ *  per-fitur MAUPUN kotak kandidat enumerasi (#12). Satu sumber! */
+const FEAT_MARGIN = {
+  blotch: 160, fold: 260, chunk: 120, pool: 180, sacs: 120,
+  thread: 220, villi: 120, mist: 220, motes: 120, flowcell: 20,
+};
+
+/** Batas atas JANGKAUAN DUNIA fitur dari pusatnya (utk kotak kandidat #12).
+ *  Nilai turunan dari rumus gambar tiap feat* + slack; sMin dipakai utk suku
+ *  piksel-tetap (drift kabut, garis tepi). Diekspor utk tes regresi. */
+export function featBounds(f, sMin) {
+  const px = 6 / sMin; // slack suku piksel-tetap (garis tepi 1–4px)
+  let reach;
+  switch (f.type) {
+    case 'blotch': reach = 1.6 * (f.size || 70); break;
+    case 'fold': reach = (f.len || 600) / 2 + (f.wave || 70) + (f.width || 24); break;
+    case 'chunk': reach = ((f.size || 28) + (f.var || 0)) * 1.15 + (f.bob || 0); break;
+    case 'pool': reach = 1.3 * (f.size || 90); break;
+    case 'sacs': reach = 1.9 * (f.size || 26); break;
+    case 'thread': reach = (f.len || 350) / 2 + (f.sway == null ? 12 : f.sway) + (f.width || 4); break;
+    case 'villi': reach = 1.6 * (f.size || 40); break;
+    case 'mist': reach = (f.size || 120) + 34 / sMin; break; // drift layar 30px
+    case 'motes': reach = (f.size || 90) + (f.dot || 3); break;
+    default: reach = 300; break;
+  }
+  return { m: FEAT_MARGIN[f.type] == null ? 160 : FEAT_MARGIN[f.type], reach: reach + px };
+}
+
+/** Kotak pandang dunia KONSERVATIF utk enumerasi grid (#12). Titik dunia mana
+ *  pun yang terproyeksi dalam viewport+margin PASTI di dalam kotak ini.
+ *  Diekspor utk tes regresi. */
+export function worldViewBox(cam, w, h, screenMargin, worldReach) {
+  const mx = (w / 2 + screenMargin) / cam.sMin + worldReach;
+  const my = (h / 2 + screenMargin) / (cam.sMin * PERSP.YS) + worldReach;
+  return { x0: cam.x - mx, x1: cam.x + mx, y0: cam.y - my, y1: cam.y + my };
 }
 
 /**
@@ -525,18 +567,18 @@ export function drawArena3D(ctx, P, time) {
   const pc = pulseCfg();
   const beat = heartbeat(time, pc.bpm) * (pc.strength || 0);
   const cam = cameraOf(P);
-  // kotak pandang dunia + margin (antisipasi variasi perspektif)
-  const mx = (w / 2 + 160) / cam.s;
-  const my = (h / 2 + 160) / (cam.s * PERSP.YS);
-  const vw = { x0: cam.x - mx, x1: cam.x + mx, y0: cam.y - my, y1: cam.y + my };
   for (let fi = 0; fi < feats.length; fi++) {
-    drawGroundFeature(ctx, P, vw, cam, w, h, time, beat, feats[fi], fi);
+    drawGroundFeature(ctx, P, cam, w, h, time, beat, feats[fi], fi);
   }
 }
 
 /** Sebar satu definisi fitur ke grid-hash dunia dalam kotak pandang. */
-function drawGroundFeature(ctx, P, vw, cam, w, h, time, beat, f, fi) {
+function drawGroundFeature(ctx, P, cam, w, h, time, beat, f, fi) {
   if (f.type === 'flowcell') return featFlowField(ctx, P, cam, w, h, time, f, fi);
+  // Kotak kandidat PER-FITUR dari frustum aktual (#12): margin layar = margin
+  // culling fitur tsb + jangkauan dunia fitur → tak ada pusat visible terlewat.
+  const B = featBounds(f, cam.sMin);
+  const vw = worldViewBox(cam, w, h, B.m, B.reach);
   const sp = f.spacing || 300;
   const dens = f.density == null ? 0.5 : f.density;
   const ix0 = Math.floor(vw.x0 / sp) - 1, ix1 = Math.floor(vw.x1 / sp) + 1;
@@ -570,7 +612,7 @@ function onScreen(P, w, h, q, m) {
 /** Noda lembut jaringan (mottling dasar). */
 function featBlotch(ctx, P, w, h, wx, wy, r1, r2, f, beat) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 160)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.blotch)) return;
   const s = (f.size || 70) * (0.6 + r1 * 0.8) * q.s * (1 + beat * 0.1);
   ctx.fillStyle = `rgba(${r2 > 0.5 ? f.color : (f.color2 || f.color)},${(f.alpha || 0.5).toFixed(3)})`;
   ctx.beginPath();
@@ -582,7 +624,7 @@ function featBlotch(ctx, P, w, h, wx, wy, r1, r2, f, beat) {
  *  Hidup: gelombang MERAMBAT (peristaltik) + sinyal berjalan opsional. */
 function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const q0 = P.project(wx, wy);
-  if (!onScreen(P, w, h, q0, 260)) return;
+  if (!onScreen(P, w, h, q0, FEAT_MARGIN.fold)) return;
   const ang = (f.angle || 0) + (r3 - 0.5) * 0.6;
   const L = f.len || 600, N = 12, amp = f.wave || 70;
   const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
@@ -627,7 +669,7 @@ function featFold(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
 function featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const bob = Math.sin(time * 1.2 + r1 * 12) * (f.bob || 0);
   const q = P.project(wx, wy + bob);
-  if (!onScreen(P, w, h, q, 120)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.chunk)) return;
   const cols = f.colors && f.colors.length ? f.colors : [f.color || '200,200,200'];
   const col = cols[Math.floor(r3 * cols.length) % cols.length];
   const s = ((f.size || 28) + (r2 - 0.5) * 2 * (f.var || 0)) * q.s;
@@ -651,7 +693,7 @@ function featChunk(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
 /** Kolam berkilau: asam / darah / cairan — aduk + didih + telegraf bahaya. */
 function featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 180)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.pool)) return;
   const s = (f.size || 90) * (0.8 + r1 * 0.4) * q.s * (1 + 0.03 * Math.sin(time * 1.5 + r2 * 9));
   ctx.fillStyle = `rgba(${f.color},0.75)`;
   ctx.beginPath(); ctx.ellipse(q.x, q.y, s, s * 0.5, 0, 0, Math.PI * 2); ctx.fill();
@@ -684,7 +726,7 @@ function featPool(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
 /** Gugus kantung: alveoli paru — 6 gelembung tembus pandang bernapas. */
 function featSacs(ctx, P, w, h, wx, wy, time, r1, r2, f) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 120)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.sacs)) return;
   const n = f.n || 6;
   const r = (f.size || 26) * q.s * (0.9 + 0.1 * Math.sin(time * 2 + r1 * 7));
   for (let k = 0; k < n; k++) {
@@ -699,7 +741,7 @@ function featSacs(ctx, P, w, h, wx, wy, time, r1, r2, f) {
 /** Serat melengkung: bronkiolus / kapiler / korda — inti + opsional kedip. */
 function featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
   const q0 = P.project(wx, wy);
-  if (!onScreen(P, w, h, q0, 220)) return;
+  if (!onScreen(P, w, h, q0, FEAT_MARGIN.thread)) return;
   const ang = (f.angle != null ? f.angle : 0.5) + (r3 - 0.5) * 0.8;
   const L = (f.len || 350) / 2;
   const dx = Math.cos(ang), dy = Math.sin(ang);
@@ -724,7 +766,7 @@ function featThread(ctx, P, w, h, wx, wy, time, r1, r2, r3, f) {
 /** Jari-jari berayun: vili dinding organ (5 jari bergoyang). */
 function featVilli(ctx, P, w, h, wx, wy, time, r1, r2, f) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 120)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.villi)) return;
   const n = 5, base = (f.size || 40) * q.s;
   for (let v = 0; v < n; v++) {
     const off = (v / (n - 1) - 0.5) * base * 2.2;
@@ -742,7 +784,7 @@ function featVilli(ctx, P, w, h, wx, wy, time, r1, r2, f) {
 /** Kabut lembut melayang: 2 gumpalan tembus pandang beriras perlahan. */
 function featMist(ctx, P, w, h, wx, wy, time, r1, r2, f) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 220)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.mist)) return;
   const s = (f.size || 120) * q.s;
   const dx1 = Math.sin(time * 0.3 + r1 * 8) * 30, dy1 = Math.cos(time * 0.23 + r2 * 6) * 18;
   ctx.fillStyle = `rgba(${f.color},${(f.alpha || 0.12).toFixed(3)})`;
@@ -754,7 +796,7 @@ function featMist(ctx, P, w, h, wx, wy, time, r1, r2, f) {
 /** Partikel kerlip: 6 titik berkelip (pengisi ruang murah). */
 function featMotes(ctx, P, w, h, wx, wy, time, r1, r2, f) {
   const q = P.project(wx, wy);
-  if (!onScreen(P, w, h, q, 120)) return;
+  if (!onScreen(P, w, h, q, FEAT_MARGIN.motes)) return;
   const spread = (f.size || 90) * q.s;
   for (let m = 0; m < 6; m++) {
     const mx = q.x + (hash2(m * 13 + 1, m * 7 + 3) - 0.5) * 2 * spread;
@@ -781,7 +823,7 @@ function featFlowField(ctx, P, cam, w, h, time, f, fi) {
     const a = (f.alpha || 0.8) * Math.max(0, fade) * Math.max(0, av);
     if (a < 0.03) continue;
     const q = P.project(snx + ux * u - uy * v, sny + uy * u + ux * v);
-    if (!onScreen(P, w, h, q, 20)) continue;
+    if (!onScreen(P, w, h, q, FEAT_MARGIN.flowcell)) continue;
     ctx.fillStyle = `rgba(${f.color},${a.toFixed(3)})`;
     ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1.5, (f.size || 6) * q.s * 0.5), 0, Math.PI * 2); ctx.fill();
   }

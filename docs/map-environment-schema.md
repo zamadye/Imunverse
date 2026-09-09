@@ -58,6 +58,9 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
 
 Semua fitur world-anchored (hash-grid dalam kotak pandang kamera, terproyeksi
 pseudo-3D, ter-cull di luar layar). Penempatan deterministik — stabil tiap frame.
+Kotak kandidat dihitung KONSERVATIF dari frustum aktual (#12): skala minimum
+global `MIN·zoom·punch` + margin culling + jangkauan dunia per tipe — tak ada
+fitur visible yang terlewat saat menjelajah (bukti: `scripts/test-map-culling.mjs`).
 
 | Tipe | Wujud | Kunci utama |
 |---|---|---|

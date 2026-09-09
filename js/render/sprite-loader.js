@@ -1,4 +1,5 @@
 import { BUILD } from '../core/version.js';
+import { isDevMode } from '../core/dev-mode.js'; // #19: placeholder loud hanya di dev
 /**
  * sprite-loader.js — Preload & cache sprite PNG transparan.
  *
@@ -69,6 +70,13 @@ const EXTRA_PRELOAD = [
   'assets/sprites/deco_aura.png',
   'assets/sprites/deco_weed_big.png',
   'assets/sprites/deco_reef_big.png',
+  // MAP #19: keluarga deco arena (tak dirujuk saat ini, tapi wajib siap pakai)
+  'assets/sprites/deco_bubble_coral.png',
+  'assets/sprites/deco_bubble_mint.png',
+  'assets/sprites/deco_bubble_sage.png',
+  'assets/sprites/deco_germ_coral.png',
+  'assets/sprites/deco_germ_sage.png',
+  'assets/sprites/deco_germ_teal.png',
   // Overlay evolusi hero (digambar via drawSprite, path hardcode di game.js)
   'assets/sprites/ov_silia.png',
   'assets/sprites/ov_pseudopodia.png',
@@ -102,9 +110,10 @@ export function loadAllSprites(data, onProgress) {
           resolve();
         };
         img.onerror = () => {
-          // FALLBACK DEV: file sprite belum ada → generate placeholder sederhana.
+          // FALLBACK: file sprite belum ada → placeholder LOUD di dev,
+          // netral di production (#19 — jangan tampilkan '?' ke pemain).
           const meta = metaByPath.get(path) || { color: '#35d0ba', label: '?' };
-          const canvas = generatePlaceholderSprite(meta.color, meta.label);
+          const canvas = isDevMode() ? generatePlaceholderSprite(meta.color, meta.label) : generateNeutralSprite();
           cache.set(path, { image: canvas, isPlaceholder: true, width: canvas.width, height: canvas.height });
           fallback++;
           done++;
@@ -119,12 +128,17 @@ export function loadAllSprites(data, onProgress) {
   return Promise.all(jobs).then(() => ({ loaded: paths.length, fallback }));
 }
 
+const warnedPaths = new Set(); // #19: peringatan fallback sekali per path
 /** Ambil entri cache sprite. Fallback on-demand bila belum pernah dimuat. */
 export function getSprite(path) {
   let entry = cache.get(path);
   if (!entry) {
+    if (!warnedPaths.has(path)) {
+      warnedPaths.add(path);
+      console.warn(`[sprite-loader] sprite tidak di-preload, memakai fallback: ${path}`);
+    }
     const meta = metaByPath.get(path) || { color: '#35d0ba', label: '?' };
-    const canvas = generatePlaceholderSprite(meta.color, meta.label);
+    const canvas = isDevMode() ? generatePlaceholderSprite(meta.color, meta.label) : generateNeutralSprite();
     entry = { image: canvas, isPlaceholder: true, width: canvas.width, height: canvas.height };
     cache.set(path, entry);
   }
@@ -249,6 +263,22 @@ export function generatePlaceholderSprite(color, label) {
   ctx.textBaseline = 'middle';
   ctx.fillText((label || '?').slice(0, 2).toUpperCase(), size / 2, size * 0.78);
 
+  return canvas;
+}
+
+/** #19: fallback NETRAL production — kotak abu tembus pandang tanpa '?'.
+ *  Kontrak render tetap (selalu kembalikan canvas 128px), tapi tak ada lagi
+ *  artefak dev yang terlihat pemain. Dipakai saat BUKAN dev mode. */
+export function generateNeutralSprite() {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(40,48,58,0.55)';
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size * 0.4, 0, Math.PI * 2);
+  ctx.fill();
   return canvas;
 }
 

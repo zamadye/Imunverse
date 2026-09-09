@@ -84,14 +84,18 @@ try {
       const cv = document.getElementById('game');
       const g = cv.getContext('2d');
       const sx = cv.width / 844, sy = cv.height / 390;
-      let ok = 0;
-      for (const [x, y] of [[282, 115], [562, 115], [282, 275], [562, 275]]) {
+      // 8 titik, dua metrik: nonVoid (anti-pecah/void #060d16) + baseHits
+      // (identitas map — anatomi sah boleh menutup sebagian titik).
+      let nonVoid = 0, baseHits = 0;
+      const pts = [[282, 115], [562, 115], [282, 275], [562, 275], [90, 60], [754, 60], [90, 330], [754, 330]];
+      for (const [x, y] of pts) {
         const d = g.getImageData(Math.round(x * sx), Math.round(y * sy), 1, 1).data;
-        if (Math.hypot(d[0] - base[0], d[1] - base[1], d[2] - base[2]) < 70) ok++;
+        if (d[0] + d[1] + d[2] > 120) nonVoid++;
+        if (Math.hypot(d[0] - base[0], d[1] - base[1], d[2] - base[2]) < 70) baseHits++;
       }
-      return { ok, hex };
+      return { nonVoid, baseHits, hex };
     });
-    log(`map-roam-ground-${id}`, ground.ok >= 3, `${ground.ok}/4 ~ ${ground.hex}`);
+    log(`map-roam-ground-${id}`, ground.nonVoid >= 7 && ground.baseHits >= 2, `${ground.nonVoid}nv/${ground.baseHits}b ~ ${ground.hex}`);
     // ---- performa: rata-rata frame < 33ms (batas low-end) ----
     const ms = await page.evaluate(() => new Promise((res) => {
       const N = 90; let last = performance.now(), sum = 0, n = 0;
