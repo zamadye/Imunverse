@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Pangkat Penjaga": lencana perisai dengan 3 chevron emas (insignia III/II/I). -->
+  <ellipse cx="32" cy="59" rx="15" ry="3" fill="#123f3a" opacity=".14"/>
+  <path d="M32 5 L53 12.5 V29 C53 42.5 44 53 32 58.5 C20 53 11 42.5 11 29 V12.5 Z" fill="#14584f"/>
+  <path d="M32 9 L49 15.2 V29 C49 40.2 41.8 49 32 53.8 C22.2 49 15 40.2 15 29 V15.2 Z" fill="#2f9c8f"/>
+  <path d="M32 9 L49 15.2 V21.5 L32 15.5 L15 21.5 V15.2 Z" fill="#fffdf4" opacity=".2"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 26 L32 20 L41 26 M23 34 L32 28 L41 34 M23 42 L32 36 L41 42" stroke="#e0a72e" stroke-width="6"/>
+    <path d="M23 26 L32 20 L41 26 M23 34 L32 28 L41 34 M23 42 L32 36 L41 42" stroke="#f5c64f" stroke-width="3.4"/>
+  </g>
+  <circle cx="32" cy="48.5" r="2.4" fill="#fffdf4"/>
+</svg>

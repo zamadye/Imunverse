@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "doc": "R1+E1: progressive disclosure trigger-based. E1 poin 7: awal game HANYA 1-2 menu (Heroes + Misi) — campaign/rank/pass/shop/dll DISEMBUNYIKAN (bukan lock) sampai trigger tercapai; UI tetap ada di kode.",
+  "doc": "R1+E1: progressive disclosure trigger-based. E1 poin 7: awal game HANYA 1-2 menu (Heroes + Misi) — campaign/rank/pass/shop/dll DISEMBUNYIKAN (bukan lock) sampai trigger tercapai; UI tetap ada di kode. UI/UX: entri dock/codex (Gel.10, sama dgn secondary/codex) & dock/arena (3 run, sama dgn campaign) ditambahkan agar menu2 HUD tidak lolos gate; ambang lain tidak diubah.",
   "gates": [
     {
       "target": "dock",
@@ -21,6 +21,16 @@
       "target": "dock",
       "id": "shop",
       "requireRuns": 5
+    },
+    {
+      "target": "dock",
+      "id": "codex",
+      "requireWave": 10
+    },
+    {
+      "target": "dock",
+      "id": "arena",
+      "requireRuns": 3
     },
     {
       "target": "quick",

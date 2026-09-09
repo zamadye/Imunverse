@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Peta Tubuh" (Kampanye): siluet Inang (kepala + bahu) dengan jalur bab
+       berupa node kondisi (koral → emas → sage) dan bendera tujuan. Palet token Imunverse. -->
+  <ellipse cx="32" cy="59" rx="18" ry="3" fill="#123f3a" opacity=".14"/>
+  <!-- kepala -->
+  <circle cx="30" cy="13.5" r="8.5" fill="#2f9c8f" stroke="#1f7a70" stroke-width="2.5"/>
+  <!-- bahu + torso -->
+  <path d="M12 56 V38 C12 29 19 24 27 24 H33 C41 24 48 29 48 38 V56 Z" fill="#2f9c8f" stroke="#1f7a70" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M15 34 C16 29 21 27 27 27 H33 C39 27 44 29 45 34 Z" fill="#fffdf4" opacity=".18"/>
+  <!-- jalur bab: garis putus-putus + node kondisi -->
+  <path d="M22 35 Q31 36 30 43 Q29 50 38 51" fill="none" stroke="#fffdf4" stroke-width="2.2" stroke-dasharray="1.6 3.2" stroke-linecap="round"/>
+  <circle cx="22" cy="35" r="4.8" fill="#f2825c" stroke="#fffdf4" stroke-width="2"/>
+  <circle cx="30.5" cy="43.5" r="4.8" fill="#f5c64f" stroke="#fffdf4" stroke-width="2"/>
+  <circle cx="38.5" cy="51" r="4.8" fill="#a9d795" stroke="#fffdf4" stroke-width="2"/>
+  <!-- bendera tujuan di bahu kanan -->
+  <path d="M50 27 V7" stroke="#fffdf4" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M51 7.5 H61 L58 12 L61 16.5 H51 Z" fill="#f2825c" stroke="#fffdf4" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

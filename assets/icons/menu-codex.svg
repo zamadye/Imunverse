@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Bio-Pedia": lensa mikroskop mengamati virus kecil (kawaii). -->
+  <ellipse cx="34" cy="59" rx="16" ry="3" fill="#123f3a" opacity=".14"/>
+  <path d="M40 40 L55 55" stroke="#c9891f" stroke-width="10" stroke-linecap="round"/>
+  <path d="M40 40 L55 55" stroke="#f5c64f" stroke-width="5.5" stroke-linecap="round"/>
+  <circle cx="27" cy="27" r="19" fill="#1f7a70"/>
+  <circle cx="27" cy="27" r="15" fill="#e8f6f1"/>
+  <circle cx="27" cy="27" r="15" fill="none" stroke="#2f9c8f" stroke-width="2"/>
+  <path d="M15.5 21 A13 13 0 0 1 22 15.5" fill="none" stroke="#fffdf4" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+  <!-- virus mungil -->
+  <g>
+    <g stroke="#7cb86a" stroke-width="2.4" stroke-linecap="round">
+      <path d="M27 14.5 V18 M27 36 V39.5 M14.5 27 H18 M36 27 H39.5 M18.2 18.2 L20.6 20.6 M33.4 33.4 L35.8 35.8 M35.8 18.2 L33.4 20.6 M20.6 33.4 L18.2 35.8"/>
+    </g>
+    <circle cx="27" cy="27" r="8.6" fill="#a9d795" stroke="#7cb86a" stroke-width="2"/>
+    <circle cx="23.8" cy="26" r="1.6" fill="#123f3a"/>
+    <circle cx="30.2" cy="26" r="1.6" fill="#123f3a"/>
+    <path d="M24.2 30 Q27 32.4 29.8 30" fill="none" stroke="#123f3a" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Imun Coin" (mata uang premium): permata heksagonal teal berfaset (bahasa pelat hex skill) + kilau krem. -->
+  <ellipse cx="32" cy="58.5" rx="16" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <polygon points="32,5 55.4,18.5 55.4,45.5 32,59 8.6,45.5 8.6,18.5" fill="#14584f"/>
+  <polygon points="32,9.5 51.5,20.8 51.5,43.2 32,54.5 12.5,43.2 12.5,20.8" fill="#2f9c8f"/>
+  <path d="M32 9.5 L51.5 20.8 L32 32 L12.5 20.8 Z" fill="#7fd8c8"/>
+  <path d="M32 32 L51.5 20.8 V43.2 L32 54.5 Z" fill="#1f7a70" opacity=".6"/>
+  <path d="M32 32 L12.5 43.2 L32 54.5 Z" fill="#fffdf4" opacity=".12"/>
+  <path d="M18 21.5 L30 14.5" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>
+  <path d="M44 34 L45.4 38 L49.4 39.4 L45.4 40.8 L44 44.8 L42.6 40.8 L38.6 39.4 L42.6 38 Z" fill="#fffdf4" opacity=".9"/>
+</svg>

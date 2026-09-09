@@ -14,12 +14,14 @@ import { writeSave } from '../save/save-manager.js';
 const steps = [
   {
     id: 'move',
-    text: 'Tarik di layar (atau W A S D) untuk bergerak!',
+    // UI/UX BUILD 42: sesuai perilaku nyata — joystick mengambang di mana saja
+    text: 'Sentuh & tarik di lantai arena (atau W A S D) untuk bergerak!',
     hint: 'tut-move',
   },
   {
     id: 'attack',
-    text: 'Tekan tombol TEMBAK! untuk menyerang patogen!',
+    // label tombolnya "SERANG" (bukan TEMBAK) — copy harus sama dengan yang dilihat pemain
+    text: 'Tahan tombol SERANG untuk menyerang — tarik sambil menahan untuk mengarahkan!',
     hint: 'tut-attack',
   },
   {

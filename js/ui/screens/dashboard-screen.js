@@ -25,7 +25,7 @@ import { applyGateVisual, gateFor } from '../../systems/feature-gate.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
-import { getSession, getFactionDef } from '../../systems/account-system.js';
+import { getSession } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
 import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager } from '../screen-manager.js';
@@ -158,10 +158,10 @@ function renderQuickRow(meta) {
   const row = document.getElementById('quick-row');
   row.textContent = '';
   const tiles = [
-    { key: 'roster', ico: 'assets/sprites/icon_heroes.png', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
-    { key: 'shop', ico: 'assets/sprites/icon_shop.png', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
-    { key: 'codex', ico: 'assets/sprites/icon_scope.png', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
-    { key: 'rank', ico: 'assets/sprites/icon_trophy.png', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
+    { key: 'roster', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
+    { key: 'shop', ico: 'assets/icons/menu-shop.svg', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
+    { key: 'codex', ico: 'assets/icons/menu-codex.svg', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
+    { key: 'rank', ico: 'assets/icons/menu-rank.svg', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
   ];
   for (const tl of tiles) {
     const t = el('button', { class: 'quick-tile', title: tl.label }, [
@@ -196,7 +196,7 @@ function renderCampaignCard(meta) {
   card.appendChild(el('span', { class: 'cc-title', text: ch.title }));
   card.appendChild(el('span', { class: 'cc-obj', text: ch.objective }));
   const play = el('button', { id: 'btn-play-big', class: 'btn-play-big', 'aria-label': 'Mulai — persiapan pertempuran' }, [
-    el('img', { src: 'assets/sprites/icon_play.png', alt: '' }),
+    el('img', { src: 'assets/icons/ui-play.svg', alt: '' }),
     el('span', { text: 'MULAI' }),
     el('small', { id: 'play-big-sub', text: ch.organ }),
   ]);
@@ -229,7 +229,7 @@ function renderModeStack(meta) {
 
   const lab = document.getElementById('mode-lab');
   lab.textContent = '';
-  lab.appendChild(el('img', { class: 'mc-ico', src: 'assets/sprites/icon_squad.png', alt: '' }));
+  lab.appendChild(el('img', { class: 'mc-ico', src: 'assets/icons/menu-squad.svg', alt: '' }));
   lab.appendChild(el('div', { class: 'mc-body' }, [
     el('b', { text: 'Lab Pasukan' }),
     el('span', { text: allyLevelBadge(meta) }),
@@ -328,7 +328,7 @@ function renderLeaderboardCard(meta) {
   card.textContent = '';
   const runs = getLeaderboard(meta, 'normal').slice(0, 3);
   card.appendChild(el('h3', { class: 'card-title ico-title' }, [
-    el('img', { class: 't-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }),
+    el('img', { class: 't-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
     el('span', { text: 'Papan Rekor — Klasik' }),
   ]));
   if (!runs.length) {
@@ -435,7 +435,7 @@ function renderArenaCard(meta) {
     status.unlocked
       ? el('span', { text: 'Terbuka ✓' })
       : el('span', { class: 'lock-line' }, [
-          el('img', { class: 'lock-ico', src: 'assets/sprites/icon_lock.png', alt: '' }),
+          el('img', { class: 'lock-ico', src: 'assets/icons/ui-lock.svg', alt: '' }),
           el('span', { text: ` ${status.text}` }),
         ]),
   ]));
@@ -463,13 +463,10 @@ export function show() {
   const imuEl = document.getElementById('dash-imun');
   if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
-  // AKUN + FRAKSI: routing konten per pasukan (layout sama, isi beda)
+  // AKUN: chip nama pemain (UI/UX Task 4: tanpa warna/label fraksi — satu pasukan saja saat ini)
   const session = getSession();
-  const faction = getFactionDef(session ? session.faction : 'imun');
-  document.documentElement.style.setProperty('--faction-color', faction.color);
   const chip = document.getElementById('account-chip');
   if (chip) {
-    chip.style.borderColor = faction.color;
     if (session) {
       chip.classList.remove('hidden');
       chip.querySelector('#account-name').textContent = session.username;
@@ -519,14 +516,14 @@ export function show() {
   }
   const badge = document.getElementById('dash-best-badge');
   badge.textContent = '';
-  badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_trophy.png', alt: '' }));
+  badge.appendChild(el('img', { class: 'badge-ico', src: 'assets/icons/ui-star.svg', alt: '' }));
   badge.appendChild(el('span', { text: `Gel. ${meta.stats.bestWave}` }));
 
   // LEVEL HERO & PASUKAN terhubung: chip di panggung (klik → Lab)
   const lvlBadge = document.getElementById('dash-level-badge');
   if (lvlBadge) {
     lvlBadge.textContent = '';
-    lvlBadge.appendChild(el('img', { class: 'badge-ico', src: 'assets/sprites/icon_sword.png', alt: '' }));
+    lvlBadge.appendChild(el('img', { class: 'badge-ico', src: 'assets/icons/menu-squad.svg', alt: '' }));
     lvlBadge.appendChild(el('span', { text: `${heroDef ? heroLevelBadge(meta, heroDef.id) : 'Lv 0'} · Pasukan ${allyLevelBadge(meta)}` }));
     lvlBadge.onclick = () => { audio.ui(); screenManager.show('upgrade'); };
   }
@@ -591,12 +588,12 @@ export function show() {
   const claimable = livesAvailable && canClaimDailyReward(meta);
   const info = el('div', { class: 'daily-info' }, [
     el('b', { class: 'ico-title' }, [
-      el('img', { class: 't-ico', src: 'assets/sprites/icon_star.png', alt: '' }),
+      el('img', { class: 't-ico', src: 'assets/icons/ui-star.svg', alt: '' }),
       el('span', { text: 'Bonus Harian' }),
     ]),
     el('span', { class: 'claim-line' }, claimable ? [
       el('b', { text: `${getData().upgrades.economy.dailyReward}` }),
-      el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: 'antibodi' }),
+      el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'antibodi' }),
       el('span', { text: ' menantimu — klaim sekarang!' }),
     ] : [el('span', { text: 'Sudah diklaim hari ini. Kembali besok.' })]),
   ]);
@@ -628,7 +625,7 @@ export function show() {
         el('span', { class: 'm-name', text: m.def.name }),
         el('span', { class: 'm-reward' }, [
         el('span', { text: `+${m.def.reward}` }),
-        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_imu.png', alt: 'Imun Coin', title: 'Imun Coin' }),
+        el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: 'Imun Coin', title: 'Imun Coin' }),
       ]),
       ]),
       el('div', { class: 'm-row' }, [

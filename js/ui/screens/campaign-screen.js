@@ -60,7 +60,7 @@ function renderPath(meta) {
       el('span', { class: 'camp-ico-wrap' }, [
         el('img', { class: 'camp-ico', src: arenaDef.thumb, alt: ch.organ }),
         status === 'cleared' ? el('span', { class: 'camp-check', text: '✓' }) : null,
-        status === 'locked' ? el('img', { class: 'camp-lock', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }) : null,
+        status === 'locked' ? el('img', { class: 'camp-lock', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }) : null,
         status === 'current' ? el('span', { class: 'camp-here', text: 'MISI' }) : null,
       ]),
       el('span', { class: 'camp-label' }, [

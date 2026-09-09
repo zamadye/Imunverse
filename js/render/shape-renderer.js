@@ -194,7 +194,6 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
   if (!joy.active) return;
   const base = 'assets/sprites/fx_joystick_base.png';
   const knob = 'assets/sprites/fx_joystick_knob.png';
-  drawImageFn(base, joy.originX, joy.originY, maxRadius * 2.3);
   // knob (dibatasi radius)
   let dx = joy.x - joy.originX;
   let dy = joy.y - joy.originY;
@@ -203,6 +202,39 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
     dx = (dx / len) * maxRadius;
     dy = (dy / len) * maxRadius;
   }
+  // UI/UX BUILD 42: sprite dasar (alpha maks 0,69, teal muda) nyaris lenyap di
+  // lantai krem → pemain tidak melihat umpan balik arah. Gambar CINCIN dasar
+  // kontras + PANAH arah di tepi cincin sebelum sprite (sprite tetap dipakai).
+  ctx.save();
+  ctx.translate(joy.originX, joy.originY);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(255,253,244,0.95)';
+  ctx.fillStyle = 'rgba(18,63,58,0.22)';
+  ctx.beginPath();
+  ctx.arc(0, 0, maxRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(18,63,58,0.35)';
+  ctx.beginPath();
+  ctx.arc(0, 0, maxRadius + 4, 0, Math.PI * 2);
+  ctx.stroke();
+  if (len > 6) {
+    // panah arah (segitiga) di tepi cincin — arah gerak terbaca dari sudut mata
+    const a = Math.atan2(dy, dx);
+    ctx.rotate(a);
+    ctx.translate(maxRadius + 12, 0);
+    ctx.fillStyle = '#fffdf4';
+    ctx.strokeStyle = 'rgba(18,63,58,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(9, 0); ctx.lineTo(-6, 8); ctx.lineTo(-3, 0); ctx.lineTo(-6, -8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+  drawImageFn(base, joy.originX, joy.originY, maxRadius * 2.3);
   drawImageFn(knob, joy.originX + dx, joy.originY + dy, maxRadius * 0.85);
 }
 

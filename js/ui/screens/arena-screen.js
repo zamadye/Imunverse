@@ -52,7 +52,7 @@ export function show() {
         status.unlocked
           ? el('div', { class: 'ai-unlock', style: 'color:#2f9c8f', text: selected ? 'Terpilih ✓' : 'Terbuka' })
           : el('div', { class: 'ai-unlock lock-line' }, [
-              el('img', { class: 'lock-ico', src: 'assets/sprites/icon_lock.png', alt: '' }),
+              el('img', { class: 'lock-ico', src: 'assets/icons/ui-lock.svg', alt: '' }),
               el('span', { text: ` ${status.text}` }),
             ]),
       ]),

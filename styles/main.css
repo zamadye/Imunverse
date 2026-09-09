@@ -876,7 +876,7 @@ img.lock-badge {
 
 /* -- Baris terkunci dengan ikon gembok PNG (bukan emoji) -- */
 .lock-line { display: inline-flex; align-items: center; gap: 4px; }
-.lock-ico { width: 13px; height: 13px; object-fit: contain; }
+.lock-ico, .arena-item img.lock-ico { width: 15px; height: 15px; border-radius: 0; object-fit: contain; flex: 0 0 auto; }
 
 /* -- Kolom teks item arena (nama + bonus + status unlock) -- */
 .ai-mid { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -933,17 +933,6 @@ img.lock-badge {
 .body-milestone.done { color: var(--gold-dark, #b98a20); }
 
 /* -- Modal fokus run -- */
-.focus-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
-.focus-item {
-  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-  border-radius: 18px; background: var(--cream); cursor: pointer;
-  border: 3px solid transparent; text-align: left; width: 100%;
-}
-.focus-item.selected { border-color: var(--teal); background: var(--teal-light); }
-.focus-item img { width: 40px; height: 40px; }
-.fi-mid { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.fi-name { font-weight: 900; color: var(--ink); }
-.fi-desc { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
 
 /* -- Dampak tubuh di game over -- */
 .go-body { font-size: 12.5px; }
@@ -1479,30 +1468,7 @@ img.lock-badge {
   background: none; border: none; font-size: 11px; font-weight: 800;
   color: #b0654a; text-decoration: underline; cursor: pointer; padding: 4px 0; text-align: left;
 }
-.auth-faction-title { font-size: 14px; margin: 16px 0 2px; }
-.auth-faction-hint { font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-bottom: 10px; }
-.auth-factions { display: flex; flex-direction: column; gap: 10px; }
-.faction-card {
-  display: flex; align-items: center; gap: 12px; text-align: left;
-  background: var(--card, #fffdf7); border: 3px solid transparent; border-radius: 18px;
-  padding: 12px 14px; box-shadow: var(--shadow-card); cursor: pointer;
-}
-.faction-card.selected.imun { border-color: var(--teal, #2f9c8f); background: #f0faf6; }
-.faction-card.selected.virus { border-color: #f2825c; background: #fdf3ee; }
-.faction-card.locked { opacity: 0.75; }
-.fc-emblem {
-  width: 52px; height: 52px; border-radius: 16px; flex: 0 0 52px;
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
-}
-.fc-emblem img { width: 40px; height: 40px; }
-.fc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.fc-body b { font-size: 14px; }
-.fc-tag { font-size: 11px; color: var(--ink-soft); font-weight: 700; line-height: 1.35; }
-.fc-goal { font-size: 10px; font-weight: 900; color: var(--teal, #2f9c8f); }
-.faction-card.virus .fc-goal { color: #c46a4a; }
-.fc-badge { font-size: 9px; font-weight: 900; padding: 3px 9px; border-radius: 8px; align-self: flex-start; }
-.fc-badge.live { background: #def3e9; color: #1f7a70; }
-.fc-badge.soon { background: #f5b7ae; color: #7a2e1d; }
+/* (UI/UX Task 4: CSS kartu fraksi auth dihapus — elemen sudah tidak ada sejak E1) */
 
 /* Chip akun di topbar dashboard */
 .account-chip {
@@ -1513,7 +1479,6 @@ img.lock-badge {
 }
 .account-chip.hidden { display: none; }
 .account-chip #account-name { font-size: 11.5px; font-weight: 900; color: var(--ink, #3a342c); max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.faction-tag { font-size: 9px; font-weight: 900; color: #fff; border-radius: 8px; padding: 3px 8px; background: var(--teal, #2f9c8f); }
 
 /* =====================================================================
    FASE 7.7 — ARSENAL & RASA TEMPUR: tombol TEMBAK manual (kid-friendly)
@@ -1773,7 +1738,7 @@ img.lock-badge {
 #screen-hud .hud-currency-run{display:flex;align-items:center;gap:4px;font-weight:900;color:#c99013;font-size:14px}
 #screen-hud .hud-currency-run img{width:15px;height:15px}
 #screen-hud .btn-pause{background:linear-gradient(180deg,#2fb3a2,#1f7a70);border:none;width:clamp(40px,9.5vh,48px);height:clamp(40px,9.5vh,48px);min-height:clamp(40px,9.5vh,48px);border-radius:13px;box-shadow:0 3px 8px rgba(31,122,112,.3);flex:0 0 auto}
-#screen-hud .btn-pause img{filter:brightness(0) invert(1)}
+#screen-hud .btn-pause img{filter:none}
 #screen-hud .hud-minimap{top:96px;right:12px;border-color:#fff;width:84px;height:84px;background:rgba(20,88,79,.5)}
 #screen-hud .hud-buffs{top:84px}
 #screen-hud .hud-lvls{flex-direction:column;gap:3px;align-items:flex-start}
@@ -2673,59 +2638,12 @@ img.lock-badge {
 .phago-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffd93d, #ffb300); border-radius: 4px; transition: width 0.25s ease; }
 
 /* ============================================================
-   E1 poin 2 — TOMBOL BERKARAKTER (skill hex MOBA + fire claw)
+   E1 poin 2 — TOMBOL BERKARAKTER → digantikan UI/UX BUILD 43
+   (pelat HEX SVG + ikon per-skill + SERANG antibodi-Y). Rule-nya
+   ada di styles/dashboard-focus.css blok "BUILD 43" (dimuat terakhir).
    ============================================================ */
-/* Skill: bentuk HEX ala MOBA + glyph SVG warna skill + rim dalam */
-#screen-hud .ability-btn{
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  border-radius: 0; border: none;
-  background:
-    linear-gradient(165deg, rgba(255,255,255,.94), rgba(214,240,233,.9)) padding-box;
-  box-shadow: inset 0 0 0 3px var(--sk,#35d0ba), inset 0 0 14px rgba(18,63,58,.14);
-}
-#screen-hud .ability-btn::before{
-  content:""; position:absolute; inset:4px; z-index:0;
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  background: radial-gradient(circle at 50% 26%, color-mix(in srgb, var(--sk,#35d0ba) 26%, transparent), transparent 72%);
-}
-#screen-hud .ability-btn.ready{box-shadow: inset 0 0 0 3px var(--sk,#35d0ba), inset 0 0 18px color-mix(in srgb, var(--sk,#35d0ba) 38%, transparent), 0 0 12px color-mix(in srgb, var(--sk,#35d0ba) 45%, transparent)}
-#screen-hud .ability-btn .sk-glyph{display:flex;align-items:center;justify-content:center}
-#screen-hud .ability-btn .sk-glyph svg{width:26px;height:26px;fill:var(--sk,#35d0ba);filter:drop-shadow(0 1.5px 0 rgba(18,63,58,.28))}
-#screen-hud .ability-btn.ult .sk-glyph svg{width:31px;height:31px}
-/* ULT: hex emas dengan mahkota rim ganda — slot paling penting terlihat beda */
-#screen-hud .ability-btn.ult{
-  box-shadow: inset 0 0 0 3px #e8b40c, inset 0 0 0 6px rgba(255,217,61,.35), inset 0 0 16px rgba(232,180,12,.22);
-}
-#screen-hud .ability-btn.ult.ready{
-  box-shadow: inset 0 0 0 3px #e8b40c, inset 0 0 0 6px rgba(255,217,61,.5), 0 0 16px rgba(255,196,10,.55);
-}
-#screen-hud .ability-btn.ult .sk-glyph svg{fill:#c98d00}
-#screen-hud .ability-btn .key-tag{z-index:3}
-#screen-hud .ability-btn .sk-name{bottom:8px}
-
-/* FIRE: cakar serang — ring bergerigi + 3 goresan claw (bukan lingkaran polos) */
-#screen-hud .fire-btn{ position:relative; overflow:visible; } /* kalahkan position:static :1815 */
-#screen-hud .fire-btn::before{
-  content:""; position:absolute; inset:-7px; border-radius:50%; z-index:-1;
-  background: conic-gradient(from 12deg,
-    #c46a4a 0deg 18deg, transparent 18deg 30deg,
-    #c46a4a 30deg 48deg, transparent 48deg 60deg,
-    #c46a4a 60deg 78deg, transparent 78deg 90deg,
-    #c46a4a 90deg 108deg, transparent 108deg 120deg,
-    #c46a4a 120deg 138deg, transparent 138deg 150deg,
-    #c46a4a 150deg 168deg, transparent 168deg 180deg,
-    #c46a4a 180deg 198deg, transparent 198deg 210deg,
-    #c46a4a 210deg 228deg, transparent 228deg 240deg,
-    #c46a4a 240deg 258deg, transparent 258deg 270deg,
-    #c46a4a 270deg 288deg, transparent 288deg 300deg,
-    #c46a4a 300deg 318deg, transparent 318deg 330deg,
-    #c46a4a 330deg 348deg, transparent 348deg 360deg);
-  opacity:.5; animation: fireGear 9s linear infinite;
-}
-@keyframes fireGear{ to{ transform: rotate(360deg); } }
-#screen-hud .fire-btn .fire-claw{position:relative;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#screen-hud .fire-btn .fire-claw svg{width:32px;height:32px;fill:#fff;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22))}
-#screen-hud .fire-btn img{display:none} /* ikon lama diganti claw svg */
+#screen-hud .fire-btn{ position:relative; overflow:visible; } /* kalahkan position:static di atas */
+#screen-hud .fire-btn img{display:none} /* ikon lama (img) diganti svg inline .fire-claw */
 
 /* ============================================================
    E1 poin 1+7 — MINIMAL HOME (fokus feel: stage + PLAY + 1-2 menu)
@@ -2798,3 +2716,129 @@ img.lock-badge {
   background:rgba(0,0,0,.35);color:#fff;font:900 11px var(--font);
   letter-spacing:.1em;padding:8px 18px;cursor:pointer;
 }
+
+/* =====================================================================
+   UI/UX WORK ORDER #3 (BUILD 44) — bahasa visual menu terpadu:
+   header satu pola, ikon bespoke (assets/icons/*.svg + js/ui/menu-icons.js),
+   Shop dengan chip-nav bagian, kartu hero berperan/tier, Lab bertab berikon.
+   ===================================================================== */
+
+/* ---- Ikon inline SVG (menu-icons.js): mengikuti ukuran kontainer ---- */
+.mi { display: inline-flex; align-items: center; justify-content: center; width: 1em; height: 1em; line-height: 0; flex: 0 0 auto; }
+.mi svg, .mi img { width: 100%; height: 100%; display: block; object-fit: contain; }
+
+/* ---- Header terpadu: [kembali] [ikon modul] [judul] [chip mata uang] ---- */
+.ui-head { width: 100%; max-width: 560px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; min-height: 48px; flex: 0 0 auto; }
+.ui-head .btn-back, .ui-head .back-btn { width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: var(--card); box-shadow: var(--shadow-card); border: 2px solid rgba(47, 156, 143, .25); }
+.ui-head .btn-back img, .ui-head .back-btn img { width: 26px; height: 26px; }
+.ui-head-ico { width: 40px; height: 40px; border-radius: 13px; background: var(--card); box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.ui-head-ico img { width: 30px; height: 30px; object-fit: contain; }
+.ui-head h1, .ui-head h2 { flex: 1; min-width: 0; text-align: left; font-size: 19px; color: var(--teal-dark); font-weight: 900; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.ui-head-right { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; min-width: 44px; justify-content: flex-end; }
+.ui-head .currency-chip.small { font-size: 13px; padding: 4px 12px 4px 5px; gap: 6px; }
+.ui-head .currency-chip.small .coin { width: 24px; height: 24px; filter: none; }
+.ui-head .codex-progress { font-size: 11px; padding: 5px 10px; }
+.ui-head .count-chip { font-size: 10px; }
+.currency-chip .coin[src$=".svg"] { filter: none; }
+.ui-modal-title { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.ui-modal-title img { width: 30px; height: 30px; object-fit: contain; }
+.modal-title.rank-title { display: flex; }
+
+/* ---- Roster: badge peran di avatar + footer tidak menutupi baris terakhir ---- */
+.role-badge {
+  position: absolute; left: -2%; top: -2%; width: 30%; max-width: 36px; aspect-ratio: 1; border-radius: 50%;
+  background: var(--card); border: 2.5px solid var(--role, var(--teal)); padding: 3px; object-fit: contain;
+  box-shadow: 0 3px 8px rgba(31, 74, 66, .25); z-index: 2;
+}
+.hero-card.locked .role-badge { filter: grayscale(.8); opacity: .7; }
+#screen-roster .screen-footer { margin-top: -66px; } /* footer menumpang di padding-bottom grid (dashboard-focus.css) */
+/* Gembok SVG krem di lingkaran krem: padding piksel tetap (persen = relatif lebar avatar → gambar hilang) */
+#screen-roster .lock-badge { padding: 4px; box-sizing: border-box; background: var(--card); border-color: #e4d9bf; }
+#screen-roster .hero-card.locked .lock-badge { background: var(--card); }
+
+/* ---- Shop: chip-nav bagian (sticky) ---- */
+.shop-nav {
+  position: sticky; top: 0; z-index: 4; width: 100%; max-width: 620px; flex: 0 0 auto; /* flex item overflow:auto → min-height 0; jangan biarkan menyusut */
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 8px;
+  background: linear-gradient(var(--cream) 78%, transparent); -webkit-overflow-scrolling: touch;
+}
+.shop-nav::-webkit-scrollbar { display: none; }
+.shop-chip {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
+  padding: 5px 12px 5px 7px; border-radius: 999px; border: 2px solid transparent;
+  background: var(--card); color: var(--ink-soft); font-family: var(--font); font-weight: 900; font-size: 11.5px;
+  box-shadow: var(--shadow-card); cursor: pointer; transition: transform .1s, border-color .15s, color .15s;
+}
+.shop-chip img { width: 22px; height: 22px; object-fit: contain; }
+.shop-chip.active { border-color: var(--teal); color: var(--teal-dark); background: #fff; }
+.shop-chip:active { transform: scale(.95); }
+
+/* ---- Shop: kepala bagian dengan ikon bespoke ---- */
+.shop-section { scroll-margin-top: 56px; }
+.ss-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.ss-ico { width: 34px; height: 34px; object-fit: contain; flex: 0 0 auto; filter: drop-shadow(0 2px 3px rgba(31, 74, 66, .18)); }
+.ss-text { display: flex; flex-direction: column; min-width: 0; }
+#screen-shop .shop-section .ss-text h3, .shop-section .ss-text h3 { margin: 0; line-height: 1.15; }
+.ss-sub { font-size: 10px; font-weight: 700; color: var(--ink-soft); line-height: 1.3; }
+
+/* ---- Shop: kartu — ikon bespoke, harga berikon, badge peran & pill tier ---- */
+.shop-ico { width: 56px; height: 56px; font-size: 56px; filter: drop-shadow(0 5px 7px rgba(31, 74, 66, .2)); }
+#screen-shop .shop-ico { width: 48px; height: 48px; font-size: 48px; }
+.price { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.price .inline-coin { width: 14px; height: 14px; margin: 0; }
+.price-tag { display: inline-flex; align-items: center; }
+.price-tag.imu { background: linear-gradient(180deg, #d9f6f1, #bfeae2); color: var(--teal-dark); box-shadow: 0 4px 10px rgba(47, 156, 143, .35); }
+.shop-card .role-badge { width: 30px; max-width: 30px; left: -8px; top: -8px; }
+.shop-card .tier-pill { font-size: 7.5px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; padding: 2px 8px; border-radius: 999px; text-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
+.shop-card .s-owned.has { color: var(--teal-deep); }
+.shop-card.owned .shop-sprite { filter: drop-shadow(0 0 8px rgba(53, 224, 200, .55)); }
+.shop-card img.lock-badge { width: 30px; height: 30px; padding: 3px; box-sizing: border-box; background: var(--card); border: 2px solid #e4d9bf; }
+/* gembok kecil (prep/kampanye): tanpa lingkaran, ukuran cukup agar detail terbaca */
+.prep-hero .ph-lock { width: 26px; height: 26px; top: -8px; right: -8px; filter: drop-shadow(0 1px 1px rgba(18,63,58,.25)); }
+.camp-lock { width: 24px; height: 24px; right: -8px; top: -8px; filter: drop-shadow(0 1px 1px rgba(18,63,58,.25)); }
+.shop-card.c-gold { background: linear-gradient(170deg, #fbefcf, #f6dd9c); }
+
+/* Skin: swatch warna + ikon aksesori */
+.skin-card { position: relative; }
+.skin-swatch { position: absolute; top: 7px; right: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--swatch, var(--teal)); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+.skin-preview.acc-ico { display: flex; align-items: center; justify-content: center; }
+.skin-preview.acc-ico img { width: 44px; height: 44px; object-fit: contain; }
+.ft-btn .price .inline-coin { width: 13px; height: 13px; }
+
+/* Gratis: kepala tile berikon */
+.ft-head { display: flex; align-items: center; gap: 7px; }
+.ft-ico { width: 24px; height: 24px; object-fit: contain; }
+
+/* Premium: tombol harga SELALU berwarna (sebelumnya .btn menimpa → kotak putih kosong) */
+.premium-card .btn-prem, .btn.btn-prem {
+  background: linear-gradient(180deg, var(--pc, #2f9c8f), color-mix(in srgb, var(--pc, #2f9c8f) 78%, #123f3a)) !important;
+  color: #fff !important; text-shadow: 0 1px 0 rgba(0, 0, 0, .18); font-size: 13px; padding: 9px 0; min-height: 40px;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--pc, #2f9c8f) 45%, transparent), inset 0 2px 0 rgba(255, 255, 255, .25);
+}
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .premium-card .btn-prem, .btn.btn-prem { background: var(--pc, #2f9c8f) !important; box-shadow: var(--shadow-card); }
+}
+.premium-card .btn-prem:disabled { filter: grayscale(.6); opacity: .7; }
+.prem-badge { background: var(--pc, #2f9c8f); }
+.prem-ico { width: 30px; height: 30px; object-fit: contain; align-self: flex-start; }
+.premium-card { border-width: 2.5px; }
+
+/* ---- Lab Pasukan: tab berikon + ikon baris bespoke ---- */
+.upg-tab { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.ut-ico { width: 20px; height: 20px; display: inline-flex; line-height: 0; }
+.ut-ico svg { width: 100%; height: 100%; }
+.upg-tab:not(.active) .ut-ico { filter: grayscale(.7); opacity: .65; }
+.upg-icon { font-size: 30px; }
+.upg-icon .mi { width: 32px; height: 32px; }
+.upg-icon.global { background: linear-gradient(160deg, #fdf0c8, #f7dd9a); }
+.hl-chip .mi { width: 16px; height: 16px; }
+.hl-banner-role img { width: 24px; height: 24px; object-fit: contain; }
+.hl-banner-role { padding: 0; }
+.btn-hl-up .inline-coin { width: 16px; height: 16px; margin: 0 3px; }
+
+/* Level-up & Tas memakai ikon bespoke yang sama */
+.choice-icon .mi { width: 32px; height: 32px; }
+.bag-card .bag-sprite.mi { width: 44px; height: 44px; font-size: 44px; }
+
+/* Ikon SVG di tempat PNG lama (ukuran mengikuti class lama; drop-shadow PNG dibuang) */
+.lock-badge[src$=".svg"], .camp-lock[src$=".svg"], .ph-lock[src$=".svg"], .lock-ico[src$=".svg"], .bp-state[src$=".svg"] { object-fit: contain; }

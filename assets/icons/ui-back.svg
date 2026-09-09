@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Kembali": panah pseudopodia teal gemuk (bentuk bulat-organik ala sel), outline teal-deep, kilau krem. -->
+  <ellipse cx="32" cy="58" rx="17" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <path d="M12.5 32 L30 15.5 Q33.5 13.5 33.5 18 V25 H48 Q55 25 55 32 Q55 39 48 39 H33.5 V46 Q33.5 50.5 30 48.5 Z" fill="#2f9c8f" stroke="#1f7a70" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M20.5 30.5 L29 22.5" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>
+  <path d="M37 29 H47" fill="none" stroke="#fffdf4" stroke-width="2.2" stroke-linecap="round" opacity=".45"/>
+</svg>

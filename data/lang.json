@@ -118,8 +118,8 @@
     "Menangkan mode Klasik": "Win Classic mode",
     "Terkunci": "Locked",
     "Save direset. Organisme baru terbentuk. 🧬": "Save reset. A new organism forms. 🧬",
-    "Tarik di layar (atau W A S D) untuk bergerak!": "Drag on screen (or W A S D) to move!",
-    "Tekan tombol TEMBAK! untuk menyerang patogen!": "Press the FIRE! button to attack pathogens!",
+    "Sentuh & tarik di lantai arena (atau W A S D) untuk bergerak!": "Touch & drag on the arena floor (or W A S D) to move!",
+    "Tahan tombol SERANG untuk menyerang — tarik sambil menahan untuk mengarahkan!": "Hold the ATTACK button to attack — drag while holding to aim!",
     "Ambil nutrisi yang jatuh: itu XP & item evolusi!": "Grab falling nutrients: that's XP & evolution parts!",
     "KONDISI TUBUH": "BODY CONDITION",
     "MULAI PERANG": "START BATTLE",
@@ -687,7 +687,34 @@
     "Raja Flu Mutan": "Mutant Flu King",
     "Alergen Purba": "Ancient Allergen",
     "Bayang Dalam": "Inner Shade",
-    "Mahakrisis": "Ultracrisis"
+    "Mahakrisis": "Ultracrisis",
+    "Pangkat": "Rank",
+    "Koleksi": "Collection",
+    "Menu perjalanan": "Journey menu",
+    "Menu regu hero": "Hero squad menu",
+    "untuk membuka!": "to unlock!",
+    "Terus bermain": "Keep playing",
+    "BEKAL RUN": "RUN SUPPLIES",
+    "Bekal sekali pakai — otomatis aktif di run berikutnya.": "Single-use supplies — auto-activate on your next run.",
+    "Warna & aksesori visual saja — tidak menambah kekuatan.": "Colors & visual accessories only — no power boost.",
+    "Tanpa bayar: tonton sponsor, isi survei, atau ajak teman.": "No payment: watch a sponsor, fill a survey, or invite friends.",
+    "Uang sungguhan (simulasi gateway) — mendukung pengembang, tanpa pay-to-win.": "Real money (simulated gateway) — supports the developers, no pay-to-win.",
+    "Kuatkan hero & pasukanmu — HERO/PASUKAN/TIM dibayar Antibodi, GLOBAL dibayar Imun Coin.": "Empower heroes & squad — HERO/SQUAD/TEAM cost Antibodies, GLOBAL costs Imun Coin.",
+    "Item": "Items",
+    "Gratis": "Free",
+    "Premium": "Premium",
+    "Skin": "Skins",
+    "Suplemen": "Supplements",
+    "Hero": "Hero",
+    "BUKA": "UNLOCK",
+    "GRATIS": "FREE",
+    "Bagian toko": "Shop sections",
+    "Tank": "Tank",
+    "Damage": "Damage",
+    "Support": "Support",
+    "Profil": "Profile",
+    "PASUKAN": "SQUAD",
+    "HERO": "HERO"
   },
   "rules": [
     {
@@ -1009,6 +1036,14 @@
     {
       "pattern": "^Bio-Pedia: kartu (.+?) tercatat!$",
       "replace": "Bio-Pedia: $1 card logged!"
+    },
+    {
+      "pattern": "^(\\d+)/(\\d+) hero dimiliki — jalur Imun Coin bisa dibuka di sini, jalur misi lewat progres run\\.$",
+      "replace": "$1/$2 heroes owned — Imun Coin heroes unlock here, mission heroes through run progress."
+    },
+    {
+      "pattern": "^\\+(\\d+) kesehatan sistem per suplemen — kondisi tubuh memengaruhi bonus run\\.$",
+      "replace": "+$1 system health per supplement — body condition affects run bonuses."
     }
   ],
   "Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan namamu sendiri.": "Create your account — progress, hero levels & purchases stay safe under your own name.",

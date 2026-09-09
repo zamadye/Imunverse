@@ -9,6 +9,7 @@ import { getData, getHero } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
+import { iconEl } from '../menu-icons.js';
 
 export function show({ level, choices }) {
   // F21: level-up = SCENE sinematik (bukan modal tiba-tiba) — potret hero +
@@ -48,9 +49,7 @@ export function show({ level, choices }) {
         }
       },
     }, [
-      def.icon.startsWith('assets/')
-        ? el('div', { class: 'choice-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:28px;height:28px;object-fit:contain;' })])
-        : el('div', { class: 'choice-icon', text: def.icon }),
+      el('div', { class: 'choice-icon' }, [iconEl(def)]), // ikon bespoke (menu-icons.js), fallback def.icon
       el('div', { class: 'choice-info' }, [
         el('b', {}, [
           el('span', { text: def.name }),
