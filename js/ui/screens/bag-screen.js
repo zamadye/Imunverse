@@ -9,6 +9,7 @@ import { getData, getCharacterDesigns, getHero } from '../../core/data-store.js'
 import { getNextEvoStageDef, canEvolve } from '../../systems/evolution-system.js';
 import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { el } from '../screen-manager.js';
+import { iconEl } from '../menu-icons.js';
 
 function appendDesignCollection(evoBox, meta) {
   const selectedHero = getHero(meta.selectedHero) || getData().heroes.heroes[0];
@@ -74,7 +75,12 @@ export function show() {
   const bagHead = document.querySelector('#screen-bag .topbar');
   if (bagHead) {
     let chip = bagHead.querySelector('.count-chip');
-    if (!chip) { chip = el('span', { class: 'count-chip' }); bagHead.insertBefore(chip, bagHead.querySelector('.currency-chip')); }
+    if (!chip) {
+      chip = el('span', { class: 'count-chip' });
+      // Header terpadu (BUILD 44): chip masuk ke slot kanan, sebelum chip mata uang
+      const slot = bagHead.querySelector('.ui-head-right') || bagHead;
+      slot.insertBefore(chip, slot.querySelector('.currency-chip'));
+    }
     chip.textContent = '';
     chip.appendChild(el('span', { text: `${partTotal + itemTotal} ` }));
     chip.appendChild(el('span', { text: 'item' }));
@@ -107,9 +113,7 @@ export function show() {
     const owned = meta.consumables[def.id] || 0;
     any = any || owned > 0;
     itemsGrid.appendChild(el('div', { class: `bag-card${owned === 0 ? ' empty' : ''}` }, [
-      def.icon.startsWith('assets/')
-        ? el('img', { class: 'bag-sprite', src: def.icon, alt: def.name })
-        : el('div', { class: 'icon-sprite', text: def.icon }),
+      iconEl(def, 'bag-sprite'), // ikon bespoke (menu-icons.js), fallback def.icon
       el('b', { text: def.name }),
       el('span', { class: `bag-count${owned > 0 ? ' ok' : ''}`, text: `×${owned}` }),
       el('small', { text: owned > 0 ? 'dipakai otomatis saat run' : 'beli di Shop' }),

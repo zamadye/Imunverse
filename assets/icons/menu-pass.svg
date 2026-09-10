@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Battle Pass": tiket musim (kartu imunisasi) berstempel bintang emas. -->
+  <ellipse cx="32" cy="58" rx="18" ry="3" fill="#123f3a" opacity=".14"/>
+  <g transform="rotate(-12 32 32)">
+    <rect x="8" y="18" width="48" height="28" rx="7" fill="#e96a4c"/>
+    <rect x="11" y="21" width="42" height="22" rx="5" fill="#fffdf4"/>
+    <rect x="11" y="21" width="10" height="22" rx="5" fill="#f2825c"/>
+    <rect x="16" y="21" width="5" height="22" fill="#f2825c"/>
+    <path d="M23 24 V40" stroke="#e96a4c" stroke-width="1.6" stroke-dasharray="2 2.4" stroke-linecap="round"/>
+    <!-- bintang stempel -->
+    <path d="M38 24.5 L40.6 30 L46.6 30.7 L42.2 34.8 L43.4 40.8 L38 37.9 L32.6 40.8 L33.8 34.8 L29.4 30.7 L35.4 30 Z" fill="#e0a72e"/>
+    <path d="M38 26.5 L40 30.9 L44.8 31.4 L41.3 34.7 L42.2 39.5 L38 37.2 L33.8 39.5 L34.7 34.7 L31.2 31.4 L36 30.9 Z" fill="#f5c64f"/>
+    <circle cx="16" cy="27" r="1.8" fill="#fffdf4" opacity=".75"/>
+    <circle cx="16" cy="37" r="1.8" fill="#fffdf4" opacity=".75"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Patogen / Musuh": virus koral bulat berduri tumpul dengan wajah nakal (alis miring). -->
+  <ellipse cx="32" cy="59" rx="16" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <g stroke="#e96a4c" stroke-width="5" stroke-linecap="round">
+    <path d="M32 12 V7 M32 52 V57 M12 32 H7 M52 32 H57 M17.9 17.9 L14.4 14.4 M46.1 46.1 L49.6 49.6 M46.1 17.9 L49.6 14.4 M17.9 46.1 L14.4 49.6"/>
+  </g>
+  <circle cx="32" cy="32" r="18" fill="#f2825c" stroke="#e96a4c" stroke-width="2.4"/>
+  <path d="M21 25 Q25 19.5 31 18.5" fill="none" stroke="#fffdf4" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>
+  <circle cx="26.5" cy="31" r="2.3" fill="#123f3a"/><circle cx="37.5" cy="31" r="2.3" fill="#123f3a"/>
+  <path d="M23 26.5 L29 28.5 M41 26.5 L35 28.5" fill="none" stroke="#123f3a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M27 38.5 Q32 36 37 38.5" fill="none" stroke="#123f3a" stroke-width="1.9" stroke-linecap="round"/>
+</svg>

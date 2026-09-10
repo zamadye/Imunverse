@@ -1,9 +1,19 @@
 /**
- * input-handler.js — Input gerak player:
- *  1. Virtual joystick untuk mobile (touchstart/touchmove/touchend):
- *     vektor arah dihitung dari TITIK AWAL sentuh → posisi sentuh sekarang,
- *     magnitude di-clamp ke radius maksimum joystick.
- *  2. WASD / Arrow keys untuk desktop.
+ * input-handler.js — Input gerak & arah player.
+ *
+ *  GERAK
+ *   1. Joystick virtual mengambang (touch / drag mouse) — di MANA SAJA di canvas:
+ *      vektor arah = TITIK AWAL sentuh → posisi sentuh sekarang, magnitude 0..1.
+ *      (UI/UX BUILD 42: zona "aim stick" tak kasatmata di 42% layar kanan DIHAPUS —
+ *      pemain menarik di sana dan hero diam → laporan "arah tidak berfungsi".)
+ *   2. WASD / panah untuk desktop — hanya ditangkap saat gameplay aktif
+ *      (isActive) dan bukan saat mengetik di <input>/<textarea>.
+ *
+ *  ARAH SERANGAN (aim)
+ *   1. Tahan tombol SERANG lalu TARIK → aim stick (ala MLBB: arah dari titik
+ *      tekan). Lepas → kembali auto-aim. Dipasang lewat bindFireButton(el).
+ *   2. Desktop: mouse bergerak tanpa tekan → arah ke kursor (aimPos).
+ *   3. Tidak ada keduanya → { active:false } → auto-aim musuh terdekat.
  *
  * getMoveVector() mengembalikan vektor {x, y} dengan magnitude 0..1.
  */
@@ -13,8 +23,11 @@ const KEY_MAP = {
   KeyS: 'down', ArrowDown: 'down',
   KeyA: 'left', ArrowLeft: 'left',
   KeyD: 'right', ArrowRight: 'right',
-  Space: 'fire', KeyK: 'fire', // TEMBAK manual (desktop)
+  Space: 'fire', KeyK: 'fire', // SERANG manual (desktop)
 };
+
+const isTypingTarget = (t) =>
+  !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
 export class InputHandler {
   /** @param {HTMLCanvasElement} canvas */
@@ -35,15 +48,17 @@ export class InputHandler {
     };
     this.maxRadius = 56; // radius jangkauan joystick (px CSS)
 
-    // ---- AIM STICK (arahkan serangan) ----
-    // Touch/pointer di ZONA KANAN canvas = aim stick; zona kiri = gerak.
-    // Mouse tanpa tekan = arah ke posisi kursor (desktop, auto-aim override).
-    this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0 };
-    this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp
-    this.aimZone = 0.58;  // mulai zona aim di 58% lebar canvas
-    this.fireButtonHeld = false; // tombol TEMBAK di HUD (touch/mouse)
+    // ---- AIM STICK (arahkan serangan) — diisi oleh drag pada tombol SERANG ----
+    this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0, ox: 0, oy: 0 };
+    this.aimDragThreshold = 12; // px: tap biasa ≠ mengarahkan
+    this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp (mouse hover)
+    this.fireButtonHeld = false; // tombol SERANG di HUD (touch/mouse)
+    this.fireEl = null;
+    this._firePointerId = null;
 
     this.onPauseKey = null; // callback opsional (Esc / P)
+    /** Predikat: keyboard gerak hanya ditangkap bila true (di-set main.js). */
+    this.isActive = null;
 
     this._bind();
   }
@@ -51,6 +66,10 @@ export class InputHandler {
   _bind() {
     // ---------- Keyboard ----------
     this._onKeyDown = (e) => {
+      // Sedang mengetik (form akun, dsb.) → biarkan browser bekerja normal
+      if (isTypingTarget(e.target)) return;
+      // Bukan gameplay (dashboard/menu/modal) → jangan tangkap & jangan blokir
+      if (this.isActive && !this.isActive()) return;
       const action = KEY_MAP[e.code];
       if (action) {
         this.keys.add(action);
@@ -62,29 +81,28 @@ export class InputHandler {
       }
     };
     this._onKeyUp = (e) => {
+      // keyup SELALU melepas tombol — walau layar sudah berganti (anti tersangkut)
       const action = KEY_MAP[e.code];
       if (action) {
         this.keys.delete(action);
-        e.preventDefault();
+        if (!isTypingTarget(e.target)) e.preventDefault();
       }
     };
     window.addEventListener('keydown', this._onKeyDown);
     window.addEventListener('keyup', this._onKeyUp);
 
-    // ---------- Touch (virtual joystick) ----------
+    // Jendela kehilangan fokus / tab disembunyikan → lepas SEMUA input.
+    // (Tanpa ini tombol yang ditahan saat pindah tab tersangkut → hero jalan sendiri.)
+    this._onBlur = () => this.releaseAll();
+    this._onVisibility = () => { if (document.hidden) this.releaseAll(); };
+    window.addEventListener('blur', this._onBlur);
+    document.addEventListener('visibilitychange', this._onVisibility);
+
+    // ---------- Touch (virtual joystick — di mana saja di canvas) ----------
     this._onTouchStart = (e) => {
       e.preventDefault();
       for (const touch of e.changedTouches) {
-        const rect = this.canvas.getBoundingClientRect();
-        const inAimZone = (touch.clientX - rect.left) > rect.width * this.aimZone;
-        if (inAimZone && !this.aimStick.active) {
-          this.aimStick.active = true;
-          this.aimStick.touchId = touch.identifier;
-          this.aimStick.ox = touch.clientX;
-          this.aimStick.oy = touch.clientY;
-          this.aimStick.dx = 0;
-          this.aimStick.dy = 0;
-        } else if (!this.joystick.active) {
+        if (!this.joystick.active) {
           this.joystick.active = true;
           this.joystick.touchId = touch.identifier;
           this.joystick.originX = touch.clientX;
@@ -103,30 +121,13 @@ export class InputHandler {
           this.joystick.y = touch.clientY;
           this._updateJoystickVector();
         }
-        if (this.aimStick.active && touch.identifier === this.aimStick.touchId) {
-          const dx = touch.clientX - this.aimStick.ox;
-          const dy = touch.clientY - this.aimStick.oy;
-          const len = Math.hypot(dx, dy);
-          if (len > 8) {
-            this.aimStick.dx = dx / len;
-            this.aimStick.dy = dy / len;
-            this.aimStick.angle = Math.atan2(dy, dx);
-          }
-        }
       }
     };
     this._onTouchEnd = (e) => {
       e.preventDefault();
       for (const touch of e.changedTouches) {
         if (this.joystick.active && touch.identifier === this.joystick.touchId) {
-          this.joystick.active = false;
-          this.joystick.touchId = null;
-          this.joystick.dx = 0;
-          this.joystick.dy = 0;
-        }
-        if (this.aimStick.active && touch.identifier === this.aimStick.touchId) {
-          this.aimStick.active = false;
-          this.aimStick.touchId = null;
+          this._releaseJoystick();
         }
       }
     };
@@ -140,19 +141,6 @@ export class InputHandler {
     // (pointerType 'touch' di-skip agar tidak dobel).
     this._onPointerDown = (e) => {
       if (e.pointerType === 'touch') return; // sudah via touch handlers
-      const rect = this.canvas.getBoundingClientRect();
-      const inAimZone = (e.clientX - rect.left) > rect.width * this.aimZone;
-      if (inAimZone) {
-        // Drag zona kanan (mouse) = aim stick
-        this.canvas.setPointerCapture?.(e.pointerId);
-        this.aimStick.active = true;
-        this.aimStick.touchId = 'pointer';
-        this.aimStick.ox = e.clientX;
-        this.aimStick.oy = e.clientY;
-        this.aimStick.dx = 0;
-        this.aimStick.dy = 0;
-        return;
-      }
       this.canvas.setPointerCapture?.(e.pointerId);
       this.joystick.active = true;
       this.joystick.touchId = 'pointer';
@@ -176,28 +164,11 @@ export class InputHandler {
         this.joystick.y = e.clientY;
         this._updateJoystickVector();
       }
-      if (this.aimStick.active && this.aimStick.touchId === 'pointer') {
-        const dx = e.clientX - this.aimStick.ox;
-        const dy = e.clientY - this.aimStick.oy;
-        const len = Math.hypot(dx, dy);
-        if (len > 8) {
-          this.aimStick.dx = dx / len;
-          this.aimStick.dy = dy / len;
-          this.aimStick.angle = Math.atan2(dy, dx);
-        }
-      }
     };
     this._onPointerUp = (e) => {
       if (e.pointerType === 'touch') return;
       if (this.joystick.active && this.joystick.touchId === 'pointer') {
-        this.joystick.active = false;
-        this.joystick.touchId = null;
-        this.joystick.dx = 0;
-        this.joystick.dy = 0;
-      }
-      if (this.aimStick.active && this.aimStick.touchId === 'pointer') {
-        this.aimStick.active = false;
-        this.aimStick.touchId = null;
+        this._releaseJoystick();
       }
     };
     this.canvas.addEventListener('pointerdown', this._onPointerDown);
@@ -211,8 +182,82 @@ export class InputHandler {
   }
 
   /**
+   * Pasang tombol SERANG: tekan/tahan = menembak, TARIK saat ditahan =
+   * mengarahkan serangan (aim stick), lepas = berhenti & kembali auto-aim.
+   * Pointer di-capture supaya jari yang meleset keluar tombol tidak memutus tembakan.
+   * @param {HTMLElement} el
+   * @param {{onPress?: Function}} [opts] onPress: respons instan tiap tekan (swing/lunge)
+   */
+  bindFireButton(el, opts = {}) {
+    if (!el) return;
+    this.fireEl = el;
+    this._onFireDown = (e) => {
+      e.preventDefault();
+      if (this._firePointerId !== null) return; // sudah ditahan jari lain
+      this._firePointerId = e.pointerId;
+      try { el.setPointerCapture(e.pointerId); } catch { /* pointer sudah lepas */ }
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--fire-r', `${r.width / 2}px`);
+      this.aimStick.ox = e.clientX;
+      this.aimStick.oy = e.clientY;
+      this.aimStick.dx = 0;
+      this.aimStick.dy = 0;
+      this.aimStick.active = false;
+      this.fireButtonHeld = true;
+      el.classList.add('held');
+      if (opts.onPress) opts.onPress(e);
+    };
+    this._onFireMove = (e) => {
+      if (e.pointerId !== this._firePointerId) return;
+      const dx = e.clientX - this.aimStick.ox;
+      const dy = e.clientY - this.aimStick.oy;
+      const len = Math.hypot(dx, dy);
+      if (len > this.aimDragThreshold) {
+        this.aimStick.active = true;
+        this.aimStick.touchId = 'fire';
+        this.aimStick.dx = dx / len;
+        this.aimStick.dy = dy / len;
+        this.aimStick.angle = Math.atan2(dy, dx);
+        el.classList.add('aiming');
+        el.style.setProperty('--aim', `${this.aimStick.angle}rad`);
+      }
+    };
+    this._onFireUp = (e) => {
+      if (e.pointerId !== this._firePointerId) return;
+      this._releaseFire();
+    };
+    el.addEventListener('pointerdown', this._onFireDown);
+    el.addEventListener('pointermove', this._onFireMove);
+    el.addEventListener('pointerup', this._onFireUp);
+    el.addEventListener('pointercancel', this._onFireUp);
+    el.addEventListener('lostpointercapture', this._onFireUp);
+  }
+
+  _releaseFire() {
+    this._firePointerId = null;
+    this.fireButtonHeld = false;
+    this.aimStick.active = false;
+    this.aimStick.touchId = null;
+    if (this.fireEl) this.fireEl.classList.remove('held', 'aiming');
+  }
+
+  _releaseJoystick() {
+    this.joystick.active = false;
+    this.joystick.touchId = null;
+    this.joystick.dx = 0;
+    this.joystick.dy = 0;
+  }
+
+  /** Lepas semua input (blur, tab tersembunyi, ganti layar). */
+  releaseAll() {
+    this.keys.clear();
+    this._releaseJoystick();
+    this._releaseFire();
+  }
+
+  /**
    * Info arah aim (arahkan serangan):
-   *  1. aim stick aktif (touch/drag zona kanan) → sudut dari stick
+   *  1. aim stick aktif (tarik tombol SERANG) → sudut dari stick
    *  2. mouse bergerak < 2.5 dtk lalu → sudut dari posisi kursor (px,py = player di layar)
    *  3. tidak ada → { active:false } → auto-aim ke musuh terdekat
    */
@@ -230,7 +275,7 @@ export class InputHandler {
     return { active: false, angle: 0, source: null };
   }
 
-  /** Dipanggil tombol TEMBAK HUD (pointerdown → true; up/cancel → false). */
+  /** Dipakai self-test/harness: paksa status tombol SERANG. */
   setFire(v) {
     this.fireButtonHeld = !!v;
   }
@@ -284,6 +329,8 @@ export class InputHandler {
   destroy() {
     window.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('keyup', this._onKeyUp);
+    window.removeEventListener('blur', this._onBlur);
+    document.removeEventListener('visibilitychange', this._onVisibility);
     this.canvas.removeEventListener('touchstart', this._onTouchStart);
     this.canvas.removeEventListener('touchmove', this._onTouchMove);
     this.canvas.removeEventListener('touchend', this._onTouchEnd);
@@ -293,5 +340,12 @@ export class InputHandler {
     this.canvas.removeEventListener('pointerup', this._onPointerUp);
     this.canvas.removeEventListener('pointercancel', this._onPointerUp);
     this.canvas.removeEventListener('contextmenu', this._onContext);
+    if (this.fireEl) {
+      this.fireEl.removeEventListener('pointerdown', this._onFireDown);
+      this.fireEl.removeEventListener('pointermove', this._onFireMove);
+      this.fireEl.removeEventListener('pointerup', this._onFireUp);
+      this.fireEl.removeEventListener('pointercancel', this._onFireUp);
+      this.fireEl.removeEventListener('lostpointercapture', this._onFireUp);
+    }
   }
 }

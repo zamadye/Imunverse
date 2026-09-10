@@ -12,7 +12,7 @@ export function show(payload) {
   const loot = document.getElementById('chest-loot');
   loot.textContent = '';
   loot.appendChild(el('div', { class: 'loot' }, [
-    el('img', { src: 'assets/sprites/icon_coin.png', alt: 'antibodi' }),
+    el('img', { src: 'assets/icons/cur-antibodi.svg', alt: 'antibodi' }),
     el('span', { text: `+${payload.currency}` }),
   ]));
   loot.appendChild(el('div', { class: 'loot' }, [

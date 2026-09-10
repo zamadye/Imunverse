@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Skin & Gaya": sel sage tersenyum dengan cipratan cat tiga warna (teal, koral, emas) + kuas kecil. -->
+  <ellipse cx="32" cy="59" rx="18" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <path d="M31 14 C42 12 52 20 51 32 C50 42 44 50 34 52 C24 54 14 46 13 35 C12 24 20 16 31 14 Z" fill="#a9d795" stroke="#7cb86a" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M20 26 C23 21 28 19 34 19.5" fill="none" stroke="#fffdf4" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>
+  <circle cx="27" cy="33" r="2.2" fill="#123f3a"/><circle cx="36" cy="33" r="2.2" fill="#123f3a"/>
+  <path d="M27.5 39 Q31.5 42.5 35.5 39" fill="none" stroke="#123f3a" stroke-width="1.9" stroke-linecap="round"/>
+  <circle cx="17" cy="20" r="5.5" fill="#2f9c8f" stroke="#fffdf4" stroke-width="2"/>
+  <circle cx="47" cy="17" r="5.5" fill="#f2825c" stroke="#fffdf4" stroke-width="2"/>
+  <circle cx="50" cy="45" r="5.5" fill="#f5c64f" stroke="#fffdf4" stroke-width="2"/>
+  <path d="M8 55 L20 43" stroke="#14584f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M19 44 L24 39" stroke="#f2825c" stroke-width="5" stroke-linecap="round"/>
+</svg>
