@@ -58,6 +58,12 @@ lantai, ring, atau dinding terpisah — pemain menjelajahi interior organ yang h
 
 Semua fitur world-anchored (hash-grid dalam kotak pandang kamera, terproyeksi
 pseudo-3D, ter-cull di luar layar). Penempatan deterministik — stabil tiap frame.
+Kotak kandidat dihitung KONSERVATIF dari frustum aktual (#12): skala minimum
+global `MIN·zoom·punch` + margin culling + jangkauan dunia per tipe — tak ada
+fitur visible yang terlewat saat menjelajah (bukti: `scripts/test-map-culling.mjs`).
+Gubernur kualitas adaptif menjaga rasa responsif: bila EMA biaya render latar
+>7ms, dekorasi dijarangkan separuh + napas layar dimatikan; pulih otomatis
+di <3ms (histeresis, keputusan tiap ±1 dtk). Visual inti tak pernah dimatikan.
 
 | Tipe | Wujud | Kunci utama |
 |---|---|---|
@@ -134,6 +140,25 @@ Konsumen: kilau napas fullscreen · bercak tanah · sel latar · motes · elemen
 - **UI/UX Agent:** `styles/`, struktur `index.html`, `cine-banner.js`, layar pilih map
   (`arena-screen.js` — MAP agent hanya menyuplai data + thumb).
 - **Combat/FX:** `effects-system.js` milik sistem lain — lapisan map terpisah.
-- **Core:** `game.js`/`camera.js` hanya DIBACA (proyektor dipakai apa adanya).
+- **Core:** `game.js` hanya hook minim MAP (`getRunArena` pilihan-menang, cap
+  `[MAP]`, hook `computeZoneZoomTarget`); **`camera.js` = scope MAP**
+  (keputusan owner — tak ada agen lain yang dev kamera).
 - Aturan MAP agent: **setiap pekerjaan wajib screenshot** (`scripts/e2e-map-showcase.mjs`
   → `shots/review/map-*.png`) sebagai bukti visual.
+
+## 8. Kamera & epic zoom zona (scope MAP)
+
+Lapisan `zoneScale` di atas `zoom·punchScale` (efektif dikalikan ketiganya).
+`game.js` memanggil `setZoneZoom(computeZoneZoomTarget())` tiap frame:
+
+| Zona | Syarat | Target |
+|---|---|---|
+| Boss | boss hidup < 520 unit dunia dari player | ×1.18 |
+| Bahaya | player di genangan toksin / inflamasi (+30 pad) | ×1.10 |
+| Normal | selain itu | ×1.00 |
+
+Masuk sinematik (~1 dtk, rate 1.6), keluar cepat (~0.4 dtk, rate 3.2),
+frame-rate independent; sisi naik memicu hentakan trauma 0.3 (sekali per
+tepi). Tuning satu-sumber: `ZONE_ZOOM` di `js/render/camera.js`.
+Bukti: `scripts/test-map-camera.mjs` (8/8 node) + 4 cek showcase
+(`map-zoomboss-*`, `map-zonedanger-*`) + `shots/review/map-zoomboss.png`.

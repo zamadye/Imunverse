@@ -14,6 +14,15 @@ import { drawBossIndicator } from './shape-renderer.js';
  */
 export const PERSP = { F: 1700, K: 1.35, YS: 0.58, MIN: 0.66, MAX: 1.85 };
 
+/**
+ * ZONE_ZOOM — tuning epic zoom kamera per zona (MAP scope).
+ * BOSS: zoom saat boss dekat (jarak dunia < BOSS_RANGE).
+ * DANGER: zoom saat player berdiri di zona bahaya (hazard/inflamasi).
+ * Nilai = pengali zoom efektif; smoothing di Camera.update (masuk sinematik,
+ * keluar cepat). Satu sumber — dipakai game.js + tes.
+ */
+export const ZONE_ZOOM = { BOSS: 1.18, DANGER: 1.1, BOSS_RANGE: 520, DANGER_PAD: 30, MAX: 1.35 };
+
 export class Camera {
   constructor() {
     this.x = 0;
@@ -29,6 +38,10 @@ export class Camera {
     this.punchDur = 0;
     this.punchT = 0;
     this.punchScale = 1;
+    // MAP: layer epic zoom zona — di ATAS punch, easing sinematik menuju
+    // zoneTarget (diset tiap frame oleh game.js dari posisi zona).
+    this.zoneScale = 1;
+    this.zoneTarget = 1;
   }
 
   reset(tx, ty) {
@@ -41,6 +54,8 @@ export class Camera {
     this.punchAmp = 0;
     this.punchT = 0;
     this.punchScale = 1;
+    this.zoneScale = 1;
+    this.zoneTarget = 1;
   }
 
   /** Follow target dengan exponential smoothing (frame-rate independent). */
@@ -71,6 +86,17 @@ export class Camera {
   }
 
   /**
+   * MAP: target epic zoom zona (1 = normal). Dipanggil tiap frame oleh
+   * game.js; transisi dihaluskan di update(). Sisi NAIK memicu hentakan
+   * trauma kecil (terasa "epic", bukan mual) — hanya saat nilai berubah.
+   */
+  setZoneZoom(target) {
+    const t = Math.max(1, Math.min(ZONE_ZOOM.MAX, target || 1));
+    if (t > this.zoneTarget + 1e-9) this.addShake(0.3);
+    this.zoneTarget = t;
+  }
+
+  /**
    * Tambah guncangan (0..1). Dipanggil saat player kena damage besar /
    * boss muncul / boss blast.
    */
@@ -96,13 +122,21 @@ export class Camera {
       this.punchScale = 1 + this.punchAmp * Math.pow(1 - pr, 3);
       if (pr >= 1) { this.punchAmp = 0; this.punchScale = 1; }
     }
+    // MAP: epic zoom zona menuju target — masuk sinematik (~1 dtk),
+    // keluar cepat (~0.4 dtk). Frame-rate independent.
+    if (Math.abs(this.zoneScale - this.zoneTarget) > 1e-4) {
+      const rate = this.zoneTarget > this.zoneScale ? 1.6 : 3.2;
+      const k = 1 - Math.exp(-rate * dt);
+      this.zoneScale += (this.zoneTarget - this.zoneScale) * k;
+      if (Math.abs(this.zoneScale - this.zoneTarget) <= 1e-4) this.zoneScale = this.zoneTarget;
+    }
   }
 
   /** Terapkan transform kamera ke ctx (w/h = ukuran viewport CSS px). */
   apply(ctx, w, h) {
     // Fallback transform rata (dipakai layar non-gameplay); gameplay memakai makeProjector().
     ctx.translate(Math.round(w / 2 + this.shakeX), Math.round(h / 2 + this.shakeY));
-    const z = this.zoom * this.punchScale; // R6: layer punch-zoom
+    const z = this.zoom * this.punchScale * this.zoneScale; // R6 + MAP zona
     ctx.scale(z, z);
     ctx.translate(-this.x, -this.y);
   }
@@ -122,7 +156,7 @@ export class Camera {
         const dy = wy - cam.y + cam.shakeY;
         let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
         persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
-        const s = persp * cam.zoom * cam.punchScale; // R6: layer punch-zoom
+        const s = persp * cam.zoom * cam.punchScale * cam.zoneScale; // R6 + MAP zona
         return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS, s, persp };
       },
     };
@@ -138,7 +172,7 @@ export class Camera {
     const dy = wy - this.y + this.shakeY;
     let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
     persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
-    const s = persp * this.zoom * this.punchScale; // R6: layer punch-zoom
+    const s = persp * this.zoom * this.punchScale * this.zoneScale; // R6 + MAP zona
     return { x: w / 2 + dx * s, y: h / 2 + dy * s * PERSP.YS };
   }
 
