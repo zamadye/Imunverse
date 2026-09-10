@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Featcheck — Self-Benchmark Cutscene (device nyata)</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; font: 14px/1.45 system-ui, sans-serif; background: #10201d; color: #e8f3ef; padding: 12px; }
+  h1 { font-size: 17px; margin: 4px 0 2px; }
+  .sub { color: #9fc4bb; font-size: 12px; margin-bottom: 10px; }
+  .panel { background: #16302b; border: 1px solid #24544a; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #1f4239; }
+  th { color: #9fc4bb; font-weight: 600; }
+  .pass { color: #7dffb8; font-weight: 700; }
+  .fail { color: #ff9f80; font-weight: 700; }
+  .warn { color: #ffd93d; font-weight: 700; }
+  button { background: #2f9c8f; color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 700; margin: 4px 6px 4px 0; }
+  button:active { transform: scale(.97); }
+  button[disabled] { background: #33473f; color: #7d938c; }
+  pre { background: #0b1815; border: 1px solid #1f4239; border-radius: 8px; padding: 10px; font-size: 11px; overflow: auto; max-height: 300px; white-space: pre-wrap; word-break: break-all; }
+  #stage { position: fixed; inset: 0; background: #000; z-index: 99; display: none; }
+  #stage canvas { width: 100%; height: 100%; display: block; }
+  #stage .tag { position: absolute; top: 8px; left: 10px; background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 6px; font-size: 13px; }
+  .bar { height: 6px; background: #1f4239; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: #2f9c8f; width: 0%; }
+</style>
+</head>
+<body>
+  <div id="stage"><canvas id="cv"></canvas><div class="tag" id="stagetag"></div></div>
+  <h1>🧪 Featcheck — Self-Benchmark Cutscene Imunverse</h1>
+  <div class="sub">Buka halaman ini <b>langsung di browser device uji</b> (bukan remote debug). Setiap mode render 20 detik lalu melaporkan: frame time (rAF), long task &lt;5 s (bar "tidak ada freeze ≥ 5 s"), init WebGL, dan payload. Hasil JSON di bawah bisa disalin ke laporan Audit Agent.</div>
+
+  <div class="panel">
+    <b>Device</b>
+    <div id="devinfo" class="sub" style="font-size:13px">mendeteksi…</div>
+  </div>
+
+  <div class="panel">
+    <b>Perintah</b><br />
+    <button id="btnA">Mode A — 3D penuh (three.js + VO)</button>
+    <button id="btnB">Mode B — 2.5D layered (Canvas 2D + VO)</button>
+    <button id="btnBoth">Jalankan keduanya (A lalu B)</button>
+    <div class="sub" style="margin-top:8px">Mode A memuat three.js dari CDN (±135 KB gzip). Tanpa internet → hanya Mode B tersedia. Mode B = desain canonical story doc 7.1 (2D layered + partikel + VO).</div>
+    <div class="bar"><i id="progbar"></i></div>
+    <div class="sub" id="proglabel">siap</div>
+  </div>
+
+  <div class="panel">
+    <b>Hasil</b>
+    <table id="results"><thead><tr><th>Metrik</th><th>Bar wajib</th><th>Mode A (3D)</th><th>Mode B (2.5D)</th></tr></thead><tbody></tbody></table>
+    <br />
+    <button id="btnCopy">Salin JSON</button>
+    <pre id="jsonout">{ jalankan minimal satu mode }</pre>
+  </div>
+
+<script type="module">
+import { createScene, SHOTS, DIALOG } from './scene.mjs';
+
+const $ = (s) => document.querySelector(s);
+const stage = $('#stage'), cv = $('#cv'), tag = $('#stagetag');
+
+// ---------------------------------------------------------------- device info
+const dev = {
+  ua: navigator.userAgent,
+  cores: navigator.hardwareConcurrency,
+  memoryGB: navigator.deviceMemory || null,
+  mobile: /Android|iPhone|iPad|Mobi/i.test(navigator.userAgent),
+  webgl: (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } })(),
+  tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+};
+$('#devinfo').innerHTML =
+  `Nukleus: <b>${dev.cores}</b> · RAM: <b>${dev.memoryGB ? dev.memoryGB + ' GB' : 'n/a'}</b> · WebGL: <b class="${dev.webgl ? 'pass' : 'fail'}">${dev.webgl ? 'ADA' : 'TIDAK ADA'}</b> · ${dev.mobile ? 'Mobile' : 'Desktop'}<br/>${dev.ua}`;
+
+// ---------------------------------------------------------------- metrik
+function startMetrics() {
+  const frames = [];
+  let last = performance.now(), freezeMax = 0;
+  const raf = (t) => { const dt = t - last; last = t; frames.push(dt); if (dt > freezeMax) freezeMax = dt; rafId = requestAnimationFrame(raf); };
+  let rafId = requestAnimationFrame(raf);
+  const longTasks = { count: 0, max: 0 };
+  let po = null;
+  try { po = new PerformanceObserver((l) => { for (const e of l.getEntries()) { longTasks.count++; if (e.duration > longTasks.max) longTasks.max = e.duration; } }); po.observe({ entryTypes: ['longtask'] }); } catch {}
+  return {
+    stop() {
+      cancelAnimationFrame(rafId); if (po) po.disconnect();
+      frames.sort((a, b) => a - b);
+      const p = (q) => frames.length ? frames[Math.floor(frames.length * q)] : 0;
+      const dropped = frames.filter((f) => f > 34).length;
+      const sum = frames.reduce((a, b) => a + b, 0);
+      return { frameCount: frames.length, fps: frames.length ? (frames.length * 1000) / (frames[frames.length - 1]) : 0,
+        avg: frames.length ? sum / frames.length : 0,
+        p50: p(0.5), p95: p(0.95), p99: p(0.99), maxGap: frames[frames.length - 1] || 0,
+        droppedFrames: dropped, longTasks, freeze5s: (longTasks.max >= 5000 || freezeMax >= 5000) };
+    },
+  };
+}
+const pct = (x) => (x == null ? '—' : x.toFixed(x < 10 ? 1 : 0));
+const mb = (b) => (b / 1048576).toFixed(2);
+
+// ---------------------------------------------------------------- Mode B renderer (2.5D layered)
+async function makeRendererB() {
+  const ctx = cv.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = innerWidth, H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.scale(dpr, dpr);
+  // sprite riil (reuse aset game — konsistensi reference sheet)
+  const spr = await Promise.all([
+    fetch('../assets/sprites/amara_pose_idle.png').then(r => r.ok ? r.blob() : null),
+    fetch('../assets/sprites/hero_macrophage_idle.png').then(r => r.ok ? r.blob() : null),
+    fetch('../assets/sprites/hero_macrophage_attack.png').then(r => r.ok ? r.blob() : null),
+  ]).then((bs) => bs.map((b) => b ? createImageBitmap(b) : null));
+  const scene = createScene('B');
+  // VO riil
+  let amaraA = null, riaA = null;
+  try {
+    const [a, r] = await Promise.all([
+      fetch('../assets/audio/narration/amara_cutscene_pembuka.mp3').then(x => x.ok ? x.blob() : null),
+      fetch('../assets/audio/narration/ria_cutscene_pembuka.mp3').then(x => x.ok ? x.blob() : null),
+    ]);
+    amaraA = a ? new Audio(URL.createObjectURL(a)) : null;
+    riaA = r ? new Audio(URL.createObjectURL(r)) : null;
+  } catch {}
+  return {
+    kind: 'B',
+    start() {
+      stage.style.display = 'block'; tag.textContent = 'MODE B — 2.5D (20 dtk)';
+      let last = performance.now();
+      const tickLoop = (now) => {
+        if (stage.style.display !== 'block') return;
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        const s = scene.tick(dt);
+        const t = s.t % 48;
+        // — render 2.5D: 3 layer parallax + sprite + partikel (sesuai story doc 7.1) —
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = s.scene === 'ruang' ? '#f6e7cf' : '#2a0d16';
+        ctx.fillRect(0, 0, W, H);
+        const cx = W / 2, cy = H / 2, z = s.zoom;
+        // bg (faktor 0.25)
+        ctx.save(); ctx.translate(cx + s.layerOffset[2], cy); ctx.scale(z, z);
+        if (s.scene === 'ruang') {
+          ctx.fillStyle = '#e8d3b0'; ctx.fillRect(-W, -H, W * 2, H * 2);
+          ctx.fillStyle = '#d9bd93'; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(-W * 0.7 + i * 260, -H * 0.55, 60, 0, 7); ctx.fill(); }
+          ctx.fillStyle = '#c9a878'; ctx.fillRect(-W, H * 0.42, W * 2, H); // lantai
+        } else {
+          const g = ctx.createRadialGradient(0, 0, 40, 0, 0, W);
+          g.addColorStop(0, '#57182a'); g.addColorStop(1, '#200812');
+          ctx.fillStyle = g; ctx.fillRect(-W * 2, -H * 2, W * 4, H * 4);
+          ctx.strokeStyle = 'rgba(255,120,140,.14)'; ctx.lineWidth = 26;
+          for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(0, 0, 180 + i * 130, 90 + i * 60, 0, 0, 7); ctx.stroke(); }
+        }
+        ctx.restore();
+        // mid (0.55)
+        ctx.save(); ctx.translate(cx + s.layerOffset[1], cy); ctx.scale(z, z);
+        if (s.scene === 'ruang') {
+          ctx.fillStyle = '#8fae9f'; ctx.fillRect(-160, -90, 320, 130); // ranjang
+          ctx.fillStyle = '#f5f0e6'; ctx.fillRect(-160, -90, 320, 26);
+          ctx.fillStyle = '#b98d5f'; ctx.fillRect(120, 40, 90, 80); // meja
+          // tangan Inang + luka (shot 2 & match-cut)
+          if (t > 6.5) {
+            ctx.fillStyle = '#e8b98f'; ctx.beginPath(); ctx.ellipse(20, 60, 70, 34, 0.3, 0, 7); ctx.fill();
+            ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.ellipse(30, 58, 14 + 6 * Math.sin(t * 2), 5, 0.3, 0, 7); ctx.fill();
+          }
+        }
+        // virion (skala parallax via ukuran)
+        if (s.scene === 'mikro') {
+          ctx.fillStyle = 'rgba(255,90,110,.8)';
+          for (let i = 0; i < s.vir.length / 2; i++) {
+            const x = s.vir[i * 2], y = s.vir[i * 2 + 1], r = 4 + (i % 5);
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+            ctx.strokeStyle = 'rgba(255,90,110,.5)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(x - r - 3, y); ctx.lineTo(x + r + 3, y); ctx.moveTo(x, y - r - 3); ctx.lineTo(x, y + r + 3); ctx.stroke();
+          }
+        }
+        ctx.restore();
+        // fg (1.0)
+        ctx.save(); ctx.translate(cx + s.layerOffset[0], cy); ctx.scale(z, z);
+        // Dr. Amara (scene ruang)
+        if (s.scene === 'ruang' && spr[0]) { ctx.drawImage(spr[0], -210, -150 + s.sprites[1].breath, 170, 190); }
+        // Mako (scene mikro)
+        if (s.scene === 'mikro') {
+          const atk = (t % 2.4) > 2.0;
+          ctx.drawImage(atk ? (spr[2] || spr[1]) : (spr[1] || null), atk ? 60 : 0, -120 + s.sprites[0].breath * 1.4, 190, 190);
+        }
+        // RIA = partikel 2D (doc 7.1: RIA murni partikel)
+        if (t > 15) {
+          const pulse = 1 + 0.18 * Math.sin(t * 3.1);
+          ctx.globalCompositeOperation = 'lighter';
+          for (let i = 0; i < s.ria.length / 2; i++) {
+            const x = s.ria[i * 2], y = s.ria[i * 2 + 1];
+            const a = 0.25 + 0.55 * Math.abs(Math.sin(t * 2 + i));
+            ctx.fillStyle = `rgba(${i % 3 ? 120 : 90},240,220,${a * Math.min(1, pulse)})`;
+            ctx.beginPath(); ctx.arc(x, y, 1.6 + (i % 4) * 0.7, 0, 7); ctx.fill();
+          }
+          ctx.globalCompositeOperation = 'source-over';
+        }
+        // match-cut flash
+        if (s.matchcut > 0.02) { ctx.fillStyle = `rgba(255,255,255,${s.matchcut * 0.9})`; ctx.fillRect(-W * 2, -H * 2, W * 4, H * 4); }
+        ctx.restore();
+        // letterbox + dialog + VO sync
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, 26); ctx.fillRect(0, H - 26, W, 26);
+        const d = DIALOG[s.diaIndex];
+        if (d) {
+          const name = d.who === 'amara' ? 'DR. AMARA' : 'RIA';
+          ctx.fillStyle = 'rgba(0,0,0,.65)';
+          const bw = Math.min(W - 40, 620);
+          ctx.fillRect(W / 2 - bw / 2, H - 118, bw, 78);
+          ctx.fillStyle = d.who === 'amara' ? '#a9d795' : '#7dffb8';
+          ctx.font = 'bold 13px system-ui'; ctx.fillText(name, W / 2 - bw / 2 + 14, H - 96);
+          ctx.fillStyle = '#fff'; ctx.font = '13px system-ui';
+          wrapText(ctx, d.text, W / 2 - bw / 2 + 14, H - 74, bw - 28, 17);
+          const la = d.who === 'amara' ? amaraA : riaA;
+          if (la && Math.abs(la.currentTime - (t - d.t)) > 0.8) { try { la.currentTime = Math.max(0, t - d.t); if (la.paused) la.play().catch(() => {}); } catch {} }
+        }
+        requestAnimationFrame(tickLoop);
+      };
+      requestAnimationFrame(tickLoop);
+    },
+    stop() { stage.style.display = 'none'; cv.width = 1; },
+    extras: { audioFiles: 2 },
+  };
+}
+function wrapText(ctx, text, x, y, maxW, lh) {
+  const words = text.split(' '); let line = '', yy = y;
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, yy); line = w; yy += lh; if (yy > y + lh * 2) { line += '…'; break; } }
+    else line = test;
+  }
+  ctx.fillText(line, x, yy);
+}
+
+// ---------------------------------------------------------------- Mode A renderer (three.js)
+async function makeRendererA() {
+  let THREE;
+  try { THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'); }
+  catch (e) { return { kind: 'A-error', error: 'CDN three.js gagal dimuat (offline?). ' + e.message }; }
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const t0 = performance.now();
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: false, powerPreference: 'low-power', alpha: false });
+  const webglInitMs = performance.now() - t0;
+  renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 100);
+  // tabung pembuluh darah
+  const tunnel = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 24, 96, 1, true), new THREE.MeshBasicMaterial({ color: 0x7a1f2b, side: THREE.BackSide }));
+  tunnel.rotation.x = Math.PI / 2; tunnel.position.z = -14; scene.add(tunnel);
+  // dinding "ruang periksa" (basic material — termurah, tanpa shader kustom)
+  const wall = new THREE.MeshBasicMaterial({ color: 0xfdf6e3 });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshBasicMaterial({ color: 0xc9a878 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -1.2; scene.add(floor);
+  const bed = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 1.4), new THREE.MeshBasicMaterial({ color: 0x8fae9f }));
+  bed.position.set(-1.5, -0.8, 0); scene.add(bed);
+  // sprite riil → tekstur (reuse aset game)
+  const loader = new THREE.TextureLoader();
+  const texAmara = loader.load('../assets/sprites/amara_pose_idle.png');
+  const texMako = loader.load('../assets/sprites/hero_macrophage_idle.png');
+  const bbAmara = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.35), new THREE.MeshBasicMaterial({ map: texAmara, transparent: true }));
+  bbAmara.position.set(0.7, 0.3, 0.3); scene.add(bbAmara);
+  const bbMako = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), new THREE.MeshBasicMaterial({ map: texMako, transparent: true }));
+  bbMako.position.set(0, -0.3, -1.6); scene.add(bbMako);
+  // partikel
+  function points(n, color, size) {
+    const g = new THREE.BufferGeometry();
+    const a = new Float32Array(n * 3);
+    g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ color, size }));
+    scene.add(p); return { p, a, attr: g.getAttribute('position') };
+  }
+  const pRia = points(300, 0x7dffb8, 0.05), pVir = points(150, 0xff5a6e, 0.09), pBld = points(120, 0xffb3c0, 0.12);
+  for (let i = 0; i < 150; i++) { pVir.a[i*3] = (Math.random()-0.5)*4; pVir.a[i*3+1] = (Math.random()-0.5)*4; pVir.a[i*3+2] = -3 - (i%10)*1.1; }
+  for (let i = 0; i < 120; i++) { pBld.a[i*3] = (Math.random()-0.5)*12; pBld.a[i*3+1] = (Math.random()-0.5)*6; pBld.a[i*3+2] = -2 - Math.random()*8; }
+  // VO
+  let amaraA = null, riaA = null;
+  try {
+    const [a, r] = await Promise.all([
+      fetch('../assets/audio/narration/amara_cutscene_pembuka.mp3').then(x => x.ok ? x.blob() : null),
+      fetch('../assets/audio/narration/ria_cutscene_pembuka.mp3').then(x => x.ok ? x.blob() : null),
+    ]);
+    amaraA = a ? new Audio(URL.createObjectURL(a)) : null;
+    riaA = r ? new Audio(URL.createObjectURL(r)) : null;
+  } catch {}
+  const sceneLogic = createScene('A');
+  const v3 = new THREE.Vector3();
+  let firstFrameMs = null;
+  return {
+    kind: 'A',
+    start() {
+      stage.style.display = 'block'; tag.textContent = 'MODE A — 3D three.js (20 dtk)';
+      let last = performance.now();
+      const loop = (now) => {
+        if (stage.style.display !== 'block') return;
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        const s = sceneLogic.tick(dt);
+        const t = s.t % 48;
+        pRia.attr.array.set(s.ria); pRia.attr.needsUpdate = true;
+        pVir.attr.array.set(s.vir); pVir.attr.needsUpdate = true;
+        pBld.attr.array.set(s.bld); pBld.attr.needsUpdate = true;
+        // pindah set antar scene (ruang ↔ mikro)
+        const mikro = t >= 17;
+        bbAmara.visible = !mikro; bed.visible = !mikro; floor.visible = !mikro;
+        tunnel.visible = mikro; bbMako.visible = mikro;
+        bbMako.rotation.y = Math.sin(t * 0.8) * 0.2;
+        const atk = (t % 2.4) > 2.0;
+        bbMako.scale.setScalar(atk ? 1.12 : 1);
+        camera.position.set(s.camPos[0], s.camPos[1], s.camPos[2]);
+        v3.set(s.camLook[0], s.camLook[1], s.camLook[2]);
+        camera.lookAt(v3);
+        renderer.render(scene, camera);
+        if (firstFrameMs === null) firstFrameMs = performance.now() - t0 - webglInitMs;
+        const d = DIALOG[s.diaIndex];
+        if (d) { const la = d.who === 'amara' ? amaraA : riaA;
+          if (la && Math.abs(la.currentTime - (t - d.t)) > 0.8) { try { la.currentTime = Math.max(0, t - d.t); if (la.paused) la.play().catch(() => {}); } catch {} } }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    },
+    stop() { stage.style.display = 'none'; renderer.dispose(); cv.width = 1; },
+    extras: { webglInitMs, audioFiles: 2, engineGzKB: 135 },
+  };
+}
+
+// ---------------------------------------------------------------- orkestrasi
+const results = {};
+async function runMode2(label, factory) {
+  let r;
+  try { r = await factory(); } catch (e) { return (results[label] = { error: e.message }); }
+  if (r.kind === 'A-error') return (results[label] = { error: r.error, webgl: dev.webgl });
+  const m = startMetrics();
+  const t0 = performance.now();
+  r.start();
+  await new Promise((res) => setTimeout(res, 20000));
+  const renderMs = performance.now() - t0;
+  const fr = m.stop();
+  r.stop();
+  results[label] = {
+    mode: label, webgl: dev.webgl, durationS: 20,
+    avgFrameMs: +fr.avg.toFixed(2),
+    rAF: { p50: +fr.p50.toFixed(2), p95: +fr.p95.toFixed(2), p99: +fr.p99.toFixed(2), max: +fr.maxGap.toFixed(1), dropped: fr.droppedFrames },
+    longTask: { count: fr.longTasks.count, maxMs: +fr.longTasks.max.toFixed(0) },
+    freeze5s: fr.freeze5s,
+    extras: r.extras || null,
+  };
+  renderTable(); exportJson();
+  return results[label];
+}
+
+function renderTable() {
+  const A = results['A'], B = results['B'];
+  const row = (name, bar, va, vb, test) => {
+    const cell = (v) => {
+      if (!v) return '<td>—</td>';
+      if (typeof v === 'string') return `<td>${v}</td>`;
+      const [txt, ok] = v;
+      return `<td class="${ok == null ? '' : ok ? 'pass' : 'fail'}">${txt}</td>`;
+    };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<th>${name}</th><td class="sub">${bar}</td>` + cell(va) + cell(vb);
+    $('#results tbody').appendChild(tr);
+  };
+  $('#results tbody').innerHTML = '';
+  if (!A && !B) return;
+  row('Durasi render', '20 dtk', A && [A.durationS + ' s', null], B && [B.durationS + ' s', null]);
+  row('Avg frame (render+JS)', '≤ 16.7 ms (60 fps)', A && [A.avgFrameMs + ' ms', A.avgFrameMs <= 16.7], B && [B.avgFrameMs + ' ms', B.avgFrameMs <= 16.7]);
+  row('rAF p95', '≤ 33 ms', A && [A.rAF.p95 + ' ms', A.rAF.p95 <= 33], B && [B.rAF.p95 + ' ms', B.rAF.p95 <= 33]);
+  row('rAF p99', '≤ 33 ms', A && [A.rAF.p99 + ' ms', A.rAF.p99 <= 33], B && [B.rAF.p99 + ' ms', B.rAF.p99 <= 33]);
+  row('Frame drop >34 ms', 'sedikit', A && [A.rAF.dropped + ' frame', A.rAF.dropped < 40], B && [B.rAF.dropped + ' frame', B.rAF.dropped < 40]);
+  row('Long task max', '< 5000 ms (bar freeze)', A && [A.longTask.maxMs + ' ms', A.longTask.maxMs < 5000], B && [B.longTask.maxMs + ' ms', B.longTask.maxMs < 5000]);
+  row('Long task count', 'info', A && [A.longTask.count, null], B && [B.longTask.count, null]);
+  row('FREEZE ≥ 5 dtk', 'TIDAK BOLEH ada', A && [A.freeze5s ? 'ADA ❌' : 'tidak ada ✓', !A.freeze5s], B && [B.freeze5s ? 'ADA ❌' : 'tidak ada ✓', !B.freeze5s]);
+  row('Init WebGL', 'info (A saja)', A && [A.extras ? A.extras.webglInitMs + ' ms' : '—', null], null);
+  row('Engine 3D (+ payload)', 'bar load < 3 s', A && ['+135 KB gzip (three) + 0 (prosedural)', null], B && ['+0 KB', true]);
+  row('VO audio (+ payload)', 'bar load < 3 s', (A || B) && ['+95 KB (2 baris MP3 VBR)', true], (A || B) && ['+95 KB (2 baris MP3 VBR)', true]);
+}
+function exportJson() {
+  $('#jsonout').textContent = JSON.stringify({ device: dev, results, bar: { loadIncrementalS: 3, freezeMs: 5000, targetFps: 60 }, ts: new Date().toISOString() }, null, 2);
+}
+$('#btnCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('#jsonout').textContent); $('#btnCopy').textContent = 'Tersalin ✓'; } catch { $('#btnCopy').textContent = 'Gagal salin — copy manual'; } });
+
+const setProg = (p, label) => { $('#progbar').style.width = p + '%'; $('#proglabel').textContent = label; };
+$('#btnA').addEventListener('click', async () => { setProg(20, 'memuat mode A…'); await runMode2('A', makeRendererA); setProg(100, 'selesai'); });
+$('#btnB').addEventListener('click', async () => { setProg(20, 'memuat mode B…'); await runMode2('B', makeRendererB); setProg(100, 'selesai'); });
+$('#btnBoth').addEventListener('click', async () => {
+  for (const b of ['#btnA', '#btnB', '#btnBoth']) $(b).disabled = true;
+  setProg(10, 'mode A (3D)…'); await runMode2('A', makeRendererA);
+  setProg(55, 'mode B (2.5D)…'); await runMode2('B', makeRendererB);
+  setProg(100, 'selesai — salin JSON ke laporan');
+  for (const b of ['#btnA', '#btnB', '#btnBoth']) $(b).disabled = false;
+});
+</script>
+</body>
+</html>

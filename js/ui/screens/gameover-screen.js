@@ -11,6 +11,8 @@ import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
+import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): epilog 6.4
+import { music } from '../../systems/music-system.js'; // R3: hentikan musik setelah epilog
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
@@ -244,15 +246,23 @@ export function wireButtons() {
     const wonCampaign = STATE.lastGameoverSummary && STATE.lastGameoverSummary.victory
       && STATE.lastGameoverSummary.modeId === 'kampanye';
     if (wonCampaign) {
+      const wonChapter = STATE.lastGameoverSummary.chapterId;
+      // R3 (Narrative-Cinematic): kemenangan BAB FINAL → EPILOG (naskah final
+      // 6.4 — 3D dgn fallback 2D, 60 dtk, skip-able) menggantikan clear_ lama
+      const cs = getData().cutscenes;
+      if (wonChapter === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
+        playCutscene('epilog', () => { music.stop(); screenManager.show('campaign'); });
+        return;
+      }
       const chapters = getData().campaign.chapters;
       const next = chapters.find((c) => !(meta.campaignCleared || {})[c.id]);
       if (next) {
         meta.selectedChapter = next.id;
         writeSave(meta);
-        playOnce('clear_' + STATE.lastGameoverSummary.chapterId, () => screenManager.show('prep'));
+        playOnce('clear_' + wonChapter, () => screenManager.show('prep'));
         return;
       }
-      playOnce('clear_' + STATE.lastGameoverSummary.chapterId, () => screenManager.show('campaign'));
+      playOnce('clear_' + wonChapter, () => screenManager.show('campaign'));
       return;
     }
     game.startRun(meta.selectedHero); // 'runstart' → HUD tampil otomatis
@@ -261,6 +271,12 @@ export function wireButtons() {
   document.getElementById('btn-home').addEventListener('click', () => {
     const summary = STATE.lastGameoverSummary;
     if (summary && summary.victory && summary.modeId === 'kampanye') {
+      // R3: bab final → EPILOG (6.4) sebelum pulang
+      const cs = getData().cutscenes;
+      if (summary.chapterId === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
+        playCutscene('epilog', () => { music.stop(); window.__IMUNVERSE_goDashboard(); });
+        return;
+      }
       playOnce('clear_' + summary.chapterId, () => window.__IMUNVERSE_goDashboard());
       return;
     }

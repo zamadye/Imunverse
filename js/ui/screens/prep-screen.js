@@ -21,6 +21,7 @@ import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { playOnce } from '../cinematic.js';
+import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): transisi bab
 import { heroLevelBadge } from '../../systems/economy-system.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
@@ -180,11 +181,20 @@ export function show() {
       if (!heroDef) return;
       const status = getHeroStatus(meta, heroDef);
       if (!status.unlocked) return;
-      applyPrepDefaults(meta);
-      // Kampanye: bab BARU diprakarsai sinematik briefing (story organ sakit)
+      applyPrepDefaults(meta); // MAP: normalisasi pilihan prep (mode/arena/fokus)
+      // R3 (Narrative-Cinematic): bab BARU → cutscene produksi 2-panel
+      // (naskah final bila ada: 6.2 utk bab_demam; teks R2 utk sisanya).
+      // bab_luka memakai CUTSCENE PEMBUKA (6.1) bila belum pernah dilihat.
+      // Kampanye: bab BARU tanpa cutscene produksi → sinematik briefing (story organ sakit)
+      const cs = getData().cutscenes;
+      const prodId = meta.selectedChapter === 'bab_luka' ? 'pembuka' : ('transisi_' + meta.selectedChapter);
+      const prod = cs && cs.scenes ? cs.scenes[prodId] : null;
+      const prodNew = prod && !(meta.cinematicsSeen || {})[prod.seenKey];
       const isCampaignNew = meta.selectedMode === 'kampanye'
-        && !(meta.cinematicsSeen || {})['brief_' + meta.selectedChapter];
-      if (isCampaignNew) {
+        && (prodNew || !(meta.cinematicsSeen || {})['brief_' + meta.selectedChapter]);
+      if (prodNew) {
+        playCutscene(prodId, () => game.startRun(heroDef.id));
+      } else if (isCampaignNew) {
         playOnce('brief_' + meta.selectedChapter, () => game.startRun(heroDef.id));
       } else {
         game.startRun(heroDef.id); // 'runstart' → HUD

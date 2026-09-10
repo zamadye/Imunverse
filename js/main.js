@@ -59,6 +59,8 @@ import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
+import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
+import { vo } from './systems/vo-system.js'; // R3: lapisan VO
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -151,6 +153,9 @@ function wireUiBridge() {
     const pf = document.getElementById('phago-fill'); if (pf) pf.style.width = '0%';
     screenManager.show('hud');
     tutorialOnRunStart(); // onboarding run pertama (3 langkah)
+    // R3 (Narrative-Cinematic, D3): tema musik prosedural PER CHAPTER
+    const _chId = (STATE.meta.selectedChapter || '').replace('bab_', '');
+    music.setTheme(_chId);
     music.start(); // F23: musik latar prosedural saat bermain
     applyHudDisclosure(); // UI/UX: item menu terkunci DISEMBUNYIKAN, toggle ikut hilang bila kosong
     renderBadges(); // F25: badge unlock baru pada ikon menu
@@ -274,6 +279,63 @@ function wireUiBridge() {
     showPresenter('ria', riaBarks[wave % riaBarks.length], { duration: 4 });
   });
 
+  // R3 (Narrative-Cinematic): REVEAL BOSS BAB 5 (naskah final 6.3) —
+  // cutscene 2-panel 1× sejak pernah; selain itu = bark VO 3-5 dtk (7.3).
+  on('bossBark', ({ chapterId }) => {
+    const meta = STATE.meta;
+    const cs = getData().cutscenes;
+    if (chapterId === 'bab_kanker' && !meta.bossRevealSeen) {
+      meta.bossRevealSeen = true;
+      writeSave(meta);
+      // reveal twist: pause → cutscene → resume (pola cinematic wave;
+      // cutsceneActive() di-set sinkron oleh playCutscene sebelum pause)
+      playCutscene('boss_reveal_bab_kanker', () => game.resume());
+      game.pause();
+      return;
+    }
+    const voPath = cs && cs.bossVo ? (cs.bossVo[chapterId] || cs.bossVo.default) : null;
+    if (voPath) vo.play(voPath);
+  });
+
+  // R3 Task 4: FIRST-TIME EXPERIENCE RIA (sekali sejak pernah, non-blocking,
+  // bisa di-tap untuk skip — presenter + VO, nada bersemangat/jenaka).
+  function nftFirst(key, event) {
+    const meta = STATE.meta;
+    if (meta.nft && meta.nft[key]) return;
+    const nft = getData().cutscenes && getData().cutscenes.nft;
+    const line = nft && nft[key];
+    if (!line) return;
+    meta.nft = meta.nft || {};
+    meta.nft[key] = true;
+    writeSave(meta);
+    showPresenter('ria', line.text, { vo: line.vo });
+    if (event) event.preventDefault?.();
+  }
+  on('nftMove', () => nftFirst('move'));
+  on('levelup', (payload) => {
+    nftFirst('levelup');
+    screenManager.show('levelup', payload);
+  });
+  on('revive', () => {
+    nftFirst('revive');
+    screenManager.show('revive');
+  });
+  // skill pertama = cast kemampuan pertama (banner nama kemampuan)
+  let bannerTimer = null;
+  on('abilityBanner', ({ name, color }) => {
+    nftFirst('skill');
+    const b = document.getElementById('ability-banner');
+    if (!b) return;
+    b.textContent = name;
+    b.style.color = color;
+    b.style.borderColor = color;
+    b.classList.remove('show');
+    void b.offsetWidth; // restart animasi
+    b.classList.add('show');
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
+  });
+
   // E1 poin 9: AMARA muncul saat pemain MENDAPAT HERO BARU — menjelaskan
   // spesifikasi (role + skill) dengan bahasa awam, karakter penuh bergestur.
   on('heroUnlocked', ({ heroId }) => {
@@ -288,30 +350,13 @@ function wireUiBridge() {
       { duration: 9 }), 900);
   });
 
-  on('levelup', (payload) => screenManager.show('levelup', payload));
   on('bosschest', (payload) => screenManager.show('bosschest', payload));
-  on('pause', () => { if (!waveCineActive()) screenManager.show('pause'); }); // E2 poin 6: cinematic wave ≠ modal pause
-  on('revive', () => screenManager.show('revive'));
+  on('pause', () => { if (!waveCineActive() && !cutsceneActive()) screenManager.show('pause'); }); // E2 poin 6 + R3: cinematic ≠ modal pause
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
     if (STATE.screen === 'gameplay') screenManager.show('hud');
   });
   on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
-
-  // Banner nama kemampuan saat dicast (impact terlihat jelas)
-  let bannerTimer = null;
-  on('abilityBanner', ({ name, color }) => {
-    const b = document.getElementById('ability-banner');
-    if (!b) return;
-    b.textContent = name;
-    b.style.color = color;
-    b.style.borderColor = color;
-    b.classList.remove('show');
-    void b.offsetWidth; // restart animasi
-    b.classList.add('show');
-    clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
-  });
 }
 
 // ---------------------------------------------------------------------
@@ -351,6 +396,10 @@ async function boot() {
     loadingScreen.setProgress(pct, `Memuat sprite… (${done}/${total})${isFallback ? ' [fallback dev]' : ''}`);
   });
   loadingScreen.setProgress(98, 'Mengaktifkan sistem imun…');
+
+  // R3 (Narrative-Cinematic): prewarm cutscene (modul three.js + VO pembuka)
+  // di background — jank init WebGL keluar dari jalur kritis cutscene.
+  prewarmCutscenes();
 
   // 3) Save / meta
   const raw = loadSave();

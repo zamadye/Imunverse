@@ -16,6 +16,8 @@
  * (roster/gameover) yang memang bukan gameplay.
  */
 
+import { vo } from '../systems/vo-system.js';
+
 const SPEAKERS = {
   ria: {
     name: 'RIA',
@@ -37,6 +39,7 @@ let layer = null;
 let talkTimer = 0;
 let hideTimer = 0;
 let visible = false;
+let voHandle = null; // R3: VO bark aktif (dihentikan saat presenter hilang)
 
 function ensureLayer() {
   if (layer) return layer;
@@ -95,9 +98,25 @@ export function showPresenter(who, text, opts = {}) {
     img.src = f ? img.dataset.talk : img.dataset.idle;
   }, 260);
 
+  // R3 (Narrative-Cinematic): VO bark opsional (Task 4: first-time RIA;
+  // boss bark). Non-blocking: durasi tampil mengikuti VO bila duration tak
+  // diberikan eksplisit — presenter tetap bisa di-tap untuk skip.
+  if (opts.vo) {
+    voHandle = vo.play(opts.vo);
+    if (opts.duration === undefined) {
+      const d = awaitVoDur(opts.vo, 5.5);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => hidePresenter(), (d + 0.8) * 1000);
+    }
+  }
+
   clearTimeout(hideTimer);
   const dur = opts.duration === undefined ? 5.5 : opts.duration;
-  if (dur > 0) hideTimer = setTimeout(() => hidePresenter(), dur * 1000);
+  if (dur > 0 && !opts.vo) hideTimer = setTimeout(() => hidePresenter(), dur * 1000);
+}
+
+async function awaitVoDur(path, fallbackSec) {
+  try { const d = await vo.duration(path); return d ? d : fallbackSec; } catch { return fallbackSec; }
 }
 
 export function hidePresenter() {
@@ -105,6 +124,7 @@ export function hidePresenter() {
   visible = false;
   clearInterval(talkTimer);
   clearTimeout(hideTimer);
+  if (voHandle) { voHandle.stop(); voHandle = null; }
   layer.classList.remove('on');
 }
 

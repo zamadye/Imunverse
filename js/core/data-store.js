@@ -56,6 +56,7 @@ export async function loadAllData() {
     mutators: 'data/mutators.json',
     campaign: 'data/campaign.json',
     cinematics: 'data/cinematics.json',
+    cutscenes: 'data/cutscenes.json', // R3 (Narrative-Cinematic): cutscene produksi + VO
     coach: 'data/coach.json',
     factions: 'data/factions.json',
     premium: 'data/premium.json',

@@ -206,6 +206,7 @@ export const game = {
       chemoEmitT: 0,
       chemoSpeedMult: 1, // pengali speed saat menyentuh jejak matang
       chemoStat: null,
+      nftMoveFired: false, // R3 Task 4: penanda "gerakan pertama" per run
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -579,7 +580,8 @@ export const game = {
       run.objective.bossSpawned = true;
       const boss = run.chapter.boss;
       if (boss) {
-        bossBark(run.chapter.id); // R2: RIA berkomentar — non-blocking, 1×/run
+        const barkText = bossBark(run.chapter.id); // R2: RIA berkomentar — non-blocking, 1×/run
+        if (barkText) emit('bossBark', { chapterId: run.chapter.id, text: barkText }); // R3: lapisan VO
         this.spawnChapterBoss(run.chapter);
       } else {
         // Bab tanpa boss → langsung bersih saat kuota tercapai
@@ -625,6 +627,15 @@ export const game = {
     // 1. Input & player (gerak + auto-attack)
     const move = this.input.getMoveVector();
     player.update(dt, move, this);
+
+    // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi
+    // ONLY (tidak menyentuh logic combat/wave). Emit 1× per run; main.js
+    // mengecek penanda meta.nft.move (sekali sejak pernah) lalu memutar
+    // VO + presenter RIA (non-blocking).
+    if (!run.nftMoveFired && (move.x !== 0 || move.y !== 0)) {
+      run.nftMoveFired = true;
+      emit('nftMove', {});
+    }
 
     // 2. Wave & spawn
     const events = run.spawnSys.update(dt, this);
