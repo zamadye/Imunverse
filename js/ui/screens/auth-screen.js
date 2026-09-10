@@ -96,7 +96,7 @@ function renderAll() {
         el('b', { text: `Lanjutkan sebagai ${registered}` }),
         el('small', { text: 'akun terdaftar di perangkat ini' }),
       ]),
-      el('img', { src: 'assets/sprites/icon_back.png', alt: '', style: 'transform:rotate(180deg);width:16px' }),
+      el('img', { src: 'assets/icons/ui-back.svg', alt: '', style: 'transform:rotate(180deg);width:16px' }),
     ]);
     btn.addEventListener('click', () => {
       screenManager.show('dashboard'); // pemilik perangkat — akses cepat

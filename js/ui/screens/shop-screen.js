@@ -20,8 +20,75 @@ import { getTintedSprite } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
+import { iconEl, roleIconSrc, roleTint, namedIconEl } from '../menu-icons.js';
 
 const PASTEL = ['c-teal', 'c-green', 'c-coral'];
+
+/**
+ * UI/UX work order #3 — Bagian toko dalam URUTAN keputusan pemain (bekal run dulu,
+ * monetisasi belakangan) + ikon bagian bespoke (assets/icons/sec-*.svg).
+ * Chip-nav di atas menggulung ke bagian; bagian aktif disorot saat scroll.
+ */
+const SECTIONS = [
+  { id: 'item', label: 'Item', icon: 'assets/icons/sec-item.svg', title: 'BEKAL RUN' },
+  { id: 'hero', label: 'Hero', icon: 'assets/icons/menu-heroes.svg', title: 'BUKA HERO' },
+  { id: 'skin', label: 'Skin', icon: 'assets/icons/sec-skin.svg', title: 'SKIN & GAYA' },
+  { id: 'sup', label: 'Suplemen', icon: 'assets/icons/sec-suplemen.svg', title: 'SUPLEMEN SISTEM TUBUH' },
+  { id: 'free', label: 'Gratis', icon: 'assets/icons/sec-gratis.svg', title: 'DAPATKAN IMUN GRATIS' },
+  { id: 'prem', label: 'Premium', icon: 'assets/icons/sec-premium.svg', title: 'PAKET PREMIUM' },
+];
+
+/** Kepala bagian: ikon bespoke + judul + keterangan singkat (satu pola untuk semua bagian). */
+function sectionEl(id, sub) {
+  const def = SECTIONS.find((x) => x.id === id);
+  const sec = el('section', { class: 'shop-section', id: `shop-sec-${id}`, 'data-sec': id });
+  sec.appendChild(el('div', { class: 'ss-head' }, [
+    el('img', { class: 'ss-ico', src: def.icon, alt: '' }),
+    el('div', { class: 'ss-text' }, [
+      el('h3', { text: def.title }),
+      sub ? el('span', { class: 'ss-sub', text: sub }) : null,
+    ]),
+  ]));
+  return sec;
+}
+
+/** Label harga dengan ikon mata uang (antibodi / Imun Coin) — dipakai di price-tag & tombol. */
+function priceEl(amount, cur = 'antibodi', cls = '') {
+  return el('span', { class: `price ${cls}`.trim() }, [
+    el('img', { class: 'inline-coin', src: cur === 'imun' ? 'assets/icons/cur-imun.svg' : 'assets/icons/cur-antibodi.svg', alt: cur === 'imun' ? 'Imun Coin' : 'Antibodi' }),
+    el('span', { text: typeof amount === 'number' ? amount.toLocaleString('id-ID') : String(amount) }),
+  ]);
+}
+
+let navObserver = null;
+/** Chip-nav bagian (scroll-spy sederhana): klik → gulung; bagian di viewport → chip aktif. */
+function buildNav(wrap) {
+  const nav = document.getElementById('shop-nav');
+  if (!nav) return;
+  nav.textContent = '';
+  for (const def of SECTIONS) {
+    const chip = el('button', { class: 'shop-chip', 'data-sec': def.id, type: 'button' }, [
+      el('img', { src: def.icon, alt: '' }),
+      el('span', { text: def.label }),
+    ]);
+    chip.addEventListener('click', () => {
+      audio.click();
+      document.getElementById(`shop-sec-${def.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      nav.querySelectorAll('.shop-chip').forEach((c) => c.classList.toggle('active', c === chip));
+    });
+    nav.appendChild(chip);
+  }
+  nav.querySelector('.shop-chip')?.classList.add('active');
+  if (navObserver) navObserver.disconnect();
+  if (typeof IntersectionObserver !== 'undefined') {
+    navObserver = new IntersectionObserver((entries) => {
+      const vis = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (!vis) return;
+      nav.querySelectorAll('.shop-chip').forEach((c) => c.classList.toggle('active', c.dataset.sec === vis.target.dataset.sec));
+    }, { root: document.getElementById('screen-shop'), rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    wrap.querySelectorAll('.shop-section').forEach((sec) => navObserver.observe(sec));
+  }
+}
 
 /**
  * Fase 14: modal sponsor simulasi — countdown 5 detik lalu grant.
@@ -93,7 +160,7 @@ function openPayment(bundle) {
     }
     const box = modal.querySelector('.pay-box');
     box.textContent = '';
-    box.appendChild(el('img', { class: 'pay-ok-ico', src: 'assets/sprites/icon_star.png', alt: '' }));
+    box.appendChild(el('img', { class: 'pay-ok-ico', src: 'assets/icons/ui-star.svg', alt: '' }));
     box.appendChild(el('h3', { class: 'pay-title', text: 'Pembayaran Berhasil!' }));
     box.appendChild(el('div', { class: 'pay-granted' }, res.granted.map((g) => el('span', { class: 'pg-item', text: g }))));
     box.appendChild(el('div', { class: 'pay-receipt', text: `Struk: ${res.receipt.receiptId} · ${res.receipt.method.toUpperCase()} · ${res.receipt.date}` }));
@@ -109,15 +176,289 @@ export function show() {
 
   const wrap = document.getElementById('shop-sections');
   wrap.textContent = '';
+  const heroes = getData().heroes.heroes;
+  const tiers = getData().heroes.tiers || {};
 
-  // ---------------- Section: buka hero ----------------
-  // ---------------- Section: PAKET PREMIUM (bundle + gateway simulasi) ----------------
-  const premSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'PAKET PREMIUM' })]);
+  // ============ 1) BEKAL RUN (item consumable — Antibodi) ============
+  const itemSection = sectionEl('item', 'Bekal sekali pakai — otomatis aktif di run berikutnya.');
+  const itemGrid = el('div', { class: 'shop-grid' });
+  getData().upgrades.shopItems.forEach((def, i) => {
+    const owned = meta.consumables[def.id] || 0;
+    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` }, [
+      el('div', { class: 'price-tag' }, [priceEl(def.cost)]),
+      iconEl(def, 'shop-ico'),
+      el('b', { text: def.name }),
+      el('div', { class: 's-desc', text: def.desc }),
+      el('div', { class: 's-owned' + (owned ? ' has' : ''), text: `Dimiliki: ${owned}` }),
+      el('button', {
+        class: 'btn btn-primary',
+        text: 'BELI',
+        disabled: meta.currency < def.cost,
+        onclick: () => {
+          if (!requireAccount('shop')) return; // transaksi wajib akun
+          const res = purchaseShopItem(STATE.meta, def.id); // logic + auto-save
+          if (res.ok) show();
+        },
+      }),
+    ]);
+    itemGrid.appendChild(card);
+  });
+  itemSection.appendChild(itemGrid);
+  wrap.appendChild(itemSection);
+
+  // ============ 2) BUKA HERO (Imun Coin / misi) ============
+  const openCount = heroes.filter((h) => meta.unlockedHeroes.includes(h.id)).length;
+  const heroSection = sectionEl('hero', `${openCount}/${heroes.length} hero dimiliki — jalur Imun Coin bisa dibuka di sini, jalur misi lewat progres run.`);
+  const heroGrid = el('div', { class: 'shop-grid' });
+  heroes.forEach((heroDef, i) => {
+    const unlocked = meta.unlockedHeroes.includes(heroDef.id);
+    const tierCfg = tiers[heroDef.tier];
+    const card = el('div', { class: `shop-card hero ${PASTEL[i % PASTEL.length]}${unlocked ? ' owned' : ''}` });
+    // Peran (Tank/Damage/Support) = badge kiri-atas; tier = pill kanan-bawah (bahasa sama dengan roster)
+    const roleSrc = roleIconSrc(heroDef.role);
+    if (roleSrc) card.appendChild(el('img', { class: 'role-badge', src: roleSrc, alt: heroDef.role, title: heroDef.role, style: `--role:${roleTint(heroDef.role)}` }));
+    if (!unlocked && (heroDef.unlock?.imuCost || 0) > 0) {
+      card.appendChild(el('div', { class: 'price-tag imu' }, [priceEl(heroDef.unlock.imuCost, 'imun')]));
+    }
+    card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
+    card.appendChild(el('b', { text: heroDef.name }));
+    if (tierCfg) card.appendChild(el('span', { class: 'tier-pill', style: `background:${tierCfg.color}`, text: tierCfg.label }));
+    card.appendChild(el('div', { class: 's-desc', text: heroDef.description }));
+
+    const uType = heroDef.unlock && heroDef.unlock.type;
+    const imuCost = (heroDef.unlock && heroDef.unlock.imuCost) || 0;
+    if (unlocked) {
+      card.appendChild(el('div', { class: 's-owned has', text: '✓ Dimiliki' }));
+    } else if (uType === 'stat' || uType === 'default') {
+      card.appendChild(el('div', { class: 's-owned', text: 'Buka via misi' }));
+      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
+    } else {
+      const canBuy = uType === 'imu' || isPurchasable(meta, heroDef);
+      card.appendChild(el('button', {
+        class: 'btn btn-gold',
+        text: canBuy ? 'BUKA' : 'SYARAT MISI BELUM',
+        disabled: !canBuy || (meta.imun || 0) < imuCost,
+        onclick: () => {
+          if (!requireAccount('shop')) return; // transaksi wajib akun
+          const res = purchaseHeroUnlock(STATE.meta, heroDef); // logic + auto-save
+          if (res.ok) { queueHeroNotice(heroDef.id); show(); }
+        },
+      }));
+      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
+    }
+    heroGrid.appendChild(card);
+  });
+  heroSection.appendChild(heroGrid);
+  wrap.appendChild(heroSection);
+
+  // ============ 3) SKIN & GAYA (kosmetik Imun — tanpa pay-to-win) ============
+  const cosCfg = getData().cosmetics;
+  const skinSection = sectionEl('skin', 'Warna & aksesori visual saja — tidak menambah kekuatan.');
+  const skinGrid = el('div', { class: 'skin-grid' });
+  const heroFor = (id) => heroes.find((h) => h.id === id) || heroes[0];
+  for (const sk of cosCfg.skins) {
+    const owned = ownsCosmetic(meta, sk.id);
+    const equipped = meta.cosmetics?.skin?.[sk.hero] === sk.id;
+    const preview = getTintedSprite(heroFor(sk.hero === 'semua' ? meta.selectedHero : sk.hero).spritePortrait || heroFor(meta.selectedHero).spriteIdle, sk.color);
+    const card = el('div', { class: `skin-card${equipped ? ' on' : ''}`, style: `--swatch:${sk.color}` }, [
+      el('span', { class: 'skin-swatch', 'aria-hidden': 'true' }),
+      el('img', { class: 'skin-preview', src: preview.toDataURL(), alt: sk.name }),
+      el('b', { text: sk.name }),
+      el('span', { class: 'skin-desc', text: sk.desc }),
+    ]);
+    const btn = el('button', { class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn', disabled: equipped });
+    if (equipped) btn.textContent = '✓ DIPAKAI';
+    else if (owned) btn.textContent = 'PAKAI';
+    else if (sk.priceImun > 0) btn.appendChild(priceEl(sk.priceImun, 'imun'));
+    else btn.textContent = 'GRATIS';
+    card.appendChild(btn);
+    btn.addEventListener('click', () => {
+      if (!owned) {
+        const res = buyCosmetic(meta, sk.id);
+        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
+        equipSkin(meta, sk.id, sk.hero);
+        audio.collect();
+        emit('toast', { message: `Skin "${sk.name}" dibeli & dipakai!`, kind: 'gold' });
+      } else {
+        equipSkin(meta, sk.id, sk.hero);
+        audio.click();
+        emit('toast', { message: `Skin "${sk.name}" dipakai.`, kind: 'gold' });
+      }
+      show();
+    });
+    skinGrid.appendChild(card);
+  }
+  for (const ac of cosCfg.accs) {
+    const owned = ownsCosmetic(meta, ac.id);
+    const equipped = ac.kind === 'crown' ? meta.cosmetics?.crown === ac.id : meta.cosmetics?.aura === ac.id;
+    const card = el('div', { class: `skin-card acc${equipped ? ' on' : ''}` }, [
+      el('span', { class: 'skin-preview acc-ico' }, [
+        el('img', { src: ac.kind === 'crown' ? 'assets/icons/sec-premium.svg' : 'assets/icons/ui-star.svg', alt: ac.name }),
+      ]),
+      el('b', { text: ac.name }),
+      el('span', { class: 'skin-desc', text: ac.desc }),
+    ]);
+    const btn = el('button', { class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn' });
+    if (equipped) btn.textContent = '✓ LEPAS';
+    else if (owned) btn.textContent = 'PAKAI';
+    else btn.appendChild(priceEl(ac.priceImun, 'imun'));
+    card.appendChild(btn);
+    btn.addEventListener('click', () => {
+      if (!owned) {
+        const res = buyCosmetic(meta, ac.id);
+        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
+        equipAcc(meta, ac.id);
+        audio.collect();
+        emit('toast', { message: `${ac.name} dibeli & dipakai!`, kind: 'gold' });
+      } else {
+        equipAcc(meta, ac.id);
+        audio.click();
+      }
+      show();
+    });
+    skinGrid.appendChild(card);
+  }
+  skinSection.appendChild(skinGrid);
+  wrap.appendChild(skinSection);
+
+  // ============ 4) SUPLEMEN SISTEM TUBUH (meta-layer kondisi tubuh) ============
+  const bodyCfg = getData().bodySystems;
+  const supSection = sectionEl('sup', `+${bodyCfg.suplemenGain} kesehatan sistem per suplemen — kondisi tubuh memengaruhi bonus run.`);
+  const supGrid = el('div', { class: 'shop-grid' });
+  bodyCfg.systems.forEach((sysDef, i) => {
+    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` }, [
+      el('div', { class: 'price-tag' }, [priceEl(bodyCfg.suplemenCost)]),
+      el('img', { class: 'shop-sprite', src: sysDef.icon, alt: sysDef.name }),
+      el('b', { text: `Suplemen ${sysDef.name}` }),
+      el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} kesehatan ${sysDef.name} — ${sysDef.role}.` }),
+      el('button', {
+        class: 'btn btn-primary',
+        text: 'BELI',
+        disabled: meta.currency < bodyCfg.suplemenCost,
+        onclick: () => {
+          if (meta.currency < bodyCfg.suplemenCost) return;
+          addCurrency(meta, -bodyCfg.suplemenCost); // sink currency (logic asli)
+          const res = applySuplemen(sysDef.id, meta);
+          if (res) emit('toast', { message: `Suplemen diminum: ${sysDef.name} +${res.gained}!`, kind: 'gold' });
+          show();
+        },
+      }),
+    ]);
+    supGrid.appendChild(card);
+  });
+  // Suplemen Premium via IAP simulasi (+20 SEMUA sistem, 1x/hari via kuota)
+  const premiumCard = el('div', { class: 'shop-card c-gold' }, [
+    namedIconEl('vitality', 'shop-ico'),
+    el('b', { text: 'Suplemen Premium' }),
+    el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} SEMUA sistem sekaligus (pembelian simulasi).` }),
+    el('button', {
+      class: 'btn btn-gold',
+      text: canWatchAd(meta) ? 'BELI (IAP SIMULASI)' : 'KUOTA HARIAN PENUH',
+      disabled: !canWatchAd(meta),
+      onclick: () => {
+        if (!canWatchAd(meta)) return;
+        triggerIAPSuplementPremium(() => {
+          trackAdWatch(meta);
+          for (const sysDef of bodyCfg.systems) applySuplemen(sysDef.id, meta);
+          emit('toast', { message: 'Suplemen Premium: semua sistem pulih!', kind: 'gold' });
+          show();
+        });
+      },
+    }),
+  ]);
+  supGrid.appendChild(premiumCard);
+  supSection.appendChild(supGrid);
+  wrap.appendChild(supSection);
+
+  // ============ 5) IMUN COIN GRATIS (offerwall untuk non-paying) ============
+  const offers = getData().battlepass.offers;
+  const freeSection = sectionEl('free', 'Tanpa bayar: tonton sponsor, isi survei, atau ajak teman.');
+  const freeGrid = el('div', { class: 'free-grid' });
+
+  const adTile = el('div', { class: 'free-tile' }, [
+    el('div', { class: 'ft-head' }, [
+      el('img', { class: 'ft-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
+      el('b', { text: 'Tonton Video Sponsor' }),
+    ]),
+    el('span', { text: `+${offers.adImun} Imun per tontonan (simulasi iklan reward)` }),
+  ]);
+  const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
+  adBtn.addEventListener('click', () => {
+    if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
+    openAdModal(() => {
+      trackAdWatch(meta);
+      addImun(meta, offers.adImun);
+      writeSave(meta);
+      audio.collect();
+      emit('toast', { message: `+${offers.adImun} Imun Coin!`, kind: 'gold' });
+      show();
+    });
+  });
+  adTile.appendChild(adBtn);
+
+  const svTile = el('div', { class: 'free-tile' }, [
+    el('div', { class: 'ft-head' }, [
+      el('img', { class: 'ft-ico', src: 'assets/icons/menu-codex.svg', alt: '' }),
+      el('b', { text: 'Survei Sponsor' }),
+    ]),
+    el('span', { text: `+${offers.surveyImun} Imun, 1× per hari (simulasi offerwall)` }),
+  ]);
+  const svBtn = el('button', { class: 'btn btn-primary ft-btn', text: canSurveyToday(meta) ? 'ISI' : '✓ SELESAI' });
+  svBtn.disabled = !canSurveyToday(meta);
+  svBtn.addEventListener('click', () => {
+    openAdModal(() => {
+      markSurveyDone(meta);
+      addImun(meta, offers.surveyImun);
+      writeSave(meta);
+      audio.collect();
+      emit('toast', { message: `Survei selesai: +${offers.surveyImun} Imun Coin!`, kind: 'gold' });
+      show();
+    }, 'SURVEI SPONSOR (SIMULASI)');
+  });
+  svTile.appendChild(svBtn);
+
+  const ref = ensureReferral(meta);
+  const rfTile = el('div', { class: 'free-tile wide' }, [
+    el('div', { class: 'ft-head' }, [
+      el('img', { class: 'ft-ico', src: 'assets/icons/menu-heroes.svg', alt: '' }),
+      el('b', { text: 'Ajak Teman' }),
+    ]),
+    el('span', {}, [
+      el('span', { text: `Kode kamu: ` }),
+      el('b', { class: 'rf-code', text: ref.code }),
+    ]),
+    el('span', { text: `Teman memakai kodemu → kamu +${offers.referralImun} Imun. Masukkan kode teman:` }),
+  ]);
+  const rfRow = el('div', { class: 'rf-row' });
+  const rfInput = el('input', { class: 'rf-input', placeholder: 'IMUN-XXXXX', maxlength: 12, 'aria-label': 'Kode referral teman' });
+  const rfBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'PAKAI' });
+  rfBtn.addEventListener('click', () => {
+    const res = applyReferralCode(meta, rfInput.value);
+    if (res.ok) {
+      audio.collect();
+      emit('toast', { message: `Referral sukses: +${res.reward} Imun Coin!`, kind: 'gold' });
+      show();
+    } else {
+      emit('toast', { message: res.error, kind: 'coral' });
+    }
+  });
+  rfRow.appendChild(rfInput);
+  rfRow.appendChild(rfBtn);
+  rfTile.appendChild(rfRow);
+  freeGrid.appendChild(adTile);
+  freeGrid.appendChild(svTile);
+  freeGrid.appendChild(rfTile);
+  freeSection.appendChild(freeGrid);
+  wrap.appendChild(freeSection);
+
+  // ============ 6) PAKET PREMIUM (bundle + gateway simulasi) ============
+  const premSection = sectionEl('prem', 'Uang sungguhan (simulasi gateway) — mendukung pengembang, tanpa pay-to-win.');
   const premGrid = el('div', { class: 'premium-grid' });
   for (const bundle of getCatalog()) {
     const owned = bundle.contents.noAds && meta.noAds;
     const card = el('div', { class: 'premium-card', style: `--pc:${bundle.color}` }, [
-      bundle.badge ? el('span', { class: 'prem-badge', style: `background:${bundle.color}`, text: bundle.badge }) : null,
+      bundle.badge ? el('span', { class: 'prem-badge', text: bundle.badge }) : null,
+      el('img', { class: 'prem-ico', src: 'assets/icons/sec-premium.svg', alt: '' }),
       el('b', { class: 'prem-name', text: bundle.name }),
       el('span', { class: 'prem-value', text: bundle.valueNote }),
       el('button', {
@@ -145,275 +486,9 @@ export function show() {
   }
   wrap.appendChild(premSection);
 
-  // ============ FASE 14: IMUN COIN GRATIS (offerwall untuk non-paying) ============
-  const offers = getData().battlepass.offers;
-  const freeSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'DAPATKAN IMUN GRATIS' })]);
-  const freeGrid = el('div', { class: 'free-grid' });
-
-  const adTile = el('div', { class: 'free-tile' }, [
-    el('b', { text: 'Tonton Video Sponsor' }),
-    el('span', { text: `+${offers.adImun} Imun per tontonan (simulasi iklan reward)` }),
-  ]);
-  const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
-  adBtn.addEventListener('click', () => {
-    if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
-    openAdModal(() => {
-      trackAdWatch(meta);
-      addImun(meta, offers.adImun);
-      writeSave(meta);
-      audio.collect();
-      emit('toast', { message: `+${offers.adImun} Imun Coin!`, kind: 'gold' });
-      show();
-    });
-  });
-  adTile.appendChild(adBtn);
-
-  const svTile = el('div', { class: 'free-tile' }, [
-    el('b', { text: 'Survei Sponsor' }),
-    el('span', { text: `+${offers.surveyImun} Imun, 1× per hari (simulasi offerwall)` }),
-  ]);
-  const svBtn = el('button', { class: 'btn btn-primary ft-btn', text: canSurveyToday(meta) ? 'ISI' : '✓ SELESAI' });
-  svBtn.disabled = !canSurveyToday(meta);
-  svBtn.addEventListener('click', () => {
-    openAdModal(() => {
-      markSurveyDone(meta);
-      addImun(meta, offers.surveyImun);
-      writeSave(meta);
-      audio.collect();
-      emit('toast', { message: `Survei selesai: +${offers.surveyImun} Imun Coin!`, kind: 'gold' });
-      show();
-    }, 'SURVEI SPONSOR (SIMULASI)');
-  });
-  svTile.appendChild(svBtn);
-
-  const ref = ensureReferral(meta);
-  const rfTile = el('div', { class: 'free-tile wide' }, [
-    el('b', { text: 'Ajak Teman' }),
-    el('span', {}, [
-      el('span', { text: `Kode kamu: ` }),
-      el('b', { class: 'rf-code', text: ref.code }),
-    ]),
-    el('span', { text: `Teman memakai kodemu → kamu +${offers.referralImun} Imun. Masukkan kode teman:` }),
-  ]);
-  const rfRow = el('div', { class: 'rf-row' });
-  const rfInput = el('input', { class: 'rf-input', placeholder: 'IMUN-XXXXX', maxlength: 12, 'aria-label': 'Kode referral teman' });
-  const rfBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'PAKAI' });
-  rfBtn.addEventListener('click', () => {
-    const res = applyReferralCode(meta, rfInput.value);
-    if (res.ok) {
-      audio.collect();
-      emit('toast', { message: `Referral sukses: +${res.reward} Imun Coin!`, kind: 'gold' });
-      show();
-    } else {
-      emit('toast', { message: res.error, kind: 'coral' });
-    }
-  });
-  rfRow.appendChild(rfInput);
-  rfRow.appendChild(rfBtn);
-  rfTile.appendChild(rfRow);
-
-  freeGrid.appendChild(adTile);
-  freeGrid.appendChild(svTile);
-  freeGrid.appendChild(rfTile);
-  freeSection.appendChild(freeGrid);
-  wrap.insertBefore(freeSection, wrap.firstChild);
-
-  // ============ FASE 14: SKIN & GAYA (kosmetik Imun — tanpa pay-to-win) ============
-  const cosCfg = getData().cosmetics;
-  const skinSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'SKIN & GAYA' })]);
-  const skinGrid = el('div', { class: 'skin-grid' });
-  const heroFor = (id) => getData().heroes.heroes.find((h) => h.id === id) || getData().heroes.heroes[0];
-  for (const sk of cosCfg.skins) {
-    const owned = ownsCosmetic(meta, sk.id);
-    const equipped = meta.cosmetics?.skin?.[sk.hero] === sk.id;
-    const preview = getTintedSprite(heroFor(sk.hero === 'semua' ? meta.selectedHero : sk.hero).spritePortrait || heroFor(meta.selectedHero).spriteIdle, sk.color);
-    const card = el('div', { class: `skin-card${equipped ? ' on' : ''}` }, [
-      el('img', { class: 'skin-preview', src: preview.toDataURL(), alt: sk.name }),
-      el('b', { text: sk.name }),
-      el('span', { class: 'skin-desc', text: sk.desc }),
-      el('button', {
-        class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn',
-        text: equipped ? '✓ DIPAKAI' : owned ? 'PAKAI' : `${sk.priceImun} IMU`,
-        disabled: equipped,
-      }),
-    ]);
-    card.querySelector('button').addEventListener('click', () => {
-      if (!owned) {
-        const res = buyCosmetic(meta, sk.id);
-        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
-        equipSkin(meta, sk.id, sk.hero);
-        audio.collect();
-        emit('toast', { message: `Skin "${sk.name}" dibeli & dipakai!`, kind: 'gold' });
-      } else {
-        equipSkin(meta, sk.id, sk.hero);
-        audio.click();
-        emit('toast', { message: `Skin "${sk.name}" dipakai.`, kind: 'gold' });
-      }
-      show();
-    });
-    skinGrid.appendChild(card);
-  }
-  for (const ac of cosCfg.accs) {
-    const owned = ownsCosmetic(meta, ac.id);
-    const equipped = ac.kind === 'crown' ? meta.cosmetics?.crown === ac.id : meta.cosmetics?.aura === ac.id;
-    const card = el('div', { class: `skin-card${equipped ? ' on' : ''}` }, [
-      el('img', { class: 'skin-preview acc', src: ac.kind === 'crown' ? 'assets/sprites/deco_chest.png' : 'assets/sprites/deco_aura.png', alt: ac.name }),
-      el('b', { text: ac.name }),
-      el('span', { class: 'skin-desc', text: ac.desc }),
-      el('button', {
-        class: 'btn ' + (equipped ? '' : 'btn-primary') + ' ft-btn',
-        text: equipped ? '✓ LEPAS' : owned ? 'PAKAI' : `${ac.priceImun} IMU`,
-      }),
-    ]);
-    card.querySelector('button').addEventListener('click', () => {
-      if (!owned) {
-        const res = buyCosmetic(meta, ac.id);
-        if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
-        equipAcc(meta, ac.id);
-        audio.collect();
-        emit('toast', { message: `${ac.name} dibeli & dipakai!`, kind: 'gold' });
-      } else {
-        equipAcc(meta, ac.id);
-        audio.click();
-      }
-      show();
-    });
-    skinGrid.appendChild(card);
-  }
-  skinSection.appendChild(skinGrid);
-  wrap.insertBefore(skinSection, wrap.children[1] || null);
-
-  const heroSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'BUKA HERO' })]);
-  const heroGrid = el('div', { class: 'shop-grid' });
-  const heroes = getData().heroes.heroes;
-  heroes.forEach((heroDef, i) => {
-    const unlocked = meta.unlockedHeroes.includes(heroDef.id);
-    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` });
-    // Badge kategori bulat kecil di pojok kiri-atas (ala mockup shop)
-    const decoIcons = ['assets/sprites/item_glukosa.png', 'assets/sprites/item_antibodi.png', 'assets/sprites/item_vitamin_c.png'];
-    card.appendChild(el('img', { class: 'corner-deco', src: decoIcons[i % decoIcons.length], alt: '' }));
-    // Badge harga di pojok (untuk yang dijual & belum dimiliki)
-    if (!unlocked && (heroDef.unlock?.imuCost || 0) > 0) {
-      card.appendChild(el('div', { class: 'price-tag' }, [
-        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_imu.png', alt: 'Imun Coin' }),
-        el('span', { text: String(heroDef.unlock.imuCost) }),
-      ]));
-    }
-    card.appendChild(el('img', { class: 'shop-sprite', src: spriteToDataURL(heroDef.spriteIdle), alt: heroDef.name }));
-    card.appendChild(el('b', { text: heroDef.name }));
-    card.appendChild(el('div', { class: 's-desc', text: heroDef.description }));
-
-    const uType = heroDef.unlock && heroDef.unlock.type;
-    const imuCost = (heroDef.unlock && heroDef.unlock.imuCost) || 0;
-    if (unlocked) {
-      card.appendChild(el('div', { class: 's-owned', text: '✓ Dimiliki' }));
-    } else if (uType === 'stat' || uType === 'default') {
-      card.appendChild(el('div', { class: 's-owned', text: 'Buka via misi' }));
-      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
-    } else {
-      const canBuy = uType === 'imu' || isPurchasable(meta, heroDef);
-      card.appendChild(el('button', {
-        class: 'btn btn-gold',
-        text: canBuy ? 'BUKA DENGAN IMUN' : 'SYARAT MISI BELUM',
-        disabled: !canBuy || (meta.imun || 0) < imuCost,
-        onclick: () => {
-          if (!requireAccount('shop')) return; // transaksi wajib akun
-          const res = purchaseHeroUnlock(STATE.meta, heroDef); // logic + auto-save
-          if (res.ok) { queueHeroNotice(heroDef.id); show(); }
-        },
-      }));
-      card.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
-    }
-    heroGrid.appendChild(card);
-  });
-  heroSection.appendChild(heroGrid);
-  wrap.appendChild(heroSection);
-
-  // ---------------- Section: item ----------------
-  const itemSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'ITEM' })]);
-  const itemGrid = el('div', { class: 'shop-grid' });
-  const items = getData().upgrades.shopItems;
-  items.forEach((def, i) => {
-    const owned = meta.consumables[def.id] || 0;
-    const card = el('div', { class: `shop-card ${PASTEL[(i + 2) % PASTEL.length]}` }, [
-      el('div', { class: 'price-tag' }, [
-        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
-        el('span', { text: String(def.cost) }),
-      ]),
-      def.icon.startsWith('assets/')
-        ? el('img', { class: 'shop-sprite', src: def.icon, alt: '' })
-        : el('div', { class: 'icon-sprite', text: def.icon }),
-      el('b', { text: def.name }),
-      el('div', { class: 's-desc', text: def.desc }),
-      el('div', { class: 's-owned', text: `Dimiliki: ${owned}` }),
-      el('button', {
-        class: 'btn btn-primary',
-        text: 'BELI',
-        disabled: meta.currency < def.cost,
-        onclick: () => {
-          if (!requireAccount('shop')) return; // transaksi wajib akun
-          const res = purchaseShopItem(STATE.meta, def.id); // logic + auto-save
-          if (res.ok) show();
-        },
-      }),
-    ]);
-    itemGrid.appendChild(card);
-  });
-  itemSection.appendChild(itemGrid);
-  wrap.appendChild(itemSection);
-
-  // ---------------- Section: SUPLEMEN SISTEM (meta-layer kondisi tubuh) ----------------
-  const bodyCfg = getData().bodySystems;
-  const supSection = el('div', { class: 'shop-section' }, [el('h3', { text: 'SUPLEMEN SISTEM TUBUH' })]);
-  const supGrid = el('div', { class: 'shop-grid' });
-  bodyCfg.systems.forEach((sysDef, i) => {
-    const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` }, [
-      el('div', { class: 'price-tag' }, [
-        el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
-        el('span', { text: String(bodyCfg.suplemenCost) }),
-      ]),
-      el('img', { class: 'shop-sprite', src: sysDef.icon, alt: sysDef.name }),
-      el('b', { text: `Suplemen ${sysDef.name}` }),
-      el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} kesehatan ${sysDef.name} — ${sysDef.role}.` }),
-      el('button', {
-        class: 'btn btn-primary',
-        text: 'BELI',
-        disabled: meta.currency < bodyCfg.suplemenCost,
-        onclick: () => {
-          if (meta.currency < bodyCfg.suplemenCost) return;
-          addCurrency(meta, -bodyCfg.suplemenCost); // sink currency (logic asli)
-          const res = applySuplemen(sysDef.id, meta);
-          if (res) emit('toast', { message: `Suplemen diminum: ${sysDef.name} +${res.gained}!`, kind: 'gold' });
-          show();
-        },
-      }),
-    ]);
-    supGrid.appendChild(card);
-  });
-
-  // Suplemen Premium via IAP simulasi (+20 SEMUA sistem, 1x/hari via kuota)
-  const premiumCard = el('div', { class: 'shop-card c-gold' }, [
-    el('img', { class: 'shop-sprite', src: 'assets/sprites/meter_energi.png', alt: '' }),
-    el('b', { text: 'Suplemen Premium' }),
-    el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} SEMUA sistem sekaligus (pembelian simulasi).` }),
-    el('button', {
-      class: 'btn btn-gold',
-      text: canWatchAd(meta) ? 'BELI (IAP SIMULASI)' : 'KUOTA HARIAN PENUH',
-      disabled: !canWatchAd(meta),
-      onclick: () => {
-        if (!canWatchAd(meta)) return;
-        triggerIAPSuplementPremium(() => {
-          trackAdWatch(meta);
-          for (const sysDef of bodyCfg.systems) applySuplemen(sysDef.id, meta);
-          emit('toast', { message: 'Suplemen Premium: semua sistem pulih!', kind: 'gold' });
-          show();
-        });
-      },
-    }),
-  ]);
-  supGrid.appendChild(premiumCard);
-  supSection.appendChild(supGrid);
-  wrap.appendChild(supSection);
+  buildNav(wrap);
 }
 
-export function hide() {}
+export function hide() {
+  if (navObserver) { navObserver.disconnect(); navObserver = null; }
+}

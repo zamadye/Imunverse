@@ -84,12 +84,13 @@
   padding-left: 12px; padding-right: 12px;
 }
 #screen-roster .screen-subtitle { max-width: 420px; margin-bottom: 8px; }
-#screen-roster .roster-grid { max-width: 620px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 10px; }
+#screen-roster .roster-grid { max-width: 620px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 10px 10px 78px; } /* ruang untuk footer MULAI sticky (BUILD 44) */
 #screen-roster .hero-card { padding: 8px 4px; background: rgba(255,253,244,.5); }
 #screen-roster .avatar-wrap { width: min(31vw, 120px); }
 #screen-roster .hero-name { font-size: 12px; }
 #screen-roster .hero-pattern, #screen-roster .lock-cond, #screen-roster .lock-buy-note { font-size: 9px; }
-#screen-roster .screen-footer { position: sticky; bottom: 0; padding: 8px 0 calc(4px + env(safe-area-inset-bottom)); background: linear-gradient(transparent,var(--cream) 30%); z-index: 2; }
+#screen-roster .screen-footer { position: sticky; bottom: 0; padding: 8px 0 calc(4px + env(safe-area-inset-bottom)); background: linear-gradient(transparent,var(--cream) 30%); z-index: 2; pointer-events: none; }
+#screen-roster .screen-footer .btn { pointer-events: auto; }
 #screen-roster .screen-footer .btn { min-height: 52px; }
 
 #screen-upgrade .topbar, #screen-shop .topbar { max-width: 420px; margin-bottom: 7px !important; }
@@ -105,7 +106,7 @@
 
 #screen-shop .shop-sections { max-width: 620px; gap: 11px; }
 #screen-shop .shop-section { padding: 10px; border-radius: 20px; background: rgba(255,253,244,.45); }
-#screen-shop .shop-section h3 { margin-bottom: 7px; font-size: 12px; }
+#screen-shop .shop-section h3 { margin-bottom: 0; font-size: 12px; }
 #screen-shop .shop-grid { gap: 8px; }
 #screen-shop .shop-card { padding: 9px 7px 9px; gap: 4px; border-radius: 17px; }
 #screen-shop .shop-sprite { width: 48px; height: 48px; }
@@ -161,7 +162,9 @@
   #screen-upgrade .screen-header, #screen-shop .screen-header,
   #screen-herodetail .topbar, #screen-campaign .topbar, #screen-prep .topbar,
   #screen-bag .topbar, #screen-codex .topbar, #screen-bp .topbar,
-  #screen-profile .screen-header { max-width:none; padding-left:18px; padding-right:18px; }
+  #screen-profile .screen-header, .ui-head, #screen-shop .shop-nav { max-width:none; padding-left:18px; padding-right:18px; }
+  .ui-head { max-width: 1180px; width: calc(100% - 36px); padding-left: 0; padding-right: 0; }
+  #screen-shop .shop-nav { max-width: 1180px; width: calc(100% - 36px); padding-left: 2px; padding-right: 2px; }
   #screen-roster .roster-grid, #screen-upgrade .upgrade-list, #screen-shop .shop-sections,
   #screen-campaign .campaign-scroll, #screen-prep .prep-scroll, #screen-bag .bag-scroll,
   #screen-codex .codex-body, #screen-bp .bp-body, #screen-profile .profile-card,
@@ -173,6 +176,7 @@
 #screen-profile .profile-card { width:min(100%,420px); margin:8px auto 20px; padding:22px; display:flex; flex-direction:column; align-items:center; gap:9px; }
 #screen-profile .profile-avatar { width:86px; height:86px; object-fit:cover; border-radius:50%; border:3px solid var(--teal); background:var(--mint); }
 #screen-profile .profile-card h3 { font-size:21px; }
+#screen-profile .profile-title { font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--teal-deep); background:var(--mint-2); border-radius:999px; padding:3px 10px; margin-top:-4px; }
 #screen-profile .profile-balances { display:flex; gap:10px; width:100%; margin:8px 0; }
 #screen-profile .profile-balances span { flex:1; display:grid; grid-template-columns:24px 1fr; align-items:center; column-gap:5px; padding:8px; background:var(--cream-2); border-radius:13px; }
 #screen-profile .profile-balances img { width:23px; height:23px; grid-row:span 2; }
@@ -204,7 +208,7 @@
 #screen-dashboard .dashboard-play:active { transform: translateY(4px) scale(.98); box-shadow: 0 7px 0 rgba(182,76,52,.2), 0 10px 18px rgba(233,106,76,.28); }
 #screen-dashboard .dashboard-play:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 #screen-dashboard .dashboard-play-icon { width: 52px; height: 52px; border-radius: 18px; display:grid; place-items:center; background:rgba(255,255,255,.2); }
-#screen-dashboard .dashboard-play-icon img { width: 32px; height:32px; filter: brightness(0) invert(1); }
+#screen-dashboard .dashboard-play-icon img { width: 32px; height:32px; }
 #screen-dashboard .dashboard-play-copy { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
 #screen-dashboard .dashboard-play-copy b { font-size: 26px; line-height:1; letter-spacing:.08em; }
 #screen-dashboard .dashboard-play-copy small { font-size: 10px; font-weight:800; opacity:.88; }
@@ -275,15 +279,6 @@
 #screen-hud .hud-xp-track { height:4px; }
 #screen-hud .hud-xp-ico { width:9px; height:9px; }
 #screen-hud .hud-controls { right:6px; bottom:6px; gap:5px; }
-#screen-hud .ability-bar { grid-template-columns:repeat(2,42px); gap:4px; }
-#screen-hud .ability-btn { width:42px; height:42px; border-radius:11px; border-width:1.5px; }
-#screen-hud .ability-btn.ult { height:34px; }
-#screen-hud .ability-btn .sk-ico { width:19px; height:19px; }
-#screen-hud .ability-btn.ult .sk-ico { width:22px; height:22px; }
-#screen-hud .ability-btn .sk-name { font-size:6px; bottom:2px; }
-#screen-hud .ability-btn.ult .sk-name { font-size:7px; bottom:3px; }
-#screen-hud .ability-btn .key-tag { font-size:6px; top:2px; left:3px; }
-#screen-hud .ability-btn .cd-num { font-size:14px; }
 #screen-hud .fire-btn { width:58px; height:58px; min-height:58px; border-width:2px; font-size:8px; border-radius:50%; }
 #screen-hud .fire-btn img { width:20px; height:20px; }
 #screen-hud .hud-mission { top:45px; width:180px; padding:4px 7px; border-radius:9px; }
@@ -511,17 +506,13 @@
 #screen-hud .hud-menu2-link { border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.9); width: 56px; height: 56px; }
 #screen-hud .menu-badge { border: 1.5px solid #fff; }
 
-/* 3) SERANG: lebih besar, ikon pedang jelas, bulat ber-bordir */
+/* 3) SERANG: lebih besar, bulat ber-bordir (ikon & grid skill → blok BUILD 43 di bawah) */
 #screen-hud .fire-btn {
   width: 96px; height: 96px; min-height: 96px; border-radius: 50%;
   border: 4px solid #fff; font-size: 11px; bottom: 14px;
   box-shadow: 0 6px 0 #c46a4a, 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 0 0 3px rgba(255, 255, 255, 0.35);
 }
 #screen-hud .fire-btn img { width: 36px; height: 36px; }
-#screen-hud .ability-btn { border-radius: 50%; border-width: 2px; } /* ikut bulat ber-bordir */
-#screen-hud .ability-btn.ult { width: 58px; height: 58px; border-radius: 50%; justify-self: end; }
-#screen-hud .ability-btn.ult .sk-ico { width: 26px; height: 26px; }
-#screen-hud .ability-bar { grid-template-columns: repeat(2, 56px); gap: 6px; }
 
 /* 5) Kartu notif diperkecil — gameplay dominan */
 body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; border-left-width: 4px; border-radius: 10px; }
@@ -572,3 +563,268 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-hud .hud-menu2-toggle{ right:176px; }
   #screen-hud .hud-game-menu2{ right:176px; }
 }
+
+/* ================================================================
+   UI/UX — MENU GAMEPLAY: PROGRESSIVE DISCLOSURE + IKON GAME
+   Dashboard = launcher 1 tombol (F24) → semua pintu hidup di HUD.
+   Aturan: item terkunci TIDAK dirender (.gated), toggle hilang bila
+   menu kosong (.gate-hidden); dua menu memakai bahasa visual yang sama:
+   emblem bulat krem ber-bordir putih + ikon set assets/icons/menu-*.svg.
+   Ditaruh di akhir file agar menang kaskade atas rule F25/E2 di atas.
+   ================================================================ */
+#screen-hud .hud-menu-link.gated,
+#screen-hud .hud-menu2-link.gated,
+#screen-hud .hud-menu-toggle.gate-hidden,
+#screen-hud .hud-menu2-toggle.gate-hidden,
+#screen-hud .hud-quests.gate-hidden { display: none !important; }
+
+/* Toggle menu = emblem bulat (kedua menu identik ukurannya) */
+#screen-hud .hud-menu-toggle,
+#screen-hud .hud-menu2-toggle {
+  width: 46px; height: 46px; border-radius: 50%; padding: 0;
+  border: 2.5px solid rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #e8f4ea);
+  box-shadow: 0 3px 0 rgba(31, 95, 87, 0.18), 0 6px 14px rgba(31, 95, 87, 0.22);
+  display: grid; place-items: center; overflow: visible; cursor: pointer;
+  transition: transform .12s ease;
+}
+#screen-hud .hud-menu-toggle { top: 8px; right: 10px; }
+#screen-hud .hud-menu-toggle img,
+#screen-hud .hud-menu2-toggle img { width: 30px; height: 30px; object-fit: contain; border-radius: 0; filter: drop-shadow(0 1px 0 rgba(255,255,255,.6)); }
+#screen-hud .hud-menu-toggle:active,
+#screen-hud .hud-menu2-toggle:active { transform: scale(0.93); }
+#screen-hud .hud-menu-toggle[aria-expanded="true"],
+#screen-hud .hud-menu2-toggle[aria-expanded="true"] { background: radial-gradient(circle at 34% 30%, #fff7dc, #f5c64f); }
+
+/* MENU 1 (kanan-atas, turun ke bawah): daftar vertikal dengan emblem + label */
+#screen-hud .hud-game-menu {
+  top: 60px; right: 10px; width: auto; min-width: 150px; padding: 6px; gap: 4px;
+  border-radius: 16px; background: rgba(255, 253, 244, 0.97);
+  box-shadow: 0 10px 26px rgba(20, 60, 54, 0.26);
+}
+#screen-hud .hud-menu-link {
+  display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px;
+  border-radius: 999px; background: var(--mint-2); color: var(--ink);
+  font: 900 11px var(--font); text-align: left; cursor: pointer;
+}
+#screen-hud .hud-menu-link img {
+  width: 30px; height: 30px; padding: 3px; border-radius: 50%;
+  background: #fffdf4; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(31, 95, 87, 0.18);
+}
+#screen-hud .hud-menu-link:active { background: var(--teal-light); transform: scale(.98); }
+
+/* MENU 2 (bawah, membuka ke atas / melebar ke kiri): emblem bulat berlabel di bawah */
+#screen-hud .hud-game-menu2 { gap: 8px; padding: 8px 10px; border-radius: 22px; background: rgba(255, 253, 244, 0.97); box-shadow: 0 10px 26px rgba(20, 60, 54, 0.26); }
+#screen-hud .hud-menu2-link {
+  width: 58px; height: 62px; padding: 3px 2px 2px; border-radius: 16px; border: 0;
+  background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
+}
+#screen-hud .hud-menu2-link img {
+  width: 40px; height: 40px; padding: 5px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #eaf4dd); border: 2px solid #fff;
+  box-shadow: 0 2px 0 rgba(31, 95, 87, 0.16), 0 4px 10px rgba(31, 95, 87, 0.18);
+}
+#screen-hud .hud-menu2-link span { font: 900 8px var(--font); color: var(--ink); white-space: nowrap; }
+#screen-hud .hud-menu2-link:active { transform: scale(0.93); }
+#screen-hud .hud-menu2-link:active img { background: radial-gradient(circle at 34% 30%, #fff7dc, #f5c64f); }
+
+/* Badge angka: kontras di atas emblem krem */
+#screen-hud .menu-badge { top: -4px; right: -4px; min-width: 17px; height: 17px; font: 900 10px/17px var(--font); border: 2px solid #fff; }
+
+/* Panel Misi: emblem kecil di kepala; TIDAK lagi menimpa chip combo (top 150px)
+   dan chip antigen (bottom 86px) — badan misi dibatasi tinggi & bisa digulir */
+/* Panel ditambatkan dari ATAS (bukan berpusat) tepat di bawah chip combo (top 118px + 26px),
+   sehingga saat dibuka ia tumbuh ke BAWAH — combo tak tertutup, antigen (bottom 74px) tetap bebas
+   karena badan dibatasi 96px: 152 + 32 kepala + 6 + 96 = 286px < 390 − 74 − 21 = 295px. */
+#screen-hud .hud-quests { top: 152px; transform: none; }
+#screen-hud .hud-quests-head img { width: 20px; height: 20px; }
+#screen-hud .hud-quests-body { max-height: 96px; overflow-y: auto; }
+#screen-hud .hud-combo { top: 118px; }
+#screen-hud .hud-antigen { bottom: 74px; }
+@media (min-height: 500px) { #screen-hud .hud-quests { top: 40%; transform: translateY(-50%); } }
+@media (max-width: 700px) {
+  #screen-hud .hud-menu-toggle, #screen-hud .hud-menu2-toggle { width: 40px; height: 40px; }
+  #screen-hud .hud-menu-toggle img, #screen-hud .hud-menu2-toggle img { width: 26px; height: 26px; }
+  #screen-hud .hud-game-menu { top: 52px; }
+  #screen-hud .hud-menu2-link { width: 52px; height: 58px; }
+  #screen-hud .hud-menu2-link img { width: 36px; height: 36px; }
+  #screen-hud .hud-quests-body { max-height: 84px; }
+}
+
+/* ================================================================
+   UI/UX BUILD 42 — ARAH & KONTROL (bug "arah tidak berfungsi")
+   Diagnosis runtime (scripts/e2e-controls.mjs):
+   - 42% layar kanan dulunya "aim stick" tak kasatmata → tarik di sana hero diam;
+   - badan panel Misi (168×134 px, pointer-events:auto) menelan tarikan di kiri;
+   - jari tutorial gerak menunjuk ke dalam panel itu; copy tutorial "TEMBAK" ≠ label "SERANG".
+   Perbaikan: joystick mengambang di mana saja; aim = TAHAN + TARIK tombol SERANG;
+   panel Misi mulai terlipat; jari tutorial menunjuk lantai kosong & tombol SERANG.
+   ================================================================ */
+/* Panel Misi terlipat: hanya kepala (pill kecil) yang menerima sentuhan */
+#screen-hud .hud-quests.collapsed { width: auto; }
+#screen-hud .hud-quests { pointer-events: none; }               /* pembungkus tembus */
+#screen-hud .hud-quests-head, #screen-hud .hud-quests-body { pointer-events: auto; } /* isi tetap bisa disentuh */
+#screen-hud .hud-quests-head { touch-action: manipulation; }
+
+/* Tombol SERANG: mode TAHAN (held) & mode ARAH (aiming) */
+#screen-hud .fire-btn { touch-action: none; }
+#screen-hud .fire-btn.held { transform: scale(0.94); }
+#screen-hud .fire-btn .fire-aim {                    /* poros: berputar mengikuti --aim */
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none;
+  transform: rotate(var(--aim, 0rad)); opacity: 0; transition: opacity .12s ease;
+}
+#screen-hud .fire-btn.aiming .fire-aim { opacity: 1; }
+#screen-hud .fire-btn .fire-aim::before {            /* garis arah dari pusat tombol */
+  content: ""; position: absolute; left: 0; top: -2px; height: 4px; width: calc(var(--fire-r, 42px) + 22px);
+  border-radius: 2px; background: linear-gradient(90deg, rgba(255,253,244,0), #fffdf4 40%, #f5c64f);
+  box-shadow: 0 0 8px rgba(245,198,79,.7);
+}
+#screen-hud .fire-btn .fire-aim::after {             /* mata panah di ujung */
+  content: ""; position: absolute; left: calc(var(--fire-r, 42px) + 20px); top: -7px; width: 0; height: 0;
+  border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 12px solid #f5c64f;
+  filter: drop-shadow(0 0 4px rgba(245,198,79,.8));
+}
+#screen-hud .fire-btn.aiming { box-shadow: 0 0 0 4px rgba(245,198,79,.55), 0 5px 14px rgba(26,140,125,.42); }
+
+/* Jari tutorial: langkah GERAK menunjuk lantai kosong tengah-kiri (bukan panel Misi),
+   langkah SERANG menunjuk tombol SERANG di kanan-bawah */
+#screen-hud .tut-finger.tut-move { left: 36%; top: 60%; bottom: auto; }
+#screen-hud .tut-finger.tut-attack { left: auto; right: 46px; top: auto; bottom: 46px; }
+@media (max-width: 700px) {
+  #screen-hud .tut-finger.tut-attack { right: 30px; bottom: 30px; }
+}
+
+/* Hint kontrol: naik di atas grid skill (dulu bottom 92px menabrak kolom skill kiri
+   di 844×390 & 667×375) dan lebar dibatasi ruang antara panel kiri & grid skill */
+#screen-hud .hud-hint { bottom: 122px; max-width: min(74vw, 600px); white-space: normal; text-align: center; line-height: 1.35; }
+@media (max-width: 700px) { #screen-hud .hud-hint { bottom: 116px; max-width: 70vw; } }
+
+/* ================================================================
+   UI/UX BUILD 43 — IKON SKILL & TOMBOL SERANG DALAM BAHASA VISUAL GAME
+   Pelat tombol skill = HEX SVG (.sk-plate: outline ink → rim warna skill
+   → muka krem + kilau), ikon per-skill dari js/ui/skill-icons.js (33 ikon,
+   gaya assets/icons/menu-*.svg), label 2 baris di BAWAH pelat (tidak lagi
+   terpotong "SIKAP BERTAHA"), SERANG = assets/icons/hud-serang.svg.
+   Dimuat terakhir → menang kaskade atas rule lama di main.css.
+   ================================================================ */
+#screen-hud .hud-controls { right: 16px; bottom: 14px; gap: 10px; align-items: flex-end; }
+/* --skw = lebar pelat; --lbl = tinggi label (0 di layar pendek/landscape HP: ikon sudah
+   berbicara sendiri + banner nama saat cast; label muncul bila tinggi ≥ 500px) */
+#screen-hud .ability-bar {
+  --skw: 52px; --lbl: 0px;
+  grid-template-columns: repeat(2, var(--skw)); gap: 6px 8px; align-items: end;
+}
+@media (min-height: 500px) { #screen-hud .ability-bar { --lbl: 13px; } }
+#screen-hud .ability-btn, #screen-hud .ability-btn.ult {
+  width: var(--skw, 58px); height: calc(var(--skw, 58px) + var(--lbl, 0px)); /* pelat + label */
+  clip-path: none; border: none; border-radius: 0; background: none; box-shadow: none; filter: none;
+  padding: 0; overflow: visible;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  transition: transform .08s ease;
+}
+#screen-hud .ability-btn::before { content: none; }
+#screen-hud .ability-btn:active { transform: translateY(2px) scale(.96); }
+#screen-hud .ability-btn .sk-plate {
+  position: absolute; left: 0; top: 0; width: var(--skw, 58px); height: var(--skw, 58px); z-index: 0; overflow: visible;
+  filter: drop-shadow(0 3px 0 rgba(18, 63, 58, .3)) drop-shadow(0 6px 10px rgba(18, 63, 58, .18));
+}
+#screen-hud .ability-btn:active .sk-plate { filter: drop-shadow(0 1px 0 rgba(18, 63, 58, .3)); }
+#screen-hud .ability-btn .sk-plate .pl-glow { fill: var(--sk, #2f9c8f); opacity: 0; transform-origin: 32px 32px; transform: scale(1.12); transition: opacity .2s ease; }
+#screen-hud .ability-btn .sk-plate .pl-ink { fill: #123f3a; }
+#screen-hud .ability-btn .sk-plate .pl-rim { fill: color-mix(in srgb, var(--sk, #2f9c8f) 82%, #fffdf4); transform-origin: 32px 32px; transform: scale(.92); }
+#screen-hud .ability-btn .sk-plate .pl-face { fill: #fffdf4; }
+#screen-hud .ability-btn .sk-plate .pl-shine { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; opacity: .75; }
+#screen-hud .ability-btn .sk-ico, #screen-hud .ability-btn.ult .sk-ico,
+#screen-hud .ability-btn .sk-glyph, #screen-hud .ability-btn.ult .sk-glyph {
+  position: absolute; left: 0; top: 0; width: var(--skw, 58px); height: var(--skw, 58px);
+  display: flex; align-items: center; justify-content: center; z-index: 2; filter: none; object-fit: unset;
+}
+#screen-hud .ability-btn .sk-glyph svg, #screen-hud .ability-btn.ult .sk-glyph svg {
+  width: calc(var(--skw, 58px) * .66); height: calc(var(--skw, 58px) * .66); fill: none; filter: none;
+}
+/* Label: di BAWAH pelat (bukan di dalam hex yang menyempit → "SIKAP BERTAHA" terpotong),
+   satu baris lebih lebar dari pelat; hanya tampil bila ada ruang vertikal (--lbl > 0) */
+#screen-hud .ability-btn .sk-name, #screen-hud .ability-btn.ult .sk-name {
+  position: absolute; left: -14px; right: -14px; bottom: auto; top: calc(var(--skw, 58px) - 2px);
+  display: none; font-size: 8px; line-height: 1.2; font-weight: 900; letter-spacing: .02em; text-transform: uppercase;
+  color: #fffdf4; text-shadow: 0 1px 0 rgba(18, 63, 58, .85), 0 0 4px rgba(18, 63, 58, .65);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0; z-index: 3; text-align: center;
+}
+@media (min-height: 500px) { #screen-hud .ability-btn .sk-name, #screen-hud .ability-btn.ult .sk-name { display: block; } }
+#screen-hud .ability-btn.ult .sk-name { color: #ffe9a8; }
+/* Cooldown: sweep konik dipotong bentuk hex, angka besar di tengah pelat */
+#screen-hud .ability-btn .cd-fill {
+  position: absolute; left: 0; top: 0; width: var(--skw, 58px); height: var(--skw, 58px); inset: auto; z-index: 2;
+  border-radius: 0; clip-path: polygon(50% 8%, 86.5% 29%, 86.5% 71%, 50% 92%, 13.5% 71%, 13.5% 29%);
+}
+#screen-hud .ability-btn .cd-num {
+  position: absolute; left: 0; top: 0; width: var(--skw, 58px); height: var(--skw, 58px); inset: auto;
+  font-size: calc(var(--skw, 58px) * .38); color: #fffdf4; text-shadow: 0 1px 0 #123f3a, 0 0 6px rgba(18, 63, 58, .9);
+}
+/* Kunci tombol keyboard: chip kecil di sudut kiri-atas pelat */
+#screen-hud .ability-btn .key-tag {
+  top: 1px; left: 1px; font-size: 7px; line-height: 1; padding: 2px 4px; border-radius: 6px;
+  background: #123f3a; color: #fffdf4; border: 1.5px solid #fffdf4; z-index: 4;
+}
+/* Siap dipakai: pelat "bernafas" lewat glow hex (bukan box-shadow persegi) */
+#screen-hud .ability-btn.ready { animation: none; box-shadow: none; }
+#screen-hud .ability-btn.ready .sk-plate .pl-glow { opacity: .55; animation: skPlateGlow 1.6s ease-in-out infinite; }
+@keyframes skPlateGlow { 0%, 100% { opacity: .25; transform: scale(1.08); } 50% { opacity: .6; transform: scale(1.16); } }
+/* ULT: pelat emas (rim emas, outline cokelat tua) sedikit lebih besar, rata kanan */
+#screen-hud .ability-btn.ult { --skw: 58px; grid-column: span 2; justify-self: end; border-color: transparent; }
+#screen-hud .ability-btn.ult .sk-plate .pl-rim { fill: #f5c64f; }
+#screen-hud .ability-btn.ult .sk-plate .pl-ink { fill: #7a4e08; }
+#screen-hud .ability-btn.ult .sk-plate .pl-glow { fill: #f5c64f; }
+#screen-hud .ability-btn.ult .sk-plate .pl-face { fill: #fff8e2; }
+#screen-hud .ability-btn.ult .key-tag { background: #7a4e08; border-color: #ffe9a8; }
+#screen-hud .ability-btn.ult.ready .sk-plate .pl-glow { opacity: .75; }
+
+/* SERANG: ikon antibodi-Y kawaii (assets/icons/hud-serang.svg) di atas teal — cincin
+   gerigi/sunburst lama dibuang (bersaing dengan ikon); offset absolut lama (right/bottom)
+   dinetralkan: posisi ditentukan flex .hud-controls, tidak lagi menimpa pelat ULT */
+#screen-hud .fire-btn { right: auto; bottom: auto; left: auto; top: auto; margin: 0; }
+#screen-hud .fire-btn::before { content: none; }
+#screen-hud .fire-btn .fire-claw { position: relative; display: flex; align-items: center; justify-content: center; pointer-events: none; width: 44px; height: 44px; margin-top: 4px; }
+#screen-hud .fire-btn .fire-claw svg { display: none; }
+#screen-hud .fire-btn .fire-claw img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 2px 0 rgba(18, 63, 58, .35)); }
+#screen-hud .fire-btn > span:not(.fire-claw):not(.fire-aim) { font-size: 11px; letter-spacing: .06em; text-shadow: 0 1px 0 rgba(18, 63, 58, .45); }
+
+@media (max-width: 700px) {
+  #screen-hud .hud-controls { right: 10px; bottom: 10px; gap: 8px; }
+  #screen-hud .ability-bar { --skw: 44px; gap: 4px 6px; }
+  #screen-hud .ability-btn.ult { --skw: 50px; }
+  #screen-hud .ability-btn .sk-name, #screen-hud .ability-btn.ult .sk-name { font-size: 7px; }
+  #screen-hud .fire-btn .fire-claw { width: 34px; height: 34px; margin-top: 2px; }
+  #screen-hud .fire-btn > span:not(.fire-claw):not(.fire-aim) { font-size: 9px; }
+}
+@media (max-width: 390px) {
+  #screen-hud .hud-controls { right: 8px; bottom: 8px; gap: 6px; }
+  #screen-hud .ability-bar { --skw: 40px; }
+  #screen-hud .ability-btn.ult { --skw: 46px; }
+  #screen-hud .fire-btn .fire-claw { width: 30px; height: 30px; }
+}
+/* Hint kontrol: tetap di atas grid skill (tinggi grid = 2 pelat + gap [+ label]) */
+#screen-hud .hud-hint { bottom: 134px; }
+@media (max-width: 700px) { #screen-hud .hud-hint { bottom: 118px; } }
+@media (min-height: 500px) { #screen-hud .hud-hint { bottom: 150px; } }
+
+/* Chip skill kecil (Prep, detail hero): pelat hex + ikon yang SAMA dengan HUD */
+.sk-chip { position: relative; display: inline-flex; width: 34px; height: 34px; flex: none; --sk: #2f9c8f; }
+.sk-chip .sk-plate { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 2px 0 rgba(18, 63, 58, .25)); }
+.sk-chip .sk-plate .pl-glow { display: none; }
+.sk-chip .sk-plate .pl-ink { fill: #123f3a; }
+.sk-chip .sk-plate .pl-rim { fill: color-mix(in srgb, var(--sk) 82%, #fffdf4); transform-origin: 32px 32px; transform: scale(.9); }
+.sk-chip .sk-plate .pl-face { fill: #fffdf4; }
+.sk-chip .sk-plate .pl-shine { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; opacity: .75; }
+.sk-chip .sk-glyph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.sk-chip .sk-glyph svg { width: 66%; height: 66%; }
+.sk-chip.ult { width: 40px; height: 40px; }
+.sk-chip.ult .sk-plate .pl-rim { fill: #f5c64f; }
+.sk-chip.ult .sk-plate .pl-ink { fill: #7a4e08; }
+.sk-chip.ult .sk-plate .pl-face { fill: #fff8e2; }
+/* Chip skill di Prep & detail hero: ukuran ringkas mengikuti konteksnya */
+.prep-summary .ps-abilities { align-items: flex-end; gap: 6px; }
+.prep-summary .ps-skill-chip { width: 30px; height: 30px; }
+.prep-summary .ps-skill-chip.ult { width: 36px; height: 36px; }
+.hl-skill .hl-skill-chip { width: 28px; height: 28px; }
+.hl-skill.ult .hl-skill-chip { width: 32px; height: 32px; }

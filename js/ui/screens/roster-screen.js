@@ -4,24 +4,66 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { getHeroStatus, isPurchasable } from '../../systems/unlock-system.js';
 import { purchaseHeroUnlock } from '../../systems/economy-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
 import { emit } from '../../core/ui-bridge.js';
 import { t as tr } from '../../systems/i18n.js';
-import { spriteToDataURL } from '../../render/sprite-loader.js';
+import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
 import { heroLevelBadge } from '../../systems/economy-system.js';
 import { screenManager as sm } from '../screen-manager.js';
+import { roleIconSrc, roleTint } from '../menu-icons.js';
 
 const PATTERN_LABEL = {
   melee_swipe: 'Tebasan Area',
   ranged_pierce: 'Penembus',
   ranged_homing: 'Penjejak',
 };
+
+function rosterEquityCue(heroId, stage) {
+  const designs = getCharacterDesigns();
+  const heroDesign = designs?.heroes?.[heroId];
+  if (!heroDesign) return null;
+  if (stage <= 0) return {
+    stage: 0,
+    color: '#9db1a8',
+    label: 'Polos',
+    cue: heroDesign.baseCue,
+  };
+  const item = (heroDesign.equity || []).find((e) => e.stage === stage)
+    || (heroDesign.equity || [])[Math.max(0, Math.min(stage - 1, (heroDesign.equity || []).length - 1))];
+  const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+  return item ? {
+    stage,
+    color: item.color || stageDef?.tierColor || '#35d0ba',
+    label: stageDef?.collectionLabel || `Equity ${stage}`,
+    cue: item.visualCue || item.name,
+  } : null;
+}
+
+function rosterEquityMini(heroDef, meta) {
+  const stage = Math.max(0, Math.min(4, meta.evoStage || 0));
+  const cue = rosterEquityCue(heroDef.id, stage);
+  if (!cue) return null;
+  const dots = [];
+  for (let i = 1; i <= 4; i++) {
+    const dotCue = rosterEquityCue(heroDef.id, i);
+    dots.push(el('span', {
+      class: `roster-eq-dot${i <= stage ? ' on' : ''}${i === stage ? ' active' : ''}`,
+      style: `--eq:${dotCue?.color || heroDef.color};`,
+      title: dotCue ? `${dotCue.label}: ${dotCue.cue}` : `Equity ${i}`,
+    }));
+  }
+  return el('div', { class: 'roster-equity', title: cue.cue }, [
+    el('span', { class: 'roster-eq-chip', style: `--eq:${cue.color};`, text: cue.label }),
+    el('span', { class: 'roster-eq-dots' }, dots),
+    el('small', { text: cue.cue }),
+  ]);
+}
 
 /** Ubah '#rrggbb' → 'rgba(r,g,b,a)'. */
 function hexAlpha(hex, a) {
@@ -35,6 +77,8 @@ export function show() {
   const meta = STATE.meta;
   const grid = document.getElementById('roster-grid');
   grid.textContent = '';
+  const imuEl = document.getElementById('roster-imun');
+  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   // Fase 13.1: chip progres koleksi di subtitle (x/11 terbuka)
   const heroesAll = getData().heroes.heroes;
@@ -56,8 +100,13 @@ export function show() {
       class: 'avatar-wrap',
       style: `background: ${hexAlpha(heroDef.color, status.unlocked ? 0.35 : 0.18)}; border-color: ${status.unlocked ? hexAlpha(heroDef.color, 0.85) : '#e4d9bf'};`,
     }, [
-      el('img', { class: 'hero-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
+      createHeroEquityPreview(heroDef, meta.evoStage || 0, { size: 128, className: 'hero-sprite roster-hero-preview' }),
     ]);
+
+    // UI/UX work order #3: badge PERAN (Tank/Damage/Support) di lingkaran avatar —
+    // ikon bespoke assets/icons/role-*.svg, bahasa sama dengan Shop & Detail Hero.
+    const roleSrc = roleIconSrc(heroDef.role);
+    if (roleSrc) avatar.appendChild(el('img', { class: 'role-badge', src: roleSrc, alt: heroDef.role, title: heroDef.role, style: `--role:${roleTint(heroDef.role)}` }));
 
     const children = [avatar];
 
@@ -79,9 +128,11 @@ export function show() {
         el('span', { text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }),
         el('span', { class: 'hero-lvl-chip', text: heroLevelBadge(meta, heroDef.id) }),
       ]));
+      const equity = rosterEquityMini(heroDef, meta);
+      if (equity) children.push(equity);
     } else {
       // Badge gembok aset PNG di lingkaran (ala mockup)
-      avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }));
+      avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: tr(status.conditionLabel) }));
       // Fase 17 (trigger 1B): hero jalur Imun Coin bisa DIBUKA langsung di roster
@@ -107,15 +158,18 @@ export function show() {
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
-      role: status.unlocked ? 'button' : undefined,
       title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
-      role: 'button',
+      // Kartu terkunci BUKAN tombol (tetapi tombol BUKA di dalamnya tetap aktif —
+      // jangan pakai aria-disabled di kartu: itu menonaktifkan keturunannya bagi AT)
+      role: status.unlocked ? 'button' : undefined,
       tabindex: status.unlocked ? '0' : '-1',
+      // SATU handler: pilih hero (tersimpan) lalu buka detail — sebelumnya dua listener
+      // (onclick pilih + listener detail) membuat render ulang grid tepat sebelum navigasi.
       onclick: () => {
         if (!status.unlocked) return;
         meta.selectedHero = heroDef.id;
         writeSave(meta);
-        show(); // render ulang highlight
+        sm.show('herodetail', { heroId: heroDef.id });
       },
     }, children);
 
@@ -128,7 +182,6 @@ export function show() {
     });
 
     grid.appendChild(card);
-    if (status.unlocked) card.addEventListener('click', () => sm.show('herodetail', { heroId: heroDef.id }));
   }
 
   // Tombol mulai aktif hanya bila hero terpilih terbuka

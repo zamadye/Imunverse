@@ -1,657 +1,548 @@
 #!/usr/bin/env python3
 """
-gen_sprites.py — Generator aset sprite PNG transparan untuk Imunverse.
-Menggambar sel imun / patogen / nutrisi secara prosedural (Pillow) dengan
-supersampling 4x agar halus. Output: assets/sprites/*.png (dipakai game via
-path di data JSON; field sprite/spriteIdle/spriteAttack).
+gen_sprites.py — Character Agent sprite generator (stdlib only).
 
-Jalankan: python3 tools/gen_sprites.py
+Generates visible gameplay sprites for the character-owned scope:
+- all immune heroes: idle, attack, portrait
+- all pathogen/enemy characters: idle/attack where data uses them
+- equity collection part icons
+
+No Pillow dependency and no old generic evolution overlays. Stage 0 remains the
+plain/base body. Stage 1-4 equity is rendered live by js/render/character-visuals.js
+from data/character-designs.json.
 """
+
+from __future__ import annotations
 
 import math
 import os
 import random
+import struct
+import zlib
 
-from PIL import Image, ImageDraw, ImageFilter
-
-SS = 4  # faktor supersampling
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "sprites")
+SS = 3
 
 
-def hex_rgb(h):
-    h = h.lstrip("#")
-    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+def hex_rgb(value: str) -> tuple[int, int, int]:
+    value = value.strip().lstrip("#")
+    return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
 
 
-def mix(c1, c2, t):
-    return tuple(int(round(a + (b - a) * t)) for a, b in zip(c1, c2))
+def mix(a, b, t):
+    return tuple(max(0, min(255, int(round(a[i] + (b[i] - a[i]) * t)))) for i in range(3))
 
 
-def rgba(c, a=255):
-    return (c[0], c[1], c[2], a)
+def shade(c, k):
+    if k >= 1:
+        return mix(c, (255, 255, 255), min(1, k - 1))
+    return mix(c, (0, 0, 0), min(1, 1 - k))
 
 
-def new_canvas(size):
-    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
-    return img, ImageDraw.Draw(img)
+def png_bytes(w: int, h: int, rgba: bytearray) -> bytes:
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+    raw = bytearray()
+    stride = w * 4
+    for y in range(h):
+        raw.append(0)
+        raw.extend(rgba[y * stride:(y + 1) * stride])
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(bytes(raw), 9)) + chunk(b"IEND", b"")
 
 
-def finish(img, size):
-    return img.resize((size, size), Image.LANCZOS)
+class Canvas:
+    def __init__(self, size: int):
+        self.size = size
+        self.w = size * SS
+        self.h = size * SS
+        self.buf = bytearray(self.w * self.h * 4)
+
+    def S(self, v):
+        return v * SS
+
+    def blend_px(self, ix: int, iy: int, color, alpha: float = 1.0):
+        if ix < 0 or iy < 0 or ix >= self.w or iy >= self.h or alpha <= 0:
+            return
+        sr, sg, sb = color
+        sa = max(0, min(255, int(round(255 * alpha))))
+        if sa <= 0:
+            return
+        off = (iy * self.w + ix) * 4
+        dr, dg, db, da = self.buf[off], self.buf[off + 1], self.buf[off + 2], self.buf[off + 3]
+        inv = 255 - sa
+        out_a = sa + (da * inv + 127) // 255
+        if out_a == 0:
+            return
+        self.buf[off] = max(0, min(255, (sr * sa + dr * da * inv // 255) // out_a))
+        self.buf[off + 1] = max(0, min(255, (sg * sa + dg * da * inv // 255) // out_a))
+        self.buf[off + 2] = max(0, min(255, (sb * sa + db * da * inv // 255) // out_a))
+        self.buf[off + 3] = max(0, min(255, out_a))
+
+    def ellipse(self, cx, cy, rx, ry, color, alpha=1.0, rot=0.0):
+        cx, cy, rx, ry = self.S(cx), self.S(cy), self.S(rx), self.S(ry)
+        pad = max(rx, ry) + 2 * SS
+        x0, x1 = int(cx - pad), int(cx + pad)
+        y0, y1 = int(cy - pad), int(cy + pad)
+        cr, sr = math.cos(-rot), math.sin(-rot)
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                dx, dy = x + 0.5 - cx, y + 0.5 - cy
+                ux = dx * cr - dy * sr
+                uy = dx * sr + dy * cr
+                q = (ux * ux) / (rx * rx) + (uy * uy) / (ry * ry)
+                if q <= 1:
+                    edge = min(1.0, max(0.0, (1 - q) * 7))
+                    self.blend_px(x, y, color, alpha * edge)
+
+    def circle(self, cx, cy, r, color, alpha=1.0):
+        self.ellipse(cx, cy, r, r, color, alpha)
+
+    def radial_ellipse(self, cx, cy, rx, ry, inner, outer, rot=0.0, steps=30, alpha=1.0):
+        for i in range(steps, 0, -1):
+            t = i / steps
+            col = mix(inner, outer, t)
+            self.ellipse(cx, cy, rx * t, ry * t, col, alpha, rot)
+
+    def line(self, x1, y1, x2, y2, color, width=3, alpha=1.0):
+        x1, y1, x2, y2, hw = self.S(x1), self.S(y1), self.S(x2), self.S(y2), self.S(width) / 2
+        xmin, xmax = int(min(x1, x2) - hw - 2), int(max(x1, x2) + hw + 2)
+        ymin, ymax = int(min(y1, y2) - hw - 2), int(max(y1, y2) + hw + 2)
+        vx, vy = x2 - x1, y2 - y1
+        den = vx * vx + vy * vy or 1
+        for y in range(ymin, ymax + 1):
+            for x in range(xmin, xmax + 1):
+                t = max(0, min(1, ((x + 0.5 - x1) * vx + (y + 0.5 - y1) * vy) / den))
+                px, py = x1 + vx * t, y1 + vy * t
+                d = math.hypot(x + 0.5 - px, y + 0.5 - py)
+                if d <= hw + 1:
+                    a = alpha * max(0, min(1, hw + 1 - d))
+                    self.blend_px(x, y, color, a)
+        # round caps
+        self.circle(x1 / SS, y1 / SS, width / 2, color, alpha)
+        self.circle(x2 / SS, y2 / SS, width / 2, color, alpha)
+
+    def polyline(self, pts, color, width=3, alpha=1.0):
+        for a, b in zip(pts, pts[1:]):
+            self.line(a[0], a[1], b[0], b[1], color, width, alpha)
+
+    def polygon(self, pts, color, alpha=1.0):
+        pts2 = [(self.S(x), self.S(y)) for x, y in pts]
+        xs = [p[0] for p in pts2]
+        ys = [p[1] for p in pts2]
+        x0, x1 = int(min(xs) - 2), int(max(xs) + 2)
+        y0, y1 = int(min(ys) - 2), int(max(ys) + 2)
+        n = len(pts2)
+        for y in range(y0, y1 + 1):
+            yy = y + 0.5
+            for x in range(x0, x1 + 1):
+                xx = x + 0.5
+                inside = False
+                j = n - 1
+                for i in range(n):
+                    xi, yi = pts2[i]
+                    xj, yj = pts2[j]
+                    if ((yi > yy) != (yj > yy)) and (xx < (xj - xi) * (yy - yi) / ((yj - yi) or 1e-9) + xi):
+                        inside = not inside
+                    j = i
+                if inside:
+                    self.blend_px(x, y, color, alpha)
+
+    def ring(self, cx, cy, r, color, width=3, alpha=1.0, segments=90):
+        pts = []
+        for i in range(segments + 1):
+            a = math.tau * i / segments
+            pts.append((cx + math.cos(a) * r, cy + math.sin(a) * r))
+        self.polyline(pts, color, width, alpha)
+
+    def star_spikes(self, cx, cy, r, color, count=10, length=14, alpha=1.0, rot=0.0):
+        for i in range(count):
+            a = rot + math.tau * i / count
+            pts = [
+                (cx + math.cos(a - 0.13) * r, cy + math.sin(a - 0.13) * r),
+                (cx + math.cos(a) * (r + length), cy + math.sin(a) * (r + length)),
+                (cx + math.cos(a + 0.13) * r, cy + math.sin(a + 0.13) * r),
+            ]
+            self.polygon(pts, color, alpha)
+
+    def blob(self, cx, cy, r, color, seed=1, lobes=5, wobble=0.1, sx=1.0, sy=1.0, alpha=1.0):
+        rnd = random.Random(seed)
+        p1, p2 = rnd.random() * math.tau, rnd.random() * math.tau
+        pts = []
+        for i in range(56):
+            a = math.tau * i / 56
+            rr = r * (1 + wobble * math.sin(a * lobes + p1) + wobble * 0.45 * math.sin(a * (lobes + 3) + p2))
+            pts.append((cx + math.cos(a) * rr * sx, cy + math.sin(a) * rr * sy))
+        self.polygon(pts, color, alpha)
+        self.polyline(pts + [pts[0]], shade(color, 0.55), max(2.0, r * 0.07), min(1.0, alpha))
+
+    def antibody_y(self, cx, cy, s, color, rot=0, width=4, alpha=1.0):
+        def tr(p):
+            x, y = p
+            c, sn = math.cos(rot), math.sin(rot)
+            return cx + x * c - y * sn, cy + x * sn + y * c
+        self.line(*tr((0, s * 0.42)), *tr((0, -s * 0.05)), color, width, alpha)
+        self.line(*tr((0, -s * 0.05)), *tr((-s * 0.35, -s * 0.48)), color, width, alpha)
+        self.line(*tr((0, -s * 0.05)), *tr((s * 0.35, -s * 0.48)), color, width, alpha)
+
+    def save(self, path):
+        small = bytearray(self.size * self.size * 4)
+        for y in range(self.size):
+            for x in range(self.size):
+                acc = [0, 0, 0, 0]
+                for yy in range(SS):
+                    for xx in range(SS):
+                        off = ((y * SS + yy) * self.w + (x * SS + xx)) * 4
+                        for k in range(4):
+                            acc[k] += self.buf[off + k]
+                out = (y * self.size + x) * 4
+                div = SS * SS
+                for k in range(4):
+                    small[out + k] = acc[k] // div
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(png_bytes(self.size, self.size, small))
 
 
-def radial_gradient(size, cx, cy, r, inner, outer, steps=64):
-    """Layer RGBA gradien radial (lingkaran konsentris)."""
-    layer = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    for i in range(steps, 0, -1):
-        t = i / steps
-        rr = r * t
-        col = rgba(mix(inner, outer, 1 - t))
-        d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], fill=col)
-    return layer
+def body(c: Canvas, cx, cy, r, color, seed=1, sx=1, sy=1, wobble=0.06):
+    rgb = hex_rgb(color)
+    c.ellipse(cx + 4, cy + 8, r * 0.95 * sx, r * 0.42 * sy, (0, 0, 0), 0.16)
+    c.blob(cx, cy, r, shade(rgb, 0.82), seed=seed, sx=sx, sy=sy, wobble=wobble, alpha=1)
+    c.radial_ellipse(cx - r * 0.18, cy - r * 0.2, r * 0.8 * sx, r * 0.68 * sy, shade(rgb, 1.45), rgb, steps=24)
+    c.ring(cx, cy, r * 0.86, shade(rgb, 1.25), width=2.2, alpha=0.55)
 
 
-def blob_polygon(cx, cy, r, points=40, wobble=0.12, seed=0, lobes=5):
-    """Titik-titik poligon 'blob' organik dengan wobble sinusoidal."""
-    rnd = random.Random(seed)
-    ph1 = rnd.uniform(0, math.tau)
-    ph2 = rnd.uniform(0, math.tau)
-    amp2 = wobble * rnd.uniform(0.3, 0.6)
-    pts = []
-    for i in range(points):
-        a = math.tau * i / points
-        rr = r * (
-            1.0
-            + wobble * math.sin(a * lobes + ph1)
-            + amp2 * math.sin(a * (lobes + 3) + ph2)
-        )
-        pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr))
-    return pts
-
-
-def paste_masked(base, layer, mask_draw_fn):
-    """Paste layer ke base dengan mask hasil mask_draw_fn(mask_draw)."""
-    mask = Image.new("L", base.size, 0)
-    md = ImageDraw.Draw(mask)
-    mask_draw_fn(md)
-    base.paste(layer, (0, 0), mask)
-
-
-def add_glow(base, color, radius, alpha=90):
-    """Glow lembut di bawah konten yang sudah ada."""
-    glow = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(glow)
-    cx, cy = base.size[0] / 2, base.size[1] / 2
-    d.ellipse([cx - radius, cy - radius, cx + radius, cy + radius], fill=rgba(color, alpha))
-    glow = glow.filter(ImageFilter.GaussianBlur(radius * 0.35))
-    out = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    out = Image.alpha_composite(out, glow)
-    out = Image.alpha_composite(out, base)
-    return out
-
-
-def specular_highlight(img, cx, cy, r, alpha=110):
-    d = ImageDraw.Draw(img)
-    hi = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    hd = ImageDraw.Draw(hi)
-    hd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, alpha))
-    hi = hi.filter(ImageFilter.GaussianBlur(r * 0.6))
-    return Image.alpha_composite(img, hi)
-
-
-# ----------------------------------------------------------------------
-# HEROES
-# ----------------------------------------------------------------------
-
-def draw_cell_hero(size, color, seed, attack=False, style="tcell"):
-    """Sel imun generik: membran blob + inti + reseptor; varian attack lebih 'terang'."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    R = S * 0.36
-    col = hex_rgb(color)
-
-    if attack:
-        img = add_glow(img, col, R * 1.15, 110)
-        d = ImageDraw.Draw(img)
-
-    body_col = tuple(min(255, int(c * (1.25 if attack else 1.0))) for c in col)
-
-    # --- reseptor / duri di rim (untuk NK: duri panjang) ---
-    if style == "spiky":
-        n = 14
-        for i in range(n):
-            a = math.tau * i / n + (0.2 if attack else 0)
-            x1, y1 = cx + math.cos(a) * R * 0.92, cy + math.sin(a) * R * 0.92
-            x2, y2 = cx + math.cos(a) * R * 1.18, cy + math.sin(a) * R * 1.18
-            d.line([x1, y1, x2, y2], fill=rgba(mix(body_col, (255, 255, 255), 0.25)), width=int(S * 0.02))
-            d.ellipse([x2 - S * 0.02, y2 - S * 0.02, x2 + S * 0.02, y2 + S * 0.02],
-                      fill=rgba(mix(body_col, (255, 255, 255), 0.5)))
-    elif style == "macrophage":
-        # pseudopodia: tonjolan blob besar
-        pts = blob_polygon(cx, cy, R * 1.12, points=48, wobble=0.16, seed=seed, lobes=6)
-        d.polygon(pts, fill=rgba(mix(body_col, (0, 0, 0), 0.25)))
+def nucleus(c: Canvas, cx, cy, r, color, kind="single"):
+    rgb = hex_rgb(color) if isinstance(color, str) else color
+    dark = shade(rgb, 0.45)
+    hi = shade(rgb, 1.65)
+    if kind == "segmented":
+        for dx, dy in [(-8, 0), (0, -5), (8, 2)]:
+            c.ellipse(cx + dx, cy + dy, r * 0.55, r * 0.4, dark, 0.86, rot=dx * 0.04)
+            c.circle(cx + dx - 2, cy + dy - 2, r * 0.13, hi, 0.8)
+    elif kind == "crescent":
+        c.ellipse(cx, cy, r * 0.76, r * 0.42, dark, 0.84, rot=-0.6)
+        c.ellipse(cx + 5, cy - 3, r * 0.6, r * 0.32, shade(rgb, 1.1), 0.48, rot=-0.6)
     else:
-        # reseptor titik kecil di rim
-        n = 10
-        for i in range(n):
-            a = math.tau * i / n + seed
-            px, py = cx + math.cos(a) * R * 1.02, cy + math.sin(a) * R * 1.02
-            rr = S * 0.028
-            d.ellipse([px - rr, py - rr, px + rr, py + rr], fill=rgba(mix(body_col, (255, 255, 255), 0.45)))
-
-    # --- tubuh (gradien radial) dengan mask blob ---
-    grad = radial_gradient(S, cx - R * 0.15, cy - R * 0.15, R * 1.05,
-                           mix(body_col, (255, 255, 255), 0.55),
-                           mix(body_col, (0, 0, 0), 0.35))
-    body_pts = blob_polygon(cx, cy, R, points=44, wobble=0.08, seed=seed + 1,
-                            lobes=5 if style != "macrophage" else 7)
-    paste_masked(img, grad, lambda md: md.polygon(body_pts, fill=255))
-
-    # --- membran luar ---
-    d = ImageDraw.Draw(img)
-    d.line(body_pts + [body_pts[0]], fill=rgba(mix(body_col, (255, 255, 255), 0.6), 200), width=int(S * 0.016), joint="curve")
-
-    # --- organel kecil ---
-    rnd = random.Random(seed + 7)
-    for _ in range(5):
-        a = rnd.uniform(0, math.tau)
-        rr = rnd.uniform(0.25, 0.62) * R
-        ox, oy = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-        orr = S * rnd.uniform(0.018, 0.034)
-        oc = rgba(mix(body_col, (0, 0, 0), 0.35), 180)
-        d.ellipse([ox - orr, oy - orr, ox + orr, oy + orr], fill=oc)
-
-    # --- inti (nucleus) ---
-    nR = R * (0.34 if style != "macrophage" else 0.30)
-    nuc = radial_gradient(S, cx, cy, nR * 1.1,
-                          mix(body_col, (255, 255, 255), 0.15),
-                          mix(body_col, (0, 0, 0), 0.62))
-    paste_masked(img, nuc, lambda md: md.ellipse([cx - nR, cy - nR, cx + nR, cy + nR], fill=255))
-    d = ImageDraw.Draw(img)
-    d.ellipse([cx - nR, cy - nR, cx + nR, cy + nR], outline=rgba(mix(body_col, (255, 255, 255), 0.4), 170),
-              width=int(S * 0.012))
-
-    img = specular_highlight(img, cx - R * 0.35, cy - R * 0.42, R * 0.32, 95)
-
-    if attack:
-        # kilat energi kecil di sekeliling saat attack
-        rnd = random.Random(seed + 21)
-        for _ in range(6):
-            a = rnd.uniform(0, math.tau)
-            rr = R * rnd.uniform(1.0, 1.14)
-            px, py = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-            d = ImageDraw.Draw(img)
-            d.line([px, py, px + math.cos(a) * S * 0.05, py + math.sin(a) * S * 0.05],
-                   fill=(255, 255, 255, 210), width=int(S * 0.014))
-
-    return finish(img, size)
+        c.ellipse(cx, cy, r * 0.48, r * 0.36, dark, 0.86, rot=0.4)
+        c.circle(cx - r * 0.12, cy - r * 0.13, r * 0.11, hi, 0.9)
 
 
-def draw_bakteri(size, attack=False):
-    """Bakteri: batang merah kapsul + flagela."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#ff6b6b")
-    L, W = S * 0.36, S * 0.14
-    ang = math.radians(-30)
-
-    def rot(px, py):
-        dx, dy = px - cx, py - cy
-        return (cx + dx * math.cos(ang) - dy * math.sin(ang),
-                cy + dx * math.sin(ang) + dy * math.cos(ang))
-
-    # flagela (3 heliks kecil di kedua ujung)
-    rnd = random.Random(5)
-    for side in (-1, 1):
-        for k in range(3):
-            pts = []
-            bx = cx + side * L * 0.92
-            for t in range(8):
-                tt = t / 7
-                px = bx + side * tt * S * 0.13
-                py = cy + (k - 1) * W * 0.5 + math.sin(tt * math.pi * 2 + k) * S * 0.035
-                pts.append(rot(px, py))
-            d.line(pts, fill=rgba(mix(col, (255, 255, 255), 0.25), 220), width=int(S * 0.014), joint="curve")
-
-    # tubuh kapsul (gradien)
-    grad = radial_gradient(S, cx - S * 0.05, cy - S * 0.05, L * 1.05,
-                           mix(col, (255, 255, 255), 0.55), mix(col, (0, 0, 0), 0.4))
-    # tubuh kapsul (gradien) = rect + 2 lingkaran ujung
-    body = [rot(cx - L, cy - W), rot(cx + L, cy - W), rot(cx + L, cy + W), rot(cx - L, cy + W)]
-    cL, cR = rot(cx - L, cy), rot(cx + L, cy)
-
-    def _bakteri_mask(md):
-        md.polygon(body, fill=255)
-        md.ellipse([cL[0] - W, cL[1] - W, cL[0] + W, cL[1] + W], fill=255)
-        md.ellipse([cR[0] - W, cR[1] - W, cR[0] + W, cR[1] + W], fill=255)
-
-    paste_masked(img, grad, _bakteri_mask)
-    d = ImageDraw.Draw(img)
-    # outline membran
-    d.line(body + [body[0]], fill=rgba(mix(col, (255, 255, 255), 0.6), 210), width=int(S * 0.014))
-    for ex in (cx - L, cx + L):
-        c = rot(ex, cy)
-        d.ellipse([c[0] - W, c[1] - W, c[0] + W, c[1] + W], outline=rgba(mix(col, (255, 255, 255), 0.6), 210),
-                  width=int(S * 0.014))
-    # inti memanjang
-    nuc = radial_gradient(S, cx, cy, W * 0.9, mix(col, (255, 255, 255), 0.2), mix(col, (0, 0, 0), 0.6))
-    paste_masked(img, nuc, lambda md: md.ellipse([cx - L * 0.62, cy - W * 0.52, cx + L * 0.62, cy + W * 0.52], fill=255))
-    # strip sel dinding
-    d = ImageDraw.Draw(img)
-    for t in (-0.4, 0.0, 0.4):
-        x = cx + L * t
-        d.line([rot(x, cy - W), rot(x, cy + W)], fill=rgba(mix(col, (0, 0, 0), 0.3), 140), width=int(S * 0.012))
-    img = specular_highlight(img, cx - S * 0.08, cy - W * 0.8, S * 0.08, 110)
-    return finish(img, size)
+def eyes(c: Canvas, cx, cy, aggressive=False):
+    if aggressive:
+        c.line(cx - 15, cy - 6, cx - 6, cy - 3, (18, 63, 58), 3)
+        c.line(cx + 15, cy - 6, cx + 6, cy - 3, (18, 63, 58), 3)
+    else:
+        c.circle(cx - 10, cy - 6, 2.2, (18, 63, 58), 0.95)
+        c.circle(cx + 10, cy - 6, 2.2, (18, 63, 58), 0.95)
 
 
-def draw_virus(size, spikes=12, small=False, attack=False):
-    """Virus berduri (corona-like). small=True untuk virion."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#9be15d" if not small else "#c7f464")
-    R = S * (0.22 if small else 0.3)
+def draw_hero(hero_id: str, color: str, archetype: str, size=128, attack=False, portrait=False) -> Canvas:
+    c = Canvas(size)
+    cx = cy = size / 2
+    scale = size / 128
+    rgb = hex_rgb(color)
+    r = 34 * scale if not portrait else 40 * scale
 
-    if attack:
-        img = add_glow(img, col, R * 1.4, 120)
-        d = ImageDraw.Draw(img)
+    if archetype == "phagocyte":
+        body(c, cx, cy + 4 * scale, r, color, seed=10, sx=1.08, sy=0.92, wobble=0.16)
+        for a in [-2.8, -0.25, 0.45, 2.7]:
+            c.line(cx + math.cos(a) * r * 0.55, cy + math.sin(a) * r * 0.35,
+                   cx + math.cos(a) * r * 1.16, cy + math.sin(a) * r * 0.92, shade(rgb, 1.15), 5 * scale, 0.9)
+        nucleus(c, cx - 3 * scale, cy + 4 * scale, 16 * scale, rgb)
+        c.ellipse(cx + 10 * scale, cy + 13 * scale, 14 * scale, 7 * scale, shade(rgb, 0.38), 0.8, rot=0.1)
+        if attack:
+            c.line(cx + 18 * scale, cy + 5 * scale, cx + 54 * scale, cy - 8 * scale, shade(rgb, 1.35), 8 * scale, 0.9)
+    elif archetype == "dendritic":
+        body(c, cx, cy + 4 * scale, r * 0.86, color, seed=12, sx=0.95, sy=0.9, wobble=0.1)
+        for i, a in enumerate([-2.7, -2.15, -1.35, -0.55, 0.05, 0.85, 1.7, 2.4]):
+            end = (cx + math.cos(a) * r * 1.45, cy + math.sin(a) * r * 1.25)
+            c.line(cx + math.cos(a) * r * 0.45, cy + math.sin(a) * r * 0.4, end[0], end[1], shade(rgb, 1.2), 4.2 * scale, 0.92)
+            if i % 2 == 0:
+                c.circle(end[0], end[1], 3.5 * scale, (255, 215, 106), 0.9)
+        nucleus(c, cx, cy + 1 * scale, 15 * scale, rgb, "crescent")
+        if attack:
+            c.ring(cx, cy, r * 1.3, (128, 199, 255), 3.4 * scale, 0.78)
+    elif archetype == "net":
+        # Stage 0 polos: segmented nucleus only; NET filaments are Equity II.
+        body(c, cx, cy + 3 * scale, r * 0.94, color, seed=13, sx=0.9, sy=0.95, wobble=0.07)
+        nucleus(c, cx, cy + 1 * scale, 18 * scale, rgb, "segmented")
+        if attack:
+            c.ring(cx, cy + 2 * scale, r * 0.92, (169, 232, 255), 2.6 * scale, 0.42)
+    elif archetype == "granule_lance":
+        body(c, cx, cy + 4 * scale, r * 0.95, color, seed=14, sx=0.94, sy=0.9, wobble=0.06)
+        nucleus(c, cx - 2 * scale, cy + 1 * scale, 15 * scale, rgb, "crescent")
+        for i in range(6):
+            a = math.tau * i / 6
+            c.circle(cx + math.cos(a) * r * 0.52, cy + 4 * scale + math.sin(a) * r * 0.38, 3.2 * scale, (255, 159, 67), 0.72)
+        if attack:
+            c.ring(cx + 3 * scale, cy, r * 0.82, (255, 159, 67), 2.8 * scale, 0.38)
+    elif archetype == "vesicle_cloud":
+        body(c, cx, cy + 4 * scale, r * 0.92, color, seed=15, sx=0.96, sy=0.96, wobble=0.05)
+        nucleus(c, cx + 2 * scale, cy + 1 * scale, 13 * scale, rgb)
+        for i in range(13):
+            a = math.tau * i / 13
+            c.circle(cx + math.cos(a) * r * 0.7, cy + 4 * scale + math.sin(a) * r * 0.56, 3.8 * scale, shade(rgb, 1.45), 0.82)
+        if attack:
+            for i in range(6):
+                c.circle(cx + (25 + i * 6) * scale, cy + (-20 + i % 3 * 8) * scale, 4 * scale, (247, 220, 111), 0.82)
+    elif archetype == "granule_tank":
+        # Stage 0 polos: bulky mast cell body; large granule sacs are equity.
+        body(c, cx, cy + 5 * scale, r * 1.02, color, seed=16, sx=1.03, sy=0.95, wobble=0.05)
+        for i in range(6):
+            a = math.tau * i / 6
+            c.circle(cx + math.cos(a) * r * 0.48, cy + 4 * scale + math.sin(a) * r * 0.38, 3.4 * scale, (255, 179, 71), 0.6)
+        nucleus(c, cx, cy + 3 * scale, 14 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 4 * scale, r * 0.88, (255, 179, 71), 3 * scale, 0.35)
+    elif archetype == "cytotoxic":
+        # Stage 0 polos: compact killer T cell; TCR/perforin/granzyme appear via equity overlay.
+        body(c, cx, cy + 4 * scale, r * 0.92, color, seed=17, sx=0.88, sy=1.02, wobble=0.04)
+        nucleus(c, cx, cy + 4 * scale, 14 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 4 * scale, r * 0.9, (127, 219, 255), 2.8 * scale, 0.42)
+    elif archetype == "helper":
+        # Stage 0 polos: no command halo/staff yet.
+        body(c, cx, cy + 4 * scale, r * 0.92, color, seed=18, sx=0.92, sy=0.98, wobble=0.04)
+        nucleus(c, cx, cy + 3 * scale, 14 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 2 * scale, r * 0.95, (255, 224, 130), 2.8 * scale, 0.38)
+    elif archetype == "regulator":
+        # Stage 0 polos: calm green body; CTLA/TGF shields are equity.
+        body(c, cx, cy + 4 * scale, r * 0.92, color, seed=19, sx=0.93, sy=0.98, wobble=0.04)
+        nucleus(c, cx, cy + 4 * scale, 14 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 4 * scale, r * 0.88, (118, 215, 196), 2.8 * scale, 0.36)
+    elif archetype == "antibody":
+        # Stage 0 polos: plain B cell body; BCR/antibody-Y wings are equity.
+        body(c, cx, cy + 5 * scale, r * 0.9, color, seed=20, sx=0.94, sy=0.98, wobble=0.04)
+        for i in range(5):
+            a = math.tau * i / 5 + 0.2
+            c.circle(cx + math.cos(a) * r * 0.55, cy + 5 * scale + math.sin(a) * r * 0.42, 2.8 * scale, shade(rgb, 1.35), 0.55)
+        nucleus(c, cx, cy + 5 * scale, 14 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 5 * scale, r * 0.9, (215, 189, 226), 2.8 * scale, 0.38)
+    elif archetype == "nk_spike":
+        # Stage 0 polos: dark NK body; missing-self scanner and perforin ring are equity.
+        body(c, cx, cy + 4 * scale, r * 0.9, color, seed=21, sx=0.9, sy=1.0, wobble=0.05)
+        for i in range(7):
+            a = math.tau * i / 7
+            c.circle(cx + math.cos(a) * r * 0.48, cy + 4 * scale + math.sin(a) * r * 0.42, 2.8 * scale, (179, 157, 219), 0.5)
+        nucleus(c, cx, cy + 4 * scale, 13 * scale, rgb)
+        if attack:
+            c.ring(cx, cy + 4 * scale, r * 0.94, (255, 93, 115), 2.8 * scale, 0.4)
+    else:
+        body(c, cx, cy, r, color)
+        nucleus(c, cx, cy, 14 * scale, rgb)
 
-    # duri
-    for i in range(spikes):
-        a = math.tau * i / spikes
-        x1, y1 = cx + math.cos(a) * R * 0.95, cy + math.sin(a) * R * 0.95
-        x2, y2 = cx + math.cos(a) * R * 1.42, cy + math.sin(a) * R * 1.42
-        wdt = int(S * (0.016 if small else 0.024))
-        d.line([x1, y1, x2, y2], fill=rgba(mix(col, (0, 0, 0), 0.15)), width=wdt)
-        hr = S * (0.022 if small else 0.036)
-        d.ellipse([x2 - hr, y2 - hr, x2 + hr, y2 + hr], fill=rgba(mix(col, (255, 255, 255), 0.35)))
-
-    # kepala (gradien)
-    grad = radial_gradient(S, cx - R * 0.2, cy - R * 0.2, R * 1.15,
-                           mix(col, (255, 255, 255), 0.6), mix(col, (0, 0, 0), 0.35))
-    paste_masked(img, grad, lambda md: md.ellipse([cx - R, cy - R, cx + R, cy + R], fill=255))
-    d = ImageDraw.Draw(img)
-    d.ellipse([cx - R, cy - R, cx + R, cy + R], outline=rgba(mix(col, (255, 255, 255), 0.6), 200),
-              width=int(S * 0.014))
-
-    # DNA inti: garis berkelok
-    pts = []
-    rnd = random.Random(3 if small else 9)
-    for t in range(14):
-        tt = t / 13
-        px = cx - R * 0.5 + tt * R
-        py = cy + math.sin(tt * math.pi * 3 + rnd.uniform(0, 1)) * R * 0.28
-        pts.append((px, py))
-    d.line(pts, fill=rgba(mix(col, (0, 0, 0), 0.45)), width=int(S * 0.016), joint="curve")
-    img = specular_highlight(img, cx - R * 0.3, cy - R * 0.35, R * 0.28, 120)
-    return finish(img, size)
-
-
-def draw_parasit(size):
-    """Parasit: cacing magenta bersegmen melengkung."""
-    img, d = new_canvas(size)
-    S = size * SS
-    col = hex_rgb("#e15fd0")
-    # jalur tubuh: kurva S
-    pts = []
-    for t in range(30):
-        tt = t / 29
-        x = S * (0.16 + 0.68 * tt)
-        y = S * 0.5 + math.sin(tt * math.pi * 1.6 + 0.4) * S * 0.16
-        pts.append((x, y))
-
-    # gambar segmen dari ekor ke kepala (besar→kecil→besar)
-    for i, (x, y) in enumerate(reversed(pts)):
-        t = 1 - i / (len(pts) - 1)
-        r = S * (0.055 + 0.03 * math.sin(t * math.pi * 3.2) + (1 - t) * 0.05)
-        shade = mix(col, (0, 0, 0), 0.05 * (i % 2))
-        d.ellipse([x - r, y - r, x + r, y + r], fill=rgba(shade))
-    # gradient overlay sederhana: highlight atas
-    hl = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    hd = ImageDraw.Draw(hl)
-    for i, (x, y) in enumerate(reversed(pts)):
-        t = 1 - i / (len(pts) - 1)
-        r = S * (0.055 + 0.03 * math.sin(t * math.pi * 3.2) + (1 - t) * 0.05)
-        hd.ellipse([x - r * 0.7, y - r * 0.75, x + r * 0.2, y - r * 0.15], fill=(255, 255, 255, 46))
-    img = Image.alpha_composite(img, hl.filter(ImageFilter.GaussianBlur(S * 0.012)))
-    d = ImageDraw.Draw(img)
-    # mata sederhana di kepala
-    hx, hy = pts[-1]
-    er = S * 0.016
-    d.ellipse([hx + S * 0.02 - er, hy - S * 0.05 - er, hx + S * 0.02 + er, hy - S * 0.05 + er], fill=(30, 10, 25, 255))
-    d.ellipse([hx + S * 0.045 - er, hy - S * 0.02 - er, hx + S * 0.045 + er, hy - S * 0.02 + er], fill=(30, 10, 25, 255))
-    return finish(img, size)
-
-
-def draw_spora(size):
-    """Spora jamur: bulat tebal berbenjol (kitin)."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#f2c14e")
-    R = S * 0.32
-
-    # benjolan luar
-    pts = blob_polygon(cx, cy, R * 1.05, points=26, wobble=0.14, seed=11, lobes=8)
-    d.polygon(pts, fill=rgba(mix(col, (0, 0, 0), 0.3)))
-    # tubuh
-    grad = radial_gradient(S, cx - R * 0.2, cy - R * 0.2, R * 1.1,
-                           mix(col, (255, 255, 255), 0.5), mix(col, (0, 0, 0), 0.3))
-    paste_masked(img, grad, lambda md: md.polygon(blob_polygon(cx, cy, R, 30, 0.07, 12, 7), fill=255))
-    d = ImageDraw.Draw(img)
-    # pori-pori
-    rnd = random.Random(4)
-    for _ in range(7):
-        a = rnd.uniform(0, math.tau)
-        rr = rnd.uniform(0.3, 0.75) * R
-        px, py = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-        pr = S * rnd.uniform(0.018, 0.032)
-        d.ellipse([px - pr, py - pr, px + pr, py + pr], fill=rgba(mix(col, (0, 0, 0), 0.4), 200))
-    d.line(pts + [pts[0]], fill=rgba(mix(col, (255, 255, 255), 0.45), 180), width=int(S * 0.014), joint="curve")
-    img = specular_highlight(img, cx - R * 0.3, cy - R * 0.4, R * 0.3, 100)
-    return finish(img, size)
+    eyes(c, cx, cy - 6 * scale, aggressive=attack)
+    if portrait:
+        c.ring(cx, cy, size * 0.43, shade(rgb, 1.25), 4 * scale, 0.8)
+    return c
 
 
-def draw_sel_kanker(size, attack=False):
-    """Bos: sel kanker raksasa tidak beraturan, inti gelapmultilobed."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#d7263d")
-    R = S * 0.4
-
-    if attack:
-        img = add_glow(img, (255, 80, 90), R * 1.1, 130)
-        d = ImageDraw.Draw(img)
-
-    # duri permukaan (papillary) khas sel kanker
-    rnd = random.Random(8)
-    for i in range(18):
-        a = math.tau * i / 18 + rnd.uniform(-0.1, 0.1)
-        x1, y1 = cx + math.cos(a) * R * 0.95, cy + math.sin(a) * R * 0.95
-        x2, y2 = cx + math.cos(a) * R * (1.12 + rnd.uniform(0, 0.1)), cy + math.sin(a) * R * (1.12 + rnd.uniform(0, 0.1))
-        d.line([x1, y1, x2, y2], fill=rgba(mix(col, (0, 0, 0), 0.35)), width=int(S * 0.02))
-
-    # tubuh tidak beraturan (multilobed nuclei style)
-    body_pts = blob_polygon(cx, cy, R, points=64, wobble=0.14, seed=13, lobes=4)
-    grad = radial_gradient(S, cx - R * 0.2, cy - R * 0.25, R * 1.1,
-                           mix(col, (255, 255, 255), 0.35), mix(col, (0, 0, 0), 0.5))
-    paste_masked(img, grad, lambda md: md.polygon(body_pts, fill=255))
-    d = ImageDraw.Draw(img)
-    d.line(body_pts + [body_pts[0]], fill=rgba(mix(col, (255, 255, 255), 0.5), 190), width=int(S * 0.014), joint="curve")
-
-    # inti gelap besar lobus
-    nR = R * 0.42
-    nuc_pts = blob_polygon(cx, cy, nR, points=30, wobble=0.22, seed=17, lobes=5)
-    nuc = radial_gradient(S, cx, cy, nR * 1.1, (90, 20, 40), (25, 5, 12))
-    paste_masked(img, nuc, lambda md: md.polygon(nuc_pts, fill=255))
-    # nukleolus
-    d = ImageDraw.Draw(img)
-    for _ in range(3):
-        a = rnd.uniform(0, math.tau)
-        rr = rnd.uniform(0, nR * 0.4)
-        px, py = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-        pr = S * 0.028
-        d.ellipse([px - pr, py - pr, px + pr, py + pr], fill=(160, 40, 60, 235))
-    img = specular_highlight(img, cx - R * 0.32, cy - R * 0.4, R * 0.3, 80)
-    return finish(img, size)
+HEROES = [
+    ("macrophage", "#4a7c59", "phagocyte"),
+    ("dendritic", "#ff8c00", "dendritic"),
+    ("neutrophil", "#1a5276", "net"),
+    ("eosinophil", "#ff6b81", "granule_lance"),
+    ("basophil", "#8e44ad", "vesicle_cloud"),
+    ("mastcell", "#a03328", "granule_tank"),
+    ("tcd8", "#00d2ff", "cytotoxic"),
+    ("tcd4", "#f1c40f", "helper"),
+    ("treg", "#2ecc71", "regulator"),
+    ("bcell", "#bb8fce", "antibody"),
+    ("nkcell", "#4a235a", "nk_spike"),
+]
 
 
-# ----------------------------------------------------------------------
-# ITEMS
-# ----------------------------------------------------------------------
+def draw_enemy(kind: str, color: str, size=128, attack=False) -> Canvas:
+    c = Canvas(size)
+    cx = cy = size / 2
+    scale = size / 128
+    rgb = hex_rgb(color)
+    r = 34 * scale if size <= 128 else 72 * scale
 
-def draw_glukosa(size):
-    """Kristal heksagon kuning."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#ffd93d")
-    R = S * 0.34
-    pts = [(cx + math.cos(math.tau * i / 6 + math.pi / 6) * R,
-            cy + math.sin(math.tau * i / 6 + math.pi / 6) * R) for i in range(6)]
-    grad = radial_gradient(S, cx - R * 0.2, cy - R * 0.2, R * 1.2,
-                           mix(col, (255, 255, 255), 0.7), mix(col, (0, 0, 0), 0.25))
-    paste_masked(img, grad, lambda md: md.polygon(pts, fill=255))
-    d = ImageDraw.Draw(img)
-    d.line(pts + [pts[0]], fill=rgba(mix(col, (255, 255, 255), 0.8), 230), width=int(S * 0.02), joint="curve")
-    # kilau dalam
-    d.line([cx - R * 0.4, cy + R * 0.1, cx - R * 0.05, cy - R * 0.45], fill=(255, 255, 255, 190), width=int(S * 0.03))
-    img = specular_highlight(img, cx - R * 0.15, cy - R * 0.3, R * 0.22, 140)
-    return finish(img, size)
+    if kind == "bacterium":
+        c.ellipse(cx + 4 * scale, cy + 9 * scale, r * 1.05, r * 0.35, (0, 0, 0), 0.16)
+        c.ellipse(cx, cy, r * 1.1, r * 0.48, shade(rgb, 0.82), 1, rot=0.25)
+        c.radial_ellipse(cx - 8 * scale, cy - 5 * scale, r * 0.95, r * 0.38, shade(rgb, 1.45), rgb, rot=0.25, steps=18)
+        for x in [-22, 0, 22]:
+            c.line(cx + x * scale, cy - 19 * scale, cx + (x + 6) * scale, cy + 17 * scale, shade(rgb, 0.55), 2.3 * scale, 0.55)
+        for a in [-2.7, 2.7]:
+            c.line(cx + math.cos(a) * r, cy + math.sin(a) * r * 0.45, cx + math.cos(a) * r * 1.45, cy + math.sin(a) * r * 0.9, shade(rgb, 1.2), 3 * scale, 0.8)
+        if attack:
+            c.star_spikes(cx + 28 * scale, cy - 8 * scale, 10 * scale, shade(rgb, 1.2), 5, 8 * scale, 0.8)
+    elif kind == "armored_bacterium":
+        c.ellipse(cx, cy, r * 1.12, r * 0.55, shade(rgb, 0.7), 1, rot=-0.2)
+        c.ring(cx, cy, r * 0.72, (245, 198, 79), 5 * scale, 0.85)
+        for x in [-28, -10, 10, 28]:
+            c.line(cx + x * scale, cy - 24 * scale, cx + (x + 7) * scale, cy + 25 * scale, (255, 224, 130), 3 * scale, 0.78)
+        if attack:
+            c.star_spikes(cx, cy, r * 0.84, (255, 217, 61), 8, 8 * scale, 0.55)
+    elif kind == "toxic_bacterium":
+        c.ellipse(cx, cy, r * 1.05, r * 0.5, shade(rgb, 0.82), 1, rot=0.1)
+        c.ring(cx, cy, r * 0.92, (110, 240, 110), 4 * scale, 0.72)
+        c.ring(cx, cy, r * 0.6, shade(rgb, 1.35), 2.3 * scale, 0.8)
+        for i in range(6):
+            a = i * math.tau / 6
+            c.circle(cx + math.cos(a) * r * 0.62, cy + math.sin(a) * r * 0.35, 4 * scale, (110, 240, 110), 0.8)
+        if attack:
+            for i in range(5):
+                c.circle(cx + (24 + i * 7) * scale, cy + (-18 + i % 2 * 16) * scale, 4 * scale, (110, 240, 110), 0.82)
+    elif kind == "virus":
+        c.star_spikes(cx, cy, r * 0.82, shade(rgb, 0.8), 14, 11 * scale, 0.92, rot=0.2)
+        c.radial_ellipse(cx - 5 * scale, cy - 7 * scale, r * 0.74, r * 0.74, shade(rgb, 1.45), rgb, steps=22)
+        for i in range(6):
+            a = i * math.tau / 6 + 0.2
+            c.line(cx, cy, cx + math.cos(a) * r * 0.62, cy + math.sin(a) * r * 0.62, shade(rgb, 0.55), 2 * scale, 0.48)
+        if attack:
+            c.ring(cx, cy, r * 1.02, (255, 93, 115), 4 * scale, 0.6)
+    elif kind == "virion":
+        c.star_spikes(cx, cy, r * 0.58, shade(rgb, 0.82), 10, 8 * scale, 0.9)
+        c.radial_ellipse(cx - 3 * scale, cy - 4 * scale, r * 0.52, r * 0.52, shade(rgb, 1.45), rgb, steps=18)
+    elif kind == "parasite":
+        pts = []
+        for i in range(22):
+            x = cx - 42 * scale + i * 4 * scale
+            y = cy + math.sin(i * 0.75) * 13 * scale
+            pts.append((x, y))
+        c.polyline(pts, shade(rgb, 0.75), 17 * scale, 1)
+        c.polyline(pts, shade(rgb, 1.25), 9 * scale, 0.95)
+        for x, y in pts[::3]:
+            c.line(x, y, x, y - 15 * scale, shade(rgb, 1.35), 2.1 * scale, 0.8)
+        c.circle(cx + 43 * scale, cy - 3 * scale, 7 * scale, (255, 224, 130), 0.95)
+        if attack:
+            c.line(cx + 42 * scale, cy - 3 * scale, cx + 60 * scale, cy - 17 * scale, (255, 107, 129), 4 * scale, 0.95)
+    elif kind == "fungus":
+        c.star_spikes(cx, cy, r * 0.75, shade(rgb, 0.75), 9, 7 * scale, 0.5)
+        c.radial_ellipse(cx, cy, r * 0.82, r * 0.72, shade(rgb, 1.35), rgb, steps=24)
+        c.ring(cx, cy, r * 0.55, shade(rgb, 0.6), 3 * scale, 0.65)
+        for i in range(10):
+            a = i * math.tau / 10
+            c.circle(cx + math.cos(a) * r * 0.45, cy + math.sin(a) * r * 0.38, 3.2 * scale, shade(rgb, 0.55), 0.7)
+    elif kind == "cancer":
+        c.blob(cx, cy, r * 0.9, shade(rgb, 0.75), seed=77, lobes=9, wobble=0.2, sx=1.05, sy=0.92)
+        c.radial_ellipse(cx - 12 * scale, cy - 12 * scale, r * 0.7, r * 0.58, shade(rgb, 1.35), rgb, steps=25)
+        for i in range(9):
+            a = i * math.tau / 9
+            c.line(cx + math.cos(a) * r * 0.45, cy + math.sin(a) * r * 0.38,
+                   cx + math.cos(a + 0.2) * r * 1.15, cy + math.sin(a + 0.2) * r * 1.0,
+                   shade(rgb, 0.62), 5 * scale, 0.82)
+        c.circle(cx + 3 * scale, cy + 2 * scale, r * 0.25, shade(rgb, 0.35), 0.92)
+        if attack:
+            c.star_spikes(cx, cy, r * 0.95, (255, 93, 115), 12, 18 * scale, 0.55, rot=0.1)
+    elif kind == "protozoa":
+        c.ellipse(cx, cy, r * 0.8, r * 1.0, shade(rgb, 0.78), 1, rot=-0.35)
+        c.radial_ellipse(cx - 6 * scale, cy - 8 * scale, r * 0.65, r * 0.8, shade(rgb, 1.45), rgb, rot=-0.35, steps=20)
+        for i in range(18):
+            a = i * math.tau / 18
+            c.line(cx + math.cos(a) * r * 0.72, cy + math.sin(a) * r * 0.9,
+                   cx + math.cos(a) * r * 1.0, cy + math.sin(a) * r * 1.15,
+                   shade(rgb, 1.25), 2 * scale, 0.8)
+        c.ellipse(cx + 4 * scale, cy + 6 * scale, 10 * scale, 16 * scale, shade(rgb, 0.42), 0.8, rot=-0.35)
+    elif kind == "toxin":
+        c.ellipse(cx, cy + 18 * scale, r * 0.9, r * 0.26, (0, 0, 0), 0.18)
+        pts = [(cx, cy - r * 0.85), (cx + r * 0.65, cy - r * 0.06), (cx + r * 0.38, cy + r * 0.72), (cx, cy + r * 0.9), (cx - r * 0.38, cy + r * 0.72), (cx - r * 0.65, cy - r * 0.06)]
+        c.polygon(pts, shade(rgb, 0.8), 1)
+        c.radial_ellipse(cx - 8 * scale, cy - 3 * scale, r * 0.45, r * 0.72, shade(rgb, 1.55), rgb, steps=18)
+        c.circle(cx - 9 * scale, cy - 18 * scale, 5 * scale, (255, 255, 255), 0.45)
+        if attack:
+            c.circle(cx + 30 * scale, cy + 11 * scale, 7 * scale, rgb, 0.55)
+            c.circle(cx - 34 * scale, cy + 19 * scale, 6 * scale, rgb, 0.45)
+    elif kind == "crystal":
+        pts = [(cx, cy - r), (cx + r * 0.66, cy - r * 0.22), (cx + r * 0.34, cy + r * 0.9), (cx - r * 0.45, cy + r * 0.78), (cx - r * 0.7, cy - r * 0.15)]
+        c.polygon(pts, shade(rgb, 0.82), 1)
+        c.polygon([(cx, cy - r), (cx + r * 0.66, cy - r * 0.22), (cx + 2 * scale, cy + 2 * scale)], shade(rgb, 1.45), 0.8)
+        c.polygon([(cx, cy - r), (cx - r * 0.7, cy - r * 0.15), (cx + 2 * scale, cy + 2 * scale)], shade(rgb, 1.15), 0.75)
+        c.line(cx - r * 0.55, cy - r * 0.1, cx + r * 0.55, cy + r * 0.05, (255, 255, 255), 2 * scale, 0.4)
+        if attack:
+            c.ring(cx, cy, r * 0.9, (255, 255, 255), 3 * scale, 0.45)
+    elif kind == "abnormal_cell":
+        c.blob(cx, cy, r * 0.86, shade(rgb, 0.8), seed=91, lobes=7, wobble=0.18, alpha=0.82)
+        c.ring(cx, cy, r * 0.88, (179, 157, 219), 3 * scale, 0.52)
+        c.circle(cx + 5 * scale, cy + 4 * scale, r * 0.26, shade(rgb, 0.35), 0.55)
+        c.line(cx - 20 * scale, cy - 18 * scale, cx + 24 * scale, cy + 18 * scale, (255, 243, 176), 2.4 * scale, 0.35)
+    elif kind == "toxin_boss":
+        c.blob(cx, cy, r * 0.72, shade(rgb, 0.7), seed=111, lobes=8, wobble=0.15, sx=1.0, sy=1.05)
+        c.star_spikes(cx, cy, r * 0.58, shade(rgb, 0.55), 14, 14 * scale, 0.86, rot=0.15)
+        c.radial_ellipse(cx - 18 * scale, cy - 22 * scale, r * 0.48, r * 0.6, shade(rgb, 1.55), rgb, steps=24)
+        for i in range(8):
+            a = i * math.tau / 8
+            c.circle(cx + math.cos(a) * r * 0.42, cy + math.sin(a) * r * 0.45, 7 * scale, (255, 243, 176), 0.55)
+        if attack:
+            c.star_spikes(cx, cy, r * 0.72, (255, 93, 115), 16, 22 * scale, 0.62)
+    else:
+        body(c, cx, cy, r, color)
 
-
-def draw_amino(size):
-    """Klaster 3 bola hijau (rantai asam amino)."""
-    img, d = new_canvas(size)
-    S = size * SS
-    col = hex_rgb("#7ae582")
-    balls = [(S * 0.42, S * 0.58, S * 0.16), (S * 0.58, S * 0.4, S * 0.13), (S * 0.62, S * 0.66, S * 0.1)]
-    for (bx, by, br) in balls:
-        grad = radial_gradient(S, bx - br * 0.3, by - br * 0.3, br * 1.3,
-                               mix(col, (255, 255, 255), 0.7), mix(col, (0, 0, 0), 0.3))
-        paste_masked(img, grad, lambda md, bx=bx, by=by, br=br: md.ellipse([bx - br, by - br, bx + br, by + br], fill=255))
-    d = ImageDraw.Draw(img)
-    # ikatan
-    for i in range(len(balls) - 1):
-        x1, y1 = balls[i][0], balls[i][1]
-        x2, y2 = balls[i + 1][0], balls[i + 1][1]
-        d.line([x1, y1, x2, y2], fill=rgba(mix(col, (0, 0, 0), 0.35), 220), width=int(S * 0.022))
-    return finish(img, size)
-
-
-def draw_vitamin_c(size):
-    """Kapsul pil oranye-putih."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#ff9f1c")
-    L, W = S * 0.28, S * 0.17
-    ang = math.radians(-35)
-
-    def rot(px, py):
-        dx, dy = px - cx, py - cy
-        return (cx + dx * math.cos(ang) - dy * math.sin(ang),
-                cy + dx * math.sin(ang) + dy * math.cos(ang))
-
-    body = [rot(cx - L, cy - W), rot(cx + L, cy - W), rot(cx + L, cy + W), rot(cx - L, cy + W)]
-    e1, e2 = rot(cx - L, cy), rot(cx + L, cy)
-    grad = radial_gradient(S, cx - S * 0.05, cy - S * 0.05, L * 1.2,
-                           mix(col, (255, 255, 255), 0.6), mix(col, (0, 0, 0), 0.2))
-
-    def _vitamin_mask(md):
-        md.polygon(body, fill=255)
-        md.ellipse([e1[0] - W, e1[1] - W, e1[0] + W, e1[1] + W], fill=255)
-        md.ellipse([e2[0] - W, e2[1] - W, e2[0] + W, e2[1] + W], fill=255)
-
-    paste_masked(img, grad, _vitamin_mask)
-    # setengah putih (kanan)
-    white = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    wd = ImageDraw.Draw(white)
-    wd.pieslice([e2[0] - W, e2[1] - W, e2[0] + W, e2[1] + W], -90, 90, fill=(245, 245, 250, 255))
-    wd.polygon([rot(cx, cy - W), rot(cx + L, cy - W), rot(cx + L, cy + W), rot(cx, cy + W)], fill=(245, 245, 250, 255))
-    white = white.filter(ImageFilter.GaussianBlur(S * 0.004))
-    img = Image.alpha_composite(img, white)
-    d = ImageDraw.Draw(img)
-    d.line([rot(cx, cy - W), rot(cx, cy + W)], fill=(200, 160, 90, 220), width=int(S * 0.012))
-    img = specular_highlight(img, cx - W * 0.5, cy - W * 0.9, S * 0.09, 130)
-    return finish(img, size)
-
-
-def draw_antibodi(size):
-    """Antibodi: bentuk Y cyan."""
-    img, d = new_canvas(size)
-    S = size * SS
-    col = hex_rgb("#4cc9f0")
-    cx = S * 0.5
-    cy = S * 0.56
-    arm = S * 0.26
-    stem = S * 0.3
-    w = int(S * 0.055)
-
-    top = (cx, cy - stem * 0.55)
-    left = (cx - arm, cy - stem * 0.55 - arm * 0.9)
-    right = (cx + arm, cy - stem * 0.55 - arm * 0.9)
-    bottom = (cx, cy + stem)
-
-    img = add_glow(img, col, S * 0.3, 80)
-    d = ImageDraw.Draw(img)
-    d.line([bottom, top], fill=rgba(col), width=w)
-    d.line([top, left], fill=rgba(col), width=w)
-    d.line([top, right], fill=rgba(col), width=w)
-    # ujung antigen-binding
-    for p in (left, right):
-        d.ellipse([p[0] - w * 0.75, p[1] - w * 0.75, p[0] + w * 0.75, p[1] + w * 0.75],
-                  fill=rgba(mix(col, (255, 255, 255), 0.6)))
-    # inti pangkal
-    d.ellipse([bottom[0] - w * 0.8, bottom[1] - w * 0.8, bottom[0] + w * 0.8, bottom[1] + w * 0.8],
-              fill=rgba(mix(col, (0, 0, 0), 0.2)))
-    img = specular_highlight(img, cx - arm * 0.5, cy - stem * 1.1, S * 0.07, 150)
-    return finish(img, size)
-
-
-def draw_sitokin(size):
-    """Sinyal sitokin: titik pusat + gelombang radiasi pink."""
-    img, d = new_canvas(size)
-    S = size * SS
-    cx = cy = S / 2
-    col = hex_rgb("#f72585")
-    img = add_glow(img, col, S * 0.28, 100)
-    d = ImageDraw.Draw(img)
-    # 3 cincin gelombang
-    for k, rr in enumerate((S * 0.16, S * 0.26, S * 0.36)):
-        alpha = 230 - k * 70
-        d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=rgba(col, alpha), width=int(S * (0.03 - k * 0.006)))
-    # titik pusat
-    grad = radial_gradient(S, cx, cy, S * 0.12, mix(col, (255, 255, 255), 0.7), col)
-    paste_masked(img, grad, lambda md: md.ellipse([cx - S * 0.1, cy - S * 0.1, cx + S * 0.1, cy + S * 0.1], fill=255))
-    return finish(img, size)
+    # hostile eyes/core; bosses keep large core from their branch.
+    if kind not in {"toxin", "crystal"}:
+        eyes(c, cx, cy - 7 * scale, aggressive=True)
+    return c
 
 
-# ----------------------------------------------------------------------
-# UI EMBLEM (untuk loading screen & dekorasi)
-# ----------------------------------------------------------------------
-
-def draw_ui_shield(size):
-    """Perisai teal dua-tone + virus lucu di tengah + kuman kecil (ala reference)."""
-    img, d = new_canvas(size)
-    S = size * SS
-    teal = hex_rgb("#2F9C8F")
-    teal_deep = hex_rgb("#1F7A70")
-    teal_light = hex_rgb("#BFE3D8")
-    cream = hex_rgb("#FDF6E3")
-    coral = hex_rgb("#F2825C")
-    green = hex_rgb("#A9D795")
-
-    W = S * 0.60
-    left = (S - W) / 2
-    right = (S + W) / 2
-    top = S * 0.16
-    mid = S * 0.60
-    tip = S * 0.86
-
-    # mask perisai: rounded rect + segitiga bawah
-    mask = Image.new("L", img.size, 0)
-    md = ImageDraw.Draw(mask)
-    md.rounded_rectangle([left, top, right, mid], radius=int(S * 0.085), fill=255)
-    md.polygon([(left, mid - S * 0.04), (right, mid - S * 0.04), (S / 2, tip)], fill=255)
-
-    # body dua-tone (kiri terang, kanan gelap — seperti reference)
-    body = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    bd = ImageDraw.Draw(body)
-    bd.rectangle([left, top, S / 2, tip], fill=rgba(mix(teal, (255, 255, 255), 0.10)))
-    bd.rectangle([S / 2, top, right, tip], fill=rgba(teal_deep))
-    img.paste(body, (0, 0), mask)
-
-    d = ImageDraw.Draw(img)
-    # rim highlight atas
-    d.rounded_rectangle([left, top, right, mid], radius=int(S * 0.085),
-                        outline=rgba(mix(teal, (255, 255, 255), 0.45), 180), width=int(S * 0.014))
-
-    # --- virus lucu di tengah perisai ---
-    cx = cy = S * 0.46
-    R = S * 0.15
-    for i in range(8):
-        a = math.tau * i / 8
-        x1, y1 = cx + math.cos(a) * R * 0.92, cy + math.sin(a) * R * 0.92
-        x2, y2 = cx + math.cos(a) * R * 1.28, cy + math.sin(a) * R * 1.28
-        d.line([x1, y1, x2, y2], fill=rgba(cream), width=int(S * 0.022))
-        kr = S * 0.026
-        d.ellipse([x2 - kr, y2 - kr, x2 + kr, y2 + kr], fill=rgba(cream))
-    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=rgba(cream))
-    # muka virus: dua mata + senyum
-    er = S * 0.016
-    d.ellipse([cx - R * 0.42 - er, cy - R * 0.18 - er, cx - R * 0.42 + er, cy - R * 0.18 + er], fill=rgba(teal_deep))
-    d.ellipse([cx + R * 0.42 - er, cy - R * 0.18 - er, cx + R * 0.42 + er, cy + R * 0.18 + er], fill=rgba(teal_deep))
-    d.arc([cx - R * 0.34, cy - R * 0.05, cx + R * 0.34, cy + R * 0.42], 20, 160, fill=rgba(teal_deep), width=int(S * 0.014))
-
-    # --- kuman kecil di sekitar (siluet coral & green dengan mata) ---
-    def germ(gx, gy, gr, col):
-        pts = blob_polygon(gx, gy, gr, points=22, wobble=0.12, seed=int(gx + gy), lobes=5)
-        d.polygon(pts, fill=rgba(col))
-        er2 = gr * 0.16
-        d.ellipse([gx - gr * 0.35 - er2, gy - gr * 0.1 - er2, gx - gr * 0.35 + er2, gy - gr * 0.1 + er2], fill=rgba(cream))
-        d.ellipse([gx + gr * 0.35 - er2, gy - gr * 0.1 - er2, gx + gr * 0.35 + er2, gy - gr * 0.1 + er2], fill=rgba(cream))
-
-    germ(S * 0.84, S * 0.20, S * 0.085, coral)
-    germ(S * 0.13, S * 0.66, S * 0.075, mix(coral, (255, 255, 255), 0.15))
-    germ(S * 0.80, S * 0.80, S * 0.06, green)
-
-    # dot dekoratif
-    for (dx, dy, dr, dc) in ((S * 0.18, S * 0.24, 0.02, green), (S * 0.88, S * 0.52, 0.016, teal_light),
-                             (S * 0.10, S * 0.42, 0.014, coral)):
-        rr = S * dr
-        d.ellipse([dx - rr, dy - rr, dx + rr, dy + rr], fill=rgba(dc))
-
-    return finish(img, size)
+ENEMIES = [
+    ("enemy_bakteri.png", "bacterium", "#ff6b6b", 128, False),
+    ("enemy_bakteri_gp.png", "armored_bacterium", "#8d5fb3", 128, False),
+    ("enemy_bakteri_gn.png", "toxic_bacterium", "#b39ddb", 128, False),
+    ("enemy_virus.png", "virus", "#9be15d", 128, False),
+    ("enemy_virion.png", "virion", "#c7f464", 96, False),
+    ("enemy_parasit.png", "parasite", "#e15fd0", 128, False),
+    ("enemy_spora.png", "fungus", "#f2c14e", 128, False),
+    ("enemy_sel_kanker.png", "cancer", "#d7263d", 256, False),
+    ("enemy_sel_kanker_attack.png", "cancer", "#d7263d", 256, True),
+    ("enemy_protozoa.png", "protozoa", "#3ecfb2", 128, False),
+    ("enemy_toksin.png", "toxin", "#6ef06e", 128, False),
+    ("enemy_prion.png", "crystal", "#9b8fae", 128, False),
+    ("enemy_sel_abnormal.png", "abnormal_cell", "#2fb89f", 128, False),
+    ("enemy_toksin_raksasa.png", "toxin_boss", "#7ed957", 256, False),
+    ("enemy_toksin_raksasa_attack.png", "toxin_boss", "#7ed957", 256, True),
+]
 
 
-# ----------------------------------------------------------------------
-# Render semua
-# ----------------------------------------------------------------------
+def part_icon(kind: str, color: str) -> Canvas:
+    c = Canvas(112)
+    cx = cy = 56
+    rgb = hex_rgb(color)
+    c.ellipse(cx + 3, cy + 8, 34, 14, (0, 0, 0), 0.18)
+    c.radial_ellipse(cx - 5, cy - 7, 33, 33, shade(rgb, 1.45), rgb, steps=25)
+    c.ring(cx, cy, 34, shade(rgb, 0.55), 3.2, 0.9)
+    if kind == "receptor":
+        for rot in [-0.7, 0, 0.7]:
+            c.antibody_y(cx, cy + 4, 42, (255, 243, 176), rot, 4.2, 0.92)
+    elif kind == "membrane":
+        for rr in [20, 29, 38]:
+            c.ring(cx, cy, rr, (128, 199, 255), 2.5, 0.72)
+        c.line(cx - 24, cy, cx + 24, cy, (255, 255, 255), 3, 0.55)
+    elif kind == "effector":
+        c.line(cx - 18, cy + 20, cx + 22, cy - 24, (255, 255, 255), 7, 0.9)
+        c.star_spikes(cx + 21, cy - 24, 8, (255, 209, 90), 6, 8, 0.9)
+    else:
+        c.polygon([(cx, cy - 35), (cx + 31, cy - 6), (cx + 19, cy + 32), (cx - 19, cy + 32), (cx - 31, cy - 6)], (255, 243, 176), 0.82)
+        c.circle(cx, cy, 13, shade(rgb, 0.45), 0.84)
+        c.ring(cx, cy, 43, (255, 224, 130), 3, 0.65)
+    return c
+
+
+PARTS = [
+    ("part_equity_receptor.png", "receptor", "#63c76a"),
+    ("part_equity_membrane.png", "membrane", "#4aa3e0"),
+    ("part_equity_effector.png", "effector", "#b07ae0"),
+    ("part_equity_memory_core.png", "memory", "#f5c64f"),
+]
+
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-
-    sprites = {
-        # heroes (idle & attack)
-        "hero_sel_t_idle.png": draw_cell_hero(128, "#35d0ba", seed=1, style="tcell"),
-        "hero_sel_t_attack.png": draw_cell_hero(128, "#35d0ba", seed=1, attack=True, style="tcell"),
-        "hero_makrofag_idle.png": draw_cell_hero(128, "#b07fd8", seed=2, style="macrophage"),
-        "hero_makrofag_attack.png": draw_cell_hero(128, "#b07fd8", seed=2, attack=True, style="macrophage"),
-        "hero_sel_b_idle.png": draw_cell_hero(128, "#5aa2ff", seed=3, style="bcell"),
-        "hero_sel_b_attack.png": draw_cell_hero(128, "#5aa2ff", seed=3, attack=True, style="bcell"),
-        "hero_sel_nk_idle.png": draw_cell_hero(128, "#ff8c42", seed=4, style="spiky"),
-        "hero_sel_nk_attack.png": draw_cell_hero(128, "#ff8c42", seed=4, attack=True, style="spiky"),
-        # enemies
-        "enemy_bakteri.png": draw_bakteri(128),
-        "enemy_virus.png": draw_virus(128, spikes=12),
-        "enemy_virion.png": draw_virus(96, spikes=7, small=True),
-        "enemy_parasit.png": draw_parasit(128),
-        "enemy_spora.png": draw_spora(128),
-        "enemy_sel_kanker.png": draw_sel_kanker(256),
-        "enemy_sel_kanker_attack.png": draw_sel_kanker(256, attack=True),
-        # items
-        "item_glukosa.png": draw_glukosa(96),
-        "item_amino.png": draw_amino(96),
-        "item_vitamin_c.png": draw_vitamin_c(96),
-        "item_antibodi.png": draw_antibodi(96),
-        "item_sitokin.png": draw_sitokin(96),
-        # ui emblem
-        "ui_shield_emblem.png": draw_ui_shield(256),
-    }
-
-    for name, img in sprites.items():
-        path = os.path.join(OUT_DIR, name)
-        img.save(path, "PNG")
-        kb = os.path.getsize(path) / 1024
-        print(f"  ✓ {name} ({img.size[0]}x{img.size[1]}, {kb:.1f} KB)")
-
-    print(f"\n{len(sprites)} sprite tersimpan di {os.path.abspath(OUT_DIR)}")
+    for hero_id, color, archetype in HEROES:
+        draw_hero(hero_id, color, archetype, 128, attack=False).save(os.path.join(OUT_DIR, f"hero_{hero_id}_idle.png"))
+        draw_hero(hero_id, color, archetype, 128, attack=True).save(os.path.join(OUT_DIR, f"hero_{hero_id}_attack.png"))
+        draw_hero(hero_id, color, archetype, 128, attack=False, portrait=True).save(os.path.join(OUT_DIR, f"portrait_{hero_id}.png"))
+    for filename, kind, color, size, attack in ENEMIES:
+        draw_enemy(kind, color, size, attack).save(os.path.join(OUT_DIR, filename))
+    for filename, kind, color in PARTS:
+        part_icon(kind, color).save(os.path.join(OUT_DIR, filename))
+    print(f"Generated {len(HEROES) * 3 + len(ENEMIES) + len(PARTS)} character sprites in {OUT_DIR}")
 
 
 if __name__ == "__main__":

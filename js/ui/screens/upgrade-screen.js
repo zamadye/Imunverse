@@ -13,6 +13,7 @@ import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 import { emit } from '../../core/ui-bridge.js';
 import { t as tr } from '../../systems/i18n.js';
+import { iconEl, TAB_ICONS, namedIconEl } from '../menu-icons.js';
 
 let activeTab = 'hero';
 let heroIdx = 0;
@@ -21,6 +22,8 @@ function wireTabs() {
   const tabs = document.getElementById('upg-tabs');
   if (tabs.dataset.wired) return;
   tabs.dataset.wired = '1';
+  // Ikon tab bespoke (menu-icons.js TAB_ICONS) — inline sekali saat wiring
+  tabs.querySelectorAll('.ut-ico[data-tab-ico]').forEach((sp) => { sp.innerHTML = TAB_ICONS[sp.dataset.tabIco] || ''; });
   tabs.querySelectorAll('.upg-tab').forEach((b) => b.addEventListener('click', () => {
     activeTab = b.dataset.tab;
     tabs.querySelectorAll('.upg-tab').forEach((x) => x.classList.toggle('active', x === b));
@@ -32,6 +35,8 @@ export function show() {
   const meta = STATE.meta;
   wireTabs();
   document.getElementById('upgrade-currency').textContent = meta.currency.toLocaleString('id-ID');
+  const imuEl = document.getElementById('upgrade-imun');
+  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   document.getElementById('upg-hero').classList.toggle('hidden', activeTab !== 'hero');
   document.getElementById('upg-global').classList.toggle('hidden', activeTab !== 'global');
@@ -94,15 +99,13 @@ export function show() {
             else if (res.reason) console.warn('[upgrade]', res.reason);
           },
         }, [
-          el('img', { class: 'inline-coin', src: 'assets/sprites/icon_coin.png', alt: '' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: '' }),
           el('span', { text: cost.toLocaleString('id-ID') }),
         ]);
 
     const row = el('div', { class: 'upg-row' }, [
       el('div', { class: 'upg-head' }, [
-        def.icon.startsWith('assets/')
-          ? el('div', { class: 'upg-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:26px;height:26px;object-fit:contain;' })])
-          : el('div', { class: 'upg-icon', text: def.icon }),
+        el('div', { class: 'upg-icon' }, [iconEl(def)]),
         el('div', { class: 'upg-info' }, [
           el('b', { class: 'upg-name-wrap' }, [
             el('span', { text: def.name }),
@@ -165,15 +168,13 @@ function renderGlobalTab(meta) {
             else if (res.reason) emit('toast', { message: res.reason, kind: 'danger' });
           },
         }, [
-          el('img', { class: 'inline-coin', src: 'assets/sprites/icon_imu.png', alt: '' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: '' }),
           el('span', { text: cost.toLocaleString('id-ID') }),
         ]);
 
     wrap.appendChild(el('div', { class: 'upg-row global-row' }, [
       el('div', { class: 'upg-head' }, [
-        def.icon.startsWith('assets/')
-          ? el('div', { class: 'upg-icon' }, [el('img', { src: def.icon, alt: '', style: 'width:26px;height:26px;object-fit:contain;' })])
-          : el('div', { class: 'upg-icon', text: def.icon }),
+        el('div', { class: 'upg-icon global' }, [iconEl(def)]),
         el('div', { class: 'upg-info' }, [
           el('b', { class: 'upg-name-wrap' }, [
             el('span', { text: def.name }),
@@ -215,23 +216,25 @@ function renderHeroTab(meta) {
     el('img', { class: 'hl-sprite', src: spriteToDataURL(heroDef.spritePortrait || heroDef.spriteIdle), alt: heroDef.name }),
     el('b', { class: 'hl-name', text: heroDef.name }),
     el('span', { class: 'hl-title', text: heroDef.title }),
-    el('div', { class: 'hl-stats' }, [
-      el('span', { text: `DMG +${Math.round(cfg.dmgPerLevel * level * 100)}%` }),
-      el('span', { text: `HP +${Math.round(cfg.hpPerLevel * level * 100)}%` }),
+    el('div', { class: 'hl-chips' }, [
+      el('span', { class: 'hl-chip atk' }, [namedIconEl('damage'), el('b', { text: `DMG +${Math.round(cfg.dmgPerLevel * level * 100)}%` })]),
+      el('span', { class: 'hl-chip hp' }, [namedIconEl('vitality'), el('b', { text: `HP +${Math.round(cfg.hpPerLevel * level * 100)}%` })]),
     ]),
     el('div', { class: 'hl-slider upg-slider' + (maxed ? ' maxed' : '') }, [
       el('div', { class: 'upg-fill', style: `width:${(level / cfg.maxLevel) * 100}%` }),
       el('div', { class: 'upg-knob', style: `left:${(level / cfg.maxLevel) * 100}%` }),
     ]),
-    el('button', {
-      class: 'btn btn-primary btn-hl-up',
-      disabled: maxed || meta.currency < cost,
-      text: maxed ? 'MAX ✓' : `LEVEL UP — ${cost}`,
-    }),
+    maxed
+      ? el('button', { class: 'btn btn-primary btn-hl-up', disabled: true, text: 'MAX ✓' })
+      : el('button', { class: 'btn btn-primary btn-hl-up', disabled: meta.currency < cost }, [
+          el('span', { text: 'LEVEL UP — ' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi' }),
+          el('span', { text: cost.toLocaleString('id-ID') }),
+        ]),
     el('div', { class: 'hl-nav' }, [
-      el('button', { class: 'icon-btn', 'aria-label': 'Sebelumnya' }, [el('img', { src: 'assets/sprites/icon_back.png', alt: '' })]),
+      el('button', { class: 'icon-btn', 'aria-label': 'Sebelumnya' }, [el('img', { src: 'assets/icons/ui-back.svg', alt: '' })]),
       el('span', { class: 'hl-owned', text: `${owned.length} hero dimiliki` }),
-      el('button', { class: 'icon-btn hl-next', 'aria-label': 'Berikutnya' }, [el('img', { src: 'assets/sprites/icon_back.png', alt: '', style: 'transform:rotate(180deg)' })]),
+      el('button', { class: 'icon-btn hl-next', 'aria-label': 'Berikutnya' }, [el('img', { src: 'assets/icons/ui-back.svg', alt: '', style: 'transform:rotate(180deg)' })]),
     ]),
   ]);
   card.querySelector('.btn-hl-up').addEventListener('click', () => {
@@ -265,25 +268,27 @@ function renderPasukanTab(meta) {
       el('span', { class: 'hl-level ally', text: `Lv ${level}` }),
     ]),
     el('div', { class: 'hl-ally-row' }, [
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_b_idle.png'), alt: 'Sel B' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_sel_nk_idle.png'), alt: 'Sel NK' }),
-      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_makrofag_idle.png'), alt: 'Makrofag' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_bcell_idle.png'), alt: 'Bella' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_nkcell_idle.png'), alt: 'Nyx' }),
+      el('img', { class: 'hl-ally', src: spriteToDataURL('assets/sprites/hero_macrophage_idle.png'), alt: 'Mako' }),
     ]),
     el('b', { class: 'hl-name', text: 'Pasukan Imun' }),
     el('span', { class: 'hl-title', text: 'Ikut bertarung otomatis — menembak patogen' }),
-    el('div', { class: 'hl-stats' }, [
-      el('span', { text: `DMG +${Math.round(cfg.dmgPerLevel * level * 100)}%` }),
-      el('span', { text: `Tempo +${Math.round(((0.95 - Math.max(0.55, 0.95 - cfg.speedPerLevel * level)) / 0.95) * 100)}%` }),
+    el('div', { class: 'hl-chips' }, [
+      el('span', { class: 'hl-chip atk' }, [namedIconEl('damage'), el('b', { text: `DMG +${Math.round(cfg.dmgPerLevel * level * 100)}%` })]),
+      el('span', { class: 'hl-chip spd' }, [namedIconEl('attack'), el('b', { text: `Tempo +${Math.round(((0.95 - Math.max(0.55, 0.95 - cfg.speedPerLevel * level)) / 0.95) * 100)}%` })]),
     ]),
     el('div', { class: 'hl-slider upg-slider' + (maxed ? ' maxed' : '') }, [
       el('div', { class: 'upg-fill', style: `width:${(level / cfg.maxLevel) * 100}%` }),
       el('div', { class: 'upg-knob', style: `left:${(level / cfg.maxLevel) * 100}%` }),
     ]),
-    el('button', {
-      class: 'btn btn-primary btn-hl-up',
-      disabled: maxed || meta.currency < cost,
-      text: maxed ? 'MAX ✓' : `LEVEL UP — ${cost}`,
-    }),
+    maxed
+      ? el('button', { class: 'btn btn-primary btn-hl-up', disabled: true, text: 'MAX ✓' })
+      : el('button', { class: 'btn btn-primary btn-hl-up', disabled: meta.currency < cost }, [
+          el('span', { text: 'LEVEL UP — ' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi' }),
+          el('span', { text: cost.toLocaleString('id-ID') }),
+        ]),
     el('span', { class: 'hl-hint', text: 'Jumlah pasukan bertambah tiap bab kampanye yang dibersihkan (maks 6 sel)' }),
   ]);
   card.querySelector('.btn-hl-up').addEventListener('click', () => {

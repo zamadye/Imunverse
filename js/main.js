@@ -13,7 +13,7 @@ import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
-import { loadLang, initSweep, sweepAll } from './systems/i18n.js';
+import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
@@ -24,7 +24,7 @@ import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
-import { gateFor } from './systems/feature-gate.js';
+import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
 import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
 
@@ -53,7 +53,6 @@ import { signUp, hasAccount } from './systems/account-system.js';
 import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
 import * as bagScreen from './ui/screens/bag-screen.js';
-import * as focusScreen from './ui/screens/focus-screen.js';
 import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
@@ -158,14 +157,41 @@ function wireUiBridge() {
     const _chId = (STATE.meta.selectedChapter || '').replace('bab_', '');
     music.setTheme(_chId);
     music.start(); // F23: musik latar prosedural saat bermain
+    applyHudDisclosure(); // UI/UX: item menu terkunci DISEMBUNYIKAN, toggle ikut hilang bila kosong
     renderBadges(); // F25: badge unlock baru pada ikon menu
     renderQuestPanel(); // F25: panel misi harian/mingguan (kiri tengah)
+    setQuestPanelOpen(false); // UI/UX BUILD 42: mulai TERLIPAT — badan panel 168×134 px menelan tarikan joystick di sisi kiri
   });
 
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
+  /**
+   * UI/UX — progressive disclosure menu gameplay. Dashboard = launcher 1 tombol
+   * (F24), maka SEMUA destinasi hidup di HUD: item yang belum terbuka tidak
+   * dirender ke pemain (bukan dipajang lalu ditolak), toggle menu tersembunyi
+   * sampai ada minimal 1 item terbuka, panel Misi ikut gerbang `quick/quests`.
+   * Sumber kebenaran tunggal: data/features.json via feature-gate.js.
+   */
+  function applyHudDisclosure() {
+    applyHudMenuGates('menu1', '.hud-menu-link', document.getElementById('hud-menu-toggle'), 'menuScreen');
+    applyHudMenuGates('menu2', '.hud-menu2-link', document.getElementById('hud-menu2-toggle'), 'menu2Screen');
+    const quests = document.getElementById('hud-quests');
+    if (quests) {
+      const g = gateFor('quick', 'quests');
+      const locked = !!(g && g.locked);
+      quests.classList.toggle('gate-hidden', locked);
+      quests.style.display = locked ? 'none' : '';
+    }
+    // menu yang sedang terbuka ditutup — daftar isinya mungkin baru berubah
+    for (const [menuId, toggleId] of [['hud-game-menu', 'hud-menu-toggle'], ['hud-game-menu2', 'hud-menu2-toggle']]) {
+      document.getElementById(menuId)?.classList.add('hidden');
+      document.getElementById(toggleId)?.setAttribute('aria-expanded', 'false');
+    }
+  }
+  window.__IMUNVERSE_applyHudDisclosure = applyHudDisclosure;
+
   function renderQuestPanel() {
     const body = document.getElementById('hud-quests-body');
     const badge = document.getElementById('quests-badge');
@@ -208,10 +234,19 @@ function wireUiBridge() {
   }
   window.__IMUNVERSE_renderQuestPanel = renderQuestPanel;
 
+  /** Buka/lipat badan panel Misi (kepala tetap terlihat; badge KLAIM tetap tampil saat terlipat). */
+  function setQuestPanelOpen(open) {
+    const body = document.getElementById('hud-quests-body');
+    const head = document.getElementById('hud-quests-toggle');
+    if (!body || !head) return;
+    body.classList.toggle('hidden', !open);
+    head.setAttribute('aria-expanded', String(open));
+    document.getElementById('hud-quests')?.classList.toggle('collapsed', !open);
+  }
+  window.__IMUNVERSE_setQuestPanelOpen = setQuestPanelOpen;
   document.getElementById('hud-quests-toggle')?.addEventListener('click', () => {
     const body = document.getElementById('hud-quests-body');
-    const open = body.classList.toggle('hidden') === false;
-    document.getElementById('hud-quests-toggle').setAttribute('aria-expanded', String(open));
+    setQuestPanelOpen(body.classList.contains('hidden'));
     audio.ui();
   });
 
@@ -333,6 +368,9 @@ async function boot() {
 
   // Input: virtual joystick (touch) + WASD/arrow (desktop)
   const input = new InputHandler(canvas);
+  // Keyboard gerak HANYA saat gameplay (layar HUD / modal jeda). Di dashboard,
+  // form akun, dsb. tombol W/A/S/D/Spasi dibiarkan ke browser (bisa mengetik).
+  input.isActive = () => STATE.screen === 'gameplay';
   input.onPauseKey = () => {
     const cur = screenManager.getCurrentId();
     if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
@@ -373,8 +411,8 @@ async function boot() {
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
     STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
-    STATE.meta.evoStage = 99;
-    STATE.meta.evoParts = { silia: 999, pseudopodia: 999, mikropedang: 999, inti_elemen: 999 };
+    STATE.meta.evoStage = 4;
+    STATE.meta.evoParts = { equity_receptor: 999, equity_membrane: 999, equity_effector: 999, equity_memory_core: 999 };
     STATE.meta.allies = 6;
     STATE.meta.allyLevel = 99;
     for (const def of (data.upgrades.globalUpgrades || [])) {
@@ -400,7 +438,6 @@ async function boot() {
   screenManager.registerScreen('revive', reviveScreen);
   screenManager.registerScreen('gameover', gameoverScreen);
   screenManager.registerScreen('arena', arenaScreen);
-  screenManager.registerScreen('focus', focusScreen);
   screenManager.registerScreen('prep', prepScreen);
   screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('codex', codexScreen);
@@ -426,7 +463,7 @@ async function boot() {
   hudMenuToggle?.addEventListener('click', () => {
     const open = hudMenu.classList.toggle('hidden') === false;
     hudMenuToggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen(); // F25: badge unlock dianggap dilihat saat menu dibuka
+    if (open) markSeen('menu1'); // F25: badge unlock dianggap dilihat saat menu dibuka
   });
   // F25: MENU 2 — Hero/Collection/Shop/Battle/Squad (pojok kanan-bawah, melebar ke kiri)
   const hudMenu2 = document.getElementById('hud-game-menu2');
@@ -434,39 +471,34 @@ async function boot() {
   hudMenu2Toggle?.addEventListener('click', () => {
     const open = hudMenu2.classList.toggle('hidden') === false;
     hudMenu2Toggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen();
+    if (open) markSeen('menu2');
   });
-  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
-    const gate = gateFor('dock', btn.dataset.menu2Screen);
-    if (gate && gate.locked) {
-      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
+  // UI/UX: satu jalur untuk kedua menu — gerbang fail-closed (item tak terdaftar
+  // = terkunci), item terkunci memang tak terlihat; toast hanya jaga-jaga (mis. klik
+  // programatik) agar tidak pernah ada jalur menuju layar yang belum terbuka.
+  const openHudMenuScreen = (menuId, screenId, menuEl) => {
+    const gate = hudMenuGate(menuId, screenId);
+    if (gate.locked) {
+      showToast({ message: `${t(gate.label || 'Terus bermain')} ${t('untuk membuka!')}` });
       audio.ui();
       return;
     }
     game.pause();
-    hudMenu2?.classList.add('hidden');
-    music.stop();
-    screenManager.show(btn.dataset.menu2Screen);
+    menuEl?.classList.add('hidden');
+    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
+    screenManager.show(screenId);
+  };
+  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
+    openHudMenuScreen('menu2', btn.dataset.menu2Screen, hudMenu2);
   }));
   document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
-    // F23: menu gameplay ikut gerbang bertahap (BP Gel.6, dst.) — konsisten dgn dashboard
-    const gate = gateFor('secondary', btn.dataset.menuScreen);
-    if (gate && gate.locked) {
-      showToast({ message: `${gate.label || 'Terus bermain'} untuk membuka!` });
-      audio.ui();
-      return;
-    }
-    game.pause();
-    hudMenu?.classList.add('hidden');
-    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
-    screenManager.show(btn.dataset.menuScreen);
+    openHudMenuScreen('menu1', btn.dataset.menuScreen, hudMenu);
   }));
 
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
   document.getElementById('btn-arena-close').addEventListener('click', () => backToContext());
-  document.getElementById('btn-focus-close').addEventListener('click', () => backToContext());
   // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
   // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
   // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
@@ -498,22 +530,24 @@ async function boot() {
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
-  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons
+  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons.
+  // UI/UX BUILD 42: TAHAN + TARIK tombol ini = mengarahkan serangan (aim stick ala
+  // MLBB) — menggantikan zona aim tak kasatmata di kanan layar. Pointer di-capture
+  // oleh InputHandler (jari meleset keluar tombol tidak memutus tembakan).
   const fireBtn = document.getElementById('btn-fire');
-  const stopFire = () => input.setFire(false);
-  fireBtn.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    input.setFire(true);
-    audio.unlock();
-    game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
+  input.bindFireButton(fireBtn, {
+    onPress: () => {
+      audio.unlock();
+      game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
+    },
   });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => fireBtn.addEventListener(ev, stopFire));
-  window.addEventListener('blur', stopFire);
+  // Pindah layar saat run hidup (menu HUD, level-up, jeda) → lepas semua input
+  // supaya tombol/joystick yang tertahan tidak "menyangkut" saat kembali.
+  on('pause', () => input.releaseAll());
 
   // Chip akun: ketuk → layar MASUK (ganti akun / keluar; data tetap tersimpan)
   document.getElementById('account-chip').addEventListener('click', () => screenManager.show('profile'));
-  // Fase 19: chip pangkat → modal PANGKAT PENJAGA (klik riil)
-  document.getElementById('rank-chip')?.addEventListener('click', () => screenManager.show('rank'));
+  // Chip pangkat: handler dipasang di dashboard-screen.js (rankChip.onclick) — jangan digandakan di sini
 
   // ---- AUDIO: unlock di gesture pertama (kebijakan autoplay browser) ----
   const unlockAudio = () => audio.unlock();
@@ -545,6 +579,7 @@ async function boot() {
   const backToContext = (fallback = 'dashboard') => {
     if (game.run && !game.run.ended && game.run.player && game.run.player.alive) {
       screenManager.show('hud');
+      window.__IMUNVERSE_applyHudDisclosure?.(); // stats/currency bisa berubah di layar menu → evaluasi ulang gerbang
       game.resume();
       return;
     }
@@ -627,8 +662,6 @@ async function boot() {
     (dt, time) => game.render(dt, time)
   );
 
-    // Bio-Pedia: tombol dashboard -> layar kodex
-  document.getElementById('btn-codex')?.addEventListener('click', () => screenManager.show('codex'));
 
 // Toggle bahasa ID/EN satu-klik (seluruh UI + data, tanpa reload)
   const updateLangButtons = () => {
@@ -711,7 +744,7 @@ async function runAutotest() {
     await until(() => STATE.screen === 'dashboard');
     log('dashboardShown', true);
 
-    STATE.meta.evoStage = 3; // Fagosit Elite → tebasan/siklon/petir terbuka
+    STATE.meta.evoStage = 3; // Equity III → tebasan/siklon/petir terbuka
     STATE.meta.focusRun = 'limfatik'; // fokus detoks → registerRunResult terukur
     game.startRun('tcd8');
     log('runStarted', STATE.screen === 'gameplay');

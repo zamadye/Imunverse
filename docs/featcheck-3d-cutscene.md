@@ -203,6 +203,8 @@ Bukti existing jalur 2D: game sudah render **151 musuh + efek @16.6 ms/frame vsy
 | Bark boss + VO (6 bark R2) | `narrative-system` (tanpa perubahan) + `main.js` | ✅ 6/6 VO |
 | 4 VO first-time RIA (Task 4) — teks dipendekkan 1× agar 10–13 s (non-blocking) | `assets/audio/narration/ria_nft_*.mp3` + `data/cutscenes.json` | ✅ 4/4 VO |
 
+**Sync dgn `origin/main` (2026-09-10):** main di-rebuild dgn root commit baru (orphan — `--allow-unrelated-histories`, konten ≈ basis lama + update MAP: sprite regen, hero id `makrofag`→`macrophage`, evoParts→fragmen equity, struktur `src/` baru). Semua perubahan R3 dipertahankan; 1 referensi sprite di-`cutscene-3d.js` di-update ke nama baru (`hero_macrophage_idle.png`). Payload pasca-merge: **317 file, raw 5,18 MB / gzip 3,30 MB** (sprite regen main −0,4 MB). Verifikasi ulang pasca-merge: syntax semua js ✓, JSON ✓, import smoke ✓, timeline 2D 7 scene & 3D 2 scene (renderer 3D terpakai, tanpa fallback diam-diam) ✓.
+
 **Koordinasi lintas-agent (issue sudah dibuat):**
 - **#26 → Character Agent**: referensi & swap-in point model 3D (non-blocking; billboard sprite sekarang)
 - **#27 → Arena Agent**: antarmuka ambient per arena vs lapisan musik/VO cutscene (pola ducking `vo-system.js`)

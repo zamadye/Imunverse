@@ -32,6 +32,7 @@ const store = {
   mastery: null,     // data/mastery.json (V2 Phase 6: hero mastery dari bermain)
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
+  characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
 };
 
 import { BUILD } from './version.js';
@@ -70,6 +71,7 @@ export async function loadAllData() {
     mastery: 'data/mastery.json',
     narrative: 'data/narrative.json',
     modules: 'data/modules.json',
+    characterDesigns: 'data/character-designs.json',
   };
 
   const entries = await Promise.all(
@@ -99,7 +101,15 @@ const TRANSLATE_FIELDS = new Set([
   'name', 'description', 'desc', 'label', 'title', 'organ', 'story',
   'objective', 'sub', 'role', 'hint', 'effect', 'line', 'short',
   'question', 'answer', 'text', 'goal', 'tagline', 'funKid', 'fact',
+  'baseCue', 'anatomy', 'visualCue', 'collectionNote', 'collectionTag',
+  'collectionLabel', 'visualRule', 'mutationFocus', 'tierCues',
 ]);
+
+function translateFieldValue(v, force) {
+  if (typeof v === 'string') return t(v);
+  if (Array.isArray(v)) return v.map((x) => (typeof x === 'string' ? t(x) : cloneMaybeTranslate(x, force)));
+  return cloneMaybeTranslate(v, force);
+}
 
 function cloneMaybeTranslate(v, force) {
   if (typeof v === 'string') return v;
@@ -108,7 +118,7 @@ function cloneMaybeTranslate(v, force) {
     const o = {};
     for (const k of Object.keys(v)) {
       const val = v[k];
-      o[k] = (force && TRANSLATE_FIELDS.has(k) && typeof val === 'string') ? t(val) : cloneMaybeTranslate(val, force);
+      o[k] = (force && TRANSLATE_FIELDS.has(k)) ? translateFieldValue(val, force) : cloneMaybeTranslate(val, force);
     }
     return o;
   }
@@ -236,6 +246,11 @@ export function getNarrative() {
 /** Flag & config 5 modul combat (Antigen Memory, Phagocytosis, dst). */
 export function getModules() {
   return getData().modules;
+}
+
+// ===== Character Agent: equity hero + mutation visual pathogen =====
+export function getCharacterDesigns() {
+  return getData().characterDesigns;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

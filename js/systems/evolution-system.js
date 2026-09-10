@@ -1,11 +1,10 @@
 /**
  * evolution-system.js — Evolusi hero berbasis drop bagian (parts) dari musuh.
  *
- * Hero berevolusi 5 tahap (Common → Legendary). Setiap tahap butuh kombinasi
- * bagian (silia/pseudopodia/mikropedang/inti_elemen) yang di-drop musuh saat
- * pertempuran — jadi visual & kekuatan hero berubah sebanding rajinnya user
- * bermain. Tahap membuka: mult damage/HP (nyata di computePlayerStats), gaya
- * efek kill, satu kemampuan aktif (lihat ability-system.js).
+ * Hero berevolusi 5 tahap: Stage 0 Polos → Full Equity. Setiap tahap butuh
+ * fragmen equity (reseptor/membran/efektor/inti memori) yang di-drop musuh saat
+ * pertempuran. Visual equity per hero diambil dari data/character-designs.json,
+ * sementara angka damage/HP tetap lewat data/evolutions.json seperti semula.
  */
 
 import { getData } from '../core/data-store.js';

@@ -1,8 +1,16 @@
 /**
- * prep-screen.js — BATTLE PREP: satu layar keputusan sebelum run
- * (pola Archero/Survivor.io): pilih hero → fokus run → arena → MULAI.
- * Semua pilihan pre-run yang tadinya tersebar di dashboard/modal kini
- * ada di alur linier yang sama, dengan CTA MULAI yang selalu terlihat.
+ * prep-screen.js — BATTLE PREP: SATU layar, SATU keputusan (pola Archero/Survivor.io).
+ *
+ * UI/UX Task 3 (pre-run 4 langkah → maks 1–2):
+ *  1. Hero — satu-satunya keputusan esensial; selalu tampil.
+ *  2. Mode — HANYA bila Endless sudah terbuka (≥1 bab kampanye tamat); sebelum itu
+ *     baris mode tidak dirender dan mode dipaksa `kampanye` (default otomatis).
+ *  Fokus Run & Arena dihapus dari alur:
+ *  - fokusRun → selalu `seimbang` (body-system di-PARK per docs/v2/phase-00 §3; nilai
+ *    fokus tak terasa pemain) — data & sistemnya tidak disentuh.
+ *  - arena → kampanye: ditentukan bab (game.getRunArena, sudah begitu sejak R2);
+ *    endless: arena terbuka terbaik dipilih otomatis (auto-default, bukan pertanyaan).
+ *  Ringkasan loadout tetap menampilkan mode/bab/arena hasil default agar transparan.
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -18,19 +26,13 @@ import { heroLevelBadge } from '../../systems/economy-system.js';
 import { game } from '../../core/game.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
+import { skillChip } from '../skill-icons.js';
 
 let heroRowWired = false;
 
 function selectHero(heroId) {
   const meta = STATE.meta;
   meta.selectedHero = heroId;
-  writeSave(meta);
-  renderAll();
-}
-
-function selectFocus(focusId) {
-  const meta = STATE.meta;
-  meta.focusRun = focusId;
   writeSave(meta);
   renderAll();
 }
@@ -42,34 +44,55 @@ function selectMode(modeId) {
   renderAll();
 }
 
-function renderModeRow(meta) {
-  const row = document.getElementById('prep-mode-row');
-  row.textContent = '';
-  const mutToday = getTodayMutator();
-  for (const modeDef of getData().modes.modes) {
-    const status = getModeUnlockStatus(modeDef, meta);
-    const selected = (meta.selectedMode || 'normal') === modeDef.id && status.unlocked;
-    const chip = el('button', {
-      class: `prep-chip mode${selected ? ' selected' : ''}${status.unlocked ? '' : ' locked'}`,
-      title: modeDef.description,
-    }, [
-      el('img', { src: modeDef.icon, alt: '' }),
-      el('span', { text: modeDef.name }),
-      modeDef.id === 'endless' && status.unlocked
-        ? el('small', { class: 'chip-sub', text: `Mutator: ${mutToday.def.name}` })
-        : null,
-      status.unlocked ? null : el('small', { class: 'chip-sub lock', text: status.label }),
-    ]);
-    if (status.unlocked && !selected) chip.addEventListener('click', () => selectMode(modeDef.id));
-    row.appendChild(chip);
-  }
+/** Mode yang bisa dipilih pemain saat ini (default selalu ada). */
+function unlockedModes(meta) {
+  return getData().modes.modes.filter((m) => getModeUnlockStatus(m, meta).unlocked);
 }
 
-function selectArena(arenaId) {
-  const meta = STATE.meta;
-  meta.selectedArena = arenaId;
-  writeSave(meta);
-  renderAll();
+/**
+ * Auto-default pilihan non-esensial (idempoten, dipanggil tiap show()):
+ * mode valid, fokus seimbang, arena otomatis. Mengembalikan true bila ada perubahan.
+ */
+export function applyPrepDefaults(meta = STATE.meta) {
+  let changed = false;
+  const modes = unlockedModes(meta);
+  const wanted = meta.selectedMode || 'kampanye';
+  if (!modes.some((m) => m.id === wanted)) {
+    meta.selectedMode = (modes.find((m) => m.id === 'kampanye') || modes[0] || { id: 'kampanye' }).id;
+    changed = true;
+  }
+  if (meta.focusRun !== 'seimbang') { meta.focusRun = 'seimbang'; changed = true; }
+  if (meta.selectedMode !== 'kampanye') {
+    // Endless: arena terbuka TERAKHIR (terbaik) — variasi tanpa bertanya
+    const list = getData().arenas.arenas;
+    const open = list.filter((a) => arenaUnlockStatus(a, meta).unlocked);
+    const best = open[open.length - 1] || list[0];
+    if (best && meta.selectedArena !== best.id) { meta.selectedArena = best.id; changed = true; }
+  }
+  if (changed) writeSave(meta);
+  return changed;
+}
+
+function renderModeRow(meta) {
+  const block = document.getElementById('prep-mode-block');
+  const row = document.getElementById('prep-mode-row');
+  if (!block || !row) return;
+  row.textContent = '';
+  const modes = unlockedModes(meta);
+  // Belum ada pilihan nyata (hanya Kampanye) → baris tidak ditampilkan sama sekali
+  block.classList.toggle('hidden', modes.length < 2);
+  if (modes.length < 2) return;
+  const mutToday = getTodayMutator();
+  for (const modeDef of modes) {
+    const selected = (meta.selectedMode || 'kampanye') === modeDef.id;
+    const chip = el('button', { class: `prep-chip mode${selected ? ' selected' : ''}`, title: modeDef.description }, [
+      el('img', { src: modeDef.icon, alt: '' }),
+      el('span', { text: modeDef.name }),
+      modeDef.id === 'endless' ? el('small', { class: 'chip-sub', text: `Mutator: ${mutToday.def.name}` }) : null,
+    ]);
+    if (!selected) chip.addEventListener('click', () => selectMode(modeDef.id));
+    row.appendChild(chip);
+  }
 }
 
 function renderHeroRow(meta) {
@@ -88,50 +111,20 @@ function renderHeroRow(meta) {
       el('span', { class: 'ph-name', text: heroDef.name.split(' ').slice(0, 2).join(' ') }),
       status.unlocked
         ? el('span', { class: 'ph-stage', style: `background:${stageDef.tierColor}`, text: `T${stageDef.stage + 1} · ${heroLevelBadge(meta, heroDef.id)}` })
-        : el('img', { class: 'ph-lock', src: 'assets/sprites/icon_lock.png', alt: 'terkunci' }),
+        : el('img', { class: 'ph-lock', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }),
     ]);
     if (status.unlocked) item.addEventListener('click', () => selectHero(heroDef.id));
     row.appendChild(item);
   }
 }
 
-function renderFocusRow(meta) {
-  const row = document.getElementById('prep-focus-row');
-  row.textContent = '';
-  for (const focusDef of getData().bodySystems.focusRuns) {
-    const selected = (meta.focusRun || 'seimbang') === focusDef.id;
-    const chip = el('button', { class: `prep-chip${selected ? ' selected' : ''}` }, [
-      el('img', { src: focusDef.icon, alt: '' }),
-      el('span', { text: focusDef.name.replace('Run ', '') }),
-    ]);
-    if (!selected) chip.addEventListener('click', () => selectFocus(focusDef.id));
-    row.appendChild(chip);
-  }
-}
-
-function renderArenaRow(meta) {
-  const row = document.getElementById('prep-arena-row');
-  row.textContent = '';
-  for (const arenaDef of getData().arenas.arenas) {
-    const status = arenaUnlockStatus(arenaDef, meta);
-    const selected = meta.selectedArena === arenaDef.id && status.unlocked;
-    const chip = el('button', { class: `prep-chip arena${selected ? ' selected' : ''}${status.unlocked ? '' : ' locked'}` }, [
-      el('img', { src: arenaDef.thumb, alt: '' }),
-      el('span', { text: arenaDef.name }),
-    ]);
-    if (status.unlocked && !selected) chip.addEventListener('click', () => selectArena(arenaDef.id));
-    row.appendChild(chip);
-  }
-}
-
-/** Ringkasan loadout: hero + tahap evolusi + kemampuan terbuka + fokus + arena. */
+/** Ringkasan loadout: hero + tahap evolusi + skill + (mode · bab/arena hasil default). */
 function renderSummary(meta) {
   const box = document.getElementById('prep-summary');
   box.textContent = '';
   const heroDef = getData().heroes.heroes.find((h) => h.id === meta.selectedHero) || getData().heroes.heroes[0];
   const stageDef = getEvoStageDef(meta);
-  const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === (meta.focusRun || 'seimbang'));
-  const arenaDef = getData().arenas.arenas.find((a) => a.id === meta.selectedArena) || getData().arenas.arenas[0];
+  const arenaDef = game.getRunArena(); // sumber kebenaran yang sama dengan startRun
 
   // Fase 12: loadout = 3 skill aktif hero (S1/S2/Ult) dari data/skills.json
   const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((s) => s.id === id)).filter(Boolean);
@@ -140,24 +133,20 @@ function renderSummary(meta) {
   const mid = el('div', { class: 'ps-mid' }, [
     el('b', { text: heroDef.name }),
     el('span', { class: 'ps-tier', style: `color:${stageDef.tierColor}`, text: `${stageDef.name} · ${stageDef.tier}` }),
+    // UI/UX BUILD 43: chip hex + ikon per-skill yang sama dengan HUD (js/ui/skill-icons.js)
     el('span', { class: 'ps-abilities' }, skillDefs.length
-      ? skillDefs.map((s, i) => el('span', {
-          class: `ps-skill-dot${i === 2 ? ' ult' : ''}`,
-          style: `background:${s.color}`,
-          title: `${s.name} (tombol ${i + 1})`,
-        }))
+      ? skillDefs.map((s, i) => skillChip(s, { ult: i === 2, cls: 'ps-skill-chip', title: `${s.name} (tombol ${i + 1}) — ${s.description}` }))
       : [el('span', { class: 'ps-noab', text: 'Kemampuan terbuka lewat evolusi' })]),
   ]);
   box.appendChild(mid);
-  const modeDef = (getData().modes.modes).find((m) => m.id === (meta.selectedMode || 'normal')) || getData().modes.modes[0];
+  const modeDef = getData().modes.modes.find((m) => m.id === (meta.selectedMode || 'kampanye')) || getData().modes.modes[0];
+  const chapter = modeDef.id === 'kampanye' && getData().campaign
+    ? (getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0])
+    : null;
   box.appendChild(el('div', { class: 'ps-meta' }, [
     el('div', {}, [
       el('img', { src: modeDef.icon, alt: '' }),
-      el('span', { text: modeDef.name }),
-    ]),
-    el('div', {}, [
-      el('img', { src: focusDef.icon, alt: '' }),
-      el('span', { text: focusDef.name }),
+      el('span', { text: chapter ? `${modeDef.name} · ${chapter.organ}` : modeDef.name }),
     ]),
     el('div', {}, [
       el('img', { src: arenaDef.thumb, alt: '' }),
@@ -168,11 +157,10 @@ function renderSummary(meta) {
 
 function renderAll() {
   const meta = STATE.meta;
+  applyPrepDefaults(meta);
   document.getElementById('prep-currency').textContent = meta.currency.toLocaleString('id-ID');
   renderHeroRow(meta);
   renderModeRow(meta);
-  renderFocusRow(meta);
-  renderArenaRow(meta);
   renderSummary(meta);
   // tombol MULAI
   const heroDef = getData().heroes.heroes.find((h) => h.id === meta.selectedHero);
@@ -183,6 +171,7 @@ function renderAll() {
 }
 
 export function show() {
+  syncCampaignArenaDefault(); // MAP: default picker = organ bab
   renderAll();
   if (!heroRowWired) {
     heroRowWired = true;
@@ -192,9 +181,11 @@ export function show() {
       if (!heroDef) return;
       const status = getHeroStatus(meta, heroDef);
       if (!status.unlocked) return;
+      applyPrepDefaults(meta); // MAP: normalisasi pilihan prep (mode/arena/fokus)
       // R3 (Narrative-Cinematic): bab BARU → cutscene produksi 2-panel
       // (naskah final bila ada: 6.2 utk bab_demam; teks R2 utk sisanya).
       // bab_luka memakai CUTSCENE PEMBUKA (6.1) bila belum pernah dilihat.
+      // Kampanye: bab BARU tanpa cutscene produksi → sinematik briefing (story organ sakit)
       const cs = getData().cutscenes;
       const prodId = meta.selectedChapter === 'bab_luka' ? 'pembuka' : ('transisi_' + meta.selectedChapter);
       const prod = cs && cs.scenes ? cs.scenes[prodId] : null;
@@ -210,6 +201,17 @@ export function show() {
       }
     });
   }
+}
+
+// MAP: di mode kampanye, default-kan pilihan arena ke organ bab aktif agar
+// penceritaan bab (organ sakit) selaras dengan map ter-render. Pemain tetap
+// bebas memilih organ lain — getRunArena menghormati pilihan yang terbuka.
+function syncCampaignArenaDefault() {
+  const meta = STATE.meta;
+  if (meta.selectedMode !== 'kampanye' || !getData().campaign) return;
+  const chs = getData().campaign.chapters;
+  const ch = chs.find((c) => c.id === meta.selectedChapter) || chs[0];
+  if (ch && ch.arenaId && meta.selectedArena !== ch.arenaId) meta.selectedArena = ch.arenaId;
 }
 
 export function hide() {}

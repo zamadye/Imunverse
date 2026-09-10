@@ -73,13 +73,14 @@ try {
 
   // ---- POIN 3: ikon = mekanisme imun nyata ----
   const icons = await page.evaluate(async () => {
-    const src = await (await fetch('/js/ui/screens/hud-screen.js')).text();
-    const fire = document.querySelector('#btn-fire .fire-claw svg');
-    const html = document.getElementById('btn-fire').outerHTML;
+    // UI/UX BUILD 43: sumber ikon skill pindah ke js/ui/skill-icons.js; SERANG = img hud-serang.svg
+    const src = await (await fetch('/js/ui/skill-icons.js')).text();
+    const fire = document.querySelector('#btn-fire .fire-claw img');
+    const fireSvgText = fire ? await (await fetch(fire.getAttribute('src'))).text() : '';
     return {
       immuneTerms: ['perforin', 'fagositosis', 'opsonisasi', 'MAC', 'NET'].every((t) => src.includes(t)),
-      fireSvg: !!fire,
-      fireAntibody: html.includes('ANTIBODI-Y') || html.includes('antibodi'),
+      fireSvg: !!fire && fire.complete && fire.naturalWidth > 0,
+      fireAntibody: /antibodi-Y/i.test(fireSvgText),
       glyphs: document.querySelectorAll('#screen-hud .ability-btn .sk-glyph svg').length,
     };
   });

@@ -5,9 +5,65 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getCharacterDesigns, getHero } from '../../core/data-store.js';
 import { getNextEvoStageDef, canEvolve } from '../../systems/evolution-system.js';
+import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { el } from '../screen-manager.js';
+import { iconEl } from '../menu-icons.js';
+
+function appendDesignCollection(evoBox, meta) {
+  const selectedHero = getHero(meta.selectedHero) || getData().heroes.heroes[0];
+  const heroDesign = getCharacterDesigns()?.heroes?.[selectedHero.id];
+  if (!selectedHero || !heroDesign) return;
+  const stages = getData().evolutions.stages || [];
+  const current = Math.max(0, Math.min(4, meta.evoStage || 0));
+  const equityRows = [
+    {
+      stage: 0,
+      label: stages.find((s) => s.stage === 0)?.collectionLabel || 'Stage 0 Polos',
+      name: 'Base Polos',
+      cue: heroDesign.baseCue,
+      color: stages.find((s) => s.stage === 0)?.tierColor || '#9db1a8',
+      cost: {},
+    },
+    ...(heroDesign.equity || []).map((item) => {
+      const st = stages.find((s) => s.stage === item.stage) || {};
+      return {
+        stage: item.stage,
+        label: st.collectionLabel || `Equity ${item.stage}`,
+        name: item.name,
+        cue: item.visualCue,
+        color: item.color || st.tierColor || selectedHero.color,
+        cost: st.cost || {},
+      };
+    }),
+  ];
+
+  evoBox.appendChild(el('div', { class: 'bag-design-panel' }, [
+    el('div', { class: 'bag-design-head' }, [
+      el('span', { class: 'bag-design-kicker', text: 'Character Design Collection' }),
+      el('b', { text: `${selectedHero.name} — Jalur Equity` }),
+      el('small', { text: 'Inventori part di atas sekarang punya konteks visual untuk tiap stage hero.' }),
+    ]),
+    el('div', { class: 'bag-design-list' }, equityRows.map((row) => el('div', {
+      class: `bag-design-row${row.stage === current ? ' active' : ''}${row.stage < current ? ' done' : ''}`,
+      style: `--eq:${row.color};`,
+    }, [
+      el('span', { class: 'bag-design-node', text: String(row.stage) }),
+      createHeroEquityPreview(selectedHero, row.stage, { size: 46, className: 'bag-design-preview character-preview' }),
+      el('div', { class: 'bag-design-copy' }, [
+        el('b', { text: `${row.label} · ${row.name}` }),
+        el('span', { text: row.cue || 'Cue visual equity.' }),
+        Object.keys(row.cost).length
+          ? el('small', { text: Object.entries(row.cost).map(([part, need]) => {
+            const partDef = getData().evolutions.parts.find((p) => p.id === part);
+            return `${need}× ${partDef ? partDef.name : part}`;
+          }).join(' + ') })
+          : el('small', { text: 'tanpa part — bentuk dasar/polos' }),
+      ]),
+    ]))),
+  ]));
+}
 
 export function show() {
   const meta = STATE.meta;
@@ -19,7 +75,12 @@ export function show() {
   const bagHead = document.querySelector('#screen-bag .topbar');
   if (bagHead) {
     let chip = bagHead.querySelector('.count-chip');
-    if (!chip) { chip = el('span', { class: 'count-chip' }); bagHead.insertBefore(chip, bagHead.querySelector('.currency-chip')); }
+    if (!chip) {
+      chip = el('span', { class: 'count-chip' });
+      // Header terpadu (BUILD 44): chip masuk ke slot kanan, sebelum chip mata uang
+      const slot = bagHead.querySelector('.ui-head-right') || bagHead;
+      slot.insertBefore(chip, slot.querySelector('.currency-chip'));
+    }
     chip.textContent = '';
     chip.appendChild(el('span', { text: `${partTotal + itemTotal} ` }));
     chip.appendChild(el('span', { text: 'item' }));
@@ -52,9 +113,7 @@ export function show() {
     const owned = meta.consumables[def.id] || 0;
     any = any || owned > 0;
     itemsGrid.appendChild(el('div', { class: `bag-card${owned === 0 ? ' empty' : ''}` }, [
-      def.icon.startsWith('assets/')
-        ? el('img', { class: 'bag-sprite', src: def.icon, alt: def.name })
-        : el('div', { class: 'icon-sprite', text: def.icon }),
+      iconEl(def, 'bag-sprite'), // ikon bespoke (menu-icons.js), fallback def.icon
       el('b', { text: def.name }),
       el('span', { class: `bag-count${owned > 0 ? ' ok' : ''}`, text: `×${owned}` }),
       el('small', { text: owned > 0 ? 'dipakai otomatis saat run' : 'beli di Shop' }),
@@ -76,6 +135,7 @@ export function show() {
   } else {
     evoBox.appendChild(el('b', { text: 'Evolusi maksimal — Imun Legenda sejati!' }));
   }
+  appendDesignCollection(evoBox, meta);
 }
 
 export function hide() {}

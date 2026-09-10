@@ -175,7 +175,7 @@ export async function createCutscene3D(canvas, scene, opts) {
   const actors = {};
   function addActor(who, w, h) {
     const path = who === 'amara' ? 'assets/sprites/amara_pose_talk.png'
-      : who === 'mako' ? 'assets/sprites/hero_makrofag_idle.png'
+      : who === 'mako' ? 'assets/sprites/hero_macrophage_idle.png' // MAP: rename sprite (basa Inggris)
       : 'assets/sprites/ria_pose_talk.png';
     const tex = texLoader.load(path);
     const m = makeBillboard(THREE, tex, w, h);

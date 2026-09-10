@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "doc": "Art Director path-based pathogen visual spec for narrow lane swarms and queues.",
+  "artBible": "assets/ART_BIBLE.md",
+  "items": [
+    {
+      "enemyId": "bakteri",
+      "name": "Bakteri",
+      "family": "bacterium",
+      "sourceColor": "#ff6b6b",
+      "legacySprite": "assets/sprites/enemy_bakteri.png",
+      "pathSprite": "assets/enemies/path/bakteri_path.png",
+      "pathReadability": {
+        "stackMarker": "capsule division stripe",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "capsule division stripe"
+    },
+    {
+      "enemyId": "bakteri_gp",
+      "name": "Bakteri Gram Positif",
+      "family": "armored_bacterium",
+      "sourceColor": "#8d5fb3",
+      "legacySprite": "assets/sprites/enemy_bakteri_gp.png",
+      "pathSprite": "assets/enemies/path/bakteri_gp_path.png",
+      "pathReadability": {
+        "stackMarker": "double membrane rim",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "double membrane rim"
+    },
+    {
+      "enemyId": "virus",
+      "name": "Virus Replikasi",
+      "family": "virus",
+      "sourceColor": "#9be15d",
+      "legacySprite": "assets/sprites/enemy_virus.png",
+      "pathSprite": "assets/enemies/path/virus_path.png",
+      "pathReadability": {
+        "stackMarker": "top spike glint",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "top spike glint"
+    },
+    {
+      "enemyId": "virion",
+      "name": "Virion",
+      "family": "virus",
+      "sourceColor": "#c7f464",
+      "legacySprite": "assets/sprites/enemy_virion.png",
+      "pathSprite": "assets/enemies/path/virion_path.png",
+      "pathReadability": {
+        "stackMarker": "top spike glint",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "top spike glint"
+    },
+    {
+      "enemyId": "parasit",
+      "name": "Parasit",
+      "family": "parasite",
+      "sourceColor": "#e15fd0",
+      "legacySprite": "assets/sprites/enemy_parasit.png",
+      "pathSprite": "assets/enemies/path/parasit_path.png",
+      "pathReadability": {
+        "stackMarker": "head marker and lane-aligned ruffle",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "head marker and lane-aligned ruffle"
+    },
+    {
+      "enemyId": "spora",
+      "name": "Spora Jamur",
+      "family": "fungus",
+      "sourceColor": "#f2c14e",
+      "legacySprite": "assets/sprites/enemy_spora.png",
+      "pathSprite": "assets/enemies/path/spora_path.png",
+      "pathReadability": {
+        "stackMarker": "chitin cap spot",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "chitin cap spot"
+    },
+    {
+      "enemyId": "sel_kanker",
+      "name": "Sel Kanker",
+      "family": "cancer",
+      "sourceColor": "#d7263d",
+      "legacySprite": "assets/sprites/enemy_sel_kanker.png",
+      "pathSprite": "assets/enemies/path/sel_kanker_path.png",
+      "pathReadability": {
+        "stackMarker": "red mutation nucleus",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "red mutation nucleus"
+    },
+    {
+      "enemyId": "protozoa",
+      "name": "Protozoa",
+      "family": "protozoa",
+      "sourceColor": "#3ecfb2",
+      "legacySprite": "assets/sprites/enemy_protozoa.png",
+      "pathSprite": "assets/enemies/path/protozoa_path.png",
+      "pathReadability": {
+        "stackMarker": "lateral cilia comb",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "lateral cilia comb"
+    },
+    {
+      "enemyId": "bakteri_gn",
+      "name": "Bakteri Gram Negatif",
+      "family": "toxic_bacterium",
+      "sourceColor": "#b39ddb",
+      "legacySprite": "assets/sprites/enemy_bakteri_gn.png",
+      "pathSprite": "assets/enemies/path/bakteri_gn_path.png",
+      "pathReadability": {
+        "stackMarker": "violet outer-membrane notch",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "violet outer-membrane notch"
+    },
+    {
+      "enemyId": "toksin",
+      "name": "Toksin",
+      "family": "toxin",
+      "sourceColor": "#6ef06e",
+      "legacySprite": "assets/sprites/enemy_toksin.png",
+      "pathSprite": "assets/enemies/path/toksin_path.png",
+      "pathReadability": {
+        "stackMarker": "droplet bubble marker",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "droplet bubble marker"
+    },
+    {
+      "enemyId": "prion",
+      "name": "Prion",
+      "family": "crystal",
+      "sourceColor": "#9b8fae",
+      "legacySprite": "assets/sprites/enemy_prion.png",
+      "pathSprite": "assets/enemies/path/prion_path.png",
+      "pathReadability": {
+        "stackMarker": "bright protein-fold edge",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "bright protein-fold edge"
+    },
+    {
+      "enemyId": "sel_abnormal",
+      "name": "Sel Abnormal",
+      "family": "abnormal_cell",
+      "sourceColor": "#2fb89f",
+      "legacySprite": "assets/sprites/enemy_sel_abnormal.png",
+      "pathSprite": "assets/enemies/path/sel_abnormal_path.png",
+      "pathReadability": {
+        "stackMarker": "unstable nucleus dot",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "unstable nucleus dot"
+    },
+    {
+      "enemyId": "toksin_raksasa",
+      "name": "Toksin Raksasa",
+      "family": "toxin_boss",
+      "sourceColor": "#7ed957",
+      "legacySprite": "assets/sprites/enemy_toksin_raksasa.png",
+      "pathSprite": "assets/enemies/path/toksin_raksasa_path.png",
+      "pathReadability": {
+        "stackMarker": "giant toxic membrane crest",
+        "laneFootprint": "keep appendages within ~0.35 body radius from lane centerline",
+        "queueRule": "alternate slight rotation/offset in renderer; do not scale below 32px without rim"
+      },
+      "biologicalCueMinimum": "giant toxic membrane crest"
+    }
+  ]
+}

@@ -12,11 +12,11 @@ export function show(payload) {
   const loot = document.getElementById('chest-loot');
   loot.textContent = '';
   loot.appendChild(el('div', { class: 'loot' }, [
-    el('img', { src: 'assets/sprites/icon_coin.png', alt: 'antibodi' }),
+    el('img', { src: 'assets/icons/cur-antibodi.svg', alt: 'antibodi' }),
     el('span', { text: `+${payload.currency}` }),
   ]));
   loot.appendChild(el('div', { class: 'loot' }, [
-    el('img', { src: payload.partSprite || 'assets/sprites/part_silia.png', alt: 'bagian' }),
+    el('img', { src: payload.partSprite || 'assets/sprites/part_equity_receptor.png', alt: 'bagian' }),
     el('span', { text: `+1 ${payload.partName}` }),
   ]));
 

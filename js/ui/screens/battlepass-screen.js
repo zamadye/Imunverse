@@ -32,8 +32,8 @@ function renderTrack(rowEl, meta, track) {
     const cell = el('button', { class: cls, title: it.label, 'aria-label': `Level ${it.lv}: ${it.label}` }, [
       el('span', { class: 'bp-lv', text: String(it.lv) }),
       el('span', { class: 'bp-reward', text: it.label }),
-      it.claimed ? el('img', { class: 'bp-state', src: 'assets/sprites/icon_star.png', alt: 'diklaim' }) : null,
-      it.premiumLocked ? el('img', { class: 'bp-state lock', src: 'assets/sprites/icon_lock.png', alt: 'premium' }) : null,
+      it.claimed ? el('img', { class: 'bp-state', src: 'assets/icons/ui-star.svg', alt: 'diklaim' }) : null,
+      it.premiumLocked ? el('img', { class: 'bp-state lock', src: 'assets/icons/ui-lock.svg', alt: 'premium' }) : null,
     ]);
     cell.addEventListener('click', () => {
       if (it.premiumLocked) {

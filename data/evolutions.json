@@ -1,101 +1,119 @@
 {
   "parts": [
     {
-      "id": "silia",
-      "name": "Silia",
-      "sprite": "assets/sprites/part_silia.png",
-      "dropWeight": 40
+      "id": "equity_receptor",
+      "name": "Kode Reseptor",
+      "sprite": "assets/sprites/part_equity_receptor.png",
+      "dropWeight": 40,
+      "collectionTag": "Equity I",
+      "description": "Fragmen reseptor untuk membuka cue anatomi pertama tiap hero imun."
     },
     {
-      "id": "pseudopodia",
-      "name": "Pseudopodia",
-      "sprite": "assets/sprites/part_pseudopodia.png",
-      "dropWeight": 30
+      "id": "equity_membrane",
+      "name": "Modul Membran",
+      "sprite": "assets/sprites/part_equity_membrane.png",
+      "dropWeight": 30,
+      "collectionTag": "Equity II",
+      "description": "Bahan membran/organela untuk mempertegas alat biologis hero."
     },
     {
-      "id": "mikropedang",
-      "name": "Mikropedang",
-      "sprite": "assets/sprites/part_pedang.png",
-      "dropWeight": 20
+      "id": "equity_effector",
+      "name": "Enzim Efektor",
+      "sprite": "assets/sprites/part_equity_effector.png",
+      "dropWeight": 20,
+      "collectionTag": "Equity III",
+      "description": "Payload ofensif/defensif yang berbeda sesuai sel imun."
     },
     {
-      "id": "inti_elemen",
-      "name": "Inti Elemen",
-      "sprite": "assets/sprites/part_inti.png",
-      "dropWeight": 10
+      "id": "equity_memory_core",
+      "name": "Inti Memori",
+      "sprite": "assets/sprites/part_equity_memory_core.png",
+      "dropWeight": 10,
+      "collectionTag": "Full Equity",
+      "description": "Core koleksi untuk bentuk full-equity tiap hero."
     }
   ],
   "stages": [
     {
       "stage": 0,
-      "id": "bulir",
-      "name": "Sel Bulir",
-      "tier": "Common",
+      "id": "polos",
+      "name": "Polos Base",
+      "tier": "Base",
       "tierColor": "#9db1a8",
       "cost": {},
       "damageMult": 1.0,
       "maxHPMult": 1.0,
       "killFx": "ring",
-      "ability": "tebasan"
+      "ability": "tebasan",
+      "collectionLabel": "Stage 0 Polos",
+      "visualRule": "Tanpa equity overlay; hanya tubuh dasar hero."
     },
     {
       "stage": 1,
-      "id": "bersilia",
-      "name": "Sel Bersilia",
+      "id": "equity_1",
+      "name": "Equity I — Reseptor",
       "tier": "Uncommon",
       "tierColor": "#63c76a",
       "cost": {
-        "silia": 2
+        "equity_receptor": 2
       },
       "damageMult": 1.08,
       "maxHPMult": 1.06,
       "killFx": "slash",
-      "ability": "tebasan"
+      "ability": "tebasan",
+      "collectionLabel": "Equity I",
+      "visualRule": "Cue anatomi pertama per hero muncul jelas di siluet."
     },
     {
       "stage": 2,
-      "id": "muda",
-      "name": "Fagosit Muda",
+      "id": "equity_2",
+      "name": "Equity II — Membran",
       "tier": "Rare",
       "tierColor": "#4aa3e0",
       "cost": {
-        "silia": 3,
-        "pseudopodia": 2
+        "equity_receptor": 3,
+        "equity_membrane": 2
       },
       "damageMult": 1.16,
       "maxHPMult": 1.12,
       "killFx": "wind",
-      "ability": "siklon"
+      "ability": "siklon",
+      "collectionLabel": "Equity II",
+      "visualRule": "Organela/alat membran kedua aktif sesuai desain hero."
     },
     {
       "stage": 3,
-      "id": "elite",
-      "name": "Fagosit Elite",
+      "id": "equity_3",
+      "name": "Equity III — Efektor",
       "tier": "Epic",
       "tierColor": "#b07ae0",
       "cost": {
-        "pseudopodia": 3,
-        "mikropedang": 2
+        "equity_membrane": 3,
+        "equity_effector": 2
       },
       "damageMult": 1.25,
       "maxHPMult": 1.18,
       "killFx": "bolt",
-      "ability": "petir"
+      "ability": "petir",
+      "collectionLabel": "Equity III",
+      "visualRule": "Payoff ofensif/defensif hero terbaca dan lebih agresif."
     },
     {
       "stage": 4,
-      "id": "legenda",
-      "name": "Imun Legenda",
+      "id": "full_equity",
+      "name": "Full Equity",
       "tier": "Legendary",
       "tierColor": "#f5c64f",
       "cost": {
-        "mikropedang": 3,
-        "inti_elemen": 2
+        "equity_effector": 3,
+        "equity_memory_core": 2
       },
       "damageMult": 1.35,
       "maxHPMult": 1.25,
       "killFx": "legend",
-      "ability": "beku"
+      "ability": "beku",
+      "collectionLabel": "Full Equity",
+      "visualRule": "Seluruh equity utama aktif; mahkota/core full-equity muncul."
     }
   ],
   "dropChanceNormal": 0.06,

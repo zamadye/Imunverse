@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Misi": penanda quest RPG — gelembung sinyal koral dengan tanda seru emas. -->
+  <ellipse cx="32" cy="59" rx="14" ry="3" fill="#123f3a" opacity=".14"/>
+  <path d="M14 10 H50 Q56 10 56 16 V38 Q56 44 50 44 H36 L28 53 L28.5 44 H14 Q8 44 8 38 V16 Q8 10 14 10 Z" fill="#e96a4c"/>
+  <path d="M15 13 H49 Q53 13 53 17 V37 Q53 41 49 41 H33.5 L30 45.5 L30.4 41 H15 Q11 41 11 37 V17 Q11 13 15 13 Z" fill="#f2825c"/>
+  <path d="M15 13 H49 Q53 13 53 17 V20 H11 V17 Q11 13 15 13 Z" fill="#fffdf4" opacity=".22"/>
+  <rect x="28" y="17" width="8" height="15" rx="4" fill="#e0a72e"/>
+  <rect x="29" y="17" width="6" height="13.5" rx="3" fill="#f5c64f"/>
+  <circle cx="32" cy="36.5" r="3.6" fill="#e0a72e"/>
+  <circle cx="32" cy="36" r="2.8" fill="#f5c64f"/>
+</svg>

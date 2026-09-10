@@ -10,9 +10,11 @@ let hintTimer = null;
 let xpGhost = 0;      // trail putih yang "mengejar" fill XP (efek kejar)
 let lastXpPct = 0;
 
-import { getData } from '../../core/data-store.js';
+import { STATE } from '../../core/state-manager.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
+import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
 
 export function show() {
   // Combat HUD hanya menampilkan informasi yang berguna selama pertarungan.
@@ -28,50 +30,50 @@ export function hide() {
  * Data dari run.skills (data/skills.json) — setiap tombol punya overlay
  * cooldown (gelap + angka sisa detik) & label tombol keyboard 1/2/3.
  */
-// E1 poin 2: GLYPH SVG BERKARAKTER per jenis skill — bukan ikon PNG generik.
-// Setiap glyph digambar khusus: siluet tebal, satu bentuk ikonik per makna,
-// currentColor supaya otomatis mengikuti warna skill (--sk).
-const KIND_GLYPH = {
-  // E2 poin 3: glyph berbasis MEKANISME IMUN NYATA (imunologi):
-  // strike=perforin+granzim (jarum menembus membran, granzim masuk);
-  // area=oxidative burst (ledakan ROS); mark=opsonisasi (antibodi menandai);
-  // devour=fagositosis; annihilate=MAC C5b-9 (8 subunit membentuk pori);
-  // summon_homing=antibodi netralisasi homing; instant_hits=NET
-  // (Neutrophil Extracellular Trap — jaring DNA penjerat).
-  strike: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 7.6a6.4 6.4 0 1 1 0 12.8 6.4 6.4 0 0 1 0-12.8zm0 2.8a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z"/><path d="M10.7 1h2.6v6.8L12 9.6l-1.3-1.8z"/><circle cx="12" cy="14" r="1.7"/></svg>',
-  area: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><path d="M12 1.4l1.5 4.2h-3zM12 22.6l-1.5-4.2h3zM1.4 12l4.2-1.5v3zM22.6 12l-4.2 1.5v-3zM4.6 4.6l4 1.8-2.2 2.2zM19.4 19.4l-4-1.8 2.2-2.2zM19.4 4.6l-1.8 4-2.2-2.2zM4.6 19.4l1.8-4 2.2 2.2z"/></svg>',
-  heal: '<svg viewBox="0 0 24 24"><path d="M12 21.4C7 17.2 2.6 13.6 2.6 9.2 2.6 6 5 3.8 7.8 3.8c1.7 0 3.3.8 4.2 2.1a5.2 5.2 0 0 1 4.2-2.1c2.8 0 5.2 2.2 5.2 5.4 0 4.4-4.4 8-9.4 12.2zm-1.2-12h2.4v2.8H16v2.4h-2.8v2.8h-2.4v-2.8H8v-2.4h2.8z"/></svg>',
-  shield_self: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1.8 21 5v6.6c0 5.2-3.6 9.5-9 11-5.4-1.5-9-5.8-9-11V5l9-3.2zm0 5.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2zm0 2.4a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4z"/></svg>',
-  protect_self: '<svg viewBox="0 0 24 24"><path d="M12 1.8 21 5v6.6c0 5.2-3.6 9.5-9 11-5.4-1.5-9-5.8-9-11V5l9-3.2zm-1.6 13.4-3-3 1.7-1.7 1.3 1.3 4.5-4.5 1.7 1.7z"/></svg>',
-  buff_self: '<svg viewBox="0 0 24 24"><path d="M12 2 15 8.2l6.8 1-4.9 4.7 1.2 6.8L12 17.5l-6.1 3.2 1.2-6.8L2.2 9.2l6.8-1z"/></svg>',
-  buff_allies: '<svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="3.1"/><circle cx="17" cy="8" r="3.1"/><path d="M1.6 19.4c0-3 2.4-5.4 5.4-5.4s5.4 2.4 5.4 5.4v1H1.6zm10.9 1v-1c0-1.9-.7-3.6-1.8-4.9a5.4 5.4 0 0 1 11.7 4.9v1z"/></svg>',
-  mark: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 21.5a9.5 9.5 0 1 1 0-19 9.5 9.5 0 0 1 0 19zm0-2.6a6.9 6.9 0 1 0 0-13.8 6.9 6.9 0 0 0 0 13.8z" opacity=".4"/><path d="M10.9 12.4 7 7.2l1.9-1.4 3.1 4.1 3.1-4.1L17 7.2l-3.9 5.2v5.4h-2.2z"/></svg>',
-  execute: '<svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 2.9-1.6 5.5-4 6.9V20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-3.1A8 8 0 0 1 12 2zM9 10.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zm6 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/></svg>',
-  annihilate: '<svg viewBox="0 0 24 24"><circle cx="12" cy="3.4" r="2"/><circle cx="12" cy="20.6" r="2"/><circle cx="3.4" cy="12" r="2"/><circle cx="20.6" cy="12" r="2"/><circle cx="5.9" cy="5.9" r="2"/><circle cx="18.1" cy="5.9" r="2"/><circle cx="5.9" cy="18.1" r="2"/><circle cx="18.1" cy="18.1" r="2"/><path fill-rule="evenodd" d="M12 8.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6zm0 2a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6z"/></svg>',
-  summon_homing: '<svg viewBox="0 0 24 24"><path d="M5.6 9.6 3 6.1l1.6-1.2 2 2.7 2-2.7L10.2 6.1 7.6 9.6v3.2H5.6zM16.4 9.6l-2.6-3.5 1.6-1.2 2 2.7 2-2.7 1.6 1.2-2.6 3.5v3.2h-2zM11 18.4l-3-4 1.7-1.3 2.3 3.1 2.3-3.1 1.7 1.3-3 4v3.4h-2z"/></svg>',
-  instant_hits: '<svg viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M2 11h20v2H2z"/><path d="M4.6 3.2 20.8 19.4l-1.4 1.4L3.2 4.6zm14.8 0 1.4 1.4L4.6 20.8l-1.4-1.4z" opacity=".6"/><circle cx="12" cy="12" r="2.6"/></svg>',
-  dash: '<svg viewBox="0 0 24 24"><path d="M2 6.6h9.8v2.4H2zm3 4.2h9.8v2.4H5zm3 4.2h9.8v2.4H8zM15 4l7 8-7 8-1.7-1.7L18.6 13H13v-2h5.6l-5.3-5.3z"/></svg>',
-  pull: '<svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 1 9-9h-2.5A6.5 6.5 0 1 0 12 18.5zm0-5.4L7.5 11h3V4.6h3V11h3z"/></svg>',
-  devour: '<svg viewBox="0 0 24 24"><path d="M20.8 7.3A9.6 9.6 0 1 0 20.8 16.7L12.4 12z"/><path d="M19.4 8.6l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/></svg>',
-};
+// UI/UX BUILD 43: ikon skill PER-SKILL (33 ikon) digambar khusus dalam bahasa visual
+// Imunverse (set assets/icons/menu-*.svg) — sumber tunggal js/ui/skill-icons.js, dipakai
+// juga oleh Prep & detail hero. Pelat tombol = HEX SVG (outline ink → rim warna skill →
+// muka krem), bukan clip-path yang memotong ring/bayangan.
+
+function currentHeroSkillVisual(run) {
+  const heroDef = run?.heroDef;
+  const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+  const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+  const eq = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+  const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+  return {
+    archetype: design?.archetype || 'generic',
+    heroColor: heroDef?.color || '#35d0ba',
+    equityColor: eq?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba',
+    stageLabel: stageDef?.collectionLabel || (stage > 0 ? `Equity ${stage}` : 'Polos'),
+    cue: eq?.visualCue || design?.baseCue || '',
+  };
+}
 
 export function buildAbilityBar() {
   const bar = document.getElementById('ability-bar');
   if (!bar) return;
   bar.textContent = '';
   const run = game.run;
+  const visual = currentHeroSkillVisual(run);
   const views = run && run.skills ? run.skills.getView() : [];
   views.forEach((view, i) => {
     const def = getData().skills.skills.find((s) => s.id === view.id);
-    const iconKind = def && def.effects[0] ? def.effects[0].kind : 'strike';
-    const glyph = KIND_GLYPH[iconKind] || KIND_GLYPH.strike;
     const btn = document.createElement('button');
-    btn.className = `ability-btn${view.ult ? ' ult' : ''}`;
+    btn.className = `ability-btn character-skill${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
+    btn.dataset.archetype = visual.archetype;
+    btn.dataset.stage = visual.stageLabel;
     btn.style.setProperty('--sk', view.color || '#35d0ba');
-    btn.setAttribute('aria-label', view.name);
+    btn.style.setProperty('--hero', visual.heroColor);
+    btn.style.setProperty('--eq', visual.equityColor);
+    btn.setAttribute('aria-label', `${view.name} — ${visual.stageLabel}`);
+    const skillTitle = def?.description ? `${view.name} — ${def.description}` : view.name;
+    btn.title = visual.cue ? `${skillTitle} · ${visual.stageLabel}: ${visual.cue}` : `${skillTitle} · ${visual.stageLabel}`;
     btn.innerHTML =
-      `<span class="sk-ico sk-glyph">${glyph}</span>` +
+      skillPlateSvg() +
+      `<span class="sk-bio-accent" aria-hidden="true"></span>` +
+      `<span class="sk-ico sk-glyph">${skillIconSvg(def)}</span>` +
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
       `<span class="cd-num"></span>` +
@@ -106,9 +108,11 @@ export function updateAbilityBar(abilities) {
 /** Hint kontrol adaptif per perangkat (touch vs keyboard). */
 function controlHintText() {
   const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
+  // UI/UX BUILD 42: copy = perilaku nyata (joystick mengambang di lantai arena;
+  // SERANG = nama tombol yang terlihat; tarik SERANG = mengarahkan)
   return isTouch
-    ? 'Sentuh & tarik di mana saja untuk bergerak'
-    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / panah / tarik mouse · Tembak: <span class="k">tahan tombol / Spasi</span> · Jeda: <span class="k">Esc</span>';
+    ? 'Tarik di lantai arena untuk bergerak · Tahan <span class="k">SERANG</span>, tarik untuk mengarahkan'
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · Serang: <span class="k">Spasi</span> / tahan <span class="k">SERANG</span> (tarik = arah) · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */
@@ -128,6 +132,20 @@ export function resetHUD() {
   const portrait = document.getElementById('hud-portrait');
   const getter = window.__IMUNVERSE_getHeroPortrait;
   if (portrait && getter) portrait.src = getter();
+
+  // Character Agent: chip equity stage langsung di portrait HUD gameplay.
+  const eqNode = document.getElementById('hud-equity-stage');
+  if (eqNode) {
+    const heroDef = game.run?.heroDef || getData().heroes.heroes.find((h) => h.id === STATE.meta.selectedHero);
+    const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+    const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+    const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+    const cue = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+    const color = cue?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba';
+    eqNode.textContent = stageDef?.collectionLabel || stageDef?.name || (stage > 0 ? `Equity ${stage}` : 'Polos');
+    eqNode.title = stage > 0 ? `${cue?.name || eqNode.textContent}: ${cue?.visualCue || ''}` : (design?.baseCue || 'Stage 0 polos');
+    eqNode.style.setProperty('--eq', color);
+  }
 
   // Hint kontrol (hilang sendiri setelah 8 detik)
   const hint = document.getElementById('hud-hint');

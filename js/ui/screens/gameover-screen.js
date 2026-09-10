@@ -97,10 +97,10 @@ export function show(summary) {
   const stars = starsFor(summary);
   document.querySelectorAll('#gameover-stars .star').forEach((s, i) => {
     s.classList.remove('on');
-    s.src = 'assets/sprites/icon_star_empty.png';
+    s.src = 'assets/icons/ui-star-empty.svg';
     if (i < stars) {
       setTimeout(() => {
-        s.src = 'assets/sprites/icon_star.png';
+        s.src = 'assets/icons/ui-star.svg';
         s.classList.add('on');
       }, 250 + i * 260);
     }
@@ -108,6 +108,10 @@ export function show(summary) {
 
   const grid = document.getElementById('gameover-summary');
   grid.textContent = '';
+  // UI/UX: baris `.go-parts` (Tubuh/Evolusi/Imun/Mastery/Pangkat) disisipkan
+  // SETELAH grid tiap render → tanpa pembersihan, baris run sebelumnya menumpuk.
+  let sib = grid.nextElementSibling;
+  while (sib && sib.classList.contains('go-parts')) { const n = sib.nextElementSibling; sib.remove(); sib = n; }
   const cells = [
     [summary.wave, 'Gelombang'],
     [formatTime(summary.time), 'Bertahan'],
@@ -141,7 +145,7 @@ export function show(summary) {
   // Bagian evolusi terkumpul run ini (feed meta-progression)
   if (summary.parts > 0) {
     const partsLine = el('div', { class: 'go-parts' }, [
-      el('img', { src: 'assets/sprites/part_inti.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
+      el('img', { src: 'assets/sprites/part_equity_memory_core.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${summary.parts} bagian evolusi dibawa pulang — cek Dashboard!` }),
     ]);
     grid.insertAdjacentElement('afterend', partsLine);
@@ -156,7 +160,7 @@ export function show(summary) {
     if (summary.bpFrom !== null && summary.bpTo > summary.bpFrom) bits.push(`Battle Pass Lv ${summary.bpFrom} → ${summary.bpTo}`);
     else if (summary.bpFrom !== null) bits.push(`Battle Pass Lv ${summary.bpTo}`);
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-imu' }, [
-      el('img', { src: 'assets/sprites/icon_imu.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
+      el('img', { src: 'assets/icons/cur-imun.svg', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${bits.join(' · ')}` }),
     ]));
   }
@@ -210,7 +214,7 @@ export function show(summary) {
     retryBtn.textContent = 'Bab Berikutnya ✓';
     homeBtn.lastChild.textContent = 'Peta Tubuh';
   } else {
-    retryBtn.innerHTML = '<img class="btn-ico" src="assets/sprites/icon_play.png" alt="" />Main Lagi';
+    retryBtn.innerHTML = '<img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />Main Lagi';
     homeBtn.lastChild.textContent = 'Dashboard';
   }
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Antibodi" (mata uang run): koin emas tebal dengan relief antibodi-Y krem + kilau. -->
+  <ellipse cx="32" cy="58.5" rx="18" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <circle cx="32" cy="34" r="24" fill="#c9891f"/>
+  <circle cx="32" cy="31" r="24" fill="#e0a72e"/>
+  <circle cx="32" cy="31" r="19.5" fill="#f5c64f" stroke="#c9891f" stroke-width="2"/>
+  <path d="M32 44 V30.5 M32 30.5 L23.5 21.5 M32 30.5 L40.5 21.5" fill="none" stroke="#c9891f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 44 V30.5 M32 30.5 L23.5 21.5 M32 30.5 L40.5 21.5" fill="none" stroke="#fffdf4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 22 Q22 15.5 29 13.5" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>
+</svg>

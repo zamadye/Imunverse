@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Arena": ubin arena heksagonal + dua antibodi-Y bersilang (medan tempur). -->
+  <ellipse cx="32" cy="59" rx="18" ry="3" fill="#123f3a" opacity=".14"/>
+  <polygon points="32,8 53,20 53,44 32,56 11,44 11,20" fill="#1f7a70"/>
+  <polygon points="32,12 49.5,22 49.5,42 32,52 14.5,42 14.5,22" fill="#dcefe6"/>
+  <polygon points="32,12 49.5,22 32,32 14.5,22" fill="#fffdf4" opacity=".5"/>
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- antibodi teal -->
+    <g transform="rotate(-32 32 34)">
+      <path d="M32 46 V33 M32 33 L25 24 M32 33 L39 24" stroke="#14584f" stroke-width="7"/>
+      <path d="M32 46 V33 M32 33 L25 24 M32 33 L39 24" stroke="#2f9c8f" stroke-width="3.6"/>
+    </g>
+    <!-- antibodi emas -->
+    <g transform="rotate(32 32 34)">
+      <path d="M32 46 V33 M32 33 L25 24 M32 33 L39 24" stroke="#c9891f" stroke-width="7"/>
+      <path d="M32 46 V33 M32 33 L25 24 M32 33 L39 24" stroke="#f5c64f" stroke-width="3.6"/>
+    </g>
+  </g>
+  <circle cx="32" cy="34" r="3.2" fill="#f2825c" stroke="#fffdf4" stroke-width="1.6"/>
+</svg>

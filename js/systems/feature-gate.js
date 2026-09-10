@@ -66,3 +66,63 @@ export function applyGateVisual(el, target, id) {
   }
   return gate;
 }
+
+/* ------------------------------------------------------------------
+ * UI/UX — MENU GAMEPLAY (HUD). Sejak F24 dashboard = launcher 1 tombol,
+ * semua destinasi hidup di dua menu HUD. Ini SATU-SATUNYA sumber kebenaran
+ * pemetaan tombol menu → gerbang features.json, dipakai handler klik,
+ * penyembunyian item, dan badge unlock — agar tidak ada jalur yang lolos
+ * (kasus lama: Collection→codex & Battle→arena tak terdaftar → terbuka).
+ * ------------------------------------------------------------------ */
+
+/** Tombol menu HUD → (target, id) gerbang. `unknown` = tak terdaftar ⇒ DIANGGAP TERKUNCI. */
+const HUD_MENU_GATES = {
+  // menu1 (perjalanan penjaga): progres & pengetahuan
+  menu1: { campaign: ['secondary', 'campaign'], rank: ['secondary', 'rank'], codex: ['secondary', 'codex'], bp: ['secondary', 'bp'] },
+  // menu2 (regu hero): hero, koleksi, toko, arena, lab pasukan
+  menu2: { roster: ['dock', 'roster'], codex: ['dock', 'codex'], shop: ['dock', 'shop'], arena: ['dock', 'arena'], upgrade: ['dock', 'upgrade'] },
+};
+
+/** Daftar item satu menu HUD: [{screenId, target, id}] — dipakai badge unlock. */
+export function hudMenuEntries(menu) {
+  return Object.entries(HUD_MENU_GATES[menu] || {}).map(([screenId, [target, id]]) => ({ screenId, target, id }));
+}
+
+/** Definisi mentah gerbang (target,id) dari features.json — null bila tak terdaftar. */
+export function gateDef(target, id) {
+  const gates = (getFeatures() && getFeatures().gates) || [];
+  return gates.find((x) => x.target === target && x.id === id) || null;
+}
+
+/**
+ * Gerbang untuk item menu HUD. Berbeda dari gateFor(): id yang TIDAK terdaftar
+ * di features.json dianggap terkunci (fail-closed), bukan lolos.
+ * @param {'menu1'|'menu2'} menu
+ * @returns {{locked:boolean, label:string, requireWave:number}}
+ */
+export function hudMenuGate(menu, screenId) {
+  const map = HUD_MENU_GATES[menu] && HUD_MENU_GATES[menu][screenId];
+  const gate = map ? gateFor(map[0], map[1]) : null;
+  return gate || { locked: !isDevMode(), label: 'Terus bermain', requireWave: 0 };
+}
+
+/**
+ * Terapkan disclosure ke satu menu HUD: item terkunci disembunyikan (class
+ * `gated` + display:none — bukan gembok), toggle menu ikut disembunyikan bila
+ * belum ada satu pun item terbuka. Kembalikan jumlah item terbuka.
+ */
+export function applyHudMenuGates(menu, linkSelector, toggleEl, datasetKey) {
+  let open = 0;
+  document.querySelectorAll(linkSelector).forEach((btn) => {
+    const gate = hudMenuGate(menu, btn.dataset[datasetKey]);
+    btn.classList.toggle('gated', gate.locked);
+    btn.style.display = gate.locked ? 'none' : '';
+    btn.setAttribute('aria-hidden', gate.locked ? 'true' : 'false');
+    if (!gate.locked) open += 1;
+  });
+  if (toggleEl) {
+    toggleEl.classList.toggle('gate-hidden', open === 0);
+    toggleEl.style.display = open === 0 ? 'none' : '';
+  }
+  return open;
+}
