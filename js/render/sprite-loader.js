@@ -69,11 +69,6 @@ const EXTRA_PRELOAD = [
   'assets/sprites/deco_aura.png',
   'assets/sprites/deco_weed_big.png',
   'assets/sprites/deco_reef_big.png',
-  // Overlay evolusi hero (digambar via drawSprite, path hardcode di game.js)
-  'assets/sprites/ov_silia.png',
-  'assets/sprites/ov_pseudopodia.png',
-  'assets/sprites/ov_pedang.png',
-  'assets/sprites/ov_inti.png',
   // E1 poin 8: karakter naratif hidup — pose idle/talk (Dr. Amara & RIA)
   'assets/sprites/amara_pose_idle.png',
   'assets/sprites/amara_pose_talk.png',

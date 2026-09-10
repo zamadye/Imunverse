@@ -4,6 +4,12 @@
 > Status: ✅ selesai · 🔄 sedang dikerjakan · ⬜ belum mulai · 🟡 sebagian
 > Legenda effort: S = ≤1 sesi · M = beberapa sesi · L = 1+ minggu
 
+## Progress map aktif
+
+- Character Agent / equity / pathogen / collection UI: [`docs/character-agent-progress-map.md`](docs/character-agent-progress-map.md)
+- Character skill visual audit: [`docs/character-skill-visual-audit.md`](docs/character-skill-visual-audit.md)
+- Character handoff agent lain: [`docs/character-agent-handoff.md`](docs/character-agent-handoff.md)
+
 | Fase | Nama | Status | Effort |
 |---|---|---|---|
 | 0 | Riset & Desain Dasar | ✅ | S |

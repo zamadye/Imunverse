@@ -1,808 +1,808 @@
 {
- "schemaVersion": 2,
- "scenes": [
-  {
-   "id": "intro",
-   "shots": [
+  "schemaVersion": 2,
+  "scenes": [
     {
-     "dur": 3400,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Cuma luka gores kok — tapi kalau kotor sedikit saja, bisa infeksi.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
+      "id": "intro",
+      "shots": [
+        {
+          "dur": 3400,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Cuma luka gores kok — tapi kalau kotor sedikit saja, bisa infeksi.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Untungnya tubuh kita punya 'pasukan' sendiri yang langsung siaga begitu ada luka.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.12,
+                0.52
+              ],
+              "to": [
+                0.32,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 2600,
+          "bg": [
+            "#f7c8a8",
+            "#3f8f7f"
+          ],
+          "text": "...zoom masuk ke luka. Warna berubah. Skala berubah. Selamat datang di dunia mikroskopis.",
+          "ease": "inOut"
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Woy, bangun! Ada celah masuk di lengan, bakteri udah nyusup duluan. Lo satu-satunya yang deket lokasi!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            },
+            {
+              "sprite": "assets/sprites/hero_macrophage_idle.png",
+              "from": [
+                0.3,
+                0.6
+              ],
+              "to": [
+                0.38,
+                0.55
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
     },
     {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Untungnya tubuh kita punya 'pasukan' sendiri yang langsung siaga begitu ada luka.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.12,
-        0.52
-       ],
-       "to": [
-        0.32,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
+      "id": "onboarding",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Tenang ya. Dari dalam sana, ada pasukan yang bertugas jaga siang-malam.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 2600,
+          "bg": [
+            "#f7c8a8",
+            "#3f8f7f"
+          ],
+          "text": "Kamu tidak tahu di tubuh siapa kamu berada. Kamu hanya tahu satu hal: kalau kamu kalah, Inang mati.",
+          "ease": "inOut"
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Namaku RIA — aku jaringan komunikasi seluruh pasukan imun. Dengar aku, dan kita selamatkan Inang bersama.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.6,
+                0.75
+              ],
+              "to": [
+                0.6,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 2800,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Bakteri di depan! Bergerak dengan menyeret arena, serang otomatis saat dekat. Gerak sekarang, gih!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.8,
+                0.75
+              ],
+              "to": [
+                0.8,
+                0.35
+              ],
+              "scale": 0.22
+            },
+            {
+              "sprite": "assets/sprites/enemy_virus.png",
+              "from": [
+                1.1,
+                0.5
+              ],
+              "to": [
+                0.6,
+                0.5
+              ],
+              "scale": 0.26
+            }
+          ]
+        }
+      ]
     },
     {
-     "dur": 2600,
-     "bg": [
-      "#f7c8a8",
-      "#3f8f7f"
-     ],
-     "text": "...zoom masuk ke luka. Warna berubah. Skala berubah. Selamat datang di dunia mikroskopis.",
-     "ease": "inOut"
+      "id": "brief_bab_luka",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Lukanya kecil, tapi harus dijaga tetap bersih — biar tidak infeksi.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Gerbangnya kebuka! Bakteri nyusup lewat goresan. Bersihkan 25 penyusup — tunjukkan siapa penjaga tubuh ini!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
     },
     {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Woy, bangun! Ada celah masuk di lengan, bakteri udah nyusup duluan. Lo satu-satunya yang deket lokasi!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      },
-      {
-       "sprite": "assets/sprites/hero_makrofag_idle.png",
-       "from": [
-        0.3,
-        0.6
-       ],
-       "to": [
-        0.38,
-        0.55
-       ],
-       "scale": 0.3
-      }
-     ]
+      "id": "brief_bab_demam",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Suhunya naik jadi 38.5 — ini normal kok, badan lagi kerja ekstra ngelawan virus flu-nya.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Denger itu? Suhu naik artinya sinyal darurat baru dikirim ke seluruh badan. Bala bantuan datang — tapi musuh makin ganas. Siap-siap!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_racun",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Sepertinya ada yang tidak beres dengan makanannya semalam. Kita bantu tubuhnya membersihkan diri.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Racun ikut masuk bareng makanan! Musuh datang lebih cepat dan acak — hajar di Lambung sebelum menyebar!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_alergi",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Reaksi alerginya cukup kuat — tubuhnya menyerang sesuatu yang sebenarnya tidak berbahaya.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Aneh... sebagian pasukan kita ngamuk sendiri. Musuh dalam selimut! Tenangkan medan, jangan sampai tubuh melukai dirinya sendiri.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_kanker",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Ada hasil yang perlu kita perhatikan lebih lanjut. Bukan berarti hal terburuk — tapi kita perlu waktu untuk memastikan.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Ini... beda. Sel ini bukan penyusup dari luar. Dia bagian dari kita yang salah tumbuh. Kita nggak punya pilihan lain.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief_bab_final",
+      "shots": [
+        {
+          "dur": 3200,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Dr. Amara: \"Malam ini penentuan. Aku di sini — dan 'pasukan' di dalam sana juga tidak akan menyerah.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3200,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Semua ancaman yang pernah kita lawan, datang bersamaan. Satu malam. Satu tubuh. Satu kesempatan. Untuk Inang!\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.72,
+                0.75
+              ],
+              "to": [
+                0.72,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_luka",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Area bersih! Lukanya mulai menutup dari dalam.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.65,
+                0.75
+              ],
+              "to": [
+                0.65,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Di dunia atas: sebuah plester kecil bergambar kartun ditempel pelan-pelan.",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_demam",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Raja Flu tumbang! Suhu mulai turun...\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.65,
+                0.75
+              ],
+              "to": [
+                0.65,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Di dunia atas: termometer dibacakan dengan suara yang sengaja diceriakan.",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_racun",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Racun bersih! Perutnya tenang lagi.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.65,
+                0.75
+              ],
+              "to": [
+                0.65,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Di dunia atas: seseorang berjanji tidak jajan sembarangan lagi.",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_alergi",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Medan tenang. Pasukan kembali waras — kamu menyelamatkan tubuh dari dirinya sendiri.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.65,
+                0.75
+              ],
+              "to": [
+                0.65,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Di dunia atas: sebuah boneka usang dipeluk erat di ranjang periksa. Tunggu... boneka?",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_kanker",
+      "shots": [
+        {
+          "dur": 3000,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Bayang Dalam... selesai. Maaf, kawan yang salah tumbuh.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.65,
+                0.75
+              ],
+              "to": [
+                0.65,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        },
+        {
+          "dur": 3000,
+          "bg": [
+            "#fff3e0",
+            "#ffd9b0"
+          ],
+          "text": "Di dunia atas: Dr. Amara tersenyum lega kepada dua orang tua muda. Inang kita... anak mereka.",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clear_bab_final",
+      "shots": [
+        {
+          "dur": 3400,
+          "bg": [
+            "#fff8e1",
+            "#ffe1b3"
+          ],
+          "text": "Kamar rumah sakit. Cahaya pagi masuk lewat jendela.",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.34
+            }
+          ]
+        },
+        {
+          "dur": 3400,
+          "bg": [
+            "#fff8e1",
+            "#ffe1b3"
+          ],
+          "text": "Dr. Amara: \"Selamat, dia bertahan dengan baik. Sekarang tinggal istirahat — biar 'pasukan' di dalam yang lanjutkan kerjanya.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/amara_pose_talk.png",
+              "from": [
+                0.09999999999999998,
+                0.52
+              ],
+              "to": [
+                0.3,
+                0.52
+              ],
+              "scale": 0.42
+            }
+          ]
+        },
+        {
+          "dur": 3600,
+          "bg": [
+            "#ffe9f0",
+            "#ffd0e0"
+          ],
+          "text": "Seorang anak kecil membuka matanya — Inang yang kamu jaga selama ini — dan tertawa.",
+          "ease": "inOut"
+        },
+        {
+          "dur": 3600,
+          "bg": [
+            "#e7f6ee",
+            "#bfe8d2"
+          ],
+          "text": "RIA: \"Kerja bagus. Lo nggak akan pernah ketemu dia langsung, tapi... dia baru aja dapet satu hari lagi buat hidup — gara-gara lo.\"",
+          "actors": [
+            {
+              "sprite": "assets/sprites/ria_pose_talk.png",
+              "from": [
+                0.6,
+                0.75
+              ],
+              "to": [
+                0.6,
+                0.35
+              ],
+              "scale": 0.3
+            }
+          ]
+        }
+      ]
     }
-   ]
-  },
-  {
-   "id": "onboarding",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Tenang ya. Dari dalam sana, ada pasukan yang bertugas jaga siang-malam.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 2600,
-     "bg": [
-      "#f7c8a8",
-      "#3f8f7f"
-     ],
-     "text": "Kamu tidak tahu di tubuh siapa kamu berada. Kamu hanya tahu satu hal: kalau kamu kalah, Inang mati.",
-     "ease": "inOut"
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Namaku RIA — aku jaringan komunikasi seluruh pasukan imun. Dengar aku, dan kita selamatkan Inang bersama.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.6,
-        0.75
-       ],
-       "to": [
-        0.6,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 2800,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Bakteri di depan! Bergerak dengan menyeret arena, serang otomatis saat dekat. Gerak sekarang, gih!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.8,
-        0.75
-       ],
-       "to": [
-        0.8,
-        0.35
-       ],
-       "scale": 0.22
-      },
-      {
-       "sprite": "assets/sprites/enemy_virus.png",
-       "from": [
-        1.1,
-        0.5
-       ],
-       "to": [
-        0.6,
-        0.5
-       ],
-       "scale": 0.26
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_luka",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Lukanya kecil, tapi harus dijaga tetap bersih — biar tidak infeksi.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Gerbangnya kebuka! Bakteri nyusup lewat goresan. Bersihkan 25 penyusup — tunjukkan siapa penjaga tubuh ini!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_demam",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Suhunya naik jadi 38.5 — ini normal kok, badan lagi kerja ekstra ngelawan virus flu-nya.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Denger itu? Suhu naik artinya sinyal darurat baru dikirim ke seluruh badan. Bala bantuan datang — tapi musuh makin ganas. Siap-siap!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_racun",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Sepertinya ada yang tidak beres dengan makanannya semalam. Kita bantu tubuhnya membersihkan diri.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Racun ikut masuk bareng makanan! Musuh datang lebih cepat dan acak — hajar di Lambung sebelum menyebar!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_alergi",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Reaksi alerginya cukup kuat — tubuhnya menyerang sesuatu yang sebenarnya tidak berbahaya.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Aneh... sebagian pasukan kita ngamuk sendiri. Musuh dalam selimut! Tenangkan medan, jangan sampai tubuh melukai dirinya sendiri.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_kanker",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Ada hasil yang perlu kita perhatikan lebih lanjut. Bukan berarti hal terburuk — tapi kita perlu waktu untuk memastikan.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Ini... beda. Sel ini bukan penyusup dari luar. Dia bagian dari kita yang salah tumbuh. Kita nggak punya pilihan lain.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "brief_bab_final",
-   "shots": [
-    {
-     "dur": 3200,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Dr. Amara: \"Malam ini penentuan. Aku di sini — dan 'pasukan' di dalam sana juga tidak akan menyerah.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3200,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Semua ancaman yang pernah kita lawan, datang bersamaan. Satu malam. Satu tubuh. Satu kesempatan. Untuk Inang!\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.72,
-        0.75
-       ],
-       "to": [
-        0.72,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_luka",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Area bersih! Lukanya mulai menutup dari dalam.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.65,
-        0.75
-       ],
-       "to": [
-        0.65,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Di dunia atas: sebuah plester kecil bergambar kartun ditempel pelan-pelan.",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.36
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_demam",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Raja Flu tumbang! Suhu mulai turun...\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.65,
-        0.75
-       ],
-       "to": [
-        0.65,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Di dunia atas: termometer dibacakan dengan suara yang sengaja diceriakan.",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.36
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_racun",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Racun bersih! Perutnya tenang lagi.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.65,
-        0.75
-       ],
-       "to": [
-        0.65,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Di dunia atas: seseorang berjanji tidak jajan sembarangan lagi.",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.36
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_alergi",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Medan tenang. Pasukan kembali waras — kamu menyelamatkan tubuh dari dirinya sendiri.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.65,
-        0.75
-       ],
-       "to": [
-        0.65,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Di dunia atas: sebuah boneka usang dipeluk erat di ranjang periksa. Tunggu... boneka?",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.36
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_kanker",
-   "shots": [
-    {
-     "dur": 3000,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Bayang Dalam... selesai. Maaf, kawan yang salah tumbuh.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.65,
-        0.75
-       ],
-       "to": [
-        0.65,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    },
-    {
-     "dur": 3000,
-     "bg": [
-      "#fff3e0",
-      "#ffd9b0"
-     ],
-     "text": "Di dunia atas: Dr. Amara tersenyum lega kepada dua orang tua muda. Inang kita... anak mereka.",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.36
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "clear_bab_final",
-   "shots": [
-    {
-     "dur": 3400,
-     "bg": [
-      "#fff8e1",
-      "#ffe1b3"
-     ],
-     "text": "Kamar rumah sakit. Cahaya pagi masuk lewat jendela.",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.34
-      }
-     ]
-    },
-    {
-     "dur": 3400,
-     "bg": [
-      "#fff8e1",
-      "#ffe1b3"
-     ],
-     "text": "Dr. Amara: \"Selamat, dia bertahan dengan baik. Sekarang tinggal istirahat — biar 'pasukan' di dalam yang lanjutkan kerjanya.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/amara_pose_talk.png",
-       "from": [
-        0.09999999999999998,
-        0.52
-       ],
-       "to": [
-        0.3,
-        0.52
-       ],
-       "scale": 0.42
-      }
-     ]
-    },
-    {
-     "dur": 3600,
-     "bg": [
-      "#ffe9f0",
-      "#ffd0e0"
-     ],
-     "text": "Seorang anak kecil membuka matanya — Inang yang kamu jaga selama ini — dan tertawa.",
-     "ease": "inOut"
-    },
-    {
-     "dur": 3600,
-     "bg": [
-      "#e7f6ee",
-      "#bfe8d2"
-     ],
-     "text": "RIA: \"Kerja bagus. Lo nggak akan pernah ketemu dia langsung, tapi... dia baru aja dapet satu hari lagi buat hidup — gara-gara lo.\"",
-     "actors": [
-      {
-       "sprite": "assets/sprites/ria_pose_talk.png",
-       "from": [
-        0.6,
-        0.75
-       ],
-       "to": [
-        0.6,
-        0.35
-       ],
-       "scale": 0.3
-      }
-     ]
-    }
-   ]
-  }
- ]
+  ]
 }

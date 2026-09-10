@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "doc": "Art Director colony building asset spec aligned to Agent 8 building ids and tower unlock linkage.",
+  "artBible": "assets/ART_BIBLE.md",
+  "migrationReference": "src/core/MIGRATION_BRIEF.md",
+  "towerUnlockCoverage": {
+    "tower_macrophage": {
+      "heroId": "macrophage",
+      "source": [
+        "markas_sel"
+      ],
+      "rule": "default anchor"
+    },
+    "tower_neutrophil": {
+      "heroId": "neutrophil",
+      "source": [
+        "barak_sel"
+      ],
+      "rule": "barak_sel stage 1"
+    },
+    "tower_tcd4": {
+      "heroId": "tcd4",
+      "source": [
+        "pos_sinyal"
+      ],
+      "rule": "pos_sinyal stage 1"
+    },
+    "tower_eosinophil": {
+      "heroId": "eosinophil",
+      "source": [
+        "barak_sel"
+      ],
+      "rule": "barak_sel stage 2"
+    },
+    "tower_tcd8": {
+      "heroId": "tcd8",
+      "source": [
+        "barak_sel"
+      ],
+      "rule": "barak_sel stage 2"
+    },
+    "tower_basophil": {
+      "heroId": "basophil",
+      "source": [
+        "pos_sinyal"
+      ],
+      "rule": "pos_sinyal stage 2"
+    },
+    "tower_mastcell": {
+      "heroId": "mastcell",
+      "source": [
+        "lab_membran"
+      ],
+      "rule": "lab_membran stage 2"
+    },
+    "tower_bcell": {
+      "heroId": "bcell",
+      "source": [
+        "pusat_riset"
+      ],
+      "rule": "pusat_riset stage 1"
+    },
+    "tower_dendritic": {
+      "heroId": "dendritic",
+      "source": [
+        "pos_sinyal",
+        "pusat_riset"
+      ],
+      "rule": "signal + research bridge"
+    },
+    "tower_treg": {
+      "heroId": "treg",
+      "source": [
+        "pusat_riset"
+      ],
+      "rule": "pusat_riset stage 2"
+    },
+    "tower_nkcell": {
+      "heroId": "nkcell",
+      "source": [
+        "pusat_riset",
+        "menara_limfa"
+      ],
+      "rule": "mature research + lymph tower"
+    }
+  },
+  "items": [
+    {
+      "buildingId": "markas_sel",
+      "name": "Markas Sel",
+      "category": "inti",
+      "palette": {
+        "base": "#38bfa7",
+        "accent": "#fff3b0"
+      },
+      "visualMetaphor": "nucleus dome, colony membrane, capillary roots",
+      "sprites": {
+        "stage1": "assets/buildings/markas_sel_stage1.png",
+        "stage2": "assets/buildings/markas_sel_stage2.png",
+        "stage3": "assets/buildings/markas_sel_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_macrophage"
+      ]
+    },
+    {
+      "buildingId": "barak_sel",
+      "name": "Barak Sel",
+      "category": "militer",
+      "palette": {
+        "base": "#ff9f43",
+        "accent": "#72d66b"
+      },
+      "visualMetaphor": "budding immune-cell pods and granule ports",
+      "sprites": {
+        "stage1": "assets/buildings/barak_sel_stage1.png",
+        "stage2": "assets/buildings/barak_sel_stage2.png",
+        "stage3": "assets/buildings/barak_sel_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_neutrophil",
+        "tower_eosinophil",
+        "tower_tcd8"
+      ]
+    },
+    {
+      "buildingId": "pos_sinyal",
+      "name": "Pos Sinyal Sitokin",
+      "category": "dukungan",
+      "palette": {
+        "base": "#4dd6ff",
+        "accent": "#f1c40f"
+      },
+      "visualMetaphor": "dendrite antenna, cytokine halo, signal vesicles",
+      "sprites": {
+        "stage1": "assets/buildings/pos_sinyal_stage1.png",
+        "stage2": "assets/buildings/pos_sinyal_stage2.png",
+        "stage3": "assets/buildings/pos_sinyal_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_tcd4",
+        "tower_basophil",
+        "tower_dendritic"
+      ]
+    },
+    {
+      "buildingId": "lab_membran",
+      "name": "Lab Membran",
+      "category": "pertahanan",
+      "palette": {
+        "base": "#7b6ee6",
+        "accent": "#80c7ff"
+      },
+      "visualMetaphor": "layered membrane shell and shield valves",
+      "sprites": {
+        "stage1": "assets/buildings/lab_membran_stage1.png",
+        "stage2": "assets/buildings/lab_membran_stage2.png",
+        "stage3": "assets/buildings/lab_membran_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_mastcell"
+      ]
+    },
+    {
+      "buildingId": "pusat_riset",
+      "name": "Pusat Riset Imun",
+      "category": "riset",
+      "palette": {
+        "base": "#bb8fce",
+        "accent": "#ffd76a"
+      },
+      "visualMetaphor": "research organelle, DNA ribbon, antibody motif",
+      "sprites": {
+        "stage1": "assets/buildings/pusat_riset_stage1.png",
+        "stage2": "assets/buildings/pusat_riset_stage2.png",
+        "stage3": "assets/buildings/pusat_riset_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_bcell",
+        "tower_dendritic",
+        "tower_treg",
+        "tower_nkcell"
+      ]
+    },
+    {
+      "buildingId": "menara_limfa",
+      "name": "Menara Limfa",
+      "category": "infrastruktur",
+      "palette": {
+        "base": "#2ecc71",
+        "accent": "#9be7ff"
+      },
+      "visualMetaphor": "lymph-vessel spire with organic valves",
+      "sprites": {
+        "stage1": "assets/buildings/menara_limfa_stage1.png",
+        "stage2": "assets/buildings/menara_limfa_stage2.png",
+        "stage3": "assets/buildings/menara_limfa_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": [
+        "tower_nkcell"
+      ]
+    },
+    {
+      "buildingId": "monumen_imun",
+      "name": "Monumen Imun",
+      "category": "kosmetik",
+      "palette": {
+        "base": "#ffe082",
+        "accent": "#ffffff"
+      },
+      "visualMetaphor": "antibody-Y pearl monument on living membrane",
+      "sprites": {
+        "stage1": "assets/buildings/monumen_imun_stage1.png",
+        "stage2": "assets/buildings/monumen_imun_stage2.png",
+        "stage3": "assets/buildings/monumen_imun_stage3.png"
+      },
+      "growthRule": [
+        "stage1 bud: small living membrane + one function cue",
+        "stage2 growing: roots and organelles extend",
+        "stage3 mature: full silhouette + extra ring/valve/beacon"
+      ],
+      "coveredTowerUnlocks": []
+    }
+  ]
+}

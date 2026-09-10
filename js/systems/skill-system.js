@@ -51,7 +51,17 @@ export class SkillSystem {
     if (!s || s.cdLeft > 0) return false;
     s.cdLeft = s.def.cooldown;
     const run = ctx.game.run;
+    const primaryKind = (s.def.effects && s.def.effects[0] && s.def.effects[0].kind) || 'skill';
+    const charFx = characterSkillVisual(ctx, s.def, primaryKind);
+    const castColor = s.def.color || charFx.equityColor || ctx.player.heroDef?.color || '#ffd93d';
+    // Frame budget aset: setiap hero hanya punya 1 idle PNG + 1 attack PNG.
+    // Jadi buildup/payoff dibuat sebagai VFX shape procedural singkat, bukan
+    // berpura-pura ada sprite-sheet charge yang belum diproduksi tim art.
+    // Character Agent: VFX cast membawa archetype + warna equity aktif agar
+    // skill di gameplay punya identitas biologis tanpa mengubah damage/cooldown.
+    ctx.effects?.spawnAbilityCharge(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind, ...charFx });
     for (const fx of s.def.effects) this.#apply(fx, ctx, run);
+    ctx.effects?.spawnAbilityPayoff(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind, ...charFx });
     // R7 Modul E: skill gerak/buff-diri meninggalkan jejak sinyal kemotaksis
     if (s.def.effects.some((fx) => fx.kind === 'dash' || fx.kind === 'buff_self')) {
       chemoActivate(ctx.game);
@@ -248,6 +258,24 @@ export class SkillSystem {
         console.warn('[skills] efek tidak dikenal:', fx.kind);
     }
   }
+}
+
+function characterSkillVisual(ctx, skillDef, primaryKind) {
+  const heroDef = ctx.player?.heroDef;
+  const run = ctx.game?.run;
+  const designs = getData().characterDesigns;
+  const heroDesign = heroDef ? designs?.heroes?.[heroDef.id] : null;
+  const stage = Math.max(0, Math.min(4, run?.evoStage?.stage || 0));
+  const eq = stage > 0 ? (heroDesign?.equity || []).find((e) => e.stage === stage) : null;
+  return {
+    skillId: skillDef?.id || primaryKind,
+    skillKind: primaryKind,
+    archetype: heroDesign?.archetype || 'generic',
+    heroColor: heroDef?.color || skillDef?.color || '#35d0ba',
+    equityColor: eq?.color || run?.evoStage?.tierColor || heroDef?.color || skillDef?.color || '#35d0ba',
+    equityStage: stage,
+    equityCue: eq?.visualCue || heroDesign?.baseCue || '',
+  };
 }
 
 function s_defColor(run, sys) {

@@ -29,6 +29,9 @@
     "scaleTo": 1.3
   },
   "shake": {
+    "hit": 0.035,
+    "critHit": 0.09,
+    "hitThrottleSec": 0.055,
     "kill": 0.06,
     "elite": 0.18,
     "boss": 0.65,

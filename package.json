@@ -7,6 +7,8 @@
   "scripts": {
     "start": "python3 -m http.server 8000 --bind 0.0.0.0",
     "sprites": "python3 tools/gen_sprites.py",
-    "check": "node scripts/check-imports.mjs"
+    "check": "node scripts/check-imports.mjs",
+    "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
+    "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs"
   }
 }

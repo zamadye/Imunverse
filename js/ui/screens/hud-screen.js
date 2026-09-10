@@ -10,7 +10,8 @@ let hintTimer = null;
 let xpGhost = 0;      // trail putih yang "mengejar" fill XP (efek kejar)
 let lastXpPct = 0;
 
-import { getData } from '../../core/data-store.js';
+import { STATE } from '../../core/state-manager.js';
+import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
 import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
@@ -33,22 +34,45 @@ export function hide() {
 // Imunverse (set assets/icons/menu-*.svg) — sumber tunggal js/ui/skill-icons.js, dipakai
 // juga oleh Prep & detail hero. Pelat tombol = HEX SVG (outline ink → rim warna skill →
 // muka krem), bukan clip-path yang memotong ring/bayangan.
+
+function currentHeroSkillVisual(run) {
+  const heroDef = run?.heroDef;
+  const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+  const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+  const eq = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+  const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+  return {
+    archetype: design?.archetype || 'generic',
+    heroColor: heroDef?.color || '#35d0ba',
+    equityColor: eq?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba',
+    stageLabel: stageDef?.collectionLabel || (stage > 0 ? `Equity ${stage}` : 'Polos'),
+    cue: eq?.visualCue || design?.baseCue || '',
+  };
+}
+
 export function buildAbilityBar() {
   const bar = document.getElementById('ability-bar');
   if (!bar) return;
   bar.textContent = '';
   const run = game.run;
+  const visual = currentHeroSkillVisual(run);
   const views = run && run.skills ? run.skills.getView() : [];
   views.forEach((view, i) => {
     const def = getData().skills.skills.find((s) => s.id === view.id);
     const btn = document.createElement('button');
-    btn.className = `ability-btn${view.ult ? ' ult' : ''}`;
+    btn.className = `ability-btn character-skill${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
+    btn.dataset.archetype = visual.archetype;
+    btn.dataset.stage = visual.stageLabel;
     btn.style.setProperty('--sk', view.color || '#35d0ba');
-    btn.setAttribute('aria-label', view.name);
-    btn.title = def ? `${view.name} — ${def.description}` : view.name;
+    btn.style.setProperty('--hero', visual.heroColor);
+    btn.style.setProperty('--eq', visual.equityColor);
+    btn.setAttribute('aria-label', `${view.name} — ${visual.stageLabel}`);
+    const skillTitle = def?.description ? `${view.name} — ${def.description}` : view.name;
+    btn.title = visual.cue ? `${skillTitle} · ${visual.stageLabel}: ${visual.cue}` : `${skillTitle} · ${visual.stageLabel}`;
     btn.innerHTML =
       skillPlateSvg() +
+      `<span class="sk-bio-accent" aria-hidden="true"></span>` +
       `<span class="sk-ico sk-glyph">${skillIconSvg(def)}</span>` +
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
@@ -108,6 +132,20 @@ export function resetHUD() {
   const portrait = document.getElementById('hud-portrait');
   const getter = window.__IMUNVERSE_getHeroPortrait;
   if (portrait && getter) portrait.src = getter();
+
+  // Character Agent: chip equity stage langsung di portrait HUD gameplay.
+  const eqNode = document.getElementById('hud-equity-stage');
+  if (eqNode) {
+    const heroDef = game.run?.heroDef || getData().heroes.heroes.find((h) => h.id === STATE.meta.selectedHero);
+    const stage = Math.max(0, Math.min(4, STATE.meta.evoStage || 0));
+    const stageDef = (getData().evolutions.stages || []).find((s) => s.stage === stage);
+    const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
+    const cue = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
+    const color = cue?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba';
+    eqNode.textContent = stageDef?.collectionLabel || stageDef?.name || (stage > 0 ? `Equity ${stage}` : 'Polos');
+    eqNode.title = stage > 0 ? `${cue?.name || eqNode.textContent}: ${cue?.visualCue || ''}` : (design?.baseCue || 'Stage 0 polos');
+    eqNode.style.setProperty('--eq', color);
+  }
 
   // Hint kontrol (hilang sendiri setelah 8 detik)
   const hint = document.getElementById('hud-hint');

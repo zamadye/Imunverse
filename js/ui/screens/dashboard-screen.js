@@ -247,7 +247,7 @@ function fmtTime(sec) {
   return `${m}m ${String(s).padStart(2, '0')}s`;
 }
 
-/** Overlay ov_* (silia/kaki/pedang/inti) di panggung sesuai tahap evolusi. */
+/** Overlay stage equity di panggung dashboard; stage 0 tetap polos/tanpa ikon. */
 function renderStageEvoOverlay(meta) {
   let box = document.getElementById('stage-evo');
   if (!box) {
@@ -257,13 +257,13 @@ function renderStageEvoOverlay(meta) {
   box.textContent = '';
   const stage = meta.evoStage || 0;
   const layers = [
-    ['assets/sprites/ov_inti.png', 'ov-inti', stage >= 4],
-    ['assets/sprites/ov_pseudopodia.png', 'ov-pseudopodia', stage >= 2],
-    ['assets/sprites/ov_silia.png', 'ov-silia', stage >= 1],
-    ['assets/sprites/ov_pedang.png', 'ov-pedang', stage >= 3],
+    ['assets/sprites/part_equity_memory_core.png', 'eq-memory', stage >= 4, 'Full Equity'],
+    ['assets/sprites/part_equity_effector.png', 'eq-effector', stage >= 3, 'Equity III'],
+    ['assets/sprites/part_equity_membrane.png', 'eq-membrane', stage >= 2, 'Equity II'],
+    ['assets/sprites/part_equity_receptor.png', 'eq-receptor', stage >= 1, 'Equity I'],
   ];
-  for (const [src, cls, on] of layers) {
-    if (on) box.appendChild(el('img', { class: cls, src, alt: '' }));
+  for (const [src, cls, on, alt] of layers) {
+    if (on) box.appendChild(el('img', { class: cls, src, alt }));
   }
 }
 

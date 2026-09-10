@@ -18,7 +18,9 @@
       "minWave": 1,
       "weight": 60,
       "orientToMovement": true,
-      "tier": "medium"
+      "tier": "medium",
+      "visualFamily": "bacterium",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri"
     },
     {
       "id": "bakteri_gp",
@@ -37,7 +39,9 @@
       "minWave": 4,
       "weight": 22,
       "orientToMovement": true,
-      "tier": "hard"
+      "tier": "hard",
+      "visualFamily": "armored_bacterium",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gp"
     },
     {
       "id": "virus",
@@ -63,7 +67,9 @@
       "minWave": 2,
       "weight": 28,
       "orientToMovement": false,
-      "tier": "medium"
+      "tier": "medium",
+      "visualFamily": "virus",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.virus"
     },
     {
       "id": "virion",
@@ -83,7 +89,9 @@
       "weight": 0,
       "orientToMovement": true,
       "elite": true,
-      "tier": "kecil"
+      "tier": "kecil",
+      "visualFamily": "virus",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.virion"
     },
     {
       "id": "parasit",
@@ -107,7 +115,9 @@
       "weight": 22,
       "orientToMovement": true,
       "elite": true,
-      "tier": "hard"
+      "tier": "hard",
+      "visualFamily": "parasite",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.parasit"
     },
     {
       "id": "spora",
@@ -126,7 +136,9 @@
       "minWave": 7,
       "weight": 16,
       "orientToMovement": false,
-      "tier": "hard"
+      "tier": "hard",
+      "visualFamily": "fungus",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.spora"
     },
     {
       "id": "sel_kanker",
@@ -152,7 +164,9 @@
       "xpPerKill": 60,
       "minWave": 5,
       "weight": 0,
-      "orientToMovement": false
+      "orientToMovement": false,
+      "visualFamily": "cancer",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_kanker"
     },
     {
       "id": "protozoa",
@@ -175,7 +189,9 @@
       "minWave": 4,
       "weight": 16,
       "orientToMovement": true,
-      "tier": "medium"
+      "tier": "medium",
+      "visualFamily": "protozoa",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.protozoa"
     },
     {
       "id": "bakteri_gn",
@@ -195,7 +211,9 @@
       "weight": 20,
       "orientToMovement": true,
       "armorLayers": 1,
-      "tier": "medium"
+      "tier": "medium",
+      "visualFamily": "toxic_bacterium",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gn"
     },
     {
       "id": "toksin",
@@ -214,7 +232,9 @@
       "minWave": 5,
       "weight": 12,
       "orientToMovement": false,
-      "tier": "medium"
+      "tier": "medium",
+      "visualFamily": "toxin",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin"
     },
     {
       "id": "prion",
@@ -236,7 +256,9 @@
       "armorLayers": 3,
       "convertRadius": 150,
       "convertInterval": 6,
-      "tier": "hard"
+      "tier": "hard",
+      "visualFamily": "crystal",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.prion"
     },
     {
       "id": "sel_abnormal",
@@ -256,7 +278,9 @@
       "weight": 9,
       "orientToMovement": false,
       "stealth": true,
-      "tier": "hard"
+      "tier": "hard",
+      "visualFamily": "abnormal_cell",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_abnormal"
     },
     {
       "id": "toksin_raksasa",
@@ -287,7 +311,9 @@
       "hazardDrop": {
         "interval": 8,
         "radius": 46
-      }
+      },
+      "visualFamily": "toxin_boss",
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin_raksasa"
     }
   ]
 }

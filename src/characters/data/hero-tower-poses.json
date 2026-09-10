@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "doc": "Art Director post-pivot hero-as-tower pose spec. Additive assets only; does not replace legacy survival sprites until pivot runtime consumes these paths.",
+  "artBible": "assets/ART_BIBLE.md",
+  "migrationReference": "src/core/MIGRATION_BRIEF.md",
+  "items": [
+    {
+      "heroId": "macrophage",
+      "towerId": "tower_macrophage",
+      "name": "Mako",
+      "sourceColor": "#4a7c59",
+      "archetype": "phagocyte",
+      "identityRule": "rooted engulfing pseudopodia",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_macrophage_idle.png",
+        "attack": "assets/sprites/hero_macrophage_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/macrophage_tower_idle.png",
+        "attack": "assets/heroes/towers/macrophage_tower_attack.png",
+        "upgrade": "assets/heroes/towers/macrophage_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "mahkota presentasi antigen di kepala"
+    },
+    {
+      "heroId": "dendritic",
+      "towerId": "tower_dendritic",
+      "name": "Dendri",
+      "sourceColor": "#ff8c00",
+      "archetype": "dendritic",
+      "identityRule": "radial sensor dendrites",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_dendritic_idle.png",
+        "attack": "assets/sprites/hero_dendritic_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/dendritic_tower_idle.png",
+        "attack": "assets/heroes/towers/dendritic_tower_attack.png",
+        "upgrade": "assets/heroes/towers/dendritic_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "mercusuar sinyal limfa di inti"
+    },
+    {
+      "heroId": "neutrophil",
+      "towerId": "tower_neutrophil",
+      "name": "Neutron",
+      "sourceColor": "#1a5276",
+      "archetype": "net",
+      "identityRule": "anchored NET filament pad",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_neutrophil_idle.png",
+        "attack": "assets/sprites/hero_neutrophil_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/neutrophil_tower_idle.png",
+        "attack": "assets/heroes/towers/neutrophil_tower_attack.png",
+        "upgrade": "assets/heroes/towers/neutrophil_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "tiga inti terang menjadi pusat bidik"
+    },
+    {
+      "heroId": "eosinophil",
+      "towerId": "tower_eosinophil",
+      "name": "Eos",
+      "sourceColor": "#ff6b81",
+      "archetype": "granule_lance",
+      "identityRule": "static granule lance",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_eosinophil_idle.png",
+        "attack": "assets/sprites/hero_eosinophil_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/eosinophil_tower_idle.png",
+        "attack": "assets/heroes/towers/eosinophil_tower_attack.png",
+        "upgrade": "assets/heroes/towers/eosinophil_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "tombak protein dasar utama"
+    },
+    {
+      "heroId": "basophil",
+      "towerId": "tower_basophil",
+      "name": "Baso",
+      "sourceColor": "#8e44ad",
+      "archetype": "vesicle_cloud",
+      "identityRule": "histamine vesicle sacs",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_basophil_idle.png",
+        "attack": "assets/sprites/hero_basophil_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/basophil_tower_idle.png",
+        "attack": "assets/heroes/towers/basophil_tower_attack.png",
+        "upgrade": "assets/heroes/towers/basophil_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "segel penenang reaksi alergi"
+    },
+    {
+      "heroId": "mastcell",
+      "towerId": "tower_mastcell",
+      "name": "Mastia",
+      "sourceColor": "#a03328",
+      "archetype": "granule_tank",
+      "identityRule": "membrane tank with degranulation valves",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_mastcell_idle.png",
+        "attack": "assets/sprites/hero_mastcell_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/mastcell_tower_idle.png",
+        "attack": "assets/heroes/towers/mastcell_tower_attack.png",
+        "upgrade": "assets/heroes/towers/mastcell_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "tameng membran tebal"
+    },
+    {
+      "heroId": "tcd8",
+      "towerId": "tower_tcd8",
+      "name": "T-Bolt",
+      "sourceColor": "#00d2ff",
+      "archetype": "cytotoxic",
+      "identityRule": "perforin scanner lance",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_tcd8_idle.png",
+        "attack": "assets/sprites/hero_tcd8_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/tcd8_tower_idle.png",
+        "attack": "assets/heroes/towers/tcd8_tower_attack.png",
+        "upgrade": "assets/heroes/towers/tcd8_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "segel target mati terprogram"
+    },
+    {
+      "heroId": "tcd4",
+      "towerId": "tower_tcd4",
+      "name": "Helia",
+      "sourceColor": "#f1c40f",
+      "archetype": "helper",
+      "identityRule": "cytokine command halo",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_tcd4_idle.png",
+        "attack": "assets/sprites/hero_tcd4_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/tcd4_tower_idle.png",
+        "attack": "assets/heroes/towers/tcd4_tower_attack.png",
+        "upgrade": "assets/heroes/towers/tcd4_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "halo komando untuk pasukan imun"
+    },
+    {
+      "heroId": "treg",
+      "towerId": "tower_treg",
+      "name": "Treg",
+      "sourceColor": "#2ecc71",
+      "archetype": "regulator",
+      "identityRule": "tolerance shield mantle",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_treg_idle.png",
+        "attack": "assets/sprites/hero_treg_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/treg_tower_idle.png",
+        "attack": "assets/heroes/towers/treg_tower_attack.png",
+        "upgrade": "assets/heroes/towers/treg_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "mantel regulator full equity"
+    },
+    {
+      "heroId": "bcell",
+      "towerId": "tower_bcell",
+      "name": "Bella",
+      "sourceColor": "#bb8fce",
+      "archetype": "antibody",
+      "identityRule": "BCR antenna and antibody-Y wings",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_bcell_idle.png",
+        "attack": "assets/sprites/hero_bcell_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/bcell_tower_idle.png",
+        "attack": "assets/heroes/towers/bcell_tower_attack.png",
+        "upgrade": "assets/heroes/towers/bcell_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "simpul memori antigen"
+    },
+    {
+      "heroId": "nkcell",
+      "towerId": "tower_nkcell",
+      "name": "Nyx",
+      "sourceColor": "#4a235a",
+      "archetype": "nk_spike",
+      "identityRule": "stress-sensor crown and spike burst",
+      "legacySprites": {
+        "idle": "assets/sprites/hero_nkcell_idle.png",
+        "attack": "assets/sprites/hero_nkcell_attack.png",
+        "portrait": null
+      },
+      "towerSprites": {
+        "idle": "assets/heroes/towers/nkcell_tower_idle.png",
+        "attack": "assets/heroes/towers/nkcell_tower_attack.png",
+        "upgrade": "assets/heroes/towers/nkcell_tower_upgrade.png"
+      },
+      "animation": {
+        "idle": "rooted breathing 2-4% scale; no locomotion",
+        "attack": "upper biological cue leans/fires toward lane while root base stays fixed",
+        "upgrade": "cytokine/equity bloom at anchor, then settle back to idle"
+      },
+      "biologicalCueMinimum": "mahkota sensor stress"
+    }
+  ]
+}

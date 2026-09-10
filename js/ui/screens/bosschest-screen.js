@@ -16,7 +16,7 @@ export function show(payload) {
     el('span', { text: `+${payload.currency}` }),
   ]));
   loot.appendChild(el('div', { class: 'loot' }, [
-    el('img', { src: payload.partSprite || 'assets/sprites/part_silia.png', alt: 'bagian' }),
+    el('img', { src: payload.partSprite || 'assets/sprites/part_equity_receptor.png', alt: 'bagian' }),
     el('span', { text: `+1 ${payload.partName}` }),
   ]));
 

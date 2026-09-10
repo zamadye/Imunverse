@@ -69,9 +69,10 @@ import { drawBackground, drawArena3D, setArenaPalette } from '../render/backgrou
 import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
-  drawKillFx,
+  drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
+import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
 export const game = {
@@ -254,7 +255,7 @@ export const game = {
       skills: new SkillSystem(heroDef, { cdMult: (squadMultipliers(meta).jurusCd || 1) * passiveSkillCdMult(heroDef) }),
       // lapisan pertahanan Fase 12: shield → protect → evade
       shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
-      parts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
+      parts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
       combo: { count: 0, timer: 0 },
@@ -678,7 +679,11 @@ export const game = {
       if (enemy.lastHitAbsorbed) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       // V2 Phase 1: knockback mikro searah proyektil (boss imun)
       this.applyHitKnockback(enemy, proj.vx, proj.vy, getGameFeel().knockback.projectile);
-      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit);
+      this.spawnHitFeedback(enemy, enemy.lastHitAbsorbed ? 0 : dmg, died, crit, {
+        dirX: proj.vx,
+        dirY: proj.vy,
+        sourceKind: 'projectile',
+      });
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
       else audio.hit();
@@ -965,7 +970,11 @@ export const game = {
       if (!e.lastHitAbsorbed) passiveOnHit(run, e, dmg);
       if (e.lastHitAbsorbed) run.effects.spawnLabel(e.x, e.y - e.radius - 6, tr('TERLAPIS!'), '#cfd8e3');
       this.applyHitKnockback(e, dx, dy, getGameFeel().knockback.melee);
-      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit);
+      this.spawnHitFeedback(e, e.lastHitAbsorbed ? 0 : dmg, died, crit, {
+        dirX: dx,
+        dirY: dy,
+        sourceKind: 'melee',
+      });
       if (!e.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(e, null);
     });
@@ -994,14 +1003,62 @@ export const game = {
     enemy.vy += (dirY / len) * force;
   },
 
+  /** Metadata visual Character untuk impact hit; visual-only, bukan balance. */
+  characterHitVisual(enemy, opts = {}) {
+    const run = this.run;
+    const heroDef = run?.heroDef || run?.player?.heroDef || null;
+    const designs = getData().characterDesigns;
+    const heroDesign = heroDef ? designs?.heroes?.[heroDef.id] : null;
+    const stageRaw = run?.evoStage?.stage ?? STATE.meta?.evoStage ?? 0;
+    const stage = Math.max(0, Math.min(4, stageRaw || 0));
+    const eq = stage > 0 ? (heroDesign?.equity || []).find((e) => e.stage === stage) : null;
+    const dirX = Number.isFinite(opts.dirX) ? opts.dirX : ((enemy && run?.player) ? enemy.x - run.player.x : 1);
+    const dirY = Number.isFinite(opts.dirY) ? opts.dirY : ((enemy && run?.player) ? enemy.y - run.player.y : 0);
+    const fallbackAngle = Math.abs(dirX) + Math.abs(dirY) > 0.001 ? Math.atan2(dirY, dirX) : 0;
+    return {
+      heroId: heroDef?.id || '',
+      archetype: heroDesign?.archetype || 'generic',
+      heroColor: heroDef?.color || enemy?.def?.color || '#35d0ba',
+      equityColor: eq?.color || run?.evoStage?.tierColor || heroDef?.color || '#35d0ba',
+      equityStage: stage,
+      hitAngle: Number.isFinite(opts.hitAngle) ? opts.hitAngle : (Number.isFinite(opts.angle) ? opts.angle : fallbackAngle),
+      sourceKind: opts.sourceKind || 'hit',
+      targetRadius: enemy?.radius || 18,
+    };
+  },
+
   /**
-   * Feedback visual per hit: bintang aset fx_hit.png + angka damage mengambang.
+   * Feedback visual per hit: flash sprite + spark + impact pulse + angka.
+   * Kill tetap punya death-pop sendiri; hit biasa kini dapat micro-shake
+   * ter-throttle supaya landing terasa tanpa membuat kamera mual di wave padat.
    */
-  spawnHitFeedback(enemy, damage, died, crit = false) {
+  spawnHitFeedback(enemy, damage, died, crit = false, opts = {}) {
+    if (crit && typeof crit === 'object') { opts = crit; crit = !!opts.crit; }
     const run = this.run;
     const gf = getGameFeel();
     tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
+    const absorbed = !!enemy.lastHitAbsorbed;
+    const hitVisual = this.characterHitVisual(enemy, opts);
+    if (crit && enemy.hitFlash !== undefined) enemy.hitFlash = Math.max(enemy.hitFlash, 0.18);
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
+    run.effects.spawnImpact(enemy.x, enemy.y - enemy.radius * 0.18, absorbed ? '#cfd8e3' : (crit ? gf.crit.color : (enemy.def.color || '#ffffff')), {
+      big: died || crit || enemy.isBoss,
+      crit,
+      absorbed,
+      ...hitVisual,
+    });
+
+    // Micro shake khusus hit yang BELUM kill. Kill/elite/boss tetap ditangani
+    // di onEnemyKilled agar intensitasnya tidak dobel.
+    if (!died && !absorbed && run.camera && gf.shake) {
+      const now = run.time || 0;
+      const throttle = gf.shake.hitThrottleSec ?? 0.055;
+      if (now - (run.lastHitShakeAt ?? -999) >= throttle) {
+        run.lastHitShakeAt = now;
+        run.camera.addShake(crit ? (gf.shake.critHit ?? 0.09) : (gf.shake.hit ?? 0.035));
+      }
+    }
+
     // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
     const dn = gf.damageNumber;
     let size = dn.base + Math.min(dn.maxBonus, damage * dn.perDamage);
@@ -1156,6 +1213,8 @@ export const game = {
     enemy.bossName = bossCfg.name || def.name;
     enemy.maxHP = Math.round(enemy.maxHP);
     enemy.hp = enemy.maxHP;
+    enemy.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, enemy);
+    enemy.visualFamily = enemy.def.visualFamily || enemy.def.family || null;
     if (run.bodyMods && run.bodyMods.enemySpeedMult) enemy.speed *= run.bodyMods.enemySpeedMult;
     run.enemies.push(enemy);
     run.boss = enemy;
@@ -1198,6 +1257,8 @@ export const game = {
     if (opts && opts.nest && !def.isBoss) {
       enemy.setNest(enemy.x, enemy.y, opts.ai || null);
     }
+    enemy.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, enemy);
+    enemy.visualFamily = enemy.def.visualFamily || enemy.def.family || null;
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
@@ -1215,7 +1276,7 @@ export const game = {
     const run = this.run;
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
-    const bonusPart = rollPartDrop('boss', 1) || 'silia';
+    const bonusPart = rollPartDrop('boss', 1) || 'equity_receptor';
     run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
     setPaused(true);
     audio.chest();
@@ -1283,7 +1344,7 @@ export const game = {
       hitEnemy: (enemy, dmg) => {
         // Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion)
         const died = enemy.takeDamageRaw ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
-        this.spawnHitFeedback(enemy, dmg, died);
+        this.spawnHitFeedback(enemy, dmg, died, false, { sourceKind: 'skill' });
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
@@ -1495,6 +1556,8 @@ export const game = {
             radiusScale: split.radiusScale,
             speedScale: split.speedScale,
           });
+          child.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, child);
+          child.visualFamily = child.def.visualFamily || child.def.family || null;
           run.enemies.push(child);
         }
       }
@@ -1988,6 +2051,7 @@ export const game = {
           flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : (e.enraged ? 0.3 : 0),
           flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
         });
+        drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
         ctx.restore();
@@ -2029,9 +2093,7 @@ export const game = {
           // (dibeli pemain) yang boleh menyala; default karakter bersih.
           if (auraAcc) drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc.color, time, 0, 0.8);
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
-          const evo = run.evoStage;
-          if (evo.stage >= 2) drawSprite(ctx, 'assets/sprites/ov_pseudopodia.png', pBody.x, pBody.y + bodySize * 0.34, bodySize * 0.62, 0, {});
-          if (evo.stage >= 4) drawSprite(ctx, 'assets/sprites/ov_inti.png', pBody.x, pBody.y, bodySize * 1.5, time * 1.1, { alpha: 0.85 });
+          const evoStage = run.evoStage?.stage || 0;
           if (skin) {
             const tinted = getTintedSprite(path, skin.color);
             const scale = bodySize / Math.max(tinted.width, tinted.height);
@@ -2039,6 +2101,7 @@ export const game = {
           } else {
             drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           }
+          drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
           // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
           const crownAcc = STATE.meta.cosmetics?.crown
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
@@ -2058,8 +2121,6 @@ export const game = {
             ctx.lineTo(pBody.x + cw / 2, cy + ch / 2);
             ctx.closePath(); ctx.fill(); ctx.stroke();
           }
-          if (evo.stage >= 1) drawSprite(ctx, 'assets/sprites/ov_silia.png', pBody.x, pBody.y - bodySize * 0.3, bodySize * 0.6, Math.sin(time * 2.2) * 0.08, {});
-          if (evo.stage >= 3) drawSprite(ctx, 'assets/sprites/ov_pedang.png', pBody.x + bodySize * 0.3, pBody.y - bodySize * 0.04, bodySize * 0.78, 0.5 + Math.sin(time * 2.6) * 0.05, {});
           ctx.restore();
 
           // NAMEPLATE ala MOBA: nama hero + level di atas kepala
@@ -2116,6 +2177,9 @@ export const game = {
       if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
       else if (fx.type === 'blast') drawBlastRing(ctx, fx);
       else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
+      else if (fx.type === 'impact') drawImpactPulse(ctx, fx);
+      else if (fx.type === 'abilityCharge') drawAbilityCharge(ctx, fx, time);
+      else if (fx.type === 'abilityPayoff') drawAbilityPayoff(ctx, fx, time);
       else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
       else if (fx.type === 'killpop') {
         // V2 Phase 1 death pop: sprite musuh membesar 1→scaleTo lalu memudar

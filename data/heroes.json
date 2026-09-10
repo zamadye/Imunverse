@@ -48,7 +48,10 @@
         "params": {
           "heal": 2
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.macrophage",
+      "equityArchetype": "phagocyte"
     },
     {
       "id": "dendritic",
@@ -101,7 +104,10 @@
           "dmg": 10,
           "duration": 3
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.dendritic",
+      "equityArchetype": "dendritic"
     },
     {
       "id": "neutrophil",
@@ -154,7 +160,10 @@
           "haste": 25,
           "duration": 3
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.neutrophil",
+      "equityArchetype": "net"
     },
     {
       "id": "eosinophil",
@@ -209,7 +218,10 @@
           "mult": 0.3,
           "duration": 2
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.eosinophil",
+      "equityArchetype": "granule_lance"
     },
     {
       "id": "basophil",
@@ -264,7 +276,10 @@
           "radius": 150,
           "mult": 0.85
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.basophil",
+      "equityArchetype": "vesicle_cloud"
     },
     {
       "id": "mastcell",
@@ -318,7 +333,10 @@
           "damage": 12,
           "radius": 120
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.mastcell",
+      "equityArchetype": "granule_tank"
     },
     {
       "id": "tcd8",
@@ -372,7 +390,10 @@
           "threshold": 0.25,
           "bonus": 0.3
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.tcd8",
+      "equityArchetype": "cytotoxic"
     },
     {
       "id": "tcd4",
@@ -425,7 +446,10 @@
         "params": {
           "cdMult": 0.85
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.tcd4",
+      "equityArchetype": "helper"
     },
     {
       "id": "treg",
@@ -479,7 +503,10 @@
         "params": {
           "hpPerSec": 0.8
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.treg",
+      "equityArchetype": "regulator"
     },
     {
       "id": "bcell",
@@ -533,7 +560,10 @@
         "params": {
           "bonus": 0.06
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.bcell",
+      "equityArchetype": "antibody"
     },
     {
       "id": "nkcell",
@@ -585,7 +615,10 @@
           "interval": 1.3,
           "revealSec": 1.6
         }
-      }
+      },
+      "baseVisualStage": "polos",
+      "equityDesignRef": "character-designs.heroes.nkcell",
+      "equityArchetype": "nk_spike"
     }
   ],
   "tiers": {

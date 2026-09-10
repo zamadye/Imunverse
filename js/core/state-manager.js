@@ -52,7 +52,7 @@ export function createDefaultMeta() {
     cinematicsSeen: {},
     leaderboard: [],
     evoStage: 0,
-    evoParts: { silia: 0, pseudopodia: 0, mikropedang: 0, inti_elemen: 0 },
+    evoParts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
     adDaily: { date: null, count: 0 },
     focusRun: 'seimbang',
     tutorialDone: false,
@@ -134,6 +134,21 @@ export function mergeMetaDefaults(meta) {
     const mapped = {};
     for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapCh(mapId(k))] = v;
     meta.codexSeen = mapped;
+  }
+  // Character Agent: migrasi part evolusi lama ke fragmen equity baru.
+  if (meta.evoParts && typeof meta.evoParts === 'object') {
+    const PART_MAP = {
+      silia: 'equity_receptor',
+      pseudopodia: 'equity_membrane',
+      mikropedang: 'equity_effector',
+      inti_elemen: 'equity_memory_core',
+    };
+    const mappedParts = {};
+    for (const [k, v] of Object.entries(meta.evoParts)) {
+      const nk = PART_MAP[k] || k;
+      mappedParts[nk] = (mappedParts[nk] || 0) + (v || 0);
+    }
+    meta.evoParts = mappedParts;
   }
   const merged = deepMerge(base, meta || {});
   return merged;

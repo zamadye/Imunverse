@@ -362,8 +362,8 @@ async function boot() {
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
     STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
-    STATE.meta.evoStage = 99;
-    STATE.meta.evoParts = { silia: 999, pseudopodia: 999, mikropedang: 999, inti_elemen: 999 };
+    STATE.meta.evoStage = 4;
+    STATE.meta.evoParts = { equity_receptor: 999, equity_membrane: 999, equity_effector: 999, equity_memory_core: 999 };
     STATE.meta.allies = 6;
     STATE.meta.allyLevel = 99;
     for (const def of (data.upgrades.globalUpgrades || [])) {
@@ -695,7 +695,7 @@ async function runAutotest() {
     await until(() => STATE.screen === 'dashboard');
     log('dashboardShown', true);
 
-    STATE.meta.evoStage = 3; // Fagosit Elite → tebasan/siklon/petir terbuka
+    STATE.meta.evoStage = 3; // Equity III → tebasan/siklon/petir terbuka
     STATE.meta.focusRun = 'limfatik'; // fokus detoks → registerRunResult terukur
     game.startRun('tcd8');
     log('runStarted', STATE.screen === 'gameplay');
