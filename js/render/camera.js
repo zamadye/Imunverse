@@ -14,7 +14,7 @@ import { drawBossIndicator } from './shape-renderer.js';
  * K dinaikkan untuk "behind-the-shoulder look": gradien ukuran depth lebih
  * terasa (obat rasa kaku top-down; referensi user: Raft / Subnautica).
  */
-export const PERSP = { F: 1450, K: 1.55, YS: 0.58, MIN: 0.6, MAX: 2.0 };
+export const PERSP = { F: 1450, K: 1.7, YS: 0.5, MIN: 0.55, MAX: 2.1 };
 
 /**
  * THIRD_PERSON — anchor player di 62% tinggi layar (camera "di belakang &
@@ -24,13 +24,13 @@ export const PERSP = { F: 1450, K: 1.55, YS: 0.58, MIN: 0.6, MAX: 2.0 };
  * bergerak cepat = kamera sedikit menjauh, diam = mendekat.
  */
 export const THIRD_PERSON = {
-  ANCHOR_Y: 0.66,          // hero di "third bawah" (ref Raft/Subnautica): 2/3 layar = wilayah DEPAN
-  FOLLOW_RATE: 6.0,        // smoothing posisi (≈ lerp 0.09/frame @60fps)
-  LOOK_MAX: 185,           // px dunia — look-ahead lebih lebar: ombak/ancaman di depan terbaca
-  HEADING_RATE: 2.6,       // heading dihaluskan pelan → terlambat saat belok
-  ZOOM_BASE: 1.36,         // baseline zoom (badan karakter besar & jelas dari belakang)
-  ZOOM_IDLE: 1.08,         // diam → mendekat (lebih besar lagi)
-  ZOOM_MOVE: 0.92,         // kecepatan penuh → menjauh (melihat ancaman lebih dulu)
+  ANCHOR_Y: 0.7,           // hero di "third bawah" → ruang vast di DEPAN (ref Raft: horizon banyak)
+  FOLLOW_RATE: 3.0,        // ≈ lerp 0.05/frame @60fps — kamera TERLAMBAT drifting saat belok (diagram #5)
+  LOOK_MAX: 170,           // look-ahead arah gerak (tidak terlalu besar agar tak jitter)
+  HEADING_RATE: 2.2,       // heading dihaluskan pelan → drift saat belok makin terasa
+  ZOOM_BASE: 1.42,         // badan hero besar & jelas dari belakang (2.5D)
+  ZOOM_IDLE: 1.09,         // diam → mendekat
+  ZOOM_MOVE: 0.93,         // cepat → menjauh
   ZOOM_RATE: 2.4,          // easing zoom kecepatan
 };
 

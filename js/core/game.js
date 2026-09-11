@@ -10,6 +10,7 @@
  */
 
 import { STATE, setPaused, setLevelUpOpen, setScreen } from './state-manager.js';
+import { hidePresenter } from '../ui/presenter.js';
 import {
   getData, getHero, getEnemyDef, getNutrientDef, getWaveConfig,
   xpToNextLevel,
@@ -970,6 +971,7 @@ export const game = {
     showAnnounce('LEVEL UP!', false);
     this.hitStopRun(getRetention().levelUpStopSec);
     setLevelUpOpen(true);
+    hidePresenter(); // RONDE-4: narrator jangan menumpuk modal pilih-evolusi
     setPaused(true);
     audio.levelup();
     buzz('levelup'); // V2 Phase 1: selebrasi terasa di tangan
@@ -1398,7 +1400,7 @@ export const game = {
     enemy.visualFamily = enemy.def.visualFamily || enemy.def.family || null;
     // Musuh mulai BERSENJATA di wave 3+: sebagian pengejar meludah proyektil —
     // koloni yang tadinya "masif tapi pasif" kini membalas dari jarak aman.
-    if ((run.spawnSys?.wave || 1) >= 3 && !def.isBoss && Math.random() < 0.22) {
+    if (!def.isBoss && ((run.spawnSys?.wave || 1) >= 2) && (def.elite || Math.random() < 0.30)) {
       enemy.armShooter();
     }
     run.enemies.push(enemy);

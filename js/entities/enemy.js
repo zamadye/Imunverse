@@ -144,10 +144,10 @@ export class Enemy {
     this.shooter = {
       range: 400,
       cd: 1.3 + Math.random() * 1.2,     // jeda sebelum tembakan pertama
-      rate: 2.3 + Math.random() * 0.9,   // jeda antar tembakan
-      speed: 250,
+      rate: 2.1 + Math.random() * 0.8,   // jeda antar tembakan
+      speed: 270,
       dmg: Math.max(3, Math.min(8, Math.round(this.def.damage * 0.45))),
-      radius: 5,
+      radius: 6.5,
       color: '#ff7d9c',
       holdMin: 210,                      // menjaga jarak (back off bila terlalu dekat)
     };
@@ -287,9 +287,13 @@ export class Enemy {
       if (engaged) {
         if (game && dist <= sh.range && (this.atkPhase === 'ready' || this.atkPhase === 'cooldown')) {
           sh.cd -= dt;
+          // TELEGRAPH mau meludah: pose serangan berubah 0.38 dtk sebelum tembakan
+          if (sh.cd <= 0.38) this.attackSpriteHint = true;
           if (sh.cd <= 0 && typeof game.tryEnemyShoot === 'function') {
-            if (game.tryEnemyShoot(this, dx / dist, dy / dist)) sh.cd = sh.rate;
+            if (game.tryEnemyShoot(this, dx / dist, dy / dist)) { sh.cd = sh.rate; this.attackSpriteHint = false; }
           }
+        } else if (!this.usesContactTelegraph || this.atkPhase !== 'windup') {
+          this.attackSpriteHint = false;
         }
         if (dist < sh.holdMin && this.atkPhase !== 'windup') {
           // mundur menjaga jarak tembak

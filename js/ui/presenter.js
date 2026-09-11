@@ -38,6 +38,13 @@ const SPEAKERS = {
 let layer = null;
 let interactive = true; // tutorial run-pertama melunakkannya agar drag tembus ke canvas
 
+// Pemuatan di muka: pose narrators dimuat SATU KALI; perubahan gantian idle↔talk
+// cukup memakai cache browser — mengikis noise GET 200 -> broken-pipe di server.
+for (const spk of Object.values(SPEAKERS)) {
+  new Image().src = spk.idle;
+  new Image().src = spk.talk;
+}
+
 /** Aktif/nonaktifkan interaksi layer presenter (drag tembus saat tutorial pertama). */
 export function setPresenterInteractive(v) {
   interactive = !!v;

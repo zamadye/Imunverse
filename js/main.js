@@ -299,6 +299,18 @@ function wireUiBridge() {
 
   // R3 Task 4: FIRST-TIME EXPERIENCE RIA (sekali sejak pernah, non-blocking,
   // bisa di-tap untuk skip — presenter + VO, nada bersemangat/jenaka).
+  // RONDE-3 visual fix: presenter TIDAK boleh menumpuk di atas modal Level-Up /
+  // pause — bark ditunda sampai momen resume (antrian 1 baris).
+  let pendingBark = null;
+  function flushBark() {
+    const b = pendingBark;
+    pendingBark = null;
+    if (b) setTimeout(() => {
+      // Level-up beruntun: jangan menimpa modal yang baru terbuka — antri ulang
+      if (STATE.levelUpOpen || (game.run && game.run.paused)) { pendingBark = b; return; }
+      showPresenter(b.who, b.text, b.opts);
+    }, 420);
+  }
   function nftFirst(key, event) {
     const meta = STATE.meta;
     if (meta.nft && meta.nft[key]) return;
@@ -308,7 +320,11 @@ function wireUiBridge() {
     meta.nft = meta.nft || {};
     meta.nft[key] = true;
     writeSave(meta);
-    showPresenter('ria', line.text, { vo: line.vo });
+    if (STATE.levelUpOpen || (game.run && game.run.paused)) {
+      pendingBark = { who: 'ria', text: line.text, opts: { vo: line.vo } };
+    } else {
+      showPresenter('ria', line.text, { vo: line.vo });
+    }
     if (event) event.preventDefault?.();
   }
   on('nftMove', () => nftFirst('move'));
@@ -355,6 +371,7 @@ function wireUiBridge() {
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
     if (STATE.screen === 'gameplay') screenManager.show('hud');
+    flushBark(); // bark NFT yang ditunda saat modal terbuka → tampil bersih di HUD
   });
   on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
 }
