@@ -9,7 +9,7 @@
   "enemySpeedScaleMax": 1.6,
   "bossWaveEvery": 5,
   "bossHPBonusPerBossIndex": 0.35,
-  "maxAliveEnemies": 130,
+  "maxAliveEnemies": 250,
   "spawnPadding": 90,
   "waveMultipliers": [
     {
@@ -44,14 +44,14 @@
   "explore": {
     "aggroRadius": 190,
     "leashRadius": 430,
-    "patrolRadius": 80,
+    "patrolRadius": 110,
     "nearNestDist": 230,
     "farNestDist": 620,
-    "nestsBase": 2,
+    "nestsBase": 5,
     "nestsAddEveryWaves": 4,
-    "nestsMax": 5,
+    "nestsMax": 10,
     "packSize": 3,
-    "packPerWave": 0.45,
+    "packPerWave": 0.9,
     "minWaveTime": 8
   },
   "breakDuration": 2.5,
@@ -100,5 +100,15 @@
     "speedMult": 1.3,
     "intervalMult": 0.62,
     "telegraphMult": 0.85
+  },
+  "ecosystem": {
+    "enabled": true,
+    "targetBase": 48,
+    "targetPerWave": 14,
+    "targetMax": 230,
+    "topUpInterval": 1.2,
+    "topUpBatch": 8,
+    "minPlayerDist": 240,
+    "maxPlayerDist": 950
   }
 }

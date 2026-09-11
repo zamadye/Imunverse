@@ -120,6 +120,14 @@ let synBadge = 0;
 // F19 temuan: musuh kiter menetap di 200px+ (di luar jangkauan melee 90) —
 // tes lama "borderline-lucky". Setup deterministik: jaga musuh dalam jangkauan
 // (penempatan = konteks tes; membunuh tetap oleh auto-attack RIIL).
+// Ronde-3: pasukan imun bergabung di level unlock skill (Lv 3 dst, bukan di
+// awal run). Naikkan level lebih dulu supaya squad #1 ikut bertempur — pin ini
+// mengukur jalur kill RIIL gabungan (auto-attack + squad), bukan RNG.
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  if (g?.run) { g.applyXpGain(900); }
+});
+await page.waitForTimeout(600);
 const topUpEnemies = () => page.evaluate(() => {
   const g = window.__IMUNVERSE.game;
   const run = g.run;

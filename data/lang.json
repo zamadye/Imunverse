@@ -996,7 +996,27 @@
     "Support": "Support",
     "Profil": "Profile",
     "PASUKAN": "SQUAD",
-    "HERO": "HERO"
+    "HERO": "HERO",
+    "Upgrade skill": "Upgrade skill",
+    "Upgrade skill — Terbuka di Level 15": "Skill upgrade — Unlock at Level 15",
+    "Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan namamu sendiri.": "Create your account — progress, hero levels & purchases stay safe under your own name.",
+    "Penjaga Tubuh": "Body Guardian",
+    "Laboratorium Tim →": "Team Laboratory →",
+    "Jalur Design Equity →": "Design Equity Path →",
+    "SKILL": "SKILL",
+    "ketuk untuk detail": "tap for details",
+    "detail skill": "skill details",
+    "Pilih hero": "Choose hero",
+    "Pasukan imun — ikut bertarung otomatis": "Immune squad — joins the fight automatically",
+    "Pasif — selalu aktif saat run": "Passive — always active during the run",
+    "Hero sebelumnya": "Previous hero",
+    "Hero berikutnya": "Next hero",
+    "Efek": "Effects",
+    "Menembak otomatis ke patogen terdekat": "Fires automatically at the nearest pathogen",
+    "Upgrade skill dilakukan di dalam run lewat badge (+) pada tombol skill (Lv 15+)": "Skill upgrades happen during the run via the (+) badge on the skill button (Lv 15+)",
+    "Spesialis antibodi — proyektil pemburu otomatis.": "Antibody specialist — automatic homing projectiles.",
+    "Pembunuh alami — agresif ke target sekarat.": "Natural killer — aggressive toward dying targets.",
+    "Fagosit garis depan — menyerap dan menghabisi patogen.": "Frontline phagocyte — engulfs and destroys pathogens."
   },
   "rules": [
     {
@@ -1366,8 +1386,18 @@
     {
       "pattern": "^\\+(\\d+) kesehatan sistem per suplemen — kondisi tubuh memengaruhi bonus run\\.$",
       "replace": "+$1 system health per supplement — body condition affects run bonuses."
+    },
+    {
+      "pattern": "^(.+?) terkunci — Terbuka di Level (\\d+)$",
+      "replace": "$1 is locked — Unlocks at Level $2"
+    },
+    {
+      "pattern": "^Upgrade ke Rank (\\d+) — (\\d+) antibodi$",
+      "replace": "Upgrade to Rank $1 — $2 antibodies"
+    },
+    {
+      "pattern": "^Butuh (\\d+) antibodi untuk upgrade skill$",
+      "replace": "Need $1 antibodies to upgrade skill"
     }
-  ],
-  "Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan namamu sendiri.": "Create your account — progress, hero levels & purchases stay safe under your own name.",
-  "Penjaga Tubuh": "Body Guardian"
+  ]
 }

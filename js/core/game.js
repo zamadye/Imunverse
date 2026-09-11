@@ -54,6 +54,7 @@ import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
+import { isSkillUnlocked, canUpgradeSkill, skillUpgradeCost, SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL } from '../systems/skill-unlock.js';
 import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
 import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 import {
@@ -196,6 +197,7 @@ export const game = {
       player,
       enemies: [],
       projectiles: [],
+      ebullets: [],
       pickups: [],
       hazards: [], // Fase 9: genangan toksin (area damage statis)
       pendingBlasts: [], // V2 Phase 5: ledakan tertunda elite VOLATILE (fuse→blast)
@@ -267,19 +269,22 @@ export const game = {
     };
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
-    // PASUKAN IMUN (permanen): ikut bertarung sesuai meta.allies
+    // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
+    // Tidak ada pasukan di awal game; 1 sel bergabung tiap hero mencapai level
+    // unlock skill (3/5/10) + Lv 15 (slot ke-4). Jumlah total tetap mengikuti
+    // meta.allies + allyLevel (Fase 20); yang berubah hanya WAKTU bergabung.
     this.run.allies = [];
-    // Fase 20 (feedback pemilik): jumlah pasukan bertambah mengikuti LEVEL PASUKAN
-    // (+1 anggota tiap N level — data upgrades.allyUpgrade.membersPerLevels),
-    // bab kampanye yang dibersihkan tetap menambah (meta.allies).
-    const membersPerLv = getData().upgrades.allyUpgrade.membersPerLevels || 3;
-    const allyByLevel = 1 + Math.floor((meta.allyLevel || 0) / membersPerLv);
-    const allyCount = Math.max(0, Math.min(6, Math.max(meta.allies || 0, allyByLevel)));
-    const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
-    for (let i = 0; i < allyCount; i++) this.run.allies.push(new Ally(i, player, allySpeedBonus));
-    if (allyCount > 0) {
-      const lvlTxt = meta.allyLevel > 0 ? ` (Lv ${meta.allyLevel})` : '';
-      emit('toast', { message: `Pasukan imun: ${allyCount} sel ikut bertarung!${lvlTxt}`, kind: '' });
+    {
+      const membersPerLv = getData().upgrades.allyUpgrade.membersPerLevels || 3;
+      const allyByLevel = 1 + Math.floor((meta.allyLevel || 0) / membersPerLv);
+      const total = Math.max(0, Math.min(6, Math.max(meta.allies || 0, allyByLevel)));
+      const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
+      this.run.squadPlan = {
+        total,
+        joined: 0,
+        speedBonus: allySpeedBonus,
+        unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL], // [3, 5, 10, 15]
+      };
     }
     // Item variasi: vaksin (+30 HP) & kopi (+12% speed)
     const flags = this.runFlags || {};
@@ -691,6 +696,9 @@ export const game = {
     // 5. Update proyektil (homing butuh grid utk cari target)
     for (const p of run.projectiles) p.update(dt, this);
 
+    // 5b. Peluru musuh (patogen bersenjata): terbang & tabrak player
+    this.updateEnemyBullets(dt);
+
     // 6. Kollision proyektil vs musuh
     run.collision.handleProjectileHits(run.projectiles, (proj, enemy) => {
       // Eosinofil: granula toksik 1,5x damage ke Parasit (dokumen entitas, nyata)
@@ -753,8 +761,17 @@ export const game = {
     }
     run.effects.update(dt);
 
-    // 11. Kamera follow + shake decay
-    run.camera.follow(player.x, player.y, dt);
+    // 11. Kamera THIRD-PERSON feel (gaya Raft/Subnautica dipetakan ke 2D):
+    // - follow ke arah pandang (look-ahead ke arah gerak; heading terlambat → drift saat belok)
+    // - anchor player 62% tinggi layar (kamera "di belakang & sedikit di atas")
+    // - zoom dinamis kecepatan: cepat = menjauh, diam = mendekat
+    const spd = Math.hypot(player.vx || 0, player.vy || 0);
+    const maxSpd = player.maxSpeed || player.speed || 220;
+    const spd01 = Math.max(0, Math.min(1, spd / (maxSpd + 1e-6)));
+    const lookX = spd > 4 ? (player.vx / (spd || 1)) : 0;
+    const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
+    run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
+    run.camera.setSpeedZoom(spd01);
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
     run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
@@ -905,7 +922,29 @@ export const game = {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
+      this.tryJoinSquad(run.level);
     }
+  },
+
+  /**
+   * Pasukan imun bergabung di level unlock skill [3, 5, 10] (+15) — satu sel
+   * per ambang, sampai total skuad meta tercapai. Tidak ada pasukan di awal
+   * run (permintaan user): mereka "dipanggil" saat hero semakin kuat.
+   */
+  tryJoinSquad(level) {
+    const run = this.run;
+    const plan = run && run.squadPlan;
+    if (!plan || plan.joined >= plan.total) return false;
+    const slotIdx = plan.unlockLevels.indexOf(level);
+    if (slotIdx < 0 || slotIdx !== plan.joined) return false;
+    const ally = new Ally(plan.joined, run.player, plan.speedBonus);
+    plan.joined += 1;
+    run.allies.push(ally);
+    // Selebrasi kecil yang jelas: burst hijau-imun + label + toast
+    run.effects.spawnBurst(run.player.x, run.player.y, '#6cf2c3', 14, 220, 4);
+    run.effects.spawnLabel(run.player.x, run.player.y - 44, tr('PASUKAN DATANG!'), '#8df7d2');
+    emit('toast', { message: `Pasukan imun: sel #${plan.joined} bergabung bertarung!`, kind: 'gold' });
+    return true;
   },
 
   /** Fase 18: cairkan XP yang ditahan saat gerbang tertutup (dipanggil saat boss tumbang). */
@@ -1260,6 +1299,71 @@ export const game = {
   /**
    * Spawn musuh di luar area pandang (dipanggil SpawnSystem).
    */
+  /**
+   * PACK AGGRO: saat satu anggota sarang menyadari player, kawan di sekitarnya
+   * ikut bangun — koloni yang ditabrak terasa "hidup" & agresif, bukan pasif.
+   */
+  packAggro(src, radius = 260) {
+    const run = this.run;
+    if (!run) return;
+    const r2 = radius * radius;
+    for (const e of run.enemies) {
+      if (e === src || !e.alive || e.isBoss) continue;
+      if (e.homeX === null) continue; // free-ranger tidak butuh dibangunkan
+      if (e.aiState === 'chase') continue;
+      const dx = e.x - src.x, dy = e.y - src.y;
+      if (dx * dx + dy * dy <= r2) e.aiState = 'chase';
+    }
+  },
+
+  /** Musuh menembak: satu peluru imun-patik (dicegah banjir via cap). */
+  tryEnemyShoot(enemy, dirX, dirY) {
+    const run = this.run;
+    if (!run || !enemy.shooter || !enemy.alive) return false;
+    if (run.ebullets.length >= 24) return false;
+    const sh = enemy.shooter;
+    // Muzzle burst kecil (umpan balik visual instan)
+    if (run.effects) run.effects.spawnBurst(enemy.x + dirX * enemy.radius, enemy.y + dirY * enemy.radius, sh.color, 4, 130, 3);
+    run.ebullets.push({
+      x: enemy.x + dirX * (enemy.radius + 4),
+      y: enemy.y + dirY * (enemy.radius + 4),
+      vx: dirX * sh.speed,
+      vy: dirY * sh.speed,
+      dmg: sh.dmg,
+      radius: sh.radius,
+      color: sh.color,
+      life: 1.9,
+      alive: true,
+    });
+    return true;
+  },
+
+  /** Update peluru musuh: terbang + tabrak player (menghormati iframes). */
+  updateEnemyBullets(dt) {
+    const run = this.run;
+    if (!run) return;
+    const player = run.player;
+    for (const b of run.ebullets) {
+      if (!b.alive) continue;
+      b.life -= dt;
+      if (b.life <= 0) { b.alive = false; continue; }
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      const dx = player.x - b.x, dy = player.y - b.y;
+      const rr = b.radius + (player.radius || 12);
+      if (dx * dx + dy * dy <= rr * rr) {
+        b.alive = false;
+        this.damagePlayer(b.dmg);
+        if (run.effects) {
+          run.effects.spawnSpark(b.x, b.y, false);
+          run.effects.spawnBurst(b.x, b.y, b.color, 6, 170, 3);
+        }
+        run.camera.addShake(0.08);
+      }
+    }
+    if (run.ebullets.length > 40) run.ebullets = run.ebullets.filter((b) => b.alive);
+  },
+
   spawnEnemy(enemyId, isBossSpawn, opts = null) {
     const run = this.run;
     const def = getEnemyDef(enemyId);
@@ -1292,6 +1396,11 @@ export const game = {
     }
     enemy.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, enemy);
     enemy.visualFamily = enemy.def.visualFamily || enemy.def.family || null;
+    // Musuh mulai BERSENJATA di wave 3+: sebagian pengejar meludah proyektil —
+    // koloni yang tadinya "masif tapi pasif" kini membalas dari jarak aman.
+    if ((run.spawnSys?.wave || 1) >= 3 && !def.isBoss && Math.random() < 0.22) {
+      enemy.armShooter();
+    }
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
@@ -1367,7 +1476,12 @@ export const game = {
     if (!run || run.ended || STATE.levelUpOpen) return false;
     const player = run.player;
     if (!player.alive) return false;
-    return run.skills.trigger(slot, {
+    // GUARD progression (Lv 3 / 5 / 10): slot skill LOCKED tidak boleh
+    // tereksekusi — berlaku untuk klik, touch, keyboard & handler lain.
+    const skill = run.skills.slots[slot];
+    if (!skill) return false;
+    if (!isSkillUnlocked(run.level, slot, skill)) return false;
+    const fired = run.skills.trigger(slot, {
       game: this,
       player,
       enemies: run.enemies,
@@ -1381,6 +1495,41 @@ export const game = {
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
+    // Third-person feel: hentakan halus saat skill meninggalkan tangan (tempur).
+    if (fired) run.camera.addShake(0.14);
+    return fired;
+  },
+
+  /**
+   * Upgrade skill slot (sistem terbuka pada PLAYER LEVEL 15).
+   * Biaya = antibodi run (run.currencyEarned). Semua guard progression di
+   * sini: sebelum Lv 15 aksi ini tidak berbuat apa-apa (return false).
+   * @returns {boolean} true bila rank skill naik.
+   */
+  upgradeAbilityBySlot(slot) {
+    const run = this.run;
+    if (!run || run.ended || STATE.levelUpOpen) return false;
+    const player = run.player;
+    if (!player.alive) return false;
+    const skill = run.skills.slots[slot];
+    if (!skill) return false;
+    // GUARD: upgrade terkunci sebelum Lv 15 (jangan membuat variabel level kedua)
+    if (run.level < SKILL_UPGRADE_LEVEL) return false;
+    if (!canUpgradeSkill(run.level, slot, skill)) return false;
+    const cost = skillUpgradeCost(skill);
+    if (run.currencyEarned < cost) {
+      emit('toast', { message: `Butuh ${cost} antibodi untuk upgrade skill`, kind: 'warn' });
+      return false;
+    }
+    if (!run.skills.tryUpgrade(slot, run.level)) return false;
+    run.currencyEarned -= cost;
+    audio.ui();
+    buzz('levelup');
+    emit('toast', {
+      message: `${skill.def.name} → RANK ${skill.rank}! (+28% damage, -7% cooldown)`,
+      kind: 'gold',
+    });
+    return true;
   },
 
   /** Fase 12: Life Steal — pulihkan HP dari damage yang diberikan. */
@@ -2200,6 +2349,37 @@ export const game = {
         ctx.restore();
       } });
     }
+    // Peluru musuh: bosa kecil bercahaya + jejak pendek (jelas "peluru musuh")
+    for (const b of run.ebullets) {
+      if (!b.alive) continue;
+      draws.push({ y: b.y, fn: () => {
+        const q = billboard(b.x, b.y, { lift: 8 });
+        // jejak pendek ke belakang arah kecepatan
+        const shx = b.vx * 0.027, shy = b.vy * 0.027;
+        ctx.strokeStyle = b.color;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = b.radius * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(b.x - shx, b.y - shy);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        // inti bercahaya
+        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius * 2.1);
+        grad.addColorStop(0, '#fff');
+        grad.addColorStop(0.45, b.color);
+        grad.addColorStop(1, 'rgba(255,125,156,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius * 2.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } });
+    }
     draws.sort((A, B) => A.y - B.y);
     for (const d of draws) d.fn();
 
@@ -2229,6 +2409,33 @@ export const game = {
       drawParticle(ctx, pt);
       ctx.restore();
     }
+    // ---- ATMO-KEDALAMAN third-person (referensi user: Raft) ----
+    // 3 lapis: kabut jauh di ATAS (horizon), bayangan FETCH bawah (foreground),
+    // vignette sudut — menjual foreground/midground/background pada bola mata.
+    {
+      const fog = this.depthFog = (this.depthFog && this.depthFog.h === h) ? this.depthFog : (this.depthFog = (() => {
+        const g = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+        g.addColorStop(0, 'rgba(215,244,236,0.36)');
+        g.addColorStop(0.35, 'rgba(214,242,234,0.14)');
+        g.addColorStop(1, 'rgba(214,242,234,0)');
+        return { g, h };
+      })());
+      ctx.fillStyle = fog.g;
+      ctx.fillRect(0, 0, w, h * 0.5);
+      // Foreground: dasar layar di-teduhkan (air dekat lebih gelap di foto ref)
+      const gr2 = ctx.createLinearGradient(0, h * 0.82, 0, h);
+      gr2.addColorStop(0, 'rgba(6,42,38,0)');
+      gr2.addColorStop(1, 'rgba(6,42,38,0.22)');
+      ctx.fillStyle = gr2;
+      ctx.fillRect(0, h * 0.82, w, h * 0.18);
+      // Vignette sudut ringan (depth cue perifer)
+      const vg = ctx.createRadialGradient(w / 2, h * 0.6, h * 0.5, w / 2, h * 0.6, h * 1.05);
+      vg.addColorStop(0, 'rgba(6,30,28,0)');
+      vg.addColorStop(1, 'rgba(6,30,28,0.16)');
+      ctx.fillStyle = vg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
     for (const n of run.effects.numbers) {
       billboard(n.x, n.y, { lift: 10 });
       drawDamageNumber(ctx, n, time);
@@ -2247,7 +2454,7 @@ export const game = {
         hpText: `${Math.ceil(player.hp)}/${player.maxHP}`,
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
-        abilities: run.skills.getView(),
+        abilities: run.skills.getView(run.level),
         combo: run.combo,
         mission: run.objective
           ? { quota: run.objective.quota, kills: run.kills, bossSpawned: run.objective.bossSpawned, bossName: run.chapter && run.chapter.boss ? run.chapter.boss.name : null }
