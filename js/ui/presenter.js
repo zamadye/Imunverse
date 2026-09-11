@@ -36,6 +36,13 @@ const SPEAKERS = {
 };
 
 let layer = null;
+let interactive = true; // tutorial run-pertama melunakkannya agar drag tembus ke canvas
+
+/** Aktif/nonaktifkan interaksi layer presenter (drag tembus saat tutorial pertama). */
+export function setPresenterInteractive(v) {
+  interactive = !!v;
+  if (layer) layer.style.pointerEvents = interactive ? '' : 'none';
+}
 let talkTimer = 0;
 let hideTimer = 0;
 let visible = false;
@@ -58,6 +65,7 @@ function ensureLayer() {
       </div>
     </div>`;
   document.body.appendChild(layer);
+  layer.style.pointerEvents = interactive ? '' : 'none';
   layer.addEventListener('click', () => hidePresenter());
   return layer;
 }

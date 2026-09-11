@@ -54,6 +54,7 @@ import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
+import { isSkillUnlocked, canUpgradeSkill, skillUpgradeCost, SKILL_UPGRADE_LEVEL } from '../systems/skill-unlock.js';
 import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
 import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 import {
@@ -753,8 +754,17 @@ export const game = {
     }
     run.effects.update(dt);
 
-    // 11. Kamera follow + shake decay
-    run.camera.follow(player.x, player.y, dt);
+    // 11. Kamera THIRD-PERSON feel (gaya Raft/Subnautica dipetakan ke 2D):
+    // - follow ke arah pandang (look-ahead ke arah gerak; heading terlambat → drift saat belok)
+    // - anchor player 62% tinggi layar (kamera "di belakang & sedikit di atas")
+    // - zoom dinamis kecepatan: cepat = menjauh, diam = mendekat
+    const spd = Math.hypot(player.vx || 0, player.vy || 0);
+    const maxSpd = player.maxSpeed || player.speed || 220;
+    const spd01 = Math.max(0, Math.min(1, spd / (maxSpd + 1e-6)));
+    const lookX = spd > 4 ? (player.vx / (spd || 1)) : 0;
+    const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
+    run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
+    run.camera.setSpeedZoom(spd01);
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
     run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
@@ -1367,7 +1377,12 @@ export const game = {
     if (!run || run.ended || STATE.levelUpOpen) return false;
     const player = run.player;
     if (!player.alive) return false;
-    return run.skills.trigger(slot, {
+    // GUARD progression (Lv 3 / 5 / 10): slot skill LOCKED tidak boleh
+    // tereksekusi — berlaku untuk klik, touch, keyboard & handler lain.
+    const skill = run.skills.slots[slot];
+    if (!skill) return false;
+    if (!isSkillUnlocked(run.level, slot, skill)) return false;
+    const fired = run.skills.trigger(slot, {
       game: this,
       player,
       enemies: run.enemies,
@@ -1381,6 +1396,41 @@ export const game = {
         if (died) this.onEnemyKilled(enemy, null);
       },
     });
+    // Third-person feel: hentakan halus saat skill meninggalkan tangan (tempur).
+    if (fired) run.camera.addShake(0.14);
+    return fired;
+  },
+
+  /**
+   * Upgrade skill slot (sistem terbuka pada PLAYER LEVEL 15).
+   * Biaya = antibodi run (run.currencyEarned). Semua guard progression di
+   * sini: sebelum Lv 15 aksi ini tidak berbuat apa-apa (return false).
+   * @returns {boolean} true bila rank skill naik.
+   */
+  upgradeAbilityBySlot(slot) {
+    const run = this.run;
+    if (!run || run.ended || STATE.levelUpOpen) return false;
+    const player = run.player;
+    if (!player.alive) return false;
+    const skill = run.skills.slots[slot];
+    if (!skill) return false;
+    // GUARD: upgrade terkunci sebelum Lv 15 (jangan membuat variabel level kedua)
+    if (run.level < SKILL_UPGRADE_LEVEL) return false;
+    if (!canUpgradeSkill(run.level, slot, skill)) return false;
+    const cost = skillUpgradeCost(skill);
+    if (run.currencyEarned < cost) {
+      emit('toast', { message: `Butuh ${cost} antibodi untuk upgrade skill`, kind: 'warn' });
+      return false;
+    }
+    if (!run.skills.tryUpgrade(slot, run.level)) return false;
+    run.currencyEarned -= cost;
+    audio.ui();
+    buzz('levelup');
+    emit('toast', {
+      message: `${skill.def.name} → RANK ${skill.rank}! (+28% damage, -7% cooldown)`,
+      kind: 'gold',
+    });
+    return true;
   },
 
   /** Fase 12: Life Steal — pulihkan HP dari damage yang diberikan. */
@@ -2247,7 +2297,7 @@ export const game = {
         hpText: `${Math.ceil(player.hp)}/${player.maxHP}`,
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
-        abilities: run.skills.getView(),
+        abilities: run.skills.getView(run.level),
         combo: run.combo,
         mission: run.objective
           ? { quota: run.objective.quota, kills: run.kills, bossSpawned: run.objective.bossSpawned, bossName: run.chapter && run.chapter.boss ? run.chapter.boss.name : null }

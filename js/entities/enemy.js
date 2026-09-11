@@ -182,7 +182,12 @@ export class Enemy {
     // ---- V2 Phase 2: CONTACT ATTACK bertelegraph ----
     // Musuh pengejar TIDAK melukai lewat sentuhan pasif; ia berhenti, windup
     // terbaca (sprite attack + shiver), lalu menerkam — dodge dihargai.
-    if (this.usesContactTelegraph && game) {
+    // ECOSYSTEM aggro-gating: musuh yang ROAM (guard/patrol di sarang) atau
+    // pulang (return/leash) BELUM menyerang — ia baru engaged setelah player
+    // memasuki DETECTION_RADIUS (aggro). ATTACK_RADIUS < DETECTION_RADIUS:
+    // musuh bisa terlihat mengitari player tanpa langsung mendaratkan damage.
+    const engagedForContact = this.homeX === null || this.isBoss || this.aiState === 'chase';
+    if (this.usesContactTelegraph && game && engagedForContact) {
       const ca = getCombat().contactAttack;
       const strikeRange = this.radius + (playerPos.radius || 0) + ca.rangeBonus;
       if (this.atkPhase === 'cooldown') {

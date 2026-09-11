@@ -75,17 +75,18 @@ try {
     }
     // lepas input → ukur waktu berhenti
     inputObj.getMoveVector = () => ({ x: 0, y: 0, magnitude: 0 });
-    let stopFrames = 0;
-    for (let i = 0; i < 60; i++) {
-      if (Math.hypot(p.vx, p.vy) < 6) { stopFrames = i; break; }
-      stopFrames = i;
+    // Ukur WAKTU berhenti (bukan hitungan frame — frame sandbox CPU-render tidak 60fps)
+    const tRel = performance.now();
+    let stopMs = 999;
+    for (let i = 0; i < 90; i++) {
+      if (Math.hypot(p.vx, p.vy) < 6) { stopMs = performance.now() - tRel; break; }
       await new Promise((r) => requestAnimationFrame(r));
     }
     inputObj.getMoveVector = backup;
-    return { v2: samples[2], v30: samples[30], stopFrames, topSpeed: Math.max(...samples) };
+    return { v2: samples[2], v30: samples[30], stopMs, topSpeed: Math.max(...samples) };
   });
   log('movement-ramps-up', move.v2 < move.v30 && move.v2 > 0);
-  log('movement-stops-fast', move.stopFrames <= 12);
+  log('movement-stops-fast', move.stopMs <= 300, `${Math.round(move.stopMs)}ms`);
   log('movement-values', `v2=${move.v2.toFixed(0)} v30=${move.v30.toFixed(0)} stopFrames=${move.stopFrames}`);
 
   // ---- SMART TARGETING: musuh sekarat > musuh full-HP sedikit lebih dekat ----

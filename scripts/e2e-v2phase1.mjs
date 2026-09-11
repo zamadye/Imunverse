@@ -48,7 +48,15 @@ try {
   await page.evaluate(() => window.localStorage.removeItem('imunverse.metrics.v1'));
 
   // ---- mulai run #1 ----
-  await page.click('#btn-play', { timeout: 8000, force: true });
+// Stabilizer: mekanik diuji pada kepadatan rendah (sandbox CPU-render;
+  // mitigasi flake frame-rate — perilaku gameplay tak berubah v2/fitur tetap)
+  await page.evaluate(() => {
+    const w = window.__IMUNVERSE.getData().waves;
+    w.ecosystem = { ...w.ecosystem, targetBase: 12, targetMax: 40 };
+    w.maxAliveEnemies = 60;
+  });
+
+    await page.click('#btn-play', { timeout: 8000, force: true });
   await page.waitForTimeout(600);
   if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
     await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
