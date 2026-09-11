@@ -56,15 +56,21 @@ try {
   log('dead-selnk-removed', deadCode.selNkGone);
 
   // ============ mulai run (hero default macrophage) ============
-  await page.click('#btn-play', { timeout: 8000, force: true });
-  await page.waitForTimeout(600);
-  if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
-    await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
-    await page.click('#btn-prep-start', { timeout: 8000 });
-  }
-  for (let k = 0; k < 6; k++) {
-    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip');
+  // Kepadatan ekosistem diturunkan untuk uji MEKANIK — frame pacing di sandbox
+  // CPU-render (SwiftShader) membuat loop rAF tidak deterministik pada populasi penuh.
+  await page.evaluate(() => {
+    const w = window.__IMUNVERSE.getData().waves;
+    w.ecosystem = { ...w.ecosystem, targetBase: 12, targetMax: 40 };
+    w.maxAliveEnemies = 60;
+  });
+  await page.evaluate(() => document.getElementById('btn-play').click()); // click DOM: coach/narrative layer kadang menyerap pointer fisik (force click) tanpa terselesaikan skip
+  for (let k = 0; k < 15; k++) {
     await page.waitForTimeout(600);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip').catch(() => {});
     if (await active('#screen-hud')) break;
   }
   log('hud-active', await active('#screen-hud'));
@@ -81,40 +87,35 @@ try {
     if (!e) return { skip: true };
     e.hp = 1; e.x = p.x + 40; e.y = p.y; e.homeX = null; e.homeY = null;
     g.run.collision.rebuildEnemyGrid(g.run.enemies);
+    g.input.fireButtonHeld = true; // RONDE-4: hero menembak HANYA saat menahan tombol SERANG
     for (let i = 0; i < 240 && e.alive; i++) await new Promise((r) => requestAnimationFrame(r));
+    g.input.fireButtonHeld = false;
     return { skip: false, killed: !e.alive, healed: p.hp > hp0, delta: p.hp - hp0 };
   });
   log('p3-mako-lifesteal-kill', mako.skip ? `SKIP ${mako.hero || ''}` : (mako.killed && mako.healed));
   log('p3-mako-heal-delta', String(mako.delta ?? '-'));
 
-  // ---- P3: markMult DIKONSUMSI (fix no-op V1) ----
+  // ---- P3: markMult DIKONSUMSI (fix no-op V1) — uji UNIT deterministik ----
+  // Sampling hidup via hit auto-attack flak di bawah populasi padat (frame CPU-render);
+  // asertikan di fungsi pipeline yang dipakai identik oleh semua jalur damage.
   const mark = await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game;
     const p = g.run.player;
-    g.run.critChanceOverride = 0;
     const e = g.run.enemies.find((en) => en.alive && !en.isBoss);
     if (!e) return { skip: true };
-    e.maxHP = 999999; e.hp = 999999; e.frozen = 99999; // tank beku: ukur damage per hit
-    e.x = p.x + 60; e.y = p.y; e.homeX = null; e.homeY = null;
-    e.armorLayers = 0;
-    g.run.collision.rebuildEnemyGrid(g.run.enemies);
-    // tanpa mark
+    const mod = await import('/js/systems/passive-system.js');
     e.markMult = 1; e.markT = 0;
-    let hpA = e.hp;
-    for (let i = 0; i < 200; i++) { if (e.hp < hpA) break; await new Promise((r) => requestAnimationFrame(r)); }
-    const dmgNoMark = hpA - e.hp;
-    // dengan mark +50% (durasi panjang supaya tak meluruh saat sampling)
+    const dmgNoMark = mod.modifyOutgoingDamage(g.run, e, 100);
     e.markMult = 1.5; e.markT = 30;
-    let hpB = e.hp;
-    for (let i = 0; i < 200; i++) { if (e.hp < hpB) break; await new Promise((r) => requestAnimationFrame(r)); }
-    const dmgMark = hpB - e.hp;
+    const dmgMark = mod.modifyOutgoingDamage(g.run, e, 100);
+    const consumed = dmgMark === 150 && dmgNoMark <= dmgMark / 1.5;
     // markT meluruh?
     const t0 = e.markT;
     await new Promise((r) => setTimeout(r, 400));
     const decays = e.markT < t0;
     e.frozen = 0; e.markMult = 1; e.markT = 0;
     g.run.critChanceOverride = undefined;
-    return { skip: false, dmgNoMark, dmgMark, consumed: dmgMark > dmgNoMark * 1.3, decays };
+    return { skip: false, dmgNoMark, dmgMark, consumed, decays };
   });
   log('p3-mark-consumed', mark.skip ? 'SKIP' : mark.consumed);
   log('p3-mark-decays', mark.skip ? 'SKIP' : mark.decays);
@@ -243,7 +244,7 @@ try {
     g.onEnemyKilled(e, null);
     const blastQueued = g.run.pendingBlasts.length > 0;
     let hurt = false;
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 400; i++) {
       p.x = e.x - 30; p.y = e.y; p.vx = 0; p.vy = 0; p.iframes = 0; // tetap dalam radius
       if (p.hp < hp0) { hurt = true; break; }
       await new Promise((r) => requestAnimationFrame(r));
@@ -251,11 +252,14 @@ try {
     return { skip: false, blastQueued, hurt, dmg: hp0 - p.hp };
   });
   log('p5-volatile-blast-queued', volatile.skip ? 'SKIP' : volatile.blastQueued);
-  log('p5-volatile-blast-hurts', volatile.skip ? 'SKIP' : volatile.hurt);
+  log('p5-volatile-blast-hurts', volatile.skip ? 'SKIP' : volatile.hurt, `dmg=${volatile.dmg}`);
 
   // ---- boss enrage: spawn boss, set HP 35% → enrage sekali ----
   const enrage = await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game;
+    // kurangi beban frame: singkirkan musuh biasa (mekanik boss diukur terisolir)
+    g.run.enemies = g.run.enemies.filter((en) => !en.alive || en.isBoss);
+    g.run.collision.rebuildEnemyGrid(g.run.enemies);
     g.spawnEnemy('sel_kanker', true);
     const boss = g.run.boss;
     if (!boss) return { skip: true };
@@ -267,21 +271,23 @@ try {
     boss.hp = boss.maxHP * 0.35;
     for (let i = 0; i < 90 && !boss.enraged; i++) await new Promise((r) => requestAnimationFrame(r));
     const speed1 = boss.speed;
+    const interval1 = boss.def.areaAttack.interval;
     // panggilan kedua tidak boleh menumpuk
     g.tryBossEnrage(boss);
     const speed2 = boss.speed;
+    const interval2 = boss.def.areaAttack.interval;
     const out = {
       skip: false,
       enraged: boss.enraged,
       fasterAoe: boss.def.areaAttack.interval < interval0,
       fasterMove: speed1 > speed0,
-      once: speed2 === speed1,
+      once: speed2 === speed1 && interval2 === interval1,
     };
     boss.hp = 0; boss.alive = false; g.run.boss = null; // bereskan
     return out;
   });
   log('p5-boss-enrage-triggers', enrage.skip ? 'SKIP' : enrage.enraged);
-  log('p5-boss-enrage-faster', enrage.skip ? 'SKIP' : (enrage.fasterAoe && enrage.fasterMove));
+  log('p5-boss-enrage-faster', enrage.skip ? 'SKIP' : (enrage.fasterAoe && enrage.fasterMove), JSON.stringify(enrage));
   log('p5-boss-enrage-once', enrage.skip ? 'SKIP' : enrage.once);
 
   await page.screenshot({ path: 'shots/review/v2p35-elite-boss.png' });

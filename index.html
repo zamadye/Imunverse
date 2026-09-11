@@ -10,7 +10,7 @@
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
   <link rel="stylesheet" href="styles/main.css?v=50a" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=1" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=2" />
 </head>
 <body>
   <div id="app">
@@ -442,25 +442,29 @@
 
       <!-- ============ GAMEPLAY HUD ============ -->
       <section id="screen-hud" class="screen passive" data-screen="hud">
-        <!-- TOP MLBB: kiri kill stat | tengah wave+timer | kanan currency -->
+        <!-- TOP CENTER: stat runs — equity chip, kills, wave, timer, currency (RoK-style grouping) -->
         <div class="hud-top">
-          <div class="hud-stat-left glass">
+          <div class="hud-center">
+            <span id="hud-equity-stage" class="hud-equity-stage">Polos</span>
             <div class="hud-kills"><img src="assets/icons/ui-kill.svg" alt="" /><span id="hud-kills">0</span></div>
-          </div>
-          <div class="hud-center glass">
             <div id="hud-wave" class="wave-pill">WAVE 1</div>
             <div id="hud-timer" class="timer-chip"><img src="assets/icons/ui-timer.svg" alt="" /><span id="hud-timer-text">00:00</span></div>
+            <div class="hud-currency-run hud-currency-anti" id="hud-anti-chip" role="button" tabindex="0" aria-label="Antibodi — cara mendapatkan">
+              <img src="assets/icons/cur-antibodi.svg" alt="" /><span id="hud-currency">0</span>
+              <button class="cur-plus" id="hud-anti-plus" aria-label="Bagaimana mendapatkan antibodi">+</button>
+            </div>
+            <div class="hud-currency-run hud-imu-run" id="hud-imu-chip" role="button" tabindex="0" aria-label="Imuncoin — cara mendapatkan">
+              <img src="assets/icons/cur-imun.svg" alt="" /><span id="hud-imu">0</span>
+              <button class="cur-plus" id="hud-imu-plus" aria-label="Bagaimana mendapatkan imuncoin">+</button>
+            </div>
             <div id="hud-boss-bar-wrap" class="hud-boss-wrap hidden">
               <div class="hud-boss-track"><div id="hud-boss-fill" class="hud-boss-fill"></div></div>
               <span id="hud-boss-name" class="hud-boss-name">SEL KANKER</span>
             </div>
           </div>
-          <div class="hud-stat-right glass">
-            <div class="hud-currency-run"><img src="assets/icons/cur-antibodi.svg" alt="" /><span id="hud-currency">0</span></div>
-            <div class="hud-currency-run hud-imu-run" id="hud-imu-chip"><img src="assets/icons/cur-imun.svg" alt="" /><span id="hud-imu">0</span></div>
-            <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/icons/ui-pause.svg" alt="" /></button>
-          </div>
         </div>
+        <!-- PAUSE dipindah ke bawah (kluster kanan-bawah dekat grid skill) sesuai petunjuk panah -->
+        <button id="btn-pause" class="btn btn-pause" aria-label="Jeda"><img src="assets/icons/ui-pause.svg" alt="" /></button>
         <!-- UI/UX: MENU 1 — "Perjalanan Penjaga" (kanan-atas): progres & pengetahuan.
              Item terkunci DISEMBUNYIKAN (progressive disclosure via data/features.json);
              toggle ikut tersembunyi bila belum ada item terbuka. Ikon = set assets/icons/menu-*.svg -->
@@ -517,7 +521,7 @@
           <div class="avatar-wrap">
             <img id="hud-portrait" class="hud-portrait" alt="" />
             <span id="hud-level" class="level-badge">Lv 1</span>
-            <span id="hud-equity-stage" class="hud-equity-stage">Polos</span>
+            <!-- Equity-stage chip dipindah ke TENGAH ATAS (arah panah user) -->
           </div>
           <div class="status-bars">
             <div class="hp-row">
@@ -532,12 +536,29 @@
           <div id="ability-bar" class="ability-bar" aria-label="Skill aktif"><!-- diisi JS --></div>
           <button id="btn-fire" class="fire-btn" aria-label="Serang">
             <!-- E2 poin 3 → UI/UX BUILD 43: ANTIBODI-Y menghantam virus (netralisasi antibodi,
-                 serangan imun paling ikonik) — ikon kawaii gaya menu-*.svg: assets/icons/hud-serang.svg -->
+                 serangan imun paling ikonik) — ikon kawaii gaya menu-*.svg: assets/icons/hud-serang.svg.
+                 Teks label dihapus (permintaan user): ikon saja, fungsi dibacakan aria-label. -->
             <span class="fire-claw"><img src="assets/icons/hud-serang.svg" alt="" width="44" height="44" draggable="false" /></span>
-            <span>SERANG</span>
             <!-- UI/UX BUILD 42: indikator arah saat TAHAN + TARIK (aim stick di tombol) -->
             <span class="fire-aim" aria-hidden="true"></span>
           </button>
+        </div>
+      </section>
+
+      <!-- ============ MODAL: CARA MENDAPATKAN CURRENCY (antibodi / imuncoin) ============ -->
+      <section id="screen-curguide" class="screen modal" data-screen="curguide" role="dialog" aria-modal="true" aria-labelledby="curguide-title">
+        <div class="modal-box curguide-box">
+          <div id="curguide-head" class="curguide-head">
+            <img id="curguide-icon" class="curguide-icon" src="assets/icons/cur-antibodi.svg" alt="" />
+            <div>
+              <h2 class="modal-title ui-modal-title" id="curguide-title">Cara Mendapatkan Antibodi</h2>
+              <p class="modal-sub" id="curguide-sub">Saldo: <b id="curguide-balance">0</b></p>
+            </div>
+          </div>
+          <ul id="curguide-tasks" class="curguide-tasks"><!-- diisi JS sesuai currency yang diklik --></ul>
+          <div class="curguide-foot">
+            <button id="btn-curguide-close" class="btn btn-primary">Mengerti</button>
+          </div>
         </div>
       </section>
 

@@ -625,7 +625,7 @@ export function show() {
         el('span', { class: 'm-name', text: m.def.name }),
         el('span', { class: 'm-reward' }, [
         el('span', { text: `+${m.def.reward}` }),
-        el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: 'Imun Coin', title: 'Imun Coin' }),
+        el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi', title: 'Antibodi' }),
       ]),
       ]),
       el('div', { class: 'm-row' }, [

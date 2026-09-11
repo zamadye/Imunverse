@@ -42,7 +42,15 @@ await page.fill('#auth-username', 'PemainHebat');
 
   // CAMPAIGN → prep → MULAI (skip sinematik briefing)
   // F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
-  await page.click('#btn-play', { timeout: 8000 });
+  await page.evaluate(() => document.getElementById('btn-play').click()); // DOM click: narrative/coach layer kadang menyerap pointer fisik
+  for (let k = 0; k < 6; k++) {
+    await page.waitForTimeout(500);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'))) break;
+  }
   await page.waitForTimeout(600);
   if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
     await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
@@ -59,13 +67,19 @@ await page.fill('#auth-username', 'PemainHebat');
   await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.maxHP = 5000; p.hp = 5000; p.iframes = 99999; });
 
   // ---------- Struktur HUD ----------
-  log('top-glass-3', await page.locator('#screen-hud .hud-top .glass').count() >= 3);
+  // HUD ronde-2+: bar top-center = 1 grup chip (equity/kills/WAVE/timer/anti/imu) — tanpa glass-band
+  log('top-center-row', await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count() >= 5,
+      `count=${await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count()}`);
   log('hero-status', await page.locator('#screen-hud .hud-hero-status .hud-portrait').count() === 1);
   const portraitSrc = await page.evaluate(() => document.getElementById('hud-portrait')?.getAttribute('src') || '');
   log('portrait-new-roster', /hero_(tcd8|macrophage|neutrophil|bcell|nkcell|eosinophil|dendritic|basophil|mastcell|tcd4|treg)_portrait/.test(portraitSrc) ? portraitSrc : 'SRC=' + portraitSrc);
   log('skills-3', await page.locator('#ability-bar .ability-btn').count() === 3);
   log('ult-1', await page.locator('#ability-bar .ability-btn.ult').count() === 1);
-  log('fire-serang', await page.evaluate(() => document.getElementById('btn-fire').textContent.includes('SERANG')));
+  // Ronde-2+: label teks SERANG DIHAPUS (request user) — ikon saja, nama tombol di aria-label
+  log('fire-serang-aria', await page.evaluate(() => {
+    const b = document.getElementById('btn-fire');
+    return (b.getAttribute('aria-label') || '').toUpperCase().includes('SERANG') && !/SERANG/.test(b.textContent.trim());
+  }));
   log('key-tags', (await page.locator('#ability-bar .key-tag').allTextContents()).join(','));
 
   // ---------- PSEUDO-3D: proyeksi & animasi jalan ----------
@@ -226,16 +240,19 @@ await page.fill('#auth-username', 'PemainHebat');
   const killed = await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game;
     const p = g.run.player;
+    // Tembakan hero = MANUAL (tombol SERANG), sistem tembak OTOMATIS = PASUKAN
+    // (unlock di level unlock skill). Paksa sel #1 bergabung — jalur RIIL yang
+    // dulu diunsurkan "auto attack".
+    g.tryJoinSquad(3);
     g.spawnEnemy('parasit', false);
     const e = g.run.enemies.filter((x) => x.alive).pop();
     if (!e) return false;
     e.x = p.x + 45; e.y = p.y;
     const k0 = g.run.kills;
-    // Fase 17: hero default kini Mako (melee, cd lebih lambat) — beri waktu cukup
     await new Promise((r) => setTimeout(r, 4600));
     return g.run.kills > k0 || !e.alive;
   });
-  log('auto-attack-kills', killed);
+  log('squad-auto-kills', killed);
 
   // ---------- Level-up modal ----------
   await page.evaluate(async () => {

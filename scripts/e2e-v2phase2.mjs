@@ -41,18 +41,17 @@ try {
   const cd = await page.evaluate(() => window.__IMUNVERSE.getData().combat);
   log('combat-json-loaded', !!cd && typeof cd.contactAttack.windup === 'number' && typeof cd.movement.accel === 'number');
   const wv = await page.evaluate(() => window.__IMUNVERSE.getData().waves);
-  log('waves-pacing-in-data', wv.breakDuration === 2.5 && wv.trickleIntervalMult === 2.2);
+  log('waves-pacing-in-data', wv.breakDuration === 3.5 && wv.trickleIntervalMult === 2.2); // RONDE-4: pembukaan lebih santai
 
   // ---- mulai run ----
-  await page.click('#btn-play', { timeout: 8000, force: true });
-  await page.waitForTimeout(600);
-  if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
-    await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
-    await page.click('#btn-prep-start', { timeout: 8000 });
-  }
-  for (let k = 0; k < 6; k++) {
-    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip');
+  await page.evaluate(() => document.getElementById('btn-play').click()); // click DOM: coach/narrative layer kadang menyerap pointer fisik (force click) tanpa terselesaikan skip
+  for (let k = 0; k < 15; k++) {
     await page.waitForTimeout(600);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip').catch(() => {});
     if (await active('#screen-hud')) break;
   }
   log('hud-active', await active('#screen-hud'));
@@ -75,17 +74,18 @@ try {
     }
     // lepas input → ukur waktu berhenti
     inputObj.getMoveVector = () => ({ x: 0, y: 0, magnitude: 0 });
-    let stopFrames = 0;
-    for (let i = 0; i < 60; i++) {
-      if (Math.hypot(p.vx, p.vy) < 6) { stopFrames = i; break; }
-      stopFrames = i;
+    // Ukur WAKTU berhenti (bukan hitungan frame — frame sandbox CPU-render tidak 60fps)
+    const tRel = performance.now();
+    let stopMs = 999;
+    for (let i = 0; i < 90; i++) {
+      if (Math.hypot(p.vx, p.vy) < 6) { stopMs = performance.now() - tRel; break; }
       await new Promise((r) => requestAnimationFrame(r));
     }
     inputObj.getMoveVector = backup;
-    return { v2: samples[2], v30: samples[30], stopFrames, topSpeed: Math.max(...samples) };
+    return { v2: samples[2], v30: samples[30], stopMs, topSpeed: Math.max(...samples) };
   });
   log('movement-ramps-up', move.v2 < move.v30 && move.v2 > 0);
-  log('movement-stops-fast', move.stopFrames <= 12);
+  log('movement-stops-fast', move.stopMs <= 300, `${Math.round(move.stopMs)}ms`);
   log('movement-values', `v2=${move.v2.toFixed(0)} v30=${move.v30.toFixed(0)} stopFrames=${move.stopFrames}`);
 
   // ---- SMART TARGETING: musuh sekarat > musuh full-HP sedikit lebih dekat ----

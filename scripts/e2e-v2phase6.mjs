@@ -49,6 +49,7 @@ try {
     const meta = window.__IMUNVERSE.STATE.meta;
     delete meta.heroMastery; // save lama tanpa field → harus aman (lazy init)
     const imu0 = meta.imun || 0;
+    const ab0 = window.__IMUNVERSE.STATE.meta.currency || 0;
 
     // run 1: 30 kill + wave 4, kalah → 30×2 + 40 = 100 XP → tepat Lv1
     const r1 = mod.addMasteryXP(meta, 'testhero', { kills: 30, wave: 4, victory: false });
@@ -57,12 +58,14 @@ try {
     const r2 = mod.addMasteryXP(meta, 'testhero', { kills: 500, wave: 20, victory: true });
     const info2 = mod.masteryInfo(meta, 'testhero');
     const imu1 = meta.imun || 0;
+    const ab1 = window.__IMUNVERSE.STATE.meta.currency || 0;
     // formula: 500×2 + 20×10 + 80 = 1280 → total 1380 → Lv5 (>=1250)
     return {
       r1xp: r1.xp, r1level: r1.level, r1reward: r1.reward,
       r2xp: r2.xp, r2levels: r2.levelsGained, level2: info2.level, title2: info2.title,
       kills: info2.kills, runs: info2.runs, wins: info2.wins,
       imuGained: imu1 - imu0,
+      abGained: ab1 - ab0,
       lazyInitOk: true,
       pctValid: info2.pct >= 0 && info2.pct <= 1,
       title1: info1.title,
@@ -73,19 +76,20 @@ try {
   log('multi-level-jump', unit.r2levels === 4 && unit.level2 === 5);
   log('title-at-lv3plus', unit.title1 === null && unit.title2 === 'Terlatih');
   log('per-hero-tracking', unit.kills === 530 && unit.runs === 2 && unit.wins === 1);
-  log('imu-reward-total', unit.imuGained === 15 * 5);
+  // RONDE-4 (premium ketat): mastery naik level → antibodi (soft), bukan Imun Coin
+  log('mastery-pays-soft-currency', unit.imuGained === 0 && unit.abGained === 15 * 5);
+  log('no-imun-from-mastery', unit.imuGained === 0, `imu=${unit.imuGained} ab=${unit.abGained}`);
   log('lazy-init-safe', unit.lazyInitOk && unit.pctValid);
 
   // ---- integrasi: run nyata → finishRun → mastery hero terpakai naik ----
-  await page.click('#btn-play', { timeout: 8000, force: true });
-  await page.waitForTimeout(600);
-  if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
-    await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
-    await page.click('#btn-prep-start', { timeout: 8000 });
-  }
-  for (let k = 0; k < 6; k++) {
-    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip');
+  await page.evaluate(() => document.getElementById('btn-play').click()); // click DOM: coach/narrative layer kadang menyerap pointer fisik (force click) tanpa terselesaikan skip
+  for (let k = 0; k < 15; k++) {
     await page.waitForTimeout(600);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.locator('#cine-skip').isVisible().catch(() => false)) await page.click('#cine-skip').catch(() => {});
     if (await active('#screen-hud')) break;
   }
   log('hud-active', await active('#screen-hud'));

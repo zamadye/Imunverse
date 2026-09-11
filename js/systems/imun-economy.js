@@ -1,16 +1,18 @@
 /**
  * imun-economy.js — IMUN COIN (currency premium, Fase 14).
  *
- * Ekonomi ganda: Antibodi = soft currency (drop musuh, upgrade dasar);
- * Imun Coin = premium (skin, aksesori, Battle Pass premium, bundle).
- * Beta: Imun didapat dari BERMAIN (konversi hasil run), Battle Pass,
- * offerwall (iklan/survei sponsor — simulasi SDK), referral, dan hadiah
- * early-beta. Pembelian uang nyata tetap via payment-system (simulasi).
+ * Ekonomi ganda: Antibodi = soft currency (drop musuh, reward misi, offerwall);
+ * Imun Coin = PREMIUM KETAT (RONDE-4): sumber HANYA (1) PEMBELIAN uang nyata
+ * (payment-system, bundle premium.json) dan (2) reward BATTLE PASS
+ * (data/battlepass.json). Tidak dari bermain biasa / misi / mastery / likuid
+ * apapun — premium tidak dimudahkan (prinsip revenue blueprint Phase 10).
+ * Bonus sampingan sosial (referral/founder/offerwall) = Antibodi.
  */
 
 import { getData } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
+import { addCurrency } from './economy-system.js'; // bonus sampingan = ANTIBODI (soft)
 
 export const FOUNDER_TITLE = 'Pendiri Imunverse';
 
@@ -87,7 +89,9 @@ export function ensureFounderReward(meta) {
   if (!meta.account || meta.founderGranted) return false;
   meta.founderGranted = true;
   meta.premiumTitle = meta.premiumTitle || FOUNDER_TITLE;
-  addImun(meta, 150); // Fase 20: ekonomi IMU diperketat — hadiah pendiri dipangkas
+  // RONDE-4: hadiah pendiri = gelar + skin + Antibodi (TANPA Imun Coin —
+  // premium murni dari pembelian & Battle Pass).
+  addCurrency(meta, 250);
   const cos = ensureCosmetics(meta);
   if (!cos.owned.includes('skin_pendiri')) cos.owned.push('skin_pendiri');
   cos.skin.semua = cos.skin.semua || 'skin_pendiri';
@@ -104,16 +108,16 @@ export function ensureReferral(meta) {
   return meta.referral;
 }
 
-/** Pakai kode teman → +Imun (sekali per kode; tidak bisa kode sendiri). */
+/** Pakai kode teman → +Antibodi (sekali per kode; tidak bisa kode sendiri). */
 export function applyReferralCode(meta, raw) {
   const code = String(raw || '').trim().toUpperCase();
   const ref = ensureReferral(meta);
   if (!/^IMUN-[A-Z0-9]{3,8}$/.test(code)) return { ok: false, error: 'Format kode: IMUN-XXXXX' };
   if (code === ref.code) return { ok: false, error: 'Itu kode kamu sendiri' };
   if (ref.applied.includes(code)) return { ok: false, error: 'Kode itu sudah dipakai' };
-  const reward = getData().battlepass.offers.referralImun;
+  const reward = getData().battlepass.offers.referralAntibodi; // RONDE-4: bonus sosial = soft currency
   ref.applied.push(code);
-  addImun(meta, reward);
+  addCurrency(meta, reward);
   writeSave(meta);
   return { ok: true, reward };
 }

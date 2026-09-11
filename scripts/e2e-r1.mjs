@@ -82,6 +82,13 @@ try {
   log('disclosure-run1-bp-rank-hidden', disc1.bp === false && disc1.rank === false);
   await page.screenshot({ path: 'shots/review/r1-dashboard-minimal.png' });
 
+  // Stabilizer sandbox: kepadatan minimal selama uji mekanik (frame CPU-render)
+  await page.evaluate(() => {
+    const w = window.__IMUNVERSE.getData().waves;
+    w.ecosystem = { ...w.ecosystem, targetBase: 12, targetMax: 40 };
+    w.maxAliveEnemies = 60;
+  });
+
   // ---- 5) PLAY (runs<3) → LANGSUNG run, bukan Peta Tubuh ----
   await page.evaluate(() => document.getElementById('btn-play-big')?.click());
   for (let k = 0; k < 6; k++) {
