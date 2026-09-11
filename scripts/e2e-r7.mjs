@@ -36,6 +36,7 @@ try {
   const act = await page.evaluate(() => {
     const g = window.__IMUNVERSE.game, run = g.run;
     const before = run.chemoActiveT;
+    g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     const used = g.useAbilityBySlot(1); // shadowstep (kind 'dash')
     return { before, used, after: run.chemoActiveT };
   });
@@ -153,6 +154,7 @@ try {
   await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game, run = g.run, input = window.__IMUNVERSE.input;
     run.chemoTrail.length = 0;
+    g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     g.useAbilityBySlot(1); // shadowstep → jendela + label
     input.keys.add('right'); input.keys.add('down');
   });
@@ -173,6 +175,7 @@ try {
     g.startRun('nkcell');
     await new Promise((r) => setTimeout(r, 700));
     const run = g.run;
+    g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     const used = g.useAbilityBySlot(1); // shadowstep tetap jalan (dash lama)
     input.keys.add('right');
     await new Promise((r) => setTimeout(r, 600));

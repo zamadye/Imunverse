@@ -51,6 +51,7 @@ try {
   const spawn = await page.evaluate(() => {
     const g = window.__IMUNVERSE.game;
     const before = g.run.inflamZones.length;
+    g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; }); // bypass unlock progression (uji efek)
     const ok = g.useAbilityBySlot(0); // grenade (kind 'area')
     const after = g.run.inflamZones.length;
     const z = g.run.inflamZones[after - 1];
@@ -164,6 +165,7 @@ try {
     const g = window.__IMUNVERSE.game;
     g.startRun('neutrophil');
     await new Promise((r) => setTimeout(r, 700));
+    g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     const used = g.useAbilityBySlot(0); // grenade tetap jalan (dmg area lama)
     const zones = g.run.inflamZones.length;
     const manual = mod.spawnInflamZone(g, g.run.player.x, g.run.player.y, 90);

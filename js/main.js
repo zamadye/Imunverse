@@ -597,9 +597,14 @@ async function boot() {
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
     const key = ev.key;
     // Fase 12: 1/2/3 = skill hero (slot 3 = ultimate), 4 = SERANG manual
-    if (key === '1' || key === '2' || key === '3') {
+    // Skill combat unlock: 1/2/3 cast (guard Lv 3/5/10 di game.useAbilityBySlot);
+    // Shift+1/2/3 = UPGRADE skill (guard Lv 15 di game.upgradeAbilityBySlot).
+    // ev.code dipakai agar Shift+digit (yang mengubah ev.key jadi '!' dst.) tetap dikenali.
+    const digitSlot = { Digit1: 0, Digit2: 1, Digit3: 2 }[ev.code];
+    if (digitSlot !== undefined) {
       ev.preventDefault();
-      game.useAbilityBySlot(Number(key) - 1);
+      if (ev.shiftKey) game.upgradeAbilityBySlot(digitSlot);
+      else game.useAbilityBySlot(digitSlot);
       return;
     }
     if (key === '4' || key.toLowerCase() === 't' || key === ' ') {
@@ -777,6 +782,9 @@ async function runAutotest() {
     log('upgradeApplied', Object.keys(game.run.upgrades).length >= 1 && !STATE.levelUpOpen);
 
     // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
+    // (skill combat unlock Lv 3/5/10: harness membuka slot manual — pola yang
+    // sama dengan scripts/e2e-mlbb.mjs — agar efek skill tetap teruji langsung)
+    game.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     const fired = game.useAbilityBySlot(2);
     log('abilityFired', fired && game.run.skills.slots[2].cdLeft > 0);
 
