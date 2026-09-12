@@ -41,7 +41,7 @@ import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import * as arenaScreen from './ui/screens/arena-screen.js';
 import * as prepScreen from './ui/screens/prep-screen.js';
-import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
+import { onRunStart as tutorialOnRunStart, isTutorialActive } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
 import * as campaignScreen from './ui/screens/campaign-screen.js';
@@ -299,16 +299,40 @@ function wireUiBridge() {
 
   // R3 Task 4: FIRST-TIME EXPERIENCE RIA (sekali sejak pernah, non-blocking,
   // bisa di-tap untuk skip — presenter + VO, nada bersemangat/jenaka).
+  // RONDE-3 visual fix: presenter TIDAK boleh menumpuk di atas modal Level-Up /
+  // pause — bark ditunda sampai momen resume (antrian 1 baris).
+  let pendingBark = null;
+  function flushBark() {
+    const b = pendingBark;
+    pendingBark = null;
+    if (b) setTimeout(() => {
+      // Level-up beruntun: jangan menimpa modal yang baru terbuka — antri ulang
+      if (STATE.levelUpOpen || (game.run && game.run.paused)) { pendingBark = b; return; }
+      showPresenter(b.who, b.text, b.opts);
+    }, 420);
+  }
   function nftFirst(key, event) {
     const meta = STATE.meta;
     if (meta.nft && meta.nft[key]) return;
+    // RONDE-4 (check-3): jangan membombardir pemain BARU — saat tutorial
+    // onboarding berjalan, bark RIA (NFT) dilewati & ditandai ditampilkan.
+    if (isTutorialActive()) {
+      meta.nft = meta.nft || {};
+      meta.nft[key] = true;
+      writeSave(meta);
+      return;
+    }
     const nft = getData().cutscenes && getData().cutscenes.nft;
     const line = nft && nft[key];
     if (!line) return;
     meta.nft = meta.nft || {};
     meta.nft[key] = true;
     writeSave(meta);
-    showPresenter('ria', line.text, { vo: line.vo });
+    if (STATE.levelUpOpen || (game.run && game.run.paused)) {
+      pendingBark = { who: 'ria', text: line.text, opts: { vo: line.vo } };
+    } else {
+      showPresenter('ria', line.text, { vo: line.vo });
+    }
     if (event) event.preventDefault?.();
   }
   on('nftMove', () => nftFirst('move'));
@@ -355,6 +379,7 @@ function wireUiBridge() {
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
     if (STATE.screen === 'gameplay') screenManager.show('hud');
+    flushBark(); // bark NFT yang ditunda saat modal terbuka → tampil bersih di HUD
   });
   on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
 }
@@ -449,6 +474,7 @@ async function boot() {
   screenManager.registerScreen('rank', rankScreen);
   screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
+  screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
   titleScreen.wire(); // F21: layar judul gameplay-first
@@ -458,6 +484,102 @@ async function boot() {
 
   // Tombol HUD pause (elemen statis — di-wire di sini agar hud-screen tetap murni view)
   document.getElementById('btn-pause').addEventListener('click', () => game.pause());
+
+  // ---------- PANDUAN CURRENCY (HUD, tanda "+") ----------
+  // Daftar sumber penghasilan (jujur ke mekanik eksisting):
+  const CUR_GUIDE = {
+    anti: {
+      title: 'Cara Mendapatkan Antibodi',
+      icon: 'assets/icons/cur-antibodi.svg',
+      balance: () => STATE.meta.currency || 0,
+      tasks: [
+        '<b>Bunuh patogen</b> — tiap kill di gameplay mengeluarkan antibodi.',
+        '<b>Selesaikan wave & boss</b> — wave tuntas memberi bonus; boss membuka Peti Boss.',
+        '<b>Klaim misi harian / mingguan</b> — dari panel Misi di HUD & dashboard.',
+        '<b>Selesaikan bab kampanye</b> — tiap bab bersih memberi hadiah besar.',
+        '<b>Upgrade hero & squad membayar dengan antibodi</b> — kumpulkan lebih banyak per run!',
+      ],
+    },
+    imu: {
+      title: 'Cara Mendapatkan Imuncoin',
+      icon: 'assets/icons/cur-imun.svg',
+      balance: () => Math.floor(STATE.meta.imun || 0),
+      tasks: [
+        '<b>Main run berulang</b> — tiap kill patogen memberi Imuncoin kecil.',
+        '<b>Selesaikan tiap wave</b> — bonus Imuncoin per wave tuntas.',
+        '<b>Kalahkan boss</b> — hadiah Imuncoin besar tiap boss tumbang.',
+        '<b>Naikkan Mastery hero</b> — reward Imuncoin di akhir run (sistem Mastery).',
+        '<b>Imuncoin dipakai untuk Battle Pass premium</b> — kumpulkan dari run ke run!',
+      ],
+    },
+  };
+
+  let guideAutoPaused = false;
+  function closeCurGuide() {
+    const pr = document.getElementById('presenter-layer');
+    if (pr) pr.style.visibility = '';
+    // kembali ke dunia yang aktif; resume hanya bila kami yang mem-pause sebelumnya
+    if (guideAutoPaused && game.run && !game.run.ended && game.run.paused) {
+      game.resume();
+      screenManager.show('hud');
+    } else if (game.run && !game.run.ended) {
+      screenManager.show('hud');
+    } else {
+      screenManager.show('dashboard');
+    }
+    guideAutoPaused = false;
+  }
+
+  function openCurGuide(kind) {
+    const g = CUR_GUIDE[kind];
+    if (!g) return;
+    document.getElementById('curguide-title').textContent = g.title;
+    document.getElementById('curguide-icon').src = g.icon;
+    document.getElementById('curguide-balance').textContent = g.balance();
+    const ul = document.getElementById('curguide-tasks');
+    ul.innerHTML = g.tasks.map((t) => `<li>${t}</li>`).join('');
+    // tetap adil: baca panduan tidak membuat player mati di belakang modal
+    if (game.run && !game.run.ended && !game.run.paused && !game.run.cinematic) {
+      game.pause();
+      guideAutoPaused = true;
+    }
+    screenManager.show('curguide');
+    // presenter naratif (RIA) jangan menimpa tombol baca— sembunyikan sementara
+    const pr = document.getElementById('presenter-layer');
+    if (pr) pr.style.visibility = 'hidden';
+  }
+
+  const antiChip = document.getElementById('hud-anti-chip');
+  const imuChip = document.getElementById('hud-imu-chip');
+  if (antiChip) {
+    antiChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('anti'); });
+    antiChip.addEventListener('click', () => openCurGuide('anti'));
+    antiChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('anti'); } });
+  }
+  if (imuChip) {
+    imuChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('imu'); });
+    imuChip.addEventListener('click', () => openCurGuide('imu'));
+    imuChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('imu'); } });
+  }
+  const cgClose = document.getElementById('btn-curguide-close');
+  if (cgClose) cgClose.addEventListener('click', closeCurGuide);
+  // Tap-area overlay modal curguide → tutup bila klik di luar kotak (konsisten dgn pola game)
+  document.getElementById('screen-curguide').addEventListener('click', (ev) => {
+    if (ev.target.id === 'screen-curguide') closeCurGuide();
+  });
+  // Profil hero di HUD = juga tindakan pause (Misi/Status) — sebelumnya hanya protected-movement tanpa aksi.
+  // Zona ini sudah UI-protected (isGameplayInputTarget=false) → aman dari joystick/aim.
+  const hpPill = document.getElementById('hp-pill');
+  if (hpPill) {
+    hpPill.addEventListener('click', () => { if (game.run && !game.run.ended && !game.run.paused) game.pause(); });
+    hpPill.setAttribute('title', 'Status hero — ketuk untuk jeda');
+    hpPill.setAttribute('role', 'button');
+    hpPill.setAttribute('aria-label', 'Status hero — jeda');
+    hpPill.tabIndex = 0;
+    hpPill.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); hpPill.click(); }
+    });
+  }
   const hudMenu = document.getElementById('hud-game-menu');
   const hudMenuToggle = document.getElementById('hud-menu-toggle');
   hudMenuToggle?.addEventListener('click', () => {
@@ -597,9 +719,14 @@ async function boot() {
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
     const key = ev.key;
     // Fase 12: 1/2/3 = skill hero (slot 3 = ultimate), 4 = SERANG manual
-    if (key === '1' || key === '2' || key === '3') {
+    // Skill combat unlock: 1/2/3 cast (guard Lv 3/5/10 di game.useAbilityBySlot);
+    // Shift+1/2/3 = UPGRADE skill (guard Lv 15 di game.upgradeAbilityBySlot).
+    // ev.code dipakai agar Shift+digit (yang mengubah ev.key jadi '!' dst.) tetap dikenali.
+    const digitSlot = { Digit1: 0, Digit2: 1, Digit3: 2 }[ev.code];
+    if (digitSlot !== undefined) {
       ev.preventDefault();
-      game.useAbilityBySlot(Number(key) - 1);
+      if (ev.shiftKey) game.upgradeAbilityBySlot(digitSlot);
+      else game.useAbilityBySlot(digitSlot);
       return;
     }
     if (key === '4' || key.toLowerCase() === 't' || key === ' ') {
@@ -623,7 +750,22 @@ async function boot() {
     });
   });
   // (handler data-back sudah kontekstual di atas — duplikasi dihapus E1 poin 4)
+  // RONDE-6: game FULL-screen saat PLAY (ubertap pada gesture pemain; iOS
+  // Safari & sebagian browser hanya izinkan fullscreen dari event pointer).
+  // Dicoba GARDA — gagal (batas platform/iframe) tidak mengganggu alur.
+  function enterImmersiveFullscreen() {
+    try {
+      const el = document.documentElement;
+      const p = el.requestFullscreen ||
+        el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (p) el[p]().catch?.(() => {});
+    } catch { /* tidak didukung */ }
+    try {
+      screen.orientation?.lock?.('landscape').catch?.(() => {});
+    } catch { /* tidak didukung */ }
+  }
   document.getElementById('btn-play').addEventListener('click', () => {
+    enterImmersiveFullscreen();
     // Fast path: Play langsung memulai run dengan hero terpilih.
     // Bila hero terpilih ternyata terkunci (save lama), buka roster.
     const heroDef = getHero(STATE.meta.selectedHero);
@@ -777,6 +919,9 @@ async function runAutotest() {
     log('upgradeApplied', Object.keys(game.run.upgrades).length >= 1 && !STATE.levelUpOpen);
 
     // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
+    // (skill combat unlock Lv 3/5/10: harness membuka slot manual — pola yang
+    // sama dengan scripts/e2e-mlbb.mjs — agar efek skill tetap teruji langsung)
+    game.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     const fired = game.useAbilityBySlot(2);
     log('abilityFired', fired && game.run.skills.slots[2].cdLeft > 0);
 

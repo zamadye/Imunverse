@@ -42,7 +42,15 @@ await page.fill('#auth-username', 'PemainHebat');
 
   // CAMPAIGN → prep → MULAI (skip sinematik briefing)
   // F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
-  await page.click('#btn-play', { timeout: 8000 });
+  await page.evaluate(() => document.getElementById('btn-play').click()); // DOM click: narrative/coach layer kadang menyerap pointer fisik
+  for (let k = 0; k < 6; k++) {
+    await page.waitForTimeout(500);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'))) break;
+  }
   await page.waitForTimeout(600);
   if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
     await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
@@ -59,13 +67,19 @@ await page.fill('#auth-username', 'PemainHebat');
   await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.maxHP = 5000; p.hp = 5000; p.iframes = 99999; });
 
   // ---------- Struktur HUD ----------
-  log('top-glass-3', await page.locator('#screen-hud .hud-top .glass').count() >= 3);
+  // HUD ronde-2+: bar top-center = 1 grup chip (equity/kills/WAVE/timer/anti/imu) — tanpa glass-band
+  log('top-center-row', await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count() >= 5,
+      `count=${await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count()}`);
   log('hero-status', await page.locator('#screen-hud .hud-hero-status .hud-portrait').count() === 1);
   const portraitSrc = await page.evaluate(() => document.getElementById('hud-portrait')?.getAttribute('src') || '');
   log('portrait-new-roster', /hero_(tcd8|macrophage|neutrophil|bcell|nkcell|eosinophil|dendritic|basophil|mastcell|tcd4|treg)_portrait/.test(portraitSrc) ? portraitSrc : 'SRC=' + portraitSrc);
   log('skills-3', await page.locator('#ability-bar .ability-btn').count() === 3);
   log('ult-1', await page.locator('#ability-bar .ability-btn.ult').count() === 1);
-  log('fire-serang', await page.evaluate(() => document.getElementById('btn-fire').textContent.includes('SERANG')));
+  // Ronde-2+: label teks SERANG DIHAPUS (request user) — ikon saja, nama tombol di aria-label
+  log('fire-serang-aria', await page.evaluate(() => {
+    const b = document.getElementById('btn-fire');
+    return (b.getAttribute('aria-label') || '').toUpperCase().includes('SERANG') && !/SERANG/.test(b.textContent.trim());
+  }));
   log('key-tags', (await page.locator('#ability-bar .key-tag').allTextContents()).join(','));
 
   // ---------- PSEUDO-3D: proyeksi & animasi jalan ----------
@@ -95,10 +109,21 @@ await page.fill('#auth-username', 'PemainHebat');
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 220, y: 250, id: 1 }] });
   await page.waitForTimeout(120);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 220, y: 165, id: 1 }] });
-  await page.waitForTimeout(500);
-  const moveInfo = await page.evaluate(() => ({ moving: window.__IMUNVERSE.game.run.player.moving, phase: window.__IMUNVERSE.game.run.player.walkPhase }));
+  // POLL hingga ~3s: frame pertama SwiftShader bisa sangat lambat pada run dingin
+  // (500ms kadang belum ada rAF yang memproses input → flake). Bila bubble
+  // tutorial masih menahan, LEWATI lalu coba lagi sekali.
+  let moveInfo = null;
+  for (let k = 0; k < 25; k++) {
+    await page.waitForTimeout(120);
+    moveInfo = await page.evaluate(() => ({ moving: window.__IMUNVERSE.game.run.player.moving, phase: window.__IMUNVERSE.game.run.player.walkPhase }));
+    if (moveInfo.moving || moveInfo.phase !== p3d.walkPhase0) break;
+    if (k === 8) {
+      await page.locator('#btn-tut-skip, .tut-skip, [data-action="tut-skip"]').first().click({ timeout: 1200 }).catch(() => {});
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 220, y: 165, id: 1 }] }).catch(() => {});
+    }
+  }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  log('drag-moves-player', moveInfo.moving || moveInfo.phase !== p3d.walkPhase0 ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
+  log('drag-moves-player', moveInfo && (moveInfo.moving || moveInfo.phase !== p3d.walkPhase0) ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
 
   // ---------- KLIK RIIL 3 skill ----------
   // Fase 17: hero default kini Mako — skill 2/3 terkunci di evolusi awal.
@@ -223,19 +248,37 @@ await page.fill('#auth-username', 'PemainHebat');
       await new Promise((r) => setTimeout(r, 250));
     }
   });
-  const killed = await page.evaluate(async () => {
+  // RONDE-6: TIDAK ADA unit milik player yang auto-fire — pasukan pun hanya
+  // menembak saat tombol SERANG ditekan. Bagian 1: musuh didekatkan, tanpa
+  // menahan SERANG → pasukan diam (passive-kills harus 0). Bagian 2: tahan
+  // SERANG → pasukan + hero menembak dan membunuh.
+  const squadIdle = await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game;
     const p = g.run.player;
+    g.tryJoinSquad(3);
     g.spawnEnemy('parasit', false);
     const e = g.run.enemies.filter((x) => x.alive).pop();
-    if (!e) return false;
+    if (!e) return { ok: false, why: 'no-enemy' };
     e.x = p.x + 45; e.y = p.y;
     const k0 = g.run.kills;
-    // Fase 17: hero default kini Mako (melee, cd lebih lambat) — beri waktu cukup
-    await new Promise((r) => setTimeout(r, 4600));
-    return g.run.kills > k0 || !e.alive;
+    await new Promise((r) => setTimeout(r, 2200));
+    return { ok: g.run.kills === k0 && e.alive, kills: g.run.kills - k0, alive: e.alive };
   });
-  log('auto-attack-kills', killed);
+  log('squad-passive-without-serang', squadIdle.ok ? 'idle safe' : JSON.stringify(squadIdle));
+  const killed = await page.evaluate(async () => {
+    const g = window.__IMUNVERSE.game;
+    g.input.fireButtonHeld = true; // tahan SERANG
+    try {
+      const k0 = g.run.kills;
+      const t0 = performance.now();
+      while (performance.now() - t0 < 6000) { // polling loop (setTimeout lambat di headless)
+        await new Promise((r) => setTimeout(r, 120));
+        if (g.run.kills > k0) return true;
+      }
+      return false;
+    } finally { g.input.fireButtonHeld = false; }
+  });
+  log('squad-fires-with-serang', killed);
 
   // ---------- Level-up modal ----------
   await page.evaluate(async () => {

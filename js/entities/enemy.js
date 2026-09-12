@@ -133,6 +133,26 @@ export class Enemy {
     this.aiState = 'guard';
   }
 
+  /**
+   * Pasang senjata ranged: patogen bersenjata meludah proyektil dari jarak
+   * aman — jawaban untuk "musuh masif tapi pasif". Diplomerak di spawn-system
+   * untuk sebagian kecil musuh chase di wave >= 3.
+   */
+  armShooter() {
+    if (!['chase_direct', 'chase_weave'].includes(this.behavior)) return;
+    if (this.isBoss || this.shooter) return;
+    this.shooter = {
+      range: 400,
+      cd: 1.3 + Math.random() * 1.2,     // jeda sebelum tembakan pertama
+      rate: 2.1 + Math.random() * 0.8,   // jeda antar tembakan
+      speed: 270,
+      dmg: Math.max(3, Math.min(8, Math.round(this.def.damage * 0.45))),
+      radius: 6.5,
+      color: '#ff7d9c',
+      holdMin: 210,                      // menjaga jarak (back off bila terlalu dekat)
+    };
+  }
+
   /** Beku total: musuh berhenti bergerak & menyerang sementara. */
   applyFreeze(time) {
     this.frozen = Math.max(this.frozen, time);
@@ -182,7 +202,12 @@ export class Enemy {
     // ---- V2 Phase 2: CONTACT ATTACK bertelegraph ----
     // Musuh pengejar TIDAK melukai lewat sentuhan pasif; ia berhenti, windup
     // terbaca (sprite attack + shiver), lalu menerkam — dodge dihargai.
-    if (this.usesContactTelegraph && game) {
+    // ECOSYSTEM aggro-gating: musuh yang ROAM (guard/patrol di sarang) atau
+    // pulang (return/leash) BELUM menyerang — ia baru engaged setelah player
+    // memasuki DETECTION_RADIUS (aggro). ATTACK_RADIUS < DETECTION_RADIUS:
+    // musuh bisa terlihat mengitari player tanpa langsung mendaratkan damage.
+    const engagedForContact = this.homeX === null || this.isBoss || this.aiState === 'chase';
+    if (this.usesContactTelegraph && game && engagedForContact) {
       const ca = getCombat().contactAttack;
       const strikeRange = this.radius + (playerPos.radius || 0) + ca.rangeBonus;
       if (this.atkPhase === 'cooldown') {
@@ -211,7 +236,7 @@ export class Enemy {
 
     // ---- F26 AI sarang: guard → chase → return (boss selalu bebas mengejar) ----
     if (this.homeX !== null && !this.isBoss) {
-      const ai = this.aiCfg || { aggroRadius: 190, leashRadius: 430, patrolRadius: 80 };
+      const ai = this.aiCfg || { aggroRadius: 420, leashRadius: 640, patrolRadius: 110 };
       const dHome = Math.hypot(this.x - this.homeX, this.y - this.homeY) || 1;
       if (this.aiState === 'return') {
         if (dist < ai.aggroRadius * 0.75) {
@@ -229,6 +254,8 @@ export class Enemy {
       if (this.aiState === 'guard' || this.aiState === 'patrol') {
         if (dist < ai.aggroRadius) {
           this.aiState = 'chase'; // player ketahuan → kejar
+          // PACK AGGRO: koloni di sekitar sarang ikut bangun (musuh = aktif & masif)
+          if (game && typeof game.packAggro === 'function') game.packAggro(this, 260);
         } else {
           // patroli kecil mengelilingi sarang (terlihat hidup, tetap di zona)
           this.patrolT -= dt;
@@ -241,8 +268,8 @@ export class Enemy {
           const tdx = tx - this.x, tdy = ty - this.y;
           const td = Math.hypot(tdx, tdy) || 1;
           if (td > 6) {
-            this.x += (tdx / td) * this.speed * 0.4 * dt;
-            this.y += (tdy / td) * this.speed * 0.4 * dt;
+            this.x += (tdx / td) * this.speed * 0.55 * dt;
+            this.y += (tdy / td) * this.speed * 0.55 * dt;
             if (this.def.orientToMovement) this.rotation = Math.atan2(tdy, tdx);
           }
           return;
@@ -250,6 +277,42 @@ export class Enemy {
       }
       if (this.aiState === 'chase' && dHome > ai.leashRadius) {
         this.aiState = 'return'; // terlalu jauh dari rumah → pulang (imun yang mencari)
+      }
+    }
+
+    // ---- SHOOTER: jaga jarak + meludah ke arah player (musuh bersenjata aktif) ----
+    if (this.shooter) {
+      const sh = this.shooter;
+      const engaged = this.homeX === null || this.aiState === 'chase' || this.isBoss;
+      if (engaged) {
+        if (game && dist <= sh.range && (this.atkPhase === 'ready' || this.atkPhase === 'cooldown')) {
+          sh.cd -= dt;
+          // TELEGRAPH mau meludah: pose serangan berubah 0.38 dtk sebelum tembakan
+          if (sh.cd <= 0.38) this.attackSpriteHint = true;
+          if (sh.cd <= 0 && typeof game.tryEnemyShoot === 'function') {
+            if (game.tryEnemyShoot(this, dx / dist, dy / dist)) { sh.cd = sh.rate; this.attackSpriteHint = false; }
+          }
+        } else if (!this.usesContactTelegraph || this.atkPhase !== 'windup') {
+          this.attackSpriteHint = false;
+        }
+        if (dist < sh.holdMin && this.atkPhase !== 'windup') {
+          // mundur menjaga jarak tembak
+          this.x -= (dx / dist) * this.speed * 0.7 * dt;
+          this.y -= (dy / dist) * this.speed * 0.7 * dt;
+          if (this.def.orientToMovement) this.rotation = Math.atan2(-dy, -dx);
+          return;
+        }
+        if (dist < sh.range * 0.8 && this.atkPhase !== 'windup') {
+          // mengepung: strafe sedengah kecepatan (tidak langsung nempel)
+          this.x += (dx / dist) * this.speed * 0.5 * dt;
+          this.y += (dy / dist) * this.speed * 0.5 * dt;
+          const perp = baseAngle + Math.PI / 2;
+          const sway = Math.sin(time * 1.8 + this.uid) * this.speed * 0.25 * dt;
+          this.x += Math.cos(perp) * sway;
+          this.y += Math.sin(perp) * sway;
+          if (this.def.orientToMovement) this.rotation = baseAngle;
+          return;
+        }
       }
     }
 

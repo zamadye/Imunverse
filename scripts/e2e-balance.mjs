@@ -83,6 +83,8 @@ await page.fill('#auth-username', 'BalanceTester');
     const { imuForRun } = window.__IMUNVERSE; // tidak terekspos? fallback import tidak mungkin — hitung via modul sistem di jendela
     return null;
   });
+  // RONDE-4 (ekonomi premium ketat): imuForRun SELALU 0 — Imun Coin tidak lagi
+  // mengalir dari hasil run (hanya pembelian & Battle Pass).
   const imuCalc = await page.evaluate(async () => {
     const mod = await import('/js/systems/retention-system.js');
     return {
@@ -92,8 +94,7 @@ await page.fill('#auth-username', 'BalanceTester');
       both: mod.imuForRun(12, 200, 2, true),
     };
   });
-  log('imu-zero-for-plain-kills', imuCalc.plain === 0, JSON.stringify(imuCalc));
-  log('imu-from-boss-and-victory', imuCalc.boss === 60 && imuCalc.victory === 50 && imuCalc.both === 90, JSON.stringify(imuCalc));
+  log('imu-run-always-zero', imuCalc.plain === 0 && imuCalc.boss === 0 && imuCalc.victory === 0 && imuCalc.both === 0, JSON.stringify(imuCalc));
 
   // ---- akhiri run (tumbang → revive skip) untuk lanjut di dashboard ----
   const closeLU = async () => {
@@ -181,11 +182,20 @@ await page.fill('#auth-username', 'BalanceTester');
   await page.evaluate(() => window.__IMUNVERSE.screenManager.show('dashboard'));
   await page.waitForTimeout(400);
 
-  // ---- 4) Pasukan bertambah mengikuti level pasukan ----
-  await page.evaluate(() => { window.__IMUNVERSE.STATE.meta.allyLevel = 6; }); // setup: 1+floor(6/3)=3 anggota
+  // ---- 4) Pasukan: TIDAK ada di awal run; bergabung di level unlock skill
+  // [3/5/10] sampai total kapasitas meta (user: "hilangkan di awal game",
+  // "level unlock pasukan sama dengan skill"). apiXpGain mensimulasikan naik.
+  await page.evaluate(() => { window.__IMUNVERSE.STATE.meta.allyLevel = 6; }); // setup: total 1+floor(6/3)=3 anggota
   await playRun();
-  const allies = await page.evaluate(() => window.__IMUNVERSE.game.run.allies.length);
-  log('allies-grow-with-level', allies === 3, `allies=${allies} (allyLevel=6)`);
+  const squad = await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    const r0 = g.run.allies.length;
+    g.applyXpGain(1e7); // naik jauh melampaui Lv 10
+    return { r0, joined: g.run.allies.length, lvl: g.run.level, planTotal: g.run.squadPlan?.total };
+  });
+  log('squad-hidden-at-run-start', squad.r0 === 0, `allies@start=${squad.r0}`);
+  log('squad-joins-on-skill-unlock-levels', squad.joined === Math.min(3, squad.planTotal) && squad.lvl >= 10,
+    JSON.stringify(squad));
 
   // ---- 5c) tile dashboard kompak, tidak menimpa play-row ----
   await page.evaluate(() => { const g = window.__IMUNVERSE.game; if (g.run && !g.run.ended) { g.finishRun(true); } });

@@ -3,9 +3,9 @@
  * bersama hero. Jumlah bertambah per bab kampanye yang dibersihkan
  * (meta.allies, maks 6) dan tersimpan di save.
  *
- * Perilaku: mengapung mengelilingi player (slot sudut), auto-menembak
- * proyektil kecil ke musuh terdekat dalam jangkauan. Tak bisa mati —
- * mereka pendukung DPS, biar kesulitan tetap "medium".
+ * Perilaku: mengapung mengelilingi player (slot sudut). Menembak hanya
+ * saat tombol SERANG ditahan (ronde-5: tidak ada auto-fire untuk unit milik
+ * pemain) — dalam ritmenya sendiri (fireInterval), target = musuh terdekat.
  */
 
 import { getSprite } from '../render/sprite-loader.js';

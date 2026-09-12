@@ -176,6 +176,13 @@ export function show() {
   if (!heroRowWired) {
     heroRowWired = true;
     document.getElementById('btn-prep-start').addEventListener('click', () => {
+      // RONDE-6: full-screen dari gesture MULAI (idempoten; anti-gagal)
+      try {
+        const d = document.documentElement;
+        const p = d.requestFullscreen || d.webkitRequestFullscreen || d.mozRequestFullScreen || d.msRequestFullscreen;
+        if (p) d[p]().catch?.(() => {});
+      } catch { /* noop */ }
+      try { screen.orientation?.lock?.('landscape').catch?.(() => {}); } catch { /* noop */ }
       const meta = STATE.meta;
       const heroDef = getData().heroes.heroes.find((h) => h.id === meta.selectedHero);
       if (!heroDef) return;

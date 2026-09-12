@@ -108,6 +108,7 @@ try {
     t.armorLayers = 0;
     t.x = run.player.x + 50; t.y = run.player.y;
     const hp0 = t.hp;
+    run.skills.slots.forEach((s) => { if (s) s.unlocked = true; }); // unlock progression guard
     // reset cooldown devour (slot dgn def.id devour)
     const slot = run.skills.slots.findIndex((s) => s.def.id === 'devour');
     if (slot < 0) return { skip: true };

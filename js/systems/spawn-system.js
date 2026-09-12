@@ -11,6 +11,7 @@
  */
 
 import { getData, getWaveConfig, getSpawnInterval, getEnemyHPScale, getEnemySpeedScale, getProgression } from '../core/data-store.js';
+import { isTutorialActive } from './tutorial-system.js';
 
 export class SpawnSystem {
   constructor() {
@@ -29,6 +30,7 @@ export class SpawnSystem {
     this.waveClearing = false;  // wave berhenti spawn setelah durasi habis
     this.breakTimer = 0;        // jeda singkat agar pemain bisa mengumpulkan nutrisi
     this.nestsSpawnedForWave = 0; // F26: sarang per wave (explore MMORPG)
+    this.ecoT = 0.6;            // ECOSYSTEM: timer top-up populasi hidup (lihat waves.json)
   }
 
   /** Gerbang tertutup = boss penjaga masih hidup, wave TIDAK bisa maju. */
@@ -49,6 +51,30 @@ export class SpawnSystem {
     const cfg = getWaveConfig();
     const events = { newWave: false, bossSpawn: false, waveBreak: false };
 
+    // RONDE-4 (pembukaan santai): selama TUTORIAL run-pertama berjalan, arena
+    // sengaja TENANG — pemain baru belajar gerak & tombol SERANG tanpa
+    // dikeroyok: tidak ada ecosystem top-up, sarang, gatekeeper, atau bos;
+    // maksimal 4 musuh kecil menetes pelan untuk latihan. Timer wave BEKU
+    // (wave tidak maju sampai tutorial selesai).
+    if (isTutorialActive()) {
+      this.spawnTimer -= dt;
+      const aliveN = game.run.enemies.reduce((n, e) => n + (e.alive ? 1 : 0), 0);
+      if (this.spawnTimer <= 0 && aliveN < 4) {
+        this.spawnTimer = 4.0;
+        const enemyId = this.pickEnemyId(this.wave);
+        if (enemyId) {
+          game.spawnEnemy(enemyId, false);
+          const e = game.run.enemies[game.run.enemies.length - 1];
+          if (e) { // cincin aman: tidak terlalu dekat, terlihat di layar
+            const a = Math.random() * Math.PI * 2;
+            e.x = game.run.player.x + Math.cos(a) * 380;
+            e.y = game.run.player.y + Math.sin(a) * 380;
+          }
+        }
+      }
+      return events;
+    }
+
     // HOOK: 15 detik pertama ramp-up — aksi terasa sejak awal, sulit merambat naik
     if (this.wave === 1) {
       this.rampTimer += dt;
@@ -56,6 +82,12 @@ export class SpawnSystem {
     } else {
       this.rampMult = 1;
     }
+
+    // ECOSYSTEM — continuous controlled spawning: arena = ekosistem hidup.
+    // Musuh yang mati digantikan (top-up), populasi punya target & cap, spawn
+    // selalu di ring jauh player (roam-first — TIDAK langsung menyerang).
+    // Skip saat waveClearing supaya fase clear bisa selesai (wave tetap maju).
+    if (!this.waveClearing) this.ecosystemTopUp(dt, game);
 
     // ---- Fase 18 GATEKEEPER: wave 5/10/15… punya PENJAGA — wajib tumbang
     // sebelum wave lanjut. Selama gerbang tertutup: timer wave BEKU, musuh
@@ -146,6 +178,53 @@ export class SpawnSystem {
   }
 
   /**
+   * ECOSYSTEM — top-up populasi hidup secara berkala.
+   * Ringkas: target = targetBase + wave*targetPerWave (di-jepit targetMax);
+   * bila musuh roaming (non-boss, hidup) di bawah target → spawn topUpBatch
+   * musuh pada RING sekitar player [minPlayerDist..maxPlayerDist], masing-masing
+   * dengan sarang & AI patrol — mereka ROAM dulu; hanya mengejar bila player
+   * memasuki aggroRadius. Tidak pernah spawn di atas/dekat player, dead cap
+   * global (maxAliveEnemies) selalu dihormati → tidak ada spawn tanpa batas.
+   */
+  ecosystemTopUp(dt, game) {
+    const cfg = getWaveConfig();
+    const eco = cfg.ecosystem;
+    if (!eco || !eco.enabled) return;
+    this.ecoT -= dt;
+    if (this.ecoT > 0) return;
+    this.ecoT = eco.topUpInterval || 2.2;
+
+    const run = game.run;
+    if (!run || !run.player) return;
+    const roaming = run.enemies.reduce((n, e) => n + (e.alive && !e.isBoss ? 1 : 0), 0);
+    const target = Math.min(
+      eco.targetMax || 30,
+      Math.round((eco.targetBase || 8) + (this.wave - 1) * (eco.targetPerWave || 0.8))
+    );
+    if (roaming >= target) return;
+
+    const ai = cfg.explore || null;
+    const minD = eco.minPlayerDist || 300;
+    const maxD = Math.max(minD + 40, eco.maxPlayerDist || 820);
+    let batch = Math.min(eco.topUpBatch || 2, target - roaming);
+    while (batch-- > 0) {
+      if (run.enemies.length >= cfg.maxAliveEnemies) break; // CAP global
+      const enemyId = this.pickEnemyId(this.wave);
+      if (!enemyId) break;
+      game.spawnEnemy(enemyId, false, { nest: true, ai });
+      const e = run.enemies[run.enemies.length - 1];
+      if (!e) break;
+      // Tempatkan di ring sekitar player (setelah spawn off-screen default)
+      const angle = Math.random() * Math.PI * 2;
+      const dist = minD + Math.random() * (maxD - minD);
+      const sx = run.player.x + Math.cos(angle) * dist;
+      const sy = run.player.y + Math.sin(angle) * dist;
+      e.x = sx; e.y = sy;
+      e.setNest(sx, sy, ai);
+    }
+  }
+
+  /**
    * F26 — Tempatkan sarang patogen di sekitar pemain: satu sarang dekat
    * (aksi terasa sejak awal, dalam jangkauan auto-attack) dan sisanya jauh
    * (target jelajah — imun yang mencari virus).
@@ -184,6 +263,8 @@ export class SpawnSystem {
           const affix = ec.affixes[Math.floor(Math.random() * ec.affixes.length)];
           e.makeElite(affix, ec);
           eliteQuota -= 1;
+          // Third-person feel: "virus kuat muncul" → hentakan samar di kamera
+          if (game && game.run && game.run.camera) game.run.camera.addShake(0.09);
         }
       }
     }
