@@ -7,7 +7,6 @@
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
 import { addCurrency } from './economy-system.js';
-import { addImun } from './imun-economy.js';
 
 /** Nilai progress stat; 'unlockedHeroes' = jumlah hero dimiliki (Fase 17). */
 function statValue(meta, stat) {
@@ -26,8 +25,10 @@ export function checkMissions(meta) {
     const value = statValue(meta, m.stat);
     if (value >= m.target) {
       meta.missionsClaimed.push(m.id);
-      // Fase 17: reward misi = IMUN COIN (retention trigger 1D)
-      addImun(meta, m.reward);
+      // RONDE-4 (ekonomi premium ketat): reward misi = ANTIBODI (soft currency).
+      // Imun Coin premium hanya dari pembelian & Battle Pass — misi bukan
+      // jalur premium lagi.
+      addCurrency(meta, m.reward);
       completed.push(m);
     }
   }

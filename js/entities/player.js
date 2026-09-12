@@ -2,7 +2,8 @@
  * player.js — Entitas player (sel imun yang dikendalikan).
  * Statistik akhir dihitung dari: baseStats hero (JSON) × upgrade squad permanen
  * (meta) × upgrade in-run (level-up) × consumable (serum).
- * Attack otomatis ke musuh terdekat dalam range — pattern sesuai data hero.
+ * Serangan HANYA manual (tombol SERANG — tryFire dipanggil game.js saat
+ * tombol ditekan/ditahan), assist-aim membidik musuh terdekat dalam range.
  */
 
 import { PERSP } from '../render/camera.js';
@@ -95,16 +96,9 @@ export class Player {
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackFlash > 0) this.attackFlash -= dt;
     this.attackTimer -= dt;
-    // Fase 12: ATTACK OTOMATIS — bila cooldown siap & ada musuh dalam jangkauan
-    if (this.attackTimer <= 0 && this.alive) {
-      const target = game.findAttackTarget(this.x, this.y, this.stats.effectiveAttackRange); // V2 Phase 2: finisher bias
-      if (target) {
-        this.performAttack(target, game);
-        this.attackTimer = this.stats.cooldown;
-      }
-    }
-
-    // (Serangan sekarang MANUAL — lewat tombol TEMBAK: game memanggil tryFire)
+    // RONDE-4: TEMBAK SERANG MANUAL. Blok "auto-attack" DIHAPUS atas arahan
+    // pemilik game — hero TIDAK menembak sendiri; semua serangan lewat
+    // tombol SERANG (game.js memanggil player.tryFire saat tombol ditekan).
   }
 
   /**
@@ -126,8 +120,17 @@ export class Player {
     })();
     let target = game.findAttackTarget(this.x, this.y, this.stats.effectiveAttackRange); // V2 Phase 2: finisher bias
     if (!target && !aimActive) {
-      // Tidak ada musuh & tidak mengarahkan: swing + langkah maju (feedback jelas)
+      // Tidak ada musuh & tidak mengarahkan: swing + langkah maju (feedback jelas).
+      // RONDE-7: TETAP tunduk pada cooldown! Dulu path ini MEMBYPASS attackTimer
+      // → tanpa musuh tembakan tiap frame (~60/dtk), saat ada musuh nyangkut di
+      // cooldown (~1/dtk) → "SERANG cepat kalau sepi, lemot saat ramai".
+      // Sekarang cadence SATU untuk semua kondisi.
+      if (this.attackTimer > 0) {
+        this.performAttack({ x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 }, game, { tap: true });
+        return;
+      }
       this.performAttack({ x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 }, game);
+      this.attackTimer = this.stats.cooldown;
       return;
     }
     if (!target) target = { x: this.x + Math.cos(this.facing) * 100, y: this.y + Math.sin(this.facing) * 100 };

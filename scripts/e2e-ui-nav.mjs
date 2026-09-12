@@ -87,8 +87,41 @@ async function auditDashboard(label, seed) {
 
 const d0 = await auditDashboard('0run', { stats: { totalRuns: 0, bestWave: 0 }, currency: 0 });
 await auditDashboard('15runs', { stats: { totalRuns: 15, bestWave: 12, totalCurrencyEarned: 900 }, currency: 900 });
-const secondaryVisible0 = d0.targets.filter((t) => /^(side|quick|dock|secondary|card):/.test(t));
+// Kontrak baru (permintaan user): bar menu bawah DOCK SELALU tampil 4-item sejak run 0
+// (yang belum terbuka tampil abu-abu terkunci dan kliknya diblokir main.js).
+// Yang tetap kosong di run 0: side-btns, quick-tiles, secondary-dock, dan kartu konten.
+const secondaryVisible0 = d0.targets.filter((t) => /^(side|quick|secondary|card):/.test(t));
 log('dash-0run-no-secondary-destinations', secondaryVisible0.length === 0, secondaryVisible0.join(',') || '(bersih)');
+const dockBtns0 = d0.targets.filter((t) => t.startsWith('dock:'));
+log('dash-0run-dock-always-4', dockBtns0.length === 4, dockBtns0.join(',') || '(kurang)');
+{
+  // Item dock yang terkunci TIDAK menavigasi (kembali ke dashboard + toast syarat)
+  const ctx = await browser.newContext({ viewport: { width: 844, height: 390 } });
+  const page = await ctx.newPage();
+  await page.addInitScript(VIS_FN);
+  await page.goto('http://localhost:8000/', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2200);
+  await page.evaluate(() => {
+    const meta = window.__IMUNVERSE.STATE.meta;
+    meta.stats.totalRuns = 0; meta.stats.bestWave = 0; meta.currency = 0;
+    meta.coachDone = true; meta.tutorialDone = true;
+    window.__IMUNVERSE.screenManager.show('dashboard');
+    document.getElementById('presenter-layer')?.remove();
+  });
+  await page.waitForTimeout(400);
+  const navResult = await page.evaluate(async () => {
+    const out = {};
+    for (const b of document.querySelectorAll('#screen-dashboard .dock-btn.gated')) {
+      b.click();
+      await new Promise((r) => setTimeout(r, 220));
+      out[b.dataset.nav] = document.querySelector('.screen.active')?.id || '?';
+    }
+    return out;
+  });
+  const stayed = Object.values(navResult).every((id) => id === 'screen-dashboard');
+  log('dash-0run-gated-dock-no-nav', stayed, JSON.stringify(navResult));
+  await ctx.close();
+}
 
 // ---------- B) HUD: disclosure per tahap progres ----------
 async function hudState(page) {

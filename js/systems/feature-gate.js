@@ -59,7 +59,14 @@ export function applyGateVisual(el, target, id) {
   if (!gate) return null;
   el.classList.toggle('gated', gate.locked);
   el.classList.toggle('gate-hidden', gate.locked);
-  el.style.display = gate.locked ? 'none' : '';
+  // Dock bawah (gaya RoK) SELALU menampilkan tombolnya — yang terkunci tampil
+  // abu-abu dengan label syarat; klik tetap diblokir handler (isDockGated).
+  // Permukaan lain (side/quick/secondary/menu HUD) tetap disembunyikan penuh.
+  const alwaysShow = target === 'dock' && el.classList.contains('dock-btn');
+  el.style.display = gate.locked && !alwaysShow ? 'none' : '';
+  if (gate.locked && alwaysShow) {
+    el.title = gate.label || '';
+  }
   if (!gate.locked) {
     el.querySelector('.gate-lock')?.remove();
     el.removeAttribute('title');

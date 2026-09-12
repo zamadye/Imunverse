@@ -207,15 +207,15 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
   // kontras + PANAH arah di tepi cincin sebelum sprite (sprite tetap dipakai).
   ctx.save();
   ctx.translate(joy.originX, joy.originY);
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = 'rgba(255,253,244,0.95)';
-  ctx.fillStyle = 'rgba(18,63,58,0.22)';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(18,63,58,0.55)';      // garis gelap kontras (kaca kabut kamera)
+  ctx.fillStyle = 'rgba(18,63,58,0.30)';
   ctx.beginPath();
   ctx.arc(0, 0, maxRadius, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(18,63,58,0.35)';
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#fffdf4';                   // cincin putih cerah di garis gelap
   ctx.beginPath();
   ctx.arc(0, 0, maxRadius + 4, 0, Math.PI * 2);
   ctx.stroke();

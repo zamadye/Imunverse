@@ -14,7 +14,7 @@ import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 
 const MASTER_VOL = 0.5;
-const MIN_GAP = { shoot: 0.035, hit: 0.05, collect: 0.06, kill: 0.05, ui: 0.03 };
+const MIN_GAP = { shoot: 0.035, hit: 0.05, collect: 0.06, kill: 0.05, ui: 0.03, swing: 0.16 };
 
 class AudioSystem {
   constructor() {
@@ -124,9 +124,12 @@ class AudioSystem {
     this._noise(0.05, { vol: 0.08, filter: 1600, filterTo: 700 });
   }
 
-  /** Fase 12c: whoosh ringan untuk swing tombol SERANG saat cooldown. */
+  /** Fase 12c: whoosh ringan untuk swing tombol SERANG saat cooldown.
+   *  RONDE-7: WAJIB lewat _gate — tryFire jalan per-FRAME saat tombol
+   *  ditahan; tanpa gate, puluhan node noise/detik dibuat → jank audio & GC
+   *  yang terasa sebagai "SERANG lemot saat dikeroyok". */
   swing() {
-    if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (!this._gate('swing')) return;
     this._noise(0.09, { vol: 0.06, filter: 2600, filterTo: 900 });
   }
 

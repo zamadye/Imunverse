@@ -13,7 +13,7 @@
 
 import { getMastery } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
-import { addImun } from './imun-economy.js';
+import { addCurrency } from './economy-system.js';
 
 /** Entry mastery hero (lazy init). */
 function entry(meta, heroId) {
@@ -63,7 +63,7 @@ export function addMasteryXP(meta, heroId, { kills = 0, wave = 0, victory = fals
   if (levelsGained > 0) {
     m.level = newLevel;
     reward = cfg.rewardPerLevel * levelsGained;
-    addImun(meta, reward);
+    addCurrency(meta, reward); // RONDE-4: mastery menghadiahi Antibodi (soft) — Imun Coin premium hanya via beli & Battle Pass
   }
   writeSave(meta);
   return { xp: gained, levelsGained, level: m.level, title: titleFor(m.level), reward };

@@ -17,6 +17,7 @@
  */
 
 import { vo } from '../systems/vo-system.js';
+import { STATE } from '../core/state-manager.js';
 
 const SPEAKERS = {
   ria: {
@@ -36,6 +37,20 @@ const SPEAKERS = {
 };
 
 let layer = null;
+let interactive = true; // tutorial run-pertama melunakkannya agar drag tembus ke canvas
+
+// Pemuatan di muka: pose narrators dimuat SATU KALI; perubahan gantian idle↔talk
+// cukup memakai cache browser — mengikis noise GET 200 -> broken-pipe di server.
+for (const spk of Object.values(SPEAKERS)) {
+  new Image().src = spk.idle;
+  new Image().src = spk.talk;
+}
+
+/** Aktif/nonaktifkan interaksi layer presenter (drag tembus saat tutorial pertama). */
+export function setPresenterInteractive(v) {
+  interactive = !!v;
+  if (layer) layer.classList.toggle('soft', !interactive);
+}
 let talkTimer = 0;
 let hideTimer = 0;
 let visible = false;
@@ -58,7 +73,10 @@ function ensureLayer() {
       </div>
     </div>`;
   document.body.appendChild(layer);
-  layer.addEventListener('click', () => hidePresenter());
+  // RONDE-7: dismiss lewat tap pada PANGGUNG (panel bark) saja; layer penuh
+  // tidak pernah menelan pointer (lihat CSS .presenter-stage).
+  layer.classList.toggle('soft', !interactive);
+  layer.querySelector('.presenter-panel').addEventListener('click', () => hidePresenter());
   return layer;
 }
 
@@ -69,6 +87,15 @@ function ensureLayer() {
  * @param {{duration?:number}} [opts] duration detik (default 5.5; 0 = manual)
  */
 export function showPresenter(who, text, opts = {}) {
+  // RONDE-7: JANGAN tampil saat game PAUSED / modal level-up / di luar layar
+  // gameplay — bark pernah mengambang di atas menu pause & menelan tombol
+  // LANJUT. Bark menunggu ringan sampai bebas (maks ~4 detik lalu batal).
+  opts.__defer = (opts.__defer || 0) + 1;
+  if (STATE.screen !== 'gameplay') return;                 // dashboard dst → batal total
+  if (STATE.paused || STATE.levelUpOpen) {
+    if (opts.__defer < 10) setTimeout(() => showPresenter(who, text, opts), 420);
+    return;
+  }
   const spk = SPEAKERS[who] || SPEAKERS.ria;
   const el = ensureLayer();
   const img = document.getElementById('presenter-img');

@@ -2735,7 +2735,18 @@ img.lock-badge {
    pose idle/talk bergantian = mulut & tangan bergerak.
    ============================================================ */
 #presenter-layer{position:fixed;inset:0;z-index:340;pointer-events:none;opacity:0;transition:opacity .28s ease}
-#presenter-layer.on{opacity:1;pointer-events:auto}
+#presenter-layer.on{opacity:1}
+/* RONDE-7: bark JANGAN mengambil pointer seluruh layar — dulu layer .on
+   pointer-events:auto inset:0 (z 340) menelan tap tombol SERANG/skill
+   (terasa "SERANG lemot/mati"). Hanya panggung bark yang bisa disentuh;
+   area lain tembus ke HUD/canvas. */
+#presenter-layer.on .presenter-panel{pointer-events:auto}
+/* RONDE-7: GAMBAR presenter (karakter RIA di kiri-bawah) TIDAK BOLEH
+   menelan sentuhan gameplay — dulu area drag di zona panel Misi mati total
+   saat bark tampil (terasa sebagai "joystick gagal / SERANG lemot").
+   Dismiss tetap mudah: ketuk PANEL bark (hint "ketuk untuk lanjut"). */
+#presenter-layer .presenter-img{pointer-events:none}
+#presenter-layer.soft .presenter-panel, #presenter-layer.soft .presenter-img{pointer-events:none} /* onboarding soft: drag tembus */
 #presenter-layer .presenter-stage{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;gap:0;padding:0 14px;filter:drop-shadow(0 10px 26px rgba(10,40,36,.35))}
 #presenter-layer .presenter-img{
   height:min(62vh,300px);width:auto;margin-bottom:-4px;flex:0 0 auto;

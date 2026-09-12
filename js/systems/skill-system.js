@@ -13,6 +13,11 @@ import { tryDevour } from './phagocytosis.js'; // R4: Modul B
 import { spawnInflamZone } from './inflammation.js'; // R5: Modul C
 import { chemoActivate } from './chemotaxis.js'; // R7: Modul E
 import { t as tr } from '../systems/i18n.js';
+// Skill combat unlock progression (Lv 3/5/10) + upgrade (Lv 15) — terpusat
+import {
+  isSkillUnlocked, canUpgradeSkill, getSkillUnlockState, getSkillUnlockLevel,
+  skillUpgradeCost, skillRankDamageMult, skillRankCooldownMult, SKILL_MAX_RANK, SKILL_UPGRADE_LEVEL,
+} from './skill-unlock.js';
 
 export class SkillSystem {
   /**
@@ -25,7 +30,9 @@ export class SkillSystem {
       const def = all.find((s) => s.id === id);
       if (!def) return null;
       const d = { ...def, cooldown: Math.max(0.8, def.cooldown * (mods.cdMult || 1)) };
-      return { def: d, cdLeft: 0, ult: i === 2 };
+      // unlocked: override manual (E2E/dev). Progresi nyata dihitung dari
+      // run.level lewat skill-unlock.js — TIDAK ada state level duplikat.
+      return { def: d, cdLeft: 0, ult: i === 2, unlocked: false, rank: 1 };
     }).filter(Boolean);
     this.lastBanner = '';
   }
@@ -35,11 +42,26 @@ export class SkillSystem {
     for (const s of this.slots) if (s.cdLeft > 0) s.cdLeft = Math.max(0, s.cdLeft - dt);
   }
 
-  getView() {
-    return this.slots.map((s) => ({
-      id: s.def.id, name: tr(s.def.name), color: s.def.color,
-      cdLeft: s.cdLeft, cdTotal: s.def.cooldown, ready: s.cdLeft <= 0, ult: s.ult,
-    }));
+  /**
+   * View HUD tombol skill.
+   * @param {number} playerLevel level player di-run (source of truth: run.level)
+   */
+  getView(playerLevel = Infinity) {
+    return this.slots.map((s, i) => {
+      const lockState = getSkillUnlockState(playerLevel, i, s);
+      return {
+        id: s.def.id, name: tr(s.def.name), color: s.def.color,
+        cdLeft: s.cdLeft, cdTotal: s.def.cooldown, ready: s.cdLeft <= 0, ult: s.ult,
+        locked: lockState === 'LOCKED',
+        unlockLevel: getSkillUnlockLevel(i),
+        lockState,
+        rank: s.rank || 1,
+        maxRank: SKILL_MAX_RANK,
+        upgradeUnlocked: playerLevel >= SKILL_UPGRADE_LEVEL,
+        upgradeReady: s.cdLeft <= 0 && canUpgradeSkill(playerLevel, i, s),
+        upgradeCost: skillUpgradeCost(s),
+      };
+    });
   }
 
   /**
@@ -49,7 +71,13 @@ export class SkillSystem {
   trigger(i, ctx) {
     const s = this.slots[i];
     if (!s || s.cdLeft > 0) return false;
-    s.cdLeft = s.def.cooldown;
+    // GUARD progression: skill LOCKED tidak boleh tereksekusi lewat jalur apa
+    // pun (klik / keyboard / touch / handler lain). CSS disabled saja tidak cukup.
+    const playerLevel = ctx?.game?.run?.level ?? 1;
+    if (!isSkillUnlocked(playerLevel, i, s)) return false;
+    s.cdLeft = s.def.cooldown * skillRankCooldownMult(s);
+    // Rank upgrade (Lv 15+) memperkuat damage seluruh efek skill ini
+    if ((s.rank || 1) > 1) ctx = { ...ctx, damage: ctx.damage * skillRankDamageMult(s) };
     const run = ctx.game.run;
     const primaryKind = (s.def.effects && s.def.effects[0] && s.def.effects[0].kind) || 'skill';
     const charFx = characterSkillVisual(ctx, s.def, primaryKind);
@@ -80,6 +108,20 @@ export class SkillSystem {
     audio.ability(s.ult ? 'petir' : 'tebasan');
     this.lastBanner = tr(s.def.name);
     emit('abilityBanner', { name: tr(s.def.name), color: s.def.color, ult: s.ult });
+    return true;
+  }
+
+  /**
+   * Naikkan rank skill slot i (Lv 15+). Semua guard di sini — handler UI
+   * (klik badge / Shift+digit) cukup memanggil game.upgradeAbilityBySlot().
+   * @returns {boolean} true bila rank benar-benar naik.
+   */
+  tryUpgrade(i, playerLevel) {
+    const s = this.slots[i];
+    if (!s) return false;
+    // GUARD: upgrade masih LOCKED sebelum Lv 15 — tombol tidak boleh berbuat apa-apa
+    if (!canUpgradeSkill(playerLevel, i, s)) return false;
+    s.rank = (s.rank || 1) + 1;
     return true;
   }
 
