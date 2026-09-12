@@ -54,7 +54,7 @@ for (const name of fs.readdirSync(dataDir)) {
       if (Array.isArray(obj)) { obj.forEach(scan); return; }
       if (obj && typeof obj === 'object') {
         for (const [k, v] of Object.entries(obj)) {
-          if (['sprite', 'spriteIdle', 'spriteAttack'].includes(k) && typeof v === 'string') {
+          if (['sprite', 'spriteIdle', 'spriteAttack', 'sheet'].includes(k) && typeof v === 'string') {
             spritePaths.add(v);
           }
           scan(v);

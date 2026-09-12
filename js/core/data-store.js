@@ -33,6 +33,7 @@ const store = {
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
   characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
+  walkAnim: null,    // data/walk-anim.json (rebuild 8-arah: sheet jalan hero & virus + tempo per arah)
 };
 
 import { BUILD } from './version.js';
@@ -72,6 +73,7 @@ export async function loadAllData() {
     narrative: 'data/narrative.json',
     modules: 'data/modules.json',
     characterDesigns: 'data/character-designs.json',
+    walkAnim: 'data/walk-anim.json',
   };
 
   const entries = await Promise.all(
@@ -251,6 +253,13 @@ export function getModules() {
 // ===== Character Agent: equity hero + mutation visual pathogen =====
 export function getCharacterDesigns() {
   return getData().characterDesigns;
+}
+
+// ===== Rebuild 8-arah: animasi jalan hero & virus (data/walk-anim.json) =====
+
+/** Config sheet animasi jalan (sheet, fps per karakter, tempo dirSpeed). */
+export function getWalkAnim() {
+  return getData().walkAnim;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

@@ -49,6 +49,15 @@ export function collectSpritePaths(data) {
       record(a.icon, '#1f7a70', a.name);
     }
   }
+  // Rebuild 8-arah: sheet animasi jalan (11 hero + 13 virus) —
+  // field `sheet` di data/walk-anim.json.
+  if (data.walkAnim) {
+    for (const set of ['heroes', 'enemies']) {
+      for (const entry of Object.values(data.walkAnim[set] || {})) {
+        record(entry.sheet, '#35d0ba', 'walk');
+      }
+    }
+  }
   return [...paths];
 }
 
@@ -168,6 +177,44 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
 
   // Flash saat kena hit (overlay lingkaran lembut; V2 Phase 5: warna bisa
   // dioverride — merah utk boss enrage)
+  if (opts.flash && opts.flash > 0) {
+    ctx.globalAlpha = opts.flash * 0.75;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = opts.flashColor || '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/**
+ * Gambar SATU SEL (col,row) dari sheet sprite (grid cols x rows) — dipakai
+ * animasi jalan 8 arah (js/render/walk-anim.js). Ukuran & flash mengikuti
+ * semantik drawSprite: `size` = bounding maksimum sel.
+ *
+ * @param {string} path   path sheet PNG (mis. assets/sprites/walk/*_walk.png)
+ * @param {number} col    kolom sheet (0-based)
+ * @param {number} row    baris sheet (0-based)
+ * @param {number} cols   jumlah kolom
+ * @param {number} rows   jumlah baris
+ * @param {object} [opts] { mirror, alpha, flash, flashColor, image (override) }
+ */
+export function drawSheetCell(ctx, path, x, y, size, col, row, cols, rows, opts = {}) {
+  const entry = getSprite(path);
+  const img = opts.image || entry.image; // override = canvas tint (size sama dgn sheet)
+  const cw = entry.width / cols;
+  const ch = entry.height / rows;
+  const scale = size / Math.max(cw, ch);
+  const w = cw * scale;
+  const h = ch * scale;
+
+  ctx.save();
+  ctx.translate(x, y);
+  if (opts.mirror) ctx.scale(-1, 1); // W/NW/SW = mirror horizontal (tanpa file ekstra)
+  if (opts.alpha !== undefined) ctx.globalAlpha = opts.alpha;
+  ctx.drawImage(img, col * cw, row * ch, cw, ch, -w / 2, -h / 2, w, h);
+
   if (opts.flash && opts.flash > 0) {
     ctx.globalAlpha = opts.flash * 0.75;
     ctx.globalCompositeOperation = 'lighter';

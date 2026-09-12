@@ -18,7 +18,8 @@ import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
-import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
+import { loadAllSprites, spriteToDataURL, getSprite, drawSheetCell } from './render/sprite-loader.js';
+import { snapDirIndex, resolveDirection, walkFrame, dirCycleSpeed, DIR8 } from './render/walk-anim.js'; // Rebuild 8-arah
 import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
@@ -838,7 +839,12 @@ async function boot() {
     game.collectPickup(new Pickup(def, pl.x + 12, pl.y));
     return true;
   };
-  window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  window.__IMUNVERSE = {
+    game, STATE, screenManager, input, getData,
+    // Rebuild 8-arah: hook e2e/debug (logika snap 45° + mirror + frame)
+    walk: { snapDirIndex, resolveDirection, walkFrame, dirCycleSpeed, DIR8 },
+    sprite: { getSprite, drawSheetCell }, // cek preload/placeholder sheet (e2e)
+  }; // getData: harness e2e
 
   loop.start();
   setPaused(false);

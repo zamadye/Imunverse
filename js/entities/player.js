@@ -9,7 +9,8 @@
 import { PERSP } from '../render/camera.js';
 
 import { audio } from '../systems/audio-system.js';
-import { getCombat } from '../core/data-store.js';
+import { getCombat, getData } from '../core/data-store.js';
+import { snapDirIndex, dirCycleSpeed } from '../render/walk-anim.js';
 
 let nextPlayerId = 1;
 
@@ -36,7 +37,8 @@ export class Player {
     this.attackFlash = 0;     // timer untuk swap sprite attack
     this.swing = 0;           // Fase 12c: animasi tebasan respons tombol
     this.moving = false;
-    this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
+    this.walkPhase = 0; // Rebuild 8-arah: fase siklus jalan (1.0 = 1 siklus penuh, 4 frame)
+    this.walkAngle = 0; // Rebuild 8-arah: arah gerak aktual (rad) — animasi saja yang di-snap 45°
     this.stepT = 0;     // jeda antar langkah (debu kaki)
     this.vx = 0;        // V2 Phase 2: velocity smoothing (accel/decel)
     this.vy = 0;
@@ -80,9 +82,20 @@ export class Player {
     this.y += this.vy * dt;
     if (hasInput) {
       this.facing = Math.atan2(move.y, move.x);
+      // Rebuild 8-arah: sudut gerak AKTUAL (kontinu) — render membulatkannya
+      // ke kelipatan 45° HANYA untuk memilih frame; gerak tetap bebas.
+      this.walkAngle = this.facing;
       this.moving = true;
-      // Fase 12b: animasi jalan — bobbing + debu langkah kecil
-      this.walkPhase += dt * (this.stats.speed / 16);
+      // Rebuild 8-arah: tempo dari data/walk-anim.json — fps per karakter,
+      // dirSpeed per arah (langkah samping lebih lambat dari bob depan/belakang).
+      const wa = getData().walkAnim;
+      const wcfg = wa && wa.heroes ? wa.heroes[this.heroDef.id] : null;
+      if (wcfg) {
+        const frames = wa.frames || 4;
+        this.walkPhase += dt * ((wcfg.fps || 6) * dirCycleSpeed(snapDirIndex(this.walkAngle), wa.dirSpeed)) / frames;
+      } else {
+        this.walkPhase += dt * (this.stats.speed / 16); // fallback legacy (tanpa sheet)
+      }
       this.stepT -= dt;
       if (this.stepT <= 0 && game && game.run) {
         this.stepT = 0.24;

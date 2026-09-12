@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "doc": "Animasi jalan 8-arah (rebuild karakter hero & virus). Tiap karakter punya sheet 5 arah unik (E, NE, N, SE, S) x 4 frame di assets/sprites/walk/. Arah W, NW, SW diperoleh MIRROR horizontal di runtime (W=E, NW=NE, SW=SE) — tidak disimpan sebagai file. Input joystick tetap kontinu 360°; sistem membulatkan sudut ke kelipatan 45° terdekat HANYA untuk memilih animasi — gerak karakter bebas. dirSpeed = pengali tempo siklus per arah (spek: timing gerak alami beda per sudut, bukan rotasi gambar). fps = langkah per detik (4 frame = 1 siklus). S frame-0 identik dengan sprite idle saat ini (tanpa perubahan visual saat diam).",
+  "sheetDirections": ["E", "NE", "N", "SE", "S"],
+  "frames": 4,
+  "defaultFps": 6,
+  "dirSpeed": {
+    "E": 0.8,
+    "NE": 0.95,
+    "N": 1.05,
+    "SE": 0.85,
+    "S": 1.15
+  },
+  "heroes": {
+    "macrophage": { "sheet": "assets/sprites/walk/macrophage_walk.png", "fps": 4.5 },
+    "dendritic": { "sheet": "assets/sprites/walk/dendritic_walk.png", "fps": 5.5 },
+    "neutrophil": { "sheet": "assets/sprites/walk/neutrophil_walk.png", "fps": 7 },
+    "eosinophil": { "sheet": "assets/sprites/walk/eosinophil_walk.png", "fps": 6 },
+    "basophil": { "sheet": "assets/sprites/walk/basophil_walk.png", "fps": 5 },
+    "mastcell": { "sheet": "assets/sprites/walk/mastcell_walk.png", "fps": 4.8 },
+    "tcd8": { "sheet": "assets/sprites/walk/tcd8_walk.png", "fps": 6.5 },
+    "tcd4": { "sheet": "assets/sprites/walk/tcd4_walk.png", "fps": 5.5 },
+    "treg": { "sheet": "assets/sprites/walk/treg_walk.png", "fps": 5 },
+    "bcell": { "sheet": "assets/sprites/walk/bcell_walk.png", "fps": 5.5 },
+    "nkcell": { "sheet": "assets/sprites/walk/nkcell_walk.png", "fps": 6 }
+  },
+  "enemies": {
+    "bakteri": { "sheet": "assets/sprites/walk/enemy_bakteri_walk.png", "fps": 5 },
+    "bakteri_gp": { "sheet": "assets/sprites/walk/enemy_bakteri_gp_walk.png", "fps": 3.8 },
+    "bakteri_gn": { "sheet": "assets/sprites/walk/enemy_bakteri_gn_walk.png", "fps": 4.5 },
+    "virus": { "sheet": "assets/sprites/walk/enemy_virus_walk.png", "fps": 4.5 },
+    "virion": { "sheet": "assets/sprites/walk/enemy_virion_walk.png", "fps": 7 },
+    "parasit": { "sheet": "assets/sprites/walk/enemy_parasit_walk.png", "fps": 6.5 },
+    "spora": { "sheet": "assets/sprites/walk/enemy_spora_walk.png", "fps": 3.5 },
+    "sel_kanker": { "sheet": "assets/sprites/walk/enemy_sel_kanker_walk.png", "fps": 3 },
+    "protozoa": { "sheet": "assets/sprites/walk/enemy_protozoa_walk.png", "fps": 5.5 },
+    "toksin": { "sheet": "assets/sprites/walk/enemy_toksin_walk.png", "fps": 1.6 },
+    "prion": { "sheet": "assets/sprites/walk/enemy_prion_walk.png", "fps": 2.6 },
+    "sel_abnormal": { "sheet": "assets/sprites/walk/enemy_sel_abnormal_walk.png", "fps": 6 },
+    "toksin_raksasa": { "sheet": "assets/sprites/walk/enemy_toksin_raksasa_walk.png", "fps": 3 }
+  }
+}

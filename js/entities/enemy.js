@@ -9,6 +9,7 @@
  */
 
 import { getCombat } from '../core/data-store.js';
+import { snapDirIndex, dirCycleSpeed } from '../render/walk-anim.js';
 
 let nextEnemyId = 1;
 
@@ -50,6 +51,8 @@ export class Enemy {
 
     // Visual
     this.rotation = Math.random() * Math.PI * 2;
+    this.walkAngle = this.rotation; // Rebuild 8-arah: arah gerak aktual (rad)
+    this.walkPhase = Math.random(); // Rebuild 8-arah: fase siklus (desync antar musuh)
     this.hitFlash = 0;
     // R4 Modul B: window telan (phagocytosis) — diisi phagoUpdateEnemy
     this.phagoEligible = false;
@@ -166,6 +169,7 @@ export class Enemy {
 
   update(dt, playerPos, time, game) {
     if (!this.alive) return;
+    const wx0 = this.x, wy0 = this.y; // Rebuild 8-arah: ukur pergeseran aktual
     if (this.hitFlash > 0) this.hitFlash -= dt;
 
     // V2 Phase 5: affix REGEN — elite pulih 2%/dtk (jawaban pemain: fokus burst)
@@ -248,6 +252,7 @@ export class Enemy {
           this.x += ((this.homeX - this.x) / dHome) * this.speed * 0.9 * dt;
           this.y += ((this.homeY - this.y) / dHome) * this.speed * 0.9 * dt;
           if (this.def.orientToMovement) this.rotation = Math.atan2(this.homeY - this.y, this.homeX - this.x);
+          this._trackWalk(dt, wx0, wy0); // Rebuild 8-arah: jalan pulang tetap dianimasikan
           return;
         }
       }
@@ -272,6 +277,7 @@ export class Enemy {
             this.y += (tdy / td) * this.speed * 0.55 * dt;
             if (this.def.orientToMovement) this.rotation = Math.atan2(tdy, tdx);
           }
+          this._trackWalk(dt, wx0, wy0); // Rebuild 8-arah: patroli tetap dianimasikan
           return;
         }
       }
@@ -300,6 +306,7 @@ export class Enemy {
           this.x -= (dx / dist) * this.speed * 0.7 * dt;
           this.y -= (dy / dist) * this.speed * 0.7 * dt;
           if (this.def.orientToMovement) this.rotation = Math.atan2(-dy, -dx);
+          this._trackWalk(dt, wx0, wy0); // Rebuild 8-arah: mundur penembak tetap dianimasikan
           return;
         }
         if (dist < sh.range * 0.8 && this.atkPhase !== 'windup') {
@@ -311,6 +318,7 @@ export class Enemy {
           this.x += Math.cos(perp) * sway;
           this.y += Math.sin(perp) * sway;
           if (this.def.orientToMovement) this.rotation = baseAngle;
+          this._trackWalk(dt, wx0, wy0); // Rebuild 8-arah: strafe penembak tetap dianimasikan
           return;
         }
       }
@@ -368,6 +376,25 @@ export class Enemy {
     // Orientasi sprite ke arah gerak bila def minta
     if (this.def.orientToMovement) {
       this.rotation = Math.atan2(dy, dx);
+    }
+
+    // Rebuild 8-arah: angle + phase animasi jalan dari pergeseran aktual.
+    this._trackWalk(dt, wx0, wy0);
+  }
+
+  /**
+   * Rebuild 8-arah: ukur pergeseran aktual sejak awal update → walkAngle +
+   * walkPhase. Dipanggil di akhir update DAN di tiap jalur return-dini yang
+   * GERAK (pulang, patroli, strafe/retreat penembak) supaya animasi jalan
+   * tidak "beku" di state tersebut. Gerak bebas; hanya animasi yang snap 45°.
+   */
+  _trackWalk(dt, wx0, wy0) {
+    const ddx = this.x - wx0, ddy = this.y - wy0;
+    if (Math.hypot(ddx, ddy) > dt * 2) {
+      this.walkAngle = Math.atan2(ddy, ddx);
+      if (this._walkAnim) {
+        this.walkPhase += dt * (this._walkAnim.fps * dirCycleSpeed(snapDirIndex(this.walkAngle), this._walkAnim.dirSpeed)) / this._walkAnim.frames;
+      }
     }
   }
 

@@ -16,7 +16,8 @@ import {
   xpToNextLevel,
 } from './data-store.js';
 import { emit } from './ui-bridge.js';
-import { getTintedSprite } from '../render/sprite-loader.js';
+import { getTintedSprite, getSprite } from '../render/sprite-loader.js';
+import { snapDirIndex, drawWalkFrame, walkCfg } from '../render/walk-anim.js'; // Rebuild 8-arah
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
@@ -177,6 +178,7 @@ export const game = {
     markSeen('imun'); // Bio-Pedia: sistem imun (pasukan pemain)
 
     const player = new Player(heroDef, stats, startX, startY);
+    player._walkCfg = walkCfg('heroes', heroDef.id, getData().walkAnim); // Rebuild 8-arah
 
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
@@ -1296,6 +1298,7 @@ export const game = {
     scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    enemy._walkAnim = walkCfg('enemies', def.id, getData().walkAnim); // Rebuild 8-arah
     markSeen(bossCfg.id); // Bio-Pedia: boss ditemui
     if (bossCfg.areaAttack) enemy.def = Object.assign({}, def, { areaAttack: bossCfg.areaAttack });
     enemy.isBoss = true;
@@ -1410,6 +1413,7 @@ export const game = {
     scalers.speedScale += Math.min(pls.speedMax, (plvl - 1) * pls.speedPerLevel);
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    enemy._walkAnim = walkCfg('enemies', def.id, getData().walkAnim); // Rebuild 8-arah
     markSeen(enemyId); // Bio-Pedia: musuh ditemui
     // Kondisi tubuh: sistem kritis bisa mempercepat musuh (mis. Imun < 20)
     if (run.bodyMods && run.bodyMods.enemySpeedMult && run.bodyMods.enemySpeedMult !== 1) {
@@ -1773,6 +1777,7 @@ export const game = {
             radiusScale: split.radiusScale,
             speedScale: split.speedScale,
           });
+          child._walkAnim = walkCfg('enemies', childDef.id, getData().walkAnim); // Rebuild 8-arah
           child.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, child);
           child.visualFamily = child.def.visualFamily || child.def.family || null;
           run.enemies.push(child);
@@ -2057,6 +2062,7 @@ export const game = {
 
     const cam = run.camera;
     const player = run.player;
+    const walkAnimData = getData().walkAnim || {}; // Rebuild 8-arah (data/walk-anim.json)
 
     // Latar prosedural (screen-space, parallax internal)
     drawBackground(ctx, cam.x, cam.y, w, h, time);
@@ -2260,14 +2266,26 @@ export const game = {
           ctx.globalAlpha = 1;
           ctx.restore();
         }
-        billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
+        // Rebuild 8-arah: bob prosedural & flip ke-player MATI saat memakai
+        // sheet — arah & bob sudah digambar di frame (bobot per arah unik).
+        const useWalk = !!e._walkAnim && !e.attackSpriteHint;
+        billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + (useWalk ? 0 : bob), flip: useWalk ? 1 : flip });
         if (hidden) ctx.globalAlpha = 0.14;
-        const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
-        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
+        const walkFlash = {
           // V2 Phase 5: boss enrage = tint merah konstan (drama fase akhir)
           flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : (e.enraged ? 0.3 : 0),
           flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
-        });
+        };
+        if (useWalk) {
+          // Sheet jalan: arah snap 45° terdekat dari sudut gerak AKTUAL —
+          // virus tetap bergerak bebas, hanya animasi yang "klik".
+          const dirIdx = snapDirIndex(e.walkAngle);
+          e._lastWalkCell = drawWalkFrame(ctx, e._walkAnim, walkAnimData.sheetDirections, e.x, e.y, e.radius * 2.667, dirIdx, e.walkPhase, walkFlash);
+        } else {
+          // Legacy: sprite idle/attack (attackSpriteHint = telegraf windup V2 Phase 2)
+          const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+          drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, walkFlash);
+        }
         drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
@@ -2300,10 +2318,18 @@ export const game = {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
-          let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
-          const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
+          // Rebuild 8-arah: sheet jalan selama bergerak (attack pose = sprite
+          // attack Character Agent tetap diprioritaskan). Diam = depan (S) frame 0.
+          const pWcfg = player._walkCfg;
+          const useWalk = !!pWcfg && player.attackFlash <= 0 && !getSprite(pWcfg.sheet).isPlaceholder;
+          let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : (useWalk ? null : player.heroDef.spriteIdle);
+          const pDirIdx = useWalk ? (player.moving ? snapDirIndex(player.walkAngle) : 2 /* S: hadap depan saat diam */) : 0;
+          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * Math.PI * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.walkAngle || player.facing) < 0 ? -1 : 1);
+          const flip = useWalk ? 1 : (Math.cos(player.facing) < 0 ? -1 : 1);
+          // Saat jalan, bob sudah ter-gambar di frame sheet (tinggi badan beda
+          // per arah); saat diam pakai napas halus; legacy = pBob prosedural.
+          const lift = player.radius * 0.62 + (useWalk ? (player.moving ? 0 : Math.sin(time * 2.1) * 1.1) : pBob);
+          billboard(pBody.x, pBody.y, { lift, flip, tilt });
           const auraAcc = STATE.meta.cosmetics?.aura
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
           // E1 poin 5: aura neon default DIHAPUS — hanya aura KOSMETIK
@@ -2311,7 +2337,16 @@ export const game = {
           if (auraAcc) drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc.color, time, 0, 0.8);
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
           const evoStage = run.evoStage?.stage || 0;
-          if (skin) {
+          if (useWalk) {
+            // 1 sel dari sheet (W/NW/SW = mirror internal; skin = tint sheet)
+            const pPhase = player.moving ? player.walkPhase : 0;
+            if (skin) {
+              const tinted = getTintedSprite(pWcfg.sheet, skin.color);
+              player._lastWalkCell = drawWalkFrame(ctx, pWcfg, walkAnimData.sheetDirections, pBody.x, pBody.y, bodySize, pDirIdx, pPhase, { image: tinted });
+            } else {
+              player._lastWalkCell = drawWalkFrame(ctx, pWcfg, walkAnimData.sheetDirections, pBody.x, pBody.y, bodySize, pDirIdx, pPhase);
+            }
+          } else if (skin) {
             const tinted = getTintedSprite(path, skin.color);
             const scale = bodySize / Math.max(tinted.width, tinted.height);
             ctx.drawImage(tinted, pBody.x - (tinted.width * scale) / 2, pBody.y - (tinted.height * scale) / 2, tinted.width * scale, tinted.height * scale);
