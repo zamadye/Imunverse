@@ -158,7 +158,9 @@ function renderQuickRow(meta) {
   const row = document.getElementById('quick-row');
   row.textContent = '';
   const tiles = [
-    { key: 'roster', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('roster') },
+    // RONDE-6: SATU LAPIS — dari dashboard langsung ke DETAIL hero (rail kiri
+    // untuk ganti hero), tanpa melewati grid roster.
+    { key: 'herodetail', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('herodetail') },
     { key: 'shop', ico: 'assets/icons/menu-shop.svg', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
     { key: 'codex', ico: 'assets/icons/menu-codex.svg', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
     { key: 'rank', ico: 'assets/icons/menu-rank.svg', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
@@ -625,7 +627,7 @@ export function show() {
         el('span', { class: 'm-name', text: m.def.name }),
         el('span', { class: 'm-reward' }, [
         el('span', { text: `+${m.def.reward}` }),
-        el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: 'Imun Coin', title: 'Imun Coin' }),
+        el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi', title: 'Antibodi' }),
       ]),
       ]),
       el('div', { class: 'm-row' }, [

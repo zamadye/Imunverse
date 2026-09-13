@@ -14,6 +14,7 @@ import { STATE } from '../../core/state-manager.js';
 import { getData, getCharacterDesigns } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
+import { emit } from '../../core/ui-bridge.js';
 import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
 
 export function show() {
@@ -56,12 +57,15 @@ export function buildAbilityBar() {
   bar.textContent = '';
   const run = game.run;
   const visual = currentHeroSkillVisual(run);
-  const views = run && run.skills ? run.skills.getView() : [];
+  const views = run && run.skills ? run.skills.getView(run ? run.level : Infinity) : [];
   views.forEach((view, i) => {
     const def = getData().skills.skills.find((s) => s.id === view.id);
     const btn = document.createElement('button');
-    btn.className = `ability-btn character-skill${view.ult ? ' ult' : ''}`;
+    // UI/UX RADIAL WHEEL: kelas `pos-i` menempatkan skill pada titik tetap
+    // relatif terhadap SERANG (muscle memory — posisi TIDAK berubah saat unlock)
+    btn.className = `ability-btn character-skill pos-${i}${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
+    btn.dataset.slot = i;
     btn.dataset.archetype = visual.archetype;
     btn.dataset.stage = visual.stageLabel;
     btn.style.setProperty('--sk', view.color || '#35d0ba');
@@ -77,31 +81,79 @@ export function buildAbilityBar() {
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
       `<span class="cd-num"></span>` +
-      `<span class="key-tag">${i + 1}</span>`;
-    btn.addEventListener('click', () => game.useAbilityBySlot(i));
+      `<span class="key-tag">${i + 1}</span>` +
+      // Locked overlay: ikon kunci + level pembuka — slot TETAP di tempatnya
+      `<span class="sk-lock" aria-hidden="true"><img src="assets/icons/ui-lock.svg" alt="" draggable="false"/><b>Lv ${view.unlockLevel}</b></span>` +
+      // Rank pips (Lv 15+: sistem upgrade)
+      `<span class="sk-rank" aria-hidden="true">${[0, 1, 2].map((p) => `<i data-pip="${p + 1}"></i>`).join('')}</span>` +
+      // Badge upgrade (+): klik = upgrade (Lv 15+), bukan cast
+      `<span class="sk-up" role="button" aria-label="${t('Upgrade skill')}">+</span>`;
+    btn.addEventListener('click', (ev) => {
+      // Badge (+) = upgrade skill (Lv 15 membuka sistem upgrade)
+      if (ev.target && ev.target.closest && ev.target.closest('.sk-up')) {
+        game.upgradeAbilityBySlot(i);
+        return;
+      }
+      // Skill terkunci: tampilkan requirement, TIDAK ada gameplay action.
+      // (Guard gameplay tetap di game.useAbilityBySlot — klik tak bisa membocori aksi)
+      if (btn.classList.contains('locked')) {
+        emitLockedHint(view);
+        return;
+      }
+      game.useAbilityBySlot(i);
+    });
     bar.appendChild(btn);
   });
 }
 
-/** Sinkronkan tombol skill tiap frame: overlay cooldown + angka sisa detik. */
+/** Feedback saat skill LOCKED diklik — murni info, bukan aksi gameplay. */
+let lockHintT = 0;
+function emitLockedHint(view) {
+  const now = performance.now();
+  if (now - lockHintT < 900) return; // anti-spam toast saat spam-klik
+  lockHintT = now;
+  emit('toast', { message: t(`${view.name} terkunci — Terbuka di Level ${view.unlockLevel}`), kind: 'warn' });
+}
+
+/** Sinkronkan tombol skill tiap frame: overlay cooldown + angka sisa detik + lock/rank. */
 export function updateAbilityBar(abilities) {
   if (!abilities) return;
   abilities.forEach((view, i) => {
     const node = document.getElementById(`ability-${view.id}`);
     if (!node) return;
-    node.classList.toggle('ready', view.ready);
+    node.classList.toggle('ready', view.ready && !view.locked);
     node.classList.toggle('ult', !!view.ult);
+    node.classList.toggle('locked', !!view.locked);
+    node.setAttribute('aria-disabled', view.locked ? 'true' : 'false');
     const fill = node.querySelector('.cd-fill');
     const num = node.querySelector('.cd-num');
     // Fase 17 (trigger 5C): overlay cooldown SIRKULAR yang berputar
     if (fill) {
-      if (view.ready) fill.style.background = 'transparent';
+      if (view.ready || view.locked) fill.style.background = 'transparent';
       else {
         const pct = Math.max(0, Math.min(100, (view.cdLeft / view.cdTotal) * 100));
         fill.style.background = `conic-gradient(rgba(12,60,54,.42) ${pct}%, transparent ${pct}%)`;
       }
     }
-    if (num) num.textContent = view.ready ? '' : Math.ceil(view.cdLeft);
+    if (num) num.textContent = view.ready || view.locked ? '' : Math.ceil(view.cdLeft);
+    // Rank pips: terisi sesuai rank (rank 1 = tanpa pip, sesuai SKILL_MAX_RANK − 1)
+    const rankNode = node.querySelector('.sk-rank');
+    if (rankNode) {
+      rankNode.classList.toggle('visible', (view.rank || 1) > 1);
+      rankNode.querySelectorAll('i').forEach((pip, p) => pip.classList.toggle('on', p < (view.rank || 1) - 1));
+    }
+    // Badge upgrade: tersembunyi saat skill terkunci; kunci halus sebelum Lv 15;
+    // menyala saat upgrade tersedia & siap
+    const up = node.querySelector('.sk-up');
+    if (up) {
+      up.classList.toggle('visible', !view.locked);
+      up.classList.toggle('locked', !view.upgradeUnlocked && !view.locked);
+      up.classList.toggle('ready', !!view.upgradeReady);
+      up.title = view.upgradeUnlocked
+        ? (view.upgradeReady ? t(`Upgrade ke Rank ${(view.rank || 1) + 1} — ${view.upgradeCost} antibodi`) : `Rank ${view.rank}/${view.maxRank}`)
+        : t('Upgrade skill — Terbuka di Level 15');
+    }
+    if (node.dataset.lockHint !== String(!!view.locked)) node.dataset.lockHint = String(!!view.locked);
   });
 }
 
@@ -142,7 +194,8 @@ export function resetHUD() {
     const design = heroDef ? getCharacterDesigns()?.heroes?.[heroDef.id] : null;
     const cue = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
     const color = cue?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba';
-    eqNode.textContent = stageDef?.collectionLabel || stageDef?.name || (stage > 0 ? `Equity ${stage}` : 'Polos');
+    // Label ringkas (chip TOP-CENTER): tidak perlu dua kata — "Stage 0 Polos" kesulitan ruang.
+    eqNode.textContent = stageDef?.collectionLabelShort || stageDef?.name?.replace(/^Stage\s*\d+\s*/i, '') || (stage > 0 ? `Equity ${stage}` : 'Polos');
     eqNode.title = stage > 0 ? `${cue?.name || eqNode.textContent}: ${cue?.visualCue || ''}` : (design?.baseCue || 'Stage 0 polos');
     eqNode.style.setProperty('--eq', color);
   }

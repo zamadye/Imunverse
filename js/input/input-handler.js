@@ -29,6 +29,31 @@ const KEY_MAP = {
 const isTypingTarget = (t) =>
   !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
+/**
+ * Zona UI yang SELALU menang prioritas atas controller gerak.
+ * Hierarchi input: UI interaction → combat button → movement zone → world.
+ * Bila pointer/touch dimulai pada salah satu elemen ini, joystick TIDAK aktif.
+ */
+export const UI_CONTROL_SELECTOR =
+  'button, a, input, textarea, select, label, summary, ' +
+  '[role="button"], [role="dialog"], [data-ui], ' +
+  '.modal-box, .screen.modal, .hud-hero-status, .hud-quests, .hud-menu2-toggle, ' +
+  '.hud-game-menu2, .hud-minimap, .hud-xp-top, .hud-mission, .hud-buff-chip, ' +
+  '.hud-antigen, .phago-meter, .ability-btn, .fire-btn, .tut-block, .hud-top, .curguide-box';
+
+/**
+ * Apakah target pointer BOLEH masuk ke movement system (GAMEPLAY_INPUT_ZONE)?
+ * @param {EventTarget|null} target
+ * @returns {boolean} false bila target berada di dalam UI overlay/kontrol
+ */
+export function isGameplayInputTarget(target) {
+  if (!target || target.nodeType !== 1) {
+    // Document/window sebagai fallback: hanya boleh saat target memang canvas-ish
+    return target instanceof HTMLCanvasElement;
+  }
+  return !target.closest(UI_CONTROL_SELECTOR);
+}
+
 export class InputHandler {
   /** @param {HTMLCanvasElement} canvas */
   constructor(canvas) {
@@ -98,8 +123,13 @@ export class InputHandler {
     window.addEventListener('blur', this._onBlur);
     document.addEventListener('visibilitychange', this._onVisibility);
 
-    // ---------- Touch (virtual joystick — di mana saja di canvas) ----------
+    // ---------- Touch (virtual joystick — GAMEPLAY_INPUT_ZONE: lantai arena) ----------
+    // Bukan window/document global: event di-bind ke canvas dan difilter:
+    // (a) hanya saat gameplay aktif (isActive), (b) target BUKAN zona UI.
+    // UI (profil, misi, jeda, tombol skill, tombol SERANG) selalu menang.
     this._onTouchStart = (e) => {
+      if (this.isActive && !this.isActive()) return; // bukan gameplay → UI normal
+      if (!isGameplayInputTarget(e.target)) return;  // sentuhan mulai di UI → jangan gerak
       e.preventDefault();
       for (const touch of e.changedTouches) {
         if (!this.joystick.active) {
@@ -141,6 +171,10 @@ export class InputHandler {
     // (pointerType 'touch' di-skip agar tidak dobel).
     this._onPointerDown = (e) => {
       if (e.pointerType === 'touch') return; // sudah via touch handlers
+      // GAMEPLAY_INPUT_ZONE: drag hanya dimulai bila gameplay aktif & target
+      // bukan zona UI (profil/misi/tombol dibind ke elemennya sendiri).
+      if (this.isActive && !this.isActive()) return;
+      if (!isGameplayInputTarget(e.target)) return;
       this.canvas.setPointerCapture?.(e.pointerId);
       this.joystick.active = true;
       this.joystick.touchId = 'pointer';

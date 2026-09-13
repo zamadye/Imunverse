@@ -370,9 +370,11 @@ export function show() {
   supSection.appendChild(supGrid);
   wrap.appendChild(supSection);
 
-  // ============ 5) IMUN COIN GRATIS (offerwall untuk non-paying) ============
+  // ============ 5) BONUS ANTIBODI (offerwall utk non-paying) ============
+  // RONDE-4: ini SOFT currency. Imun Coin premium hanya dari bundle di atas
+  // & reward Battle Pass — tidak dari video/survei/referral.
   const offers = getData().battlepass.offers;
-  const freeSection = sectionEl('free', 'Tanpa bayar: tonton sponsor, isi survei, atau ajak teman.');
+  const freeSection = sectionEl('free', 'Bonus Antibodi: tonton sponsor, isi survei, atau ajak teman. Imun Coin (premium) tersedia lewat pembelian & musim Battle Pass.');
   const freeGrid = el('div', { class: 'free-grid' });
 
   const adTile = el('div', { class: 'free-tile' }, [
@@ -380,17 +382,17 @@ export function show() {
       el('img', { class: 'ft-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
       el('b', { text: 'Tonton Video Sponsor' }),
     ]),
-    el('span', { text: `+${offers.adImun} Imun per tontonan (simulasi iklan reward)` }),
+    el('span', { text: `+${offers.adAntibodi} Antibodi per tontonan (simulasi iklan reward)` }),
   ]);
   const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
   adBtn.addEventListener('click', () => {
     if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
     openAdModal(() => {
       trackAdWatch(meta);
-      addImun(meta, offers.adImun);
+      addCurrency(meta, offers.adAntibodi);
       writeSave(meta);
       audio.collect();
-      emit('toast', { message: `+${offers.adImun} Imun Coin!`, kind: 'gold' });
+      emit('toast', { message: `+${offers.adAntibodi} Antibodi!`, kind: 'gold' });
       show();
     });
   });
@@ -401,17 +403,17 @@ export function show() {
       el('img', { class: 'ft-ico', src: 'assets/icons/menu-codex.svg', alt: '' }),
       el('b', { text: 'Survei Sponsor' }),
     ]),
-    el('span', { text: `+${offers.surveyImun} Imun, 1× per hari (simulasi offerwall)` }),
+    el('span', { text: `+${offers.surveyAntibodi} Antibodi, 1× per hari (simulasi offerwall)` }),
   ]);
   const svBtn = el('button', { class: 'btn btn-primary ft-btn', text: canSurveyToday(meta) ? 'ISI' : '✓ SELESAI' });
   svBtn.disabled = !canSurveyToday(meta);
   svBtn.addEventListener('click', () => {
     openAdModal(() => {
       markSurveyDone(meta);
-      addImun(meta, offers.surveyImun);
+      addCurrency(meta, offers.surveyAntibodi);
       writeSave(meta);
       audio.collect();
-      emit('toast', { message: `Survei selesai: +${offers.surveyImun} Imun Coin!`, kind: 'gold' });
+      emit('toast', { message: `Survei selesai: +${offers.surveyAntibodi} Antibodi!`, kind: 'gold' });
       show();
     }, 'SURVEI SPONSOR (SIMULASI)');
   });
@@ -427,7 +429,7 @@ export function show() {
       el('span', { text: `Kode kamu: ` }),
       el('b', { class: 'rf-code', text: ref.code }),
     ]),
-    el('span', { text: `Teman memakai kodemu → kamu +${offers.referralImun} Imun. Masukkan kode teman:` }),
+    el('span', { text: `Teman memakai kodemu → kamu +${offers.referralAntibodi} Antibodi. Masukkan kode teman:` }),
   ]);
   const rfRow = el('div', { class: 'rf-row' });
   const rfInput = el('input', { class: 'rf-input', placeholder: 'IMUN-XXXXX', maxlength: 12, 'aria-label': 'Kode referral teman' });
@@ -436,7 +438,7 @@ export function show() {
     const res = applyReferralCode(meta, rfInput.value);
     if (res.ok) {
       audio.collect();
-      emit('toast', { message: `Referral sukses: +${res.reward} Imun Coin!`, kind: 'gold' });
+      emit('toast', { message: `Referral sukses: +${res.reward} Antibodi!`, kind: 'gold' });
       show();
     } else {
       emit('toast', { message: res.error, kind: 'coral' });

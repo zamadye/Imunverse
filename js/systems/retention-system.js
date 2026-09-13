@@ -16,16 +16,14 @@ export function getRetention() {
 }
 
 /**
- * Imun Coin akhir run — spek: (wave × 8) + (kills × 0.5) + (boss × 50).
- * @returns {number} bulat
+ * [RETIRED RONDE-4] Imun Coin tidak lagi mengalir dari hasil run — premium
+ * currency hanya dari PEMBELIAN & reward Battle Pass (aturan revenue platform:
+ * blueprint Master Phase 10 — premium tidak dimudahkan). Fungsi disimpan *
+ * bernilai 0 supaya pemanggil lama tidak rusak; jangan dipakai untuk fitur baru.
+ * @returns {number} selalu 0
  */
-export function imuForRun(wave, kills, bossKills, victory = false) {
-  // Imun Coin adalah currency premium langka: hanya boss dan victory.
-  // Kill biasa memberi Antibodi (soft currency), bukan Imun Coin.
-  const r = getRetention().imuReward;
-  let imu = Math.floor((bossKills || 0) * (r.perBoss || 0));
-  if (victory) imu += r.victoryBonus || 0;
-  return imu;
+export function imuForRun() {
+  return 0;
 }
 
 /**

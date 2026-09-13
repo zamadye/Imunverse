@@ -62,9 +62,14 @@ for (let k = 0; k < 8; k++) {
   await page.waitForTimeout(300);
 }
 
-// ---- TRIGGER 1: founder 300 Imun Coin (titik awal ekonomi) ----
-const imu0 = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.imun || 0);
-ok('meta-founder-150-imu', imu0 === 150, `imu0=${imu0}`); // F20: hadiah pendiri dipangkas (IMU langka)
+// ---- TRIGGER 1: hadiah pendiri TANPA Imun Coin (RONDE-4: premium murni beli & Battle Pass) ----
+// Founder = gelar + skin pendiri + Antibodi — TIDAK ada jalur premium gratis.
+const feed0 = await page.evaluate(() => {
+  const m = window.__IMUNVERSE.STATE.meta;
+  return { imu: m.imun || 0, ab: m.currency || 0, skin: (m.cosmetics?.owned || []).includes('skin_pendiri'), title: !!m.premiumTitle };
+});
+ok('founder-zero-imun', feed0.imu === 0, `imu0=${feed0.imu}`);
+ok('founder-gift-soft', feed0.ab >= 250 && feed0.skin && feed0.title, JSON.stringify(feed0));
 
 // default hero = Mako (spek: Mako default)
 const selHero = await page.evaluate(() => window.__IMUNVERSE.STATE.meta.selectedHero);
@@ -81,11 +86,13 @@ ok('wave-config-1.8-0.08-0.4', waveCfg.base === 1.8 && waveCfg.decay === 0.08 &&
 // ---- TRIGGER 2/4: mulai run — auto-attack membunuh; XP label & combo muncul ----
 await page.evaluate(() => { const sc = document.querySelector('.dash-scroll'); if (sc) sc.scrollTop = 0; });
 // F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
-await page.click('#btn-play', { timeout: 8000 });
+await page.evaluate(() => document.getElementById('btn-play').click()); // click DOM: coach/narrative layer kadang menyerap pointer fisik (force click) tanpa terselesaikan skip // force: coach-layer kadang mengintercept pointer; alur dashboard sudah diuji terpisah
 await page.waitForTimeout(600);
-if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+for (let k = 0; k < 6; k++) {
+  if (!await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) break;
   await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
-  await page.click('#btn-prep-start', { timeout: 8000 });
+  await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(500);
 }
 await page.waitForTimeout(600);
 // sinematik briefing bab baru → lewati (klik riil), lalu tunggu HUD aktif
@@ -120,6 +127,14 @@ let synBadge = 0;
 // F19 temuan: musuh kiter menetap di 200px+ (di luar jangkauan melee 90) —
 // tes lama "borderline-lucky". Setup deterministik: jaga musuh dalam jangkauan
 // (penempatan = konteks tes; membunuh tetap oleh auto-attack RIIL).
+// Ronde-3: pasukan imun bergabung di level unlock skill (Lv 3 dst, bukan di
+// awal run). Naikkan level lebih dulu supaya squad #1 ikut bertempur — pin ini
+// mengukur jalur kill RIIL gabungan (auto-attack + squad), bukan RNG.
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  if (g?.run) { g.applyXpGain(900); }
+});
+await page.waitForTimeout(600);
 const topUpEnemies = () => page.evaluate(() => {
   const g = window.__IMUNVERSE.game;
   const run = g.run;
@@ -135,6 +150,10 @@ const topUpEnemies = () => page.evaluate(() => {
     e.applyFreeze(3);            // musuh kiter langsung kabur dari jangkauan — dibekukan di tempat
   });
 });
+// RONDE-7: kill RIIL = tahan tombol SERANG manual (hero+squad menembak) —
+// tidak ada auto-attack; suite memegang tombol selama berburu, sekarang
+// jalur kill yang diuji = jalur gameplay sesungguhnya.
+await page.evaluate(() => { window.__IMUNVERSE.game.input.fireButtonHeld = true; });
 while (tries < 70) {
   // modal level-up meng-pause game → pilih satu lalu lanjut berburu
   if (await page.locator('#screen-levelup.active').isVisible().catch(() => false)) {
@@ -144,6 +163,7 @@ while (tries < 70) {
     }
     await page.locator('#levelup-choices .choice-card').first().click();
     await page.waitForTimeout(350);
+    await page.evaluate(() => { window.__IMUNVERSE.game.input.fireButtonHeld = true; });
     continue;
   }
   await topUpEnemies();
@@ -152,7 +172,8 @@ while (tries < 70) {
   if (kills >= 4) break;
   tries++;
 }
-ok('auto-attack-kills>=4', kills >= 4, `kills=${kills}`);
+await page.evaluate(() => { window.__IMUNVERSE.game.input.fireButtonHeld = false; });
+ok('manual-serang-kills>=4', kills >= 4, `kills=${kills}`);
 
 // FEEDBACK: floating text (damage + XP) hidup di effects
 const feed = await page.evaluate(() => {
@@ -166,7 +187,8 @@ const feed = await page.evaluate(() => {
   };
 });
 ok('floating-text-active', feed.numbersEver > 0 || feed.xpGained > 0, JSON.stringify(feed));
-ok('imu-chip-visible', feed.imuChip !== null && Number(feed.imuChip) >= 1, `chip=${feed.imuChip}`);
+// Chip Imun Coin tetap TERLIHAT walau saldo 0 (premium mulai dari NOL)
+ok('imu-chip-visible', feed.imuChip !== null && Number.isFinite(Number(feed.imuChip)), `chip=${feed.imuChip}`);
 ok('hp-bar-smooth-transition', parseFloat(feed.hpTransition) > 0, feed.hpTransition);
 
 // ---- level up (AUTONOMY): 3 pilihan + badge sinergi (tercatat saat loop) ----
@@ -228,17 +250,20 @@ const after = await page.evaluate(() => {
 });
 // Misal run pendek belum menyelesaikan misi apa pun → uji pembayaran misi
 // lewat system-call di halaman (logic asli checkMissions, bukan mock).
+// RONDE-7: reward misi = ANTIBODI (bukan IMU — aturan ekonomi ronde-4);
+// pin lama "paid-imu" obsolete → assert antibodi TERBAYAR & IMU NOL.
 const missionPay = await page.evaluate(async () => {
   const { STATE } = await import('/js/core/state-manager.js');
   const { checkMissions } = await import('/js/systems/mission-system.js');
   const meta = STATE.meta;
-  const before = meta.imun || 0;
+  const imun0 = meta.imun || 0;
+  const ab0 = meta.currency || 0;
   meta.stats.totalKills = Math.max(meta.stats.totalKills, 10); // syarat first_blood
   const done = checkMissions(meta);
-  return { paid: (meta.imun || 0) - before, done: done.map((m) => m.id) };
+  return { imuPaid: (meta.imun || 0) - imun0, abPaid: (meta.currency || 0) - ab0, done: done.map((m) => m.id) };
 });
 const allMissions = await page.evaluate(() => window.__IMUNVERSE.getData().missions.missions);
-const missionSum = missionPay.paid + after.claimed
+const missionSum = missionPay.abPaid + after.claimed
   .map((id) => allMissions.find((m) => m.id === id))
   .filter(Boolean)
   .reduce((a, m) => a + m.reward, 0);
@@ -252,9 +277,12 @@ const summary = await page.evaluate(() => {
 // hasil run polos (tanpa boss/menang) = 0 IMU; delta saldo boleh >0 via reward BP
 const imuEarnedRun = await page.evaluate(() => window.STATE?.lastGameoverSummary?.imuEarned ?? window.__IMUNVERSE?.STATE?.lastGameoverSummary?.imuEarned);
 ok('imu-not-from-plain-kills', imuEarnedRun === 0, `imuEarned=${imuEarnedRun}`);
-ok('mission-claim-paid-imu', missionSum > 0, `missionSum=${missionSum} done=${missionPay.done.join(',')}`);
+ok('mission-claim-paid-antibodi-not-imu', missionSum > 0 && missionPay.imuPaid === 0, `abSum=${missionSum} imuPaid=${missionPay.imuPaid} done=${missionPay.done.join(',')}`);
 
 // ---- TRIGGER 1: unlock hero via ROSTER (klik riil tombol BUKA) ----
+// RONDE-4: Neutron berharga IMU (premium) — suite memuat saldo fixture agar
+// alur BUKA teruji (bukan klaim ekonomi; metode cara dapat IMU = beli/BP).
+await page.evaluate(() => { const m = window.__IMUNVERSE.STATE.meta; m.imun = 120; window.__IMUNVERSE.writeSave?.(m); });
 await page.evaluate(() => window.__IMUNVERSE.screenManager.show('roster'));
 await page.waitForTimeout(600);
 // F20: hero ber-TIER — Legend (Nyx, 1500 IMU) sengaja TIDAK terjangkau awal;

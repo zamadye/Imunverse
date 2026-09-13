@@ -87,19 +87,15 @@ const mouseDrag = async (x0, y0, x1, y1, holdMs = 450) => {
   return { ...delta(a, b), joy: st.joy, aim: st.aim };
 };
 
-// ---------- 7) tutorial: jari & copy ----------
-const tut = await page.evaluate(() => {
-  const finger = document.querySelector('.tut-finger');
-  const bubble = document.querySelector('.tut-bubble')?.textContent || '';
-  const r = finger?.getBoundingClientRect();
-  const q = document.getElementById('hud-quests')?.getBoundingClientRect();
-  const overlap = !!(r && q && r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);
-  const under = r ? (document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.id || '') : null;
-  return { hasFinger: !!finger, bubble, overlapQuests: overlap, under, questsOpen: !document.getElementById('hud-quests-body').classList.contains('hidden') };
-});
-log('tut-move-finger-not-over-quest-panel', tut.hasFinger && !tut.overlapQuests && tut.under === 'game', JSON.stringify({ under: tut.under, overlap: tut.overlapQuests }));
-log('tut-move-copy-matches-behaviour', /lantai arena/i.test(tut.bubble) && !/di mana saja/i.test(tut.bubble), `"${tut.bubble}"`);
-log('quest-panel-starts-collapsed', tut.questsOpen === false);
+// ---------- 7) TUTORIAL DIHAPUS (RONDE-7): overlay gelembung/jari tidak boleh ----------
+const tutGone = await page.evaluate(() => ({
+  finger: !!document.querySelector('.tut-finger'),
+  bubble: !!document.querySelector('.tut-bubble'),
+  layerShown: !document.getElementById('tutorial-layer')?.classList.contains('hidden'),
+  questsOpen: !document.getElementById('hud-quests-body').classList.contains('hidden'),
+}));
+log('tutorial-overlay-absent', !tutGone.finger && !tutGone.bubble && !tutGone.layerShown, JSON.stringify(tutGone));
+log('quest-panel-starts-collapsed', tutGone.questsOpen === false);
 const hint = await page.evaluate(() => document.getElementById('hud-hint').textContent);
 log('hud-hint-uses-real-button-name', /SERANG/.test(hint) && !/TEMBAK|Tembak/.test(hint), `"${hint.slice(0, 80)}"`);
 
@@ -204,24 +200,14 @@ await page.evaluate(() => { const i = window.__IMUNVERSE.game.input; Object.assi
 await page.screenshot({ path: 'shots/ui-nav/controls-joystick.png' });
 await page.evaluate(() => { window.__IMUNVERSE.game.input.joystick.active = false; });
 
-// ---------- tutorial langkah 2: jari di atas tombol SERANG ----------
-const step2 = await page.evaluate(async () => {
+// ---------- tutorial API juga mati total (shouldRun ≡ false) ----------
+const tutApi = await page.evaluate(async () => {
   const tut = await import('/js/systems/tutorial-system.js');
-  // Bila gameplay nyata di atas sempat menyelesaikan seluruh tutorial (kill + ambil nutrisi
-  // acak), meta.tutorialDone = true → onRunStart() tidak merender ulang dan DOM menyimpan
-  // gelembung lama "Ambil nutrisi" (sumber flake lama). Reset syarat tutorial dulu.
   const meta = window.__IMUNVERSE.STATE.meta; meta.tutorialDone = false; meta.stats.totalRuns = 0;
-  tut.onRunStart();        // ulang dari langkah 1
-  tut.notifyMoved(1e9, 1); // paksa langkah gerak selesai → langkah SERANG (renderStep sinkron)
-  const finger = document.querySelector('.tut-finger.tut-attack');
-  const bubble = document.querySelector('.tut-bubble')?.textContent || '';
-  if (!finger) return { finger: false, bubble };
-  const r = finger.getBoundingClientRect(); const f = document.getElementById('btn-fire').getBoundingClientRect();
-  const inside = r.left >= f.left - 6 && r.right <= f.right + 6 && r.top >= f.top - 6 && r.bottom <= f.bottom + 6;
-  return { finger: true, inside, bubble };
+  tut.onRunStart();
+  return { active: tut.isTutorialActive(), rendered: !!document.querySelector('.tut-bubble, .tut-finger') };
 });
-log('tut-attack-finger-on-fire-button', step2.finger && step2.inside, JSON.stringify(step2));
-log('tut-attack-copy-says-SERANG', /SERANG/.test(step2.bubble) && !/TEMBAK/.test(step2.bubble), `"${step2.bubble}"`);
+log('tutorial-api-disabled', tutApi.active === false && tutApi.rendered === false, JSON.stringify(tutApi));
 
 await ctx.close();
 await browser.close();

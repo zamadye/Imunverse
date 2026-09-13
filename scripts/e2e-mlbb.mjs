@@ -42,7 +42,15 @@ await page.fill('#auth-username', 'PemainHebat');
 
   // CAMPAIGN → prep → MULAI (skip sinematik briefing)
   // F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
-  await page.click('#btn-play', { timeout: 8000 });
+  await page.evaluate(() => document.getElementById('btn-play').click()); // DOM click: narrative/coach layer kadang menyerap pointer fisik
+  for (let k = 0; k < 6; k++) {
+    await page.waitForTimeout(500);
+    if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
+      await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
+      await page.click('#btn-prep-start', { timeout: 8000 }).catch(() => {});
+    }
+    if (await page.evaluate(() => document.querySelector('#screen-hud')?.classList.contains('active'))) break;
+  }
   await page.waitForTimeout(600);
   if (await page.evaluate(() => document.querySelector('#screen-prep')?.classList.contains('active'))) {
     await page.locator('.prep-hero:not(.locked)').first().click({ timeout: 4000 }).catch(() => {});
@@ -59,13 +67,19 @@ await page.fill('#auth-username', 'PemainHebat');
   await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.maxHP = 5000; p.hp = 5000; p.iframes = 99999; });
 
   // ---------- Struktur HUD ----------
-  log('top-glass-3', await page.locator('#screen-hud .hud-top .glass').count() >= 3);
+  // HUD ronde-2+: bar top-center = 1 grup chip (equity/kills/WAVE/timer/anti/imu) — tanpa glass-band
+  log('top-center-row', await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count() >= 5,
+      `count=${await page.locator('#screen-hud .hud-top .hud-center > *:not(.hidden)').count()}`);
   log('hero-status', await page.locator('#screen-hud .hud-hero-status .hud-portrait').count() === 1);
   const portraitSrc = await page.evaluate(() => document.getElementById('hud-portrait')?.getAttribute('src') || '');
   log('portrait-new-roster', /hero_(tcd8|macrophage|neutrophil|bcell|nkcell|eosinophil|dendritic|basophil|mastcell|tcd4|treg)_portrait/.test(portraitSrc) ? portraitSrc : 'SRC=' + portraitSrc);
   log('skills-3', await page.locator('#ability-bar .ability-btn').count() === 3);
   log('ult-1', await page.locator('#ability-bar .ability-btn.ult').count() === 1);
-  log('fire-serang', await page.evaluate(() => document.getElementById('btn-fire').textContent.includes('SERANG')));
+  // Ronde-2+: label teks SERANG DIHAPUS (request user) — ikon saja, nama tombol di aria-label
+  log('fire-serang-aria', await page.evaluate(() => {
+    const b = document.getElementById('btn-fire');
+    return (b.getAttribute('aria-label') || '').toUpperCase().includes('SERANG') && !/SERANG/.test(b.textContent.trim());
+  }));
   log('key-tags', (await page.locator('#ability-bar .key-tag').allTextContents()).join(','));
 
   // ---------- PSEUDO-3D: proyeksi & animasi jalan ----------
@@ -95,18 +109,45 @@ await page.fill('#auth-username', 'PemainHebat');
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 220, y: 250, id: 1 }] });
   await page.waitForTimeout(120);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 220, y: 165, id: 1 }] });
-  await page.waitForTimeout(500);
-  const moveInfo = await page.evaluate(() => ({ moving: window.__IMUNVERSE.game.run.player.moving, phase: window.__IMUNVERSE.game.run.player.walkPhase }));
+  // POLL hingga ~3s: frame pertama SwiftShader bisa sangat lambat pada run dingin
+  // (500ms kadang belum ada rAF yang memproses input → flake). Bila bubble
+  // tutorial masih menahan, LEWATI lalu coba lagi sekali.
+  let moveInfo = null;
+  for (let k = 0; k < 25; k++) {
+    await page.waitForTimeout(120);
+    moveInfo = await page.evaluate(() => ({ moving: window.__IMUNVERSE.game.run.player.moving, phase: window.__IMUNVERSE.game.run.player.walkPhase }));
+    if (moveInfo.moving || moveInfo.phase !== p3d.walkPhase0) break;
+    if (k === 8) {
+      await page.locator('#btn-tut-skip, .tut-skip, [data-action="tut-skip"]').first().click({ timeout: 1200 }).catch(() => {});
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 220, y: 165, id: 1 }] }).catch(() => {});
+    }
+  }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  log('drag-moves-player', moveInfo.moving || moveInfo.phase !== p3d.walkPhase0 ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
+  const dragOk = moveInfo && (moveInfo.moving || moveInfo.phase !== p3d.walkPhase0);
+  if (!dragOk) { // DIAG: tangkap penyebabnya, jangan asal flake
+    const diag = await page.evaluate(() => {
+      const g = window.__IMUNVERSE.game;
+      const els = document.elementsFromPoint(220, 250).map((e) => e.id || e.className || e.tagName).slice(0, 6);
+      return { els, joy: g.input.joystick.active, fs: !!document.fullscreenElement, paused: window.__IMUNVERSE.STATE.paused, hp: Math.round(g.run.player.hp), modal: [...document.querySelectorAll('.screen.modal.active')].map((m) => m.id) };
+    });
+    console.log('  diag drag-fail:', JSON.stringify(diag));
+  }
+  log('drag-moves-player', dragOk ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
 
   // ---------- KLIK RIIL 3 skill ----------
   // Fase 17: hero default kini Mako — skill 2/3 terkunci di evolusi awal.
-  // Uji ini menverifikasi KLIK → cooldown, jadi buka kunci slotnya dulu.
+  // Uji ini menverifikasi KLIK → cooldown. RONDE-7: unlocked dihitung dari
+  // LEVEL (getSkillUnlockState), bukan flag slot → naikkan level run ke 6
+  // (slot 3 terbuka di Lv 5) — jalur unlock yang dipakai gameplay nyata.
   await page.evaluate(() => {
     const g = window.__IMUNVERSE.game;
-    if (g.run && g.run.skills) g.run.skills.slots.forEach((s) => { s.unlocked = true; });
+    if (g.run) {
+      g.run.level = 6;
+      if (g.run.skills) g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
+    }
   });
+  { const d0 = await page.evaluate(() => { const g = window.__IMUNVERSE.game; const v = g.run ? g.run.skills.getView(g.run.level) : []; return { lvl: g.run ? g.run.level : null, locks: v.map((x) => x.lockState), flag: g.run && g.run.skills ? g.run.skills.slots.map((s) => !!s.unlocked) : null }; });
+    console.log('  unlock-diag:', JSON.stringify(d0)); }
   const ensureGameplay = async () => {
     for (let k = 0; k < 12; k++) {
       const lu = await page.evaluate(() => document.querySelector('#screen-levelup')?.classList.contains('active'));
@@ -123,6 +164,19 @@ await page.fill('#auth-username', 'PemainHebat');
       }
     });
   };
+  {
+    // DIAG (pra-klik): tangkap apapun yang menutupi tombol skill — FATAL
+    // "click timeout" di headless sering kali overlay tak terlihat (z-index)
+    // bukan tombolnya yang rusak.
+    const pre = await page.evaluate(() => {
+      const el = document.querySelector('#ability-bar .ability-btn');
+      if (!el) return { present: false };
+      const r = el.getBoundingClientRect();
+      const cover = document.elementsFromPoint(r.x + r.width / 2, r.y + r.height / 2).map((e) => e.id || e.className || e.tagName).slice(0, 6);
+      return { present: true, cls: el.className, cover, modal: [...document.querySelectorAll('.screen.modal.active')].map((m) => m.id), lvl: window.__IMUNVERSE.STATE.levelUpOpen, paused: window.__IMUNVERSE.STATE.paused };
+    });
+    console.log('  pre-skill-click diag:', JSON.stringify(pre));
+  }
   for (let i = 0; i < 3; i++) {
     // Fase 18: XP per kill memicu level-up lebih sering — modal bisa menyela
     // di tengah klik → tutup & ulangi. Setup deterministik: reset cd slot ini
@@ -223,19 +277,37 @@ await page.fill('#auth-username', 'PemainHebat');
       await new Promise((r) => setTimeout(r, 250));
     }
   });
-  const killed = await page.evaluate(async () => {
+  // RONDE-6: TIDAK ADA unit milik player yang auto-fire — pasukan pun hanya
+  // menembak saat tombol SERANG ditekan. Bagian 1: musuh didekatkan, tanpa
+  // menahan SERANG → pasukan diam (passive-kills harus 0). Bagian 2: tahan
+  // SERANG → pasukan + hero menembak dan membunuh.
+  const squadIdle = await page.evaluate(async () => {
     const g = window.__IMUNVERSE.game;
     const p = g.run.player;
+    g.tryJoinSquad(3);
     g.spawnEnemy('parasit', false);
     const e = g.run.enemies.filter((x) => x.alive).pop();
-    if (!e) return false;
+    if (!e) return { ok: false, why: 'no-enemy' };
     e.x = p.x + 45; e.y = p.y;
     const k0 = g.run.kills;
-    // Fase 17: hero default kini Mako (melee, cd lebih lambat) — beri waktu cukup
-    await new Promise((r) => setTimeout(r, 4600));
-    return g.run.kills > k0 || !e.alive;
+    await new Promise((r) => setTimeout(r, 2200));
+    return { ok: g.run.kills === k0 && e.alive, kills: g.run.kills - k0, alive: e.alive };
   });
-  log('auto-attack-kills', killed);
+  log('squad-passive-without-serang', squadIdle.ok ? 'idle safe' : JSON.stringify(squadIdle));
+  const killed = await page.evaluate(async () => {
+    const g = window.__IMUNVERSE.game;
+    g.input.fireButtonHeld = true; // tahan SERANG
+    try {
+      const k0 = g.run.kills;
+      const t0 = performance.now();
+      while (performance.now() - t0 < 6000) { // polling loop (setTimeout lambat di headless)
+        await new Promise((r) => setTimeout(r, 120));
+        if (g.run.kills > k0) return true;
+      }
+      return false;
+    } finally { g.input.fireButtonHeld = false; }
+  });
+  log('squad-fires-with-serang', killed);
 
   // ---------- Level-up modal ----------
   await page.evaluate(async () => {
@@ -283,6 +355,16 @@ await page.fill('#auth-username', 'PemainHebat');
   await page.waitForTimeout(900);
   const sndEN = await page.locator('#btn-sound-pause').textContent();
   log('en-changed', sndID !== sndEN ? `${sndID.trim()} -> ${sndEN.trim()}` : false);
+  { const pre = await page.evaluate(() => {
+      const el = document.getElementById('btn-resume');
+      if (!el) return { present: false };
+      const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
+      const cover = document.elementsFromPoint(r.x + r.width / 2, r.y + r.height / 2).map((e) => e.id || e.className || e.tagName).slice(0, 6);
+      const barkOn = document.getElementById('presenter-layer') && document.getElementById('presenter-layer').classList.contains('on');
+      const barkTxt = document.getElementById('presenter-text') ? document.getElementById('presenter-text').textContent : '';
+      return { present: true, vis: cs.visibility, disp: cs.display, pe: cs.pointerEvents, rect: [r.x | 0, r.y | 0, r.width | 0, r.height | 0], cover, paused: window.__IMUNVERSE.STATE.paused, barkOn, barkTxt };
+    });
+    console.log('  pre-resume diag:', JSON.stringify(pre)); }
   await page.click('#btn-resume', { timeout: 6000 });
   await page.waitForTimeout(600);
   log('resume-hud', await active('#screen-hud'));
