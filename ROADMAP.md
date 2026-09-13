@@ -21,6 +21,7 @@ Roadmap ini adalah **turunan** dari kedua dokumen itu yang sudah **direkonsilias
 | **1.5 ✅ gerbang CI** — `npm run validate` kini **3 validator**, `npm run test:fase1` (31 cek), definisi workflow di `tools/ci/validate.yml` | retune yang dibatalkan membuat CI merah — dibuktikan: `costGrowth` 1,22→1,35 = **ERROR, exit 1**. ⚠️ workflow belum terpasang di GitHub: push agent ditolak (izin `workflows`) → `npm run ci:install` (§10 #14) |
 | `data/retention-config.json` & `data/economy-anchors.json` **sudah terdaftar di loader** sebagai `DATA.retentionConfig` / `DATA.anchors` (**G7** beres tanpa mengedit drop-in) | `js/core/data-store.js` + getter `getRetentionConfig` / `getAnchors` / `getAdEconomy` |
 | `comeback-system.js` **sudah dipakai runtime**; `pricing-model.js` dipakai validator katalog. Sisa 2 modul murni masih kode mati | `main.js:boot()`, `tools/validate-catalog.mjs` |
+| **2.6 ✅ PWA** — `manifest.json` (standalone, landscape), `sw.js` (cache per-BUILD: build baru = cache baru, cache lama dihapus saat activate; navigasi network-first dengan fallback offline; `files.zip`/hasil e2e tidak pernah di-cache), prompt pasang **sekali setelah run ke-3** yang bisa ditolak permanen, jalur petunjuk manual untuk iOS (satu-satunya cara pasang di sana), ikon placeholder dari palet design system | `js/systems/pwa-system.js` (keputusan murni), `js/ui/install-prompt-modal.js` (nol CSS baru), `tools/gen_pwa_icons.py`, 35 pemeriksaan headless — **pertahanan save utama** setelah keputusan §10 #10 |
 | **1B ✅ Toko diadaptasi ke katalog v2** — harga dari `priceRp`, nilai/badge/hemat dihitung runtime oleh `pricing-model.js` dari `economy-anchors.json`, metode = objek (QRIS → e-wallet → kartu), produk `active:false` tidak tampil, entitlement `cosmetics[]`/`drip`/`perks[]` benar-benar diberikan, bonus pembelian pertama 2×, `limit.perAccount` + jendela 72 jam | `payment-system.js` (ditulis ulang), `shop-screen.js`, `imun-economy.js` (+`grantCosmetics`/perk/drip), `monetization.js` (kuota +2 dari perk), 3 field save baru |
 | Uji headless **31/31 + 62/62 lolos** tanpa browser (loader, save lama, comeback, streak, BP, GP, evolusi, kampanye · katalog v2, metode bayar, Paket Perdana, Kartu Imun, bonus pertama, toleransi katalog) | `scripts/unit-fase1-retune.mjs`, `scripts/unit-fase1b-shop.mjs` |
 
@@ -152,7 +153,7 @@ Tambahan yang dibutuhkan agar entitlement nyata (bukan sekadar tidak error): fie
 | 2.3 | **Lepas gerbang landscape dari layar menu** | `index.html:691` `#rotate-hud`; batasi hanya saat state layar = gameplay. Verifikasi dulu apakah gerbangnya global; bila sudah dibatasi, laporkan dan lewati |
 | 2.4 | **Hook akhir sesi** di `gameover-screen.js`, maksimal 3 baris **di atas** tombol Main Lagi, ETA dalam **run** | wajib menyelesaikan **G1–G5, G7** dulu, kalau tidak hook tampil kosong |
 | 2.5 | **Hitung mundur reset harian** di dashboard, layar akhir run, panel misi HUD; penekanan visual bila sisa < 4 jam | `retention-config.json:dailyAnchor` |
-| 2.6 | **PWA**: manifest + service worker + prompt pasang setelah run ke-3 (sekali, bisa ditolak permanen) | juga lapisan pertahanan kedua untuk save di iOS (pengecualian penghapusan 7 hari) |
+| 2.6 | **PWA**: manifest + service worker + prompt pasang setelah run ke-3 (sekali, bisa ditolak permanen) | ✅ **SELESAI 13 Sep (BUILD 54a).** Dengan keputusan §10 #10 (tetap `localStorage`, tanpa backend) pekerjaan ini **naik kelas dari kenyamanan menjadi pertahanan save utama**: aplikasi terpasang dikecualikan dari penghapusan penyimpanan 7 hari WebKit. Modal hanya dari dashboard, tidak pernah di dalam run; bila modal comeback masih antre, penawaran dilewati ke kunjungan berikutnya. Ikon saat ini **placeholder** yang konsisten dengan palet (lihat §10 #16) |
 
 ---
 
@@ -218,6 +219,7 @@ Empat sistem navigasi untuk dua belas destinasi (dock bawah, sidebar, quick row,
 | 11 | **G12**: adapter di pemanggil (`{ ...meta, battlepass: meta.bp }`) vs migrasi kunci save `meta.bp` → `meta.battlepass` | memblokir Fase 2.4 |
 | 12 | **G13**: bentuk kanonik `meta.cosmetics.skin` — `{}` (repo, 3 tempat) vs `null` (drop-in) | memblokir Fase 4.2 |
 | 14 | **Pasang gerbang CI di GitHub**: jalankan `npm run ci:install` (menyalin `tools/ci/validate.yml` → `.github/workflows/validate.yml`) lalu commit+push dengan akun manusia, **atau** beri App izin `workflows` (Settings → Actions → General → Workflow permissions) | **perlu manusia** — sampai terpasang, gerbang hanya jalan lokal (`npm run validate` + `npm run test:fase1`) |
+| 16 | **Ikon PWA masih placeholder** (sel dari palet design system, dihasilkan `tools/gen_pwa_icons.py`). Ganti dengan art final pemilik bila tersedia — nama & ukuran berkas harus tetap (`assets/icons/pwa/*`) karena ditunjuk `manifest.json` + `index.html` | terbuka (kosmetik, tidak memblokir) |
 | 15 | **G15**: (a) `revive` & `double currency` ikut kuota 6/hari atau memang sengaja bebas kuota? (b) `noAds` boleh mematikan placement rewarded, atau hanya banner/interstitial (sesuai doc katalog)? | terbuka — harus dijawab **sebelum** `bundle_noads` diaktifkan |
 | 13 | **BP net −300** sudah diterapkan (harga 800 / kembali 500). Bila pemilik memilih model Fortnite (net 0) sesuai §10 #1, imbalan premium harus naik ke **800** Imun dan `premium.json` + `validate-retune-sync.mjs` ikut berubah | terbuka — terkait #1 |
 
@@ -230,7 +232,7 @@ Semua harus benar, bukan sebagian:
 - `npm run validate` lulus **0 error** — dan toleransi validator **tidak pernah** dilonggarkan
 - `npm run check` lulus
 - Self-test headless `index.html?autotest=1` → `SELFTEST_PASS`, dan **diperluas** untuk menutup jalur baru fase itu
-- **Khusus Fase 1/1B:** karena tidak ada browser di lingkungan kerja, `?autotest=1` dilengkapi `npm run test:fase1` (31 pemeriksaan jalur boot) dan `npm run test:fase1b` (62 pemeriksaan katalog v2 + pembayaran). Self-test browser tetap wajib sebelum rilis
+- **Khusus Fase 1/1B/2.6:** karena tidak ada browser di lingkungan kerja, `?autotest=1` dilengkapi `npm run test:fase1` (31 pemeriksaan jalur boot), `npm run test:fase1b` (62 pemeriksaan katalog v2 + pembayaran), dan `npm run test:fase2pwa` (35 pemeriksaan manifest/ikon/service worker/keputusan prompt). Self-test browser tetap wajib sebelum rilis — khususnya untuk PWA: verifikasi pemasangan nyata dan mode offline di perangkat
 - `BUILD` di `js/core/version.js` **dan** `?v=` di `index.html` sudah dibump
 - Save dari BUILD sebelumnya dimuat **tanpa kehilangan data** — diuji dengan save nyata, bukan save kosong
 - Seluruh string baru ada di `data/lang.json` **dan** `TRANSLATE_FIELDS` di `data-store.js`, berganti bahasa tanpa reload

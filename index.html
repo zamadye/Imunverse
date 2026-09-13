@@ -7,6 +7,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="theme-color" content="#fdf6e3" />
+  <!-- Fase 2.6: PWA — manifest + ikon home screen. manifest.json (bukan
+       .webmanifest) supaya Content-Type application/json tersedia di semua
+       server statis; ikon PNG dihasilkan tools/gen_pwa_icons.py -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icons/pwa/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/pwa/icon-192.png" />
+  <meta name="apple-mobile-web-app-title" content="Imunverse" />
+  <meta name="application-name" content="Imunverse" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
   <link rel="stylesheet" href="styles/main.css?v=54" />
@@ -687,7 +695,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=53a"></script>
+  <script type="module" src="js/main.js?v=54a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

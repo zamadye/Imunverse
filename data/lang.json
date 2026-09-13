@@ -5,6 +5,15 @@
     "en"
   ],
   "strings": {
+    "PASANG DI PERANGKAT?": "INSTALL ON DEVICE?",
+    "Imunverse bisa dipasang seperti aplikasi: ikon di layar utama, layar penuh, dan tetap bisa dimainkan tanpa jaringan.": "Imunverse can be installed like an app: a home-screen icon, full screen, and it keeps working without a network.",
+    "Versi terpasang juga melindungi progresmu dari pembersihan penyimpanan browser.": "The installed version also protects your progress from browser storage cleanup.",
+    "PASANG SEKARANG": "INSTALL NOW",
+    "NANTI SAJA — JANGAN TANYAKAN LAGI": "NOT NOW — DON'T ASK AGAIN",
+    "Imunverse bisa dipasang seperti aplikasi, dan versi terpasang TIDAK dihapus Safari setelah 7 hari tidak dipakai.": "Imunverse can be installed like an app, and the installed version is NOT deleted by Safari after 7 days of inactivity.",
+    "Cara pasang di iPhone/iPad: buka menu Bagikan (ikon kotak berpanah), lalu pilih \"Tambahkan ke Layar Utama\".": "To install on iPhone/iPad: open the Share menu (box-with-arrow icon), then choose \"Add to Home Screen\".",
+    "Imunverse terpasang di perangkatmu!": "Imunverse is installed on your device!",
+    "Pemasangan dibatalkan.": "Installation canceled.",
     "Tutup (hadiah batal)": "Close (forfeit reward)",
     "Kartu Imun 30 Hari": "30-Day Imun Card",
     "✓ DIKLAIM HARI INI": "✓ CLAIMED TODAY",

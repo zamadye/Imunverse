@@ -29,6 +29,7 @@ import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
 import { runComebackPass } from './systems/comeback-system.js'; // Fase 1.3: win-back saat boot
 import { getBodyState } from './systems/body-system.js'; // Fase 1.3: pastikan bodyState ada sebelum pass comeback
+import { registerServiceWorker, captureInstallPrompt, markInstalled } from './systems/pwa-system.js'; // Fase 2.6: PWA
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -468,6 +469,20 @@ async function boot() {
     if (comeback.changed) writeSave(STATE.meta);
     if (comeback.returnGift || comeback.streakReward) STATE.pendingComeback = comeback;
   }
+
+  // ===== Fase 2.6: PWA — service worker + penawaran pasang =====
+  // Registrasi TIDAK pernah memblokir boot: kegagalan hanya console.warn di
+  // dalam pwa-system. beforeinstallprompt DITAHAN (preventDefault) supaya kita
+  // yang memilih momennya: setelah run ke-3, dari dashboard, sekali.
+  registerServiceWorker();
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    captureInstallPrompt(e);
+  });
+  window.addEventListener('appinstalled', () => {
+    markInstalled(STATE.meta);
+    emit('toast', { message: 'Imunverse terpasang di perangkatmu!', kind: 'gold' });
+  });
 
   // 4) Wiring UI
   game.init({ canvas, input });

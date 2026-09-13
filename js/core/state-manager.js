@@ -71,6 +71,8 @@ export function createDefaultMeta() {
     drip: null,        // { productId, imunPerDay, days, startTs, lastClaimDay, claimedDays } — Kartu Imun 30 Hari
     perks: {},         // { perkId: untilTs } — 0 = permanen; mis. noForcedAds, adDailyLimitPlus2
     purchaseCount: {}, // { productId: n } — batas `limit.perAccount`; receipts dipangkas ke 30 jadi tidak bisa dipakai menghitung
+    // Fase 2.6 (PWA): penawaran pasang hanya SEKALI dan bisa ditolak permanen.
+    pwa: { promptedAt: 0, declined: false, installed: false, lastOfferBuild: null },
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,
