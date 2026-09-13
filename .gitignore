@@ -7,3 +7,7 @@
 __pycache__/
 .harness/
 .arena-tmp/
+
+# Brand tooling (rebuildable via pip/download — not brand assets)
+brand/bin/
+brand/libs/
