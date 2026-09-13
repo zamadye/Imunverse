@@ -9,6 +9,9 @@
     "sprites": "python3 tools/gen_sprites.py",
     "check": "node scripts/check-imports.mjs",
     "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
-    "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs"
+    "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs",
+    "validate:catalog": "node tools/validate-catalog.mjs",
+    "validate:retention": "node tools/validate-retention.mjs",
+    "validate": "npm run validate:catalog && npm run validate:retention"
   }
 }

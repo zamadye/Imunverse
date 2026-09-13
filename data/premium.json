@@ -1,76 +1,163 @@
 {
- "schemaVersion": 1,
- "note": "Harga simulasi. Balancing: 1 antibodi dasar ± Rp 10; bundle memberi nilai 1.5-1.8x lipat vs beli satuan (hemat terasa, tetap adil).",
- "bundles": [
-  {
-   "id": "bundle_welcome",
-   "name": "Welcome Bundle",
-   "priceRp": 15000,
-   "priceLabel": "Rp 15rb",
-   "badge": "HEMAT 72%",
-   "color": "#4aa3e0",
-   "contents": {
-    "currency": 1500,
-    "imun": 300,
-    "skin": "skin_pendiri",
-    "consumables": {
-     "serum_awal": 2,
-     "vaksin_awal": 1
+  "version": "2.0.0",
+  "effectiveDate": "2026-09-13",
+  "anchorsFile": "data/economy-anchors.json",
+  "doc": "Katalog IAP. File ini HANYA menyimpan harga jual dan isi. Semua nilai, badge, dan persentase hemat dihitung runtime oleh js/systems/pricing-model.js dari data/economy-anchors.json. Tidak ada angka nilai yang boleh ditulis manual di sini.",
+
+  "methods": [
+    {
+      "id": "qris",
+      "name": "QRIS",
+      "mdrPct": 0.7,
+      "flatFeeRp": 0,
+      "feeIncludesPpn": true,
+      "doc": "MDR reguler Bank Indonesia 0,7% per transaksi sukses; di Midtrans tarif QRIS sudah termasuk PPN. Metode termurah dan paling lazim untuk produk digital di Indonesia."
+    },
+    {
+      "id": "ewallet",
+      "name": "GoPay / OVO / DANA / ShopeePay",
+      "mdrPct": 2.0,
+      "flatFeeRp": 0,
+      "feeIncludesPpn": true,
+      "doc": "Tarif GoPay dan ShopeePay di Midtrans sudah termasuk PPN."
+    },
+    {
+      "id": "kartu",
+      "name": "Kartu Kredit / Debit",
+      "mdrPct": 2.9,
+      "flatFeeRp": 2000,
+      "feeIncludesPpn": false,
+      "ppnOnFeePct": 11,
+      "doc": "2,9% + Rp 2.000, belum termasuk PPN atas biaya. Untuk transaksi kecil metode ini paling mahal secara proporsional — jangan dijadikan default di UI."
     }
-   },
-   "valueNote": "1.500 antibodi + 300 Imun + Skin Pendiri + 3 item — paket awal terbaik"
+  ],
+
+  "firstPurchaseBonus": {
+    "enabled": true,
+    "appliesTo": ["imun_500", "imun_1000"],
+    "bonusPct": 100,
+    "oncePerTier": true,
+    "doc": "Bonus 2x sekali per tier, hanya pada dua tier terbawah. Praktik terbukti di pasar Indonesia (Double Diamond First Recharge MLBB, first-purchase bonus Genshin). Sengaja TIDAK diterapkan ke tier 2.500 dan 5.000 agar bonus berfungsi sebagai alat konversi pembeli pertama, bukan diskon untuk whale."
   },
-  {
-   "id": "bundle_pass_m1",
-   "name": "Pass Premium + 15 Lv",
-   "priceRp": 35000,
-   "priceLabel": "Rp 35rb",
-   "badge": "PALING LARIS",
-   "color": "#2f9c8f",
-   "contents": {
-    "currency": 800,
-    "imun": 500,
-    "consumables": {
-     "kopi_limfa": 2
+
+  "bundles": [
+    {
+      "id": "bundle_perdana",
+      "name": "Paket Perdana",
+      "priceRp": 15000,
+      "active": true,
+      "class": "starter",
+      "limit": { "perAccount": 1, "visibleForHoursAfterFirstLogin": 72 },
+      "color": "#4fd1c5",
+      "contents": {
+        "imun": 400,
+        "currency": 2000,
+        "cosmetics": ["skin_pendiri"],
+        "consumables": { "serum_awal": 2, "vaksin_awal": 2 }
+      },
+      "doc": "Loss-leader konversi. Satu-satunya tugasnya adalah memecah hambatan transaksi pertama. Titik harga Rp 15.000 dipilih karena setara tier impuls termurah di pasar lokal. Imun sengaja ditahan di 400 — di bawah imun_500 pada harga yang sama — supaya paket ini dibaca sebagai paket KONTEN, bukan paket mata uang, dan tidak mematikan tier referensi selama 72 jam pertama."
+    },
+
+    {
+      "id": "imun_500",
+      "name": "500 Imun",
+      "priceRp": 15000,
+      "active": true,
+      "class": "currency_ladder",
+      "color": "#f5c64f",
+      "contents": { "imun": 500 },
+      "doc": "Tier referensi. Rp 30 per Imun. Semua tier lain wajib lebih murah per Imun daripada tier ini."
+    },
+    {
+      "id": "imun_1000",
+      "name": "1.000 Imun",
+      "priceRp": 25000,
+      "active": true,
+      "class": "currency_ladder",
+      "color": "#f5c64f",
+      "contents": { "imun": 1000 },
+      "doc": "Rp 25 per Imun. Menggantikan bundle_imun lama yang menjual 100 Imun pada titik harga yang sama."
+    },
+    {
+      "id": "imun_2500",
+      "name": "2.500 Imun",
+      "priceRp": 55000,
+      "active": true,
+      "class": "currency_ladder",
+      "badge": "PALING LARIS",
+      "color": "#f5c64f",
+      "contents": { "imun": 2500 },
+      "doc": "Rp 22 per Imun. Tier yang diarahkan sebagai titik pusat katalog."
+    },
+    {
+      "id": "imun_5000",
+      "name": "5.000 Imun",
+      "priceRp": 99000,
+      "active": true,
+      "class": "currency_ladder",
+      "color": "#f5c64f",
+      "contents": { "imun": 5000 },
+      "doc": "Rp 19,80 per Imun. Tier tertinggi yang disetujui owner."
+    },
+    {
+      "id": "imun_12000",
+      "name": "12.000 Imun",
+      "priceRp": 199000,
+      "active": false,
+      "class": "currency_ladder",
+      "color": "#f5c64f",
+      "contents": { "imun": 12000 },
+      "doc": "Tier whale, dinonaktifkan sampai Fase 2. Harga sudah final (Rp 16,58 per Imun) sehingga tinggal mengubah active menjadi true. Alasan menahan: tanpa data ARPPU nyata, tier whale hanya memindahkan belanja pembeli tier 5.000 ke rate yang lebih murah."
+    },
+
+    {
+      "id": "bundle_riset",
+      "name": "Paket Riset Lanjutan",
+      "priceRp": 65000,
+      "active": true,
+      "class": "value_bundle",
+      "badge": "NILAI TERBAIK",
+      "color": "#9f7aea",
+      "contents": {
+        "imun": 2500,
+        "currency": 20000,
+        "consumables": { "koin_ganda": 3, "pelindung_lendir": 3, "kopi_limfa": 4 }
+      },
+      "doc": "Superset dari imun_2500 pada harga +Rp 10.000. Ini upsell yang sah, bukan dominasi: pembeli yang hanya menginginkan Imun tetap punya imun_2500 pada Rp 55.000. Jumlah Antibodi sengaja 20.000 sehingga selisih 0 Imun dan pembeli tidak pernah membayar Imun lebih mahal daripada tangga resmi."
+    },
+
+    {
+      "id": "pass_bulanan",
+      "name": "Kartu Imun 30 Hari",
+      "priceRp": 29000,
+      "active": true,
+      "class": "subscription",
+      "badge": "LANGGANAN",
+      "color": "#48bb78",
+      "contents": {
+        "imun": 300,
+        "drip": { "imunPerDay": 50, "days": 30 },
+        "perks": ["noForcedAds", "adDailyLimitPlus2"]
+      },
+      "doc": "Produk retensi utama. Model Starlight/Welkin: total 1.800 Imun tetapi menetes selama 30 hari sehingga tidak merusak tangga harga instan. Rate terbaik di toko justru benar untuk produk yang menuntut 30 kali login. Perk noForcedAds hanya mematikan banner dan interstitial; seluruh iklan rewarded tetap tersedia."
+    },
+
+    {
+      "id": "bundle_noads",
+      "name": "Bebas Iklan",
+      "priceRp": 89000,
+      "active": false,
+      "class": "entitlement",
+      "color": "#718096",
+      "contents": { "noAds": true, "imun": 500 },
+      "doc": "DIPENSIUNKAN sampai iklan paksa benar-benar ada. Saat ini kelima placement iklan bersifat opt-in rewarded, sehingga meta.noAds justru mencabut faucet Imun harian pembeli dan opsi revive miliknya. Menjual produk yang merugikan pembelinya adalah risiko hukum dan reputasi. Aktifkan hanya setelah banner/interstitial dirilis DAN flag noAds diubah agar tidak menyentuh placement rewarded."
     }
-   },
-   "valueNote": "500 Imun (buka Pass Premium) + 800 antibodi + 2 Kopi Limfa"
-  },
-  {
-   "id": "bundle_imun_pro",
-   "name": "Paket Imun Pro",
-   "priceRp": 45000,
-   "priceLabel": "Rp 45rb",
-   "badge": "TERBAIK",
-   "color": "#f5c64f",
-   "contents": {
-    "currency": 5000,
-    "imun": 150,
-    "consumables": {
-     "koin_ganda": 2,
-     "pelindung_lendir": 2,
-     "kopi_limfa": 2
-    }
-   },
-   "valueNote": "5.000 antibodi + 150 Imun + 6 item tempur premium"
-  },
-  {
-   "id": "bundle_noads",
-   "name": "Bebas Iklan",
-   "priceRp": 35000,
-   "priceLabel": "Rp 35rb",
-   "badge": "SEKALI BELI",
-   "color": "#9b6fd0",
-   "contents": {
-    "noAds": true,
-    "imun": 100
-   },
-   "valueNote": "Tanpa interupsi iklan selamanya + 100 Imun — dukung pengembang"
+  ],
+
+  "battlePass": {
+    "premiumCostImun": 800,
+    "imunReturnedOnFullTrack": 500,
+    "netImun": -300,
+    "doc": "Naik dari 500 ke 800 Imun (setara ~Rp 20.000 pada tier 1.000) — masih jauh di bawah pass pasar lokal. Track premium mengembalikan 500 Imun sehingga musim berikutnya terasa hampir gratis tetapi tetap menyisakan defisit 300 Imun per musim yang menjaga tarikan pembelian ulang. Field doc lama yang menyebut '525 Imun, untung' WAJIB dihapus dari battlepass.json."
   }
- ],
- "methods": [
-  "qris",
-  "ewallet",
-  "kartu"
- ]
 }

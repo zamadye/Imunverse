@@ -28,12 +28,54 @@ function walk(dir, out = []) {
   return out;
 }
 
+/**
+ * Buang komentar (// dan /* *\/) dari sumber JS sebelum pemindaian import,
+ * dengan tetap menghormati string ('…', "…", `…`) agar URL seperti
+ * 'https://…' di dalam string tidak memotong baris.
+ *
+ * Alasan: modul murni (mis. js/systems/comeback-system.js, session-hook.js)
+ * menuliskan CONTOH titik integrasi di komentar kepala berkas:
+ *     import { runComebackPass } from './systems/comeback-system.js';
+ * Tanpa pembuangan komentar, contoh itu ikut dipindai sebagai import nyata dan
+ * dilaporkan "tidak ada" — positif palsu, bukan kerusakan.
+ */
+function stripComments(src) {
+  let out = '';
+  let i = 0;
+  const n = src.length;
+  let quote = null; // ' " `
+  while (i < n) {
+    const c = src[i];
+    const d = src[i + 1];
+    if (quote) {
+      out += c;
+      if (c === '\\') { if (i + 1 < n) out += src[i + 1]; i += 2; continue; }
+      if (c === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; out += c; i++; continue; }
+    if (c === '/' && d === '/') { while (i < n && src[i] !== '\n') i++; continue; }
+    if (c === '/' && d === '*') {
+      i += 2;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i += 2;
+      out += ' '; // jaga agar token tidak menempel
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
 console.log('— Import antar modul —');
 const jsFiles = walk(path.join(ROOT, 'js')).filter((f) => f.endsWith('.js'));
 const importRe = /(?:import\s[^'"]*?from\s*|import\s*\(\s*|export\s[^'"]*?from\s*)['"](\.[^'"]+)['"]/g;
 for (const file of jsFiles) {
-  const src = fs.readFileSync(file, 'utf8');
+  const src = stripComments(fs.readFileSync(file, 'utf8'));
   let m;
+  importRe.lastIndex = 0;
   while ((m = importRe.exec(src))) {
     const target = path.resolve(path.dirname(file), m[1]);
     if (!fs.existsSync(target)) fail(`${path.relative(ROOT, file)} → ${m[1]} (tidak ada)`);

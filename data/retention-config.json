@@ -1,0 +1,157 @@
+{
+  "version": "1.0.0",
+  "effectiveDate": "2026-09-13",
+  "doc": "Konfigurasi lapisan retensi. Menemani data/economy-anchors.json — anchors mengatur berapa harga sesuatu, file ini mengatur berapa lama sesuatu dicapai. Keduanya harus dibaca bersama: produk berlangganan 30 hari dan Battle Pass 30 level hanya masuk akal bila kurva di sini benar.",
+
+  "referenceRun": {
+    "wave": 15,
+    "kills": 250,
+    "bossKills": 3,
+    "heroLevelInRun": 12,
+    "runsPerDayActive": 3,
+    "doc": "Run referensi untuk semua perhitungan pacing. Semua target di file ini dinyatakan dalam jumlah run referensi, bukan dalam jam, agar bisa diverifikasi ulang oleh tools/validate-retention.mjs setiap kali angka gameplay berubah."
+  },
+
+  "pacingTargets": {
+    "doc": "Berapa run referensi yang SEHARUSNYA dibutuhkan untuk menyelesaikan tiap sistem. Validator gagal bila kurva aktual meleset di luar toleransi. Tangga ini disusun supaya selalu ada satu sistem yang hampir selesai di setiap titik umur pemain.",
+    "toleransiPct": 35,
+    "targets": {
+      "kampanye": 45,
+      "battlePass": 85,
+      "pangkat": 48,
+      "evolusi": 33,
+      "masteryPerHero": 9,
+      "levelHeroPerHero": 34,
+      "squadPenuh": 133
+    }
+  },
+
+  "battlePass": {
+    "doc": "Retune. Kurva lama (xpNeed 40+10L, XP run = lv*40 + wave*15 + kills) menyelesaikan 30 level dalam 6,1 run — seluruh musim habis dalam dua hari. Kurva baru memakai batas per run plus sumber XP dari misi, sehingga pass menghargai KEHADIRAN HARIAN, bukan satu run panjang.",
+    "xpNeedFormula": { "base": 100, "perLevel": 25 },
+    "maxLevel": 30,
+    "totalXpToMax": 14625,
+    "runXp": {
+      "heroLevelMult": 6,
+      "waveMult": 4,
+      "killMult": 0.25,
+      "perRunCap": 120,
+      "dailyRunXpCap": 360
+    },
+    "missionXp": { "daily": 40, "weekly": 200, "chapterClear": 150 },
+    "expectedDaysToMax": 27,
+    "seasonDays": 30
+  },
+
+  "rank": {
+    "doc": "Retune. GP lama (wave*18 + kill*2 + boss*120 + victory 250 + chapter 100) memberi 1.130 GP per run referensi, sehingga 13 tier / 12.000 GP tamat dalam 10,6 run. Semua nilai dibagi 4,5 agar tangga pangkat berumur satu musim.",
+    "gpPerWave": 4,
+    "gpPerKill": 0.45,
+    "gpPerBoss": 27,
+    "gpVictory": 55,
+    "gpChapterClear": 22,
+    "maxGp": 12000
+  },
+
+  "evolution": {
+    "doc": "Retune. Pada 6% per kill reguler, satu run referensi menjatuhkan 29 fragmen — seluruh pohon evolusi (17 fragmen) selesai sebelum run pertama berakhir. Peluang diturunkan dan biaya dinaikkan agar pohon menjadi tujuan sebulan.",
+    "dropChanceNormal": 0.004,
+    "dropChanceElite": 0.04,
+    "bossGuaranteedParts": 1,
+    "stageCost": {
+      "equity_receptor": 50,
+      "equity_membran": 50,
+      "equity_effector": 50,
+      "inti_memori": 17
+    }
+  },
+
+  "heroUpgrade": {
+    "doc": "Retune. growth 1,35 membuat satu hero mencapai level 20 dalam 165 run dan seluruh roster dalam 1.975 run — di luar umur hidup game mana pun. growth 1,22 memberi 34 run per hero.",
+    "baseCost": 150,
+    "growth": 1.22,
+    "maxLevel": 20
+  },
+
+  "campaign": {
+    "doc": "Retune. Enam bab dengan kuota 25-50 kill selesai dalam 6 run — seluruh konten utama habis dalam 40 menit. Perbaikan termurah adalah tingkat kesulitan, karena hpMult per bab sudah ada di kode: tiga tingkat per bab memberi 18 penyelesaian tanpa aset baru.",
+    "difficulties": [
+      { "id": "normal", "label": "Normal", "hpMult": 1.0, "quotaMult": 1.0, "rewardMult": 1.0, "unlock": null },
+      { "id": "sulit", "label": "Sulit", "hpMult": 1.6, "quotaMult": 1.8, "rewardMult": 2.2, "unlock": "normal" },
+      { "id": "kritis", "label": "Kritis", "hpMult": 2.4, "quotaMult": 2.6, "rewardMult": 4.0, "unlock": "sulit" }
+    ],
+    "quotaMultGlobal": 2.2,
+    "expectedRunsPerClear": 2.5
+  },
+
+  "comeback": {
+    "doc": "Peluruhan kondisi tubuh 1 poin/hari secara rolling berarti pemain yang kembali setelah dua minggu menemukan lima sistem tubuhnya kritis dan run-nya dihukum. Itu kebalikan dari win-back. Peluruhan dibatasi, lalu absen dibayar dengan hadiah, bukan denda.",
+    "maxOfflineDecayDays": 2,
+    "streak": {
+      "graceDays": 1,
+      "rewards": [
+        { "day": 2, "currency": 150 },
+        { "day": 3, "currency": 250, "consumables": { "serum_awal": 1 } },
+        { "day": 5, "currency": 400, "consumables": { "kopi_limfa": 1 } },
+        { "day": 7, "currency": 700, "imun": 40, "consumables": { "koin_ganda": 1 } },
+        { "day": 14, "currency": 1500, "imun": 80 },
+        { "day": 30, "currency": 3500, "imun": 200 }
+      ],
+      "cycleAfterDay": 30,
+      "cycleRepeatFromDay": 7
+    },
+    "returnGift": [
+      { "minDaysAway": 3, "maxDaysAway": 6, "currency": 500, "restoreBody": true, "consumables": { "serum_awal": 1 } },
+      { "minDaysAway": 7, "maxDaysAway": 13, "currency": 1200, "restoreBody": true, "imun": 30, "consumables": { "serum_awal": 1, "vaksin_awal": 1 } },
+      { "minDaysAway": 14, "maxDaysAway": 999, "currency": 2500, "restoreBody": true, "imun": 60, "consumables": { "serum_awal": 2, "vaksin_awal": 2, "koin_ganda": 1 } }
+    ]
+  },
+
+  "dailyAnchor": {
+    "doc": "Jendela 24 jam rolling tetap dipertahankan karena lebih adil bagi pemain yang jam mainnya bergeser. Yang ditambahkan adalah keterbacaan: kebiasaan butuh isyarat yang bisa diprediksi, jadi sisa waktu WAJIB tampil sebagai hitung mundur di dashboard dan di layar akhir run.",
+    "showCountdown": true,
+    "countdownSurfaces": ["dashboard", "gameover", "hud-mission-panel"],
+    "warnWhenHoursLeft": 4
+  },
+
+  "rareDrop": {
+    "doc": "Implementasi konsep poin 3 owner: kosmetik langka yang bisa didapat pemain gratis lewat bermain konsisten di level menengah-tinggi, dengan RNG plus pity. Hanya kill layak yang dihitung, sehingga farming wave rendah tidak berguna.",
+    "minWave": 12,
+    "chanceElite": 0.002,
+    "chanceBoss": 0.010,
+    "pityEligibleKills": 400,
+    "pityResetOnDrop": true,
+    "maxDropsPerRun": 1,
+    "poolField": "f2pDroppable",
+    "excludeOwned": true
+  },
+
+  "recurringImunSinks": {
+    "doc": "Seluruh sink Imun yang ada saat ini adalah dinding sekali pakai; pemain yang menyelesaikannya tidak akan pernah membeli lagi. Ini lima sink berulang. Dua di antaranya menempel pada layar yang SUDAH ADA (revive dan peti boss), jadi bisa rilis tanpa UI baru.",
+    "sinks": [
+      { "id": "lanjut_run", "label": "Lanjut Run", "costImun": 50, "limitPerRun": 1, "screen": "revive", "requiresExistingScreen": true },
+      { "id": "peti_riset", "label": "Peti Riset", "costImun": 150, "screen": "bosschest", "requiresExistingScreen": true, "pity": 10 },
+      { "id": "slot_loadout", "label": "Slot Loadout", "costImun": 300, "maxPurchases": 3, "screen": "prep" },
+      { "id": "reset_global", "label": "Reset Upgrade Global", "costImun": 200, "screen": "upgrade" },
+      { "id": "refresh_misi", "label": "Refresh Misi Harian", "costImun": 30, "limitPerDay": 1, "screen": "hud" }
+    ],
+    "targetMonthlyImunSpendPerEngagedPayer": [300, 600]
+  },
+
+  "sessionHook": {
+    "doc": "Layar akhir run saat ini menampilkan hasil lalu dua tombol. Yang hilang adalah tujuan yang belum selesai. Hook ini memilih maksimum tiga progres terdekat dari SEMUA sistem dan menampilkannya sebagai jarak dalam run, bukan dalam angka mentah — 'kurang 2 run' jauh lebih kuat daripada '148 / 150 kill'.",
+    "maxItems": 3,
+    "minPctToShow": 0.35,
+    "maxEtaRuns": 6,
+    "priority": [
+      "misi_harian",
+      "unlock_hero",
+      "unlock_arena",
+      "battlepass_level",
+      "kuota_bab",
+      "pangkat_tier",
+      "mastery_level",
+      "evolusi_tahap"
+    ]
+  }
+}

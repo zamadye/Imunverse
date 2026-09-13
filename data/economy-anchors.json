@@ -1,0 +1,76 @@
+{
+  "version": "1.0.0",
+  "effectiveDate": "2026-09-13",
+  "doc": "SATU-SATUNYA sumber kebenaran valuasi. Semua badge HEMAT/BONUS, semua harga bundle, dan semua audit katalog dihitung dari file ini. Jangan hardcode nilai apa pun di js/ atau di premium.json — premium.json hanya menyimpan harga jual dan isi, bukan nilai.",
+
+  "currency": {
+    "imun": {
+      "baseRateRp": 30,
+      "referenceTierId": "imun_500",
+      "doc": "Rp per 1 Imun pada tier terkecil (500 Imun / Rp 15.000). Tier lebih besar WAJIB lebih murah per Imun. Jangkar pasar: 1 diamond MLBB ~Rp 270 (Jun 2026); Imun sengaja diposisikan ~9x lebih murah karena judul baru tanpa brand equity, distribusi web, dan basis pemain Indonesia tier-2."
+    },
+    "antibodi": {
+      "perImun": 40,
+      "doc": "Kurs resmi 1 Imun = 40 Antibodi. Diturunkan dari dua rasio nyata di kode: rasio perolehan F2P harian (~3.200 Antibodi : ~150 Imun = 21:1) dan rasio dinding sink (2.228.946 : 43.169 = 51,6:1). Nilai tengah geometrik = 33; dibulatkan ke 40 agar membeli Antibodi dengan uang sedikit lebih mahal daripada menggilingnya — melindungi loop gameplay."
+    }
+  },
+
+  "itemValuation": {
+    "mode": "shopCostAntibodi",
+    "doc": "Nilai Rp sebuah consumable = biaya tokonya dalam Antibodi x kurs Antibodi. Angka di bawah HARUS identik dengan upgrades.json shopItems.",
+    "shopItems": {
+      "serum_awal": 200,
+      "vaksin_awal": 180,
+      "kopi_limfa": 160,
+      "pelindung_lendir": 250,
+      "koin_ganda": 300
+    }
+  },
+
+  "cosmeticValuation": {
+    "mode": "priceImun",
+    "doc": "Nilai Rp kosmetik = priceImun x baseRateRp. Kosmetik limited (priceImun = 0 di cosmetics.json) memakai limitedValueImun agar badge tetap dapat direproduksi.",
+    "limitedValueImun": 250,
+    "prices": {
+      "skin_pendiri": 0,
+      "skin_mako_daun": 45,
+      "skin_eos_sakura": 60,
+      "skin_helia_murni": 250,
+      "skin_tbolt_krom": 400,
+      "acc_aura_bintang": 120,
+      "acc_mahkota_beta": 300
+    },
+    "limited": ["skin_pendiri"]
+  },
+
+  "entitlementValuation": {
+    "doc": "Entitlement non-currency dinilai eksplisit agar badge bundle yang memuatnya dapat direproduksi. noAds sengaja bernilai 0 sampai iklan paksa (banner/interstitial) benar-benar ada di build — lihat temuan P0-4.",
+    "noAds": 0,
+    "monthlyPassDripImun": 50,
+    "monthlyPassDripDays": 30
+  },
+
+  "badgePolicy": {
+    "minSavingPctToShow": 10,
+    "roundingMode": "floor",
+    "minDiscountPct": 20,
+    "maxDiscountPct": 50,
+    "doc": "Badge HEMAT hanya tampil bila penghematan >= 10% dan dibulatkan ke bawah, sehingga klaim di UI tidak pernah melebihi penghematan sesungguhnya (mitigasi risiko konsumen dari temuan P0-3). minDiscountPct/maxDiscountPct adalah pita diskon yang wajib dipatuhi semua bundle non-tangga: di bawah 20% bundle terasa tidak layak dibanding membeli Imun langsung, di atas 50% bundle mengkanibal tangga harga. Karena seluruh komponen kini dinilai pada satu kurs, satu-satunya variabel yang tersisa antar bundle adalah persentase diskon ini — itulah yang harus dijaga konsisten, bukan kurs per komponen."
+  },
+
+  "adEconomy": {
+    "imunPerAd": 10,
+    "dailyLimit": 6,
+    "rollingWindowHours": 24,
+    "doc": "Diturunkan dari 30 Imun x 5. Alasan: pada 30 Imun/iklan, satu tayangan memberi Rp 900 nilai sementara pendapatan iklan APAC ~Rp 65 per tayangan (eCPM rewarded ~USD 4). Rasio 13,8x itu membuat tier 500 Imun setara 3,4 hari menonton iklan sehingga tidak akan pernah dibeli. Pada 10 Imun x 6, faucet F2P = 60 Imun/hari: seluruh 7 hero terbuka dalam 41 hari, tier terkecil setara 8,3 hari iklan.",
+    "removedFields": ["offers.adAntibodi"]
+  },
+
+  "targetSinkMix": {
+    "doc": "Komposisi sink Imun yang dituju. Saat ini upgrade global menyerap 90% dinding premium — artinya mata uang premium menjadi gerbang kurva kekuatan, yang berbahaya begitu PvP asimetris (Team Blue vs Team Red) dirilis.",
+    "power": 0.45,
+    "cosmetic": 0.35,
+    "convenience": 0.15,
+    "battlePass": 0.05
+  }
+}
