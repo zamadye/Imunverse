@@ -3,7 +3,7 @@
  * cutscene pembuka & epilog (keputusan D1: 3D hanya 2 momen besar; gate =
  * hasil benchmark.html di device low-end sebelum produksi).
  *
- * Kebijakan performa (hasil feasibility — docs/featcheck-3d-cutscene.md):
+ * Kebijakan performa (hasil uji kelayakan — tools/featcheck/):
  *  - three.js di-import LALAI (dynamic import) — hanya dimuat bila 3D dipakai
  *  - prewarm(): modul + WebGL context dibuat di latar belakang saat
  *    title/dashboard → jank init KULUAR dari jalur kritis cutscene

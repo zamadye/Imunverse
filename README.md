@@ -1,114 +1,124 @@
 # 🧬 Imunverse
 
-**HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework/library eksternal**.
+**HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework dan tanpa build step**.
 
-![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0)
+![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0) ![build](https://img.shields.io/badge/BUILD-51a-f5c64f)
 
 ---
 
+## 📌 Dokumen acuan
+
+| Dokumen | Isi |
+|---|---|
+| [`ROADMAP.md`](ROADMAP.md) | Rencana kerja aktif: status terverifikasi, temuan integrasi, Fase 1 → 4, keputusan terbuka |
+| [`docs/rekomendasi-struktur-imunverse.md`](docs/rekomendasi-struktur-imunverse.md) | Sumber kebenaran desain monetisasi & retensi (v2.0) |
+| [`docs/brief-agent-building.md`](docs/brief-agent-building.md) | Instruksi kerja per fase + kriteria terima yang bisa diverifikasi mesin |
+
+Dokumen lama (33 file di `docs/`, `ROADMAP.md` era Fase 1–19, dan 145 screenshot) **sudah dihapus** pada 13 Sep 2026 agar tidak ada pengetahuan yang saling bertentangan. Nomor "Fase"/"RONDE" lama yang masih muncul di komentar kode adalah jejak sejarah, bukan rencana kerja.
+
 ## ▶️ Menjalankan
 
-Karena game memakai **ES6 modules** (import/export) + `fetch()` file JSON, browser memblokirnya saat dibuka via protokol `file://` (kebijakan CORS semua browser modern). Jalankan lewat server statis lokal:
+Game memakai **ES6 modules** + `fetch()` file JSON, sehingga browser memblokirnya lewat protokol `file://`. Jalankan lewat server statis lokal:
 
 ```bash
-# Opsi 1 (Python, tanpa dependensi)
-python3 -m http.server 8000
-
-# Opsi 2 (Node)
-npx serve .
+npm start          # python3 -m http.server 8000 --bind 0.0.0.0
+# atau: python3 -m http.server 8000  |  npx serve .
 ```
 
-Lalu buka **http://localhost:8000** — selesai. Tidak ada build step, tidak ada npm install.
+Buka **http://localhost:8000**. Tidak ada `npm install`, tidak ada langkah build.
 
-> Catatan: ini batasan keamanan bawaan browser untuk ES modules, bukan ketergantungan framework. Seluruh kode tetap vanilla JS.
-
-## 🎮 Cara Main
+## 🎮 Cara main
 
 | Aksi | Mobile | Desktop |
 |---|---|---|
 | Bergerak | **Virtual joystick** (sentuh di mana saja, tarik dari titik awal sentuh) | **WASD / Arrow keys** |
-| Menyerang | **Otomatis** ke musuh terdekat dalam range | Otomatis |
+| Menyerang | Tombol SERANG (tahan = tembak; tahan + tarik = aim) | Tombol SERANG / tahan |
 | Jeda | Tombol ⏸ | `Esc` / `P` |
 
-- Bertahanlah dari gelombang patogen. Setiap 25 detik = 1 **gelombang** baru (musuh makin banyak & kuat).
-- **Boss Sel Kanker** muncul tiap 5 gelombang — awas ledakan sitotoksinnya (area merah = telegraph, kabur!).
-- Kumpulkan **nutrisi**: Glukosa/Amino (XP), Vitamin C (heal), Antibodi (mata uang), Sinyal Sitokin (magnet).
-- **Level up** → pilih 1 dari 3 upgrade acak.
-- Antibodi dipakai untuk **Upgrade Squad permanen**, **unlock hero**, dan item di **Toko** — semua tersimpan otomatis di `localStorage`.
+- Tiap **25 detik** = 1 gelombang baru (`data/waves.json:waveDuration`); musuh makin banyak dan makin kuat.
+- **Boss** muncul tiap 5 gelombang (`bossWaveEvery`) — area merah adalah telegraph ledakan sitotoksin, kabur.
+- Kumpulkan nutrisi: Glukosa/Amino (XP), Vitamin C (heal), Antibodi (mata uang), Sinyal Sitokin (magnet).
+- **Level up** → pilih 1 dari 3 upgrade acak (rarity + pity + anti dead-choice).
+- Antibodi dipakai untuk upgrade squad permanen, unlock hero, dan item toko — tersimpan otomatis di `localStorage` (`imunverse.save.v1`).
 
-## 🏗️ Struktur Proyek
+> ⚠️ **Known issue (BUILD 51a):** `data/premium.json` sudah diganti ke katalog v2.0.0, tetapi layar Toko belum diadaptasi. Lihat `ROADMAP.md` §2 G8 dan §4 (Fase 1B) sebelum menyentuh monetisasi.
+
+## 🏗️ Struktur proyek
 
 ```
 Imunverse/
 ├── index.html                  # Entry point + kerangka screen UI (overlay DOM)
-├── styles/main.css             # Design system cream/teal/coral ala reference UI
-├── data/                       # SEMUA data game (JSON, bukan hardcoded)
-│   ├── heroes.json             #   4 hero (stat, attack pattern, sprite path, unlock)
-│   ├── enemies.json            #   6 tipe musuh (behavior, HP, XP, splitter config, boss AOE)
-│   ├── nutrients.json          #   5 item nutrisi (XP/heal/currency/magnet + drop rate)
-│   ├── waves.json              #   Config gelombang (formula spawn & scaling HP)
-│   ├── upgrades.json           #   Pool level-up, upgrade squad, item toko, config ekonomi
-│   └── missions.json           #   Misi/achievement + kondisi unlock hero
-├── assets/sprites/             # Sprite PNG transparan (generator: tools/gen_sprites.py)
-└── js/
-    ├── main.js                 # Bootstrap: data → sprite preload → save → loop
-    ├── core/
-    │   ├── game-loop.js        # rAF + delta-time nyata (bukan asumsi 60fps)
-    │   ├── state-manager.js    # State global + struktur meta default
-    │   ├── data-store.js       # Loader & akses data JSON + formula (XP, spawn, scaling)
-    │   ├── ui-bridge.js        # Event bus (gameplay ⇄ UI, tanpa dependensi silang)
-    │   └── game.js             # Orkestrator run: update/render/serang/drop/level-up/death
-    ├── input/input-handler.js  # Virtual joystick (touch) + WASD/arrow (keyboard)
-    ├── entities/
-    │   ├── player.js           # Auto-attack: melee_swipe / ranged_pierce / ranged_homing
-    │   ├── enemy.js            # chase_direct / chase_weave / splitter / boss_pattern_a
-    │   ├── projectile.js       # Pierce & homing (belok kejar musuh terdekat)
-    │   └── pickup.js           # Nutrisi: sebar, magnet, kedaluwarsa
-    ├── systems/
-    │   ├── spawn-system.js     # Wave spawning + spawn di luar viewport + weighted pool
-    │   ├── collision-system.js # Spatial hash grid + circle-to-circle (100+ entity lancar)
-    │   ├── upgrade-system.js   # Level-up pool acak + upgrade squad permanen
-    │   ├── economy-system.js   # Antibodi, daily reward, bonus akhir run, pembelian
-    │   ├── unlock-system.js    # Unlock hero dari statistik misi (atau beli di toko)
-    │   ├── mission-system.js   # Misi/achievement + reward otomatis
-    │   ├── effects-system.js   # Partikel & VFX (cap pool aman GC)
-    │   └── monetization.js     # ★ HOOK iklan: triggerRewardedAdRevive,
-    │                           #   triggerRewardedAdDoubleCurrency, checkDailyLives
-    ├── render/
-    │   ├── sprite-loader.js    # loadAllSprites() → Promise + cache Image + fallback dev
-    │   ├── shape-renderer.js   # drawProjectile, drawParticle, drawPulseGlow, drawHealthBar…
-    │   ├── camera.js           # Follow player (smoothed) + screen shake
-    │   └── background.js       # Latar tubuh prosedural parallax
-    ├── save/save-manager.js    # localStorage: JSON.stringify/parse + auto-save points
-    └── ui/
-        ├── screen-manager.js   # Registrasi & switching screen
-        └── screens/            # Satu modul per layar:
-            ├── loading-screen.js    ├── dashboard-screen.js
-            ├── roster-screen.js     ├── upgrade-screen.js
-            ├── shop-screen.js       ├── hud-screen.js
-            ├── levelup-screen.js    ├── pause-screen.js
-            ├── revive-screen.js     └── gameover-screen.js
-└── tools/gen_sprites.py        # Generator sprite PNG prosedural (Pillow, dev-only)
+├── styles/                     # Design system cream/teal/coral
+├── data/                       # 35 file JSON — SEMUA angka gameplay, bukan hardcoded
+│   ├── heroes.json             #   11 hero (stat, pola serangan, sprite, unlock)
+│   ├── enemies.json            #   13 tipe musuh (behavior, HP, XP, splitter, boss AOE)
+│   ├── arenas.json             #   5 arena (organ, unlock, bonus, palet lingkungan)
+│   ├── campaign.json           #   6 bab kampanye (killQuota, boss, reward, story)
+│   ├── waves.json  nutrients.json  upgrades.json  evolutions.json  skills.json
+│   ├── battlepass.json  ranks.json (13 tier)  mastery.json  missions.json
+│   ├── cosmetics.json  premium.json (katalog IAP v2.0.0)
+│   ├── economy-anchors.json    # ★ SATU sumber kebenaran valuasi (kurs Imun/Antibodi, badge)
+│   ├── retention-config.json   # ★ target pacing, comeback, drop langka, sink, session hook
+│   └── lang.json               #   kamus i18n (string UI wajib terdaftar di sini)
+├── assets/                     # sprite PNG, ikon SVG, audio, bangunan, reference sheet
+├── js/                         # 99 file JS
+│   ├── main.js                 # Bootstrap: data → sprite preload → save → loop
+│   ├── core/                   # game-loop (delta-time), state-manager, data-store,
+│   │                           # ui-bridge (event bus), game.js (orkestrator run), version.js
+│   ├── input/                  # virtual joystick + keyboard
+│   ├── entities/               # player, enemy, projectile, pickup, ally
+│   ├── systems/                # 43 modul: spawn, collision (spatial hash), upgrade, economy,
+│   │                           # imun-economy, unlock, mission, effects, monetization, payment,
+│   │                           # battlepass, rank, mastery, evolution, body, retention, metrics,
+│   │                           # tutorial, audio/music/vo, narrative, i18n, haptics, feature-gate
+│   │   ├── pricing-model.js    # ★ valuasi, badge, bonus pembelian pertama, deteksi dominasi
+│   │   ├── comeback-system.js  # ★ batas peluruhan offline, streak berampun, hadiah kembali
+│   │   ├── session-hook.js     # ★ 3 progres terdekat, ETA dalam RUN
+│   │   └── rare-drop-system.js # ★ drop kosmetik langka + pity, Peti Riset (pity terpisah)
+│   ├── render/                 # sprite-loader, shape-renderer, camera, background, visuals
+│   ├── save/save-manager.js    # localStorage + titik auto-save
+│   ├── ui/                     # screen-manager, cinematic, cutscene 2D/3D, coach, presenter
+│   │   └── screens/            # 23 layar (title, dashboard, roster, hero-detail, prep, shop,
+│   │                           #   bag, codex, campaign, arena, battlepass, rank, profile,
+│   │                           #   auth, hud, levelup, pause, revive, bosschest, gameover, …)
+│   └── vendor/three.module.js  # three.js (hanya untuk cutscene 3D, dynamic import)
+├── tools/
+│   ├── validate-catalog.mjs    # ★ audit katalog IAP — exit 1 bila ada error
+│   ├── validate-retention.mjs  # ★ audit pacing + Monte Carlo drop + sim comeback 45 hari
+│   ├── gen_sprites.py  gen_assets.py  gen_ecosystem_assets.py  server.py  featcheck/
+├── scripts/                    # check-imports.mjs + 30 e2e/unit (menulis bukti ke shots/)
+├── image-search/               # referensi visual UI dari game lain (bahan riset)
+└── files.zip                   # arsip asli paket update monetisasi/retensi (sudah di-unpack)
 ```
 
-## 🔑 Detail Teknis Sesuai Spek
+★ = bagian dari paket monetisasi & retensi v2.0 (13 Sep 2026). Empat modul bertanda ★ di `js/systems/` adalah **modul murni**: tidak menyentuh DOM, tidak menulis save, tidak memanggil `emit`.
 
-- **Delta-time**: `dt = (timestamp_rAF - sebelumnya) / 1000`, di-clamp 50 ms — gameplay identik di layar 30/60/120 Hz.
-- **Formula wave** (`data/waves.json`): `spawnInterval = max(0.4, 1.8 − wave×0.08)`; `enemyHP = baseHP × (1 + (wave−1)×0.12)`.
-- **XP curve**: `xpToNextLevel = ceil(10 × level^1.5)`; level-up mem-pause game dan menampilkan 3 pilihan acak.
-- **Collision**: circle-to-circle (perbandingan kuadrat jarak vs jumlah radius) via spatial hash grid sel 96 px — cek hanya antar sel bertetangga.
-- **Sprite**: semua karakter dirender `drawImage()` dari PNG transparan; path tersimpan di JSON (`sprite`/`spriteIdle`/`spriteAttack`). `loadAllSprites()` mengembalikan Promise dan game baru mulai setelah semua termuat. Generator placeholder (canvas offscreen) hanya fallback bila file PNG tidak ada.
-- **Save**: objek JSON murni di `localStorage` (`imunverse.save.v1`); auto-save setelah akhir run, pembelian, unlock, klaim harian.
-- **Monetisasi**: hook di `js/systems/monetization.js` (simulasi). Alur setelah iklan sukses — revive 50% HP + bersih-bersih musuh, 2× antibodi, daily reward — semuanya logic asli.
+## 🔑 Detail teknis
 
-## 🛠️ Tooling (opsional, untuk pengembangan)
+- **Delta-time nyata:** `dt = (t_rAF − sebelumnya) / 1000`, di-clamp **50 ms** (`game-loop.js:52`) — gameplay identik di layar 30/60/120 Hz.
+- **Formula gelombang** (`data/waves.json`): `spawnInterval = max(0.4, 1.8 − wave × 0.08)`; `enemyHP = baseHP × (1 + (wave−1) × 0.105)`; kecepatan musuh naik 1,5%/gelombang hingga ×1,6; maksimum 250 musuh hidup.
+- **Kurva XP:** `xpToNextLevel = ceil(10 × level^1.5)` (`data-store.js:272`). Level-up mem-pause game 0,3 s dan menampilkan 3 pilihan acak.
+- **Collision:** circle-to-circle (kuadrat jarak vs kuadrat jumlah radius) lewat **spatial hash grid sel 96 px** — hanya antar sel bertetangga.
+- **Sprite:** semua karakter dirender `drawImage()` dari PNG transparan; path disimpan di JSON. `loadAllSprites()` mengembalikan Promise dan game baru mulai setelah semua termuat; `?v=BUILD` untuk cache-busting.
+- **Save:** JSON murni di `localStorage` (`imunverse.save.v1`); field baru wajib aman lewat `mergeMetaDefaults` (deep-merge) agar save lama tidak pecah. Metrik run di `imunverse.metrics.v1` (ring buffer 200 run).
+- **Isolasi:** gameplay → UI **hanya** lewat event bus `ui-bridge` (`emit`/`on`). Destinasi menu wajib terdaftar di `data/features.json` (gerbang *fail-closed*).
+- **Monetisasi:** `js/systems/monetization.js` masih berisi hook iklan simulasi; `payment-system.js` adalah gateway simulasi. Katalog v2 menilai semua produk runtime dari `economy-anchors.json` (kurs **Rp 30/Imun**, **1 Imun = 40 Antibodi**).
+
+## 🛠️ Tooling
 
 ```bash
-npm run sprites   # regenerasi assets/sprites/*.png (butuh Pillow)
-npm run check     # validasi import path, JSON, dan kelengkapan sprite
-npm start         # jalankan server statis di :8000
+npm start                     # server statis :8000
+npm run validate              # ★ gerbang merge: validate:catalog + validate:retention (0 error)
+npm run validate:catalog      # audit katalog IAP saja
+npm run validate:retention    # audit pacing/Monte Carlo/comeback/session-hook saja
+npm run check                 # validasi import path, JSON, sprite, referensi index.html
+npm run sprites               # regenerasi assets/sprites/*.png (butuh Pillow)
+npm run ecosystem-assets      # regenerasi aset ekosistem (reference sheet, bangunan, path)
+npm run check:ecosystem-assets
 ```
+
+`npm run validate` **wajib lulus sebelum merge** apa pun. Jangan pernah melonggarkan toleransi validator agar build lewat — perbaiki angkanya, atau laporkan.
 
 ## 🧪 Self-test headless
 
-Buka `index.html?autotest=1` — game menjalankan alur nyata (start run → auto-attack → kill → level-up → mati → game over → save) dan mencetak `SELFTEST_PASS`/`SELFTEST_FAIL` ke console. Berguna untuk smoke-test otomatis.
+Buka `index.html?autotest=1` — game menjalankan alur nyata (start run → attack → kill → level-up → mati → game over → save) dan mencetak `SELFTEST_PASS` / `SELFTEST_FAIL` ke console. Skrip `scripts/e2e-*.mjs` (Playwright) menulis bukti screenshot ke `shots/` — folder itu adalah **output**, dibuat ulang otomatis.

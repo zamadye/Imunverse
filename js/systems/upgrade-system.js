@@ -15,7 +15,7 @@ import { antigenUpgradeAvailable, applyAntigenUpgrade } from './antigen-memory.j
 
 /**
  * V2 Phase 4 — roll pilihan level-up dengan RARITY + PITY + anti dead-choice.
- * (menggantikan Fisher-Yates seragam V1; spek docs/v2/phase-04-build-evolution.md)
+ * (menggantikan Fisher-Yates seragam V1)
  *  - weighted sampling tanpa penggantian (bobot luRules.rarityWeights)
  *  - patterns per entri: hero melee tidak pernah ditawari upgrade proyektil
  *  - pity: run.luPity ≥ pityRolls → dijamin ≥1 rare+ pada roll ini

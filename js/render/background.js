@@ -16,7 +16,7 @@
  *  - Ritme DETAK JANTUNG (lub-dub) global: glow, bercak, dan isi tanah
  *    naik-turun mengikuti denyut. Semua parameter motif-detail dibaca dari
  *    data/arenas.json → palette; kode hanya berisi DEFAULT fallback
- *    (lihat docs/map-environment-schema.md).
+ *    (skema motif-detail per arena hidup di data/arenas.json itu sendiri).
  */
 
 import { drawSprite, getSprite } from './sprite-loader.js';

@@ -74,7 +74,7 @@ export class EffectsSystem {
 
   /**
    * V2 Phase 1 "death pop": sprite musuh membesar lalu memudar saat mati,
-   * supaya kill tidak terasa "lenyap begitu saja" (spek docs/v2/phase-01).
+   * supaya kill tidak terasa "lenyap begitu saja".
    * @param {string} sprite path aset musuh
    * @param {number} radius radius render musuh (px dunia)
    * @param {boolean} flip  arah hadap terakhir

@@ -6,7 +6,7 @@
  *  2. Mode — HANYA bila Endless sudah terbuka (≥1 bab kampanye tamat); sebelum itu
  *     baris mode tidak dirender dan mode dipaksa `kampanye` (default otomatis).
  *  Fokus Run & Arena dihapus dari alur:
- *  - fokusRun → selalu `seimbang` (body-system di-PARK per docs/v2/phase-00 §3; nilai
+ *  - fokusRun → selalu `seimbang` (body-system di-PARK; nilai
  *    fokus tak terasa pemain) — data & sistemnya tidak disentuh.
  *  - arena → kampanye: ditentukan bab (game.getRunArena, sudah begitu sejak R2);
  *    endless: arena terbuka terbaik dipilih otomatis (auto-default, bukan pertanyaan).
