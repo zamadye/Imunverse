@@ -18,29 +18,30 @@ import { getData } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 
-const todayStr = () => new Date().toISOString().slice(0, 10);
+const DAY_MS = 86400000;
 
-/** Selisih hari kalender (string YYYY-MM-DD). */
-function daysBetween(fromStr, toStr) {
-  if (!fromStr) return 1;
-  const a = new Date(fromStr + 'T00:00:00Z');
-  const b = new Date(toStr + 'T00:00:00Z');
-  return Math.max(0, Math.round((b - a) / 86400000));
+/**
+ * Konvensi waktu F8 (keputusan user 2026-09-13): semua siklus "harian"
+ * tubuh (decay, rawat, streak sehat) memakai 24 jam ROLLING berbasis
+ * timestamp — mengikuti ritme main user, bukan tanggal kalender.
+ */
+function dayTs(dateStr) {
+  return dateStr ? new Date(dateStr + 'T00:00:00Z').getTime() : 0;
 }
 
 /** Kondisi default meta.bodyState (di-merge deep saat load save). */
 export function createDefaultBodyState() {
   const systems = {};
   for (const def of getData().bodySystems.systems) {
-    systems[def.id] = { health: def.startHealth, lastCaredDay: null };
+    systems[def.id] = { health: def.startHealth, lastCaredTs: null };
   }
   return {
     systems,
     energi: 40,
     racun: 15,
-    lastVisitedDay: null,
+    lastDecayTs: null,
     perfectStreak: 0,
-    lastPerfectDay: null, // fix L8 (audit 2026-09-13): dipakai registerRunResult (streak), deklarasikan di default
+    lastPerfectTs: null,
     milestoneDone: false,
     narrativeStage: 0, // index ke dalam arc naratif (0 = terinfeksi kronis)
   };
@@ -73,16 +74,23 @@ export function clampHealth(v) {
 export function applyDailyDecay(meta = STATE.meta) {
   const cfg = getData().bodySystems;
   const st = getBodyState(meta);
-  const today = todayStr();
-  const elapsed = daysBetween(st.lastVisitedDay, today);
-  if (elapsed <= 0) return { decayed: [], days: 0 };
+  // migrasi save lama: lastVisitedDay (tanggal kalender) → ts
+  if (typeof st.lastDecayTs !== 'number' && st.lastVisitedDay) {
+    st.lastDecayTs = dayTs(st.lastVisitedDay);
+  }
+  const now = Date.now();
+  const elapsed = Math.floor((now - (st.lastDecayTs || 0)) / DAY_MS);
+  if (elapsed < 1) return { decayed: [], days: 0 };
 
   const decayed = [];
   for (const sysDef of cfg.systems) {
     const sys = st.systems[sysDef.id];
-    // hari terakhir dirawat vs hari terakhir kunjungan: decay hanya bila
-    // TIDAK dirawat pada hari-hari yang berlalu
-    const caredElapsed = daysBetween(sys.lastCaredDay, today);
+    // 24 jam rolling sejak terakhir "dirawat": decay hanya bila TIDAK
+    // dirawat selama siklus-siklus yang berlalu (cap 7, anti cliff)
+    const caredTs = typeof sys.lastCaredTs === 'number'
+      ? sys.lastCaredTs
+      : (sys.lastCaredDay ? dayTs(sys.lastCaredDay) : 0);
+    const caredElapsed = Math.floor((now - caredTs) / DAY_MS);
     if (caredElapsed >= 1) {
       const drop = Math.min(cfg.decayPerDay * Math.min(caredElapsed, 7), sys.health);
       if (drop > 0) {
@@ -91,16 +99,18 @@ export function applyDailyDecay(meta = STATE.meta) {
       }
     }
   }
-  st.lastVisitedDay = today;
+  // fase siklus dipertahankan: anchor maju sebesar elapsed (bukan "now"),
+  // supaya ritme user tetap terjaga (F8)
+  st.lastDecayTs = (st.lastDecayTs || 0) + elapsed * DAY_MS;
   meta.bodyState = st;
   writeSave(meta);
   return { decayed, days: elapsed };
 }
 
-/** Tandai sistem "dirawat" hari ini (run fokus menang / suplemen / iklan). */
+/** Tandai sistem "dirawat" sekarang — reset jendela decay 24 jam-nya (F8). */
 export function markCared(sysId, meta = STATE.meta) {
   const st = getBodyState(meta);
-  st.systems[sysId].lastCaredDay = todayStr();
+  st.systems[sysId].lastCaredTs = Date.now();
   meta.bodyState = st;
 }
 
@@ -200,7 +210,6 @@ export function getMilestoneProgress(meta = STATE.meta) {
 export function registerRunResult(meta, { kills, wave, focusId, omegaCleanse }) {
   const cfg = getData().bodySystems;
   const st = getBodyState(meta);
-  const today = todayStr();
   const impact = { racunGained: 0, energiGained: 0, systemGains: {}, toxicSeep: 0, detox: 0, milestone: null };
 
   // ---- 1. Racun sisa pertarungan (formula dari desain) ----
@@ -258,16 +267,16 @@ export function registerRunResult(meta, { kills, wave, focusId, omegaCleanse }) 
     impact.toxicSeep = seep;
   }
 
-  // ---- 5. Milestone makro: semua ≥80 hari ini → streak ----
+  // ---- 5. Milestone makro: semua ≥80 pada siklus 24 jam ini → streak (F8) ----
   const allHealthy = Object.values(st.systems).every((s) => s.health >= cfg.perfectThreshold);
   if (allHealthy) {
-    if (st.lastPerfectDay !== today) {
+    if (typeof st.lastPerfectTs !== 'number' || Date.now() - st.lastPerfectTs >= DAY_MS) {
       st.perfectStreak += 1;
-      st.lastPerfectDay = today;
+      st.lastPerfectTs = Date.now();
     }
   } else {
     st.perfectStreak = 0;
-    st.lastPerfectDay = null;
+    st.lastPerfectTs = null;
   }
   if (!st.milestoneDone && st.perfectStreak >= cfg.perfectDays) {
     st.milestoneDone = true;

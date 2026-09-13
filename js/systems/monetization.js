@@ -64,29 +64,37 @@ export function triggerRewardedAdBossChest(onSuccess, onFail) {
 }
 
 /**
- * Kuota iklan reward harian (semua placement dihitung bersama) — mencegah
- * reward inflation & ad fatigue (riset: cap konservatif, limit dari JSON).
- * @returns {boolean} true bila masih ada kuota hari ini.
+ * Kuota iklan reward (semua placement dihitung bersama) — 1× siklus
+ * 24 jam ROLLING per akun (F8, keputusan user 2026-09-13): di-anchor ke
+ * aktivitas user sendiri, bukan tanggal kalender — "kalau klaim jam 8, jam 8
+ * pula refresh-nya". Limit dari data/upgrades.json (5×/hari utk jalur gratis).
+ * @returns {boolean} true bila masih ada kuota di siklus 24 jam ini.
  */
+const DAY_MS = 86400000;
+
+/** Gulir kuota bila siklus 24 jam lama sudah lewat (lazy, tanpa write save). */
+function rollAdQuota(meta, now = Date.now()) {
+  const q = meta.adDaily;
+  if (!q || typeof q.anchorTs !== 'number' || now - q.anchorTs >= DAY_MS) {
+    meta.adDaily = { anchorTs: now, count: 0 };
+  }
+  return meta.adDaily;
+}
+
 export function canWatchAd(meta) {
   if (meta.noAds) return false; // IAP Bebas Iklan aktif — tidak ada interupsi
-  const today = new Date().toISOString().slice(0, 10);
-  if (!meta.adDaily || meta.adDaily.date !== today) return true;
+  const q = rollAdQuota(meta);
   // Limit dari data/upgrades.json → economy.adDailyLimit (bukan hardcode)
-  let limit = 6;
+  let limit = 5;
   try {
     limit = getData().upgrades.economy.adDailyLimit ?? limit;
   } catch { /* data-store belum siap — pakai limit konservatif */ }
-  return meta.adDaily.count < limit;
+  return q.count < limit;
 }
 
 /** Catat 1 iklan selesai ditonton (dipanggil setelah onSuccess). */
 export function trackAdWatch(meta) {
-  const today = new Date().toISOString().slice(0, 10);
-  if (!meta.adDaily || meta.adDaily.date !== today) {
-    meta.adDaily = { date: today, count: 0 };
-  }
-  meta.adDaily.count += 1;
+  rollAdQuota(meta).count += 1;
 }
 
 /**
@@ -103,8 +111,10 @@ export function triggerRewardedAdRecovery(onSuccess, onFail) {
   return true;
 }
 
-/** Fase 14: offerwall — video/survei sponsor. RONDE-4 (audit 2026-09-13):
- * hadiahnya ANTIBODI (soft), bukan Imun Coin — premium hanya beli & Battle Pass.
+/** Fase 14: offerwall — video/survei sponsor. Kebijakan 2026-09-13
+ * (keputusan user): video sponsor memberi IMUN COIN (jalur gratis, 5×/24 jam
+ * via kuota bersama); survei sponsor memberi Antibodi. Buyer: beli Imun
+ * langsung via bundle (data/premium.json).
  * (Seam integrasi; tile offerwall toko saat ini memakai openAdModal shop-screen.) */
 export function triggerRewardedAdOfferwall(onSuccess, onFail) {
   console.info('[monetization] triggerRewardedAdOfferwall() — simulasi offerwall sponsor');

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "season": 1,
   "name": "Beta Musim 1",
-  "doc": "Fase 14 \u2014 Battle Pass. XP dari bermain (akhir run: level*40 + wave*15 + kills). Jalur gratis terbuka semua; jalur premium dibeli 500 Imun Coin. Twist: total Imun di jalur premium (525) > harga pass (500) \u2192 pass membayar dirinya untuk musim berikutnya. XP naik level butuh 40+10*level.",
+  "doc": "Fase 14 — Battle Pass. XP dari bermain (akhir run: level*40 + wave*15 + kills). Jalur gratis terbuka semua; jalur premium dibeli 500 Imun Coin. Twist: total Imun di jalur premium (525) > harga pass (500) → pass membayar dirinya untuk musim berikutnya. XP naik level butuh 40+10*level.",
   "premiumCostImun": 500,
   "xpNeed": {
     "base": 40,
@@ -327,9 +327,10 @@
     }
   ],
   "offers": {
-    "doc": "RONDE-4 \u2014 offerwall/bonus sosial = ANTIBODI (soft currency). Imun Coin premium HANYA dari pembelian & reward Battle Pass.",
+    "doc": "RONDE-4 — offerwall/bonus sosial = ANTIBODI (soft currency). Imun Coin premium HANYA dari pembelian & reward Battle Pass.",
     "adAntibodi": 80,
     "surveyAntibodi": 150,
-    "referralAntibodi": 250
+    "referralAntibodi": 250,
+    "adImun": 30
   }
 }

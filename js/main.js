@@ -506,13 +506,14 @@ async function boot() {
       title: 'Cara Mendapatkan Imuncoin',
       icon: 'assets/icons/cur-imun.svg',
       balance: () => Math.floor(STATE.meta.imun || 0),
-      // fix T2 (audit 2026-09-13): teks panduan lama salah — Imun Coin
-      // TIDAK lagi mengalir dari kill/wave/boss/mastery (RONDE-4: premium
-      // hanya dari pembelian & reward Battle Pass).
+      // Kebijakan 2026-09-13 (keputusan user): 2 jalur resmi Imun Coin —
+      // GRATIS: video sponsor (5×/24 jam) · BUYER: beli bundle langsung.
+      // TIDAK dari kill/wave/boss/mastery (RONDE-4).
       tasks: [
-        '<b>Beli bundle di Toko</b> — bundle premium (simulasi pembayaran) berisi Imun Coin.',
+        '<b>Player gratis: Tonton Video Sponsor di Toko</b> — 5× per 24 jam, dapat Imun Coin.',
+        '<b>Buyer: beli bundle di Toko</b> — Paket Imun & bundle premium berisi Imun Coin.',
         '<b>Klaim reward Battle Pass jalur premium</b> — level tertentu memberi Imun Coin.',
-        '<b>Pemakaian</b> — membuka Battle Pass premium, upgrade global semua hero, unlock hero jalur Imun.',
+        '<b>Pemakaian</b> — upgrade global semua hero, skin & aksesori, unlock hero jalur Imun.',
       ],
     },
   };

@@ -278,6 +278,7 @@ export function show() {
     card.appendChild(btn);
     btn.addEventListener('click', () => {
       if (!owned) {
+        if (!requireAccount('shop')) return; // keputusan 2026-09-13: semua transaksi toko wajib akun
         const res = buyCosmetic(meta, sk.id);
         if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
         equipSkin(meta, sk.id, sk.hero);
@@ -309,6 +310,7 @@ export function show() {
     card.appendChild(btn);
     btn.addEventListener('click', () => {
       if (!owned) {
+        if (!requireAccount('shop')) return; // keputusan 2026-09-13: semua transaksi toko wajib akun
         const res = buyCosmetic(meta, ac.id);
         if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
         equipAcc(meta, ac.id);
@@ -340,6 +342,7 @@ export function show() {
         text: 'BELI',
         disabled: meta.currency < bodyCfg.suplemenCost,
         onclick: () => {
+          if (!requireAccount('shop')) return; // keputusan 2026-09-13: semua transaksi toko wajib akun
           if (meta.currency < bodyCfg.suplemenCost) return;
           addCurrency(meta, -bodyCfg.suplemenCost); // sink currency (logic asli)
           const res = applySuplemen(sysDef.id, meta);
@@ -355,14 +358,16 @@ export function show() {
     namedIconEl('vitality', 'shop-ico'),
     el('b', { text: 'Suplemen Premium' }),
     el('div', { class: 's-desc', text: `+${bodyCfg.suplemenGain} SEMUA sistem sekaligus (pembelian simulasi).` }),
+    // F7 + keputusan user 2026-09-13: IAP BUKAN iklan — tidak boleh diblokir
+    // kuota iklan (pemilik Bebas Iklan justru harus tetap bisa beli), tidak
+    // tercatat sebagai tontonan iklan; pembelian WAJIB akun.
     el('button', {
       class: 'btn btn-gold',
-      text: canWatchAd(meta) ? 'BELI (IAP SIMULASI)' : 'KUOTA HARIAN PENUH',
-      disabled: !canWatchAd(meta),
+      text: 'BELI (IAP SIMULASI)',
+      disabled: false,
       onclick: () => {
-        if (!canWatchAd(meta)) return;
+        if (!requireAccount('shop')) return; // transaksi wajib akun
         triggerIAPSuplementPremium(() => {
-          trackAdWatch(meta);
           for (const sysDef of bodyCfg.systems) applySuplemen(sysDef.id, meta);
           emit('toast', { message: 'Suplemen Premium: semua sistem pulih!', kind: 'gold' });
           show();
@@ -378,25 +383,30 @@ export function show() {
   // RONDE-4: ini SOFT currency. Imun Coin premium hanya dari bundle di atas
   // & reward Battle Pass — tidak dari video/survei/referral.
   const offers = getData().battlepass.offers;
-  const freeSection = sectionEl('free', 'Bonus Antibodi: tonton sponsor, isi survei, atau ajak teman. Imun Coin (premium) tersedia lewat pembelian & musim Battle Pass.');
+  // Kebijakan 2026-09-13 (keputusan user): player GRATIS dapat Imun Coin dari
+  // video sponsor (5×/24 jam — kuota bersama semua iklan); buyer beli Imun
+  // Coin & item langsung di atas. Survei tetap Antibodi (1×/hari).
+  const freeSection = sectionEl('free', 'Player gratis: Imun Coin dari video sponsor (5× per 24 jam) & survei sponsor. Buyer: beli Imun Coin & item langsung di atas.');
   const freeGrid = el('div', { class: 'free-grid' });
 
+  // Player gratis: tonton video sponsor → IMUN COIN (keputusan user 2026-09-13).
+  // Tetap masuk kuota 24 jam bersama (canWatchAd) — 5×/hari, anti inflation.
   const adTile = el('div', { class: 'free-tile' }, [
     el('div', { class: 'ft-head' }, [
       el('img', { class: 'ft-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
       el('b', { text: 'Tonton Video Sponsor' }),
     ]),
-    el('span', { text: `+${offers.adAntibodi} Antibodi per tontonan (simulasi iklan reward)` }),
+    el('span', { text: `+${offers.adImun} Imun Coin per tontonan (5× per 24 jam — player gratis)` }),
   ]);
   const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
   adBtn.addEventListener('click', () => {
-    if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
+    if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan sudah habis — tunggu siklus 24 jam berikutnya.', kind: 'coral' }); return; }
     openAdModal(() => {
       trackAdWatch(meta);
-      addCurrency(meta, offers.adAntibodi);
+      addImun(meta, offers.adImun);
       writeSave(meta);
       audio.collect();
-      emit('toast', { message: `+${offers.adAntibodi} Antibodi!`, kind: 'gold' });
+      emit('toast', { message: `+${offers.adImun} Imun Coin!`, kind: 'gold' });
       show();
     });
   });

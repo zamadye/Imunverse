@@ -57,7 +57,9 @@ export function createDefaultMeta() {
     leaderboard: [],
     evoStage: 0,
     evoParts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
-    adDaily: { date: null, count: 0 },
+    // F8 (keputusan user 2026-09-13): kuota iklan = siklus 24 jam ROLLING
+    // per akun — anchorTs = waktu aktivitas pertama di siklus ini.
+    adDaily: { anchorTs: null, count: 0 },
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,
@@ -88,7 +90,7 @@ export function createDefaultMeta() {
       totalCurrencyEarned: 0,
       totalXP: 0,
     },
-    lastDailyClaim: null, // string tanggal "YYYY-MM-DD"
+    lastDailyClaimTs: null, // F8: ts klaim terakhir — daily = 24 jam ROLLING per akun
     createdAt: new Date().toISOString(),
     updatedAt: null,
   };

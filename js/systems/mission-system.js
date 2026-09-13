@@ -40,21 +40,37 @@ export function checkMissions(meta) {
  * Data progress misi untuk UI dashboard.
  * @returns {Array<{def, value:number, target:number, done:boolean, claimed:boolean}>}
  */
-function periodKey(kind, now = new Date()) {
-  if (kind === 'daily') return `d:${now.toISOString().slice(0, 10)}`;
-  const first = new Date(now.getFullYear(), 0, 1);
-  const week = Math.ceil((((now - first) / 86400000) + first.getDay() + 1) / 7);
-  return `w:${now.getFullYear()}-${week}`;
-}
+const DAY_MS = 86400000;
+const WEEK_MS = 7 * DAY_MS;
 
-function ensureQuestPeriod(meta) {
-  meta.questState = meta.questState || { periodKey: null, accepted: {}, claimed: {}, baseline: {} };
-  const key = `${periodKey('daily')}|${periodKey('weekly')}`;
-  if (meta.questState.periodKey !== key) {
-    meta.questState = { periodKey: key, accepted: {}, claimed: {}, baseline: {} };
-    writeSave(meta);
+/**
+ * Periode quest. F8 (keputusan user 2026-09-13): ROLLING 24 jam (harian) /
+ * 7 hari (mingguan) — di-anchor ke aktivitas user sendiri, bukan tanggal
+ * kalender: "kalau klaim jam 8, jam 8 pula refresh-nya, bebas tiap user."
+ * Save lama (schema periodKey) dimigrasikan: siklus di-reset sekali saat
+ * update pertama.
+ */
+function ensureQuestPeriod(meta, now = Date.now()) {
+  const st = meta.questState || { accepted: {}, claimed: {}, baseline: {} };
+  meta.questState = st;
+  let changed = false;
+  if (st.periodKey !== undefined) { delete st.periodKey; changed = true; } // migrasi schema lama
+  if (typeof st.dailyAnchor !== 'number' || now - st.dailyAnchor >= DAY_MS) {
+    st.dailyAnchor = now;
+    changed = true;
+    for (const q of questDefs('daily')) {
+      delete st.accepted[q.id]; delete st.claimed[q.id]; delete st.baseline[q.id];
+    }
   }
-  return meta.questState;
+  if (typeof st.weeklyAnchor !== 'number' || now - st.weeklyAnchor >= WEEK_MS) {
+    st.weeklyAnchor = now;
+    changed = true;
+    for (const q of questDefs('weekly')) {
+      delete st.accepted[q.id]; delete st.claimed[q.id]; delete st.baseline[q.id];
+    }
+  }
+  if (changed) writeSave(meta);
+  return st;
 }
 
 function questDefs(kind) { return (getData().missions && getData().missions[kind]) || []; }

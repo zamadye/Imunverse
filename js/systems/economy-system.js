@@ -30,16 +30,20 @@ export function spendCurrency(meta, amount) {
   return true;
 }
 
-function todayString() {
-  const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
+const DAY_MS = 86400000;
 
-/** Apakah daily reward tersedia hari ini. */
+/**
+ * Apakah daily reward tersedia. F8 (keputusan user 2026-09-13): 1× per
+ * 24 jam ROLLING per akun — refresh mengikuti waktu klaim user sendiri,
+ * bukan tanggal kalender. Save lama (lastDailyClaim = string tanggal)
+ * dimigrasikan ke tengah malam lokal tanggal itu.
+ */
 export function canClaimDailyReward(meta) {
-  return meta.lastDailyClaim !== todayString();
+  let ts = meta.lastDailyClaimTs;
+  if (typeof ts !== 'number' && meta.lastDailyClaim) {
+    ts = new Date(meta.lastDailyClaim + 'T00:00:00').getTime();
+  }
+  return Date.now() - (ts || 0) >= DAY_MS;
 }
 
 /**
@@ -48,7 +52,8 @@ export function canClaimDailyReward(meta) {
 export function claimDailyReward(meta) {
   if (!canClaimDailyReward(meta)) return 0;
   const amount = getEconomyConfig().dailyReward;
-  meta.lastDailyClaim = todayString();
+  meta.lastDailyClaimTs = Date.now();
+  delete meta.lastDailyClaim; // migrasi selesai — tak dipakai lagi
   addCurrency(meta, amount);
   writeSave(meta); // auto-save
   return amount;
