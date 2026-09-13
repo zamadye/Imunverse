@@ -111,7 +111,9 @@ export const game = {
     const heroDef = getHero(heroId) || getHero(meta.selectedHero);
     if (!heroDef) throw new Error('Hero tidak ditemukan: ' + heroId);
 
-    meta.selectedHero = heroId;
+    // fix L2 (audit 2026-09-13): simpan id terverifikasi — argumen tidak valid
+    // (fallback ke hero lama) dulu tetap menulis id mentah ke save.
+    meta.selectedHero = heroDef.id;
     writeSave(meta); // simpan pilihan hero
 
     // Consumable "Serum Awal" dipakai otomatis di awal run
@@ -183,7 +185,6 @@ export const game = {
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
-    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=50a`);
 
     // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
     const focusId = meta.focusRun || 'seimbang';
@@ -243,7 +244,7 @@ export const game = {
       boss: null,
       arena,
       evoStage,
-      bodyMods,
+      // (fix L3 audit 2026-09-13: key bodyMods duplikat dihapus — sudah ada di atas)
       mode: modeDef,
       chapter: chapterDef,
       mutator: mutatorDef,
@@ -265,7 +266,10 @@ export const game = {
       partsCollectedTotal: 0,
       bossChest: null,
       combo: { count: 0, timer: 0 },
-      imuAccrued: 0, // Fase 17: IMU terkumpul live di HUD (akhir run = rumus penuh)
+      // RONDE-4 (fix T2 audit 2026-09-13): field disimpan utk kompatibilitas
+      // bentuk run; TIDAK lagi di-akruasi — Imun Coin hanya dari pembelian &
+      // reward Battle Pass (lihat onEnemyKilled/update).
+      imuAccrued: 0,
       hitStop: 0,
       // RONDE-7: hit-stop kill digerbang agar tidak berantai tak putus — saat
       // membantai kerumunan (banyak kill/detik) hit-stop 30ms yang di-refresh
@@ -495,6 +499,9 @@ export const game = {
     const run = this.run;
     if (!run || run.ended) return;
     const player = run.player;
+    // FIX K1 (audit 2026-09-13): `meta` dulu tak dideklarasikan di scope ini —
+    // blok bonus Endless (wave %5) melempar ReferenceError → game loop mati.
+    const meta = STATE.meta;
 
     // RONDE-7: gerbang hit-stop meluruh juga selama freeze (real-time)
     if (run.hitStopCool > 0) run.hitStopCool -= dt;
@@ -667,10 +674,10 @@ export const game = {
       emit('wave', { wave: run.spawnSys.wave, isBoss: false });
       audio.wave();
       const w = run.spawnSys.wave;
-      // Fase 17 (trigger 1A): Imun Coin masuk LIVE tiap wave — +perWave, float emas
-      const imuWave = getRetention().imuReward.perWave;
-      run.imuAccrued += imuWave;
-      run.effects.spawnLabel(player.x, player.y - 46, `+${imuWave} Imun`, '#ffd76a');
+      // RONDE-4 (audit 2026-09-13 fix T2): Imun Coin TIDAK lagi mengalir dari
+      // run — dulu ada akruan live di sini (+perWave, float emas) yang TIDAK
+      // pernah diberikan di finishRun (imuEarned=0) → saldo HUD naik lalu
+      // hilang (mata uang fantom). Sumber sah: pembelian & reward Battle Pass.
       // Milestone XP tiap kelipatan 10 wave
       if (w % 10 === 0) {
         const bonus = 20 + w * 3;
@@ -896,6 +903,7 @@ export const game = {
       B.xp.mult *= 1 + v;
       B.xp.t = Math.max(B.xp.t, dur);
       run.effects.spawnLabel(p.x, p.y - 10, tr(`+${Math.round(v * 100)}% XP!`), '#8fe8d2');
+      this.recomputePlayerStats(); // fix S1 (audit 2026-09-13): dulu tertinggal → multiplier XP tak aktif
     } else if (t === 'buff_maxhp') {
       run.permBoost.maxHP += v;
       this.recomputePlayerStats();
@@ -1620,12 +1628,9 @@ export const game = {
     this.addXP(killXp);
     run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP`, '#cde86b');
 
-    // ---- Fase 17 (trigger 1A): IMU terkumpul +0.5/kill (chip HUD berdetak) ----
-    run.imuAccrued += getRetention().imuReward.perKill;
-    if (enemy.isBoss) {
-      run.imuAccrued += getRetention().imuReward.perBoss - getRetention().imuReward.perKill;
-      run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 38, `+${getRetention().imuReward.perBoss} Imun`, '#ffd76a');
-    }
+    // RONDE-4 (audit 2026-09-13 fix T2): tanpa akruan Imun per kill/boss —
+    // akruan live ini dulu tampil di HUD + float "+N Imun" tapi tidak pernah
+    // cair di finishRun (fantom). Imun Coin hanya dari pembelian & Battle Pass.
 
     // EQUITY PER TIER: kecil jarang, MEDIUM sering (koin), HARD pasti koin x2 + nutrisi bonus
     if (!enemy.isBoss) {
@@ -1933,21 +1938,24 @@ export const game = {
     });
     run.masteryGain = masteryRes;
     if (masteryRes.levelsGained > 0) {
+      // fix T2 (audit 2026-09-13): toast dulu menulis "Imun" padahal reward
+      // Mastery = ANTIBODI (mastery-system.js → addCurrency, RONDE-4).
       emit('toast', {
-        message: `MASTERY ${run.heroDef.name} Lv ${masteryRes.level}${masteryRes.title ? ` — ${masteryRes.title}` : ''}! +${masteryRes.reward} Imun`,
+        message: `MASTERY ${run.heroDef.name} Lv ${masteryRes.level}${masteryRes.title ? ` — ${masteryRes.title}` : ''}! +${masteryRes.reward} Antibodi`,
         kind: 'gold',
       });
     }
 
     // META-LAYER kondisi tubuh: racun, energi, pemulihan sistem fokus,
     // toxic seep, streak milestone — loop tertutup antar-run.
+    // (fix S2 audit 2026-09-13: event bodyimpact dihapus dari ui-bridge —
+    // tidak ada listener; ringkasan dampak tetap di this.lastBodyImpact utk debug/e2e.)
     this.lastBodyImpact = registerRunResult(meta, {
       kills: run.kills,
       wave: run.spawnSys.wave,
       focusId: run.focusId || 'seimbang',
       omegaCleanse: run.permBoost ? run.permBoost.omega : 0,
     });
-    emit('bodyimpact', this.lastBodyImpact);
 
     // LEADERBOARD lokal per mode (top-10, wave → waktu → kill)
     const lbResult = recordLeaderboardEntry(meta, {
@@ -2532,7 +2540,7 @@ export const game = {
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,
-        imu: Math.floor((STATE.meta.imun || 0) + (run.imuAccrued || 0)), // F20: saldo total, bukan akruan run saja
+        imu: Math.floor(STATE.meta.imun || 0), // F20 (fix T2): saldo meta saja — akruan run dihapus (RONDE-4)
         gate: run.spawnSys.isGateBlocked(),
         gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,

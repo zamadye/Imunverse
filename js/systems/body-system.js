@@ -40,6 +40,7 @@ export function createDefaultBodyState() {
     racun: 15,
     lastVisitedDay: null,
     perfectStreak: 0,
+    lastPerfectDay: null, // fix L8 (audit 2026-09-13): dipakai registerRunResult (streak), deklarasikan di default
     milestoneDone: false,
     narrativeStage: 0, // index ke dalam arc naratif (0 = terinfeksi kronis)
   };

@@ -506,12 +506,13 @@ async function boot() {
       title: 'Cara Mendapatkan Imuncoin',
       icon: 'assets/icons/cur-imun.svg',
       balance: () => Math.floor(STATE.meta.imun || 0),
+      // fix T2 (audit 2026-09-13): teks panduan lama salah — Imun Coin
+      // TIDAK lagi mengalir dari kill/wave/boss/mastery (RONDE-4: premium
+      // hanya dari pembelian & reward Battle Pass).
       tasks: [
-        '<b>Main run berulang</b> — tiap kill patogen memberi Imuncoin kecil.',
-        '<b>Selesaikan tiap wave</b> — bonus Imuncoin per wave tuntas.',
-        '<b>Kalahkan boss</b> — hadiah Imuncoin besar tiap boss tumbang.',
-        '<b>Naikkan Mastery hero</b> — reward Imuncoin di akhir run (sistem Mastery).',
-        '<b>Imuncoin dipakai untuk Battle Pass premium</b> — kumpulkan dari run ke run!',
+        '<b>Beli bundle di Toko</b> — bundle premium (simulasi pembayaran) berisi Imun Coin.',
+        '<b>Klaim reward Battle Pass jalur premium</b> — level tertentu memberi Imun Coin.',
+        '<b>Pemakaian</b> — membuka Battle Pass premium, upgrade global semua hero, unlock hero jalur Imun.',
       ],
     },
   };

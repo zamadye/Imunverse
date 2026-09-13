@@ -4,7 +4,8 @@
  * Progres per-hero yang tumbuh HANYA dari memainkan hero itu (tidak bisa
  * dibeli — selaras premium cap 30% & filosofi rank tanpa penalti):
  *   xp = kills×perKill + wave×perWave + victoryBonus (data/mastery.json)
- * 10 level per hero, reward Imun Coin per level, gelar di level 3/6/9/10.
+ * 10 level per hero, reward ANTIBODI (soft) per level — RONDE-4: Imun Coin
+ * premium hanya dari pembelian & Battle Pass — gelar di level 3/6/9/10.
  *
  * State: meta.heroMastery[heroId] = { xp, level, kills, runs, wins }
  * (lazy init — save lama tanpa field ini aman). Sekaligus menjadi tracker

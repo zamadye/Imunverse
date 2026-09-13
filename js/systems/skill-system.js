@@ -215,13 +215,14 @@ export class SkillSystem {
       case 'instant_hits': {
         const t = this.#nearest(ctx);
         if (!t) break;
-        const total = (fx.hits || 3) * damage * (fx.mult || 1);
+        // fix L4 (audit 2026-09-13): variabel `total` tak terpakai dihapus;
+        // indirection s_defColor() (selalu konstanta) di-inline.
         for (let i = 0; i < (fx.hits || 3); i++) {
           const died = t.alive && t.takeDamage(damage * (fx.mult || 1));
           game.spawnHitFeedback(t, damage * (fx.mult || 1), died);
           if (died) { game.onEnemyKilled(t, null); break; }
         }
-        effects.spawnLabel(t.x, t.y - t.radius - 12, `x${fx.hits}`, s_defColor(run, this));
+        effects.spawnLabel(t.x, t.y - t.radius - 12, `x${fx.hits}`, '#ffe082');
         break;
       }
       case 'summon_homing': {
@@ -320,6 +321,5 @@ function characterSkillVisual(ctx, skillDef, primaryKind) {
   };
 }
 
-function s_defColor(run, sys) {
-  return '#ffe082';
-}
+// (fix L4 audit 2026-09-13: s_defColor() dihapus — selalu return konstanta,
+// pemakai tunggal sudah di-inline ke '#ffe082'.)

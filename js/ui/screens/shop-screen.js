@@ -106,12 +106,16 @@ function openAdModal(onReward, title = 'VIDEO SPONSOR (SIMULASI)') {
   document.body.appendChild(modal);
   let left = 5;
   const countEl = modal.querySelector('.ad-count');
-  const done = () => { modal.remove(); onReward(); };
+  let iv = null;
+  const done = () => { if (iv) { clearInterval(iv); iv = null; } modal.remove(); onReward(); };
   const cancel = modal.querySelector('.pay-cancel');
-  cancel.addEventListener('click', () => modal.remove());
-  const iv = setInterval(() => {
+  // fix T1 (audit 2026-09-13): cancel harus membatalkan interval — sebelumnya
+  // countdown tetap jalan dan 5 dtk kemudian onReward() tetap terpanggil
+  // (hadiah masuk walau "hadiah batal"; survei juga menghanguskan jatah 1×/hari).
+  cancel.addEventListener('click', () => { if (iv) { clearInterval(iv); iv = null; } modal.remove(); });
+  iv = setInterval(() => {
     left -= 1;
-    if (left <= 0) { clearInterval(iv); done(); return; }
+    if (left <= 0) { done(); return; }
     countEl.textContent = String(left);
   }, 1000);
 }

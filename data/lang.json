@@ -5,6 +5,8 @@
     "en"
   ],
   "strings": {
+    "DMG": "DMG",
+    "XP": "XP",
     "Menyiapkan organisme…": "Preparing organism…",
     "Jaga 5 sistem — tubuh adalah universe-nya.": "Care for 5 systems — the body is your universe.",
     "GANTI": "SWITCH",

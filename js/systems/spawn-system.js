@@ -256,7 +256,9 @@ export class SpawnSystem {
       const px = game.run.player.x + Math.cos(angle) * dist;
       const py = game.run.player.y + Math.sin(angle) * dist;
       const enemyId = this.pickEnemyId(this.wave);
-      if (!enemyId) return;
+      // fix L5 (audit 2026-09-13): dulu `return` → seluruh nest sisa wave
+      // batal terpasang bila satu roll kosong; sekarang hanya nest ini skip.
+      if (!enemyId) continue;
       for (let m = 0; m < packSize; m++) {
         if (game.run.enemies.length >= cfg.maxAliveEnemies) return;
         game.spawnEnemy(enemyId, false, { nest: false }); // posisi ditimpa di bawah

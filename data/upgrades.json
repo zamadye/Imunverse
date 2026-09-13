@@ -340,7 +340,7 @@
   {
    "id": "g_range",
    "name": "Reseptor Jauh",
-   "icon": "assets/sprites/icon_crosshair.png",
+   "icon": "assets/sprites/icon_scope.png",
    "desc": "+12% jarak serang SEMUA hero per level",
    "stat": "attackRange",
    "mode": "percent",
