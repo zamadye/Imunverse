@@ -58,6 +58,15 @@ export function createDefaultMeta() {
     evoStage: 0,
     evoParts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
     adDaily: { date: null, count: 0 },
+    // ===== Fase 1 retensi v2.0 (13 Sep 2026) =====
+    // Field baru ini WAJIB aman untuk save lama: mergeMetaDefaults() memakai
+    // deepMerge(base, meta) sehingga objek yang hilang diisi dari default di
+    // sini, dan objek parsial digabung bertingkat. Jangan pindahkan ke modul.
+    lastPlayedAt: 0,   // ts kunjungan terakhir — dasar hitung hari absen (comeback-system)
+    streak: { day: 0, lastDayTs: 0, best: 0 },                       // streak harian + hari pengampunan
+    dropPity: { eligibleKills: 0, totalDrops: 0, lastDropAt: 0 },     // pity drop kosmetik GRATIS
+    cratePity: { opens: 0 },                                          // pity Peti Riset (TERPISAH dari drop gratis)
+    firstBuy: {},      // { productId: true } — bonus pembelian pertama 2x, sekali per tier
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,

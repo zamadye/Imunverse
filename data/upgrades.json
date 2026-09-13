@@ -273,7 +273,7 @@
  },
  "heroUpgrade": {
   "baseCost": 150,
-  "costGrowth": 1.35,
+  "costGrowth": 1.22,
   "maxLevel": 20,
   "dmgPerLevel": 0.06,
   "hpPerLevel": 0.08,

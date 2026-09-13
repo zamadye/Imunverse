@@ -5,7 +5,7 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { requireAccount } from '../../systems/account-system.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getAdEconomy } from '../../core/data-store.js';
 import { addCurrency, purchaseShopItem, purchaseHeroUnlock } from '../../systems/economy-system.js';
 import { isPurchasable } from '../../systems/unlock-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
@@ -370,11 +370,17 @@ export function show() {
   supSection.appendChild(supGrid);
   wrap.appendChild(supSection);
 
-  // ============ 5) BONUS ANTIBODI (offerwall utk non-paying) ============
-  // RONDE-4: ini SOFT currency. Imun Coin premium hanya dari bundle di atas
-  // & reward Battle Pass — tidak dari video/survei/referral.
+  // ============ 5) BONUS HARIAN (iklan rewarded + offerwall non-paying) ============
+  // RETUNE v2.0 (Fase 1.4): iklan rewarded kini memberi IMUN, bukan Antibodi.
+  //   sebelumnya: offers.adAntibodi = 80 Antibodi per tayangan
+  //   sekarang  : economy-anchors.json:adEconomy → 10 Imun × 6/hari = 60 Imun/hari
+  // Alasannya (economy-anchors.json): pada 30 Imun/tayangan satu iklan memberi
+  // Rp 900 nilai vs ~Rp 65 pendapatan (rasio 13,8×) sehingga tier termurah tidak
+  // akan pernah dibeli. Field offers.adAntibodi sudah DIHAPUS dari battlepass.json
+  // sesuai anchors.adEconomy.removedFields. Survei & referral tetap ANTIBODI.
   const offers = getData().battlepass.offers;
-  const freeSection = sectionEl('free', 'Bonus Antibodi: tonton sponsor, isi survei, atau ajak teman. Imun Coin (premium) tersedia lewat pembelian & musim Battle Pass.');
+  const adEcon = getAdEconomy(); // { imunPerAd, dailyLimit, rollingWindowHours }
+  const freeSection = sectionEl('free', `Bonus harian: tonton sponsor untuk Imun (kuota ${adEcon.dailyLimit}/hari), isi survei atau ajak teman untuk Antibodi.`);
   const freeGrid = el('div', { class: 'free-grid' });
 
   const adTile = el('div', { class: 'free-tile' }, [
@@ -382,17 +388,17 @@ export function show() {
       el('img', { class: 'ft-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
       el('b', { text: 'Tonton Video Sponsor' }),
     ]),
-    el('span', { text: `+${offers.adAntibodi} Antibodi per tontonan (simulasi iklan reward)` }),
+    el('span', { text: `+${adEcon.imunPerAd} Imun per tontonan · kuota ${adEcon.dailyLimit}/hari (simulasi iklan reward)` }),
   ]);
   const adBtn = el('button', { class: 'btn btn-primary ft-btn', text: 'TONTON' });
   adBtn.addEventListener('click', () => {
     if (!canWatchAd(meta)) { emit('toast', { message: 'Kuota iklan harian sudah habis.', kind: 'coral' }); return; }
     openAdModal(() => {
       trackAdWatch(meta);
-      addCurrency(meta, offers.adAntibodi);
+      addImun(meta, adEcon.imunPerAd); // v2.0: IMUN (bukan Antibodi) — angka dari economy-anchors.json
       writeSave(meta);
       audio.collect();
-      emit('toast', { message: `+${offers.adAntibodi} Antibodi!`, kind: 'gold' });
+      emit('toast', { message: `+${adEcon.imunPerAd} Imun!`, kind: 'gold' });
       show();
     });
   });

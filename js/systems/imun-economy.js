@@ -2,11 +2,18 @@
  * imun-economy.js — IMUN COIN (currency premium, Fase 14).
  *
  * Ekonomi ganda: Antibodi = soft currency (drop musuh, reward misi, offerwall);
- * Imun Coin = PREMIUM KETAT (RONDE-4): sumber HANYA (1) PEMBELIAN uang nyata
- * (payment-system, bundle premium.json) dan (2) reward BATTLE PASS
- * (data/battlepass.json). Tidak dari bermain biasa / misi / mastery / likuid
- * apapun — premium tidak dimudahkan (prinsip revenue blueprint Phase 10).
- * Bonus sampingan sosial (referral/founder/offerwall) = Antibodi.
+ * Imun Coin = PREMIUM KETAT. Sumber Imun (diperbarui 13 Sep 2026, retune v2.0):
+ *   (1) PEMBELIAN uang nyata — payment-system + katalog data/premium.json
+ *   (2) reward BATTLE PASS — data/battlepass.json (jalur premium 500 Imun/musim)
+ *   (3) IKLAN REWARDED — 10 Imun × 6/hari, angka dari data/economy-anchors.json
+ *       (adEconomy.imunPerAd/dailyLimit). Ini faucet F2P pengganti
+ *       offers.adAntibodi yang dihapus; rasio nilainya dijaga validator katalog.
+ *   (4) COMEBACK & STREAK — hadiah kembali/harian dari data/retention-config.json
+ *       (comeback.returnGift[].imun, comeback.streak.rewards[].imun), diberikan
+ *       oleh js/systems/comeback-system.js saat boot.
+ *   (5) mastery level (addMasteryXP) — jumlah kecil, sudah ada sejak V2 Phase 6.
+ * Tetap TIDAK dari bermain biasa / drop run / likuidasi apa pun: premium tidak
+ * dimudahkan. Bonus sampingan sosial (referral/founder/survei) = Antibodi.
  */
 
 import { getData } from '../core/data-store.js';

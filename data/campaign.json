@@ -1,13 +1,20 @@
 {
   "schemaVersion": 2,
   "doc": "R2: REMAP PENUH — 6 bab = 6 kondisi kesehatan Inang (story doc §5). Organ lama tetap jadi LOKASI (arenaId). Mystery hook: identitas Inang terungkap bertahap lewat story/hostHints.",
+  "quotaMultGlobal": 2.2,
+  "difficulties": [
+    { "id": "normal",  "label": "Normal",  "hpMult": 1.0, "quotaMult": 1.0, "rewardMult": 1.0, "unlock": null },
+    { "id": "sulit",   "label": "Sulit",   "hpMult": 1.6, "quotaMult": 1.8, "rewardMult": 2.2, "unlock": "normal" },
+    { "id": "kritis",  "label": "Kritis",  "hpMult": 2.4, "quotaMult": 2.6, "rewardMult": 4.0, "unlock": "sulit" }
+  ],
+  "difficultyDoc": "RETUNE v2.0 (13 Sep 2026, data/retention-config.json:campaign). killQuota tiap bab sudah dikali quotaMultGlobal 2,2 (25/30/35/40/45/50 -> 55/66/77/88/99/110) karena satu run referensi menghasilkan 250 kill sehingga 6 bab tamat dalam 6 run. Tiga tingkat kesulitan di atas adalah DEFINISI DATA saja — pelacakan penyelesaian per bab per tingkat, gerbang unlock berjenjang, dan perkalian reward diimplementasikan di Fase 4.1 (lihat ROADMAP.md). Pengganda konten termurah: 6 bab -> 18 penyelesaian tanpa aset baru.",
   "chapters": [
     {
       "id": "bab_luka",
       "organ": "Luka Kecil",
       "title": "Goresan Pertama",
       "arenaId": "limfe",
-      "killQuota": 25,
+      "killQuota": 55,
       "boss": null,
       "bossName": null,
       "reward": 60,
@@ -19,7 +26,7 @@
       "organ": "Demam Pertama",
       "title": "Suhu Naik",
       "arenaId": "paru",
-      "killQuota": 30,
+      "killQuota": 66,
       "boss": {
         "id": "virus",
         "name": "Raja Flu Mutan",
@@ -34,7 +41,7 @@
       "organ": "Keracunan",
       "title": "Makanan Semalam",
       "arenaId": "lambung",
-      "killQuota": 35,
+      "killQuota": 77,
       "boss": {
         "id": "toksin_raksasa",
         "name": "Ratu Racun",
@@ -49,7 +56,7 @@
       "organ": "Alergi Parah",
       "title": "Musuh dalam Selimut",
       "arenaId": "paru",
-      "killQuota": 40,
+      "killQuota": 88,
       "boss": {
         "id": "spora",
         "name": "Alergen Purba",
@@ -71,7 +78,7 @@
       "organ": "Ancaman Tersembunyi",
       "title": "Musuh dari Dalam",
       "arenaId": "limfe",
-      "killQuota": 45,
+      "killQuota": 99,
       "boss": {
         "id": "sel_kanker",
         "name": "Bayang Dalam",
@@ -93,7 +100,7 @@
       "organ": "Pertahanan Terakhir",
       "title": "Satu Hari Lagi",
       "arenaId": "saraf",
-      "killQuota": 50,
+      "killQuota": 110,
       "boss": {
         "id": "prion",
         "name": "Mahakrisis",

@@ -27,6 +27,8 @@ import { music } from './systems/music-system.js';
 import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
 import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
+import { runComebackPass } from './systems/comeback-system.js'; // Fase 1.3: win-back saat boot
+import { getBodyState } from './systems/body-system.js'; // Fase 1.3: pastikan bodyState ada sebelum pass comeback
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -447,6 +449,25 @@ async function boot() {
   }
   if (!raw) writeSave(STATE.meta);
   applyDataLanguage(STATE.meta.lang || 'id'); // dwibahasa: data sesuai bahasa tersimpan
+
+  // ===== Fase 1.3 (retune v2.0): PASS COMEBACK — satu titik panggil saat boot =====
+  // Setelah loadSave/mergeMetaDefaults, sebelum dashboard dirender. Modulnya murni
+  // (tidak menyentuh DOM/save/event bus), jadi penulisan save dan penanda modal
+  // dilakukan di sini. Hasilnya: peluruhan tubuh offline dibatasi 2 hari, absen
+  // ≥3 hari dibayar hadiah kembali (termasuk pemulihan tubuh), dan streak harian
+  // maju dengan satu hari pengampunan.
+  const comebackCfg = getData().retentionConfig?.comeback;
+  if (comebackCfg) {
+    // restoreBody() di comeback-system menulis ke meta.bodyState.systems; pada
+    // save lama/pemain baru field itu masih null (diisi malas oleh body-system).
+    // Inisialisasi di sini supaya hadiah "pulihkan tubuh" benar-benar diterapkan
+    // dan modal tidak mengklaim sesuatu yang tidak terjadi. getBodyState() murni
+    // (mengembalikan salinan gabungan default), jadi penugasan aman.
+    if (!STATE.meta.bodyState) STATE.meta.bodyState = getBodyState(STATE.meta);
+    const comeback = runComebackPass({ meta: STATE.meta, cfg: comebackCfg, now: Date.now() });
+    if (comeback.changed) writeSave(STATE.meta);
+    if (comeback.returnGift || comeback.streakReward) STATE.pendingComeback = comeback;
+  }
 
   // 4) Wiring UI
   game.init({ canvas, input });

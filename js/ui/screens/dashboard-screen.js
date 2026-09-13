@@ -14,6 +14,7 @@ import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { markSeen } from '../../systems/codex-system.js';
 import { drainHeroNotices } from '../../systems/retention-system.js';
+import { showComebackModal } from '../comeback-modal.js'; // Fase 1.3: satu modal win-back saat dashboard dibuka
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
 import {
   getBodyState, getCriticalSystems, getMilestoneProgress, getNarrativeStage,
@@ -448,6 +449,7 @@ function renderArenaCard(meta) {
 
 export function show() {
   showHeroNotice(); // Fase 17: perayaan "HERO BARU!" bila ada yang baru terbuka
+  showComebackModal(); // Fase 1.3 (v2.0): hadiah kembali + streak + tubuh pulih — SATU modal, sekali
   if (dashWasHidden) {
     // Fase 15: cegah auto-scroll browser memotong banner saat layar dibuka
     requestAnimationFrame(() => {

@@ -1,0 +1,66 @@
+# Gerbang merge — Fase 1.5 (retune v2.0, 13 Sep 2026)
+#
+# Tiga aturan repo yang dijalankan mesin, bukan diingat orang:
+#   1. npm run check    — import path, JSON, sprite, referensi index.html
+#   2. npm run validate — katalog IAP + pacing retensi + sinkronisasi retune
+#   3. BUILD harus berbeda dari main bila js/, data/, atau index.html berubah,
+#      dan ?v= di index.html harus sama dengan BUILD (cache-busting).
+#
+# Jangan pernah melonggarkan toleransi validator agar build lewat — perbaiki
+# angkanya, atau laporkan (docs/brief-agent-building.md §11).
+
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # dibutuhkan untuk membandingkan dengan origin/main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pemeriksaan statis (import, JSON, sprite, index.html)
+        run: npm run check
+
+      - name: Validator ekonomi & retensi
+        run: npm run validate
+
+      - name: Uji headless Fase 1 (loader, comeback, Battle Pass, GP, evolusi)
+        run: npm run test:fase1
+
+      - name: BUILD harus dibump bila js/ data/ index.html berubah
+        run: |
+          git fetch origin main --depth=1 || true
+          if ! git rev-parse --verify origin/main >/dev/null 2>&1; then
+            echo "origin/main tidak tersedia (push pertama) — pemeriksaan dilewati."; exit 0
+          fi
+          CHANGED=$(git diff --name-only origin/main...HEAD -- js/ data/ index.html | wc -l)
+          if [ "$CHANGED" -eq 0 ]; then
+            echo "Tidak ada perubahan js/, data/, atau index.html — BUILD tidak wajib naik."; exit 0
+          fi
+          NOW=$(grep -o "BUILD = '[^']*'" js/core/version.js | head -1)
+          OLD=$(git show origin/main:js/core/version.js | grep -o "BUILD = '[^']*'" | head -1)
+          echo "main: $OLD  ->  branch: $NOW  ($CHANGED berkas berubah)"
+          if [ "$NOW" = "$OLD" ]; then
+            echo "::error::BUILD tidak dibump ($NOW) padahal js/, data/, atau index.html berubah. Pemain lama akan menerima campuran aset lama dan baru."
+            exit 1
+          fi
+
+      - name: "?v= di index.html harus sama dengan BUILD"
+        run: |
+          BUILD=$(grep -o "BUILD = '[^']*'" js/core/version.js | head -1 | sed "s/BUILD = '//;s/'//")
+          V=$(grep -o 'js/main.js?v=[^"]*' index.html | head -1 | sed 's|js/main.js?v=||')
+          echo "BUILD=$BUILD  index.html ?v=$V"
+          if [ "$BUILD" != "$V" ]; then
+            echo "::error::index.html memakai ?v=$V tetapi BUILD=$BUILD — cache-busting tidak konsisten."
+            exit 1
+          fi

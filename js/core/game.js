@@ -40,7 +40,7 @@ import { CollisionSystem } from '../systems/collision-system.js';
 import { rollLevelUpChoices, applyLevelUp, squadMultipliers, evolutionBoosts, effectiveStacks } from '../systems/upgrade-system.js';
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
-import { addBpXP } from '../systems/battlepass-system.js';
+import { grantRunBpXP, grantMissionBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
 import { xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
@@ -1882,9 +1882,13 @@ export const game = {
     // KAMPANYE: bab bersih → tandai + pasukan imun permanen bertambah (+1/bab, maks 6)
     if (victory && run.chapter) {
       meta.campaignCleared = meta.campaignCleared || {};
+      const firstClear = !meta.campaignCleared[run.chapter.id];
       meta.campaignCleared[run.chapter.id] = true;
       const clearedCount = Object.keys(meta.campaignCleared).length;
       meta.allies = Math.min(6, Math.max(meta.allies || 1, 1 + clearedCount));
+      // Retune v2.0: bab bersih = sumber XP Battle Pass non-run (sekali per bab,
+      // bukan per kemenangan — supaya tidak bisa ditambang ulang).
+      if (firstClear) run.bpChapterXp = grantMissionBpXP(meta, 'chapterClear');
     }
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
@@ -1904,7 +1908,15 @@ export const game = {
     // RONDE-4 (ekonomi premium ketat): Imun Coin TIDAK lagi diberikan dari
     // hasil run — coin premium hanya dari PEMBELIAN & reward Battle Pass
     // (aturan platform revenue; blueprint: premium ≠ gampang digratiskan).
-    const bpRes = addBpXP(meta, run.level * 40 + run.spawnSys.wave * 15 + run.kills);
+    // Retune v2.0 (data/retention-config.json:battlePass.runXp): XP dari run
+    // dibatasi 120/run dan 360/hari. Formula lama (level*40 + wave*15 + kills,
+    // tanpa batas) menyelesaikan 30 level dalam 6,1 run — seluruh musim habis
+    // dalam dua hari. Sisanya kini datang dari misi & bab bersih.
+    const bpRes = grantRunBpXP(meta, {
+      heroLevel: run.level,
+      wave: run.spawnSys.wave,
+      kills: run.kills,
+    });
     run.bpGain = bpRes; // ringkasan akhir run
     run.imuEarned = 0;
 

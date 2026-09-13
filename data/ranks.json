@@ -6,11 +6,11 @@
     "daysPerSeason": 28
   },
   "points": {
-    "perWave": 18,
-    "perKill": 2,
-    "perBoss": 120,
-    "victoryBonus": 250,
-    "chapterBonus": 100
+    "perWave": 4,
+    "perKill": 0.45,
+    "perBoss": 27,
+    "victoryBonus": 55,
+    "chapterBonus": 22
   },
   "tiers": [
     { "id": "sel_baru",    "name": "Sel Baru",             "min": 0,     "color": "#c9d6d0", "insignia": "•" },

@@ -55,7 +55,7 @@
       "tier": "Uncommon",
       "tierColor": "#63c76a",
       "cost": {
-        "equity_receptor": 2
+        "equity_receptor": 20
       },
       "damageMult": 1.08,
       "maxHPMult": 1.06,
@@ -71,8 +71,8 @@
       "tier": "Rare",
       "tierColor": "#4aa3e0",
       "cost": {
-        "equity_receptor": 3,
-        "equity_membrane": 2
+        "equity_receptor": 30,
+        "equity_membrane": 20
       },
       "damageMult": 1.16,
       "maxHPMult": 1.12,
@@ -88,8 +88,8 @@
       "tier": "Epic",
       "tierColor": "#b07ae0",
       "cost": {
-        "equity_membrane": 3,
-        "equity_effector": 2
+        "equity_membrane": 30,
+        "equity_effector": 20
       },
       "damageMult": 1.25,
       "maxHPMult": 1.18,
@@ -105,8 +105,8 @@
       "tier": "Legendary",
       "tierColor": "#f5c64f",
       "cost": {
-        "equity_effector": 3,
-        "equity_memory_core": 2
+        "equity_effector": 30,
+        "equity_memory_core": 17
       },
       "damageMult": 1.35,
       "maxHPMult": 1.25,
@@ -116,7 +116,7 @@
       "visualRule": "Seluruh equity utama aktif; mahkota/core full-equity muncul."
     }
   ],
-  "dropChanceNormal": 0.06,
-  "dropChanceElite": 0.3,
-  "bossGuaranteedParts": 2
+  "dropChanceNormal": 0.004,
+  "dropChanceElite": 0.04,
+  "bossGuaranteedParts": 1
 }

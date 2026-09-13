@@ -2,7 +2,7 @@
 
 **HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework dan tanpa build step**.
 
-![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0) ![build](https://img.shields.io/badge/BUILD-51a-f5c64f)
+![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0) ![build](https://img.shields.io/badge/BUILD-52a-f5c64f)
 
 ---
 
@@ -41,7 +41,7 @@ Buka **http://localhost:8000**. Tidak ada `npm install`, tidak ada langkah build
 - **Level up** → pilih 1 dari 3 upgrade acak (rarity + pity + anti dead-choice).
 - Antibodi dipakai untuk upgrade squad permanen, unlock hero, dan item toko — tersimpan otomatis di `localStorage` (`imunverse.save.v1`).
 
-> ⚠️ **Known issue (BUILD 51a):** `data/premium.json` sudah diganti ke katalog v2.0.0, tetapi layar Toko belum diadaptasi. Lihat `ROADMAP.md` §2 G8 dan §4 (Fase 1B) sebelum menyentuh monetisasi.
+> ⚠️ **Known issue (BUILD 52a):** `data/premium.json` sudah diganti ke katalog v2.0.0, tetapi layar Toko belum diadaptasi. Lihat `ROADMAP.md` §2 G8 dan §4 (Fase 1B) sebelum menyentuh monetisasi.
 
 ## 🏗️ Struktur proyek
 
@@ -59,9 +59,10 @@ Imunverse/
 │   ├── cosmetics.json  premium.json (katalog IAP v2.0.0)
 │   ├── economy-anchors.json    # ★ SATU sumber kebenaran valuasi (kurs Imun/Antibodi, badge)
 │   ├── retention-config.json   # ★ target pacing, comeback, drop langka, sink, session hook
+│   │                           #   (dimuat sebagai DATA.retentionConfig — lihat ROADMAP §2 G7)
 │   └── lang.json               #   kamus i18n (string UI wajib terdaftar di sini)
 ├── assets/                     # sprite PNG, ikon SVG, audio, bangunan, reference sheet
-├── js/                         # 99 file JS
+├── js/                         # 100 file JS
 │   ├── main.js                 # Bootstrap: data → sprite preload → save → loop
 │   ├── core/                   # game-loop (delta-time), state-manager, data-store,
 │   │                           # ui-bridge (event bus), game.js (orkestrator run), version.js
@@ -73,11 +74,13 @@ Imunverse/
 │   │                           # tutorial, audio/music/vo, narrative, i18n, haptics, feature-gate
 │   │   ├── pricing-model.js    # ★ valuasi, badge, bonus pembelian pertama, deteksi dominasi
 │   │   ├── comeback-system.js  # ★ batas peluruhan offline, streak berampun, hadiah kembali
+│   │                           #   → DIPAKAI: dipanggil sekali dari main.js:boot() (BUILD 52a)
 │   │   ├── session-hook.js     # ★ 3 progres terdekat, ETA dalam RUN
 │   │   └── rare-drop-system.js # ★ drop kosmetik langka + pity, Peti Riset (pity terpisah)
 │   ├── render/                 # sprite-loader, shape-renderer, camera, background, visuals
 │   ├── save/save-manager.js    # localStorage + titik auto-save
-│   ├── ui/                     # screen-manager, cinematic, cutscene 2D/3D, coach, presenter
+│   ├── ui/                     # screen-manager, cinematic, cutscene 2D/3D, coach, presenter,
+│   │                           # comeback-modal (Fase 1.3: satu modal hadiah kembali/streak)
 │   │   └── screens/            # 23 layar (title, dashboard, roster, hero-detail, prep, shop,
 │   │                           #   bag, codex, campaign, arena, battlepass, rank, profile,
 │   │                           #   auth, hud, levelup, pause, revive, bosschest, gameover, …)
@@ -85,8 +88,11 @@ Imunverse/
 ├── tools/
 │   ├── validate-catalog.mjs    # ★ audit katalog IAP — exit 1 bila ada error
 │   ├── validate-retention.mjs  # ★ audit pacing + Monte Carlo drop + sim comeback 45 hari
+│   ├── validate-retune-sync.mjs # ★ bandingkan data/*.json repo dengan target config (29 cek)
+│   ├── ci/                     # ★ validate.yml (gerbang CI) + install-workflow.sh + README
 │   ├── gen_sprites.py  gen_assets.py  gen_ecosystem_assets.py  server.py  featcheck/
-├── scripts/                    # check-imports.mjs + 30 e2e/unit (menulis bukti ke shots/)
+├── scripts/                    # check-imports.mjs + 31 e2e/unit (menulis bukti ke shots/)
+│   └── unit-fase1-retune.mjs   # ★ uji headless Fase 1 (31 cek, tanpa browser) — npm run test:fase1
 ├── image-search/               # referensi visual UI dari game lain (bahan riset)
 └── files.zip                   # arsip asli paket update monetisasi/retensi (sudah di-unpack)
 ```
@@ -98,6 +104,8 @@ Imunverse/
 - **Delta-time nyata:** `dt = (t_rAF − sebelumnya) / 1000`, di-clamp **50 ms** (`game-loop.js:52`) — gameplay identik di layar 30/60/120 Hz.
 - **Formula gelombang** (`data/waves.json`): `spawnInterval = max(0.4, 1.8 − wave × 0.08)`; `enemyHP = baseHP × (1 + (wave−1) × 0.105)`; kecepatan musuh naik 1,5%/gelombang hingga ×1,6; maksimum 250 musuh hidup.
 - **Kurva XP:** `xpToNextLevel = ceil(10 × level^1.5)` (`data-store.js:272`). Level-up mem-pause game 0,3 s dan menampilkan 3 pilihan acak.
+- **Pass comeback saat boot (BUILD 52a):** `runComebackPass()` dipanggil sekali di `main.js:boot()`. Peluruhan tubuh offline dibatasi **2 hari** (`retention-config.comeback.maxOfflineDecayDays`, dibaca `body-system.applyDailyDecay`), absen ≥3 hari dibayar hadiah kembali + tubuh dipulihkan, dan streak harian maju dengan **satu hari pengampunan**. Hasilnya ditampilkan sebagai **satu** modal (`js/ui/comeback-modal.js`), sekali, saat dashboard dibuka.
+- **Pacing hasil retune (BUILD 52a):** Battle Pass `100 + 25×level` XP/level, cap **120 XP/run** & **360/hari**, harga premium **800 Imun** dengan imbalan **500** (net −300/musim); pangkat **4 GP/gelombang**, 0,45/kill, 27/boss, 55 menang, 22 per bab (12.000 GP ≈ 36 run); evolusi 0,4%/kill normal, 4%/elite, 1 bagian/boss, pohon **167 fragmen** ≈ 33 run; iklan rewarded **10 Imun × 6/hari**.
 - **Collision:** circle-to-circle (kuadrat jarak vs kuadrat jumlah radius) lewat **spatial hash grid sel 96 px** — hanya antar sel bertetangga.
 - **Sprite:** semua karakter dirender `drawImage()` dari PNG transparan; path disimpan di JSON. `loadAllSprites()` mengembalikan Promise dan game baru mulai setelah semua termuat; `?v=BUILD` untuk cache-busting.
 - **Save:** JSON murni di `localStorage` (`imunverse.save.v1`); field baru wajib aman lewat `mergeMetaDefaults` (deep-merge) agar save lama tidak pecah. Metrik run di `imunverse.metrics.v1` (ring buffer 200 run).
@@ -108,7 +116,10 @@ Imunverse/
 
 ```bash
 npm start                     # server statis :8000
-npm run validate              # ★ gerbang merge: validate:catalog + validate:retention (0 error)
+npm run validate              # ★ gerbang merge: catalog + retention + sync (0 error)
+npm run validate:sync         # ★ data/*.json repo harus sama dengan angka target config
+npm run test:fase1            # ★ uji headless Fase 1: boot, comeback, Battle Pass, GP, evolusi
+npm run ci:install            # pasang tools/ci/validate.yml ke .github/workflows/ (lihat tools/ci/README.md)
 npm run validate:catalog      # audit katalog IAP saja
 npm run validate:retention    # audit pacing/Monte Carlo/comeback/session-hook saja
 npm run check                 # validasi import path, JSON, sprite, referensi index.html
@@ -117,7 +128,7 @@ npm run ecosystem-assets      # regenerasi aset ekosistem (reference sheet, bang
 npm run check:ecosystem-assets
 ```
 
-`npm run validate` **wajib lulus sebelum merge** apa pun. Jangan pernah melonggarkan toleransi validator agar build lewat — perbaiki angkanya, atau laporkan.
+`npm run validate` **wajib lulus sebelum merge** apa pun (sejak BUILD 52a: tiga validator, dan gerbang CI `tools/ci/validate.yml` menolak PR yang tidak mem-bump `BUILD` atau yang `?v=`-nya beda dari `BUILD` — pasang sekali dengan `npm run ci:install`, lihat `tools/ci/README.md`). Jangan pernah melonggarkan toleransi validator agar build lewat — perbaiki angkanya, atau laporkan.
 
 ## 🧪 Self-test headless
 

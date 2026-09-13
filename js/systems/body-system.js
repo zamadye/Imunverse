@@ -14,7 +14,7 @@
  * antar-run (dashboard kondisi tubuh + pilih fokus run).
  */
 
-import { getData } from '../core/data-store.js';
+import { getData, getRetentionConfig } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 
@@ -67,7 +67,19 @@ export function clampHealth(v) {
 
 // ---------------------------------------------------------------------------
 // DAILY DECAY — tiap sistem -1/hari bila tidak "dirawat" (run fokus yang
-// menang / suplemen). Hari yang terlewat saat offline dihitung (cap 7 hari).
+// menang / suplemen).
+//
+// RETUNE v2.0 (Fase 1.3): jumlah hari peluruhan offline DIBATASI oleh
+// data/retention-config.json:comeback.maxOfflineDecayDays (2 hari), bukan lagi
+// 7 hari hardcode. Alasan: pemain yang kembali setelah dua minggu dulu
+// menemukan kelima sistem tubuhnya kritis dan run pertamanya dihukum —
+// kebalikan dari win-back, dijalankan di momen paling rapuh. Absen sekarang
+// dibayar dengan hadiah kembali (comeback-system.runComebackPass), bukan denda.
+//
+// Sengaja TIDAK memakai cappedDecayDays() dari comeback-system di sini: pass itu
+// menghitung dari meta.lastPlayedAt yang sudah ia setel ke `now` saat boot,
+// sehingga memanggilnya dari startRun akan selalu menghasilkan 0 hari dan
+// mematikan decay sepenuhnya. Logika lastCaredDay per sistem dipertahankan.
 // ---------------------------------------------------------------------------
 export function applyDailyDecay(meta = STATE.meta) {
   const cfg = getData().bodySystems;
@@ -76,6 +88,9 @@ export function applyDailyDecay(meta = STATE.meta) {
   const elapsed = daysBetween(st.lastVisitedDay, today);
   if (elapsed <= 0) return { decayed: [], days: 0 };
 
+  // Batas hari peluruhan offline dari konfigurasi retensi (fallback 7 = perilaku lama).
+  const maxDecay = getRetentionConfig()?.comeback?.maxOfflineDecayDays ?? 7;
+
   const decayed = [];
   for (const sysDef of cfg.systems) {
     const sys = st.systems[sysDef.id];
@@ -83,7 +98,7 @@ export function applyDailyDecay(meta = STATE.meta) {
     // TIDAK dirawat pada hari-hari yang berlalu
     const caredElapsed = daysBetween(sys.lastCaredDay, today);
     if (caredElapsed >= 1) {
-      const drop = Math.min(cfg.decayPerDay * Math.min(caredElapsed, 7), sys.health);
+      const drop = Math.min(cfg.decayPerDay * Math.min(caredElapsed, maxDecay), sys.health);
       if (drop > 0) {
         sys.health = clampHealth(sys.health - drop);
         decayed.push(sysDef.id);

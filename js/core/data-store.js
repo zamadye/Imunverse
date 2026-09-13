@@ -33,6 +33,14 @@ const store = {
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
   characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
+  // Paket monetisasi & retensi v2.0 (13 Sep 2026):
+  anchors: null,        // data/economy-anchors.json — SATU sumber kebenaran valuasi (kurs, badge)
+  retentionConfig: null, // data/retention-config.json — target pacing, comeback, drop langka, hook
+  // CATATAN (ROADMAP §2 G7): kunci `retention` DI ATAS sudah dipakai
+  // data/retention.json (trigger Fase 17). Karena itu retention-config.json
+  // sengaja didaftarkan sebagai `retentionConfig`, dan pemanggil modul murni
+  // mengoper { ...DATA, retention: DATA.retentionConfig } bila modul itu
+  // membaca data.retention (session-hook.js:203).
 };
 
 import { BUILD } from './version.js';
@@ -72,6 +80,8 @@ export async function loadAllData() {
     narrative: 'data/narrative.json',
     modules: 'data/modules.json',
     characterDesigns: 'data/character-designs.json',
+    anchors: 'data/economy-anchors.json',
+    retentionConfig: 'data/retention-config.json',
   };
 
   const entries = await Promise.all(
@@ -251,6 +261,35 @@ export function getModules() {
 // ===== Character Agent: equity hero + mutation visual pathogen =====
 export function getCharacterDesigns() {
   return getData().characterDesigns;
+}
+
+// ===== Paket monetisasi & retensi v2.0 (13 Sep 2026) =====
+
+/**
+ * data/economy-anchors.json — SATU-SATUNYA sumber kebenaran valuasi.
+ * Kurs Imun (Rp 30), kurs Antibodi (1 Imun = 40), nilai item/kosmetik,
+ * kebijakan badge, ekonomi iklan. Semua badge dihitung runtime oleh
+ * js/systems/pricing-model.js dari file ini — jangan hardcode nilai apa pun.
+ */
+export function getAnchors() {
+  return getData().anchors;
+}
+
+/**
+ * data/retention-config.json — target pacing & konfigurasi lapisan retensi:
+ * referenceRun, pacingTargets, battlePass, rank, evolution, heroUpgrade,
+ * campaign, comeback, dailyAnchor, rareDrop, recurringImunSinks, sessionHook.
+ *
+ * BUKAN `getRetention()` — itu data/retention.json (trigger Fase 17: imuReward,
+ * combo, xpPerKill, particles, synergy). Keduanya hidup berdampingan.
+ */
+export function getRetentionConfig() {
+  return getData().retentionConfig;
+}
+
+/** Ekonomi iklan rewarded (imunPerAd, dailyLimit) dari anchors — bukan hardcode. */
+export function getAdEconomy() {
+  return getData().anchors.adEconomy;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

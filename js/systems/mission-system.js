@@ -7,6 +7,7 @@
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
 import { addCurrency } from './economy-system.js';
+import { grantMissionBpXP } from './battlepass-system.js'; // retune v2.0: misi = XP Battle Pass non-run
 
 /** Nilai progress stat; 'unlockedHeroes' = jumlah hero dimiliki (Fase 17). */
 function statValue(meta, stat) {
@@ -89,6 +90,10 @@ export function claimQuest(meta, id) {
   const state = ensureQuestPeriod(meta);
   state.claimed[id] = true;
   addCurrency(meta, item.def.reward);
+  // Retune v2.0 (data/retention-config.json:battlePass.missionXp): misi memberi
+  // XP Battle Pass di luar batas XP run — harian 40, mingguan 200. Inilah yang
+  // membuat pass menghargai kehadiran harian, bukan satu run panjang.
+  grantMissionBpXP(meta, item.kind);
   writeSave(meta);
   return item.def.reward;
 }
