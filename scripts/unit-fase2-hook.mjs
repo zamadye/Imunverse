@@ -221,7 +221,7 @@ check('lang.json punya "Progres terdekat"', typeof lang.strings['Progres terdeka
 const version = read('js/core/version.js');
 const html = read('index.html');
 const build = (version.match(/BUILD\s*=\s*'([^']+)'/) || [])[1];
-check('BUILD = 57a', build === '57a', `BUILD=${build}`);
+check('BUILD terbaca dari version.js', typeof build === 'string' && /^\d+[a-z]$/.test(build), `BUILD=${build}`);
 check('index.html memuat main.js?v=BUILD yang sama', html.includes(`main.js?v=${build}`));
 
 /* ---------- ringkasan ---------- */

@@ -51,13 +51,16 @@ check('pilihan pemain (MATI) bertahan lewat merge', mergeMetaDefaults(offSave).s
 
 /* ---------- 2. game.js: struktur keputusan auto-fire ---------- */
 
-console.log('\n=== 2. game.js: manual menang, auto hanya bila ada target ===');
+console.log('\n=== 2. game.js: manual menang, auto HANYA saat diam + ada target ===');
 const game = readFileSync('js/core/game.js', 'utf8');
 check('membaca preferensi dari meta.settings.autoFire', game.includes('STATE.meta.settings.autoFire !== false'));
 check('manual fire diperiksa LEBIH DULU (ambil alih)', /const manualFire = !!\(this\.input\.isFiring[\s\S]{0,220}?if \(manualFire\) \{\s*player\.tryFire\(this\);/.test(game));
+check('EVAL 13 Sep: auto-fire HANYA SAAT DIAM (Archero sejati, tidak terus-menerus)', /const heroIdle = move\.magnitude < 0\.05;/.test(game) && /else if \(heroIdle && \(STATE\.meta\.settings/.test(game));
+check('tembak manual TIDAK dibatasi diam (boleh menembak sambil bergerak)', /if \(manualFire\) \{\s*player\.tryFire\(this\);\s*\} else if \(heroIdle/.test(game));
+check('vektor gerak dibaca SEKALI per frame (tidak dobel)', (game.match(/const move = this\.input\.getMoveVector\(\);/g) || []).length === 1);
 check('auto-fire HANYA saat ada target dalam jangkauan', /findAttackTarget\(player\.x, player\.y, player\.stats\.effectiveAttackRange\)/.test(game));
 check('auto-fire tidak swing sia-sia (guard sebelum tryFire)', /firingNow = !!this\.findAttackTarget[\s\S]{0,80}?if \(firingNow\) player\.tryFire\(this\);/.test(game));
-check('pasukan mengikuti ritme tembakan hero (bukan input mentah)', /let firingNow = manualFire;[\s\S]{0,700}?for \(const ally of run\.allies\)/.test(game) && !/const firingNow = this\.input\.isFiring/.test(game));
+check('pasukan mengikuti ritme tembakan hero (bukan input mentah)', /let firingNow = manualFire;[\s\S]{0,900}?for \(const ally of run\.allies\)/.test(game) && !/const firingNow = this\.input\.isFiring/.test(game));
 check('assist-aim player.tryFire tetap utuh (regresi)', readFileSync('js/entities/player.js', 'utf8').includes('findAttackTarget'));
 
 /* ---------- 3. Fase 2.3: gerbang landscape hanya gameplay ---------- */
@@ -77,7 +80,7 @@ check('baris toggle ada di Profil (index.html)', html.includes('btn-profile-auto
 const prof = readFileSync('js/ui/screens/profile-screen.js', 'utf8');
 check('profile-screen mengwire toggle + writeSave', prof.includes("getElementById('btn-profile-autofire')") && prof.includes('writeSave(meta)'));
 const hud = readFileSync('js/ui/screens/hud-screen.js', 'utf8');
-check('hint HUD menyebut auto-fire saat NYALA', hud.includes('hero menembak sendiri'));
+check('hint HUD menyebut auto-fire SAAT DIAM (perilaku nyata)', hud.includes('hero menembak sendiri saat diam'));
 check('hint HUD tetap punya varian manual saat MATI', hud.includes('Tahan <span class="k">SERANG</span>, tarik untuk mengarahkan'));
 const lang = JSON.parse(readFileSync('data/lang.json', 'utf8'));
 check('string baru terdaftar di lang.json', 'Serang Otomatis' in lang.strings, lang.strings['Serang Otomatis']);

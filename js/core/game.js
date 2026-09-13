@@ -614,16 +614,23 @@ export const game = {
     if (player.squash > 0) player.squash -= dt;
 
     // FASE 2.1 — AUTO-FIRE (default NYALA, toggle di Profil: meta.settings.autoFire).
-    // Model Archero: hero menembak sendiri ke musuh terdekat dalam jangkauan
-    // sehingga pemain baru yang hanya menyentuh joystick tetap bertarung
-    // (kriteria brief §2.1: membunuh musuh dalam 10 detik pertama tanpa input tembak).
-    // Aim manual / tahan tombol SERANG tetap MENGAMBIL ALIH bila pemain mau.
-    // Tanpa target dalam jangkauan hero diam — tidak swing & tidak berbunyi sia-sia.
+    // Model Archero — EVALUASI PEMILIK 13 Sep: versi pertama menembak terus-menerus
+    // sepanjang level (termasuk sambil lari) dan itu dinilai tidak tepat. Kini hero
+    // menembak sendiri HANYA SAAT DIAM (vektor gerak ~nol = joystick/tombol arah
+    // dilepas); bergerak untuk menghindar = tidak menembak. Kriteria brief §2.1
+    // tetap terpenuhi: pemain baru yang hanya menyentuh joystick tetap bertarung —
+    // begitu joystick dilepas, hero langsung menembak target terdekat (10 detik
+    // pertama). Aim manual / tahan SERANG tetap MENGAMBIL ALIH kapan pun,
+    // termasuk sambil bergerak. Tanpa target dalam jangkauan hero tetap diam —
+    // tidak swing & tidak berbunyi sia-sia.
+    const move = this.input.getMoveVector();
+    // Ambang input (bukan angka gameplay): joystick nyaris netral dianggap diam.
+    const heroIdle = move.magnitude < 0.05;
     const manualFire = !!(this.input.isFiring && this.input.isFiring());
     let firingNow = manualFire;
     if (manualFire) {
       player.tryFire(this);
-    } else if ((STATE.meta.settings ? STATE.meta.settings.autoFire !== false : true)) {
+    } else if (heroIdle && (STATE.meta.settings ? STATE.meta.settings.autoFire !== false : true)) {
       firingNow = !!this.findAttackTarget(player.x, player.y, player.stats.effectiveAttackRange);
       if (firingNow) player.tryFire(this);
     }
@@ -653,8 +660,7 @@ export const game = {
       }
     }
 
-    // 1. Input & player (gerak + auto-attack)
-    const move = this.input.getMoveVector();
+    // 1. Gerak player — vektor `move` sudah dibaca SEKALI di blok AUTO-FIRE di atas
     player.update(dt, move, this);
 
     // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi

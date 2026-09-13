@@ -173,17 +173,18 @@ export function updateAbilityBar(abilities) {
 /** Hint kontrol adaptif per perangkat (touch vs keyboard). */
 function controlHintText() {
   const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
-  // Fase 2.1: dengan Serang Otomatis NYALA (default), hero menembak sendiri —
-  // hint menjelaskan itu dan cara mengambil alih arah; bila dimatikan di Profil,
-  // hint kembali menjelaskan tembakan manual (perilaku nyata, bukan janji).
+  // Fase 2.1 (evaluasi 13 Sep): dengan Serang Otomatis NYALA (default), hero
+  // menembak sendiri HANYA SAAT DIAM (model Archero) — hint menjelaskan itu dan
+  // cara mengambil alih arah; bila dimatikan di Profil, hint kembali menjelaskan
+  // tembakan manual (perilaku nyata, bukan janji).
   const auto = STATE.meta.settings ? STATE.meta.settings.autoFire !== false : true;
   if (isTouch) {
     return auto
-      ? 'Tarik di lantai arena untuk bergerak · hero menembak sendiri · tahan <span class="k">SERANG</span> untuk ambil alih arah'
+      ? 'Tarik di lantai arena untuk bergerak · lepas = hero menembak sendiri saat diam · tahan <span class="k">SERANG</span> untuk ambil alih arah'
       : 'Tarik di lantai arena untuk bergerak · Tahan <span class="k">SERANG</span>, tarik untuk mengarahkan';
   }
   return auto
-    ? 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · hero menembak sendiri · tahan <span class="k">Spasi</span> untuk ambil alih arah · Jeda: <span class="k">Esc</span>'
+    ? 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · lepas = hero menembak sendiri saat diam · tahan <span class="k">Spasi</span> untuk ambil alih arah · Jeda: <span class="k">Esc</span>'
     : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · Serang: <span class="k">Spasi</span> / tahan <span class="k">SERANG</span> (tarik = arah) · Jeda: <span class="k">Esc</span>';
 }
 
