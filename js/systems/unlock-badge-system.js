@@ -15,11 +15,12 @@
 
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
-import { hudMenuEntries, hudMenuGate, gateDef } from './feature-gate.js';
+import { journeyEntries, journeyGate, gateDef } from './feature-gate.js';
 
+// §6: dua menu HUD (menu1/menu2) dilebur jadi SATU sheet "Perjalanan" →
+// satu badge pada tombol sheet di HUD (id journey-badge).
 const MENUS = [
-  { menu: 'menu1', badge: 'menu1-badge' },
-  { menu: 'menu2', badge: 'menu2-badge' },
+  { menu: 'journey', badge: 'journey-badge' },
 ];
 
 const key = (e) => `${e.target}:${e.id}`;
@@ -31,7 +32,8 @@ function hasRequirement(e) {
 }
 
 function unlockedEntries(menu) {
-  return hudMenuEntries(menu).filter((e) => !hudMenuGate(menu, e.screenId).locked && hasRequirement(e));
+  if (menu !== 'journey') return [];
+  return journeyEntries().filter((e) => !journeyGate(e.screenId).locked && hasRequirement(e));
 }
 
 /** Pastikan `meta.seenUnlocks` ada; save lama → anggap yang sudah terbuka sudah dilihat. */

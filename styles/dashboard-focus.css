@@ -1919,3 +1919,76 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-curguide .curguide-tasks li { font-size: 11px; line-height: 1.3; }
   #screen-curguide .modal-box { padding: 10px 14px 12px; gap: 4px; }
 }
+
+/* ================================================================
+   §6 NAVIGASI (BUILD 59a) — SATU SHEET "PERJALANAN"
+   Sidebar/quick row/secondary dock DIHAPUS dari markup; dua menu HUD
+   dilebur. Yang tersisa: dock permanen 5 SLOT (slot 1 = Perjalanan)
+   + tombol bulat HUD (kelas .hud-menu-toggle lama → gaya tetap jalan)
+   + sheet bawah yang sama untuk keduanya. Topbar permanen: chip
+   Pangkat (Fase 19) + chip Battle Pass + item teratas session hook
+   + chip hitung mundur reset harian (Fase 2.5, pindah dari daftar misi).
+   ================================================================ */
+#screen-dashboard .dock { grid-template-columns: repeat(5, auto); }
+
+/* Backdrop + sheet bawah */
+.journey-backdrop { position: fixed; inset: 0; z-index: 350; background: rgba(18, 45, 41, .45); backdrop-filter: blur(2px); }
+.journey-backdrop.hidden { display: none; }
+.journey-sheet {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 351;
+  width: min(100vw, 560px); max-height: 72vh; overflow-y: auto;
+  background: var(--cream); border-radius: 22px 22px 0 0;
+  box-shadow: 0 -12px 34px rgba(20, 60, 54, .28);
+  padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+}
+.journey-sheet.hidden { display: none; }
+.journey-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.journey-head b { font-size: 15px; font-weight: 900; color: var(--ink); letter-spacing: .04em; }
+.journey-close {
+  border: 0; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  background: rgba(47, 156, 143, .12); color: var(--teal-dark); font: 900 14px var(--font);
+}
+.journey-close:active { transform: scale(.92); }
+.journey-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(78px, 1fr)); gap: 10px; }
+.journey-item {
+  border: 0; background: none; padding: 4px 2px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.journey-item .ji-ico img {
+  width: 48px; height: 48px; padding: 7px; border-radius: 50%; object-fit: contain;
+  background: radial-gradient(circle at 34% 30%, #fffdf4, #e8f4ea);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 0 rgba(31, 95, 87, .16), 0 4px 10px rgba(31, 95, 87, .18);
+  transition: transform .12s ease;
+}
+.journey-item:active .ji-ico img { transform: scale(.93); background: radial-gradient(circle at 34% 30%, #fff7dc, #f5c64f); }
+.journey-item .ji-label { font: 900 9.5px var(--font); color: var(--ink); text-align: center; }
+@media (max-height: 470px) {
+  .journey-sheet { max-height: 84vh; padding: 8px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .journey-item .ji-ico img { width: 40px; height: 40px; padding: 6px; }
+  .journey-list { gap: 8px; }
+}
+
+/* Topbar permanen: chip Battle Pass + chip hook + countdown (Fase 2.5) */
+#screen-dashboard .bp-chip {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  background: var(--card); border: 0; border-radius: 999px; padding: 4px 10px 4px 6px;
+  font: 900 11px var(--font); color: var(--teal-dark); box-shadow: var(--shadow-card);
+}
+#screen-dashboard .bp-chip.hidden { display: none; }
+#screen-dashboard .bp-chip img { width: 20px; height: 20px; object-fit: contain; }
+#screen-dashboard .bp-chip .bp-bar { width: 34px; height: 5px; border-radius: 3px; background: rgba(47, 156, 143, .18); overflow: hidden; }
+#screen-dashboard .bp-chip .bp-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8fe8d2, #f5c64f); }
+#screen-dashboard .hook-chip {
+  display: inline-flex; align-items: center; gap: 5px; min-width: 0;
+  background: rgba(47, 156, 143, .08); border-radius: 999px; padding: 4px 10px;
+  font: 800 10px var(--font); color: var(--ink-soft);
+}
+#screen-dashboard .hook-chip.hidden { display: none; }
+#screen-dashboard .hook-chip img { width: 15px; height: 15px; flex: none; object-fit: contain; }
+#screen-dashboard .hook-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 28vw; }
+#screen-dashboard .topbar .reset-count { margin: 0; }
+@media (max-width: 700px) {
+  #screen-dashboard .hook-chip span { max-width: 20vw; }
+  #screen-dashboard .bp-chip .bp-bar { display: none; }
+}

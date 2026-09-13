@@ -5,7 +5,10 @@
  */
 
 import { STATE } from '../../core/state-manager.js';
-import { getData, getHero } from '../../core/data-store.js';
+import { getData, getHero, getRetentionConfig } from '../../core/data-store.js';
+import { ensureBp, xpNeed } from '../../systems/battlepass-system.js'; // §6: chip BP topbar
+import { buildSessionHook } from '../../systems/session-hook.js'; // §6: chip hook topbar
+import { composeHookData, composeHookMeta, toHookMissions, prettifyEvolutionLabels } from '../../systems/session-hook-adapter.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
 import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest } from '../../systems/mission-system.js';
@@ -24,7 +27,7 @@ import {
 } from '../../systems/body-system.js';
 import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../systems/monetization.js';
 import { playerRank } from '../../systems/rank-system.js';
-import { applyGateVisual, gateFor } from '../../systems/feature-gate.js';
+import { applyGateVisual, gateFor, journeyGate } from '../../systems/feature-gate.js';
 import { arenaUnlockStatus } from './arena-screen.js';
 import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
@@ -161,33 +164,7 @@ function renderBanner(meta) {
 }
 
   /** Dashboard focus: empat pintu sekunder; daily/misi tetap hidup sebagai notifikasi di bawah. */
-function renderQuickRow(meta) {
-  const row = document.getElementById('quick-row');
-  row.textContent = '';
-  const tiles = [
-    // RONDE-6: SATU LAPIS — dari dashboard langsung ke DETAIL hero (rail kiri
-    // untuk ganti hero), tanpa melewati grid roster.
-    { key: 'herodetail', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('herodetail') },
-    { key: 'shop', ico: 'assets/icons/menu-shop.svg', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
-    { key: 'codex', ico: 'assets/icons/menu-codex.svg', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
-    { key: 'rank', ico: 'assets/icons/menu-rank.svg', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
-  ];
-  for (const tl of tiles) {
-    const t = el('button', { class: 'quick-tile', title: tl.label }, [
-      tl.badge ? el('span', { class: 'qt-badge', text: tl.badge }) : null,
-      el('img', { src: tl.ico, alt: '' }),
-      el('span', { class: 'qt-label', text: tl.label }),
-    ]);
-    // F21: gerbang bertahap — tile terkunci menampilkan syarat & toast (buka via main)
-    const gate = gateFor('quick', tl.key);
-    if (gate && gate.locked) {
-      // R1: progressive disclosure — tile terkunci TIDAK dirender (muncul saat unlock)
-      continue;
-    }
-    t.addEventListener('click', tl.act);
-    row.appendChild(t);
-  }
-}
+// §6: renderQuickRow DIHAPUS — quick row menduplikasi destinasi dock/sheet Perjalanan.
 
 /** Fase 13: kartu KAMPANYE besar (bab aktif + tombol MULAI #btn-play-big). */
 function renderCampaignCard(meta) {
@@ -469,6 +446,61 @@ function maybeShowInstallPrompt() {
   if (dec.show) showInstallPromptModal(STATE.meta, dec);
 }
 
+/**
+ * §6: indikator topbar permanen — chip Battle Pass + item teratas session hook
+ * (chip Pangkat sudah ada sejak Fase 19) + chip hitung mundur reset harian
+ * (Fase 2.5, dipindah ke sini karena isi dash-scroll tersembunyi sejak F24).
+ */
+function refreshTopbarIndicators(meta) {
+  const topbar = document.querySelector('#screen-dashboard .topbar');
+
+  // Hitung mundur reset harian (Fase 2.5) — angka & ambang urgent dari data.
+  unmountResetCountdown(dashResetChip);
+  dashResetChip = mountResetCountdown(topbar, 'dashboard');
+  if (dashResetChip) topbar?.querySelector('.dash-points')?.insertAdjacentElement('beforebegin', dashResetChip);
+
+  // Battle Pass: level + progres XP ke level berikutnya; gerbang secondary/bp.
+  const bpChip = document.getElementById('bp-chip');
+  if (bpChip) {
+    const locked = journeyGate('bp').locked;
+    bpChip.classList.toggle('hidden', locked);
+    if (!locked) {
+      const bp = ensureBp(meta);
+      const need = Math.max(1, xpNeed(bp.level));
+      const lvl = document.getElementById('bp-chip-level');
+      if (lvl) lvl.textContent = String(bp.level);
+      const fill = document.getElementById('bp-chip-fill');
+      if (fill) fill.style.width = `${Math.min(100, Math.round(((bp.xp || 0) / need) * 100))}%`;
+      bpChip.onclick = () => { audio.ui(); screenManager.show('bp'); };
+    }
+  }
+
+  // Item teratas session hook (Fase 2.4) — alasan "main lagi" selalu terlihat.
+  const hookChip = document.getElementById('hook-chip');
+  if (hookChip) {
+    let top = null;
+    try {
+      const cfg = (getRetentionConfig() || {}).sessionHook;
+      if (cfg) {
+        const composedMeta = composeHookMeta(meta);
+        const hook = prettifyEvolutionLabels(buildSessionHook({
+          meta: composedMeta,
+          lastRun: null, // di dashboard tidak ada run yang baru selesai
+          data: composeHookData(getData()),
+          cfg,
+          missionProgress: toHookMissions(getMissionProgressList(composedMeta)),
+        }), getData());
+        top = hook.items[0] || null;
+      }
+    } catch { top = null; } // indikator = pelengkap; dashboard tidak boleh gagal karenanya
+    hookChip.classList.toggle('hidden', !top);
+    if (top) {
+      const txt = document.getElementById('hook-chip-text');
+      if (txt) txt.textContent = `${top.label} · ≈${top.etaRuns} run`;
+    }
+  }
+}
+
 export function show() {
   showHeroNotice(); // Fase 17: perayaan "HERO BARU!" bila ada yang baru terbuka
   showComebackModal(); // Fase 1.3 (v2.0): hadiah kembali + streak + tubuh pulih — SATU modal, sekali
@@ -503,16 +535,9 @@ export function show() {
     }
   }
 
-  // F21: GERBANG MENU BERTAHAP — side-nav & quick-menu terbuka sesuai bestWave
-  document.querySelectorAll('.side-btn').forEach((b) => {
-    const id = b.id.replace('side-', '');
-    applyGateVisual(b, 'side', id);
-  });
+  // F21 (disesuaikan §6): gerbang dock bawah — side-nav & secondary-dock dihapus.
   document.querySelectorAll('.dock-btn[data-nav]').forEach((b) => {
     applyGateVisual(b, 'dock', b.dataset.nav);
-  });
-  document.querySelectorAll('.secondary-dock [data-nav]').forEach((b) => {
-    applyGateVisual(b, 'secondary', b.dataset.nav);
   });
   // Fase 19: CHIP PANGKAT PENJAGA — tujuan pemain selalu terlihat (goal gradient)
   const rankChip = document.getElementById('rank-chip');
@@ -580,7 +605,7 @@ export function show() {
 
   renderLeaderboardCard(meta);
   renderBanner(meta); // Fase 13: banner carousel
-  renderQuickRow(meta); // Fase 13: quick menu
+  refreshTopbarIndicators(meta); // §6: chip BP + hook + countdown di topbar permanen
   renderCampaignCard(meta); // Fase 13: kartu kampanye besar
   renderModeStack(meta); // Fase 13: kolom mode
   // Fase 13: avatar profil di topbar
@@ -642,10 +667,9 @@ export function show() {
   // ---- Misi (3 progres teratas yang belum selesai) ----
   const list = document.getElementById('dash-missions');
   list.textContent = '';
-  // Fase 2.5: sisa waktu reset harian di atas daftar misi — angka dari data
-  // (retention-config.dailyAnchor), < warnWhenHoursLeft jam → penekanan .urgent.
-  unmountResetCountdown(dashResetChip);
-  dashResetChip = mountResetCountdown(list, 'dashboard');
+  // Fase 2.5 (direvisi §6): chip hitung mundur PINDAH ke topbar — sejak F24 isi
+  // dash-scroll disembunyikan (dashboard = launcher sinematik), chip di daftar
+  // misi tidak pernah terlihat. Lihat refreshTopbarIndicators() di bawah.
   const progress = getMissionProgressList(meta);
   const active = progress.filter((m) => !m.claimed).slice(0, 3);
   const doneCount = progress.filter((m) => m.claimed).length;

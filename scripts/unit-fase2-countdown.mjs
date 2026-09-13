@@ -128,7 +128,7 @@ const dr = read('js/systems/daily-reset.js');
 const css = read('styles/main.css');
 const lang = JSON.parse(read('data/lang.json'));
 
-check('dashboard mount surface "dashboard"', dash.includes("mountResetCountdown(list, 'dashboard')"));
+check('dashboard mount surface "dashboard" (topbar sejak §6)', dash.includes("mountResetCountdown(topbar, 'dashboard')"));
 check('gameover mount surface "gameover"', go.includes("'gameover'") && go.includes('mountResetCountdown'));
 check('hud mount surface "hud-mission-panel"', hud.includes("mountResetCountdown(document.getElementById('hud-quests'), 'hud-mission-panel')"));
 const wired = ['dashboard', 'gameover', 'hud-mission-panel'];
@@ -156,6 +156,7 @@ const html = read('index.html');
 const build = (version.match(/BUILD\s*=\s*'([^']+)'/) || [])[1];
 check('BUILD terbaca dari version.js', typeof build === 'string' && /^\d+[a-z]$/.test(build), `BUILD=${build}`);
 check('index.html memuat main.js?v=BUILD yang sama', html.includes(`main.js?v=${build}`));
+check('CSS ikut cache-busting ?v=BUILD (bug laten: main.css berubah, ?v=54 tetap)', html.includes(`styles/main.css?v=${build}`) && html.includes(`styles/dashboard-focus.css?v=${build}`));
 
 /* ---------- ringkasan ---------- */
 

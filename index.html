@@ -17,8 +17,8 @@
   <meta name="application-name" content="Imunverse" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=54" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=5" />
+  <link rel="stylesheet" href="styles/main.css?v=59a" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=59a" />
 </head>
 <body>
   <div id="app">
@@ -87,33 +87,22 @@
               <small id="rank-sub">—</small>
             </span>
           </button>
+          <!-- §6: indikator topbar permanen — Battle Pass + item teratas session hook -->
+          <button id="bp-chip" class="bp-chip hidden" title="Battle Pass" aria-label="Buka Battle Pass">
+            <img src="assets/icons/menu-pass.svg" alt="" />
+            <span class="bp-lvl">Lv <b id="bp-chip-level">1</b></span>
+            <span class="bp-bar"><i id="bp-chip-fill"></i></span>
+          </button>
+          <div id="hook-chip" class="hook-chip hidden" role="status" title="Progres terdekat">
+            <img src="assets/icons/menu-quest.svg" alt="" /><span id="hook-chip-text">—</span>
+          </div>
           <div class="dash-points" title="Antibodi dari gameplay"><img class="coin" src="assets/icons/cur-antibodi.svg" alt="Antibodi" /><span id="dash-currency">0</span></div>
           <div class="currency-chip imu-chip" title="Imun Coin premium"><img class="coin" src="assets/icons/cur-imun.svg" alt="Imun Coin" /><span id="dash-imun">0</span></div>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
         </header>
 
         <div class="dash-body">
-          <!-- ===== SIDEBAR NAV (kiri, ala MLBB) ===== -->
-          <nav class="side-nav" aria-label="Navigasi fitur">
-            <button class="side-btn active" id="side-home" title="Beranda">
-              <img src="assets/icons/ui-home.svg" alt="" /><span>Home</span>
-            </button>
-            <button class="side-btn" id="side-campaign" title="Peta Tubuh — Kampanye">
-              <img src="assets/icons/menu-campaign.svg" alt="" /><span>Kampanye</span>
-            </button>
-            <button class="side-btn" id="side-codex" title="Bio-Pedia">
-              <img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span>
-            </button>
-            <button class="side-btn" id="side-bp" title="Battle Pass">
-              <img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span>
-            </button>
-            <button class="side-btn" id="side-records" title="Papan Rekor">
-              <img src="assets/icons/menu-rank.svg" alt="" /><span>Rekor</span>
-            </button>
-            <button class="side-btn" id="side-body" title="Kondisi Tubuh">
-              <img src="assets/icons/ui-heart.svg" alt="" /><span>Tubuh</span>
-            </button>
-          </nav>
+          <!-- §6: SIDEBAR DIHAPUS — destinasi hidup di dock 5 slot + sheet "Perjalanan" -->
 
           <div class="dash-scroll">
             <!-- ===== BANNER CAROUSEL ===== -->
@@ -143,8 +132,7 @@
               <div class="banner-dots" id="banner-dots"></div>
             </section>
 
-            <!-- ===== QUICK MENU ===== -->
-            <div id="quick-row" class="quick-row"><!-- diisi JS --></div>
+            <!-- §6: QUICK ROW DIHAPUS — menduplikasi destinasi dock/sheet; semua pintu lewat "Perjalanan" -->
 
             <!-- ===== BARIS PLAY: kartu bab besar + kolom mode ===== -->
             <div class="play-row">
@@ -180,8 +168,14 @@
           <span class="dashboard-play-icon"><img src="assets/icons/ui-play.svg" alt="" /></span>
           <span class="dashboard-play-copy"><b>PLAY</b><small>Mulai run sekarang</small></span>
         </button>
-        <!-- Dock navigasi utilitas -->
+        <!-- Dock navigasi utilitas — §6: PERMANEN 5 SLOT (slot 1 = sheet Perjalanan) -->
         <nav class="dock">
+          <button class="dock-btn" id="btn-journey" aria-label="Perjalanan — semua destinasi">
+            <span class="dock-ico">
+              <img src="assets/icons/menu-journey.svg" alt="" />
+            </span>
+            <span>Perjalanan</span>
+          </button>
           <button class="dock-btn" data-nav="herodetail" aria-label="Detail hero">
             <span class="dock-ico">
               <img src="assets/icons/menu-heroes.svg" alt="" />
@@ -207,13 +201,7 @@
             <span>Shop</span>
           </button>
         </nav>
-        <!-- Fitur sekunder tetap tersedia tanpa mengambil fokus dari Play. -->
-        <nav class="secondary-dock" aria-label="Fitur sekunder">
-          <button data-nav="campaign" title="Kampanye"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Campaign</span></button>
-          <button data-nav="bp" title="Battle Pass"><img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span></button>
-          <button data-nav="codex" title="Bio-Pedia"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span></button>
-          <button data-nav="rank" title="Pangkat"><img src="assets/icons/menu-rank.svg" alt="" /><span>Rank</span></button>
-        </nav>
+        <!-- §6: SECONDARY DOCK DIHAPUS — digantikan sheet "Perjalanan" (journey-sheet.js) -->
       </section>
 
       <!-- ============ ROSTER HERO ============ -->
@@ -481,22 +469,10 @@
         <!-- UI/UX: MENU 1 — "Perjalanan Penjaga" (kanan-atas): progres & pengetahuan.
              Item terkunci DISEMBUNYIKAN (progressive disclosure via data/features.json);
              toggle ikut tersembunyi bila belum ada item terbuka. Ikon = set assets/icons/menu-*.svg -->
-        <button id="hud-menu-toggle" class="hud-menu-toggle" aria-label="Menu perjalanan" aria-expanded="false"><img src="assets/icons/menu-journey.svg" alt="" /><span id="menu1-badge" class="menu-badge hidden"></span></button>
-        <div id="hud-game-menu" class="hud-game-menu hidden" aria-label="Menu perjalanan">
-          <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Peta Tubuh</span></button>
-          <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/icons/menu-rank.svg" alt="" /><span>Pangkat</span></button>
-          <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
-          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Battle Pass</span></button>
-        </div>
+        <!-- §6: SATU tombol perjalanan — membuka sheet yang sama dengan dock dashboard -->
+        <button id="hud-journey-toggle" class="hud-menu-toggle" aria-label="Menu perjalanan" aria-expanded="false"><img src="assets/icons/menu-journey.svg" alt="" /><span id="journey-badge" class="menu-badge hidden"></span></button>
         <!-- UI/UX: MENU 2 — "Regu Hero" (bawah, kiri grid skill; membuka ke atas): hero, koleksi, toko, arena, lab -->
-        <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu regu hero" aria-expanded="false"><img src="assets/icons/menu-heroes.svg" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
-        <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu regu hero">
-          <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/icons/menu-heroes.svg" alt="" /><span>Heroes</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Koleksi</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/icons/menu-shop.svg" alt="" /><span>Shop</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="arena"><img src="assets/icons/menu-battle.svg" alt="" /><span>Arena</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="upgrade"><img src="assets/icons/menu-squad.svg" alt="" /><span>Lab Pasukan</span></button>
-        </div>
+        <!-- §6: MENU 2 (regu hero) DIHAPUS — dilebur ke sheet "Perjalanan" -->
         <!-- F25: panel quest harian/mingguan — kiri tengah; hadiah manual-claim + badge kecil -->
         <div id="hud-quests" class="hud-quests">
           <button id="hud-quests-toggle" class="hud-quests-head" aria-expanded="true">
@@ -696,11 +672,21 @@
       <button id="cine-skip" class="cine-skip">Lewati »</button>
     </div>
 
+    <!-- ============ §6: SHEET PERJALANAN — satu-satunya menu destinasi (dashboard & HUD) ============ -->
+    <div id="journey-backdrop" class="journey-backdrop hidden"></div>
+    <section id="journey-sheet" class="journey-sheet hidden" role="dialog" aria-label="Perjalanan">
+      <div class="journey-head">
+        <b>Perjalanan</b>
+        <button id="journey-close" class="journey-close" type="button" aria-label="Tutup">✕</button>
+      </div>
+      <div id="journey-list" class="journey-list"><!-- diisi js/ui/journey-sheet.js — hanya destinasi ter-unlock --></div>
+    </section>
+
     <!-- Toast notifikasi -->
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=58a"></script>
+  <script type="module" src="js/main.js?v=59a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

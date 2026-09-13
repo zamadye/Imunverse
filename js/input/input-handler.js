@@ -37,8 +37,8 @@ const isTypingTarget = (t) =>
 export const UI_CONTROL_SELECTOR =
   'button, a, input, textarea, select, label, summary, ' +
   '[role="button"], [role="dialog"], [data-ui], ' +
-  '.modal-box, .screen.modal, .hud-hero-status, .hud-quests, .hud-menu2-toggle, ' +
-  '.hud-game-menu2, .hud-minimap, .hud-xp-top, .hud-mission, .hud-buff-chip, ' +
+  '.modal-box, .screen.modal, .hud-hero-status, .hud-quests, .journey-backdrop, ' +
+  '.journey-sheet, .hud-minimap, .hud-xp-top, .hud-mission, .hud-buff-chip, ' +
   '.hud-antigen, .phago-meter, .ability-btn, .fire-btn, .tut-block, .hud-top, .curguide-box';
 
 /**

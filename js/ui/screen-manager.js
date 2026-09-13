@@ -46,6 +46,8 @@ export function registerScreen(id, mod) {
 export function show(id, params) {
   const record = registry.get(id);
   if (!record) throw new Error('Screen tidak terdaftar: ' + id);
+  // §6: sheet "Perjalanan" adalah overlay global — layar berpindah = sheet tertutup.
+  window.__IMUNVERSE_closeJourneySheet?.();
   if (currentId && currentId !== id) {
     hideCurrent();
   }

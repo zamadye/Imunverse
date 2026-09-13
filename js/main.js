@@ -24,8 +24,9 @@ import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
-import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
-import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
+import { gateFor } from './systems/feature-gate.js'; // §6: hudMenuGate/applyHudMenuGates dilebur ke journey-sheet
+import { renderBadges } from './systems/unlock-badge-system.js';
+import { wireJourneySheet } from './ui/journey-sheet.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
 import { runComebackPass } from './systems/comeback-system.js'; // Fase 1.3: win-back saat boot
 import { getBodyState } from './systems/body-system.js'; // Fase 1.3: pastikan bodyState ada sebelum pass comeback
@@ -178,8 +179,10 @@ function wireUiBridge() {
    * Sumber kebenaran tunggal: data/features.json via feature-gate.js.
    */
   function applyHudDisclosure() {
-    applyHudMenuGates('menu1', '.hud-menu-link', document.getElementById('hud-menu-toggle'), 'menuScreen');
-    applyHudMenuGates('menu2', '.hud-menu2-link', document.getElementById('hud-menu2-toggle'), 'menu2Screen');
+    // §6: SATU sheet Perjalanan — gerbang destinasi dievaluasi journey-sheet.js
+    // saat sheet dirender (fail-closed, item terkunci tidak dirender). Di sini
+    // cukup panel Misi (gerbang quick/quests) + menutup sheet yang terbuka
+    // karena isinya mungkin basi setelah statistik berubah.
     const quests = document.getElementById('hud-quests');
     if (quests) {
       const g = gateFor('quick', 'quests');
@@ -187,11 +190,7 @@ function wireUiBridge() {
       quests.classList.toggle('gate-hidden', locked);
       quests.style.display = locked ? 'none' : '';
     }
-    // menu yang sedang terbuka ditutup — daftar isinya mungkin baru berubah
-    for (const [menuId, toggleId] of [['hud-game-menu', 'hud-menu-toggle'], ['hud-game-menu2', 'hud-menu2-toggle']]) {
-      document.getElementById(menuId)?.classList.add('hidden');
-      document.getElementById(toggleId)?.setAttribute('aria-expanded', 'false');
-    }
+    window.__IMUNVERSE_closeJourneySheet?.();
   }
   window.__IMUNVERSE_applyHudDisclosure = applyHudDisclosure;
 
@@ -617,42 +616,10 @@ async function boot() {
       if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); hpPill.click(); }
     });
   }
-  const hudMenu = document.getElementById('hud-game-menu');
-  const hudMenuToggle = document.getElementById('hud-menu-toggle');
-  hudMenuToggle?.addEventListener('click', () => {
-    const open = hudMenu.classList.toggle('hidden') === false;
-    hudMenuToggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen('menu1'); // F25: badge unlock dianggap dilihat saat menu dibuka
-  });
-  // F25: MENU 2 — Hero/Collection/Shop/Battle/Squad (pojok kanan-bawah, melebar ke kiri)
-  const hudMenu2 = document.getElementById('hud-game-menu2');
-  const hudMenu2Toggle = document.getElementById('hud-menu2-toggle');
-  hudMenu2Toggle?.addEventListener('click', () => {
-    const open = hudMenu2.classList.toggle('hidden') === false;
-    hudMenu2Toggle.setAttribute('aria-expanded', String(open));
-    if (open) markSeen('menu2');
-  });
-  // UI/UX: satu jalur untuk kedua menu — gerbang fail-closed (item tak terdaftar
-  // = terkunci), item terkunci memang tak terlihat; toast hanya jaga-jaga (mis. klik
-  // programatik) agar tidak pernah ada jalur menuju layar yang belum terbuka.
-  const openHudMenuScreen = (menuId, screenId, menuEl) => {
-    const gate = hudMenuGate(menuId, screenId);
-    if (gate.locked) {
-      showToast({ message: `${t(gate.label || 'Terus bermain')} ${t('untuk membuka!')}` });
-      audio.ui();
-      return;
-    }
-    game.pause();
-    menuEl?.classList.add('hidden');
-    music.stop(); // keluar arena → musik berhenti; mulai lagi saat runstart berikutnya
-    screenManager.show(screenId);
-  };
-  document.querySelectorAll('.hud-menu2-link').forEach((btn) => btn.addEventListener('click', () => {
-    openHudMenuScreen('menu2', btn.dataset.menu2Screen, hudMenu2);
-  }));
-  document.querySelectorAll('.hud-menu-link').forEach((btn) => btn.addEventListener('click', () => {
-    openHudMenuScreen('menu1', btn.dataset.menuScreen, hudMenu);
-  }));
+  // §6: DUA menu HUD (F25) dilebur jadi SATU sheet "Perjalanan" — sama dengan
+  // yang dibuka dock dashboard. Gerbang fail-closed + pause-run + musik stop
+  // saat memilih destinasi dari HUD semuanya hidup di journey-sheet.js.
+  wireJourneySheet();
 
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
@@ -678,16 +645,7 @@ async function boot() {
     const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
     game.startRun(unlocked ? heroDef.id : (getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0]).id);
   });
-  // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
-  const sideHome = document.getElementById('side-home');
-  if (sideHome) sideHome.addEventListener('click', () => {
-    document.querySelector('.dash-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
-  document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
-  document.getElementById('side-bp')?.addEventListener('click', () => screenManager.show('bp'));
-  document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  // §6: sidebar DIHAPUS — semua destinasi lewat dock 5 slot + sheet Perjalanan.
 
   // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons.
   // UI/UX BUILD 42: TAHAN + TARIK tombol ini = mengarahkan serangan (aim stick ala

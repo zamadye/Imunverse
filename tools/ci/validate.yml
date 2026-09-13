@@ -52,6 +52,9 @@ jobs:
       - name: Uji headless Fase 2.4 (hook akhir sesi, adapter G1-G5/G7/G12)
         run: npm run test:fase2hook
 
+      - name: Uji headless §6 Navigasi (satu sheet Perjalanan, dock 5 slot, fail-closed)
+        run: npm run test:fasenav
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true
