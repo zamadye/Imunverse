@@ -2225,8 +2225,12 @@ img.lock-badge {
   55%, 82% { transform: rotate(-90deg); }
   100% { transform: rotate(0deg); }
 }
+/* Fase 2.3: gerbang landscape HANYA saat gameplay. body.in-run dipasang
+   screen-manager.js:53 tepat ketika layar aktif = 'hud' (state run), jadi menu,
+   dashboard, toko, dsb. tetap bisa dipakai portrait; begitu run mulai, pemain
+   tetap disuruh memutar perangkat. */
 @media (orientation: portrait) {
-  #rotate-hud { display: flex; }
+  body.in-run #rotate-hud { display: flex; }
 }
 
 /* --- Dashboard lanskap: grid 2 kolom (banner+kampanye | menu+info) --- */

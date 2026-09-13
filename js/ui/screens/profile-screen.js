@@ -40,6 +40,22 @@ export function show() {
     refresh();
   };
 
+  // Fase 2.1: toggle Serang Otomatis (default NYALA; tersimpan di meta.settings).
+  // Aim manual / tahan tombol SERANG tetap menang saat pemain mengambil alih.
+  const btnAuto = document.getElementById('btn-profile-autofire');
+  if (btnAuto) {
+    const autoOn = () => (meta.settings ? meta.settings.autoFire !== false : true);
+    const refreshAuto = () => { btnAuto.textContent = autoOn() ? 'AKTIF' : 'MATI'; };
+    refreshAuto();
+    btnAuto.onclick = () => {
+      meta.settings = Object.assign({ autoFire: true }, meta.settings || {});
+      meta.settings.autoFire = !autoOn();
+      writeSave(meta);
+      audio.ui();
+      refreshAuto();
+    };
+  }
+
   // Reset save (dipindah dari footer dashboard yang dihapus desain gameplay-first)
   document.getElementById('btn-profile-reset').onclick = () => {
     if (window.confirm('Hapus seluruh progress (antibodi, unlock, upgrade)?')) {

@@ -5,6 +5,7 @@
     "en"
   ],
   "strings": {
+    "Serang Otomatis": "Auto Attack",
     "PASANG DI PERANGKAT?": "INSTALL ON DEVICE?",
     "Imunverse bisa dipasang seperti aplikasi: ikon di layar utama, layar penuh, dan tetap bisa dimainkan tanpa jaringan.": "Imunverse can be installed like an app: a home-screen icon, full screen, and it keeps working without a network.",
     "Versi terpasang juga melindungi progresmu dari pembersihan penyimpanan browser.": "The installed version also protects your progress from browser storage cleanup.",

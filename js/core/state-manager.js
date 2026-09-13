@@ -73,6 +73,9 @@ export function createDefaultMeta() {
     purchaseCount: {}, // { productId: n } — batas `limit.perAccount`; receipts dipangkas ke 30 jadi tidak bisa dipakai menghitung
     // Fase 2.6 (PWA): penawaran pasang hanya SEKALI dan bisa ditolak permanen.
     pwa: { promptedAt: 0, declined: false, installed: false, lastOfferBuild: null },
+    // Fase 2.1: preferensi gameplay. autoFire default NYALA (model Archero);
+    // aim manual / tahan tombol SERANG tetap mengambil alih bila dipakai.
+    settings: { autoFire: true },
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,

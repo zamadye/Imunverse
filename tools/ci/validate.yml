@@ -43,6 +43,9 @@ jobs:
       - name: Uji headless Fase 2.6 (manifest, ikon, service worker, keputusan prompt)
         run: npm run test:fase2pwa
 
+      - name: Uji headless Fase 2.1/2.3 (auto-fire default, gerbang landscape)
+        run: npm run test:fase2onb
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true

@@ -613,15 +613,25 @@ export const game = {
     // Squash-stretch decay
     if (player.squash > 0) player.squash -= dt;
 
-    // TEMBAK MANUAL: hanya saat tombol TEMBAK ditekan/tahan
-    if (this.input.isFiring && this.input.isFiring()) {
+    // FASE 2.1 — AUTO-FIRE (default NYALA, toggle di Profil: meta.settings.autoFire).
+    // Model Archero: hero menembak sendiri ke musuh terdekat dalam jangkauan
+    // sehingga pemain baru yang hanya menyentuh joystick tetap bertarung
+    // (kriteria brief §2.1: membunuh musuh dalam 10 detik pertama tanpa input tembak).
+    // Aim manual / tahan tombol SERANG tetap MENGAMBIL ALIH bila pemain mau.
+    // Tanpa target dalam jangkauan hero diam — tidak swing & tidak berbunyi sia-sia.
+    const manualFire = !!(this.input.isFiring && this.input.isFiring());
+    let firingNow = manualFire;
+    if (manualFire) {
       player.tryFire(this);
+    } else if ((STATE.meta.settings ? STATE.meta.settings.autoFire !== false : true)) {
+      firingNow = !!this.findAttackTarget(player.x, player.y, player.stats.effectiveAttackRange);
+      if (firingNow) player.tryFire(this);
     }
 
-    // PASUKAN: follow player; menembak HANYA saat tomorin SERANG ditahan —
-    // aturan gameplay ronde-5: TIDAK ADA unit milik pemain yang menyerang
-    // otomatis (squad = tambahan DPS dalam ritme tombol, bukan auto-fire).
-    const firingNow = this.input.isFiring && this.input.isFiring();
+    // PASUKAN: follow player; menembak mengikuti aturan hero (brief §2.1):
+    // saat hero menembak — manual MAUPUN auto-fire — pasukan ikut menembak;
+    // selain itu hanya follow (aturan RONDE-5 tetap: tidak ada unit yang
+    // menyerang di luar ritme tembakan hero).
     const allyCfg = getData().upgrades.allyUpgrade;
     const allyLvl = STATE.meta.allyLevel || 0;
     for (const ally of run.allies) {
