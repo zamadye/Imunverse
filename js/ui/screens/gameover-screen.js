@@ -6,13 +6,16 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getRetentionConfig } from '../../core/data-store.js'; // getRetentionConfig: Fase 2.4 cfg sessionHook
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
 import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): epilog 6.4
 import { mountResetCountdown, unmountResetCountdown } from '../reset-countdown.js';
+import { buildSessionHook } from '../../systems/session-hook.js'; // Fase 2.4: drop-in murni (tidak diedit)
+import { composeHookData, composeHookMeta, toHookMissions, prettifyEvolutionLabels } from '../../systems/session-hook-adapter.js';
+import { getMissionProgressList } from '../../systems/mission-system.js';
 
 /** Fase 2.5: chip hitung mundur reset harian di kartu ringkasan (surface "gameover"). */
 let goResetChip = null;
@@ -104,6 +107,9 @@ export function show(summary) {
   if (goResetChip) {
     document.getElementById('gameover-sub')?.insertAdjacentElement('afterend', goResetChip);
   }
+
+  // Fase 2.4: hook akhir sesi — maksimal 3 alasan "main lagi", di atas tombol.
+  renderSessionHook(summary);
 
   // Bintang rating ala mockup victory (aset PNG: empty → filled)
   const stars = starsFor(summary);
@@ -299,6 +305,52 @@ export function wireButtons() {
 export function hide() {
   unmountResetCountdown(goResetChip); // Fase 2.5: matikan ticker saat layar tutup
   goResetChip = null;
+}
+
+/**
+ * Fase 2.4 — hook akhir sesi (brief §2.4 + retention-config.sessionHook).
+ * Drop-in murni `session-hook.js` memindai SEMUA sistem progresi dan memilih
+ * maks `maxItems` (3) yang paling dekat selesai; jarak dinyatakan dalam RUN.
+ * Skema data berbeda (G1–G5, G7, G12) dijembatani `session-hook-adapter.js`
+ * di pemanggil ini — drop-in tidak diedit, save tidak dimigrasi.
+ * Hook adalah pelengkap: bila apa pun gagal, layar gameover tetap tampil.
+ */
+function renderSessionHook(summary) {
+  const card = document.querySelector('#screen-gameover .gameover-card') || document.getElementById('screen-gameover');
+  if (!card) return;
+  card.querySelector('#go-session-hook')?.remove(); // render ulang (mis. setelah 2x antibodi)
+  const cfg = (getRetentionConfig() || {}).sessionHook;
+  if (!cfg) return;
+  let hook;
+  try {
+    hook = buildSessionHook({
+      meta: composeHookMeta(STATE.meta),
+      lastRun: summary, // {kills, wave, victory}; heroId absen → drop-in fallback meta.selectedHero
+      data: composeHookData(getData()), // G7: retention = retentionConfig
+      cfg,
+      missionProgress: toHookMissions(getMissionProgressList(STATE.meta)),
+      // runHistory (ring buffer metrics.js) sengaja tidak dikirim: rekaman
+      // belum memuat bossKills/currency → laju seumur hidup meta.stats lebih jujur.
+    });
+    hook = prettifyEvolutionLabels(hook, getData()); // "Evolusi — Modul Membran", bukan id teknis
+  } catch {
+    return;
+  }
+  if (!hook || !hook.headline || !hook.items.length) return;
+
+  const rows = hook.items.slice(0, cfg.maxItems || 3).map((it) =>
+    el('div', { class: 'go-hook-row', role: 'listitem' }, [
+      el('b', { class: 'go-hook-label', text: it.label }),
+      el('span', { class: 'go-hook-prog', text: `${it.current.toLocaleString('id-ID')}/${it.target.toLocaleString('id-ID')}` }),
+      el('em', { class: 'go-hook-eta', text: `≈${it.etaRuns} run` }),
+    ]));
+  const box = el('div', { id: 'go-session-hook', class: 'go-hook', role: 'list', 'aria-label': tr('Progres terdekat') }, [
+    el('p', { class: 'go-hook-head', text: hook.headline }),
+    ...rows,
+  ]);
+  const btnRow = card.querySelector('.btn-row');
+  if (btnRow) btnRow.insertAdjacentElement('beforebegin', box);
+  else card.appendChild(box);
 }
 
 function formatTime(sec) {

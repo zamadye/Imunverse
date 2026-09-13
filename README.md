@@ -2,7 +2,7 @@
 
 **HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework dan tanpa build step**.
 
-![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0) ![build](https://img.shields.io/badge/BUILD-56a-f5c64f)
+![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0) ![build](https://img.shields.io/badge/BUILD-57a-f5c64f)
 
 ---
 
@@ -78,6 +78,8 @@ Imunverse/
 │   │   ├── comeback-system.js  # ★ batas peluruhan offline, streak berampun, hadiah kembali
 │   │                           #   → DIPAKAI: dipanggil sekali dari main.js:boot() (BUILD 52a)
 │   │   ├── session-hook.js     # ★ 3 progres terdekat, ETA dalam RUN
+│   │   │                       #   → DIPAKAI: gameover-screen.js (BUILD 57a), drop-in TIDAK diedit
+│   │   ├── session-hook-adapter.js # jembatan skema repo ↔ drop-in (G1–G5, G7, G12)
 │   │   └── rare-drop-system.js # ★ drop kosmetik langka + pity, Peti Riset (pity terpisah)
 │   ├── render/                 # sprite-loader, shape-renderer, camera, background, visuals
 │   ├── save/save-manager.js    # localStorage + titik auto-save
@@ -114,6 +116,7 @@ Imunverse/
 - **Katalog IAP v2 (BUILD 53a):** `data/premium.json` hanya menyimpan **harga jual dan isi**. Nilai, badge `HEMAT n%`/`+n% BONUS`, dan persentase hemat dihitung runtime oleh `js/systems/pricing-model.js` dari `data/economy-anchors.json` — tidak ada angka nilai tulis tangan di `js/` maupun di katalog. Produk `active:false` (`imun_12000`, `bundle_noads`) tidak tampil; `limit.perAccount` dan jendela 72 jam dihormati; bonus pembelian pertama 2× hanya untuk `imun_500`/`imun_1000`, sekali per tier.
 - **Auto-fire (BUILD 55a):** hero menembak sendiri ke musuh terdekat dalam jangkauan (default **NYALA**, toggle "Serang Otomatis" di Profil) sehingga pemain baru yang hanya menyentuh joystick tetap bertarung; aim manual / tahan SERANG tetap mengambil alih, dan pasukan mengikuti ritme tembakan hero. Gerbang "Putar HP-mu" kini hanya muncul saat gameplay (`body.in-run`) — menu dan dashboard tetap nyaman portrait.
 - **PWA (BUILD 54a):** `manifest.json` + `sw.js` membuat game bisa dibuka dan dimainkan **tanpa jaringan**; cache diberi nama per-BUILD sehingga build lama tidak pernah tercampur. Prompt pasang muncul **sekali setelah run ke-3** dari dashboard dan bisa ditolak permanen (`meta.pwa`); di iOS ditawarkan petunjuk "Bagikan → Tambahkan ke Layar Utama" karena hanya itu jalur pemasangan — dan aplikasi terpasanglah yang dikecualikan dari penghapusan penyimpanan 7 hari WebKit (pertahanan save setelah keputusan tanpa-backend, ROADMAP §10 #10).
+- **Hook akhir sesi (BUILD 57a):** layar gameover menampilkan maksimal **3 alasan "main lagi"** di atas tombol Main Lagi — progres terdekat dari SEMUA sistem (misi, buka hero/arena, Battle Pass, kuota bab, pangkat, mastery, evolusi) dengan jarak dalam **run**, bukan angka mentah ("Satu run lagi: Buka Eos"). Pemilihan, ambang (`minPctToShow` 0,35 · `maxEtaRuns` 6) dan urutan prioritas semuanya dari `retention-config.json:sessionHook`. Drop-in `session-hook.js` tidak diedit — skema data repo dijembatani `session-hook-adapter.js` (temuan integrasi G1–G5/G7/G12 di ROADMAP §2), dan hook dibungkus try/catch sehingga tidak pernah menjatuhkan layar gameover.
 - **Hitung mundur reset harian (BUILD 56a):** sisa waktu menuju reset harian tampil sebagai chip `HH:MM:SS` di tiga surface dari `retention-config.json:dailyAnchor` — daftar misi dashboard, kartu akhir run, dan panel Misi di HUD. Batasnya diturunkan dari konvensi yang sudah dipakai semua fitur harian (kunci tanggal UTC): **tengah malam UTC berikutnya** (`js/systems/daily-reset.js`). Kurang dari 4 jam (`warnWhenHoursLeft`, dari data) chip berubah coral dan berdenyut.
 - **Kartu Imun 30 Hari:** 300 Imun instan + tetesan 50 Imun/hari × 30 hari yang **hangus bila tidak diklaim** (tidak menumpuk) + perk `noForcedAds` dan `adDailyLimitPlus2` (kuota iklan 6 → 8/hari selama kartu aktif).
 - **Pacing hasil retune (BUILD 52a):** Battle Pass `100 + 25×level` XP/level, cap **120 XP/run** & **360/hari**, harga premium **800 Imun** dengan imbalan **500** (net −300/musim); pangkat **4 GP/gelombang**, 0,45/kill, 27/boss, 55 menang, 22 per bab (12.000 GP ≈ 36 run); evolusi 0,4%/kill normal, 4%/elite, 1 bagian/boss, pohon **167 fragmen** ≈ 33 run; iklan rewarded **10 Imun × 6/hari**.

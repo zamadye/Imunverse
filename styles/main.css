@@ -689,6 +689,24 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 .summary-reward { display: flex; gap: 9px; align-items: center; font-size: 14px; font-weight: 900; color: var(--ink-soft); }
 .summary-reward strong { color: var(--gold-deep); font-size: 22px; font-variant-numeric: tabular-nums; }
 
+/* Fase 2.4 — hook akhir sesi: maks 3 alasan "main lagi" DI ATAS tombol Main Lagi.
+   Isi & urutan dari retention-config.sessionHook (drop-in session-hook.js). */
+.go-hook {
+  display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 430px;
+  margin: 10px auto 2px; padding: 8px 12px;
+  border-radius: var(--r-md); background: rgba(47, 156, 143, 0.07);
+  border: 1px solid rgba(47, 156, 143, 0.18); text-align: left;
+}
+.go-hook-head { font-size: 13px; font-weight: 900; color: var(--teal-deep); }
+.go-hook-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); }
+.go-hook-row .go-hook-label { flex: 1; font-weight: 800; color: var(--ink); }
+.go-hook-row .go-hook-prog { font-variant-numeric: tabular-nums; }
+.go-hook-row .go-hook-eta {
+  font-style: normal; font-weight: 900; color: var(--gold-deep);
+  background: rgba(245, 198, 79, 0.16); border-radius: var(--pill); padding: 1px 8px;
+  white-space: nowrap;
+}
+
 /* ---------------- Responsif & aksesibilitas ---------------- */
 @media (max-width: 420px) {
   .roster-grid { gap: 18px 10px; padding: 16px 12px; }

@@ -49,6 +49,9 @@ jobs:
       - name: Uji headless Fase 2.5 (hitung mundur reset harian, anchor UTC, 3 surface)
         run: npm run test:fase2count
 
+      - name: Uji headless Fase 2.4 (hook akhir sesi, adapter G1-G5/G7/G12)
+        run: npm run test:fase2hook
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true
