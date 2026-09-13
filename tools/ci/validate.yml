@@ -46,6 +46,9 @@ jobs:
       - name: Uji headless Fase 2.1/2.3 (auto-fire default, gerbang landscape)
         run: npm run test:fase2onb
 
+      - name: Uji headless Fase 2.5 (hitung mundur reset harian, anchor UTC, 3 surface)
+        run: npm run test:fase2count
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true

@@ -16,14 +16,27 @@ import { game } from '../../core/game.js';
 import { t } from '../../systems/i18n.js';
 import { emit } from '../../core/ui-bridge.js';
 import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
+import { mountResetCountdown, unmountResetCountdown } from '../reset-countdown.js';
+
+/** Fase 2.5: chip hitung mundur reset harian di panel Misi (surface "hud-mission-panel"). */
+let hudResetChip = null;
 
 export function show() {
   // Combat HUD hanya menampilkan informasi yang berguna selama pertarungan.
   // Level meta hero/pasukan tetap tersedia di layar roster dan tidak diulang di arena.
+  // Fase 2.5: panel Misi (#hud-quests) ikut menampilkan sisa waktu reset harian —
+  // dipasang antara kepala panel & badan panel agar tidak terhapus renderQuestPanel().
+  unmountResetCountdown(hudResetChip);
+  hudResetChip = mountResetCountdown(document.getElementById('hud-quests'), 'hud-mission-panel');
+  if (hudResetChip) {
+    document.getElementById('hud-quests-body')?.insertAdjacentElement('beforebegin', hudResetChip);
+  }
 }
 
 export function hide() {
   clearAnnounce();
+  unmountResetCountdown(hudResetChip); // Fase 2.5: matikan ticker saat keluar arena
+  hudResetChip = null;
 }
 
 /**

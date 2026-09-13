@@ -35,6 +35,10 @@ import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
+import { mountResetCountdown, unmountResetCountdown } from '../reset-countdown.js';
+
+/** Fase 2.5: chip hitung mundur reset harian di daftar misi (surface "dashboard"). */
+let dashResetChip = null;
 
 /** Fase 13: ikon organ per arena (untuk kartu & banner kampanye). */
 const ORGAN_ICONS = {
@@ -638,6 +642,10 @@ export function show() {
   // ---- Misi (3 progres teratas yang belum selesai) ----
   const list = document.getElementById('dash-missions');
   list.textContent = '';
+  // Fase 2.5: sisa waktu reset harian di atas daftar misi — angka dari data
+  // (retention-config.dailyAnchor), < warnWhenHoursLeft jam → penekanan .urgent.
+  unmountResetCountdown(dashResetChip);
+  dashResetChip = mountResetCountdown(list, 'dashboard');
   const progress = getMissionProgressList(meta);
   const active = progress.filter((m) => !m.claimed).slice(0, 3);
   const doneCount = progress.filter((m) => m.claimed).length;
@@ -703,6 +711,8 @@ export function show() {
 
 export function hide() {
   stopBannerTimer();
+  unmountResetCountdown(dashResetChip); // Fase 2.5: matikan ticker saat layar tutup
+  dashResetChip = null;
   dashWasHidden = true;
   import('../../render/cine-banner.js').then((m) => m.stopBannerCine()).catch(() => {});
 }

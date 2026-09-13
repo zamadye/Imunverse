@@ -2,4 +2,4 @@
  * version.js — Versi build aset. Naikkan setiap rilis agar browser pemain
  * memuat ulang file (cache-busting), apa pun server statisnya.
  */
-export const BUILD = '55a';
+export const BUILD = '56a';

@@ -12,6 +12,10 @@ import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
 import { playOnce } from '../cinematic.js';
 import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): epilog 6.4
+import { mountResetCountdown, unmountResetCountdown } from '../reset-countdown.js';
+
+/** Fase 2.5: chip hitung mundur reset harian di kartu ringkasan (surface "gameover"). */
+let goResetChip = null;
 import { music } from '../../systems/music-system.js'; // R3: hentikan musik setelah epilog
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
@@ -92,6 +96,14 @@ export function show(summary) {
     summary.wave >= 10
       ? 'Luar biasa! Sistem imun mengingat jasamu.'
       : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+
+  // Fase 2.5: sisa waktu reset harian di bawah subjudul — pemain yang kalah
+  // langsung tahu kapan misi/kuota pulih (angka & ambang urgent dari data).
+  unmountResetCountdown(goResetChip);
+  goResetChip = mountResetCountdown(document.getElementById('gameover-sub')?.parentElement, 'gameover');
+  if (goResetChip) {
+    document.getElementById('gameover-sub')?.insertAdjacentElement('afterend', goResetChip);
+  }
 
   // Bintang rating ala mockup victory (aset PNG: empty → filled)
   const stars = starsFor(summary);
@@ -284,7 +296,10 @@ export function wireButtons() {
   });
 }
 
-export function hide() {}
+export function hide() {
+  unmountResetCountdown(goResetChip); // Fase 2.5: matikan ticker saat layar tutup
+  goResetChip = null;
+}
 
 function formatTime(sec) {
   const m = Math.floor(sec / 60);

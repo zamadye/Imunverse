@@ -18,6 +18,7 @@
     "ci:install": "bash tools/ci/install-workflow.sh",
     "test:fase1b": "node scripts/unit-fase1b-shop.mjs",
     "test:fase2pwa": "node scripts/unit-fase2-pwa.mjs",
-    "test:fase2onb": "node scripts/unit-fase2-onboarding.mjs"
+    "test:fase2onb": "node scripts/unit-fase2-onboarding.mjs",
+    "test:fase2count": "node scripts/unit-fase2-countdown.mjs"
   }
 }

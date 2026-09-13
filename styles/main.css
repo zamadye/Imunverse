@@ -301,6 +301,26 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 
 .mission-list { display: flex; flex-direction: column; gap: 11px; }
 .mission-item { display: flex; flex-direction: column; gap: 5px; }
+
+/* Fase 2.5 — chip hitung mundur reset harian (dashboard / gameover / panel Misi HUD).
+   Angka & ambang urgent dari data/retention-config.json → dailyAnchor. */
+.reset-count {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  padding: 3px 11px; margin: 0 0 6px; border-radius: var(--pill);
+  font-size: 12px; font-weight: 700; color: var(--ink-soft);
+  background: rgba(47, 156, 143, 0.08); border: 1px solid rgba(47, 156, 143, 0.2);
+}
+.reset-count .rc-time {
+  font-variant-numeric: tabular-nums; font-weight: 900;
+  color: var(--teal-deep); letter-spacing: 0.03em;
+}
+.reset-count.urgent {
+  color: var(--coral-deep);
+  background: rgba(242, 130, 92, 0.14);
+  border-color: rgba(233, 106, 76, 0.45);
+}
+.reset-count.urgent .rc-time { color: var(--heart); animation: rc-pulse 1.6s ease-in-out infinite; }
+@keyframes rc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .mission-item .m-row { display: flex; justify-content: space-between; font-size: 12.5px; }
 .mission-item .m-name { font-weight: 900; }
 .mission-item .m-reward { color: var(--gold-deep); font-weight: 900; }
