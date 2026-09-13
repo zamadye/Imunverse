@@ -412,6 +412,9 @@ function renderBodyCard(meta) {
   if (criticals.length > 0 && canWatchAd(meta)) {
     const btn = el('button', { class: 'btn btn-gold btn-sm', text: `+ PEMULIHAN IKLAN (${criticals[0].def.name})` });
     btn.addEventListener('click', () => {
+      // F5 (audit 2026-09-13): busy guard — simulasi iklan 900 ms tanpa
+      // disable memungkinkan double-tap = recoverViaAd 2× (tak ada cap harian).
+      btn.disabled = true;
       triggerRewardedAdRecovery(() => {
         trackAdWatch(meta);
         const res = recoverViaAd(meta);

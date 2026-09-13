@@ -103,7 +103,9 @@ export function triggerRewardedAdRecovery(onSuccess, onFail) {
   return true;
 }
 
-/** Fase 14: offerwall — video/survei sponsor yang memberi Imun Coin. */
+/** Fase 14: offerwall — video/survei sponsor. RONDE-4 (audit 2026-09-13):
+ * hadiahnya ANTIBODI (soft), bukan Imun Coin — premium hanya beli & Battle Pass.
+ * (Seam integrasi; tile offerwall toko saat ini memakai openAdModal shop-screen.) */
 export function triggerRewardedAdOfferwall(onSuccess, onFail) {
   console.info('[monetization] triggerRewardedAdOfferwall() — simulasi offerwall sponsor');
   simulateAdPlayback(onSuccess, onFail);

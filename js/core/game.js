@@ -1824,7 +1824,20 @@ export const game = {
   // REVIVE (rewarded ad hook — alur setelahnya logic asli)
   // =====================================================================
   requestRevive() {
+    // F2 (audit 2026-09-13): kontrak monetization.js = "semua placement
+    // dihitung bersama" kuota harian — dulu slot revive (dan double-currency)
+    // bypass total. noAds (IAP Bebas Iklan) juga tidak boleh ditawari iklan.
+    if (!canWatchAd(STATE.meta)) {
+      emit('toast', {
+        message: STATE.meta.noAds
+          ? 'Iklan nonaktif (Bebas Iklan aktif) — pilih Lewati.'
+          : 'Kuota iklan harian sudah habis — pilih Lewati.',
+        kind: 'coral',
+      });
+      return false;
+    }
     triggerRewardedAdRevive(() => this.confirmRevive());
+    return true;
   },
 
   /** Logic asli setelah iklan "selesai ditonton". */
@@ -1833,6 +1846,7 @@ export const game = {
     if (!run || run.ended) return;
     const player = run.player;
     run.reviveUsed = true;
+    trackAdWatch(STATE.meta); // F2: revive tercatat ke kuota harian
     player.alive = true;
     player.hp = Math.round(player.maxHP * 0.5);
     player.iframes = 2.0;
@@ -2042,12 +2056,14 @@ export const game = {
     run.doubleCurrencyUsed = true;
     const meta = STATE.meta;
     addCurrency(meta, run.earned);
+    trackAdWatch(meta); // F2 (audit 2026-09-13): double-currency tercatat ke kuota harian
     writeSave(meta); // AUTO-SAVE
     return meta.currency;
   },
 
   canDoubleCurrency() {
-    return !!(this.run && !this.run.doubleCurrencyUsed && this.run.earned > 0);
+    // F2: + kuota harian (slot 2x ini dulu bypass canWatchAd)
+    return !!(this.run && !this.run.doubleCurrencyUsed && this.run.earned > 0 && canWatchAd(STATE.meta));
   },
 
   // =====================================================================
