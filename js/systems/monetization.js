@@ -15,6 +15,7 @@
  */
 
 import { getData } from '../core/data-store.js';
+import { adLimitBonusFromPerks } from './imun-economy.js'; // Fase 1B: kuota iklan + perk langganan
 
 const SIMULATED_AD_DURATION_MS = 900;
 
@@ -72,11 +73,14 @@ export function canWatchAd(meta) {
   if (meta.noAds) return false; // IAP Bebas Iklan aktif — tidak ada interupsi
   const today = new Date().toISOString().slice(0, 10);
   if (!meta.adDaily || meta.adDaily.date !== today) return true;
-  // Limit dari data/upgrades.json → economy.adDailyLimit (bukan hardcode)
+  // Limit dari data/upgrades.json → economy.adDailyLimit (bukan hardcode),
+  // ditambah bonus perk langganan (Fase 1B): Kartu Imun 30 Hari membawa
+  // perk `adDailyLimitPlus2` di data/premium.json → 6 + 2 = 8/hari selama aktif.
   let limit = 6;
   try {
     limit = getData().upgrades.economy.adDailyLimit ?? limit;
   } catch { /* data-store belum siap — pakai limit konservatif */ }
+  limit += adLimitBonusFromPerks(meta);
   return meta.adDaily.count < limit;
 }
 

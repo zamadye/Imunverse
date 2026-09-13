@@ -12,10 +12,18 @@ import { queueHeroNotice } from '../../systems/retention-system.js';
 import { applySuplemen } from '../../systems/body-system.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
-import { getCatalog, createOrder, setMethod, payOrder, getMethods, getReceipts } from '../../systems/payment-system.js';
+// FASE 1B (katalog IAP v2.0): harga, nilai isi, dan badge TIDAK lagi dibaca dari
+// field data yang sudah tidak ada (`priceLabel`/`valueNote`) — semuanya dihitung
+// runtime oleh payment-system + pricing-model dari data/economy-anchors.json.
+import {
+  getVisibleCatalog, createOrder, setMethod, payOrder, getMethodsSorted, getReceipts,
+  formatRp, valueSummary, badgeForProduct, methodName,
+} from '../../systems/payment-system.js';
 import { audio } from '../../systems/audio-system.js';
-import { addImun, buyCosmetic, ownsCosmetic, equipSkin, equipAcc, applyReferralCode, ensureReferral, canSurveyToday, markSurveyDone } from '../../systems/imun-economy.js';
-import { triggerRewardedAdOfferwall } from '../../systems/monetization.js';
+import {
+  addImun, buyCosmetic, ownsCosmetic, equipSkin, equipAcc, applyReferralCode, ensureReferral,
+  canSurveyToday, markSurveyDone, dripStatus, claimDrip,
+} from '../../systems/imun-economy.js';
 import { getTintedSprite } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
@@ -116,18 +124,36 @@ function openAdModal(onReward, title = 'VIDEO SPONSOR (SIMULASI)') {
   }, 1000);
 }
 
+/**
+ * Label pendek metode pembayaran, diturunkan dari `name` di data (bukan peta
+ * tulis tangan): "GoPay / OVO / DANA / ShopeePay" → "GoPay", "Kartu Kredit /
+ * Debit" → "Kartu Kredit". Nama lengkapnya tetap tersedia lewat title/aria.
+ */
+function methodShortName(m) {
+  return String(m.name || m.id || '').split(' / ')[0].trim();
+}
+
 /** Modal pembayaran: ringkasan → pilih metode → bayar (simulasi) → receipt. */
 function openPayment(bundle) {
   const orderRes = createOrder(bundle.id);
-  if (!orderRes.ok) return;
+  if (!orderRes.ok) {
+    // Fase 1B: produk nonaktif / limit per akun habis / jendela penawaran lewat.
+    emit('toast', { message: orderRes.error, kind: 'coral' });
+    return;
+  }
   const order = orderRes.order;
+  const price = formatRp(bundle.priceRp); // dihitung dari priceRp, bukan priceLabel (sudah tidak ada)
   const modal = el('div', { class: 'pay-modal' }, [
     el('div', { class: 'pay-box' }, [
       el('h3', { class: 'pay-title', text: bundle.name }),
       el('span', { class: 'pay-note', text: 'Pembayaran SIMULASI — tidak ada tagihan nyata. Gateway siap disambungkan ke PSP.' }),
       el('div', { class: 'pay-summary' }, [
-        el('span', { text: bundle.valueNote }),
-        el('b', { class: 'pay-price', text: bundle.priceLabel }),
+        el('span', { text: valueSummary(bundle) }), // nilai isi dihitung dari economy-anchors.json
+        (() => {
+          const badge = badgeForProduct(bundle); // klaim hemat/bonus runtime, satu sumber
+          return badge ? el('span', { text: badge }) : null;
+        })(),
+        el('b', { class: 'pay-price', text: price }),
       ]),
       el('div', { class: 'pay-methods' }),
       el('button', { class: 'btn btn-primary pay-confirm', disabled: true, text: 'Pilih metode dulu' }),
@@ -135,15 +161,17 @@ function openPayment(bundle) {
     ]),
   ]);
   const methodsBox = modal.querySelector('.pay-methods');
-  const METHOD_LABEL = { qris: 'QRIS', ewallet: 'E-Wallet', kartu: 'Kartu' };
-  for (const m of getMethods()) {
-    const chip = el('button', { class: 'pay-method', 'data-m': m, text: METHOD_LABEL[m] || m });
+  // Fase 1B: `methods[]` katalog v2 berisi OBJEK {id,name,mdrPct,…}, bukan string.
+  // Urutan dari getMethodsSorted(): biaya gateway termurah dulu (QRIS), kartu terakhir.
+  for (const m of getMethodsSorted()) {
+    const chip = el('button', { class: 'pay-method', 'data-m': m.id, text: methodShortName(m), title: m.name });
     chip.addEventListener('click', () => {
-      setMethod(order.orderId, m);
+      const res = setMethod(order.orderId, m.id); // id, bukan objek
+      if (!res.ok) { emit('toast', { message: res.error, kind: 'coral' }); return; }
       methodsBox.querySelectorAll('.pay-method').forEach((x) => x.classList.toggle('selected', x === chip));
       const confirm = modal.querySelector('.pay-confirm');
       confirm.disabled = false;
-      confirm.textContent = `Bayar ${bundle.priceLabel} — ${(METHOD_LABEL[m] || m).toUpperCase()}`;
+      confirm.textContent = `Bayar ${price} — ${methodShortName(m)}`;
     });
     methodsBox.appendChild(chip);
   }
@@ -163,7 +191,7 @@ function openPayment(bundle) {
     box.appendChild(el('img', { class: 'pay-ok-ico', src: 'assets/icons/ui-star.svg', alt: '' }));
     box.appendChild(el('h3', { class: 'pay-title', text: 'Pembayaran Berhasil!' }));
     box.appendChild(el('div', { class: 'pay-granted' }, res.granted.map((g) => el('span', { class: 'pg-item', text: g }))));
-    box.appendChild(el('div', { class: 'pay-receipt', text: `Struk: ${res.receipt.receiptId} · ${res.receipt.method.toUpperCase()} · ${res.receipt.date}` }));
+    box.appendChild(el('div', { class: 'pay-receipt', text: `Struk: ${res.receipt.receiptId} · ${methodName(res.receipt.method)} · ${res.receipt.date}` }));
     box.appendChild(el('button', { class: 'btn btn-primary', text: 'Lanjut', onclick: () => { modal.remove(); show(); } }));
   });
   document.body.appendChild(modal);
@@ -459,19 +487,29 @@ export function show() {
   freeSection.appendChild(freeGrid);
   wrap.appendChild(freeSection);
 
-  // ============ 6) PAKET PREMIUM (bundle + gateway simulasi) ============
+  // ============ 6) PAKET PREMIUM (katalog v2 + gateway simulasi) ============
+  // FASE 1B (menambal G8): layar ini dulu merender `bundle.priceLabel` dan
+  // `bundle.valueNote` yang SUDAH TIDAK ADA di katalog v2 → teks "undefined" di
+  // kartu dan tombol; `methods[]` diiterasi sebagai string → chip "[object
+  // Object]" dan `setMethod()` selalu gagal sehingga tidak ada pembelian yang
+  // bisa diselesaikan; produk `active:false` (imun_12000, bundle_noads) ikut
+  // terjual; `grantContents()` tidak mengenal cosmetics[]/drip/perks sehingga
+  // skin Paket Perdana dan tetesan Kartu Imun tidak pernah diberikan.
+  // Sekarang: hanya produk aktif & penawarannya terbuka, harga dari `priceRp`,
+  // nilai + hemat + badge dihitung runtime dari data/economy-anchors.json.
   const premSection = sectionEl('prem', 'Uang sungguhan (simulasi gateway) — mendukung pengembang, tanpa pay-to-win.');
   const premGrid = el('div', { class: 'premium-grid' });
-  for (const bundle of getCatalog()) {
+  for (const bundle of getVisibleCatalog(meta)) {
     const owned = bundle.contents.noAds && meta.noAds;
+    const badge = badgeForProduct(bundle); // runtime — bukan string tulis tangan
     const card = el('div', { class: 'premium-card', style: `--pc:${bundle.color}` }, [
-      bundle.badge ? el('span', { class: 'prem-badge', text: bundle.badge }) : null,
+      badge ? el('span', { class: 'prem-badge', text: badge }) : null,
       el('img', { class: 'prem-ico', src: 'assets/icons/sec-premium.svg', alt: '' }),
       el('b', { class: 'prem-name', text: bundle.name }),
-      el('span', { class: 'prem-value', text: bundle.valueNote }),
+      el('span', { class: 'prem-value', text: valueSummary(bundle) }),
       el('button', {
         class: 'btn btn-prem',
-        text: owned ? '✓ DIMILIKI' : bundle.priceLabel,
+        text: owned ? '✓ DIMILIKI' : formatRp(bundle.priceRp),
         disabled: !!owned,
       }),
     ]);
@@ -485,11 +523,43 @@ export function show() {
     premGrid.appendChild(card);
   }
   premSection.appendChild(premGrid);
+
+  // Kartu Imun 30 Hari: sisa hari + jatah hari ini (ROADMAP §7 butir 3).
+  // Memakai kelas .prem-receipts yang sudah ada → tanpa CSS baru.
+  const drip = dripStatus(meta);
+  if (drip) {
+    const claimBtn = el('button', {
+      class: 'btn btn-gold',
+      text: !drip.active ? 'KARTU BERAKHIR' : drip.claimedToday ? '✓ DIKLAIM HARI INI' : `KLAIM ${drip.imunPerDay} IMUN`,
+      disabled: !drip.active || drip.claimedToday,
+    });
+    claimBtn.addEventListener('click', () => {
+      const res = claimDrip(meta);
+      if (res.ok) {
+        audio.collect();
+        emit('toast', { message: `Kartu Imun hari ${res.dayNumber}/${drip.days}: +${res.imun} Imun!`, kind: 'gold' });
+        show();
+      } else {
+        emit('toast', { message: res.error, kind: 'coral' });
+      }
+    });
+    premSection.appendChild(el('div', { class: 'prem-receipts' }, [
+      el('span', { class: 'pr-title', text: 'Kartu Imun 30 Hari' }),
+      el('span', {
+        class: 'pr-row',
+        text: drip.active
+          ? `Hari ${drip.dayNumber}/${drip.days} · ${drip.imunPerDay} Imun/hari · sisa ${drip.daysLeft} hari · hangus bila tidak diklaim hari ini`
+          : `Berakhir · ${drip.claimedDays} dari ${drip.days} hari diklaim`,
+      }),
+      claimBtn,
+    ]));
+  }
+
   const receipts = getReceipts().slice(0, 3);
   if (receipts.length) {
     premSection.appendChild(el('div', { class: 'prem-receipts' }, [
       el('span', { class: 'pr-title', text: 'Riwayat pembelian (simulasi):' }),
-      ...receipts.map((r) => el('span', { class: 'pr-row', text: `${r.date} · ${r.productName} · ${r.method.toUpperCase()} · ${r.receiptId}` })),
+      ...receipts.map((r) => el('span', { class: 'pr-row', text: `${r.date} · ${r.productName} · ${methodName(r.method)} · ${r.receiptId}` })),
     ]));
   }
   wrap.appendChild(premSection);

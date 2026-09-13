@@ -3,7 +3,9 @@
  *
  * Ekonomi ganda: Antibodi = soft currency (drop musuh, reward misi, offerwall);
  * Imun Coin = PREMIUM KETAT. Sumber Imun (diperbarui 13 Sep 2026, retune v2.0):
- *   (1) PEMBELIAN uang nyata — payment-system + katalog data/premium.json
+ *   (1) PEMBELIAN uang nyata — payment-system + katalog data/premium.json,
+ *       termasuk TETESAN harian Kartu Imun 30 Hari (contents.drip: 50 Imun/hari
+ *       × 30 hari, hangus bila tidak diklaim) dan perk langganan di dalamnya
  *   (2) reward BATTLE PASS — data/battlepass.json (jalur premium 500 Imun/musim)
  *   (3) IKLAN REWARDED — 10 Imun × 6/hari, angka dari data/economy-anchors.json
  *       (adEconomy.imunPerAd/dailyLimit). Ini faucet F2P pengganti
@@ -37,10 +39,35 @@ export function spendImun(meta, n) {
   return true;
 }
 
-/** Kosmetik: pastikan struktur, lalu operasi milik/pakai. */
-function ensureCosmetics(meta) {
+/**
+ * Kosmetik: pastikan struktur, lalu operasi milik/pakai.
+ *
+ * DIEKSPOR (Fase 1B) karena ini satu-satunya bentuk kanonik `meta.cosmetics`
+ * di repo: `{ owned: [], skin: {}, crown: null, aura: null }`. Modul drop-in
+ * `rare-drop-system.grantCosmetic()` menginisialisasi `skin: null` (ROADMAP
+ * §2 G13) — karena itu kosmetik dari pembelian/drop harus lewat sini lebih
+ * dulu supaya bentuk save tidak bercabang.
+ */
+export function ensureCosmetics(meta) {
   if (!meta.cosmetics) meta.cosmetics = { owned: [], skin: {}, crown: null, aura: null };
+  if (!Array.isArray(meta.cosmetics.owned)) meta.cosmetics.owned = [];
   return meta.cosmetics;
+}
+
+/**
+ * Berikan kosmetik dari isi produk katalog v2 (`contents.cosmetics[]`).
+ * @returns {string[]} id yang BARU dimiliki (yang sudah dimiliki dilewati)
+ */
+export function grantCosmetics(meta, ids) {
+  const cos = ensureCosmetics(meta);
+  const added = [];
+  for (const id of ids || []) {
+    if (!id || cos.owned.includes(id)) continue;
+    cos.owned.push(id);
+    added.push(id);
+  }
+  if (added.length) writeSave(meta);
+  return added;
 }
 
 export function ownsCosmetic(meta, id) {
@@ -139,4 +166,104 @@ export function markSurveyDone(meta) {
   meta.offerwall = meta.offerwall || {};
   meta.offerwall.surveyDate = new Date().toISOString().slice(0, 10);
   writeSave(meta);
+}
+
+/* ---------------------------------------------------------------------------
+ * FASE 1B — ENTITLEMENT DARI PEMBELIAN (katalog IAP v2.0, data/premium.json)
+ *
+ * Tiga jenis isi produk yang belum dikenal repo sebelum Fase 1B:
+ *   contents.cosmetics[]  → grantCosmetics()   (skin Paket Perdana)
+ *   contents.perks[]      → grantPerks()       (noForcedAds, adDailyLimitPlus2)
+ *   contents.drip{…}      → startDrip()/claimDrip()  (Kartu Imun 30 Hari)
+ *
+ * Aturannya dari ROADMAP §4 butir 4 dan doc `pass_bulanan`: tetesan HANGUS bila
+ * tidak diambil pada harinya — tidak pernah menumpuk. Perk ikut jendela kartu
+ * (startTs + days), jadi kuota iklan +2 ikut berakhir saat kartunya berakhir.
+ * Tidak ada angka di sini: semuanya dari contents produk di data.
+ * ------------------------------------------------------------------------- */
+
+const DAY_MS = 86400000;
+const dayKey = (ts) => new Date(ts).toISOString().slice(0, 10);
+
+/**
+ * Catat perk langganan.
+ * @param {number} untilTs timestamp kedaluwarsa; 0 = permanen
+ */
+export function grantPerks(meta, perkIds, untilTs = 0) {
+  meta.perks = meta.perks || {};
+  for (const id of perkIds || []) meta.perks[id] = untilTs || 0;
+  writeSave(meta);
+  return meta.perks;
+}
+
+/** Apakah satu perk masih berlaku? */
+export function hasPerk(meta, perkId, now = Date.now()) {
+  const until = meta && meta.perks ? meta.perks[perkId] : 0;
+  if (!until) return false;
+  return until === 0 || until > now;
+}
+
+/**
+ * Bonus kuota iklan harian dari perk berbentuk `adDailyLimitPlusN`.
+ * Angkanya dibaca dari id perk (yang datang dari data/premium.json), jadi
+ * menambah `adDailyLimitPlus3` di data tidak memerlukan perubahan kode.
+ */
+export function adLimitBonusFromPerks(meta, now = Date.now()) {
+  let bonus = 0;
+  for (const id of Object.keys((meta && meta.perks) || {})) {
+    const m = /^adDailyLimitPlus(\d+)$/.exec(id);
+    if (m && hasPerk(meta, id, now)) bonus += Number(m[1]);
+  }
+  return bonus;
+}
+
+/** Mulai tetesan Imun harian (menimpa kartu lama — produk ini tidak ditumpuk). */
+export function startDrip(meta, drip, productId = null, now = Date.now()) {
+  meta.drip = {
+    productId,
+    imunPerDay: (drip && drip.imunPerDay) || 0,
+    days: (drip && drip.days) || 0,
+    startTs: now,
+    lastClaimDay: null,
+    claimedDays: 0,
+  };
+  writeSave(meta);
+  return meta.drip;
+}
+
+/** Status kartu untuk UI: hari ke berapa, sisa hari, sudah klaim hari ini? */
+export function dripStatus(meta, now = Date.now()) {
+  const d = meta && meta.drip;
+  if (!d || !d.days) return null;
+  const elapsed = Math.floor((now - d.startTs) / DAY_MS); // 0 = hari pertama
+  const active = elapsed < d.days;
+  const dayNumber = Math.min(elapsed + 1, d.days);
+  return {
+    productId: d.productId,
+    active,
+    dayNumber,
+    days: d.days,
+    daysLeft: Math.max(0, d.days - elapsed),
+    imunPerDay: d.imunPerDay,
+    claimedToday: d.lastClaimDay === dayKey(now),
+    claimedDays: d.claimedDays || 0,
+    totalImun: d.imunPerDay * d.days,
+    expiresTs: d.startTs + d.days * DAY_MS,
+  };
+}
+
+/**
+ * Klaim tetesan hari ini. Hari yang terlewat HANGUS (tidak menumpuk).
+ * @returns {{ok:boolean, imun?:number, dayNumber?:number, daysLeft?:number, expired?:boolean, error?:string}}
+ */
+export function claimDrip(meta, now = Date.now()) {
+  const st = dripStatus(meta, now);
+  if (!st) return { ok: false, error: 'Tidak ada kartu aktif' };
+  if (!st.active) return { ok: false, expired: true, error: 'Kartu sudah berakhir' };
+  if (st.claimedToday) return { ok: false, error: 'Sudah diklaim hari ini' };
+  addImun(meta, st.imunPerDay);
+  meta.drip.lastClaimDay = dayKey(now);
+  meta.drip.claimedDays = (meta.drip.claimedDays || 0) + 1;
+  writeSave(meta);
+  return { ok: true, imun: st.imunPerDay, dayNumber: st.dayNumber, daysLeft: st.daysLeft };
 }

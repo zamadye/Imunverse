@@ -67,6 +67,10 @@ export function createDefaultMeta() {
     dropPity: { eligibleKills: 0, totalDrops: 0, lastDropAt: 0 },     // pity drop kosmetik GRATIS
     cratePity: { opens: 0 },                                          // pity Peti Riset (TERPISAH dari drop gratis)
     firstBuy: {},      // { productId: true } — bonus pembelian pertama 2x, sekali per tier
+    // Fase 1B (katalog IAP v2.0): entitlement hasil pembelian uang nyata.
+    drip: null,        // { productId, imunPerDay, days, startTs, lastClaimDay, claimedDays } — Kartu Imun 30 Hari
+    perks: {},         // { perkId: untilTs } — 0 = permanen; mis. noForcedAds, adDailyLimitPlus2
+    purchaseCount: {}, // { productId: n } — batas `limit.perAccount`; receipts dipangkas ke 30 jadi tidak bisa dipakai menghitung
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,

@@ -37,6 +37,9 @@ jobs:
       - name: Uji headless Fase 1 (loader, comeback, Battle Pass, GP, evolusi)
         run: npm run test:fase1
 
+      - name: Uji headless Fase 1B (katalog v2, metode bayar, entitlement, tetesan)
+        run: npm run test:fase1b
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true
