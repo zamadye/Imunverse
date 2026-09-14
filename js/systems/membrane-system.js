@@ -1023,7 +1023,19 @@ export function pulseHit(game, opts = {}) {
       dirX: dx, dirY: dy, sourceKind: opts.isSecondWave ? 'pulse_wave2' : 'pulse',
     });
     if (!e.lastHitAbsorbed) game.onDamageDealt(dmg);
-    if (died) game.onEnemyKilled(e, null);
+    if (died) {
+      // PHAGOS iterasi: Mastia (pulse_only) tidak punya kontak/engulf —
+      // kill via Pulse DIANGGAP engulf-lite agar ekonomi Bio & stack armor
+      // tetap jalan (Pulse ADALAH cara ia menelan).
+      if (mem.shape === 'pulse_only') {
+        run.bioPoints = (run.bioPoints || 0) + 1;
+        mem.stats.engulfCount += 1;
+        player.heal(player.maxHP * st.engulfHealPct);
+        run.effects.spawnLabel(e.x, e.y - e.radius - 10, '+1 BIO', '#8df7d2');
+        try { applyEngulfSpecial(game, e); } catch { /* abaikan */ }
+      }
+      game.onEnemyKilled(e, null);
+    }
     else {
       // Pulse juga bisa memicu engulf bila musuh sekarat di dalam medan
       // (Mastia pulse_only: pulse radius dianggap medan sesaat)

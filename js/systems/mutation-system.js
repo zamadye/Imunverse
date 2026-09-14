@@ -65,21 +65,23 @@ export function rollMutationChoices(run) {
 
   if (safety) {
     // 1 kartu upgrade stat lama sebagai jaring pengaman
-    // PHAGOS: hanya upgrade yang masih bermakna untuk membran (damage→DPS
-    // kontak via scale, maxHP/moveSpeed/magnet→survivalitas). attackSpeed
-    // tidak dipakai (tidak ada proyektil) → dikeluarkan agar tak jadi kartu mati.
-    const pool = (getData().upgrades.levelUpPool || []).filter((u) =>
-      ['damage', 'maxHP', 'moveSpeed', 'magnet'].includes(u.id) &&
-      (run.upgrades[u.id] || 0) < (u.maxStacks || 99));
-    if (pool.length > 0) {
-      const u = pool[Math.floor(Math.random() * pool.length)];
-      cards.push({ ...u, isMutation: false, kind: 'upgrade' });
+    const u = rollLegacySafety(run);
+    if (u) {
+      cards.push(u);
     } else if (locked.length > 0) {
       cards.push({ ...locked[0], isMutation: true, kind: 'mutation', lockedByBio: (locked[0].bioCost || 0) > bio });
     }
   }
   // Acak urutan akhir agar posisi tidak tertebak
-  return shuffle(cards).slice(0, 3);
+  const final = shuffle(cards).slice(0, 3);
+  // PHAGOS iterasi — KATUP ANTI-BUNTU: modal tak boleh hanya berisi kartu
+  // terkunci (mis. Bio habis di Lv5+ tanpa safety net). Selipkan 1 upgrade
+  // lama di slot terakhir agar selalu ada pilihan valid.
+  if (final.length > 0 && !final.some((c) => !c.lockedByBio)) {
+    const u = rollLegacySafety(run);
+    if (u) return [...final.slice(0, 2), u];
+  }
+  return final;
 }
 
 /**
@@ -130,6 +132,21 @@ export function isMutationId(id) {
 /** Label tier untuk kartu. */
 export function tierLabel(tier) {
   return tier === 1 ? 'MUTASI I' : tier === 2 ? 'MUTASI II' : 'MUTASI III';
+}
+
+/**
+ * Satu kartu upgrade stat lama yang masih bermakna untuk membran
+ * (damage→DPS kontak via scale, maxHP/moveSpeed/magnet→survivalitas).
+ * attackSpeed dikeluarkan (tak ada proyektil → kartu mati).
+ * @returns {object|null} kartu upgrade atau null bila pool habis
+ */
+function rollLegacySafety(run) {
+  const pool = (getData().upgrades.levelUpPool || []).filter((u) =>
+    ['damage', 'maxHP', 'moveSpeed', 'magnet'].includes(u.id) &&
+    (run.upgrades[u.id] || 0) < (u.maxStacks || 99));
+  if (pool.length === 0) return null;
+  const u = pool[Math.floor(Math.random() * pool.length)];
+  return { ...u, isMutation: false, kind: 'upgrade' };
 }
 
 function shuffle(arr) {

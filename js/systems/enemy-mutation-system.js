@@ -28,19 +28,29 @@ export function mutationWaves() {
 
 /**
  * Pilih trait counter berdasarkan statistik build pemain.
- * Prioritas: cek tiap trigger non-balanced; jika tidak ada yang cocok → acak_bermutasi.
+ * PHAGOS iterasi: ACAK di antara semua trigger yang cocok (bukan first-match
+ * — dulu wave mutasi hampir selalu trait yang sama karena engulfCount selalu
+ * besar), dan hindari trait yang sudah dipakai di wave mutasi sebelumnya
+ * agar tiap wave mutasi terasa berbeda.
  */
 export function selectCounterTrait(run) {
   const c = cfg();
   if (!c) return null;
   const stats = (run.membrane && run.membrane.stats) || {};
   const traits = c.traits || [];
-  // Evaluasi trigger
-  for (const tr of traits) {
-    if (tr.id === 'acak_bermutasi') continue;
-    if (triggerMatches(tr.trigger, stats, run)) return tr;
-  }
-  return traits.find((t) => t.id === 'acak_bermutasi') || null;
+  // Kumpulkan SEMUA yang cocok (selain fallback acak)
+  const matched = traits.filter((tr) =>
+    tr.id !== 'acak_bermutasi' && triggerMatches(tr.trigger, stats, run));
+  const pool = matched.length > 0
+    ? matched
+    : traits.filter((t) => t.id === 'acak_bermutasi');
+  if (pool.length === 0) return null;
+  // Anti-ulang: coret trait yang sudah muncul (bila masih ada pilihan lain)
+  const hist = new Set(
+    ((run.enemyMutation && run.enemyMutation.history) || []).map((h) => h.trait));
+  const fresh = pool.filter((t) => !hist.has(t.id));
+  const src = fresh.length > 0 ? fresh : pool;
+  return src[Math.floor(Math.random() * src.length)];
 }
 
 function triggerMatches(trigger, stats, run) {
