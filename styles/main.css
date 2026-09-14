@@ -3068,3 +3068,9 @@ img.lock-badge {
 .challenge-box { max-width: 380px; text-align: center; }
 .challenge-box h2 { color: #ffd166; margin: 4px 0; }
 .challenge-sub { color: #9fd8cc; font-size: 13px; margin: 0 0 8px; }
+
+/* ADDENDUM P2 §6.6: modal build share */
+.build-hero { color: #ffd166; font-weight: 800; margin: 6px 0; }
+.build-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 6px 0; }
+.build-chip { font-size: 12px; font-weight: 700; color: #0b2224; background: #7fe3d0; padding: 3px 10px; border-radius: 12px; }
+.build-note { color: #9fd8cc; font-size: 11px; display: block; margin-bottom: 8px; }

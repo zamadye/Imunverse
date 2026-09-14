@@ -5,6 +5,9 @@ import { music } from '../../systems/music-system.js';
 import { audio } from '../../systems/audio-system.js';
 import { clearSave, writeSave } from '../../save/save-manager.js';
 import { createDefaultMeta } from '../../core/state-manager.js';
+import { myCode, myReferralLink, pendingRewards, claimPending } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
+import { copyText } from '../../systems/challenge-system.js';
+import { emit } from '../../core/ui-bridge.js';
 
 export function show() {
   const meta = STATE.meta;
@@ -51,6 +54,32 @@ export function show() {
       screenManager.show('auth');
     }
   };
+
+  // ADDENDUM P2 §3.4 — referral dua arah (kode + link + klaim)
+  try {
+    document.getElementById('profile-refcode').textContent = myCode(meta);
+    const btnClaim = document.getElementById('btn-ref-claim');
+    const refreshClaim = () => {
+      const p = pendingRewards(meta);
+      btnClaim.textContent = `KLAIM (${p.hits + p.milestones})`;
+    };
+    refreshClaim();
+    document.getElementById('btn-ref-link').onclick = async () => {
+      const ok = await copyText(myReferralLink(meta));
+      emit('toast', { message: ok ? 'Link undangan tersalin! 💌' : 'Gagal menyalin link.', kind: ok ? 'gold' : 'warn' });
+    };
+    btnClaim.onclick = () => {
+      const r = claimPending(meta);
+      if (r.total > 0) {
+        audio.collect();
+        emit('toast', { message: `Klaim referral: +${r.total} Biokredit! 🎉`, kind: 'gold' });
+        document.getElementById('profile-currency').textContent = (meta.currency || 0).toLocaleString('id-ID');
+        refreshClaim();
+      } else {
+        emit('toast', { message: 'Belum ada hadiah referral.', kind: 'warn' });
+      }
+    };
+  } catch { /* abaikan */ }
 
   document.getElementById('btn-profile-logout').onclick = () => {
     logout();

@@ -19,6 +19,8 @@ import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simp
 import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
 import { isCapsulePending } from '../../systems/welcome-box-system.js'; // ADDENDUM §1: Kapsul Membran
 import { saveCurrentRun, copyText } from '../../systems/challenge-system.js'; // ADDENDUM §3.3
+import { encodeCurrentBuild, makeBuildUrl } from '../../systems/build-share-system.js'; // ADDENDUM P2 §6.6
+import { checkMilestone } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { emit } from '../../core/ui-bridge.js';
 
 let wiringDone = false;
@@ -44,6 +46,11 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
+  // ADDENDUM P2 §3.4 — bonus milestone referral (wave 5 pertama)
+  try {
+    const ms = checkMilestone(game.run, STATE.meta);
+    if (ms > 0) setTimeout(() => emit('toast', { message: `Bonus referral: +${ms} Biokredit! \u{1F389}`, kind: 'gold' }), 800);
+  } catch { /* abaikan */ }
   // R2: 1 baris bark kontekstual RIA — non-blocking (story doc §7.3)
   const oldBark = document.getElementById('go-ria-bark');
   if (oldBark) oldBark.remove();
@@ -253,6 +260,16 @@ export function wireButtons() {
     doHome();
   });
   // ADDENDUM §3.3 — Challenge link (onclick agar tak dobel-bind tiap show)
+  // ADDENDUM P2 §6.6 — bagikan build (onclick agar tak dobel-bind)
+  document.getElementById('btn-build').onclick = async () => {
+    const code = encodeCurrentBuild(game);
+    if (!code) {
+      emit('toast', { message: 'Gagal membuat kode build.', kind: 'warn' });
+      return;
+    }
+    const ok = await copyText(makeBuildUrl(code));
+    emit('toast', { message: ok ? 'Link build tersalin! \u{1F9EC}' : 'Salin manual: ' + makeBuildUrl(code), kind: 'gold' });
+  };
   document.getElementById('btn-challenge').onclick = async () => {
     const saved = saveCurrentRun(game);
     if (!saved) {

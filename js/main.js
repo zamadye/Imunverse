@@ -59,6 +59,8 @@ import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
 import { getChallenge, showChallengeModal } from './systems/challenge-system.js'; // ADDENDUM §3.3
+import { handleRefParam } from './systems/referral-system.js'; // ADDENDUM P2 §3.4
+import { decodeBuild, showBuildModal } from './systems/build-share-system.js'; // ADDENDUM P2 §6.6
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
 import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
@@ -872,16 +874,9 @@ async function boot() {
 function handleAcquisitionParams() {
   const q = new URLSearchParams(location.search);
   const meta = STATE.meta;
-  // Referral: simpan pengundang (sekali, bukan diri sendiri). Hadiah butuh
-  // server — untuk MVP datanya saja yang disimpan (§6 P2).
+  // Referral: simpan pengundang + catat hadiah dua arah (outbox klaim).
   const ref = (q.get('ref') || '').slice(0, 32);
-  if (ref && meta && !meta.referredBy) {
-    const mine = (meta.account && meta.account.uid) || meta.guestUid;
-    if (ref !== mine) {
-      meta.referredBy = ref;
-      try { writeSave(meta); } catch { /* abaikan */ }
-    }
-  }
+  if (ref && meta) handleRefParam(meta, ref);
   // Zero friction: ?play=1 → langsung layar persiapan run
   if (q.get('play') === '1') screenManager.show('prep');
   // Challenge: tampilkan modal perbandingan di atas layar aktif
@@ -889,6 +884,12 @@ function handleAcquisitionParams() {
   if (ch) {
     const summary = getChallenge(ch);
     if (summary) setTimeout(() => showChallengeModal(summary), 600);
+  }
+  // Build share: tampilkan modal resep build
+  const b = (q.get('build') || '').slice(0, 1024);
+  if (b) {
+    const build = decodeBuild(b);
+    if (build) setTimeout(() => showBuildModal(build), 600);
   }
 }
 
