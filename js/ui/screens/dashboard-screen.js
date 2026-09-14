@@ -30,6 +30,8 @@ import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js'
 import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager } from '../screen-manager.js';
 import { isCapsulePending, isCapsuleSnoozed } from '../../systems/welcome-box-system.js'; // ADDENDUM §1
+import { currentStrainId } from '../../systems/weekly-strain-system.js'; // ADDENDUM §3.5
+import { traitDisplayName } from '../../systems/enemy-mutation-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
@@ -447,6 +449,29 @@ function renderArenaCard(meta) {
   card.appendChild(btn);
 }
 
+// ADDENDUM §3.5 — banner Strain of the Week di puncak dashboard.
+function renderStrainBanner() {
+  const sc = document.querySelector('#screen-dashboard .dash-scroll');
+  if (!sc) return;
+  let b = document.getElementById('strain-banner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'strain-banner';
+    b.className = 'strain-banner';
+    sc.prepend(b);
+  }
+  const name = traitDisplayName(currentStrainId());
+  b.innerHTML = '';
+  const tag = document.createElement('span');
+  tag.className = 'strain-tag';
+  tag.textContent = 'STRAIN MINGGU INI';
+  const nm = document.createElement('b');
+  nm.textContent = name;
+  const hint = document.createElement('small');
+  hint.textContent = '15% musuh wave 4+ membawa trait ini. Sesuaikan mutasimu!';
+  b.append(tag, nm, hint);
+}
+
 export function show() {
   // ADDENDUM §1: kapsul pending & tak ditunda → alihkan otomatis (sekali per sesi)
   try {
@@ -468,6 +493,7 @@ export function show() {
   for (const sid of ['sirkulasi', 'pencernaan', 'saraf', 'imun', 'limfatik']) markSeen(sid);
   const meta = STATE.meta;
   document.getElementById('dash-currency').textContent = meta.currency.toLocaleString('id-ID');
+  try { renderStrainBanner(); } catch { /* abaikan */ } // ADDENDUM §3.5
   // Fase 14: saldo Imun Coin + hadiah early-beta (idempoten)
   ensureFounderReward(meta);
   const imuEl = document.getElementById('dash-imun');

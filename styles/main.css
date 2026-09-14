@@ -3053,3 +3053,18 @@ img.lock-badge {
 .capsule-btns { display: flex; gap: 10px; justify-content: center; margin-top: 6px; }
 .capsule-share-note { color: #9fd8cc; font-size: 12px; min-height: 16px; }
 .linklike { background: none; border: none; color: #6fa9a2; text-decoration: underline; cursor: pointer; font-size: 13px; }
+
+/* ADDENDUM §3.5: banner Strain of the Week */
+.strain-banner { display: flex; align-items: center; gap: 10px; margin: 8px 12px; padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(195,155,211,.18), rgba(44,122,120,.18));
+  border: 1px solid #c39bd3; border-radius: 10px; color: #eafff7; font-size: 13px; }
+.strain-banner .strain-tag { font-size: 10px; font-weight: 900; letter-spacing: 1.5px; color: #0b2224;
+  background: #c39bd3; padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
+.strain-banner b { color: #ffd166; font-size: 15px; }
+.strain-banner small { color: #9fd8cc; margin-left: auto; text-align: right; }
+
+/* ADDENDUM §3.3: modal challenge */
+.challenge-modal { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(4,18,20,.72); }
+.challenge-box { max-width: 380px; text-align: center; }
+.challenge-box h2 { color: #ffd166; margin: 4px 0; }
+.challenge-sub { color: #9fd8cc; font-size: 13px; margin: 0 0 8px; }

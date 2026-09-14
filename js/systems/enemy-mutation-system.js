@@ -12,6 +12,7 @@
 import { getEnemyMutations } from '../core/data-store.js';
 import { emit } from '../core/ui-bridge.js';
 import { showPresenter } from '../ui/presenter.js';
+import { currentStrainId, WEEKLY_STRAIN_CHANCE, WEEKLY_STRAIN_MIN_WAVE } from './weekly-strain-system.js'; // ADDENDUM §3.5
 
 function cfg() {
   try {
@@ -138,9 +139,19 @@ export function checkPreWarning(game) {
 export function maybeApplyTrait(run, enemy) {
   if (!run || !enemy || enemy.isBoss) return;
   const traitId = run.enemyMutation && run.enemyMutation.activeTrait;
-  if (!traitId) return;
-  if (Math.random() > 0.35) return;
-  applyTraitToEnemy(run, enemy, traitId);
+  if (traitId && Math.random() <= 0.35) {
+    applyTraitToEnemy(run, enemy, traitId);
+    return;
+  }
+  // ADDENDUM §3.5 — Strain of the Week: 15% musuh wave 4+ membawa trait
+  // mingguan global (hanya yang belum punya trait counter-build).
+  try {
+    const wave = run.spawnSys ? run.spawnSys.wave : 1;
+    if (wave < WEEKLY_STRAIN_MIN_WAVE) return;
+    if (enemy.mutTrait) return;
+    if (Math.random() > WEEKLY_STRAIN_CHANCE) return;
+    applyTraitToEnemy(run, enemy, currentStrainId());
+  } catch { /* abaikan */ }
 }
 
 export function applyTraitToEnemy(run, enemy, traitId) {
@@ -203,6 +214,11 @@ export function updateEnemyMutations(game, dt) {
       }
     }
   }
+}
+
+/** Nama display trait dari id (dipakai banner strain mingguan). */
+export function traitDisplayName(traitId) {
+  return traitName({ id: traitId });
 }
 
 function traitName(trait) {

@@ -18,6 +18,8 @@ import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
 import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
 import { isCapsulePending } from '../../systems/welcome-box-system.js'; // ADDENDUM §1: Kapsul Membran
+import { saveCurrentRun, copyText } from '../../systems/challenge-system.js'; // ADDENDUM §3.3
+import { emit } from '../../core/ui-bridge.js';
 
 let wiringDone = false;
 
@@ -250,6 +252,16 @@ export function wireButtons() {
     if (capsuleFirst(doHome)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
     doHome();
   });
+  // ADDENDUM §3.3 — Challenge link (onclick agar tak dobel-bind tiap show)
+  document.getElementById('btn-challenge').onclick = async () => {
+    const saved = saveCurrentRun(game);
+    if (!saved) {
+      emit('toast', { message: 'Gagal membuat tantangan.', kind: 'warn' });
+      return;
+    }
+    const ok = await copyText(saved.url);
+    emit('toast', { message: ok ? 'Link tantangan tersalin! ⚔️' : 'Salin manual: ' + saved.url, kind: 'gold' });
+  };
 }
 
 // ADDENDUM §1: alihkan ke kapsul bila pending; onLater = alur semula.

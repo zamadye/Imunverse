@@ -325,5 +325,30 @@ log('i18n-mechanic-kept', i18n.t('Memori Antibodi') === 'Antibody Memory' && i18
 STATE.meta.lang = 'id';
 log('i18n-id-passthrough', i18n.t('Biokredit didapat:') === 'Biokredit didapat:');
 
+// ---------- 10. Challenge link + Strain of the Week (ADDENDUM §3.3/§3.5) ----------
+const chSys = await mod('js/systems/challenge-system.js');
+const strainSys = await mod('js/systems/weekly-strain-system.js');
+STATE.meta.account = { uid: 'u1', username: 'Penjaja' };
+const fakeGame = { run: { challengeId: null, heroDef: { id: 'amara' }, spawnSys: { wave: 9 }, level: 7, kills: 120, membrane: { stats: { engulfCount: 30 } }, activeMutations: ['m1', 'm2'], victory: true } };
+const saved = chSys.saveCurrentRun(fakeGame);
+log('challenge-save', !!saved && saved.url.includes('?challenge=u1-') && chSys.getChallenge(saved.runId).wave === 9, saved && saved.url);
+log('challenge-idempotent', chSys.saveCurrentRun(fakeGame).runId === saved.runId);
+log('challenge-missing', chSys.getChallenge('tidak-ada') === null);
+log('strain-rotation', strainSys.currentStrainId(0) === 'penembak_asam'
+  && strainSys.currentStrainId(604800000) === 'kebal_membran'
+  && strainSys.currentStrainId(5 * 604800000) === 'penembak_asam'
+  && !['acak_bermutasi'].includes(strainSys.currentStrainId(Date.now())));
+log('strain-name', enemyMutSys.traitDisplayName('pemurni') === 'Pemurni');
+const realRandom = Math.random;
+Math.random = () => 0.05; // paksa lolos peluang 15%
+const wRun = { spawnSys: { wave: 5 }, enemyMutation: {} };
+const wEnemy = {};
+enemyMutSys.maybeApplyTrait(wRun, wEnemy);
+const wRunLow = { spawnSys: { wave: 3 }, enemyMutation: {} };
+const wEnemyLow = {};
+enemyMutSys.maybeApplyTrait(wRunLow, wEnemyLow);
+Math.random = realRandom;
+log('strain-apply', wEnemy.mutTrait === strainSys.currentStrainId() && !wEnemyLow.mutTrait, `trait=${wEnemy.mutTrait}`);
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);
