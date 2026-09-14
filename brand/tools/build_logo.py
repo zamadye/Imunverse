@@ -5,7 +5,7 @@ Run: PYTHONPATH=brand/libs python3 brand/tools/build_logo.py
 """
 import os, sys, math, random, subprocess, shutil
 from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageFilter
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.chdir(os.path.join(ROOT, 'brand'))
 F = lambda f, s: ImageFont.truetype(f'fonts/{f}', s)
 CREAM = (253, 246, 227); CORAL = (255, 107, 107); SAGE = (124, 182, 142); TEAL = (13, 115, 119)

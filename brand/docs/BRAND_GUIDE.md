@@ -25,8 +25,10 @@ menelan patogen hidup-hidup. Nama brand-nya adalah mekaniknya.
 - Cerita rebrand itu sendiri bisa jadi konten (pilar CERITA): "Kenapa kami
   ganti nama?" — underdog story yang orang mau bagikan.
 
-**CTA di semua aset:** "Ketik phagos.space — langsung main." (gratis, tanpa
-download, web game).
+**CTA di semua aset (pra-rilis):** **"SEGERA HADIR DI PLAY STORE"**.
+`phagos.space` tetap tampil sebagai info domain resmi (teks kecil).
+JANGAN pakai "ketik phagos.space / langsung main" sebelum game live di
+Play Store.
 
 ---
 
@@ -130,6 +132,22 @@ atas konten — TIDAK dibungkus panel/kotak background.**
   drop shadow berlebihan.
 - **Banner X header**: `banners/twitter/x-header-1500x500.png` (1500×500).
 
+### 4.4 Banner (key art CINEMATIC + copy Play Store)
+Banner BUKAN sekadar teks — full-bleed key art karakter (Mako + T-Bolt + Nyx
+vs horde patogen), teks di area kiri yang di-scrim gelap. Dibangun oleh
+`tools/build_banners.py` (source art: `banners/twitter/x-header-art-src.png`,
+`banners/shared/hero-keyart-16x9-src.png`):
+
+| File | Ukuran | Pakai untuk |
+|---|---|---|
+| `banners/twitter/x-header-1500x500.png` | 1500×500 | Header X/Twitter |
+| `banners/twitter/tw-post-16x9.png` | 1200×675 | Post X/Twitter |
+| `banners/fb/fb-post-16x9.png` | 1200×675 | Feed Facebook |
+| `banners/fb/fb-link-1200x630.png` | 1200×630 | Link card FB / OG |
+
+Aturan: CTA emas "SEGERA HADIR DI PLAY STORE" (emas = momen launch/premium),
+headline "TUBUHMU ADALAH ARENANYA.", tagline di bawah wordmark.
+
 ## 5. Karakter
 
 **Referensi kunci (DIKUNCI — semua aset memakai desain ini):**
@@ -212,14 +230,14 @@ brand/
 ├── bin/              # ffmpeg static (tooling — TIDAK di-commit)
 ├── libs/             # Pillow (tooling — TIDAK di-commit)
 ├── ref/              # Mako master, sheet, 9 ekspresi
-├── logo/             # phagos-concept, full, compact, mono, watermark, animasi
+├── logo/             # icon (7 ukuran + preview), wordmark transparan, animasi
 ├── patterns/         # pattern, divider, frame
 ├── stickers/         # 12 stiker + contact sheet
-├── banners/          # x/ youtube/ tiktok/ instagram/ discord/ googleplay/
+├── banners/          # twitter/ fb/ shared/ (key art cinematic + banner)
 ├── templates/        # vertical/ horizontal/ square/ (13 template)
 ├── video/            # trailer/ hero/ shorts/ (MP4 + frames + audio)
 ├── docs/             # BRAND_GUIDE.md, MARKETING_STRATEGY.md, scripts
-├── tools/            # build_assets.py
+├── tools/            # build_assets.py, build_logo.py, build_banners.py
 └── (screenshots asli game: ../screenshots/, ../shots/review/)
 ```
 
