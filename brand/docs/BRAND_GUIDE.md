@@ -93,17 +93,24 @@ Jangan set ulang dengan font standar.
 
 | Varian | File | Pakai untuk |
 |---|---|---|
-| **Logo penuh (horizontal)** | `logo/logo-full.png` (1600×900) + `logo-full-square.png` | Header website, banner YouTube, intro video, footer konten. Wordmark + Mako + tagline. |
-| **Logo compact (emblem)** | `logo/logo-compact.png` + 800/512/400/320/200/110 | Ikon app, profile picture semua platform, favicon. |
-| **Logo monokrom** | `logo/logo-mono.png` (cream, transparan) | Watermark, merchandise, stamp. |
+| **Wordmark (TRANSPARAN)** | `logo/wordmark.png` (1246×403, PNG alpha) | **Logo teks utama.** Header website, banner, thumbnail, video — di-layer di atas apa pun. Tanpa background. |
+| **Wordmark monokrom** | `logo/wordmark-mono.png` (cream, alpha) | Merchandise, stamp, watermark, latar yang butuh single-color. |
+| **Logo compact (emblem 1:1)** | `logo/logo-compact.png` + 800/512/400/320/200/110 | Ikon app, profile picture semua platform, favicon. (Mako vs Sel Kanker) |
+| **Emblem monokrom** | `logo/logo-mono.png` (cream, transparan) | Watermark, merchandise. |
 | **Watermark** | `logo/logo-watermark-150.png` (40% opacity) | Overlay video/screenshot. |
-| **Logo animasi** | `logo/logo-animasi.mp4` (1024², 4 dtk, loop) | Intro video, loading, opener TikTok. |
+| **Logo animasi** | `logo/logo-animasi.mp4` (16:9, 4 dtk, loop) | Intro video, loading, opener TikTok. (wordmark + partikel) |
 
-**Aturan pemakaian:**
-- Safe area: padding minimal 10% di sekeliling logo.
-- Minimum ukuran: compact 110 px, full 480 px lebar.
-- Jangan: rotate, ubah warna, ganti lettering, efek berlebihan, tempel di atas
-  latar ramai tanpa scrim teal.
+**Aturan pemakaian wordmark (PENTING):**
+- **Sangatkan, jangan di-frame.** Wordmark harus di-layer langsung di atas
+  konten (foto/video/gradient) — TIDAK DIBOLEH tempel di atas panel/kotak
+  background buatan. Glow-nya sudah jadi bagian logo.
+- Di atas foto terang/ramai: tambahkan **scrim teal gelap** (gradient alpha)
+  di balik wordmark agar cream terbaca.
+- Di atas latar putih/terang: pakai `wordmark-mono.png` versi dark teal
+  (reverse) — jangan cream langsung.
+- Safe area: padding minimal 10%. Minimum lebar 320 px.
+- Jangan: rotate, ubah warna, ganti lettering, tambah kotak/background,
+  efek drop shadow berlebihan.
 - Emblem compact (Mako vs Sel Kanker) boleh berdiri sendiri — sudah mengandung
   konflik inti game.
 
