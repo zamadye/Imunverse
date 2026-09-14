@@ -36,12 +36,6 @@ export function xpForKill(tier, isBoss) {
   return lo + Math.floor(Math.random() * (hi - lo + 1));
 }
 
-/** Perkalian XP saat combo aktif (≥ threshold kill dalam window detik). */
-export function comboXpMult(comboCount) {
-  const c = getRetention().combo;
-  return comboCount >= c.threshold ? c.xpMult : 1;
-}
-
 /**
  * Terapkan UPGRADE GLOBAL (semua hero) ke statistik dasar run.
  * damage/moveSpeed/attackSpeed/attackRange = persen; maxHP = flat; lifeSteal = persen.

@@ -21,6 +21,7 @@
 
 import { drawSprite, getSprite } from './sprite-loader.js';
 import { PERSP } from './camera.js';
+import { isDevMode } from '../core/dev-mode.js';
 
 /** Gelapkan/terangkan warna hex "#rrggbb" dengan faktor (clamp 0..255). */
 function hexShade(hex, f) {
@@ -148,10 +149,10 @@ export function mapGovObserve(ms) {
   govTick = 0;
   if (govLevel === 1 && govEMA > GOV.SLOW) {
     govLevel = 0.5;
-    console.info(`[MAP] kualitas latar hemat (EMA ${govEMA.toFixed(1)}ms)`);
+    if (isDevMode()) console.info(`[MAP] kualitas latar hemat (EMA ${govEMA.toFixed(1)}ms)`);
   } else if (govLevel === 0.5 && govEMA < GOV.FAST) {
     govLevel = 1;
-    console.info(`[MAP] kualitas latar penuh (EMA ${govEMA.toFixed(1)}ms)`);
+    if (isDevMode()) console.info(`[MAP] kualitas latar penuh (EMA ${govEMA.toFixed(1)}ms)`);
   }
 }
 /** Level kualitas latar aktif (1 = penuh, 0.5 = hemat). Diekspor utk tes. */

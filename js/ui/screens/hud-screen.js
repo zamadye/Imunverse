@@ -62,7 +62,7 @@ export function buildAbilityBar() {
     const def = getData().skills.skills.find((s) => s.id === view.id);
     const btn = document.createElement('button');
     // UI/UX RADIAL WHEEL: kelas `pos-i` menempatkan skill pada titik tetap
-    // relatif terhadap SERANG (muscle memory — posisi TIDAK berubah saat unlock)
+    // relatif terhadap PULSE (muscle memory — posisi TIDAK berubah saat unlock)
     btn.className = `ability-btn character-skill pos-${i}${view.ult ? ' ult' : ''}`;
     btn.id = `ability-${view.id}`;
     btn.dataset.slot = i;
@@ -245,7 +245,6 @@ export function updateHUD(data) {
   try { updateBioChip(data.bioPoints, data.activeMutations); } catch { /* abaikan */ }
   try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
-  // Combo pill (juice): tampil saat >= 3 kill beruntun
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
   const gateNode = document.getElementById('hud-gate');
   if (gateNode) {
@@ -256,25 +255,6 @@ export function updateHUD(data) {
       const bank = data.gateBank || 0;
       bankNode.classList.toggle('hidden', !(data.gate && bank > 0));
       if (data.gate && bank > 0) bankNode.textContent = `+${bank} XP ${t('ditahan')}`;
-    }
-  }
-
-  const comboNode = document.getElementById('hud-combo');
-  if (comboNode) {
-    const count = data.combo?.count || 0;
-    if (count >= 3) {
-      comboNode.classList.remove('hidden');
-      comboNode.innerHTML = `x${count} <small>COMBO</small>`;
-      // restart animasi pop tiap kenaikan angka
-      if (comboNode.dataset.last !== String(count)) {
-        comboNode.dataset.last = String(count);
-        comboNode.style.animation = 'none';
-        void comboNode.offsetWidth;
-        comboNode.style.animation = '';
-      }
-    } else {
-      comboNode.classList.add('hidden');
-      comboNode.dataset.last = '0';
     }
   }
 
@@ -316,7 +296,7 @@ function setBar(id, pct) {
  * Siap = menyala + label PULSE; cooldown = overlay conic + angka detik.
  */
 function updatePulseButton(pulse) {
-  const btn = document.getElementById('btn-fire');
+  const btn = document.getElementById('btn-pulse');
   if (!btn) return;
   let fill = btn.querySelector('.pulse-cd');
   let num = btn.querySelector('.pulse-num');

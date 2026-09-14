@@ -24,7 +24,7 @@ const KEY_MAP = {
   KeyS: 'down', ArrowDown: 'down',
   KeyA: 'left', ArrowLeft: 'left',
   KeyD: 'right', ArrowRight: 'right',
-  Space: 'fire', KeyK: 'fire', // SERANG manual (desktop)
+  Space: 'pulse', KeyK: 'pulse', // PULSE (desktop)
 };
 
 const isTypingTarget = (t) =>
@@ -40,7 +40,7 @@ export const UI_CONTROL_SELECTOR =
   '[role="button"], [role="dialog"], [data-ui], ' +
   '.modal-box, .screen.modal, .hud-hero-status, .hud-quests, .hud-menu2-toggle, ' +
   '.hud-game-menu2, .hud-minimap, .hud-xp-top, .hud-mission, .hud-buff-chip, ' +
-  '.hud-antigen, .phago-meter, .ability-btn, .fire-btn, .tut-block, .hud-top, .curguide-box';
+  '.hud-antigen, .phago-meter, .ability-btn, .pulse-btn, .tut-block, .hud-top, .curguide-box';
 
 /**
  * Apakah target pointer BOLEH masuk ke movement system (GAMEPLAY_INPUT_ZONE)?
@@ -74,13 +74,13 @@ export class InputHandler {
     };
     this.maxRadius = 56; // radius jangkauan joystick (px CSS)
 
-    // ---- AIM STICK (arahkan serangan) — diisi oleh drag pada tombol SERANG ----
+    // ---- AIM STICK (arahkan Pulse) — diisi oleh drag pada tombol PULSE ----
     this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0, ox: 0, oy: 0 };
     this.aimDragThreshold = 12; // px: tap biasa ≠ mengarahkan
     this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp (mouse hover)
-    this.fireButtonHeld = false; // tombol PULSE di HUD (touch/mouse)
-    this.fireEl = null;
-    this._firePointerId = null;
+    this.pulseButtonHeld = false; // tombol PULSE di HUD (touch/mouse)
+    this.pulseEl = null;
+    this._pulsePointerId = null;
     // PHAGOS: antrean PULSE edge-trigger (ditekan → meledak sekali)
     this._pulseQueued = false;
 
@@ -102,7 +102,7 @@ export class InputHandler {
       if (action) {
         this.keys.add(action);
         // PHAGOS: Spasi/K = PULSE edge-trigger (abaikan auto-repeat)
-        if (action === 'fire' && !e.repeat) this._pulseQueued = true;
+        if (action === 'pulse' && !e.repeat) this._pulseQueued = true;
         e.preventDefault();
       }
       if (e.code === 'Space') e.preventDefault();
@@ -131,7 +131,7 @@ export class InputHandler {
     // ---------- Touch (virtual joystick — GAMEPLAY_INPUT_ZONE: lantai arena) ----------
     // Bukan window/document global: event di-bind ke canvas dan difilter:
     // (a) hanya saat gameplay aktif (isActive), (b) target BUKAN zona UI.
-    // UI (profil, misi, jeda, tombol skill, tombol SERANG) selalu menang.
+    // UI (profil, misi, jeda, tombol skill, tombol PULSE) selalu menang.
     this._onTouchStart = (e) => {
       if (this.isActive && !this.isActive()) return; // bukan gameplay → UI normal
       if (!isGameplayInputTarget(e.target)) return;  // sentuhan mulai di UI → jangan gerak
@@ -229,37 +229,37 @@ export class InputHandler {
    * @param {{onPress?: Function}} [opts] onPress: respons instan tiap tekan
    */
   bindPulseButton(el, opts = {}) {
-    this.bindFireButton(el, opts);
+    this.bindPulseButton(el, opts);
   }
-  bindFireButton(el, opts = {}) {
+  bindPulseButton(el, opts = {}) {
     if (!el) return;
-    this.fireEl = el;
-    this._onFireDown = (e) => {
+    this.pulseEl = el;
+    this._onPulseDown = (e) => {
       e.preventDefault();
-      if (this._firePointerId !== null) return; // sudah ditahan jari lain
-      this._firePointerId = e.pointerId;
+      if (this._pulsePointerId !== null) return; // sudah ditahan jari lain
+      this._pulsePointerId = e.pointerId;
       try { el.setPointerCapture(e.pointerId); } catch { /* pointer sudah lepas */ }
       const r = el.getBoundingClientRect();
-      el.style.setProperty('--fire-r', `${r.width / 2}px`);
+      el.style.setProperty('--pulse-r', `${r.width / 2}px`);
       this.aimStick.ox = e.clientX;
       this.aimStick.oy = e.clientY;
       this.aimStick.dx = 0;
       this.aimStick.dy = 0;
       this.aimStick.active = false;
-      this.fireButtonHeld = true;
+      this.pulseButtonHeld = true;
       el.classList.add('held');
       // PHAGOS: tiap tekan = satu PULSE (edge-trigger)
       this._pulseQueued = true;
       if (opts.onPress) opts.onPress(e);
     };
-    this._onFireMove = (e) => {
-      if (e.pointerId !== this._firePointerId) return;
+    this._onPulseMove = (e) => {
+      if (e.pointerId !== this._pulsePointerId) return;
       const dx = e.clientX - this.aimStick.ox;
       const dy = e.clientY - this.aimStick.oy;
       const len = Math.hypot(dx, dy);
       if (len > this.aimDragThreshold) {
         this.aimStick.active = true;
-        this.aimStick.touchId = 'fire';
+        this.aimStick.touchId = 'pulse';
         this.aimStick.dx = dx / len;
         this.aimStick.dy = dy / len;
         this.aimStick.angle = Math.atan2(dy, dx);
@@ -267,23 +267,23 @@ export class InputHandler {
         el.style.setProperty('--aim', `${this.aimStick.angle}rad`);
       }
     };
-    this._onFireUp = (e) => {
-      if (e.pointerId !== this._firePointerId) return;
-      this._releaseFire();
+    this._onPulseUp = (e) => {
+      if (e.pointerId !== this._pulsePointerId) return;
+      this._releasePulse();
     };
-    el.addEventListener('pointerdown', this._onFireDown);
-    el.addEventListener('pointermove', this._onFireMove);
-    el.addEventListener('pointerup', this._onFireUp);
-    el.addEventListener('pointercancel', this._onFireUp);
-    el.addEventListener('lostpointercapture', this._onFireUp);
+    el.addEventListener('pointerdown', this._onPulseDown);
+    el.addEventListener('pointermove', this._onPulseMove);
+    el.addEventListener('pointerup', this._onPulseUp);
+    el.addEventListener('pointercancel', this._onPulseUp);
+    el.addEventListener('lostpointercapture', this._onPulseUp);
   }
 
-  _releaseFire() {
-    this._firePointerId = null;
-    this.fireButtonHeld = false;
+  _releasePulse() {
+    this._pulsePointerId = null;
+    this.pulseButtonHeld = false;
     this.aimStick.active = false;
     this.aimStick.touchId = null;
-    if (this.fireEl) this.fireEl.classList.remove('held', 'aiming');
+    if (this.pulseEl) this.pulseEl.classList.remove('held', 'aiming');
   }
 
   _releaseJoystick() {
@@ -297,7 +297,7 @@ export class InputHandler {
   releaseAll() {
     this.keys.clear();
     this._releaseJoystick();
-    this._releaseFire();
+    this._releasePulse();
     this._pulseQueued = false;
   }
 
@@ -317,8 +317,8 @@ export class InputHandler {
   }
 
   /**
-   * Info arah aim (arahkan serangan):
-   *  1. aim stick aktif (tarik tombol SERANG) → sudut dari stick
+   * Info arah aim (arahkan Pulse hero kerucut):
+   *  1. aim stick aktif (tarik tombol PULSE) → sudut dari stick
    *  2. mouse bergerak < 2.5 dtk lalu → sudut dari posisi kursor (px,py = player di layar)
    *  3. tidak ada → { active:false } → auto-aim ke musuh terdekat
    */
@@ -337,14 +337,14 @@ export class InputHandler {
   }
 
   /** Dipakai self-test/harness: paksa status tombol PULSE. */
-  setFire(v) {
-    this.fireButtonHeld = !!v;
+  setPulse(v) {
+    this.pulseButtonHeld = !!v;
     if (v) this._pulseQueued = true;
   }
 
-  /** Sedang menekan PULSE? (tombol HUD ATAU Space/K) — kompat lama. */
+  /** Sedang menekan PULSE? (tombol HUD ATAU Space/K). */
   isFiring() {
-    return this.fireButtonHeld || this.keys.has('fire');
+    return this.pulseButtonHeld || this.keys.has('pulse');
   }
 
   /** Hitung vektor joystick dari titik awal sentuh. */
@@ -402,12 +402,12 @@ export class InputHandler {
     this.canvas.removeEventListener('pointerup', this._onPointerUp);
     this.canvas.removeEventListener('pointercancel', this._onPointerUp);
     this.canvas.removeEventListener('contextmenu', this._onContext);
-    if (this.fireEl) {
-      this.fireEl.removeEventListener('pointerdown', this._onFireDown);
-      this.fireEl.removeEventListener('pointermove', this._onFireMove);
-      this.fireEl.removeEventListener('pointerup', this._onFireUp);
-      this.fireEl.removeEventListener('pointercancel', this._onFireUp);
-      this.fireEl.removeEventListener('lostpointercapture', this._onFireUp);
+    if (this.pulseEl) {
+      this.pulseEl.removeEventListener('pointerdown', this._onPulseDown);
+      this.pulseEl.removeEventListener('pointermove', this._onPulseMove);
+      this.pulseEl.removeEventListener('pointerup', this._onPulseUp);
+      this.pulseEl.removeEventListener('pointercancel', this._onPulseUp);
+      this.pulseEl.removeEventListener('lostpointercapture', this._onPulseUp);
     }
   }
 }

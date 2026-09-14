@@ -660,8 +660,8 @@ async function boot() {
 
   // PHAGOS: tombol PULSE (SATU TOMBOL) — tiap TEKAN = satu ledakan membran.
   // Antrean edge-trigger dikonsumsi game.update; onPress memberi respons instan.
-  const fireBtn = document.getElementById('btn-fire');
-  input.bindFireButton(fireBtn, {
+  const pulseBtn = document.getElementById('btn-pulse');
+  input.bindPulseButton(pulseBtn, {
     onPress: () => {
       audio.unlock();
       game.triggerPulse(); // respons instan; cooldown digerbang di membrane-system
@@ -722,7 +722,7 @@ async function boot() {
     const target = ev.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
     const key = ev.key;
-    // Fase 12: 1/2/3 = skill hero (slot 3 = ultimate), 4 = SERANG manual
+    // 1/2/3 = skill hero (slot 3 = ultimate); 4/T/K = PULSE langsung
     // Skill combat unlock: 1/2/3 cast (guard Lv 3/5/10 di game.useAbilityBySlot);
     // Shift+1/2/3 = UPGRADE skill (guard Lv 15 di game.upgradeAbilityBySlot).
     // ev.code dipakai agar Shift+digit (yang mengubah ev.key jadi '!' dst.) tetap dikenali.
@@ -922,8 +922,8 @@ async function runAutotest() {
     game.startRun('tcd8');
     log('runStarted', STATE.screen === 'gameplay');
 
-    // Tempatkan musuh dekat player; TEMBAK manual dinyalakan untuk self-test
-    game.input.setFire(true);
+    // Tempatkan musuh dekat player; antrekan PULSE manual (kontak membran yang membunuh)
+    game.input.queuePulse(); game.input.setPulse(true);
     for (let i = 0; i < 6; i++) game.spawnEnemy('bakteri', false);
     game.run.enemies.slice(-6).forEach((e, i) => {
       const a = (i / 6) * Math.PI * 2;
@@ -933,10 +933,9 @@ async function runAutotest() {
 
     await until(() => game.run.kills > 0, 12000, 'ada kill');
     log('enemiesSpawned', game.run.enemies.length + game.run.kills > 0);
-    log('shotsFired', game.run.stats.shotsFired > 0);
     log('killsCounted', game.run.kills);
 
-    // Level-up: beri XP besar → modal muncul → pilih upgrade sampai antrean habis
+    // Level-up: beri XP besar → modal muncul → pilih kartu sampai antrean habis
     const levelBefore = game.run.level;
     game.addXP(500);
     await until(() => STATE.levelUpOpen, 5000, 'modal level-up');
@@ -947,7 +946,7 @@ async function runAutotest() {
       game.chooseLevelUp(choiceId);
       await sleep(30);
     }
-    log('upgradeApplied', Object.keys(game.run.upgrades).length >= 1 && !STATE.levelUpOpen);
+    log('upgradeApplied', (Object.keys(game.run.upgrades).length + (game.run.activeMutations || []).length) >= 1 && !STATE.levelUpOpen);
 
     // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
     // (skill combat unlock Lv 3/5/10: harness membuka slot manual — pola yang

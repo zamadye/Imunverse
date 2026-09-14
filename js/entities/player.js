@@ -2,8 +2,8 @@
  * player.js — Entitas player (sel imun yang dikendalikan).
  * Statistik akhir dihitung dari: baseStats hero (JSON) × upgrade squad permanen
  * (meta) × upgrade in-run (level-up) × consumable (serum).
- * Serangan HANYA manual (tombol SERANG — tryFire dipanggil game.js saat
- * tombol ditekan/ditahan), assist-aim membidik musuh terdekat dalam range.
+ * PHAGOS: TIDAK ADA serangan tombol — damage = kontak membran (pasif) +
+ * PULSE (satu tombol). tryFire/performAttack MATI (badan dikomentari §13.8).
  */
 
 import { PERSP } from '../render/camera.js';
@@ -96,15 +96,13 @@ export class Player {
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackFlash > 0) this.attackFlash -= dt;
     this.attackTimer -= dt; // PHAGOS: sisa cooldown jalur tembak mati (tidak dipakai)
-    // RONDE-4: TEMBAK SERANG MANUAL. Blok "auto-attack" DIHAPUS atas arahan
-    // pemilik game — hero TIDAK menembak sendiri; semua serangan lewat
-    // tombol SERANG (game.js memanggil player.tryFire saat tombol ditekan).
+    // PHAGOS: hero TIDAK menyerang sendiri — damage hanya dari membran
+    // (updateMembrane) + PULSE. Blok tembak/auto-attack DIHAPUS total.
   }
 
   /**
-   * TEMBAK MANUAL (dipanggil game saat tombol TEMBAK ditekan/tahan).
-   * Arah: mengikuti aim player (mouse/stick) — kalau tidak mengarahkan,
-   * bantu anak-anak: bidik musuh terdekat dalam jangkauan (assist aim).
+   * JALUR TEMBAK MATI — stub dipertahankan agar pemanggil lama tak crash.
+   * Badan asli dikomentari di bawah (bible §13.8: komentari, jangan hapus).
    */
   tryFire(game) {
     return;
@@ -146,7 +144,7 @@ export class Player {
   */
   }
 
-  /** Jalankan attack pattern sesuai data hero. */
+  /** JALUR TEMBAK MATI — stub (badan dikomentari §13.8, tak dipanggil). */
   performAttack(target, game, opts = {}) {
     return;
     /* PHAGOS Sprint 1 (§13.8): JALUR TEMBAK MATI (tak dipanggil). Dikomentari, bukan dihapus.

@@ -14,127 +14,59 @@
   "levelUpChoices": 3,
   "levelUpPool": [
     {
-      "id": "damage",
-      "name": "Sitokin Padu",
-      "icon": "assets/sprites/fx_spark.png",
-      "desc": "+15% damage semua serangan",
-      "stat": "damage",
+      "id": "hp_boost",
+      "name": "Sitoskeleton",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+15% HP maksimum & pulih 15% (rangka sel kokoh)",
+      "stat": "maxHP",
       "mode": "percent",
       "amount": 0.15,
       "maxStacks": 99,
       "rarity": "common"
     },
     {
-      "id": "attackSpeed",
-      "name": "Respons Imun",
-      "icon": "assets/sprites/icon_bolt.png",
-      "desc": "+12% kecepatan serangan",
-      "stat": "attackSpeed",
-      "mode": "percent",
-      "amount": 0.12,
-      "maxStacks": 99,
-      "rarity": "common"
-    },
-    {
-      "id": "moveSpeed",
-      "name": "Aliran Limfa",
+      "id": "speed_boost",
+      "name": "Kemotaksis",
       "icon": "assets/sprites/icon_boot.png",
-      "desc": "+8% kecepatan gerak",
-      "stat": "moveSpeed",
+      "desc": "+10% kecepatan gerak (kejar patogen)",
+      "stat": "speed",
       "mode": "percent",
-      "amount": 0.08,
+      "amount": 0.10,
       "maxStacks": 99,
       "rarity": "common"
     },
     {
-      "id": "maxHP",
-      "name": "Regenerasi Membran",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "+20 HP maksimum & pulih 20 HP",
-      "stat": "maxHP",
-      "mode": "flat",
-      "amount": 20,
-      "maxStacks": 99,
-      "rarity": "common"
-    },
-    {
-      "id": "attackRange",
-      "name": "Reseptor Panjang",
-      "icon": "assets/sprites/icon_scope.png",
-      "desc": "+12% jarak serangan",
-      "stat": "attackRange",
-      "mode": "percent",
-      "amount": 0.12,
-      "maxStacks": 99,
-      "rarity": "common"
-    },
-    {
-      "id": "projectileCount",
-      "name": "Multi-L Respons",
-      "icon": "assets/sprites/icon_multi.png",
-      "desc": "+1 proyektil / tebasan ekstra",
-      "stat": "projectileCount",
-      "mode": "flat",
-      "amount": 1,
-      "maxStacks": 4,
-      "rarity": "epic"
-    },
-    {
-      "id": "lifeSteal",
-      "name": "Fagositosis Vital",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "Life Steal +5% — pulihkan HP dari damage musuh",
-      "stat": "lifeSteal",
-      "mode": "flat",
-      "amount": 1,
-      "maxStacks": 4,
-      "rarity": "rare"
-    },
-    {
-      "id": "pierce",
-      "name": "Duri Penembus",
-      "icon": "assets/sprites/icon_scope.png",
-      "desc": "+1 tembus musuh per proyektil",
-      "stat": "pierce",
-      "mode": "flat",
-      "amount": 1,
-      "maxStacks": 3,
-      "rarity": "rare",
-      "patterns": [
-        "ranged_pierce",
-        "ranged_homing"
-      ]
-    },
-    {
-      "id": "critChance",
-      "name": "Titik Lemah",
+      "id": "contact_boost",
+      "name": "Enzim Lisosom",
       "icon": "assets/sprites/fx_spark.png",
-      "desc": "+4% peluang critical hit",
-      "stat": "critChance",
-      "mode": "flat",
-      "amount": 0.04,
-      "maxStacks": 5,
-      "rarity": "rare"
-    },
-    {
-      "id": "magnet",
-      "name": "Medan Kemotaksis",
-      "icon": "assets/sprites/icon_multi.png",
-      "desc": "+25% radius magnet nutrisi",
-      "stat": "magnet",
+      "desc": "+20% damage kontak membran (lelehkan musuh)",
+      "stat": "contactDps",
       "mode": "percent",
-      "amount": 0.25,
-      "maxStacks": 4,
+      "amount": 0.20,
+      "maxStacks": 99,
       "rarity": "common"
     },
     {
-      "id": "antigen_boost",
-      "name": "Memori Antigen",
-      "description": "RIA mempercepat ingatan pasukan: tipe patogen yang paling sering kamu bunuh LANGSUNG naik 1 tier memori.",
-      "icon": "✚",
-      "rarity": "rare",
-      "maxStacks": 3,
-      "conditional": "antigen"
+      "id": "pulse_boost",
+      "name": "Sinyal Kalsium",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "Pulse 15% lebih cepat (cooldown −15%)",
+      "stat": "pulseCooldown",
+      "mode": "percent",
+      "amount": -0.15,
+      "maxStacks": 99,
+      "rarity": "common"
+    },
+    {
+      "id": "engulf_boost",
+      "name": "Pseudopodia",
+      "icon": "assets/sprites/icon_magnet.png",
+      "desc": "+15% heal tiap menelan (lengan sel rakus)",
+      "stat": "engulfHeal",
+      "mode": "percent",
+      "amount": 0.15,
+      "maxStacks": 99,
+      "rarity": "common"
     }
   ],
   "squadUpgrades": [
@@ -417,46 +349,5 @@
     },
     "pityRolls": 2,
     "synergyBonus": 0.25
-  },
-  "evolutions": [
-    {
-      "id": "evo_storm",
-      "name": "Badai Sitokin",
-      "icon": "assets/sprites/icon_bolt.png",
-      "desc": "EVOLUSI: damage ×1.3 & serangan 15% lebih cepat — build DPS menyatu!",
-      "requires": {
-        "damage": 4,
-        "attackSpeed": 3
-      },
-      "boost": {
-        "damageMult": 1.3,
-        "cooldownMult": 0.85
-      }
-    },
-    {
-      "id": "evo_fortress",
-      "name": "Benteng Membran",
-      "icon": "assets/sprites/icon_heart.png",
-      "desc": "EVOLUSI: HP maksimum ×1.35 & damage ×1.1 — pertahanan hidup!",
-      "requires": {
-        "maxHP": 4
-      },
-      "boost": {
-        "maxHPMult": 1.35,
-        "damageMult": 1.1
-      }
-    },
-    {
-      "id": "evo_swarm",
-      "name": "Kawanan Reseptor",
-      "icon": "assets/sprites/icon_multi.png",
-      "desc": "EVOLUSI: +2 proyektil ekstra — kawanan tak terbendung!",
-      "requires": {
-        "projectileCount": 3
-      },
-      "boost": {
-        "projectileFlat": 2
-      }
-    }
-  ]
+  }
 }

@@ -52,7 +52,7 @@ try {
   const lay = await page.evaluate(() => {
     const r = (sel) => document.querySelector('#screen-hud ' + sel).getBoundingClientRect();
     const hero = r('.hud-hero-status'), xp = r('.hud-xp-top');
-    const fire = r('.fire-btn'), m2 = r('.hud-menu2-toggle');
+    const pulseBtn = r('.pulse-btn'), m2 = r('.hud-menu2-toggle');
     const coins = r('.hud-stat-right');
     return {
       heroTop: hero.top < 60, heroLeft: hero.left < 40,
@@ -73,9 +73,9 @@ try {
 
   // ---- POIN 3: ikon = mekanisme imun nyata ----
   const icons = await page.evaluate(async () => {
-    // UI/UX BUILD 43: sumber ikon skill pindah ke js/ui/skill-icons.js; SERANG = img hud-serang.svg
+    // UI/UX BUILD 43: sumber ikon skill pindah ke js/ui/skill-icons.js; PULSE = img hud-pulse.svg
     const src = await (await fetch('/js/ui/skill-icons.js')).text();
-    const fire = document.querySelector('#btn-fire .fire-claw img');
+    const pulseBtn = document.querySelector('#btn-pulse .pulse-claw img');
     const fireSvgText = fire ? await (await fetch(fire.getAttribute('src'))).text() : '';
     return {
       immuneTerms: ['perforin', 'fagositosis', 'opsonisasi', 'MAC', 'NET'].every((t) => src.includes(t)),

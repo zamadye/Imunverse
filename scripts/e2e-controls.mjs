@@ -8,11 +8,11 @@
  *      panel Misi mulai terlipat, kepala tetap bisa diklik (buka/tutup).
  *   3. Keyboard: WASD/panah menggerakkan hero saat gameplay; TIDAK diblokir saat mengetik di form akun.
  *   4. Tombol tidak "menyangkut": blur/visibilitychange/pause melepas semua input.
- *   5. Aim = TAHAN + TARIK tombol SERANG: tap biasa = menembak tanpa aim; tarik > ambang = aim aktif,
+ *   5. Aim = TAHAN + TARIK tombol PULSE: tap biasa = Pulse tanpa aim; tarik > ambang = aim aktif,
  *      sudut benar, kelas .aiming + --aim terpasang; lepas = aim mati & tembak berhenti.
  *   6. Joystick punya umpan balik visual kontras (cincin + panah) — piksel berubah > 6000 px saat aktif.
- *   7. Copy tutorial/hint memakai nama tombol yang benar ("SERANG", bukan "TEMBAK") & jari tutorial
- *      GERAK tidak berada di atas panel Misi; jari SERANG berada di atas tombol SERANG.
+ *   7. Copy tutorial/hint memakai nama tombol yang benar ("PULSE", bukan "SERANG"/"TEMBAK") & jari tutorial
+ *      GERAK tidak berada di atas panel Misi; jari PULSE berada di atas tombol PULSE.
  * Exit code 1 bila ada FAIL / pageerror.
  * Jalankan: node scripts/e2e-controls.mjs (server :8000 + chromium /tmp)
  */
@@ -56,7 +56,7 @@ await page.waitForTimeout(1200);
 await page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; p.iframes = 1e9; p.maxHP = 99999; p.hp = 99999; });
 
 const pos = () => page.evaluate(() => { const p = window.__IMUNVERSE.game.run.player; return { x: p.x, y: p.y }; });
-const inp = () => page.evaluate(() => { const i = window.__IMUNVERSE.game.input; return { joy: i.joystick.active, aim: i.aimStick.active, angle: i.aimStick.angle, fire: i.fireButtonHeld, keys: [...i.keys] }; });
+const inp = () => page.evaluate(() => { const i = window.__IMUNVERSE.game.input; return { joy: i.joystick.active, aim: i.aimStick.active, angle: i.aimStick.angle, pulse: i.pulseButtonHeld, keys: [...i.keys] }; });
 const delta = (a, b) => ({ dx: Math.round(b.x - a.x), dy: Math.round(b.y - a.y) });
 
 /** Drag sentuh sintetis pada elemen yang ada di titik awal (persis seperti jari pemain). */
@@ -97,7 +97,7 @@ const tutGone = await page.evaluate(() => ({
 log('tutorial-overlay-absent', !tutGone.finger && !tutGone.bubble && !tutGone.layerShown, JSON.stringify(tutGone));
 log('quest-panel-starts-collapsed', tutGone.questsOpen === false);
 const hint = await page.evaluate(() => document.getElementById('hud-hint').textContent);
-log('hud-hint-uses-real-button-name', /SERANG/.test(hint) && !/TEMBAK|Tembak/.test(hint), `"${hint.slice(0, 80)}"`);
+log('hud-hint-uses-real-button-name', /PULSE/.test(hint) && !/SERANG|TEMBAK|Tembak/.test(hint), `"${hint.slice(0, 80)}"`);
 
 // ---------- 1) tarik di MANA SAJA menggerakkan hero ----------
 const rightTouch = await touchDrag(620, 200, 680, 200);
@@ -144,18 +144,18 @@ await page.evaluate(() => window.__IMUNVERSE.game.resume());
 await page.keyboard.up('KeyA');
 log('pause-releases-held-keys', st.keys.length === 0, JSON.stringify(st.keys));
 
-// ---------- 5) SERANG: tap = tembak; tahan+tarik = aim ----------
-const fireBox = await page.evaluate(() => { const r = document.getElementById('btn-fire').getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width }; });
-await page.mouse.move(fireBox.cx, fireBox.cy); await page.mouse.down();
+// ---------- 5) PULSE: tap = ledak; tahan+tarik = aim ----------
+const pulseBox = await page.evaluate(() => { const r = document.getElementById('btn-pulse').getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width }; });
+await page.mouse.move(pulseBox.cx, pulseBox.cy); await page.mouse.down();
 await page.waitForTimeout(120);
 st = await inp();
-log('fire-tap-fires-without-aim', st.fire === true && st.aim === false, JSON.stringify({ fire: st.fire, aim: st.aim }));
-await page.mouse.move(fireBox.cx - 4, fireBox.cy + 3, { steps: 2 }); // < ambang 12 px → masih tap
+log('fire-tap-fires-without-aim', st.fire === true && st.aim === false, JSON.stringify({ pulse: st.fire, aim: st.aim }));
+await page.mouse.move(pulseBox.cx - 4, pulseBox.cy + 3, { steps: 2 }); // < ambang 12 px → masih tap
 st = await inp();
 log('fire-small-jitter-not-aim', st.aim === false);
-await page.mouse.move(fireBox.cx - 60, fireBox.cy - 60, { steps: 5 }); // tarik ke kiri-atas → sudut -135°
+await page.mouse.move(pulseBox.cx - 60, pulseBox.cy - 60, { steps: 5 }); // tarik ke kiri-atas → sudut -135°
 await page.waitForTimeout(150);
-const aimState = await page.evaluate(() => { const i = window.__IMUNVERSE.game.input; const b = document.getElementById('btn-fire'); const g = window.__IMUNVERSE.game; const sp = g.run.camera.getPlayerScreen(); return { aim: i.aimStick.active, deg: Math.round(i.aimStick.angle * 180 / Math.PI), cls: b.className, cssAim: b.style.getPropertyValue('--aim'), info: i.getAimInfo(sp.x, sp.y), fire: i.fireButtonHeld }; });
+const aimState = await page.evaluate(() => { const i = window.__IMUNVERSE.game.input; const b = document.getElementById('btn-pulse'); const g = window.__IMUNVERSE.game; const sp = g.run.camera.getPlayerScreen(); return { aim: i.aimStick.active, deg: Math.round(i.aimStick.angle * 180 / Math.PI), cls: b.className, cssAim: b.style.getPropertyValue('--aim'), info: i.getAimInfo(sp.x, sp.y), pulse: i.pulseButtonHeld }; });
 log('fire-hold-drag-activates-aim', aimState.aim && aimState.fire && Math.abs(aimState.deg + 135) <= 3 && /aiming/.test(aimState.cls) && aimState.info.source === 'stick', JSON.stringify({ deg: aimState.deg, cls: aimState.cls, cssAim: aimState.cssAim, src: aimState.info.source }));
 // hero menghadap arah aim setelah tembakan berikutnya (facing hanya diperbarui saat serangan
 // benar-benar dilepas — bukan saat 'tap' cooldown; tunggu > 1 cooldown). Facing dunia =
@@ -166,21 +166,21 @@ log('hero-faces-aim-direction', Math.cos(facing) < 0 && Math.sin(facing) < 0, `f
 await page.screenshot({ path: 'shots/ui-nav/controls-aim.png' });
 await page.mouse.up();
 st = await inp();
-log('fire-release-stops-fire-and-aim', st.fire === false && st.aim === false, JSON.stringify({ fire: st.fire, aim: st.aim }));
-// Sentuh: tahan + tarik pada tombol SERANG via pointer events (touch) — capture harus menahan walau jari keluar tombol
+log('fire-release-stops-fire-and-aim', st.fire === false && st.aim === false, JSON.stringify({ pulse: st.fire, aim: st.aim }));
+// Sentuh: tahan + tarik pada tombol PULSE via pointer events (touch) — capture harus menahan walau jari keluar tombol
 const touchAim = await page.evaluate(async () => {
-  const b = document.getElementById('btn-fire'); const r = b.getBoundingClientRect();
+  const b = document.getElementById('btn-pulse'); const r = b.getBoundingClientRect();
   const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   const ev = (type, x, y) => b.dispatchEvent(new PointerEvent(type, { pointerId: 9, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y, bubbles: true, cancelable: true }));
   ev('pointerdown', cx, cy);
   await new Promise((res) => setTimeout(res, 60));
-  const tapOnly = { fire: window.__IMUNVERSE.game.input.fireButtonHeld, aim: window.__IMUNVERSE.game.input.aimStick.active };
+  const tapOnly = { pulse: window.__IMUNVERSE.game.input.pulseButtonHeld, aim: window.__IMUNVERSE.game.input.aimStick.active };
   ev('pointermove', cx - 90, cy); // jauh keluar tombol ke kiri
   await new Promise((res) => setTimeout(res, 60));
   const i = window.__IMUNVERSE.game.input;
-  const dragged = { fire: i.fireButtonHeld, aim: i.aimStick.active, deg: Math.round(i.aimStick.angle * 180 / Math.PI) };
+  const dragged = { pulse: i.pulseButtonHeld, aim: i.aimStick.active, deg: Math.round(i.aimStick.angle * 180 / Math.PI) };
   ev('pointerup', cx - 90, cy);
-  const after = { fire: i.fireButtonHeld, aim: i.aimStick.active };
+  const after = { pulse: i.pulseButtonHeld, aim: i.aimStick.active };
   return { tapOnly, dragged, after };
 });
 log('touch-fire-hold-drag-outside-keeps-firing-and-aims', touchAim.tapOnly.fire && !touchAim.tapOnly.aim && touchAim.dragged.fire && touchAim.dragged.aim && Math.abs(Math.abs(touchAim.dragged.deg) - 180) <= 2 && !touchAim.after.fire && !touchAim.after.aim, JSON.stringify(touchAim));

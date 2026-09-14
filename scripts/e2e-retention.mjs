@@ -5,7 +5,7 @@
  * Skenario (sesuai "Instruksi Verifikasi" dokumen):
  *  1. META: run pertama mati → Imun Coin bertambah persis rumus
  *     (wave×8 + kills×0.5 + boss×50) + reward misi; unlock hero via Roster (klik BUKA).
- *  2. FEEDBACK: XP per kill + damage number mengambang; bar XP bergerak; combo pill ≥3 kill.
+ *  2. FEEDBACK: XP per kill + damage number mengambang; bar XP bergerak.
  *  3. AUTONOMY: level-up modal 3 pilihan (pool) + badge sinergi.
  *  4. RELAXATION: konfigurasi wave max(0.4, 1.8 − wave×0.08); auto-attack aktif.
  *  5. JUICE: HP bar transition; cooldown sirkular; partikel burst kematian ≥ spek.
@@ -83,7 +83,7 @@ const waveCfg = await page.evaluate(() => ({
 }));
 ok('wave-config-1.8-0.08-0.4', waveCfg.base === 1.8 && waveCfg.decay === 0.08 && waveCfg.min === 0.4, JSON.stringify(waveCfg));
 
-// ---- TRIGGER 2/4: mulai run — auto-attack membunuh; XP label & combo muncul ----
+// ---- TRIGGER 2/4: mulai run — kontak membran membunuh; XP label muncul ----
 await page.evaluate(() => { const sc = document.querySelector('.dash-scroll'); if (sc) sc.scrollTop = 0; });
 // F24: home launcher — PLAY = fast-play (1 tap, tanpa prep); prep ditangani bila muncul
 await page.evaluate(() => document.getElementById('btn-play').click()); // click DOM: coach/narrative layer kadang menyerap pointer fisik (force click) tanpa terselesaikan skip // force: coach-layer kadang mengintercept pointer; alur dashboard sudah diuji terpisah
@@ -183,7 +183,6 @@ const feed = await page.evaluate(() => {
     xpGained: run.xpGained,
     imuChip: document.getElementById('hud-imu') ? document.getElementById('hud-imu').textContent : null,
     hpTransition: getComputedStyle(document.getElementById('hud-hp-fill')).transitionDuration,
-    comboPillHidden: document.getElementById('hud-combo').classList.contains('hidden'),
   };
 });
 ok('floating-text-active', feed.numbersEver > 0 || feed.xpGained > 0, JSON.stringify(feed));
@@ -336,9 +335,6 @@ const tregLocked = await page.evaluate(() => {
 });
 ok('imu-stat-hero-locked', tregLocked);
 
-// combo window & threshold config
-const comboCfg = await page.evaluate(() => window.__IMUNVERSE.getData().retention.combo);
-ok('combo-config-5s-x1.2', comboCfg.window === 5 && comboCfg.threshold === 3 && comboCfg.xpMult === 1.2, JSON.stringify(comboCfg));
 
 ok('no-pageerrors', pageErrors.length === 0, pageErrors.join(' | '));
 

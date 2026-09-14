@@ -157,17 +157,16 @@ const lvlScale = await page.evaluate(async () => {
 });
 ok('enemy-scale-follows-player-level', Math.abs(lvlScale.ratio - 1.18) < 0.02, JSON.stringify(lvlScale));
 
-// ---- XP band early: addXP(10) → +16 (1.6×) ----
-const xpBand = await page.evaluate(() => {
+// ---- PHAGOS (bible §5, D6): XP MURNI — addXP(10) → 10 × xpMult, tanpa band/kombo ----
+const xpPure = await page.evaluate(() => {
   const g = window.__IMUNVERSE.game;
   const run = g.run;
   const g0 = run.xpGained;
   g.addXP(10);
-  const bandMult = window.__IMUNVERSE.getData().progression.bands.find((b) => run.spawnSys.wave <= b.maxWave).xpMult;
-  return { gained: run.xpGained - g0, xpMult: run.player.stats.xpMult, combo: run.combo.count >= 3 ? 1.2 : 1, bandMult };
+  return { gained: run.xpGained - g0, xpMult: run.player.stats.xpMult };
 });
-const expectedXp = 10 * xpBand.xpMult * xpBand.combo * xpBand.bandMult;
-ok('xp-band-early-boosted', Math.abs(xpBand.gained - expectedXp) < 0.05, `gained=${xpBand.gained} expected=${expectedXp}`);
+const expectedXp = 10 * xpPure.xpMult;
+ok('xp-pure-no-band-combo', Math.abs(xpPure.gained - expectedXp) < 0.05, `gained=${xpPure.gained} expected=${expectedXp}`);
 
 // ---- 2) GATEKEEPER: lompat ke wave 4.9 → wave 5 boss muncul & gerbang terkunci ----
 // XP dari stabilize bisa memicu level-up → stabilkan dulu, LALU tutup modal

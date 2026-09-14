@@ -21,10 +21,10 @@ Legenda: ✅ selesai · 🟡 sebagian/butuh verifikasi · ❌ belum · ⚠️ se
 - [x] ✅ Medan membran pasif (kontak, tanpa tombol) — `membrane-system.js` + `data/membrane.json`
 - [x] ✅ Pulse satu tombol, cooldown per hero — `hud-screen.js` (indikator radial ada, baris ~315)
 - [x] ✅ Engulf otomatis <15%, heal 7%, +1 Bio-Point — `membrane.json` cocok §2.1
-- [~] 🟡 18 mutasi 3 tier + visual kumulatif — data ✅ (`bioCost` 0/5/15 ✅); pool level-up ❌ (aturan §4.1 belum, stat boost masih shooter); visual kumulatif 🟡 (18 overlay ada — butuh verifikasi device)
+- [~] 🟡 18 mutasi 3 tier + visual kumulatif — data ✅ (`bioCost` 0/5/15 ✅); stat boost safety-net ✅ 5 entri §4.1 (aturan pool level-up 🟡 Sprint 2); visual kumulatif 🟡 (18 overlay ada — butuh verifikasi device)
 - [~] 🟡 6 trait wave 6/10/14 — data ✅ (waves + warn 5s ✅, seleksi counter ada); ambang trigger vs §4.2 🟡 (verifikasi)
 - [~] 🟡 11 hero bentuk medan unik — struktur ✅, nama ✅ cocok bible; **angka DEVIASI dari tabel §3** (lihat §2.1 — retune wajib)
-- [ ] ❌ 8–9 level up per run referensi — XP curve masih lama (lihat §2.2)
+- [~] 🟡 8–9 level up per run referensi — curve ✅ (80+35L); run endless terukur 49–60 lv karena pacing spawn ×~4 terlalu lambat → Sprint 3
 - [~] 🟡 Run 3–8 menit — TERUKUR: ±20 mnt/16 wave (AI headless); pacing spawn ×~4 → Sprint 3
 
 ### Progresi & ekonomi
@@ -82,11 +82,23 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 - [ ] **4. CHECKPOINT DEVICE (owner): jalan → musuh meleleh. STOP.**
 - [x] 5. Pulse — ✅
 - [ ] **6. CHECKPOINT DEVICE (owner): Pulse memuaskan. STOP.**
-- [x] 7. Engulf — ✅ (verifikasi hit-stop 0,15 dtk §2.2 — kode punya 0,1)
+- [x] 7. Engulf — ✅ (hit-stop 0,15 dtk §2.2 ✅ di `gamefeel.json`)
 - [x] 8. Pembersihan proyektil — hero `_weapon` beku ✅; pipeline `game.js` terverifikasi bersih (recon: jalur shooter mati, tidak ada spawn proyektil hero)
-- [ ] 9. **XP curve §5**: `xpNeed = 80+35L`; sumber per TIPE kill (3/5/20/60); cabut band/kombo/orb-tier (D6)
+- [x] 9. **XP curve §5** — `xpNeed = 80+35L` ✅; sumber per TIPE kill (kontak/engulf/Pulse/dot/melee/skill/insidental + bos) ✅; band/kombo/orb-tier dicabut ✅; devoured-branch +20 XP engulf ✅ (D6 moment — D6 TERTUTUP)
 - [x] 10. Rebrand — teks inti + kosakata §3 ✅; `?v=` diseragamkan ✅
-- [ ] Ukur **run referensi PHAGOS** (kill kontak/Pulse/engulf, wave, durasi, BK/run) — fondasi Sprint 3
+- [x] Ukur **run referensi PHAGOS** ✅ — `scripts/measure-run.mjs` (endless headless, AI seek+Pulse+auto-pick, tally kill per cause) — fondasi Sprint 3:
+
+  | Hero | Wave | Durasi | Kill | Engulf | Pulse | Kontak | Insidental* | Lv | Pick | XP | BK | Bio | Bos | Akhir |
+  |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+  | Macrophage | 16 | 1236 dtk | 3943 | 1404 | 209 | 128 | 2202 | 55 | 54 | 57100 | 5184 | 2738 | 3 | hidup (HP 879) |
+  | Neutrofil | 5 | 221 dtk | 641 | 180 | 156 | 34 | 271 | 17 | 16 | 6656 | 520 | 290 | 0 | MATI wave-5 (bos) |
+  | Natural Killer | 16 | 1182 dtk | 3811 | 1218 | 178 | 148 | 2267 | 49 | 48 | 45015 | 5094 | 2366 | 3 | hidup (HP 790) |
+
+  \* Insidental = parasit + rantai + antigen + cascade + cermin (3 XP; semua penyebab ter-tag, `other`/`none` = 0).
+  Temuan → Sprint 2/3: (a) pacing ±74 dtk/wave vs bible 15 wave/5–7 mnt — spawn pacing ×~4; (b) kontak hanya ±3% kill late-game — mutasi carry; (c) Neutrofil mati di bos wave-5 — cek balance hero/bos; (d) pool mutasi habis di ±11 kartu → fallback legacy ✅ by-design.
+  Bug produksi ditemukan & diperbaiki saat pengukuran: filter tawaran mutasi satu-arah vs `applyMutation` dua-arah (kartu tak-terpilih bisa ditawarkan) — `mutation-system.js` sekarang dua-arah; crash endless `addCurrency(meta)` → `STATE.meta`.
+- [x] Pengerasan produksi pasca-Sprint 1 ✅ — pool shooter → 5 safety-net §4.1 (Sitoskeleton/Kemotaksis/Enzim Lisosom/Sinyal Kalsium/Pseudopodia); evolusi senjata + kombo (state/UI/toast/audio) + `triggerAttack`/`audio.swing`/`comboXpMult`/`shotsFired` dicabut; hit-stop satu sumber (`gamefeel.json`, engulf 0,15 §2.2); tombol `btn-fire`→`btn-pulse` (+aset `hud-pulse.svg`, hapus blok CSS ganda); modal "Level Up!"→"BERMUTASI!"; log `[MAP]`/fallback dicabut atau dev-gated; `e2e-v2phase4`→`test-safetynet.mjs` (17/17 ✅); e2e basi diselaraskan (serang-manual→Pulse, XP murni, tanpa combo).
+  Backlog antar-sprint (bukan Sprint 1): kosakata `lang.json` + layar toko/upgrade/battlepass (Sprint 3–5); perilaku squad tembak vs membran-mini = opsi A/B §15 (owner, setelah Sprint 2); label SERANGAN/SENJATA di upgrade-screen (Sprint 3).
 
 ### Sprint 2 — Mutasi & hero
 

@@ -109,7 +109,7 @@ function membraneCfg() {
     contactTickSec: 0.1, maxContactTargets: 12,
     pulseRadiusMult: 3.0, pulseDurationSec: 0.4,
     pulseExpandSec: 0.15, pulseHoldSec: 0.1, pulseShrinkSec: 0.15,
-    pulseDamageMult: 4.0, pulseHitStopSec: 0.1,
+    pulseDamageMult: 4.0,
     engulfThreshold: 0.15, engulfHealPct: 0.07, bioPointPerEngulf: 1,
   };
 }
@@ -205,6 +205,12 @@ export function getMembraneStats(run) {
   const heroDef = run.heroDef;
   const cfg = membraneCfg();
   const fx = aggregateMutationEffects(run);
+  // PHAGOS safety net (bible §4.1): Enzim Lisosom +20% kontak, Sinyal
+  // Kalsium −15% cooldown Pulse, Pseudopodia +15% heal engulf (per stack).
+  const safety = run.upgrades || {};
+  const contactSafety = 1 + (safety.contact_boost || 0) * 0.20;
+  const pulseSafety = Math.pow(0.85, safety.pulse_boost || 0);
+  const engulfSafety = 1 + (safety.engulf_boost || 0) * 0.15;
   const baseDmg = heroDef?.baseStats?.damage || 10;
   const curDmg = player?.stats?.damage || baseDmg;
   const scale = baseDmg > 0 ? curDmg / baseDmg : 1;
@@ -219,7 +225,7 @@ export function getMembraneStats(run) {
   // Metamorfosis aktif: radius membesar drastis
   if (mem.metaActiveT > 0) radius *= fx.metaRadiusMult;
 
-  let contactDps = mem.baseContactDps * fx.contactDmgMult * scale;
+  let contactDps = mem.baseContactDps * fx.contactDmgMult * scale * contactSafety;
   // Helia support: damage rendah
   if (mem.shape === 'support') contactDps *= 0.45;
   // Mastia pulse_only: tidak ada kontak pasif
@@ -241,7 +247,7 @@ export function getMembraneStats(run) {
   if (itime < (ibuf.cadanganUntil || 0)) contactDps *= 1.5;
 
   const heroMem = run.heroDef?.membrane || {};
-  const pulseCooldown = mem.basePulseCooldown * fx.pulseCooldownMult;
+  const pulseCooldown = mem.basePulseCooldown * fx.pulseCooldownMult * pulseSafety;
   // Mastia (pulse_only): radius kontak 0, tapi pulse punya basis sendiri
   const pulseBase = mem.shape === 'pulse_only'
     ? (heroMem.shapeParams?.pulseBaseRadius || 64) * fx.radiusMult
@@ -252,7 +258,7 @@ export function getMembraneStats(run) {
     : contactDps * (cfg.pulseDamageMult || 4));
   let engulfThreshold = fx.engulfThreshold || (run.heroDef?.membrane?.engulfThreshold) || cfg.engulfThreshold || 0.15;
   if (itime < (ibuf.enzimUntil || 0)) engulfThreshold = 0.30; // ADDENDUM §2: Enzim Litik
-  const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.07) * fx.engulfHealMult;
+  const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.07) * fx.engulfHealMult * engulfSafety;
 
   // Simpan untuk trigger mutasi musuh + HUD
   mem.stats.totalRadiusMult = fx.radiusMult * (mem.metaActiveT > 0 ? fx.metaRadiusMult : 1);
@@ -828,7 +834,7 @@ export function tryEngulf(game, enemy, opts = {}) {
   // Engulf specials per hero
   applyEngulfSpecial(game, enemy);
 
-  // Kill normal (XP, drop, combo, chain) — PHAGOS: engulf tetap kill
+  // Kill normal (XP, drop, chain) — PHAGOS: engulf tetap kill
   game.onEnemyKilled(enemy, 'engulf');
   try { audio.collect(); } catch { /* headless */ }
   return true;

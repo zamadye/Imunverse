@@ -1274,20 +1274,6 @@ img.lock-badge {
 /* =====================================================================
    FASE 7 — AUDIO & JUICE: combo pill, tombol suara, ghost button
    ===================================================================== */
-.hud-combo {
-  position: absolute; left: 14px; top: 150px;
-  padding: 6px 14px; border-radius: 18px;
-  background: var(--card); border: 3px solid var(--gold, #f5c64f);
-  color: #b98a20; font-weight: 900; font-size: 16px;
-  box-shadow: var(--shadow-card);
-  animation: combo-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.hud-combo small { font-size: 10px; font-weight: 900; letter-spacing: 0.08em; color: var(--ink-soft); }
-@keyframes combo-pop {
-  0% { transform: scale(0.5) rotate(-6deg); }
-  60% { transform: scale(1.2) rotate(2deg); }
-  100% { transform: scale(1) rotate(0); }
-}
 .btn-ghost {
   background: transparent; border: 3px solid var(--teal-light);
   color: var(--ink-soft); box-shadow: none;
@@ -1503,49 +1489,27 @@ img.lock-badge {
 .account-chip #account-name { font-size: 11.5px; font-weight: 900; color: var(--ink, #3a342c); max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* =====================================================================
-   FASE 7.7 — ARSENAL & RASA TEMPUR: tombol TEMBAK manual (kid-friendly)
+   PHAGOS — tombol PULSE (SATU TOMBOL, bible §2.3). Basis teal; ukuran final
+   dioverride rule #screen-hud di bawah + dashboard-focus.css (kaskade).
    ===================================================================== */
-.fire-btn {
+.pulse-btn {
   position: absolute; right: 16px; bottom: 64px; z-index: 7;
   pointer-events: auto; /* .screen.passive = none — tombol wajib diopt-in */
   width: 84px; height: 84px; border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #ffab8f, #f2825c 62%);
-  border: 4px solid #fff; box-shadow: 0 6px 0 #c46a4a, 0 10px 22px rgba(0,0,0,0.28);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0; color: #fff; font-weight: 900; font-size: 12px; letter-spacing: 0.04em;
-  cursor: pointer; touch-action: none; user-select: none;
-  animation: fire-breath 1.6s ease-in-out infinite;
-}
-.fire-btn img { width: 30px; height: 30px; filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2)); }
-.fire-btn:active, .fire-btn.held {
-  transform: scale(0.92); box-shadow: 0 2px 0 #c46a4a, 0 4px 10px rgba(0,0,0,0.25);
-}
-@keyframes fire-breath {
-  0%, 100% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 0 rgba(242,130,92,0.45); }
-  50% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 12px rgba(242,130,92,0); }
-}
-
-/* =====================================================================
-   FASE 7.7 — ARSENAL & RASA TEMPUR: tombol TEMBAK manual (kid-friendly)
-   ===================================================================== */
-.fire-btn {
-  position: absolute; right: 16px; bottom: 64px; z-index: 7;
-  pointer-events: auto; /* .screen.passive = none — tombol wajib diopt-in */
-  width: 84px; height: 84px; border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #ffab8f, #f2825c 62%);
-  border: 4px solid #fff; box-shadow: 0 6px 0 #c46a4a, 0 10px 22px rgba(0,0,0,0.28);
+  background: linear-gradient(170deg, #3ec9b5, #1f8f80);
+  border: 4px solid #fff; box-shadow: 0 6px 0 #14655c, 0 10px 22px rgba(0,0,0,0.28);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; font-weight: 900; font-size: 12px; letter-spacing: 0.04em;
   cursor: pointer; touch-action: none; user-select: none;
-  animation: fire-breath 1.6s ease-in-out infinite;
+  animation: pulse-breath 1.6s ease-in-out infinite;
 }
-.fire-btn img { width: 30px; height: 30px; filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2)); }
-.fire-btn:active, .fire-btn.held {
-  transform: scale(0.92); box-shadow: 0 2px 0 #c46a4a, 0 4px 10px rgba(0,0,0,0.25);
+.pulse-btn img { width: 30px; height: 30px; filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2)); }
+.pulse-btn:active, .pulse-btn.held {
+  transform: scale(0.92); box-shadow: 0 2px 0 #14655c, 0 4px 10px rgba(0,0,0,0.25);
 }
-@keyframes fire-breath {
-  0%, 100% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 0 rgba(242,130,92,0.45); }
-  50% { box-shadow: 0 6px 0 #c46a4a, 0 0 0 12px rgba(242,130,92,0); }
+@keyframes pulse-breath {
+  0%, 100% { box-shadow: 0 6px 0 #14655c, 0 0 0 0 rgba(62,201,181,0.45); }
+  50% { box-shadow: 0 6px 0 #14655c, 0 0 0 12px rgba(62,201,181,0); }
 }
 
 /* Layer upgrade: badge kategori per baris */
@@ -1844,14 +1808,14 @@ img.lock-badge {
 #screen-hud .ability-btn.ult .sk-name{font-size:10px;bottom:5px}
 #screen-hud .ability-btn .sk-ico{width:28px;height:28px;object-fit:contain;z-index:2}
 #screen-hud .ability-btn.ult .sk-ico{width:32px;height:32px}
-#screen-hud .fire-btn{position:static;width:90px;height:90px;min-height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(170deg,#3ec9b5,#1f8f80);border:3.5px solid #fff;color:#fff;font-weight:900;font-size:12px;letter-spacing:.05em;box-shadow:0 5px 14px rgba(26,140,125,.42),inset 0 -4px 0 rgba(0,0,0,.12);cursor:pointer;pointer-events:auto;transition:transform .08s ease}
-#screen-hud .fire-btn:active{transform:scale(.93)}
-#screen-hud .fire-btn img{width:27px;height:27px;filter:brightness(0) invert(1)}
+#screen-hud .pulse-btn{position:static;width:90px;height:90px;min-height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(170deg,#3ec9b5,#1f8f80);border:3.5px solid #fff;color:#fff;font-weight:900;font-size:12px;letter-spacing:.05em;box-shadow:0 5px 14px rgba(26,140,125,.42),inset 0 -4px 0 rgba(0,0,0,.12);cursor:pointer;pointer-events:auto;transition:transform .08s ease}
+#screen-hud .pulse-btn:active{transform:scale(.93)}
+#screen-hud .pulse-btn img{width:27px;height:27px;filter:brightness(0) invert(1)}
 #screen-hud .ability-btn.ready{animation:hudSkillPulse 1.6s ease-in-out infinite}
 @media (max-width:390px){
   #screen-hud .ability-btn{width:56px;height:56px}
   #screen-hud .ability-bar{grid-template-columns:repeat(2,56px)}
-  #screen-hud .fire-btn{width:80px;height:80px;min-height:80px}
+  #screen-hud .pulse-btn{width:80px;height:80px;min-height:80px}
   #screen-hud .status-bars{width:150px}
   #screen-hud .hud-minimap{width:72px;height:72px}
 }
@@ -2619,8 +2583,8 @@ img.lock-badge {
 #screen-hud .ability-btn.ult{height:38px}
 #screen-hud .ability-btn.ult .sk-ico{width:24px;height:24px}
 #screen-hud .ability-btn .sk-name{font-size:6px;bottom:2px}
-#screen-hud .fire-btn{width:68px;height:68px;min-height:68px;border-width:2px;font-size:9px}
-#screen-hud .fire-btn img{width:22px;height:22px}
+#screen-hud .pulse-btn{width:68px;height:68px;min-height:68px;border-width:2px;font-size:9px}
+#screen-hud .pulse-btn img{width:22px;height:22px}
 #screen-hud .hud-minimap{top:72px;right:12px;width:64px;height:64px;opacity:.72}
 #screen-hud .hud-buffs{top:72px;left:80px;right:80px}
 #screen-hud .hud-announce{max-width:220px;font-size:12px}
@@ -2632,7 +2596,7 @@ img.lock-badge {
   #screen-hud .ability-bar{grid-template-columns:repeat(2,42px)}
   #screen-hud .ability-btn{width:42px;height:42px}
   #screen-hud .ability-btn.ult{height:34px}
-  #screen-hud .fire-btn{width:58px;height:58px;min-height:58px}
+  #screen-hud .pulse-btn{width:58px;height:58px;min-height:58px}
   #screen-hud .hud-hero-status .status-bars{width:106px}
   #screen-hud .hud-minimap{right:7px;width:54px;height:54px}
 }
@@ -2709,8 +2673,8 @@ img.lock-badge {
    (pelat HEX SVG + ikon per-skill + SERANG antibodi-Y). Rule-nya
    ada di styles/dashboard-focus.css blok "BUILD 43" (dimuat terakhir).
    ============================================================ */
-#screen-hud .fire-btn{ position:relative; overflow:visible; } /* kalahkan position:static di atas */
-#screen-hud .fire-btn img{display:none} /* ikon lama (img) diganti svg inline .fire-claw */
+#screen-hud .pulse-btn{ position:relative; overflow:visible; } /* kalahkan position:static di atas */
+#screen-hud .pulse-btn img{display:none} /* ikon lama (img) diganti svg inline .pulse-claw */
 
 /* ============================================================
    E1 poin 1+7 — MINIMAL HOME (fokus feel: stage + PLAY + 1-2 menu)
@@ -2925,7 +2889,7 @@ img.lock-badge {
  * Gaya satu-tombol PULSE, Bio-Point, membran hidup, kartu mutasi.
  * Semua class diawali pulse-/hud-bio/hud-living/mutation- agar mudah dicabut. */
 
-/* --- Tombol PULSE (memakai #btn-fire) --- */
+/* --- Tombol PULSE (#btn-pulse) + overlay cooldown radial --- */
 #screen-hud .pulse-btn { overflow: hidden; }
 #screen-hud .pulse-btn .pulse-cd {
   position: absolute; inset: 0; border-radius: 50%;

@@ -526,7 +526,6 @@
           <div class="hud-mission-bar"><div id="hud-mission-fill"></div></div>
         </div>
         <div id="ability-banner" class="ability-banner"></div>
-        <div id="hud-combo" class="hud-combo hidden"></div>
         <div id="tutorial-layer" class="hidden"></div>
         <div class="hud-hint" id="hud-hint"></div>
         <!-- BOTTOM LEFT: status hero ala MLBB (avatar + HP + XP) -->
@@ -547,13 +546,12 @@
         <!-- BOTTOM RIGHT: grid skill + tombol PULSE besar (PHAGOS: satu tombol) -->
         <div class="hud-controls">
           <div id="ability-bar" class="ability-bar" aria-label="Skill aktif"><!-- diisi JS --></div>
-          <button id="btn-fire" class="fire-btn pulse-btn" aria-label="Pulse — ledakkan membran">
-            <!-- E2 poin 3 → UI/UX BUILD 43: ANTIBODI-Y menghantam virus (netralisasi antibodi,
-                 serangan imun paling ikonik) — ikon kawaii gaya menu-*.svg: assets/icons/hud-serang.svg.
-                 Teks label dihapus (permintaan user): ikon saja, fungsi dibacakan aria-label. -->
-            <span class="fire-claw"><img src="assets/icons/hud-serang.svg" alt="" width="44" height="44" draggable="false" /></span>
-            <!-- UI/UX BUILD 42: indikator arah saat TAHAN + TARIK (aim stick di tombol) -->
-            <span class="fire-aim" aria-hidden="true"></span>
+          <button id="btn-pulse" class="pulse-btn" aria-label="Pulse — ledakkan membran">
+            <!-- PHAGOS: tombol PULSE — ikon antibodi-Y kawaii gaya menu-*.svg:
+                 assets/icons/hud-pulse.svg. Ikon saja, fungsi dibacakan aria-label. -->
+            <span class="pulse-claw"><img src="assets/icons/hud-pulse.svg" alt="" width="44" height="44" draggable="false" /></span>
+            <!-- Indikator arah saat TAHAN + TARIK (aim stick di tombol, hero kerucut) -->
+            <span class="pulse-aim" aria-hidden="true"></span>
           </button>
         </div>
       </section>
@@ -596,14 +594,14 @@
         </div>
       </section>
 
-      <!-- ============ LEVEL UP MODAL ============ -->
+      <!-- ============ MODAL MUTASI (LEVEL UP) ============ -->
       <section id="screen-levelup" class="screen modal" data-screen="levelup">
         <div class="lu-scene">
           <div class="lu-glow"></div>
           <img id="levelup-hero" class="lu-hero" src="assets/sprites/portrait_macrophage.png" alt="" />
           <div class="lu-stars"><img src="assets/icons/ui-star.svg" alt="" /><img src="assets/icons/ui-star.svg" alt="" /><img src="assets/icons/ui-star.svg" alt="" /></div>
-          <h2 class="levelup-title">Level Up!</h2>
-          <p id="levelup-sub" class="levelup-sub">Level 2 — pilih satu peningkatan</p>
+          <h2 class="levelup-title">BERMUTASI!</h2>
+          <p id="levelup-sub" class="levelup-sub">Pilih bentuk baru!</p>
           <div id="levelup-choices" class="choice-grid"><!-- diisi JS --></div>
         </div>
       </section>

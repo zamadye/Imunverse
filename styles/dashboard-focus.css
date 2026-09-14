@@ -282,8 +282,8 @@
 #screen-hud .hud-xp-track { height:4px; }
 #screen-hud .hud-xp-ico { width:9px; height:9px; }
 #screen-hud .hud-controls { right:6px; bottom:6px; gap:5px; }
-#screen-hud .fire-btn { width:58px; height:58px; min-height:58px; border-width:2px; font-size:8px; border-radius:50%; }
-#screen-hud .fire-btn img { width:20px; height:20px; }
+#screen-hud .pulse-btn { width:58px; height:58px; min-height:58px; border-width:2px; font-size:8px; border-radius:50%; }
+#screen-hud .pulse-btn img { width:20px; height:20px; }
 #screen-hud .hud-mission { top:45px; width:180px; padding:4px 7px; border-radius:9px; }
 #screen-hud .hud-mission-text { font-size:8px; }
 #screen-hud .hud-mission-bar { height:4px; margin-top:2px; }
@@ -468,8 +468,8 @@
    F25b — 5 POLISH TERAKHIR SEBELUM F26 (arah pemilik)
    1) XP progres → kanan-atas (konvensi UI game)
    2) Ikon menu = karakter game (virus / hero), bukan garis-3/profil
-   3) SERANG lebih besar, ikon tepat, semuanya bulat ber-bordir
-   4) Menu kanan-bawah geser ke tengah — bebas dari SERANG & skill
+   3) PULSE lebih besar, ikon tepat, semuanya bulat ber-bordir
+   4) Menu kanan-bawah geser ke tengah — bebas dari PULSE & skill
    5) Kartu notif diperkecil — gameplay dominan
    --------------------------------------------------------------- */
 
@@ -499,7 +499,7 @@
   display: grid; place-items: center; background: rgba(255, 253, 244, 0.92);
 }
 #screen-hud .hud-menu2-toggle {
-  right: 168px; bottom: 104px;  /* 4) geser ke tengah — bebas dari SERANG/skill */
+  right: 168px; bottom: 104px;  /* 4) geser ke tengah — bebas dari PULSE/skill */
   width: 46px; height: 46px; border-radius: 50%;
   border: 2.5px solid rgba(255, 255, 255, 0.95);
   background: radial-gradient(circle at 34% 30%, #fffdf4, #e8f4ea);
@@ -509,13 +509,13 @@
 #screen-hud .hud-menu2-link { border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.9); width: 56px; height: 56px; }
 #screen-hud .menu-badge { border: 1.5px solid #fff; }
 
-/* 3) SERANG: lebih besar, bulat ber-bordir (ikon & grid skill → blok BUILD 43 di bawah) */
-#screen-hud .fire-btn {
+/* 3) PULSE: lebih besar, bulat ber-bordir (ikon & grid skill → blok BUILD 43 di bawah) */
+#screen-hud .pulse-btn {
   width: 96px; height: 96px; min-height: 96px; border-radius: 50%;
   border: 4px solid #fff; font-size: 11px; bottom: 14px;
   box-shadow: 0 6px 0 #c46a4a, 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 0 0 3px rgba(255, 255, 255, 0.35);
 }
-#screen-hud .fire-btn img { width: 36px; height: 36px; }
+#screen-hud .pulse-btn img { width: 36px; height: 36px; }
 
 /* 5) Kartu notif diperkecil — gameplay dominan */
 body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; border-left-width: 4px; border-radius: 10px; }
@@ -528,8 +528,8 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-hud .hud-minimap { top: 72px; right: 7px; }
   #screen-hud .hud-menu2-toggle { right: 130px; bottom: 92px; width: 42px; height: 42px; }
   #screen-hud .hud-game-menu2 { right: 130px; bottom: 142px; }
-  #screen-hud .fire-btn { width: 84px; height: 84px; min-height: 84px; }
-  #screen-hud .fire-btn img { width: 31px; height: 31px; }
+  #screen-hud .pulse-btn { width: 84px; height: 84px; min-height: 84px; }
+  #screen-hud .pulse-btn img { width: 31px; height: 31px; }
 }
 
 /* ================================================================
@@ -642,7 +642,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-quests { top: 152px; transform: none; }
 #screen-hud .hud-quests-head img { width: 20px; height: 20px; }
 #screen-hud .hud-quests-body { max-height: 96px; overflow-y: auto; }
-#screen-hud .hud-combo { top: 118px; }
 #screen-hud .hud-antigen { bottom: 74px; }
 @media (min-height: 500px) { #screen-hud .hud-quests { top: 40%; transform: translateY(-50%); } }
 @media (max-width: 700px) {
@@ -659,9 +658,9 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
    Diagnosis runtime (scripts/e2e-controls.mjs):
    - 42% layar kanan dulunya "aim stick" tak kasatmata → tarik di sana hero diam;
    - badan panel Misi (168×134 px, pointer-events:auto) menelan tarikan di kiri;
-   - jari tutorial gerak menunjuk ke dalam panel itu; copy tutorial "TEMBAK" ≠ label "SERANG".
-   Perbaikan: joystick mengambang di mana saja; aim = TAHAN + TARIK tombol SERANG;
-   panel Misi mulai terlipat; jari tutorial menunjuk lantai kosong & tombol SERANG.
+   - jari tutorial gerak menunjuk ke dalam panel itu; copy tutorial lama "TEMBAK" ≠ tombol baru.
+   Perbaikan: joystick mengambang di mana saja; aim = TAHAN + TARIK tombol PULSE;
+   panel Misi mulai terlipat; jari tutorial menunjuk lantai kosong & tombol PULSE.
    ================================================================ */
 /* Panel Misi terlipat: hanya kepala (pill kecil) yang menerima sentuhan */
 #screen-hud .hud-quests.collapsed { width: auto; }
@@ -669,28 +668,28 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-quests-head, #screen-hud .hud-quests-body { pointer-events: auto; } /* isi tetap bisa disentuh */
 #screen-hud .hud-quests-head { touch-action: manipulation; }
 
-/* Tombol SERANG: mode TAHAN (held) & mode ARAH (aiming) */
-#screen-hud .fire-btn { touch-action: none; }
-#screen-hud .fire-btn.held { transform: scale(0.94); }
-#screen-hud .fire-btn .fire-aim {                    /* poros: berputar mengikuti --aim */
+/* Tombol PULSE: mode TAHAN (held) & mode ARAH (aiming) */
+#screen-hud .pulse-btn { touch-action: none; }
+#screen-hud .pulse-btn.held { transform: scale(0.94); }
+#screen-hud .pulse-btn .pulse-aim {                    /* poros: berputar mengikuti --aim */
   position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none;
   transform: rotate(var(--aim, 0rad)); opacity: 0; transition: opacity .12s ease;
 }
-#screen-hud .fire-btn.aiming .fire-aim { opacity: 1; }
-#screen-hud .fire-btn .fire-aim::before {            /* garis arah dari pusat tombol */
-  content: ""; position: absolute; left: 0; top: -2px; height: 4px; width: calc(var(--fire-r, 42px) + 22px);
+#screen-hud .pulse-btn.aiming .pulse-aim { opacity: 1; }
+#screen-hud .pulse-btn .pulse-aim::before {            /* garis arah dari pusat tombol */
+  content: ""; position: absolute; left: 0; top: -2px; height: 4px; width: calc(var(--pulse-r, 42px) + 22px);
   border-radius: 2px; background: linear-gradient(90deg, rgba(255,253,244,0), #fffdf4 40%, #f5c64f);
   box-shadow: 0 0 8px rgba(245,198,79,.7);
 }
-#screen-hud .fire-btn .fire-aim::after {             /* mata panah di ujung */
-  content: ""; position: absolute; left: calc(var(--fire-r, 42px) + 20px); top: -7px; width: 0; height: 0;
+#screen-hud .pulse-btn .pulse-aim::after {             /* mata panah di ujung */
+  content: ""; position: absolute; left: calc(var(--pulse-r, 42px) + 20px); top: -7px; width: 0; height: 0;
   border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 12px solid #f5c64f;
   filter: drop-shadow(0 0 4px rgba(245,198,79,.8));
 }
-#screen-hud .fire-btn.aiming { box-shadow: 0 0 0 4px rgba(245,198,79,.55), 0 5px 14px rgba(26,140,125,.42); }
+#screen-hud .pulse-btn.aiming { box-shadow: 0 0 0 4px rgba(245,198,79,.55), 0 5px 14px rgba(26,140,125,.42); }
 
 /* Jari tutorial: langkah GERAK menunjuk lantai kosong tengah-kiri (bukan panel Misi),
-   langkah SERANG menunjuk tombol SERANG di kanan-bawah */
+   langkah PULSE menunjuk tombol PULSE di kanan-bawah */
 #screen-hud .tut-finger.tut-move { left: 36%; top: 60%; bottom: auto; }
 #screen-hud .tut-finger.tut-attack { left: auto; right: 46px; top: auto; bottom: 46px; }
 @media (max-width: 700px) {
@@ -703,11 +702,11 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 @media (max-width: 700px) { #screen-hud .hud-hint { bottom: 116px; max-width: 70vw; } }
 
 /* ================================================================
-   UI/UX BUILD 43 — IKON SKILL & TOMBOL SERANG DALAM BAHASA VISUAL GAME
+   UI/UX BUILD 43 — IKON SKILL & TOMBOL PULSE DALAM BAHASA VISUAL GAME
    Pelat tombol skill = HEX SVG (.sk-plate: outline ink → rim warna skill
    → muka krem + kilau), ikon per-skill dari js/ui/skill-icons.js (33 ikon,
    gaya assets/icons/menu-*.svg), label 2 baris di BAWAH pelat (tidak lagi
-   terpotong "SIKAP BERTAHA"), SERANG = assets/icons/hud-serang.svg.
+   terpotong "SIKAP BERTAHA"), PULSE = assets/icons/hud-pulse.svg.
    Dimuat terakhir → menang kaskade atas rule lama di main.css.
    ================================================================ */
 #screen-hud .hud-controls { right: 16px; bottom: 14px; gap: 10px; align-items: flex-end; }
@@ -782,29 +781,28 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .ability-btn.ult .key-tag { background: #7a4e08; border-color: #ffe9a8; }
 #screen-hud .ability-btn.ult.ready .sk-plate .pl-glow { opacity: .75; }
 
-/* SERANG: ikon antibodi-Y kawaii (assets/icons/hud-serang.svg) di atas teal — cincin
+/* PULSE: ikon antibodi-Y kawaii (assets/icons/hud-pulse.svg) di atas teal — cincin
    gerigi/sunburst lama dibuang (bersaing dengan ikon); offset absolut lama (right/bottom)
    dinetralkan: posisi ditentukan flex .hud-controls, tidak lagi menimpa pelat ULT */
-#screen-hud .fire-btn { right: auto; bottom: auto; left: auto; top: auto; margin: 0; }
-#screen-hud .fire-btn::before { content: none; }
-#screen-hud .fire-btn .fire-claw { position: relative; display: flex; align-items: center; justify-content: center; pointer-events: none; width: 44px; height: 44px; margin-top: 4px; }
-#screen-hud .fire-btn .fire-claw svg { display: none; }
-#screen-hud .fire-btn .fire-claw img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 2px 0 rgba(18, 63, 58, .35)); }
-#screen-hud .fire-btn > span:not(.fire-claw):not(.fire-aim) { font-size: 11px; letter-spacing: .06em; text-shadow: 0 1px 0 rgba(18, 63, 58, .45); }
+#screen-hud .pulse-btn { right: auto; bottom: auto; left: auto; top: auto; margin: 0; }
+#screen-hud .pulse-btn::before { content: none; }
+#screen-hud .pulse-btn .pulse-claw { position: relative; display: flex; align-items: center; justify-content: center; pointer-events: none; width: 44px; height: 44px; margin-top: 4px; }
+#screen-hud .pulse-btn .pulse-claw img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 2px 0 rgba(18, 63, 58, .35)); }
+#screen-hud .pulse-btn > span:not(.pulse-claw):not(.pulse-aim) { font-size: 11px; letter-spacing: .06em; text-shadow: 0 1px 0 rgba(18, 63, 58, .45); }
 
 @media (max-width: 700px) {
   #screen-hud .hud-controls { right: 10px; bottom: 10px; gap: 8px; }
   #screen-hud .ability-bar { --skw: 44px; gap: 4px 6px; }
   #screen-hud .ability-btn.ult { --skw: 50px; }
   #screen-hud .ability-btn .sk-name, #screen-hud .ability-btn.ult .sk-name { font-size: 7px; }
-  #screen-hud .fire-btn .fire-claw { width: 34px; height: 34px; margin-top: 2px; }
-  #screen-hud .fire-btn > span:not(.fire-claw):not(.fire-aim) { font-size: 9px; }
+  #screen-hud .pulse-btn .pulse-claw { width: 34px; height: 34px; margin-top: 2px; }
+  #screen-hud .pulse-btn > span:not(.pulse-claw):not(.pulse-aim) { font-size: 9px; }
 }
 @media (max-width: 390px) {
   #screen-hud .hud-controls { right: 8px; bottom: 8px; gap: 6px; }
   #screen-hud .ability-bar { --skw: 40px; }
   #screen-hud .ability-btn.ult { --skw: 46px; }
-  #screen-hud .fire-btn .fire-claw { width: 30px; height: 30px; }
+  #screen-hud .pulse-btn .pulse-claw { width: 30px; height: 30px; }
 }
 /* Hint kontrol: tetap di atas grid skill (tinggi grid = 2 pelat + gap [+ label]) */
 #screen-hud .hud-hint { bottom: 134px; }
@@ -834,8 +832,8 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 
 /* ================================================================
    UI/UX COMBAT — RADIAL SKILL WHEEL + UNLOCK PROGRESSION (Lv 3/5/10/15)
-   SERANG = pusat/primary action terbesar; skill S1/S2/ULT pada titik
-   TETAP mengelilingi SERANG (semi-radial, absolute — bukan document
+   PULSE = pusat/primary action terbesar; skill S1/S2/ULT pada titik
+   TETAP mengelilingi PULSE (semi-radial, absolute — bukan document
    flow — supaya muscle memory tidak bergeser saat skill unlock).
    Slot LOCKED tetap dirender di tempatnya (overlay kunci + level).
    ================================================================ */
@@ -843,13 +841,13 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   /* geometry vars (desktop) */
   --wb: 232px; /* lebar wheel */
   --wh: 182px; /* tinggi wheel */
-  --fw: 96px;  /* diameter SERANG */
+  --pw: 96px;  /* diameter PULSE */
   --sw: 52px;  /* diameter skill */
   --swu: 58px; /* diameter ULT */
-  --fx: calc(var(--wb) - 14px - var(--fw));     /* fire: kiri rel wheel */
-  --fy: calc(var(--wh) - 6px - var(--fw));      /* fire: atas rel wheel */
-  --fcx: calc(var(--wb) - 14px - var(--fw) / 2); /* fire: pusat-x rel wheel */
-  --fcy: calc(var(--wh) - 6px - var(--fw) / 2);  /* fire: pusat-y rel wheel */
+  --px: calc(var(--wb) - 14px - var(--pw));     /* pulse: kiri rel wheel */
+  --py: calc(var(--wh) - 6px - var(--pw));      /* pulse: atas rel wheel */
+  --pcx: calc(var(--wb) - 14px - var(--pw) / 2); /* pulse: pusat-x rel wheel */
+  --pcy: calc(var(--wh) - 6px - var(--pw) / 2);  /* pulse: pusat-y rel wheel */
   position: absolute; right: 10px; bottom: 8px;
   width: var(--wb); height: var(--wh);
   display: block; gap: 0; z-index: 6;
@@ -858,39 +856,39 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-controls::before {
   content: ""; position: absolute; z-index: 0; pointer-events: none;
   --r: 104px; width: calc(var(--r) * 2); height: calc(var(--r) * 2);
-  left: calc(var(--fcx) - var(--r)); top: calc(var(--fcy) - var(--r));
+  left: calc(var(--pcx) - var(--r)); top: calc(var(--pcy) - var(--r));
   border-radius: 50%; border: 2px dashed rgba(255, 253, 244, 0.34);
   box-shadow: inset 0 0 0 5px rgba(53, 208, 186, 0.10);
   opacity: .8;
 }
-#screen-hud .fire-btn {
-  position: absolute; left: var(--fx); top: var(--fy);
-  width: var(--fw); height: var(--fw); min-height: var(--fw); border-radius: 50%;
-  z-index: 2; /* SERANG = pusat, selalu paling besar & paling menonjol */
+#screen-hud .pulse-btn {
+  position: absolute; left: var(--px); top: var(--py);
+  width: var(--pw); height: var(--pw); min-height: var(--pw); border-radius: 50%;
+  z-index: 2; /* PULSE = pusat, selalu paling besar & paling menonjol */
 }
 /* Semua tombol skill = absolute di dalam wheel (bukan grid/document flow) */
 #screen-hud .ability-bar {
   position: absolute; inset: 0; display: block;
   --skw: var(--sw); gap: 0; z-index: 1;
 }
-/* Posisi TETAP mengelilingi SERANG:
-   S2 di atas SERANG · S1 kiri-atas · ULT kanan-atas (semi-radial atas) */
+/* Posisi TETAP mengelilingi PULSE:
+   S2 di atas PULSE · S1 kiri-atas · ULT kanan-atas (semi-radial atas) */
 #screen-hud .ability-btn.pos-0 { /* SKILL 1 — kiri-atas */
-  left: calc(var(--fcx) - 96px - var(--sw) / 2);
-  top: calc(var(--fcy) - 74px - var(--sw) / 2);
+  left: calc(var(--pcx) - 96px - var(--sw) / 2);
+  top: calc(var(--pcy) - 74px - var(--sw) / 2);
 }
 #screen-hud .ability-btn.pos-1 { /* SKILL 2 — atas, geser kiri 20px agar tidak bertumpuk ULT */
-  left: calc(var(--fcx) - 20px - var(--sw) / 2);
-  top: calc(var(--fcy) - 106px - var(--sw) / 2);
+  left: calc(var(--pcx) - 20px - var(--sw) / 2);
+  top: calc(var(--pcy) - 106px - var(--sw) / 2);
 }
-#screen-hud .ability-btn.pos-2 { /* ULT — kanan-atas, ±8px jelas dari S2; naik 8px: bbox bebas SERANG */
-  left: calc(var(--fcx) + 43px - var(--swu) / 2);
-  top: calc(var(--fcy) - 92px - var(--swu) / 2);
+#screen-hud .ability-btn.pos-2 { /* ULT — kanan-atas, ±8px jelas dari S2; naik 8px: bbox bebas PULSE */
+  left: calc(var(--pcx) + 43px - var(--swu) / 2);
+  top: calc(var(--pcy) - 92px - var(--swu) / 2);
 }
 #screen-hud .ability-btn.ult { --skw: var(--swu); grid-column: auto; justify-self: auto; }
 /* Subtle shadow saja — tanpa card/kotak/bayangan berat.
    position:absolute di dalam wheel — skill TIDAK menumpuk di document flow
-   (sebelumnya relative → slot2/ULT jatuh di bawah SERANG). */
+   (sebelumnya relative → slot2/ULT jatuh di bawah PULSE). */
 #screen-hud .ability-btn {
   position: absolute; box-shadow: none; overflow: visible;
   /* RONDE-4 (fix 3×): HILARKAN TOTAL "kotak" di belakang pelat hex —
@@ -976,7 +974,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   50% { transform: scale(1.12); box-shadow: 0 0 0 5px rgba(245, 198, 79, 0); }
 }
 
-/* Tombol menu2 regu: tetap di kiri SERANG, bebas dari lengkung skill */
+/* Tombol menu2 regu: tetap di kiri PULSE, bebas dari lengkung skill */
 #screen-hud .hud-menu2-toggle { right: 190px; bottom: 100px; }
 #screen-hud .hud-game-menu2 { right: 190px; bottom: 150px; }
 
@@ -985,13 +983,13 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 
 @media (max-width: 700px) {
   #screen-hud .hud-controls {
-    --wb: 190px; --wh: 150px; --fw: 78px; --sw: 44px; --swu: 48px;
+    --wb: 190px; --wh: 150px; --pw: 78px; --sw: 44px; --swu: 48px;
     right: 8px; bottom: 8px;
   }
   #screen-hud .hud-controls::before { --r: 84px; border-width: 1.5px; }
-  #screen-hud .ability-btn.pos-0 { left: calc(var(--fcx) - 80px - var(--sw) / 2); top: calc(var(--fcy) - 60px - var(--sw) / 2); }
-  #screen-hud .ability-btn.pos-1 { left: calc(var(--fcx) - 16px - var(--sw) / 2); top: calc(var(--fcy) - 88px - var(--sw) / 2); }
-  #screen-hud .ability-btn.pos-2 { left: calc(var(--fcx) + 36px - var(--swu) / 2); top: calc(var(--fcy) - 68px - var(--swu) / 2); }
+  #screen-hud .ability-btn.pos-0 { left: calc(var(--pcx) - 80px - var(--sw) / 2); top: calc(var(--pcy) - 60px - var(--sw) / 2); }
+  #screen-hud .ability-btn.pos-1 { left: calc(var(--pcx) - 16px - var(--sw) / 2); top: calc(var(--pcy) - 88px - var(--sw) / 2); }
+  #screen-hud .ability-btn.pos-2 { left: calc(var(--pcx) + 36px - var(--swu) / 2); top: calc(var(--pcy) - 68px - var(--swu) / 2); }
   #screen-hud .hud-menu2-toggle { right: 212px; bottom: 84px; width: 42px; height: 42px; }
   #screen-hud .hud-game-menu2 { right: 212px; bottom: 134px; }
   #screen-hud .hud-hint { bottom: 166px; left: 10px; right: auto; transform: none; text-align: left; max-width: 46vw; }
@@ -1002,10 +1000,10 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 }
 @media (max-height: 370px) {
   /* Landscape HP sangat pendek: padatkan roda sedikit, label skill sembunyi */
-  #screen-hud .hud-controls { --wb: 208px; --wh: 162px; --fw: 84px; --sw: 46px; --swu: 50px; }
-  #screen-hud .ability-btn.pos-0 { left: calc(var(--fcx) - 88px - var(--sw) / 2); top: calc(var(--fcy) - 64px - var(--sw) / 2); }
-  #screen-hud .ability-btn.pos-1 { left: calc(var(--fcx) - 18px - var(--sw) / 2); top: calc(var(--fcy) - 94px - var(--sw) / 2); }
-  #screen-hud .ability-btn.pos-2 { left: calc(var(--fcx) + 38px - var(--swu) / 2); top: calc(var(--fcy) - 72px - var(--swu) / 2); }
+  #screen-hud .hud-controls { --wb: 208px; --wh: 162px; --pw: 84px; --sw: 46px; --swu: 50px; }
+  #screen-hud .ability-btn.pos-0 { left: calc(var(--pcx) - 88px - var(--sw) / 2); top: calc(var(--pcy) - 64px - var(--sw) / 2); }
+  #screen-hud .ability-btn.pos-1 { left: calc(var(--pcx) - 18px - var(--sw) / 2); top: calc(var(--pcy) - 94px - var(--sw) / 2); }
+  #screen-hud .ability-btn.pos-2 { left: calc(var(--pcx) + 38px - var(--swu) / 2); top: calc(var(--pcy) - 72px - var(--swu) / 2); }
   #screen-hud .hud-hint { bottom: 176px; }
 }
 
@@ -1748,7 +1746,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
    2. PAUSE pindah ke kluster kanan-bawah (dekat grid skill).
    3. Kotak/opacity di belakang ikon skill TERKUNCI-pos terbuka dihapus:
       ikon langsung di lantai (tanpa hex face putih).
-   4. Teks pada tombol SERANG dihapus (markup) — ruang ikon lebih lega.
+   4. Teks pada tombol PULSE dihapus (markup) — ruang ikon lebih lega.
    ================================================================ */
 
 /* --- 1) TOP CENTER: kills + currency + wave/timer satu baris --------- */
@@ -1789,8 +1787,8 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .ability-btn:not(.locked) .sk-plate .pl-rim { opacity: .42; }
 #screen-hud .ability-btn:not(.locked) .sk-plate { filter: drop-shadow(0 2px 0 rgba(18,63,58,.28)) drop-shadow(0 4px 8px rgba(18,63,58,.16)); }
 
-/* --- 4) SERANG: label teks dihapus — ikon besar saja ----------------- */
-#screen-hud .fire-btn .fire-claw { transform: scale(1.28); }
+/* --- 4) PULSE: label teks dihapus — ikon besar saja ----------------- */
+#screen-hud .pulse-btn .pulse-claw { transform: scale(1.28); }
 
 /* --- Modal panduan currency ------------------------------------------- */
 .curguide-box { max-width: 400px; text-align: left; }

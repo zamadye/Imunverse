@@ -55,7 +55,8 @@ import { Pickup } from '../entities/pickup.js';
 
 import { SpawnSystem } from '../systems/spawn-system.js';
 import { CollisionSystem } from '../systems/collision-system.js';
-import { rollLevelUpChoices, applyLevelUp, squadMultipliers, evolutionBoosts, effectiveStacks } from '../systems/upgrade-system.js';
+import { rollLevelUpChoices, applyLevelUp, squadMultipliers, effectiveStacks } from '../systems/upgrade-system.js';
+import { isDevMode } from './dev-mode.js';
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
@@ -171,7 +172,6 @@ export const game = {
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
     setArenaPalette(arena.palette);
-    console.info(`[MAP] run arena=${arena.id} mode=${STATE.meta.selectedMode || 'normal'} render=50a`);
 
     // Fokus run (dari dashboard/roster) — menentukan sistem yang dipulihkan
     const focusId = meta.focusRun || 'seimbang';
@@ -221,7 +221,6 @@ export const game = {
       upgrades,
       luPity: 0,
       phagoMeter: 0, // R4 Modul B: fuel ultimate dari telan      // V2 Phase 4: counter pity roll rare+
-      evoTaken: {},   // V2 Phase 4: evolusi senjata yang sudah diambil run ini
       levelUpQueue: 0,
       currentChoices: null,
       reviveUsed: false,
@@ -252,7 +251,6 @@ export const game = {
       parts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
-      combo: { count: 0, timer: 0 },
       imuAccrued: 0, // Fase 17: IMU terkumpul live di HUD (akhir run = rumus penuh)
       hitStop: 0,
       // RONDE-7: hit-stop kill digerbang agar tidak berantai tak putus — saat
@@ -262,7 +260,6 @@ export const game = {
       // punya beat-nya; sisanya menunggu celah 0.24 dtk.
       hitStopCool: 0,
       ended: false,
-      stats: { shotsFired: 0 },
       // PHAGOS: membran + mutasi + bio-point + adaptasi musuh (run-only)
       activeMutations: [],
       mutationHistory: [],
@@ -423,25 +420,22 @@ export const game = {
     const buffXP = tb ? tb.xp.mult : 1;
     const perm = (this.run && this.run.permBoost) || { maxHP: 0, regen: 0, omega: 0 };
 
-    // V2 Phase 4: SINERGI ROLE NYATA — stack upgrade yang cocok role hero
-    // dihitung ×1.25 (luRules.synergyBonus); badge "✦ Sinergi" jadi jujur.
+    // Sinergi role: stack upgrade yang cocok role hero dihitung ×(1+bonus)
+    // (luRules.synergyBonus); badge "✦ Sinergi" jadi jujur.
     const syn = synergyFor(heroDef);
     const eff = (id) => effectiveStacks({ upgrades: up, heroDef }, id, syn);
-    // V2 Phase 4: EVOLUSI SENJATA in-run (Badai Sitokin / Benteng / Kawanan).
-    // Guard: saat run BARU di-init, this.run masih run lama — evoTaken lama
-    // tidak boleh bocor; pakai this.run hanya bila upgrades-nya objek yang sama.
-    const evoB = evolutionBoosts(this.run && this.run.upgrades === up ? this.run : null);
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
-    const cooldown = base.attackCooldown / ((1 + eff('attackSpeed') * 0.12) * squad.attackSpeed) * buffCooldown * evoB.cooldownMult;
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const cooldown = base.attackCooldown / squad.attackSpeed * buffCooldown;
     // PHAGOS: Treg memperlambat SEMUA termasuk dirinya sendiri (-10%)
     const tregSlow = heroDef.id === 'treg' ? 0.9 : 1;
-    const speed = base.speed * squad.speed * (1 + eff('moveSpeed') * 0.08) * (tb ? tb.speed.mult : 1) * tregSlow;
-    const attackRange = base.attackRange * squad.attackRange * (1 + eff('attackRange') * 0.12);
-    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + eff('attackRange') * 0.12);
-    const maxHP = Math.round((base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + eff('maxHP') * 20 + (perm.maxHP || 0)) * evoB.maxHPMult);
-    const projectileCount = base.projectileCount + (up.projectileCount || 0) + evoB.projectileFlat;
-    const lifeSteal = (up.lifeSteal || 0) * 0.05; // Fase 12: Life Steal +5% per pilihan
+    // PHAGOS safety net (bible §4.1): Kemotaksis +10% speed, Sitoskeleton +15% HP.
+    const speed = base.speed * squad.speed * (1 + eff('speed_boost') * 0.10) * (tb ? tb.speed.mult : 1) * tregSlow;
+    const attackRange = base.attackRange * squad.attackRange;
+    const swipeRadius = (base.swipeRadius || 0) * squad.attackRange;
+    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) * (1 + eff('hp_boost') * 0.15) + (perm.maxHP || 0));
+    const projectileCount = base.projectileCount;
+    const lifeSteal = 0; // pool life-steal dicabut (bible §14); konsumen dipertahankan utk mutasi Sprint 2
 
     const isMelee = heroDef.attackPattern === 'melee_swipe';
 
@@ -454,10 +448,9 @@ export const game = {
       swipeRadius,
       maxHP,
       projectileCount,
-      // V2 Phase 4: entri pool baru — pierce (rare) & magnet (common)
-      pierce: base.pierce + (up.pierce || 0),
+      pierce: base.pierce,
       projectileSpeed: base.projectileSpeed,
-      magnetRadius: base.magnetRadius * (1 + (up.magnet || 0) * 0.25),
+      magnetRadius: base.magnetRadius,
       pickupRadius: base.pickupRadius,
       xpMult: squad.xpGain * buffXP,
       lifeSteal,
@@ -609,11 +602,6 @@ export const game = {
       }
     }
 
-    // Combo decay (2 dtk tanpa kill → reset)
-    if (run.combo.timer > 0) {
-      run.combo.timer -= dt;
-      if (run.combo.timer <= 0) run.combo.count = 0;
-    }
     // Squash-stretch decay
     if (player.squash > 0) player.squash -= dt;
 
@@ -647,7 +635,7 @@ export const game = {
     }
 
     // PHAGOS desktop: ARAH = MOUSE (facing mengikuti kursor; cone/tentakel +
-    // dash T-Bolt otomatis mengikutinya), SERANG = KEYBOARD (Spasi/K/4/T —
+    // dash T-Bolt otomatis mengikutinya), PULSE = KEYBOARD (Spasi/K/4/T —
     // antrean PULSE di atas). Sentuh/joy-drag tetap memakai arah gerak.
     run._mouseAimFresh = false;
     try {
@@ -701,7 +689,7 @@ export const game = {
         const bonus = Math.round(w * 5 * getProgressionBand(w).rewardMult);
         run.bonusCurrency += bonus;
         addCurrency(STATE.meta, bonus); // PHAGOS Sprint 1: fix crash endless (meta tak terdefinisi di scope update)
-        emit('toast', { message: `Endless wave ${w}! +${bonus} biokredit`, kind: 'gold' });
+        emit('toast', { message: `Endless wave ${w}! +${bonus} Biokredit`, kind: 'gold' });
       }
       run.wave = run.spawnSys.wave;
     }
@@ -1020,13 +1008,13 @@ export const game = {
       run.currentChoices = rollMutationChoices(run);
       if (!run.currentChoices || run.currentChoices.length === 0) throw new Error('pool mutasi kosong');
     } catch (err) {
-      console.warn('[phagos] rollMutationChoices gagal, fallback upgrade:', err);
+      if (isDevMode()) console.warn('[phagos] rollMutationChoices gagal, fallback upgrade:', err);
       run.currentChoices = rollLevelUpChoices(run);
     }
     const pfx = getRetention().particles;
     run.effects.spawnBurst(run.player.x, run.player.y, '#ffd93d', pfx.levelUp, 240, 5);
     run.camera.addShake(0.3);
-    showAnnounce('LEVEL UP!', false);
+    showAnnounce('BERMUTASI!', false);
     this.hitStopRun(getRetention().levelUpStopSec);
     setLevelUpOpen(true);
     hidePresenter(); // RONDE-4: narrator jangan menumpuk modal pilih-evolusi
@@ -1058,16 +1046,6 @@ export const game = {
       const result = applyLevelUp(run, upgradeId);
       this.recomputePlayerStats();
       if (result.healAmount > 0) run.player.heal(result.healAmount);
-      // V2 Phase 4: EVOLUSI SENJATA diambil → selebrasi besar (momen memorable)
-      if (result.evolved) {
-        showAnnounce(result.evolved.name.toUpperCase() + '!', true);
-        run.effects.spawnBurst(run.player.x, run.player.y, '#c39bd3', 40, 280, 5);
-        run.camera.addShake(0.5);
-        this.hitStopRun(getGameFeel().hitStop.ult);
-        audio.evolve();
-        buzz('levelup');
-        emit('toast', { message: `EVOLUSI: ${result.evolved.name}!`, kind: 'gold' });
-      }
     }
 
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
@@ -1131,9 +1109,7 @@ export const game = {
   /** V2 Phase 1: roll critical hit global (data/gamefeel.json crit.chance). */
   rollCrit() {
     const cfg = getGameFeel().crit;
-    // V2 Phase 3: passive bcell + V2 Phase 4: upgrade "Titik Lemah" (+4%/stack)
-    const upBonus = ((this.run.upgrades && this.run.upgrades.critChance) || 0) * 0.04;
-    const chance = this.run.critChanceOverride ?? (cfg.chance + passiveCritBonus(this.run) + upBonus);
+    const chance = this.run.critChanceOverride ?? (cfg.chance + passiveCritBonus(this.run));
     return Math.random() < chance;
   },
 
@@ -1584,7 +1560,7 @@ export const game = {
     meta.evoParts[chest.partId] = (meta.evoParts[chest.partId] || 0) + (doubled ? 2 : 1);
     writeSave(meta);
     run.bossChest = null;
-    emit('toast', { message: `Peti boss: +${currency} biokredit${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    emit('toast', { message: `Peti boss: +${currency} Biokredit${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
     setPaused(false);
     emit('resume');
   },
@@ -1621,11 +1597,6 @@ export const game = {
   triggerPulseForce() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
     return tryPulse(this, { ignoreCd: true });
-  },
-
-  /** Kompat lama: SERANG manual → kini memicu PULSE. */
-  triggerAttack() {
-    return this.triggerPulse();
   },
 
   useAbilityBySlot(slot) {
@@ -1675,7 +1646,7 @@ export const game = {
     if (!canUpgradeSkill(run.level, slot, skill)) return false;
     const cost = skillUpgradeCost(skill);
     if (run.currencyEarned < cost) {
-      emit('toast', { message: `Butuh ${cost} biokredit untuk upgrade skill`, kind: 'warn' });
+      emit('toast', { message: `Butuh ${cost} Biokredit untuk upgrade skill`, kind: 'warn' });
       return false;
     }
     if (!run.skills.tryUpgrade(slot, run.level)) return false;
@@ -1740,10 +1711,8 @@ export const game = {
     cascadeOnDeath(this, enemy); // R6 Modul D: tagged mati → rantai opsonisasi
 
     // R4 Modul B: korban TELAN dikonversi resource (heal+fuel di tryDevour) —
-    // TANPA drop XP/koin/imu normal (combat doc §3.1). Combo/efek tetap.
+    // TANPA drop XP/Biokredit/Genom normal — efek visual tetap.
     if (enemy.devoured) {
-      run.combo.count += 1;
-      run.combo.timer = getRetention().combo.window;
       run.effects.spawnBurst(enemy.x, enemy.y, '#ffd93d', getRetention().particles.enemyDeath, 150, 4);
       // PHAGOS Sprint 1 (bible §5.1): korban telan (skill devour) = engulf → 20 XP.
       // Drop tetap tidak ada (trade-off jalur skill — D9; engulf membran tetap full kill).
@@ -1790,14 +1759,7 @@ export const game = {
       }
     }
 
-    // ---- JUICE: combo counter + hit-stop + SFX kill ----
-    run.combo.count += 1;
-    run.combo.timer = getRetention().combo.window; // spek: 3+ kill dalam 5 detik
-    if (run.combo.count >= 3) audio.combo(run.combo.count);
-    if (run.combo.count > 0 && run.combo.count % 10 === 0) {
-      // PHAGOS Sprint 1 (D6): milestone kombo tanpa XP (juice saja)
-      emit('toast', { message: `COMBO x${run.combo.count}!`, kind: 'gold' });
-    }
+    // ---- JUICE: hit-stop + SFX kill ----
     audio.kill();
     // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
     const gf = getGameFeel();
@@ -2122,7 +2084,7 @@ export const game = {
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);
     for (const m of completedMissions) {
-      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} biokredit`, kind: 'gold' });
+      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} Biokredit`, kind: 'gold' });
     }
     // Auto-unlock hero dari statistik
     const newlyUnlocked = checkAutoUnlocks(meta);
@@ -2718,7 +2680,6 @@ export const game = {
         xpPct: run.xp / xpToNextLevel(run.level),
         wave: run.spawnSys.wave,
         abilities: run.skills.getView(run.level),
-        combo: run.combo,
         pulse,
         bioPoints: run.bioPoints || 0,
         activeMutations: run.activeMutations || [],

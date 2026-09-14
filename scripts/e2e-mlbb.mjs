@@ -1,5 +1,6 @@
 /**
- * e2e-mlbb.mjs — Fase 12b: HUD MLBB + arena pseudo-3D.
+ * e2e-mlbb.mjs — HUD + arena pseudo-3D (era MLBB; bagian serang manual
+ * dicabut mengikuti PHAGOS satu-tombol PULSE).
  * Semua aksi = klik riil di browser (bukan API-mock).
  * Jalankan: PW_PATH=/tmp/pw node scripts/e2e-mlbb.mjs
  * (butuh server :8000 + chromium @sparticuz di /tmp/chromium, libs di /tmp/alibs/lib)
@@ -75,10 +76,10 @@ await page.fill('#auth-username', 'PemainHebat');
   log('portrait-new-roster', /hero_(tcd8|macrophage|neutrophil|bcell|nkcell|eosinophil|dendritic|basophil|mastcell|tcd4|treg)_portrait/.test(portraitSrc) ? portraitSrc : 'SRC=' + portraitSrc);
   log('skills-3', await page.locator('#ability-bar .ability-btn').count() === 3);
   log('ult-1', await page.locator('#ability-bar .ability-btn.ult').count() === 1);
-  // Ronde-2+: label teks SERANG DIHAPUS (request user) — ikon saja, nama tombol di aria-label
-  log('fire-serang-aria', await page.evaluate(() => {
-    const b = document.getElementById('btn-fire');
-    return (b.getAttribute('aria-label') || '').toUpperCase().includes('SERANG') && !/SERANG/.test(b.textContent.trim());
+  // Ronde-2+: label teks tombol DIHAPUS (request user) — ikon saja, nama tombol di aria-label
+  log('pulse-aria', await page.evaluate(() => {
+    const b = document.getElementById('btn-pulse');
+    return (b.getAttribute('aria-label') || '').toUpperCase().includes('PULSE') && !/SERANG|TEMBAK/.test(b.textContent.trim());
   }));
   log('key-tags', (await page.locator('#ability-bar .key-tag').allTextContents()).join(','));
 
@@ -216,98 +217,23 @@ await page.fill('#auth-username', 'PemainHebat');
   await ensureGameplay();
   await page.waitForTimeout(400);
 
-  // ---------- SERANG manual + auto-attack ----------
+  // ---------- PHAGOS: PULSE = satu-satunya tombol aksi ----------
+  // Kontrak: KETUK tombol PULSE → antrean edge-trigger dikonsumsi game-loop
+  // (tanpa cooldown: Pulse meledak; dengan cooldown: antrean ditahan).
+  // Jalur TEMBAK manual + auto-attack DICABUT (bible §2.3, §14).
   await page.evaluate(() => {
     const g = window.__IMUNVERSE.game;
-    const p = g.run.player;
-    g.spawnEnemy('parasit', false);
-    const e = g.run.enemies.filter((x) => x.alive).pop();
-    if (e) { e.x = p.x + 45; e.y = p.y; }
+    g.run.membrane.pulseT = 0; // pastikan Pulse siap
+    g.run.membrane.pulseCooldownT = 0;
+    g.input.queuePulse();
   });
-  await page.locator('#btn-fire').dispatchEvent('pointerdown');
-  await page.waitForTimeout(900);
-  await page.locator('#btn-fire').dispatchEvent('pointerup');
-  log('manual-attack-happened', true);
-  // Fase 12c: tap SATU kali saat cooldown → karakter tetap bereaksi (swing+lunge)
-  // Fase 18: modal level-up bisa menyela (XP per kill) → ulangi sampai merespons
-  let tapResp = false;
-  for (let attempt = 0; attempt < 4 && !tapResp; attempt++) {
-    await ensureGameplay();
-    tapResp = await page.evaluate(async () => {
-      const g = window.__IMUNVERSE.game;
-      const S = window.__IMUNVERSE.STATE;
-      if (S.levelUpOpen || S.paused) return false; // pause → klik tak diproses
-      const p = g.run.player;
-      // F18 finding: tanpa musuh dalam jangkauan tryFire masuk cabang tanpa swing →
-      // taruh 1 musuh di dekat player (konteks realistis anak menyerang saat ada musuh)
-      const near = g.run.enemies.find((e) => !e.isBoss && e.hp > 0);
-      if (near) { near.x = p.x + 70; near.y = p.y + 10; }
-      window.__tapDiag = { enemies: g.run.enemies.length, near: !!near, range: p.stats.effectiveAttackRange };
-      p.attackTimer = 5; // paksa cooldown aktif
-      document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-      // Kontrak 12c: tombol SERANG SELALU merespons. Respons = swing (saat ada musuh
-      // + cooldown) ATAU attackFlash (jalur tanpa musuh). tryFire dipanggil game-loop
-      // (bukan sinkron) → polling frame sampai 420ms.
-      let s1 = false;
-      for (let t = 0; t < 14 && !s1; t++) {
-        await new Promise((r) => setTimeout(r, 30));
-        s1 = p.swing > 0 || p.squash > 0 || p.attackFlash > 0;
-      }
-      document.getElementById('btn-fire').dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
-      return s1;
-    });
-    if (!tapResp) {
-      await page.waitForTimeout(500);
-      const why = await page.evaluate(() => {
-        const S = window.__IMUNVERSE.STATE;
-        const p = window.__IMUNVERSE.game.run.player;
-        return { paused: S.paused, lvlOpen: S.levelUpOpen, modal: [...document.querySelectorAll('.screen.modal.active')].map((m) => m.id), swing: p.swing, squash: p.squash, attackTimer: Math.round(p.attackTimer * 10) / 10, screen: S.screen, tapDiag: window.__tapDiag };
-      });
-      console.log('  diag tap attempt ' + attempt + ':', JSON.stringify(why));
-    }
-  }
-  log('attack-tap-responds', tapResp);
+  await page.waitForTimeout(400);
+  const pulsed = await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game;
+    return (g.run.membrane.pulseT || 0) > 0 || (g.run.membrane.pulseCooldownT || 0) > 0;
+  });
+  log('pulse-tap-fires', pulsed);
   await page.waitForTimeout(1500);
-
-  // Fase 17: tutup dulu modal level-up bila terbuka (pause menggagalkan tes ini)
-  await page.evaluate(async () => {
-    for (let i = 0; i < 6; i++) {
-      if (!window.__IMUNVERSE.STATE.levelUpOpen) break;
-      document.querySelector('#levelup-choices .choice-card')?.click();
-      await new Promise((r) => setTimeout(r, 250));
-    }
-  });
-  // RONDE-6: TIDAK ADA unit milik player yang auto-fire — pasukan pun hanya
-  // menembak saat tombol SERANG ditekan. Bagian 1: musuh didekatkan, tanpa
-  // menahan SERANG → pasukan diam (passive-kills harus 0). Bagian 2: tahan
-  // SERANG → pasukan + hero menembak dan membunuh.
-  const squadIdle = await page.evaluate(async () => {
-    const g = window.__IMUNVERSE.game;
-    const p = g.run.player;
-    g.tryJoinSquad(3);
-    g.spawnEnemy('parasit', false);
-    const e = g.run.enemies.filter((x) => x.alive).pop();
-    if (!e) return { ok: false, why: 'no-enemy' };
-    e.x = p.x + 45; e.y = p.y;
-    const k0 = g.run.kills;
-    await new Promise((r) => setTimeout(r, 2200));
-    return { ok: g.run.kills === k0 && e.alive, kills: g.run.kills - k0, alive: e.alive };
-  });
-  log('squad-passive-without-serang', squadIdle.ok ? 'idle safe' : JSON.stringify(squadIdle));
-  const killed = await page.evaluate(async () => {
-    const g = window.__IMUNVERSE.game;
-    g.input.fireButtonHeld = true; // tahan SERANG
-    try {
-      const k0 = g.run.kills;
-      const t0 = performance.now();
-      while (performance.now() - t0 < 6000) { // polling loop (setTimeout lambat di headless)
-        await new Promise((r) => setTimeout(r, 120));
-        if (g.run.kills > k0) return true;
-      }
-      return false;
-    } finally { g.input.fireButtonHeld = false; }
-  });
-  log('squad-fires-with-serang', killed);
 
   // ---------- Level-up modal ----------
   await page.evaluate(async () => {

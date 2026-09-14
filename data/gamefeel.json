@@ -12,9 +12,7 @@
     "boss": 0.09,
     "crit": 0.025,
     "ult": 0.06,
-    "membraneKill": 0.015,
-    "pulse": 0.1,
-    "engulf": 0.06
+    "membraneKill": 0.015
   },
   "crit": {
     "chance": 0.08,
@@ -72,8 +70,8 @@
     "note": "PHAGOS: Pulse = momen aksi utama, shake lebih besar dari kill biasa"
   },
   "engulf": {
-    "hitStop": 0.06,
-    "note": "PHAGOS: hit-stop engulf unik — lebih lambat & basah dari kill biasa"
+    "hitStop": 0.15,
+    "note": "PHAGOS bible §2.2: hit-stop engulf 0,15 dtk — lebih lambat & basah dari kill biasa"
   },
   "membrane": {
     "contactShake": 0.02,

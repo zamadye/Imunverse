@@ -93,7 +93,7 @@ function upgradeCard(def, heroDef, syn) {
   const rar = def.rarity || 'common';
   const card = el('button', {
     class: 'choice-card safety-card' + (isSyn ? ' synergy' : '') +
-      (rar !== 'common' ? ` rar-${rar}` : '') + (def.isEvo ? ' evo-card' : ''),
+      (rar !== 'common' ? ` rar-${rar}` : ''),
     onclick: () => {
       game.chooseLevelUp(def.id);
       if (STATE.levelUpOpen && game.run && game.run.currentChoices) {
@@ -105,11 +105,10 @@ function upgradeCard(def, heroDef, syn) {
     el('div', { class: 'choice-info' }, [
       el('b', {}, [
         el('span', { text: def.name }),
-        el('span', { class: 'syn-badge safety-badge', text: 'KLASIK' }),
+        el('span', { class: 'syn-badge safety-badge', text: 'STAT' }),
         isSyn ? el('span', { class: 'syn-badge', title: `Cocok untuk ${heroDef.name}`, text: '✦ Sinergi' }) : null,
-        def.isEvo ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: '⚡ EVOLUSI' })
-          : (rar === 'epic' ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: 'EPIC' })
-            : rar === 'rare' ? el('span', { class: 'syn-badge', style: 'background:#7fdbff;color:#0b2a33', text: 'RARE' }) : null),
+        (rar === 'epic' ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: 'EPIC' })
+          : rar === 'rare' ? el('span', { class: 'syn-badge', style: 'background:#7fdbff;color:#0b2a33', text: 'RARE' }) : null),
       ]),
       el('p', { text: def.desc }),
       stacks > 0 ? el('span', { class: 'choice-stack', text: `Dimiliki: ${stacks}x` }) : null,

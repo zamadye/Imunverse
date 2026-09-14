@@ -12,7 +12,6 @@
     "pulseHoldSec": 0.1,
     "pulseShrinkSec": 0.15,
     "pulseDamageMult": 4.0,
-    "pulseHitStopSec": 0.1,
     "engulfThreshold": 0.15,
     "engulfHealPct": 0.07,
     "bioPointPerEngulf": 1

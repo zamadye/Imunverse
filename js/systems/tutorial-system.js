@@ -8,12 +8,12 @@
  *
  * Alur (gameplay terus berjalan; tanpa pause):
  *   1. Gerak   : tarik di lantai kiri/kanan → advance saat sudah bergerak
- *   2. Serang  : TAHAN tombol SERANG besar → advance saat kill pertama
+ *   2. Pulse   : KETUK tombol PULSE besar → advance saat kill pertama
  *   3. Skill   : slot terbuka di level 3 / 5 / 10 (info — tombol LANJUT)
  *   4. Misi    : batasan objektif ada di atas (info — LANJUT)
- *   5. Currency: Antibodi & Imuncoin kosong di awal — hasilkan dari bermain;
- *                tap "+" p i currency untuk panduan lengkap (info — LANJUT)
- *   6. Pause   : tombol II di kluster kanan-bawah, atau tap pil HP-hero (info)
+ *   5. Currency: Biokredit & Genom kosong di awal — hasilkan dari bermain;
+ *                tap "+" di currency untuk panduan lengkap (info — LANJUT)
+ *   6. Jeda    : tombol II di kluster kanan-bawah, atau tap pil HP-hero (info)
  *   7. Nutrisi : ambil pickup yang jatuh → advance saat collect pertama
  * Bisa dilewati: tombol LEWATI. Tandai meta.tutorialDone saat selesai.
  */
@@ -34,8 +34,8 @@ const steps = [
   },
   {
     id: 'attack',
-    text: 'SERANG: TAHAN tombol besar di kanan-bawah — tarik sambil menahan untuk MENGARAHKAN. Bunuh patogen pertama!',
-    target: '#btn-fire',
+    text: 'PULSE: KETUK tombol besar di kanan-bawah — membran MELEDAK! Berjalanlah KE patogen dan telan mereka!',
+    target: '#btn-pulse',
   },
   {
     id: 'skill',
