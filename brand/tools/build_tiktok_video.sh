@@ -73,14 +73,18 @@ $FF -y -loglevel error -i "$TMP/video-only.mp4" \
   -i brand/video/tiktok/audio/vo1-tubuhmu.mp3 \
   -i brand/video/tiktok/audio/vo2-daridalam.mp3 \
   -i brand/video/tiktok/audio/vo3-penjaga.mp3 \
-  -i brand/video/tiktok/audio/vo4-cta.mp3 \
+  -i brand/video/tiktok/audio/vo5-aksi.mp3 \
+  -i brand/video/tiktok/audio/vo6-kenali.mp3 \
+  -i brand/video/tiktok/audio/vo7-cta.mp3 \
   -filter_complex "\
 [1]volume=1.0[s];\
 [2]adelay=600|600,volume=1.7[a1];\
 [3]adelay=4300|4300,volume=1.7[a2];\
 [4]adelay=7800|7800,volume=1.7[a3];\
-[5]adelay=21200|21200,volume=1.8[a4];\
-[s][a1][a2][a3][a4]amix=inputs=5:duration=first:normalize=0,\
+[5]adelay=12600|12600,volume=1.6[a4];\
+[6]adelay=20700|20700,volume=1.8[a5];\
+[7]adelay=23000|23000,volume=1.8[a6];\
+[s][a1][a2][a3][a4][a5][a6]amix=inputs=7:duration=first:normalize=0,\
 afade=t=out:st=25.4:d=0.9,alimiter=limit=0.95[aout]" \
   -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k -movflags +faststart -shortest "$OUT"
 echo "  FINAL: $OUT"
