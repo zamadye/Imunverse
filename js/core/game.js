@@ -32,7 +32,7 @@ import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4:
 import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.js'; // R5: Modul C
 import { tagOnHit, cascadeOnDeath } from '../systems/tag-cascade.js'; // R6: Modul D
 import { chemoUpdate } from '../systems/chemotaxis.js'; // R7: Modul E
-import { SkillSystem } from '../systems/skill-system.js';
+import { SkillSystem, SKILL_TRIGGER_LABEL } from '../systems/skill-system.js';
 // PHAGOS eksperimen: membran + mutasi hero + mutasi musuh
 import {
   initMembrane, updateMembrane, tryPulse, tryEngulf, getMembraneStats,
@@ -74,7 +74,7 @@ import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
-import { isSkillUnlocked, canUpgradeSkill, skillUpgradeCost, SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL } from '../systems/skill-unlock.js';
+import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
 import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
 import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 import {
@@ -292,7 +292,7 @@ export const game = {
         total,
         joined: 0,
         speedBonus: allySpeedBonus,
-        unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL], // [3, 5, 10, 15]
+        unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL], // [3, 5, 10, 15]
       };
     }
 
@@ -964,6 +964,7 @@ export const game = {
       run.level += 1;
       run.levelUpQueue += 1;
       this.tryJoinSquad(run.level);
+      this.announceSkillProgress(run.level);
     }
   },
 
@@ -1302,6 +1303,7 @@ export const game = {
     // PERTAHANAN (upgrade permanen): kurangi damage diterima
     amount = Math.max(1, Math.round(amount * (squadMultipliers(STATE.meta).armor || 1)));
     if (!player.takeDamage(amount)) return;
+    this.fireSkillTrigger('damaged');
     emit('playerHit', { damage: amount });
     // Fase 17 (trigger 5B): percikan merah 5–8 partikel di sekitar player
     run.effects.spawnBurst(player.x, player.y, '#ff6b6b', getRetention().particles.playerHit, 120, 3);
@@ -1599,17 +1601,14 @@ export const game = {
     return tryPulse(this, { ignoreCd: true });
   },
 
-  useAbilityBySlot(slot) {
+  /**
+   * PHAGOS D5 — konteks eksekusi skill PASIF (dibangun sekali per pemicu).
+   * Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion).
+   */
+  skillCtx() {
     const run = this.run;
-    if (!run || run.ended || STATE.levelUpOpen) return false;
     const player = run.player;
-    if (!player.alive) return false;
-    // GUARD progression (Lv 3 / 5 / 10): slot skill LOCKED tidak boleh
-    // tereksekusi — berlaku untuk klik, touch, keyboard & handler lain.
-    const skill = run.skills.slots[slot];
-    if (!skill) return false;
-    if (!isSkillUnlocked(run.level, slot, skill)) return false;
-    const fired = run.skills.trigger(slot, {
+    return {
       game: this,
       player,
       enemies: run.enemies,
@@ -1617,48 +1616,50 @@ export const game = {
       effects: run.effects,
       camera: run.camera,
       hitEnemy: (enemy, dmg) => {
-        // Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion)
         const died = enemy.takeDamageRaw ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
         this.spawnHitFeedback(enemy, dmg, died, false, { sourceKind: 'skill' });
         if (died) this.onEnemyKilled(enemy, 'skill');
       },
-    });
-    // Third-person feel: hentakan halus saat skill meninggalkan tangan (tempur).
-    if (fired) run.camera.addShake(0.14);
-    return fired;
+    };
   },
 
   /**
-   * Upgrade skill slot (sistem terbuka pada PLAYER LEVEL 15).
-   * Biaya = antibodi run (run.currencyEarned). Semua guard progression di
-   * sini: sebelum Lv 15 aksi ini tidak berbuat apa-apa (return false).
-   * @returns {boolean} true bila rank skill naik.
+   * PHAGOS D5 — tembakkan SEMUA skill pasif yang terpicu `trigger`
+   * ('pulse'/'engulf'/'kill'/'damaged'). Guard kedalaman 2 mencegah rantai
+   * rekursif (skill → kill → skill → ...) meledak.
    */
-  upgradeAbilityBySlot(slot) {
+  fireSkillTrigger(trigger) {
     const run = this.run;
-    if (!run || run.ended || STATE.levelUpOpen) return false;
-    const player = run.player;
-    if (!player.alive) return false;
-    const skill = run.skills.slots[slot];
-    if (!skill) return false;
-    // GUARD: upgrade terkunci sebelum Lv 15 (jangan membuat variabel level kedua)
-    if (run.level < SKILL_UPGRADE_LEVEL) return false;
-    if (!canUpgradeSkill(run.level, slot, skill)) return false;
-    const cost = skillUpgradeCost(skill);
-    if (run.currencyEarned < cost) {
-      emit('toast', { message: `Butuh ${cost} Biokredit untuk upgrade skill`, kind: 'warn' });
-      return false;
+    if (!run || run.ended || !run.player.alive) return;
+    const depth = run._skillNotifyDepth || 0;
+    if (depth >= 2) return;
+    run._skillNotifyDepth = depth + 1;
+    try {
+      run.skills.notify(trigger, this.skillCtx());
+    } finally {
+      run._skillNotifyDepth = depth;
     }
-    if (!run.skills.tryUpgrade(slot, run.level)) return false;
-    run.currencyEarned -= cost;
-    audio.ui();
-    buzz('levelup');
-    emit('toast', {
-      message: `${skill.def.name} → RANK ${skill.rank}! (+28% damage, -7% cooldown)`,
-      kind: 'gold',
-    });
-    return true;
   },
+
+  /**
+   * PHAGOS D5 — umumkan progresi skill pasif saat level naik:
+   * toast aktivasi (Lv 3/5/10) + toast rank 2 otomatis (Lv 15).
+   */
+  announceSkillProgress(level) {
+    const run = this.run;
+    if (!run || !run.skills) return;
+    for (let i = 0; i < run.skills.slots.length; i++) {
+      if (level === SKILL_UNLOCK_LEVELS[i]) {
+        const def = run.skills.slots[i].def;
+        run.effects.spawnLabel(run.player.x, run.player.y - 56, `${def.name} AKTIF!`, '#8df7d2');
+        emit('toast', { message: `${def.name} aktif — picu: ${SKILL_TRIGGER_LABEL[def.trigger] || def.trigger}`, kind: 'gold' });
+      }
+    }
+    if (level === SKILL_RANK2_LEVEL) {
+      emit('toast', { message: 'Semua skill pasif → RANK 2! (+28% damage, −7% cooldown)', kind: 'gold' });
+    }
+  },
+
 
   /** Fase 12: Life Steal — pulihkan HP dari damage yang diberikan. */
   onDamageDealt(amount) {
@@ -1709,6 +1710,7 @@ export const game = {
     passiveOnKill(run, this); // V2 Phase 3: heal Mako / frenzy Neo
     onAntigenKill(run, enemy, this); // R3 Modul A: memori antigen per tipe
     cascadeOnDeath(this, enemy); // R6 Modul D: tagged mati → rantai opsonisasi
+    this.fireSkillTrigger('kill'); // PHAGOS D5: skill pasif pemicu 'kill'
 
     // R4 Modul B: korban TELAN dikonversi resource (heal+fuel di tryDevour) —
     // TANPA drop XP/Biokredit/Genom normal — efek visual tetap.

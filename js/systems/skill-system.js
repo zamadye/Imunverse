@@ -1,8 +1,9 @@
 /**
- * skill-system.js — Sistem 3 skill aktif per hero (Skill 1, Skill 2, Ultimate)
- * ala MLBB. Data-driven penuh dari data/skills.json: setiap skill = daftar
- * efek primitif (area, strike, heal, buff, shield, mark, dash, dst.) yang
- * dieksekusi executor di bawah — TIDAK ada logika hero yang di-hardcode.
+ * skill-system.js — PHAGOS D5 (owner): 3 skill PASIF per hero (bukan tombol).
+ * Tiap skill punya `trigger` (pulse/engulf/kill/damaged — data/skills.json)
+ * dan menyala OTOMATIS saat pemicunya terjadi (cooldown = jeda minimum).
+ * Aktivasi di level 3/5/10, rank 2 otomatis di level 15. TIDAK ADA tombol
+ * cast, TIDAK ADA biaya upgrade. Eksekutor efek tetap data-driven.
  */
 
 import { getData, getGameFeel } from '../core/data-store.js';
@@ -13,11 +14,14 @@ import { tryDevour } from './phagocytosis.js'; // R4: Modul B
 import { spawnInflamZone } from './inflammation.js'; // R5: Modul C
 import { chemoActivate } from './chemotaxis.js'; // R7: Modul E
 import { t as tr } from '../systems/i18n.js';
-// Skill combat unlock progression (Lv 3/5/10) + upgrade (Lv 15) — terpusat
+// Progresi pasif: aktif Lv 3/5/10 + rank 2 otomatis Lv 15 — terpusat
 import {
-  isSkillUnlocked, canUpgradeSkill, getSkillUnlockState, getSkillUnlockLevel,
-  skillUpgradeCost, skillRankDamageMult, skillRankCooldownMult, SKILL_MAX_RANK, SKILL_UPGRADE_LEVEL,
+  isSkillUnlocked, getSkillUnlockLevel,
+  skillRankDamageMult, skillRankCooldownMult, SKILL_RANK2_LEVEL,
 } from './skill-unlock.js';
+
+/** Label Indonesia pemicu skill pasif (HUD). */
+export const SKILL_TRIGGER_LABEL = { pulse: 'saat Pulse', engulf: 'saat menelan', kill: 'saat kill', damaged: 'saat terluka' };
 
 export class SkillSystem {
   /**
@@ -43,38 +47,51 @@ export class SkillSystem {
   }
 
   /**
-   * View HUD tombol skill.
+   * View HUD deret pasif (ikon + status, tanpa tombol).
    * @param {number} playerLevel level player di-run (source of truth: run.level)
    */
   getView(playerLevel = Infinity) {
-    return this.slots.map((s, i) => {
-      const lockState = getSkillUnlockState(playerLevel, i, s);
-      return {
-        id: s.def.id, name: tr(s.def.name), color: s.def.color,
-        cdLeft: s.cdLeft, cdTotal: s.def.cooldown, ready: s.cdLeft <= 0, ult: s.ult,
-        locked: lockState === 'LOCKED',
-        unlockLevel: getSkillUnlockLevel(i),
-        lockState,
-        rank: s.rank || 1,
-        maxRank: SKILL_MAX_RANK,
-        upgradeUnlocked: playerLevel >= SKILL_UPGRADE_LEVEL,
-        upgradeReady: s.cdLeft <= 0 && canUpgradeSkill(playerLevel, i, s),
-        upgradeCost: skillUpgradeCost(s),
-      };
-    });
+    return this.slots.map((s, i) => ({
+      id: s.def.id, name: tr(s.def.name), desc: tr(s.def.description || ''),
+      color: s.def.color, ult: s.ult,
+      trigger: s.def.trigger || 'pulse',
+      triggerLabel: SKILL_TRIGGER_LABEL[s.def.trigger] || s.def.trigger,
+      locked: !isSkillUnlocked(playerLevel, i, s),
+      unlockLevel: getSkillUnlockLevel(i),
+      cdLeft: s.cdLeft, cdTotal: s.def.cooldown,
+      rank: s.rank || 1,
+    }));
   }
 
   /**
-   * Aktivasi skill slot i. @returns {boolean} true bila terluncur.
+   * PHAGOS D5: pemicu otomatis — nyalakan semua slot yang cocok.
+   * @param {string} triggerName pulse|engulf|kill|damaged
+   * @param {object} ctx konteks eksekusi (dari game.skillCtx())
+   */
+  notify(triggerName, ctx) {
+    const game = ctx && ctx.game;
+    const run = game && game.run;
+    if (!run || run.ended || !run.player || !run.player.alive) return;
+    for (let i = 0; i < this.slots.length; i++) {
+      const sl = this.slots[i];
+      if (!sl || (sl.def.trigger || 'pulse') !== triggerName) continue;
+      if (sl.cdLeft > 0) continue;
+      try { this.trigger(i, ctx); } catch { /* satu skill gagal → lainnya tetap */ }
+    }
+  }
+
+  /**
+   * Eksekusi skill slot i (dipanggil notify otomatis). @returns {boolean} true bila terluncur.
    * ctx: { game, player, enemies, damage, effects, camera }
    */
   trigger(i, ctx) {
     const s = this.slots[i];
     if (!s || s.cdLeft > 0) return false;
-    // GUARD progression: skill LOCKED tidak boleh tereksekusi lewat jalur apa
-    // pun (klik / keyboard / touch / handler lain). CSS disabled saja tidak cukup.
+    // GUARD progression: slot LOCKED tak boleh tereksekusi lewat jalur apa pun.
     const playerLevel = ctx?.game?.run?.level ?? 1;
     if (!isSkillUnlocked(playerLevel, i, s)) return false;
+    // D5: rank 2 OTOMATIS di level 15 (tanpa biaya/tombol).
+    s.rank = playerLevel >= SKILL_RANK2_LEVEL ? 2 : 1;
     s.cdLeft = s.def.cooldown * skillRankCooldownMult(s);
     // Rank upgrade (Lv 15+) memperkuat damage seluruh efek skill ini
     if ((s.rank || 1) > 1) ctx = { ...ctx, damage: ctx.damage * skillRankDamageMult(s) };
@@ -106,22 +123,11 @@ export class SkillSystem {
       ctx.game.hitStopRun(0.05);
     }
     audio.ability(s.ult ? 'petir' : 'tebasan');
-    this.lastBanner = tr(s.def.name);
-    emit('abilityBanner', { name: tr(s.def.name), color: s.def.color, ult: s.ult });
-    return true;
-  }
-
-  /**
-   * Naikkan rank skill slot i (Lv 15+). Semua guard di sini — handler UI
-   * (klik badge / Shift+digit) cukup memanggil game.upgradeAbilityBySlot().
-   * @returns {boolean} true bila rank benar-benar naik.
-   */
-  tryUpgrade(i, playerLevel) {
-    const s = this.slots[i];
-    if (!s) return false;
-    // GUARD: upgrade masih LOCKED sebelum Lv 15 — tombol tidak boleh berbuat apa-apa
-    if (!canUpgradeSkill(playerLevel, i, s)) return false;
-    s.rank = (s.rank || 1) + 1;
+    // D5: banner hanya untuk slot-3 (ult) agar auto-cast tak membanjiri layar.
+    if (s.ult) {
+      this.lastBanner = tr(s.def.name);
+      emit('abilityBanner', { name: tr(s.def.name), color: s.def.color, ult: s.ult });
+    }
     return true;
   }
 
@@ -224,14 +230,15 @@ export class SkillSystem {
         effects.spawnLabel(t.x, t.y - t.radius - 12, `x${fx.hits}`, s_defColor(run, this));
         break;
       }
-      case 'summon_homing': {
-        for (let i = 0; i < (fx.count || 3); i++) {
-          const ang = (Math.PI * 2 * i) / (fx.count || 3);
-          game.spawnProjectile({
-            pattern: 'homing', x: px + Math.cos(ang) * player.radius, y: py + Math.sin(ang) * player.radius,
-            angle: ang, speed: 260, damage: damage * (fx.mult || 1), pierce: 1, turnRate: 6,
-            color: '#f5c64f',
-          });
+      case 'instant_multi': { // D3: N hit instan ke N terdekat (tanpa proyektil)
+        const sorted = [...enemies].filter((e) => e.alive)
+          .sort((a, b) => (Math.hypot(a.x - px, a.y - py) - Math.hypot(b.x - px, b.y - py)));
+        for (const t of sorted.slice(0, fx.count || 3)) {
+          const dmg = damage * (fx.mult || 1);
+          effects.spawnBurst(t.x, t.y, '#f5c64f', 5, 170, 3);
+          const died = t.takeDamage(dmg);
+          game.spawnHitFeedback(t, dmg, died);
+          if (died) game.onEnemyKilled(t, 'skill');
         }
         break;
       }

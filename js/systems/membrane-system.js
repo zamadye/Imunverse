@@ -7,7 +7,8 @@
  *  - Engulf = fagositosis otomatis (<15% HP di dalam medan → serap, heal + Bio-Point)
  *
  * Modul ini sengaja standalone: menerima `game` (untuk onEnemyKilled,
- * spawnHitFeedback, spawnProjectile, damagePlayer hooks) dan `run`.
+ * spawnHitFeedback, fireSkillTrigger, damagePlayer hooks) dan `run`.
+ * D3: SEMUA damage hero di sini INSTAN (tanpa proyektil pemain).
  * Tidak menyentuh wave/spawner/ekonomi/save.
  */
 
@@ -33,7 +34,8 @@ export function initMembrane(run, heroDef) {
   run.membrane = {
     shape: m.shape || 'circle',
     // Base dari hero; efektif dihitung tiap frame via getMembraneStats
-    baseRadius: m.baseRadius || Math.round((heroDef.baseStats?.radius || 15) * 3.2),
+    // Mastia: baseRadius 0 = tak ada medan pasif (?? agar 0 selamat — || akan jatuh ke fallback!).
+    baseRadius: m.baseRadius ?? Math.round((heroDef.baseStats?.radius || 15) * 3.2),
     baseContactDps: m.contactDps || cfg.contactDpsBase || 8, // PHAGOS Sprint 1: hero menang (D10), 8 = fallback bible §2.1
     basePulseCooldown: m.pulseCooldown || 2.0,
     engulfSpecial: m.engulfSpecial || null,
@@ -75,8 +77,10 @@ export function initMembrane(run, heroDef) {
     // T-Bolt dash
     dashT: 0,
     dashAngle: 0,
-    // Nyx vanish
+    // Nyx vanish + teleportasi (timer frame)
     vanishT: 0,
+    nyxTeleport: null,
+    nyxTeleportT: 0,
     // Adaptive (adaptif mutation) cached bonus
     adaptiveBonus: null,
     // Stats untuk trigger mutasi musuh
@@ -219,7 +223,8 @@ export function getMembraneStats(run) {
   // Baso: radius berdenyut 0.7–1.3× per 2 dtk
   if (mem.shape === 'pulsing') {
     const t = run.time || 0;
-    const osc = 0.5 - 0.5 * Math.cos((t / 2.0) * Math.PI * 2);
+    const period = mem.shapeParams?.periodSec || 2.0;
+    const osc = 0.5 - 0.5 * Math.cos((t / period) * Math.PI * 2);
     radius *= 0.7 + 0.6 * osc;
   }
   // Metamorfosis aktif: radius membesar drastis
@@ -429,6 +434,16 @@ export function updateMembrane(game, dt) {
     player.y += Math.sin(mem.dashAngle) * sp * dt;
   }
   if (mem.vanishT > 0) mem.vanishT -= dt;
+  if (mem.nyxTeleportT > 0) { // Nyx: teleport mendarat sebelum vanish habis
+    mem.nyxTeleportT -= dt;
+    if (mem.nyxTeleportT <= 0 && mem.nyxTeleport && player.alive && !run.ended) {
+      player.x = mem.nyxTeleport.x;
+      player.y = mem.nyxTeleport.y;
+      try { game.arenaClamp(player, player.radius || 15); } catch { /* abaikan */ }
+      run.effects.spawnBurst(player.x, player.y, '#4a235a', 12, 200, 4);
+    }
+    if (mem.nyxTeleportT <= 0) mem.nyxTeleport = null;
+  }
   if (mem.sweepT >= 0) {
     mem.sweepT -= dt;
     if (mem.sweepT < 0) mem.sweepT = -1;
@@ -614,8 +629,8 @@ function contactTick(game) {
     // Slow on contact (lengket / dual outer)
     const slowPct = Math.max(fx.contactSlowPct || 0, ring === 'outer' ? fx.outerSlowPct : 0);
     if (slowPct > 0) e.applySlow(1 - slowPct, 0.25);
-    // Treg hero: selalu slow 25% musuh di medan
-    if (mem.engulfSpecial === 'balance_slow') e.applySlow(0.75, 0.25);
+    // Treg (bible §3): medan slow 50% semua musuh di dalam (hero slow 10% via tregSlow)
+    if (mem.engulfSpecial === 'balance_slow') e.applySlow(0.5, 0.25);
     // Lengket: tarik pelan ke pusat
     if (fx.pullToCenter > 0) {
       const dx = player.x - e.x, dy = player.y - e.y;
@@ -700,8 +715,8 @@ export function dealMembraneDamage(game, enemy, amount, opts = {}) {
   }
   dmg = modifyOutgoingDamage(run, enemy, dmg);
   dmg *= antigenDamageMult(run, enemy);
-  // Eos anti-parasit: bonus vs parasit
-  if (run.membrane?.engulfSpecial === 'parasite_hunter' && enemy.def?.id === 'parasit') dmg *= 1.5;
+  // Eos (bible §3): ×3 damage ke parasit (semua damage membran lewat jalur ini)
+  if (run.membrane?.engulfSpecial === 'parasite_hunter' && enemy.def?.id === 'parasit') dmg *= 3;
   enemy.lastHitDamage = dmg;
   const died = antigenIgnoreArmor(run, enemy) ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
   game.provokeEnemy(enemy);
@@ -787,7 +802,6 @@ export function tryEngulf(game, enemy, opts = {}) {
   // Bio-Point (run-only)
   let bio = membraneCfg().bioPointPerEngulf || 1;
   if (mem.engulfSpecial === 'heal_bonus') bio = Math.ceil(bio * 1.3);
-  if (mem.engulfSpecial === 'parasite_hunter' && enemy.def?.id === 'parasit') bio += 2;
   if (run.itemBuffs && run.itemBuffs.katalis) bio *= 2; // ADDENDUM §2: Katalis Mitosis (2× final)
   run.bioPoints = (run.bioPoints || 0) + bio;
 
@@ -836,6 +850,8 @@ export function tryEngulf(game, enemy, opts = {}) {
 
   // Kill normal (XP, drop, chain) — PHAGOS: engulf tetap kill
   game.onEnemyKilled(enemy, 'engulf');
+  // PHAGOS D5: skill pasif pemicu 'engulf'
+  try { game.fireSkillTrigger('engulf'); } catch { /* abaikan */ }
   try { audio.collect(); } catch { /* headless */ }
   return true;
 }
@@ -896,7 +912,8 @@ function applyEngulfSpecial(game, enemy) {
       run.shield = (run.shield || 0) + Math.round(player.maxHP * 0.1);
       break;
     }
-    case 'cleanse': { // Treg: hapus satu efek negatif (hazard terdekat + heal kecil)
+    case 'balance_slow': { // Treg (bible §3): hapus 1 efek negatif — satu-satunya
+      // efek negatif in-run = hazard arena → musnahkan hazard terdekat.
       if (run.hazards.length > 0) {
         let bi = 0; let bd = Infinity;
         run.hazards.forEach((h, i) => {
@@ -999,6 +1016,9 @@ export function tryPulse(game, opts = {}) {
   // Per-hero pulse behavior
   applyPulseSpecial(game, opts);
 
+  // PHAGOS D5: skill pasif pemicu 'pulse' (manual maupun otomatis)
+  try { game.fireSkillTrigger('pulse'); } catch { /* abaikan */ }
+
   return true;
 }
 
@@ -1094,16 +1114,16 @@ function applyPulseSpecial(game, opts) {
       mem.sweepT = 0.4;
       break;
     }
-    case 'eosinophil': { // Granul ke 5 target terdekat (mini-homing)
+    case 'eosinophil': { // Granul ke 5 target terdekat — instan (D3: tanpa proyektil)
       const targets = nearestEnemies(run, player.x, player.y, 420, 5);
       for (const t of targets) {
-        const ang = Math.atan2(t.y - player.y, t.x - player.x);
-        game.spawnProjectile({
-          pattern: 'homing', x: player.x, y: player.y, angle: ang,
-          speed: 340, damage: Math.max(4, st.contactDps * 1.2),
-          pierce: 1, turnRate: 7, color: '#ff6b81',
-          antiParasitMult: 1.5,
-        });
+        const dmg5 = Math.max(4, st.contactDps * 1.2);
+        const ang5 = Math.atan2(t.y - player.y, t.x - player.x);
+        run.effects.spawnSwipe(player.x, player.y, ang5, 52, 1.0, '#ff6b81');
+        run.effects.spawnBurst(t.x, t.y, '#ff6b81', 5, 170, 3);
+        const died5 = t.takeDamage(dmg5);
+        game.spawnHitFeedback(t, dmg5, died5);
+        if (died5) game.onEnemyKilled(t, 'pulse');
       }
       break;
     }
@@ -1122,18 +1142,28 @@ function applyPulseSpecial(game, opts) {
     case 'treg': { // Hapus debuff + immunity 3 dtk
       mem.tregImmuneT = 3;
       run.tempBuffs.cooldown.mult = 1; run.tempBuffs.cooldown.t = 0;
+      if (run.hazards.length > 0) { // cleanse: musnahkan hazard terdekat
+        let bi = 0; let bd = Infinity;
+        run.hazards.forEach((h, i) => {
+          const d = Math.hypot(h.x - player.x, h.y - player.y);
+          if (d < bd) { bd = d; bi = i; }
+        });
+        run.hazards.splice(bi, 1);
+      }
       if (player.iframes < 0.5) player.iframes = 0.5;
       run.effects.spawnLabel(player.x, player.y - 50, 'IMUN 3 DTK!', '#2ecc71');
       break;
     }
-    case 'bcell': { // 8 antibodi segala arah
-      for (let i = 0; i < 8; i++) {
-        const ang = (i / 8) * Math.PI * 2;
-        game.spawnProjectile({
-          pattern: 'homing', x: player.x, y: player.y, angle: ang,
-          speed: 320, damage: Math.max(4, st.contactDps * 1.5),
-          pierce: 1, turnRate: 6, color: '#bb8fce',
-        });
+    case 'bcell': { // 8 antibodi segala arah — instan ke ≤8 target (D3: tanpa proyektil)
+      const targets8 = nearestEnemies(run, player.x, player.y, st.pulseRadius + 60, 8);
+      for (const t of targets8) {
+        const dmg8 = Math.max(4, st.contactDps * 1.5);
+        const ang8 = Math.atan2(t.y - player.y, t.x - player.x);
+        run.effects.spawnSwipe(player.x, player.y, ang8, 60, 0.9, '#bb8fce');
+        run.effects.spawnBurst(t.x, t.y, '#bb8fce', 5, 160, 3);
+        const died8 = t.takeDamage(dmg8);
+        game.spawnHitFeedback(t, dmg8, died8);
+        if (died8) game.onEnemyKilled(t, 'pulse');
       }
       break;
     }
@@ -1142,17 +1172,11 @@ function applyPulseSpecial(game, opts) {
       player.iframes = Math.max(player.iframes, 0.6);
       const near = nearestEnemies(run, player.x, player.y, 420, 1)[0];
       if (near) {
-        // Teleport ke belakang musuh (relatif ke arah hadap musuh→player lama)
+        // Teleport ke belakang musuh (relatif ke arah hadap musuh→player lama).
+        // Timer FRAME (bukan setTimeout) agar hormat pause/hit-stop/akhir run.
         const ang = Math.atan2(player.y - near.y, player.x - near.x);
-        mem._nyxTeleport = { x: near.x + Math.cos(ang) * (near.radius + 30), y: near.y + Math.sin(ang) * (near.radius + 30) };
-        setTimeout(() => {
-          if (mem._nyxTeleport && player.alive) {
-            player.x = mem._nyxTeleport.x;
-            player.y = mem._nyxTeleport.y;
-            run.effects.spawnBurst(player.x, player.y, '#4a235a', 12, 200, 4);
-          }
-          mem._nyxTeleport = null;
-        }, 480);
+        mem.nyxTeleport = { x: near.x + Math.cos(ang) * (near.radius + 30), y: near.y + Math.sin(ang) * (near.radius + 30) };
+        mem.nyxTeleportT = 0.48;
       }
       break;
     }
@@ -1230,12 +1254,14 @@ function fireBellaAntibody(game, rate) {
     if (d > bd) { bd = d; best = e; }
   });
   if (!best) return;
+  // D3 (owner): TANPA entitas proyektil — damage instan + visual antibodi.
+  const dmg = Math.max(3, st.contactDps * 0.8);
   const ang = Math.atan2(best.y - player.y, best.x - player.x);
-  game.spawnProjectile({
-    pattern: 'homing', x: player.x, y: player.y, angle: ang,
-    speed: 360, damage: Math.max(3, st.contactDps * 0.8),
-    pierce: 1, turnRate: 8, color: '#bb8fce',
-  });
+  run.effects.spawnSwipe(player.x, player.y, ang, 46, 1.1, '#bb8fce');
+  run.effects.spawnBurst(best.x, best.y, '#bb8fce', 6, 170, 3);
+  const died = best.takeDamage(dmg);
+  game.spawnHitFeedback(best, dmg, died);
+  if (died) game.onEnemyKilled(best, 'antibody');
   void rate; void mem;
 }
 

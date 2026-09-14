@@ -12,10 +12,10 @@
 
 import { getMutations, getData } from '../core/data-store.js';
 
-/** Tier yang boleh muncul di level tertentu. */
+/** Tier yang boleh muncul di level tertentu (bible §4.1). */
 export function tiersForLevel(level) {
   if (level <= 4) return [1];
-  if (level <= 8) return [2];
+  if (level <= 8) return [1, 2];
   return [2, 3];
 }
 
@@ -157,8 +157,8 @@ export function tierLabel(tier) {
  * @returns {object|null} kartu upgrade atau null bila pool habis
  */
 function rollLegacySafety(run) {
+  // PHAGOS Sprint 2: pool = 5 stat boost §4.1 (seluruh pool = safety net).
   const pool = (getData().upgrades.levelUpPool || []).filter((u) =>
-    ['damage', 'maxHP', 'moveSpeed', 'magnet'].includes(u.id) &&
     (run.upgrades[u.id] || 0) < (u.maxStacks || 99));
   if (pool.length === 0) return null;
   const u = pool[Math.floor(Math.random() * pool.length)];

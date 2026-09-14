@@ -28,7 +28,8 @@ import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { squadMultipliers } from '../../systems/upgrade-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { masteryInfo } from '../../systems/mastery-system.js';
-import { SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL, SKILL_MAX_RANK } from '../../systems/skill-unlock.js';
+import { SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../../systems/skill-unlock.js';
+import { SKILL_TRIGGER_LABEL } from '../../systems/skill-system.js';
 
 let heroId = null;
 let keyHandler = null;
@@ -86,7 +87,7 @@ function describeSkillEffects(def) {
       case 'devour': return tr(`Telan musuh sekarat — jadi bahan bakar`);
       case 'execute': return tr(`Eksekusi bila target sekarat (×${fx.execMult})`);
       case 'mark': return tr(`Tandai target — damage diterima +${fx.dmg}% (${fx.duration}s)`);
-      case 'summon_homing': return tr(`Luncurkan ${fx.count || 3} proyektil pemburu`);
+      case 'instant_multi': return tr(`Hantam ${fx.count || 3} target terdekat sekaligus`);
       case 'instant_hits': return tr(`Hantaman beruntun ×${fx.hits || 3}`);
       case 'annihilate': return tr(`Anihilasi target + percikan area`);
       case 'shield_self': return tr(`Perisai +${fx.amount}`);
@@ -106,14 +107,14 @@ function buildSkillFloatContent(heroDef, index) {
       el('div', { class: 'hd-skill-modal-ico' }, [skillChip(def, { ult: isUlt })]),
       el('div', { class: 'hd-skill-pop-titles' }, [
         el('b', { class: 'hd-skill-pop-name', text: tr(def.name) }),
-        el('span', { class: 'hd-skill-pop-tag', text: `${isUlt ? 'ULTIMATE' : tr('Skill aktif')} · ${tr('Slot')} ${index + 1} · CD ${def.cooldown}s` }),
+        el('span', { class: 'hd-skill-pop-tag', text: `${isUlt ? 'ULTIMATE' : tr('Pasif')} · ${SKILL_TRIGGER_LABEL[def.trigger] || def.trigger} · CD ${def.cooldown}s` }),
       ]),
     ]),
     el('p', { class: 'hd-skill-pop-desc', text: tr(def.description || '') }),
     el('ul', { class: 'hd-skill-effects' }, describeSkillEffects(def).slice(0, 2).map((x) => el('li', { text: x }))),
     el('div', { class: 'hd-skill-req' }, [
       el('span', { class: 'hd-skill-req-chip', text: tr(`Terbuka di Level ${unlockLv} (dalam run)`) }),
-      el('span', { class: 'hd-skill-req-chip upg', text: tr(`Upgrade terbuka di Level ${SKILL_UPGRADE_LEVEL} (dalam run)`) }),
+      el('span', { class: 'hd-skill-req-chip upg', text: tr(`Rank 2 otomatis di Level ${SKILL_RANK2_LEVEL}`) }),
     ]),
   ]);
 }

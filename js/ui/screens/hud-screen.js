@@ -27,9 +27,9 @@ export function hide() {
 }
 
 /**
- * Fase 12 — grid skill ala MLBB: S1, S2 (atas) + ULTIMATE (bawah, lebar).
- * Data dari run.skills (data/skills.json) — setiap tombol punya overlay
- * cooldown (gelap + angka sisa detik) & label tombol keyboard 1/2/3.
+ * PHAGOS D5 — baris skill PASIF: S1, S2 + ULTIMATE (posisi tetap, muscle
+ * memory). BUKAN tombol cast — indikator status: ikon + overlay cooldown +
+ * label pemicu (Pulse/Kill/Telan/Terluka) + kunci Lv + pip rank. Klik = info.
  */
 // UI/UX BUILD 43: ikon skill PER-SKILL (33 ikon) digambar khusus dalam bahasa visual
 // Imunverse (set assets/icons/menu-*.svg) — sumber tunggal js/ui/skill-icons.js, dipakai
@@ -71,7 +71,7 @@ export function buildAbilityBar() {
     btn.style.setProperty('--sk', view.color || '#35d0ba');
     btn.style.setProperty('--hero', visual.heroColor);
     btn.style.setProperty('--eq', visual.equityColor);
-    btn.setAttribute('aria-label', `${view.name} — ${visual.stageLabel}`);
+    btn.setAttribute('aria-label', `${view.name} (pasif, picu: ${view.triggerLabel}) — ${visual.stageLabel}`);
     const skillTitle = def?.description ? `${view.name} — ${def.description}` : view.name;
     btn.title = visual.cue ? `${skillTitle} · ${visual.stageLabel}: ${visual.cue}` : `${skillTitle} · ${visual.stageLabel}`;
     btn.innerHTML =
@@ -81,26 +81,19 @@ export function buildAbilityBar() {
       `<span class="sk-name">${view.name}</span>` +
       `<div class="cd-fill"></div>` +
       `<span class="cd-num"></span>` +
-      `<span class="key-tag">${i + 1}</span>` +
+      // PHAGOS D5: label pemicu (pengganti key-tag — tidak ada cast manual)
+      `<span class="key-tag sk-trigger">${view.triggerLabel}</span>` +
       // Locked overlay: ikon kunci + level pembuka — slot TETAP di tempatnya
       `<span class="sk-lock" aria-hidden="true"><img src="assets/icons/ui-lock.svg" alt="" draggable="false"/><b>Lv ${view.unlockLevel}</b></span>` +
-      // Rank pips (Lv 15+: sistem upgrade)
-      `<span class="sk-rank" aria-hidden="true">${[0, 1, 2].map((p) => `<i data-pip="${p + 1}"></i>`).join('')}</span>` +
-      // Badge upgrade (+): klik = upgrade (Lv 15+), bukan cast
-      `<span class="sk-up" role="button" aria-label="${t('Upgrade skill')}">+</span>`;
-    btn.addEventListener('click', (ev) => {
-      // Badge (+) = upgrade skill (Lv 15 membuka sistem upgrade)
-      if (ev.target && ev.target.closest && ev.target.closest('.sk-up')) {
-        game.upgradeAbilityBySlot(i);
-        return;
-      }
-      // Skill terkunci: tampilkan requirement, TIDAK ada gameplay action.
-      // (Guard gameplay tetap di game.useAbilityBySlot — klik tak bisa membocori aksi)
+      // Rank pip tunggal: menyala saat rank 2 (otomatis di Lv 15)
+      `<span class="sk-rank" aria-hidden="true"><i data-pip="2"></i></span>`;
+    // PHAGOS D5: klik = info (nama + pemicu + deskripsi), BUKAN aksi gameplay.
+    btn.addEventListener('click', () => {
       if (btn.classList.contains('locked')) {
         emitLockedHint(view);
         return;
       }
-      game.useAbilityBySlot(i);
+      emitPassiveInfo(view);
     });
     bar.appendChild(btn);
   });
@@ -113,6 +106,16 @@ function emitLockedHint(view) {
   if (now - lockHintT < 900) return; // anti-spam toast saat spam-klik
   lockHintT = now;
   emit('toast', { message: t(`${view.name} terkunci — Terbuka di Level ${view.unlockLevel}`), kind: 'warn' });
+}
+
+/** PHAGOS D5: klik skill pasif aktif → info ringkas (nama + pemicu + rank). */
+let passiveInfoT = 0;
+function emitPassiveInfo(view) {
+  const now = performance.now();
+  if (now - passiveInfoT < 900) return;
+  passiveInfoT = now;
+  const rankTxt = (view.rank || 1) > 1 ? ` · Rank ${view.rank}` : '';
+  emit('toast', { message: `${view.name} (pasif — picu: ${view.triggerLabel}${rankTxt})${view.desc ? ` — ${view.desc}` : ''}`, kind: 'info' });
 }
 
 /** Sinkronkan tombol skill tiap frame: overlay cooldown + angka sisa detik + lock/rank. */
@@ -136,22 +139,11 @@ export function updateAbilityBar(abilities) {
       }
     }
     if (num) num.textContent = view.ready || view.locked ? '' : Math.ceil(view.cdLeft);
-    // Rank pips: terisi sesuai rank (rank 1 = tanpa pip, sesuai SKILL_MAX_RANK − 1)
+    // Rank pip tunggal: menyala saat rank 2 (otomatis di Lv 15)
     const rankNode = node.querySelector('.sk-rank');
     if (rankNode) {
       rankNode.classList.toggle('visible', (view.rank || 1) > 1);
-      rankNode.querySelectorAll('i').forEach((pip, p) => pip.classList.toggle('on', p < (view.rank || 1) - 1));
-    }
-    // Badge upgrade: tersembunyi saat skill terkunci; kunci halus sebelum Lv 15;
-    // menyala saat upgrade tersedia & siap
-    const up = node.querySelector('.sk-up');
-    if (up) {
-      up.classList.toggle('visible', !view.locked);
-      up.classList.toggle('locked', !view.upgradeUnlocked && !view.locked);
-      up.classList.toggle('ready', !!view.upgradeReady);
-      up.title = view.upgradeUnlocked
-        ? (view.upgradeReady ? t(`Upgrade ke Rank ${(view.rank || 1) + 1} — ${view.upgradeCost} antibodi`) : `Rank ${view.rank}/${view.maxRank}`)
-        : t('Upgrade skill — Terbuka di Level 15');
+      rankNode.querySelectorAll('i').forEach((pip) => pip.classList.toggle('on', (view.rank || 1) > 1));
     }
     if (node.dataset.lockHint !== String(!!view.locked)) node.dataset.lockHint = String(!!view.locked);
   });

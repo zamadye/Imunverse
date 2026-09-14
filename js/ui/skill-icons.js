@@ -420,7 +420,7 @@ export const KIND_FALLBACK = {
   pull: 'taunt', protect_self: 'defensive_stance', devour: 'devour', mark: 'mark_target',
   heal: 'heal_pulse', buff_self: 'empower', area: 'grenade', instant_hits: 'blitz',
   strike: 'precision_shot', shield_self: 'barrier', execute: 'execute', buff_allies: 'rally',
-  summon_homing: 'antibody_burst', dash: 'shadowstep', annihilate: 'annihilate',
+  instant_multi: 'antibody_burst', dash: 'shadowstep', annihilate: 'annihilate',
 };
 
 /** Markup SVG ikon untuk definisi skill (data/skills.json) — per-id, fallback per-jenis. */

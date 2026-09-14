@@ -103,11 +103,13 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 ### Sprint 2 — Mutasi & hero
 
 - [x] 11. `data/mutations.json` — ✅ (18, tier, bioCost cocok)
-- [ ] 12. **Pool level-up §4.1** (L2–4 / L5–8 / L9+) + **stat boost membran** (ganti pool shooter `levelUpPool`)
+- [x] 12. **Pool level-up §4.1** (L2–4 / L5–8 / L9+) + **stat boost membran** ✅ (ganti pool shooter `levelUpPool`)
 - [x] 13. `data/enemy-mutations.json` — ✅
-- [~] 14. Inject strain — ✅ mekanisme; samakan ambang trigger ke tabel §4.2
-- [ ] 15. **Retune 11 hero ke tabel §3** (radius + cooldown; perilaku spesial diaudit satu per satu)
-- [ ] **16. CHECKPOINT DEVICE (owner): tiap hero terasa BERBEDA + putuskan D4 (squad A/B). STOP.**
+- [x] 14. Inject strain ✅ (mekanisme + ambang trigger = tabel §4.2)
+- [x] 15. **Retune 11 hero ke tabel §3** ✅ (radius + cooldown; D3 + D5 selesai — lihat bawah)
+- [x] 15b. **D3 instan** ✅ — Bella auto-antibodi + Pulse 8-arah, Eos Pulse granul ×5: SEMUA damage instan-dalam-medan (visual swipe/burst, cause `antibody`/`pulse`); nol proyektil pemain. `summon_homing` → `instant_multi`.
+- [x] 15c. **D5 pasif** ✅ — 33 skill punya `trigger` (pulse 16 / damaged 10 / engulf 4 / kill 3); `SkillSystem.notify()` dipicu Pulse/engulf/kill/damaged (guard rekursi 2); cast+upgrade manual DICABUT (game/main/HUD/keyboard 1-3/Shift); HUD = baris pasif (label pemicu + pip rank); rank 2 otomatis Lv 15; toast aktivasi Lv 3/5/10 + rank 2. E2E r4/r5/r7/mlbb/character-visual ditunda ke item 16.
+- [ ] **16. CHECKPOINT DEVICE (owner): tiap hero terasa BERBEDA + putuskan D4 (squad A/B) + selaraskan E2E basi (r4/r5/r7/mlbb/character-visual). STOP.**
 
 ### Sprint 3 — Ekonomi & progresi
 

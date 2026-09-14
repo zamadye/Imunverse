@@ -716,25 +716,14 @@ async function boot() {
     btn.addEventListener('click', () => backToContext(btn.dataset.back));
   });
 
-  // Keyboard kemampuan aktif (j/k/l/o sesuai data/abilities.json + angka 1-4)
+  // PHAGOS D5: skill hero 100% PASIF — tidak ada tombol cast/upgrade.
+  // Satu-satunya aksi tempur keyboard: 4 / T / K = PULSE langsung.
+  // (SPASI ditangani InputHandler — antrean edge-trigger — jangan di sini.)
   window.addEventListener('keydown', (ev) => {
     if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const target = ev.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
     const key = ev.key;
-    // 1/2/3 = skill hero (slot 3 = ultimate); 4/T/K = PULSE langsung
-    // Skill combat unlock: 1/2/3 cast (guard Lv 3/5/10 di game.useAbilityBySlot);
-    // Shift+1/2/3 = UPGRADE skill (guard Lv 15 di game.upgradeAbilityBySlot).
-    // ev.code dipakai agar Shift+digit (yang mengubah ev.key jadi '!' dst.) tetap dikenali.
-    const digitSlot = { Digit1: 0, Digit2: 1, Digit3: 2 }[ev.code];
-    if (digitSlot !== undefined) {
-      ev.preventDefault();
-      if (ev.shiftKey) game.upgradeAbilityBySlot(digitSlot);
-      else game.useAbilityBySlot(digitSlot);
-      return;
-    }
-    // PHAGOS: 4 / T = Pulse langsung. SPASI ditangani InputHandler (antrean
-    // edge-trigger) agar tidak memicu ganda — jangan dipanggil di sini.
     if (key === '4' || key.toLowerCase() === 't' || key.toLowerCase() === 'k') {
       ev.preventDefault();
       game.triggerPulse();
@@ -948,12 +937,12 @@ async function runAutotest() {
     }
     log('upgradeApplied', (Object.keys(game.run.upgrades).length + (game.run.activeMutations || []).length) >= 1 && !STATE.levelUpOpen);
 
-    // Kemampuan aktif: petir (slot 3) terluncur → cooldown berjalan
-    // (skill combat unlock Lv 3/5/10: harness membuka slot manual — pola yang
-    // sama dengan scripts/e2e-mlbb.mjs — agar efek skill tetap teruji langsung)
+    // PHAGOS D5: skill pasif (slot 3) menyala via pemicunya → cooldown berjalan
+    // (harness membuka slot manual — pola yang sama dengan e2e-mlbb —
+    // agar efek skill tetap teruji langsung tanpa menunggu level)
     game.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
-    const fired = game.useAbilityBySlot(2);
-    log('abilityFired', fired && game.run.skills.slots[2].cdLeft > 0);
+    game.fireSkillTrigger(game.run.skills.slots[2].def.trigger);
+    log('abilityFired', game.run.skills.slots[2].cdLeft > 0);
 
     // Drop bagian evolusi: bunuh 30 musuh elite (30%/kill) → pasti dapat,
     // lalu teleport semua pickup bagian ke player dan proses pengambilan.

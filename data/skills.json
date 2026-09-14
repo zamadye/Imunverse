@@ -6,6 +6,7 @@
    "name": "Taunt",
    "description": "Tarik perhatian musuh di sekitar lalu bentalkan diri.",
    "cooldown": 8,
+   "trigger": "damaged",
    "color": "#4a7c59",
    "effects": [
     {
@@ -23,6 +24,7 @@
    "name": "Sikap Bertahan",
    "description": "Damage yang diterima -30% selama 4 detik.",
    "cooldown": 12,
+   "trigger": "damaged",
    "color": "#5d8a6b",
    "effects": [
     {
@@ -37,6 +39,7 @@
    "name": "Devour",
    "description": "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Ultimate +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.",
    "cooldown": 20,
+   "trigger": "engulf",
    "color": "#d4a017",
    "effects": [
     {
@@ -51,6 +54,7 @@
    "name": "Mark Target",
    "description": "Tandai musuh terdekat: menerima +20% damage 6 dtk.",
    "cooldown": 7,
+   "trigger": "kill",
    "color": "#ff8c00",
    "effects": [
     {
@@ -65,6 +69,7 @@
    "name": "Heal Pulse",
    "description": "Pulihkan 15 HP untukmu & pasukan di sekitar.",
    "cooldown": 9,
+   "trigger": "damaged",
    "color": "#ffd700",
    "effects": [
     {
@@ -79,6 +84,7 @@
    "name": "Overcharge",
    "description": "Semua serangan +30% selama 5 detik.",
    "cooldown": 22,
+   "trigger": "pulse",
    "color": "#ffaa00",
    "effects": [
     {
@@ -99,6 +105,7 @@
    "name": "Grenade",
    "description": "Ledakan granula: area damage 2.5×.",
    "cooldown": 6,
+   "trigger": "pulse",
    "color": "#1a5276",
    "effects": [
     {
@@ -113,6 +120,7 @@
    "name": "Adrenaline",
    "description": "Kecepatan +30% selama 3 detik.",
    "cooldown": 10,
+   "trigger": "kill",
    "color": "#bdc3c7",
    "effects": [
     {
@@ -127,6 +135,7 @@
    "name": "Blitz",
    "description": "5 serangan kilat beruntun ke target terdekat.",
    "cooldown": 18,
+   "trigger": "pulse",
    "color": "#2980b9",
    "effects": [
     {
@@ -141,6 +150,7 @@
    "name": "Poison Dart",
    "description": "Dart beracun: damage + racun 4 detik.",
    "cooldown": 7,
+   "trigger": "pulse",
    "color": "#ff6b81",
    "effects": [
     {
@@ -158,6 +168,7 @@
    "name": "Evade",
    "description": "Menghindari 1 serangan berikutnya penuh.",
    "cooldown": 12,
+   "trigger": "damaged",
    "color": "#ff8a80",
    "effects": [
     {
@@ -172,6 +183,7 @@
    "name": "Parasite Strike",
    "description": "Tombak pemburu: damage besar 6× ke 1 musuh.",
    "cooldown": 16,
+   "trigger": "pulse",
    "color": "#e05570",
    "effects": [
     {
@@ -185,6 +197,7 @@
    "name": "Histamine",
    "description": "Awan histamin: damage kecil + musuh lambat 40%.",
    "cooldown": 8,
+   "trigger": "damaged",
    "color": "#8e44ad",
    "effects": [
     {
@@ -203,6 +216,7 @@
    "name": "Allergy",
    "description": "Musuh di dekat panik — tertegun sejenak.",
    "cooldown": 11,
+   "trigger": "pulse",
    "color": "#6c3483",
    "effects": [
     {
@@ -218,6 +232,7 @@
    "name": "Chemical Storm",
    "description": "Badai kimia luas: damage 3× + lambat 5 detik.",
    "cooldown": 20,
+   "trigger": "pulse",
    "color": "#9b59b6",
    "effects": [
     {
@@ -236,6 +251,7 @@
    "name": "Barrier",
    "description": "Perisai menyerap 30 damage.",
    "cooldown": 9,
+   "trigger": "damaged",
    "color": "#a03328",
    "effects": [
     {
@@ -249,6 +265,7 @@
    "name": "Sting",
    "description": "Sengatan + musuh target melambat.",
    "cooldown": 7,
+   "trigger": "pulse",
    "color": "#8b4513",
    "effects": [
     {
@@ -266,6 +283,7 @@
    "name": "Anaphylaxis",
    "description": "Ledakan reaksi hebat: area damage 5×.",
    "cooldown": 24,
+   "trigger": "engulf",
    "color": "#c0392b",
    "effects": [
     {
@@ -280,6 +298,7 @@
    "name": "Precision Shot",
    "description": "Tembakan presisi: 2.5× damage.",
    "cooldown": 6,
+   "trigger": "pulse",
    "color": "#00d2ff",
    "effects": [
     {
@@ -293,6 +312,7 @@
    "name": "Lock On",
    "description": "Target dikunci: menerima +50% damage 5 dtk.",
    "cooldown": 10,
+   "trigger": "kill",
    "color": "#00a8cc",
    "effects": [
     {
@@ -307,6 +327,7 @@
    "name": "Execute",
    "description": "Damage 3× — atau 8× bila HP target di bawah 20%.",
    "cooldown": 20,
+   "trigger": "pulse",
    "color": "#7fdbff",
    "effects": [
     {
@@ -322,6 +343,7 @@
    "name": "Rally",
    "description": "Pasukan serang +15% selama 5 detik.",
    "cooldown": 9,
+   "trigger": "pulse",
    "color": "#f1c40f",
    "effects": [
     {
@@ -342,6 +364,7 @@
    "name": "Command",
    "description": "Perintah fokus: pasukan +40% damage 5 detik.",
    "cooldown": 11,
+   "trigger": "pulse",
    "color": "#f39c12",
    "effects": [
     {
@@ -357,6 +380,7 @@
    "name": "Battle Cry",
    "description": "Semua +50% serangan & pertahanan +30% (8 dtk).",
    "cooldown": 26,
+   "trigger": "pulse",
    "color": "#ffd93d",
    "effects": [
     {
@@ -378,6 +402,7 @@
    "name": "Pacify",
    "description": "Tenangkan 1 musuh — tak bergerak 2 detik.",
    "cooldown": 9,
+   "trigger": "damaged",
    "color": "#2ecc71",
    "effects": [
     {
@@ -392,6 +417,7 @@
    "name": "Shield",
    "description": "Perisai 25 HP untukmu & pasukan dekat.",
    "cooldown": 8,
+   "trigger": "damaged",
    "color": "#27ae60",
    "effects": [
     {
@@ -405,6 +431,7 @@
    "name": "Truce",
    "description": "Gencatan senjata: semua damage -50% 4 detik.",
    "cooldown": 22,
+   "trigger": "damaged",
    "color": "#16a085",
    "effects": [
     {
@@ -428,10 +455,11 @@
    "name": "Antibody",
    "description": "Luncurkan 3 antibodi pengejar.",
    "cooldown": 7,
+   "trigger": "pulse",
    "color": "#bb8fce",
    "effects": [
     {
-     "kind": "summon_homing",
+     "kind": "instant_multi",
      "count": 3,
      "mult": 1.2
     }
@@ -442,6 +470,7 @@
    "name": "Empower",
    "description": "Serangan +25% selama 4 detik.",
    "cooldown": 10,
+   "trigger": "engulf",
    "color": "#d7bde2",
    "effects": [
     {
@@ -456,6 +485,7 @@
    "name": "Plasma Rain",
    "description": "Hujan plasma: 10 serangan beruntun.",
    "cooldown": 22,
+   "trigger": "pulse",
    "color": "#af7ac5",
    "effects": [
     {
@@ -470,6 +500,7 @@
    "name": "Backstab",
    "description": "Serangan matang dari arah gelap: 2.5×.",
    "cooldown": 6,
+   "trigger": "pulse",
    "color": "#4a235a",
    "effects": [
     {
@@ -483,6 +514,7 @@
    "name": "Shadowstep",
    "description": "Menghilang & muncul di depan arah gerak.",
    "cooldown": 8,
+   "trigger": "damaged",
    "color": "#1c1c1c",
    "effects": [
     {
@@ -496,6 +528,7 @@
    "name": "Annihilate",
    "description": "3× + ledakan + 10% HP maksimum target.",
    "cooldown": 20,
+   "trigger": "engulf",
    "color": "#6c3483",
    "effects": [
     {

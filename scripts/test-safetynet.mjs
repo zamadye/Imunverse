@@ -40,6 +40,7 @@ const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
 const { loadAllData, getData } = await mod('js/core/data-store.js');
 await loadAllData();
 const { rollLevelUpChoices, applyLevelUp } = await mod('js/systems/upgrade-system.js');
+const { rollMutationChoices, tiersForLevel } = await mod('js/systems/mutation-system.js');
 const { getMembraneStats } = await mod('js/systems/membrane-system.js');
 
 // ---------- Uji ----------
@@ -124,6 +125,55 @@ function mockMemRun(upgrades) {
   ok('engulf-hitstop-0.15', gf.engulf && gf.engulf.hitStop === 0.15, JSON.stringify(gf.engulf));
   ok('hitstop-no-dups', !('pulse' in gf.hitStop) && !('engulf' in gf.hitStop), JSON.stringify(gf.hitStop));
   ok('membrane-no-hitstop-key', !('pulseHitStopSec' in (mem.defaults || {})), JSON.stringify(Object.keys(mem.defaults || {})));
+}
+
+// 6. Aturan pool §4.1: tier per level + safety net L2-4 + katup anti-buntu
+{
+  ok('tiers-L2-4', JSON.stringify(tiersForLevel(2)) === '[1]' && JSON.stringify(tiersForLevel(4)) === '[1]');
+  ok('tiers-L5-8', JSON.stringify(tiersForLevel(5)) === '[1,2]' && JSON.stringify(tiersForLevel(8)) === '[1,2]');
+  ok('tiers-L9+', JSON.stringify(tiersForLevel(9)) === '[2,3]' && JSON.stringify(tiersForLevel(20)) === '[2,3]');
+  const mock = (level, bio, active) => ({ level, bioPoints: bio, activeMutations: active || [], upgrades: {} });
+  const c3 = rollMutationChoices(mock(3, 0));
+  ok('L3-2mut-1safety', c3.length === 3 && c3.filter((c) => c.isMutation).length === 2 && c3.filter((c) => !c.isMutation).length === 1,
+    JSON.stringify(c3.map((c) => c.id)));
+  ok('L3-safety-new-pool', c3.filter((c) => !c.isMutation).every((c) => EXPECT_IDS.includes(c.id)));
+  ok('L3-mut-tier1', c3.filter((c) => c.isMutation).every((c) => c.tier === 1));
+  const c6 = rollMutationChoices(mock(6, 0));
+  ok('L6-no-tier2-broke', c6.every((c) => !c.isMutation || c.tier !== 2 || c.lockedByBio),
+    JSON.stringify(c6.map((c) => [c.id, c.lockedByBio])));
+  // Katup: L9 bio 0 → 2 mutasi terkunci + 1 safety (tak pernah 3 terkunci)
+  const c9 = rollMutationChoices(mock(9, 0));
+  ok('L9-valve-inserts-safety', c9.length === 3 && c9.filter((c) => !c.lockedByBio && !c.isMutation).length === 1
+    && c9.some((c) => !c.lockedByBio), JSON.stringify(c9.map((c) => [c.id, !!c.lockedByBio])));
+  // Pool habis total → [] (game.js fallback ke rollLevelUpChoices — by design)
+  const allIds = data.mutations.mutations.map((m) => m.id);
+  const cEmpty = rollMutationChoices(mock(9, 9999, allIds));
+  ok('pool-exhausted-empty', Array.isArray(cEmpty) && cEmpty.length === 0);
+}
+
+// 7. Ambang trigger musuh §4.2 (data)
+{
+  const tr = Object.fromEntries(data.enemyMutations.traits.map((t) => [t.id, t.trigger]));
+  ok('trig-radius-2x', tr.penembak_asam.threshold === 2.0 && tr.penembak_asam.compare === '>');
+  ok('trig-contact-2x', tr.kebal_membran.threshold === 2.0 && tr.kebal_membran.compare === '>');
+  ok('trig-engulf-10', tr.beracun_saat_diserap.threshold === 10 && tr.beracun_saat_diserap.compare === '>');
+  ok('trig-pulse-8', tr.kebal_knockback.threshold === 8 && tr.kebal_knockback.compare === '>');
+  ok('trig-waves-6-10-14', JSON.stringify(data.enemyMutations.mutationWaves) === '[6,10,14]');
+}
+
+// 8. Angka hero = tabel bible §3 (radius + cooldown)
+{
+  const expect = {
+    macrophage: [52, 2.0], tcd8: [44, 1.5], dendritic: [40, 2.5], neutrophil: [32, 1.0],
+    eosinophil: [40, 2.0], basophil: [44, 2.5], mastcell: [0, 4.0], tcd4: [48, 2.0],
+    treg: [48, 3.0], bcell: [36, 2.5], nkcell: [40, 2.0],
+  };
+  const hs = Object.fromEntries(data.heroes.heroes.map((h) => [h.id, (h.membrane || {})]));
+  const bad = Object.entries(expect).filter(([id, [r, cd]]) => hs[id].baseRadius !== r || hs[id].pulseCooldown !== cd);
+  ok('heroes-11-radius-cd', bad.length === 0, JSON.stringify(bad));
+  ok('mastia-pulsebase-56', hs.mastcell.shapeParams && hs.mastcell.shapeParams.pulseBaseRadius === 56);
+  ok('tbolt-insta25', hs.tcd8.engulfThreshold === 0.25);
+  ok('nyx-insta30', hs.nkcell.engulfThreshold === 0.3);
 }
 
 console.log(`\nRESULT: ${pass} PASS, ${fail} FAIL${fails.length ? ' → ' + fails.join(', ') : ''}`);

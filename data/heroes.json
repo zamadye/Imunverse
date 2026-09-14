@@ -54,7 +54,7 @@
       "equityArchetype": "phagocyte",
       "membrane": {
         "shape": "circle",
-        "baseRadius": 72,
+        "baseRadius": 52,
         "contactDps": 14,
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 3.0,
@@ -130,9 +130,9 @@
       "equityArchetype": "dendritic",
       "membrane": {
         "shape": "tentacles",
-        "baseRadius": 48,
+        "baseRadius": 40,
         "contactDps": 12,
-        "pulseCooldown": 2.2,
+        "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
@@ -210,7 +210,7 @@
       "equityArchetype": "net",
       "membrane": {
         "shape": "circle",
-        "baseRadius": 38,
+        "baseRadius": 32,
         "contactDps": 26,
         "pulseCooldown": 1.0,
         "pulseRadiusMult": 2.0,
@@ -287,7 +287,7 @@
       "equityArchetype": "granule_lance",
       "membrane": {
         "shape": "cone_trail",
-        "baseRadius": 48,
+        "baseRadius": 40,
         "contactDps": 15,
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 2.5,
@@ -368,9 +368,9 @@
       "equityArchetype": "vesicle_cloud",
       "membrane": {
         "shape": "pulsing",
-        "baseRadius": 52,
+        "baseRadius": 44,
         "contactDps": 13,
-        "pulseCooldown": 2.2,
+        "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
@@ -450,13 +450,13 @@
         "shape": "pulse_only",
         "baseRadius": 0,
         "contactDps": 16,
-        "pulseCooldown": 3.0,
+        "pulseCooldown": 4.0,
         "pulseRadiusMult": 4.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
         "engulfSpecial": "armor_stack",
         "shapeParams": {
-          "pulseBaseRadius": 64
+          "pulseBaseRadius": 56
         }
       },
       "_weapon": {
@@ -525,9 +525,9 @@
       "equityArchetype": "cytotoxic",
       "membrane": {
         "shape": "cone",
-        "baseRadius": 48,
+        "baseRadius": 44,
         "contactDps": 22,
-        "pulseCooldown": 1.8,
+        "pulseCooldown": 1.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.25,
         "engulfHealPct": 0.07,
@@ -603,9 +603,9 @@
       "equityArchetype": "helper",
       "membrane": {
         "shape": "support",
-        "baseRadius": 60,
+        "baseRadius": 48,
         "contactDps": 18,
-        "pulseCooldown": 2.4,
+        "pulseCooldown": 2.0,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
@@ -679,9 +679,9 @@
       "equityArchetype": "regulator",
       "membrane": {
         "shape": "circle",
-        "baseRadius": 60,
+        "baseRadius": 48,
         "contactDps": 13,
-        "pulseCooldown": 2.0,
+        "pulseCooldown": 3.0,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
@@ -757,9 +757,9 @@
       "equityArchetype": "antibody",
       "membrane": {
         "shape": "circle",
-        "baseRadius": 52,
+        "baseRadius": 36,
         "contactDps": 12,
-        "pulseCooldown": 2.2,
+        "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
         "engulfHealPct": 0.07,
@@ -831,7 +831,7 @@
       "equityArchetype": "nk_spike",
       "membrane": {
         "shape": "invisible",
-        "baseRadius": 52,
+        "baseRadius": 40,
         "contactDps": 20,
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 2.5,

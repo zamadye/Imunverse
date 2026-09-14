@@ -763,7 +763,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   position: absolute; left: 0; top: 0; width: var(--skw, 58px); height: var(--skw, 58px); inset: auto;
   font-size: calc(var(--skw, 58px) * .38); color: #fffdf4; text-shadow: 0 1px 0 #123f3a, 0 0 6px rgba(18, 63, 58, .9);
 }
-/* Kunci tombol keyboard: chip kecil di sudut kiri-atas pelat */
+/* PHAGOS D5: label pemicu skill pasif — chip kecil di sudut kiri-atas pelat */
 #screen-hud .ability-btn .key-tag {
   top: 1px; left: 1px; font-size: 7px; line-height: 1; padding: 2px 4px; border-radius: 6px;
   background: #123f3a; color: #fffdf4; border: 1.5px solid #fffdf4; z-index: 4;
@@ -932,7 +932,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   box-shadow: 0 1px 3px rgba(18, 63, 58, .25);
 }
 
-/* ---- Rank pips (upgrade skill Lv 15+) ---- */
+/* ---- Rank pip tunggal (rank 2 otomatis di Lv 15) ---- */
 #screen-hud .ability-btn .sk-rank {
   display: none; position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
   gap: 2.5px; z-index: 5; pointer-events: none;
@@ -947,30 +947,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   box-shadow: 0 0 4px rgba(245, 198, 79, .8);
 }
 
-/* ---- Badge upgrade (+): kanan-atas tombol skill ---- */
-#screen-hud .ability-btn .sk-up {
-  display: none; position: absolute; top: -4px; right: -4px; z-index: 6;
-  width: 19px; height: 19px; border-radius: 50%;
-  align-items: center; justify-content: center;
-  font: 900 12px/1 var(--font); color: #0f4c46;
-  background: linear-gradient(180deg, #fffdf4, #cfeede);
-  border: 1.5px solid #123f3a;
-  box-shadow: 0 1px 3px rgba(18, 63, 58, .35);
-  cursor: pointer;
-}
-#screen-hud .ability-btn .sk-up.visible { display: flex; }
-#screen-hud .ability-btn .sk-up.locked {
-  color: transparent; font-size: 0;
-  background: #d9e4dd url("../../assets/icons/ui-lock.svg") center/11px 11px no-repeat;
-  border-color: rgba(18, 63, 58, .45);
-}
-#screen-hud .ability-btn .sk-up.ready {
-  background: linear-gradient(180deg, #ffe9a8, #f5c64f);
-  color: #7a4e08; border-color: #7a4e08;
-  animation: skUpPulse 1.4s ease-in-out infinite;
-}
-@keyframes skUpPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 198, 79, .6); }
+/* PHAGOS D5: badge upgrade (+) dihapus — skill pasif tanpa tombol. */
   50% { transform: scale(1.12); box-shadow: 0 0 0 5px rgba(245, 198, 79, 0); }
 }
 
