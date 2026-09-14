@@ -7,3 +7,8 @@
 __pycache__/
 .harness/
 .arena-tmp/
+
+# Output e2e & screenshot lokal (jangan commit ulang)
+shots/
+screenshots/
+image-search/
