@@ -1,4 +1,4 @@
-# 🧬 Imunverse
+# 🧬 PHAGOS
 
 **HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework/library eksternal**.
 
@@ -39,7 +39,7 @@ Lalu buka **http://localhost:8000** — selesai. Tidak ada build step, tidak ada
 ## 🏗️ Struktur Proyek
 
 ```
-Imunverse/
+Imunverse/  <!-- nama repo & branch eksperimen tetap; brand game = PHAGOS -->
 ├── index.html                  # Entry point + kerangka screen UI (overlay DOM)
 ├── styles/main.css             # Design system cream/teal/coral ala reference UI
 ├── data/                       # SEMUA data game (JSON, bukan hardcoded)
@@ -98,7 +98,7 @@ Imunverse/
 - **XP curve**: `xpToNextLevel = ceil(10 × level^1.5)`; level-up mem-pause game dan menampilkan 3 pilihan acak.
 - **Collision**: circle-to-circle (perbandingan kuadrat jarak vs jumlah radius) via spatial hash grid sel 96 px — cek hanya antar sel bertetangga.
 - **Sprite**: semua karakter dirender `drawImage()` dari PNG transparan; path tersimpan di JSON (`sprite`/`spriteIdle`/`spriteAttack`). `loadAllSprites()` mengembalikan Promise dan game baru mulai setelah semua termuat. Generator placeholder (canvas offscreen) hanya fallback bila file PNG tidak ada.
-- **Save**: objek JSON murni di `localStorage` (`imunverse.save.v1`); auto-save setelah akhir run, pembelian, unlock, klaim harian.
+- **Save**: objek JSON murni di `localStorage` (`phagos.save.v1`, migrasi otomatis dari `imunverse.save.v1` lama); auto-save setelah akhir run, pembelian, unlock, klaim harian.
 - **Monetisasi**: hook di `js/systems/monetization.js` (simulasi). Alur setelah iklan sukses — revive 50% HP + bersih-bersih musuh, 2× antibodi, daily reward — semuanya logic asli.
 
 ## 🛠️ Tooling (opsional, untuk pengembangan)

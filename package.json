@@ -1,7 +1,7 @@
 {
-  "name": "imunverse",
+  "name": "phagos",
   "version": "1.0.0",
-  "description": "Imunverse — HTML5 roguelike survival bertema sel imun. Vanilla JS + Canvas 2D, tanpa framework.",
+  "description": "PHAGOS — HTML5 roguelike survival bertema sel imun. Vanilla JS + Canvas 2D, tanpa framework.",
   "private": true,
   "type": "module",
   "scripts": {

@@ -14,7 +14,7 @@ import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 import { addCurrency } from './economy-system.js'; // bonus sampingan = ANTIBODI (soft)
 
-export const FOUNDER_TITLE = 'Pendiri Imunverse';
+export const FOUNDER_TITLE = 'Pendiri PHAGOS';
 
 /** Tambah Imun Coin (beta earn / reward / offerwall). */
 export function addImun(meta, n) {

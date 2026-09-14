@@ -378,7 +378,7 @@ export function startBannerCine(canvas) {
     ctx.fillStyle = INK;
     ctx.font = `900 ${11 * DPR}px system-ui, sans-serif`;
     ctx.textAlign = 'right';
-    ctx.fillText(tr('⬡ IMUNVERSE'), W - 12 * DPR, H - 16 * DPR);
+    ctx.fillText(tr('⬡ PHAGOS'), W - 12 * DPR, H - 16 * DPR);
     ctx.textAlign = 'left';
     ctx.globalAlpha = 1;
 

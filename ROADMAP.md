@@ -1,4 +1,4 @@
-# 🗺️ ROADMAP PENGEMBANGAN IMUNVERSE
+# 🗺️ ROADMAP PENGEMBANGAN PHAGOS
 
 > Dokumen progres resmi proyek. Diperbarui setiap akhir fase.
 > Status: ✅ selesai · 🔄 sedang dikerjakan · ⬜ belum mulai · 🟡 sebagian
@@ -299,7 +299,7 @@ Upgrade dua lapis sesuai speks pemilik: (A) HUD pertempuran digaya Mobile Legend
 - [x] **Pilar 2 — Battle Pass** (`data/battlepass.json` + layar `#screen-bp` + `battlepass-system.js`): 30 level × 2 jalur; XP dari bermain (level×40 + wave×15 + kills); klaim manual klik-riil; jalur premium **500 IMU**; **twist self-sustaining**: total IMU premium (525) > harga pass; ring XP + dua baris scroll horizontal; sidebar "Pass" + tile quick-menu.
 - [x] **Pilar 3 — Monetisasi tanpa P2W**: **kosmetik visual saja** (`data/cosmetics.json`): 5 skin tint (`getTintedSprite` — warna pada karakter in-game & preview) + mahkota/aura; beli & pasang via Shop "SKIN & GAYA"; **Welcome Bundle Rp 15rb** (1.500 antibodi + 300 IMU + Skin Pendiri + item), Pass bundle, top-up IMU di bundle — alur pembayaran simulasi existing (receipt) tetap dipakai.
 - [x] **Pilar 4 — Offerwall non-paying**: section "DAPATKAN IMUN GRATIS" (video sponsor +8 IMU wajib-tonton 5 detik simulasi, survei +15 IMU 1×/hari, referral +50 IMU dengan kode `IMUN-XXXXX` — guard kode salah/sendiri/duplikat); hook `triggerRewardedAdOfferwall` siap SDK.
-- [x] **Pilar 5 — Early beta**: hadiah **"Pendiri Imunverse"** otomatis per akun (gelar + Skin Pendiri terbatas + 300 IMU); kode referral per-uid; bundle pra-rilis di katalog.
+- [x] **Pilar 5 — Early beta**: hadiah **"Pendiri PHAGOS"** otomatis per akun (gelar + Skin Pendiri terbatas + 300 IMU); kode referral per-uid; bundle pra-rilis di katalog.
 - [x] Ringkasan akhir run menampilkan `+N Imun Coin · Battle Pass Lv X → Y`; toast keluar-run lanskap pindah ke pojok kanan-bawah (tidak menutupi tile).
 - **Kriteria lulus 14:** **e2e-eco 14/14 PASS** (founder reward, klaim BP gratis, guard premium saat saldo kurang, beli premium, klaim skin premium, offerwall +8, beli+pasang skin, tolak referral salah) + **e2e inti 20 asersi PASS**; bukti `docs/screenshots/57-eco-dash, 58-eco-battlepass, 59-eco-shop-imun, 60-eco-gameover`.
 
@@ -414,7 +414,7 @@ Semua parameter hidup di **data/retention.json** (baru) — tanpa angka keras di
 - [x] **Toast lanskap** dinaikkan ke atas dock (bottom 102px) — tidak lagi menyenggol dock.
 - [x] Harness e2e diperkuat: skip coach toleran (retry klik) — tidak flaky lagi.
 **(B) Cinematic battle imun-vs-virus di atas home ("video" agar web hidup)**
-- [x] `js/render/cine-banner.js` — **video prosedural Canvas 2D** loop 6 detik: virus merah masuk → dieksekusi 3 tembakan homing emas → ledakan partikel + ring + screen-shake; virus ungu mengejar → hero **charge aura** → **ULT shockwave** melansir; spawn virus baru; bug branding `⬡ IMUNVERSE`. Tanpa file video — tajam di semua DPI, ringan.
+- [x] `js/render/cine-banner.js` — **video prosedural Canvas 2D** loop 6 detik: virus merah masuk → dieksekusi 3 tembakan homing emas → ledakan partikel + ring + screen-shake; virus ungu mengejar → hero **charge aura** → **ULT shockwave** melansir; spawn virus baru; bug branding watermark `⬡` kanan-bawah. Tanpa file video — tajam di semua DPI, ringan.
 - [x] Panggung dashboard kini canvas penuh (`#dash-cine`); start/stop mengikuti slide banner aktif & lifecycle layar; fix impor dinamis (path salah 404 diam) + restart-instance; ukuran kanvas 392×200 (DPR-aware).
 - [x] **i18n**: bug branding lewat `t()` + kamus `lang.json` — EN klik → judul canvas ikut berubah.
 - [x] Hero lebih besar & center; trail dash; spacing musuh proporsional.
