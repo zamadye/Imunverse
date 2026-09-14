@@ -41,9 +41,9 @@ import { rollLevelUpChoices, applyLevelUp, squadMultipliers, evolutionBoosts, ef
 import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { grantRunBpXP, grantMissionBpXP } from '../systems/battlepass-system.js';
-import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
+import { addImun, spendImun, getEquippedSkin } from '../systems/imun-economy.js'; // §7.4: spendImun untuk sink Lanjut Run & Peti Riset
 import { xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
-import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
+import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules, getImunSinks } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import {
   passiveCritBonus, modifyOutgoingDamage, passiveOnHit,
@@ -236,6 +236,7 @@ export const game = {
       currentChoices: null,
       reviveUsed: false,
       reviveOffered: false,
+      imunContinueUsed: 0, // §7.4: sink Lanjut Run (50 Imun), batas 1/run
       doubleCurrencyUsed: false,
       earned: 0, // total antibodi yang dibawa pulang (diisi di finishRun)
       boss: null,
@@ -1465,7 +1466,7 @@ export const game = {
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
     const bonusPart = rollPartDrop('boss', 1) || 'equity_receptor';
-    run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
+    run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false, researchBought: false };
     setPaused(true);
     audio.chest();
     emit('bosschest', {
@@ -1473,6 +1474,10 @@ export const game = {
       partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
       partSprite: getData().evolutions.parts.find((p) => p.id === bonusPart)?.sprite || '',
       adAvailable: canWatchAd(STATE.meta),
+      // §7.4: Peti Riset — sink Imun 2× tanpa iklan, jalur & penanda TERPISAH dari iklan
+      imun: STATE.meta.imun || 0,
+      researchCost: getImunSinks().researchChest.costImun,
+      researchAvailable: !run.bossChest.researchBought,
     });
   },
 
@@ -1489,6 +1494,26 @@ export const game = {
       trackAdWatch(meta);
       this._grantBossChest(true);
     }, () => this._grantBossChest(false));
+  },
+
+  /**
+   * §7.4: Peti Riset — gandakan isi peti boss dengan 150 Imun (tanpa iklan).
+   * Pity/penanda TERPISAH dari jalur gratis: metode ini tidak membaca kuota
+   * iklan (canWatchAd) dan tidak memanggil trackAdWatch; jalur iklan tidak
+   * membaca researchBought. Keduanya bertemu hanya di _grantBossChest().
+   */
+  buyResearchChest() {
+    const run = this.run;
+    const chest = run && run.bossChest;
+    if (!chest || chest.researchBought) return false;
+    const cost = getImunSinks().researchChest.costImun;
+    if (!spendImun(STATE.meta, cost)) {
+      emit('toast', { message: `Imun tidak cukup — Peti Riset butuh ${cost} Imun.`, kind: 'coral' });
+      return false;
+    }
+    chest.researchBought = true;
+    this._grantBossChest(true);
+    return true;
   },
 
   _grantBossChest(doubled) {
@@ -1831,6 +1856,26 @@ export const game = {
   // =====================================================================
   requestRevive() {
     triggerRewardedAdRevive(() => this.confirmRevive());
+  },
+
+  /**
+   * §7.4: Lanjut Run — sink Imun berulang (50 Imun, batas 1/run).
+   * TERPISAH dari revive iklan: tidak menyentuh kuota iklan; efek bangkitnya
+   * identik karena memakai confirmRevive() yang sama (50% HP, bersih sekitar,
+   * iframes 2 dtk). Gagal (Imun kurang / sudah dipakai) → false, run aman.
+   */
+  continueWithImun() {
+    const run = this.run;
+    if (!run || run.ended || run.reviveUsed) return false;
+    const cfg = getImunSinks().continueRun;
+    if ((run.imunContinueUsed || 0) >= cfg.perRunLimit) return false;
+    if (!spendImun(STATE.meta, cfg.costImun)) {
+      emit('toast', { message: `Imun tidak cukup — Lanjut Run butuh ${cfg.costImun} Imun.`, kind: 'coral' });
+      return false;
+    }
+    run.imunContinueUsed = (run.imunContinueUsed || 0) + 1;
+    this.confirmRevive(); // logika bangkit asli — satu sumber dengan jalur iklan
+    return true;
   },
 
   /** Logic asli setelah iklan "selesai ditonton". */

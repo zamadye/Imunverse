@@ -134,6 +134,17 @@ function methodShortName(m) {
 }
 
 /** Modal pembayaran: ringkasan → pilih metode → bayar (simulasi) → receipt. */
+/**
+ * §7.2: penanda "2× pembelian pertama" — hanya imun_500 & imun_1000, sekali per
+ * tier; penanda HILANG setelah terpakai (meta.firstBuy[id] diset payment-system).
+ */
+function firstBuyAvailable(bundle, meta = STATE.meta) {
+  const cfg = getData().premium.firstPurchaseBonus;
+  if (!cfg || !cfg.enabled) return false;
+  if (!cfg.appliesTo.includes(bundle.id)) return false;
+  return !(meta && meta.firstBuy && meta.firstBuy[bundle.id]);
+}
+
 function openPayment(bundle) {
   const orderRes = createOrder(bundle.id);
   if (!orderRes.ok) {
@@ -153,6 +164,9 @@ function openPayment(bundle) {
           const badge = badgeForProduct(bundle); // klaim hemat/bonus runtime, satu sumber
           return badge ? el('span', { text: badge }) : null;
         })(),
+        firstBuyAvailable(bundle)
+          ? el('span', { class: 'pay-firstbuy', text: `Bonus 2× pembelian pertama termasuk — total ${((bundle.contents.imun || 0) * 2).toLocaleString('id-ID')} Imun` })
+          : null,
         el('b', { class: 'pay-price', text: price }),
       ]),
       el('div', { class: 'pay-methods' }),
@@ -504,6 +518,7 @@ export function show() {
     const badge = badgeForProduct(bundle); // runtime — bukan string tulis tangan
     const card = el('div', { class: 'premium-card', style: `--pc:${bundle.color}` }, [
       badge ? el('span', { class: 'prem-badge', text: badge }) : null,
+      firstBuyAvailable(bundle, meta) ? el('span', { class: 'prem-firstbuy', text: '2× PEMBELIAN PERTAMA' }) : null,
       el('img', { class: 'prem-ico', src: 'assets/icons/sec-premium.svg', alt: '' }),
       el('b', { class: 'prem-name', text: bundle.name }),
       el('span', { class: 'prem-value', text: valueSummary(bundle) }),

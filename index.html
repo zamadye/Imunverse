@@ -17,8 +17,8 @@
   <meta name="application-name" content="Imunverse" />
   <meta name="description" content="Imunverse — roguelike survival bertema sel imun. Bertahanlah di dalam tubuh melawan gelombang patogen!" />
   <title>Imunverse — Roguelike Survival Sel Imun</title>
-  <link rel="stylesheet" href="styles/main.css?v=59a" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=59a" />
+  <link rel="stylesheet" href="styles/main.css?v=60a" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=60a" />
 </head>
 <body>
   <div id="app">
@@ -92,6 +92,9 @@
             <img src="assets/icons/menu-pass.svg" alt="" />
             <span class="bp-lvl">Lv <b id="bp-chip-level">1</b></span>
             <span class="bp-bar"><i id="bp-chip-fill"></i></span>
+          </button>
+          <button id="card-chip" class="card-chip hidden" title="Kartu Imun 30 Hari" aria-label="Buka status Kartu Imun di Toko">
+            <img src="assets/icons/cur-imun.svg" alt="" /><span id="card-chip-text">—</span>
           </button>
           <div id="hook-chip" class="hook-chip hidden" role="status" title="Progres terdekat">
             <img src="assets/icons/menu-quest.svg" alt="" /><span id="hook-chip-text">—</span>
@@ -353,6 +356,8 @@
             <span><img src="assets/icons/cur-antibodi.svg" alt="" /><b id="profile-currency">0</b><small>Antibodi</small></span>
             <span><img src="assets/icons/cur-imun.svg" alt="" /><b id="profile-imun">0</b><small>Imun Coin</small></span>
           </div>
+          <!-- §7.3: sisa hari Kartu Imun 30 Hari (hanya tampil saat kartu aktif) -->
+          <div id="profile-card-line" class="profile-card-line hidden"></div>
           <div class="profile-stats" id="profile-stats"></div>
           <!-- F23: Pengaturan tinggal di Profil (pola umum game; tanpa layar settings terpisah) -->
           <div class="profile-settings">
@@ -568,6 +573,8 @@
           <h2 class="modal-title coral">Peti Boss!</h2>
           <div id="chest-loot" class="chest-loot"><!-- diisi JS --></div>
           <button id="btn-chest-ad" class="btn btn-gold btn-xl">TONTON IKLAN — 2X LOOT</button>
+          <!-- §7.4: Peti Riset — 2× loot dengan Imun, jalur & pity terpisah dari iklan -->
+          <button id="btn-chest-research" class="btn btn-prem">PETI RISET — 150 IMUN (2X LOOT)</button>
           <button id="btn-chest-keep" class="btn btn-primary">Ambil Saja</button>
         </div>
       </section>
@@ -603,6 +610,8 @@
           <p class="revive-sub">Tonton video singkat untuk bangkit dengan 50% HP dan membersihkan patogen di sekitarmu.</p>
           <div class="revive-count">Bangkit otomatis batal dalam <span id="revive-countdown">5</span>s</div>
           <button id="btn-watch-ad-revive" class="btn btn-primary btn-xl">Tonton Iklan &amp; Bangkit</button>
+          <!-- §7.4: Lanjut Run — sink Imun 50, 1×/run, terpisah dari revive iklan -->
+          <button id="btn-imun-revive" class="btn btn-prem">Lanjut Run — 50 Imun</button>
           <button id="btn-skip-revive" class="btn btn-danger">Tidak, Akhiri Run</button>
         </div>
       </section>
@@ -686,7 +695,7 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=59a"></script>
+  <script type="module" src="js/main.js?v=60a"></script>
   <div id="rotate-hud" aria-hidden="true">
     <div class="rh-phone"><span></span></div>
     <b>Putar HP-mu</b>

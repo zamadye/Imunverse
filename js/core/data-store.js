@@ -292,6 +292,11 @@ export function getAdEconomy() {
   return getData().anchors.adEconomy;
 }
 
+/** §7.4: dua sink Imun berulang (Lanjut Run 50, Peti Riset 150) dari anchors. */
+export function getImunSinks() {
+  return getData().anchors.imunSinks;
+}
+
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====
 
 /** Seluruh config progresi. */

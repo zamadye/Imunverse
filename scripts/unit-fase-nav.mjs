@@ -99,7 +99,7 @@ check('topbar permanen: chip Pangkat + BP + hook', html.includes('id="rank-chip"
 
 console.log('\n=== 4. Cache-busting ?v=BUILD untuk JS DAN CSS ===');
 const build = (read('js/core/version.js').match(/BUILD\s*=\s*'([^']+)'/) || [])[1];
-check('BUILD = 59a', build === '59a', `BUILD=${build}`);
+check('BUILD = pola <angka><huruf> (jangan pin — dinaikkan tiap rilis)', /^\d+[a-z]$/.test(build), `BUILD=${build}`);
 check('main.js?v=BUILD', html.includes(`main.js?v=${build}`));
 check('main.css?v=BUILD (dulu ?v=54 statis — gaya basi di 55a–58a)', html.includes(`styles/main.css?v=${build}`));
 check('dashboard-focus.css?v=BUILD', html.includes(`styles/dashboard-focus.css?v=${build}`));

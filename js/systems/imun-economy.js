@@ -196,11 +196,19 @@ export function grantPerks(meta, perkIds, untilTs = 0) {
   return meta.perks;
 }
 
-/** Apakah satu perk masih berlaku? */
+/**
+ * Apakah satu perk masih berlaku?
+ * BUG FIX (audit Fase 3.5, BUILD 60a): versi lama menulis `if (!until) return
+ * false` sehingga perk PERMANEN (untilTs 0 — kontrak grantPerks & doc
+ * state-manager "0 = permanen") tidak pernah dikenali; baris `until === 0` di
+ * bawahnya adalah kode mati. Jalur grantPerks(meta, perks, 0) di
+ * payment-system (produk ber-perk tanpa drip) akibatnya tidak pernah aktif.
+ */
 export function hasPerk(meta, perkId, now = Date.now()) {
-  const until = meta && meta.perks ? meta.perks[perkId] : 0;
-  if (!until) return false;
-  return until === 0 || until > now;
+  const perks = (meta && meta.perks) || {};
+  if (!(perkId in perks)) return false;
+  const until = perks[perkId];
+  return until === 0 || until > now; // 0 = permanen; selain itu batas waktu
 }
 
 /**

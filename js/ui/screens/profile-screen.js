@@ -5,6 +5,8 @@ import { music } from '../../systems/music-system.js';
 import { audio } from '../../systems/audio-system.js';
 import { clearSave, writeSave } from '../../save/save-manager.js';
 import { createDefaultMeta } from '../../core/state-manager.js';
+import { dripStatus, claimDrip } from '../../systems/imun-economy.js'; // §7.3: Kartu Imun di profil
+import { emit } from '../../core/ui-bridge.js';
 
 export function show() {
   const meta = STATE.meta;
@@ -21,6 +23,37 @@ export function show() {
     <span><b>${best}</b><small>Best Wave</small></span>
     <span><b>${(meta.stats?.totalKills || 0).toLocaleString('id-ID')}</b><small>Patogen</small></span>`;
   if (hero && window.__IMUNVERSE_getHeroPortrait) hero.src = window.__IMUNVERSE_getHeroPortrait();
+
+  // §7.3: sisa hari Kartu Imun 30 Hari juga tampil di profil (bukan hanya di Toko).
+  const cardLine = document.getElementById('profile-card-line');
+  if (cardLine) {
+    const drip = dripStatus(meta);
+    if (drip && drip.active) {
+      cardLine.classList.remove('hidden');
+      cardLine.textContent = `Kartu Imun: hari ${drip.dayNumber}/${drip.days} · sisa ${drip.daysLeft} hari`;
+      if (drip.claimedToday) {
+        cardLine.append(' · ✓ jatah hari ini sudah diklaim');
+      } else {
+        const b = document.createElement('button');
+        b.className = 'btn btn-gold btn-sm';
+        b.textContent = `Klaim ${drip.imunPerDay} Imun`;
+        b.onclick = () => {
+          const res = claimDrip(meta);
+          if (res.ok) {
+            audio.collect();
+            emit('toast', { message: `Kartu Imun hari ${res.dayNumber}/${drip.days}: +${res.imun} Imun!`, kind: 'gold' });
+            show();
+          } else {
+            emit('toast', { message: res.error, kind: 'coral' });
+          }
+        };
+        cardLine.append(b);
+      }
+    } else {
+      cardLine.classList.add('hidden');
+      cardLine.textContent = '';
+    }
+  }
 
   // F23: Pengaturan suara (letak umum: di dalam Profil, bukan tersebar di UI)
   const btnMusic = document.getElementById('btn-profile-music');

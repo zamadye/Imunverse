@@ -1058,7 +1058,11 @@
     "Upgrade skill dilakukan di dalam run lewat badge (+) pada tombol skill (Lv 15+)": "Skill upgrades happen during the run via the (+) badge on the skill button (Lv 15+)",
     "Spesialis antibodi — proyektil pemburu otomatis.": "Antibody specialist — automatic homing projectiles.",
     "Pembunuh alami — agresif ke target sekarat.": "Natural killer — aggressive toward dying targets.",
-    "Fagosit garis depan — menyerap dan menghabisi patogen.": "Frontline phagocyte — engulfs and destroys pathogens."
+    "Fagosit garis depan — menyerap dan menghabisi patogen.": "Frontline phagocyte — engulfs and destroys pathogens.",
+    "Lanjut Run": "Continue Run",
+    "Peti Riset": "Research Chest",
+    "Kartu Imun": "Imun Card",
+    "2× PEMBELIAN PERTAMA": "2× FIRST PURCHASE"
   },
   "rules": [
     {

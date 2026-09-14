@@ -8,6 +8,7 @@
 
 import { game } from '../../core/game.js';
 import { STATE } from '../../core/state-manager.js';
+import { getImunSinks } from '../../core/data-store.js'; // §7.4: biaya Lanjut Run dari data
 
 let countdown = null;
 let busy = false;
@@ -18,6 +19,18 @@ export function show() {
   btn.disabled = false;
   btn.textContent = 'Tonton Iklan & Bangkit';
   document.getElementById('btn-skip-revive').disabled = false;
+
+  // §7.4: Lanjut Run — sink Imun berulang (50 Imun, 1/run), terpisah dari iklan.
+  const imunBtn = document.getElementById('btn-imun-revive');
+  if (imunBtn) {
+    const cfg = getImunSinks().continueRun;
+    const saldo = (STATE.meta && STATE.meta.imun) || 0;
+    imunBtn.textContent = `Lanjut Run — ${cfg.costImun} Imun (saldo ${saldo})`;
+    imunBtn.disabled = saldo < cfg.costImun;
+    imunBtn.title = saldo < cfg.costImun
+      ? `Imun tidak cukup (saldo ${saldo})`
+      : 'Bangkit dengan 50% HP tanpa menonton iklan — 1× per run';
+  }
 
   let left = 5;
   document.getElementById('revive-countdown').textContent = left;
@@ -55,6 +68,23 @@ export function wireButtons() {
       btn.disabled = false;
       btn.textContent = 'Coba lagi / Lewati';
     }, 3000);
+  });
+
+  // §7.4: bayar 50 Imun → confirmRevive() yang sama dengan jalur iklan.
+  document.getElementById('btn-imun-revive')?.addEventListener('click', () => {
+    if (busy) return;
+    clearInterval(countdown);
+    if (game.continueWithImun()) return; // modal ditutup lewat 'resume' (main.js)
+    // Gagal (saldo kurang / sudah dipakai): tekanan waktu tetap ada — 2 detik.
+    show(); // segarkan tombol (busy=false, label, disabled) — memasang ulang interval 5 dtk
+    clearInterval(countdown); // matikan interval 5 dtk milik show() sebelum diganti 2 dtk
+    let left = 2;
+    document.getElementById('revive-countdown').textContent = left;
+    countdown = setInterval(() => {
+      left -= 1;
+      document.getElementById('revive-countdown').textContent = left;
+      if (left <= 0) { clearInterval(countdown); countdown = null; game.declineRevive(); }
+    }, 1000);
   });
 
   document.getElementById('btn-skip-revive').addEventListener('click', () => {

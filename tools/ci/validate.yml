@@ -55,6 +55,9 @@ jobs:
       - name: Uji headless §6 Navigasi (satu sheet Perjalanan, dock 5 slot, fail-closed)
         run: npm run test:fasenav
 
+      - name: Uji headless Fase 3 (monetisasi: bonus 2x, Kartu Imun, sink Lanjut Run & Peti Riset, audit iklan)
+        run: npm run test:fase3
+
       - name: BUILD harus dibump bila js/ data/ index.html berubah
         run: |
           git fetch origin main --depth=1 || true

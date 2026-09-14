@@ -33,7 +33,7 @@ import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../syst
 import { currentChapterId } from './campaign-screen.js';
 import { getSession } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
-import { ensureFounderReward } from '../../systems/imun-economy.js';
+import { ensureFounderReward, dripStatus } from '../../systems/imun-economy.js'; // §7.3: chip Kartu Imun
 import { screenManager } from '../screen-manager.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -472,6 +472,19 @@ function refreshTopbarIndicators(meta) {
       const fill = document.getElementById('bp-chip-fill');
       if (fill) fill.style.width = `${Math.min(100, Math.round(((bp.xp || 0) / need) * 100))}%`;
       bpChip.onclick = () => { audio.ui(); screenManager.show('bp'); };
+    }
+  }
+
+  // Kartu Imun 30 Hari (§7.3): sisa hari terlihat permanen selama kartu aktif.
+  const cardChip = document.getElementById('card-chip');
+  if (cardChip) {
+    const drip = dripStatus(meta);
+    const active = !!(drip && drip.active);
+    cardChip.classList.toggle('hidden', !active);
+    if (active) {
+      const txt = document.getElementById('card-chip-text');
+      if (txt) txt.textContent = `Kartu Imun · sisa ${drip.daysLeft} hari`;
+      cardChip.onclick = () => { audio.ui(); screenManager.show('shop'); };
     }
   }
 

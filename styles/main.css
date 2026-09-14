@@ -2962,3 +2962,35 @@ img.lock-badge {
 
 /* Ikon SVG di tempat PNG lama (ukuran mengikuti class lama; drop-shadow PNG dibuang) */
 .lock-badge[src$=".svg"], .camp-lock[src$=".svg"], .ph-lock[src$=".svg"], .lock-ico[src$=".svg"], .bp-state[src$=".svg"] { object-fit: contain; }
+
+/* ===== Fase 3 (BUILD 60a): penanda pembelian pertama, baris Kartu Imun, tombol sink ===== */
+
+/* §7.2: pita "2× PEMBELIAN PERTAMA" di kartu premium (kiri atas; badge hemat tetap kanan atas). */
+.premium-card .prem-firstbuy {
+  position: absolute; top: -9px; left: 8px; z-index: 2;
+  background: linear-gradient(90deg, #f5c64f, #ff9f68); color: #3a2b12;
+  font-size: 8.5px; font-weight: 900; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 8px;
+}
+
+/* §7.2: baris penegas bonus di modal pembayaran. */
+.pay-summary .pay-firstbuy { color: #a06410; font-weight: 900; }
+
+/* §7.3: baris status Kartu Imun di profil (di bawah saldo, di atas statistik). */
+.profile-card-line {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
+  margin-top: 6px; padding: 6px 10px; border-radius: 12px;
+  background: rgba(245, 198, 79, .14);
+  font-size: 11px; font-weight: 800; color: var(--ink-soft);
+}
+.profile-card-line.hidden { display: none; }
+.profile-card-line .btn { padding: 4px 10px; font-size: 10px; }
+
+/* §7.4: tombol sink Imun di modal revive/peti — sekunder terhadap jalur iklan,
+ * tapi tetap premium: gradasi emas, full-width seperti tombol modal lain. */
+#btn-imun-revive, #btn-chest-research {
+  width: 100%;
+  background: linear-gradient(90deg, #f5c64f, #ff9f68) !important;
+  color: #3a2b12 !important;
+}
+#btn-imun-revive:disabled, #btn-chest-research:disabled { opacity: .45; cursor: not-allowed; }

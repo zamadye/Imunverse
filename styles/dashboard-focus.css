@@ -1992,3 +1992,18 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-dashboard .hook-chip span { max-width: 20vw; }
   #screen-dashboard .bp-chip .bp-bar { display: none; }
 }
+
+/* ===== §7.3 (BUILD 60a): chip Kartu Imun 30 Hari di topbar dashboard =====
+ * Hanya tampil selama kartu aktif; klik → Toko (panel klaim ada di sana).
+ * Pola mengikuti chip §6 (bp-chip/hook-chip) agar topbar tetap satu bahasa. */
+#screen-dashboard .card-chip {
+  display: inline-flex; align-items: center; gap: 5px; min-width: 0;
+  background: rgba(245, 198, 79, .14); border: 0; border-radius: 999px; padding: 4px 10px;
+  font: 800 10px var(--font); color: var(--ink-soft); cursor: pointer;
+}
+#screen-dashboard .card-chip.hidden { display: none; }
+#screen-dashboard .card-chip img { width: 15px; height: 15px; flex: none; object-fit: contain; }
+#screen-dashboard .card-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 24vw; }
+@media (max-width: 700px) {
+  #screen-dashboard .card-chip span { max-width: 16vw; }
+}

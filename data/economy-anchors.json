@@ -66,6 +66,19 @@
     "removedFields": ["offers.adAntibodi"]
   },
 
+  "imunSinks": {
+    "doc": "ROADMAP §7 butir 4: DUA sink Imun berulang yang menumpang modal yang sudah ada. Daftar ini TERTUTUP — dilarang menambah sink Imun di luar dua entri ini tanpa perubahan ROADMAP. Angka 50/150 ditetapkan brief; keduanya jauh di atas faucet iklan 60 Imun/hari sehingga satu Lanjut Run ≈ hampir seharian kuota iklan, dan satu Peti Riset ≈ 2,5 hari — sink terasa berarti tanpa harus membeli.",
+    "continueRun": {
+      "costImun": 50,
+      "perRunLimit": 1,
+      "doc": "Lanjut Run di revive-screen: bangkit dengan 50% HP (confirmRevive yang sama dengan jalur iklan). TERPISAH dari revive iklan: tidak menyentuh kuota canWatchAd/trackAdWatch. Batas 1/run."
+    },
+    "researchChest": {
+      "costImun": 150,
+      "doc": "Peti Riset di bosschest-screen: 2× isi peti boss tanpa iklan. Pity/penanda TERPISAH dari jalur gratis (iklan) — jangan digabung: jalur ini tidak membaca kuota iklan dan jalur iklan tidak membaca penanda riset."
+    }
+  },
+
   "targetSinkMix": {
     "doc": "Komposisi sink Imun yang dituju. Saat ini upgrade global menyerap 90% dinding premium — artinya mata uang premium menjadi gerbang kurva kekuatan, yang berbahaya begitu PvP asimetris (Team Blue vs Team Red) dirilis.",
     "power": 0.45,
