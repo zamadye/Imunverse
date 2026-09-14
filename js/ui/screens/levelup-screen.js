@@ -1,7 +1,7 @@
 /**
- * levelup-screen.js — Modal pilihan 3 upgrade acak saat level up.
+ * levelup-screen.js — PHAGOS: modal pilihan MUTASI BENTUK saat level up.
  * Game sudah di-pause oleh game.js sebelum modal ini tampil.
- * Pemain klik satu kartu → upgrade diterapkan (logic asli) → lanjut main.
+ * Pemain klik satu kartu → mutasi diterapkan (atau upgrade safety-net) → lanjut.
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -10,6 +10,15 @@ import { game } from '../../core/game.js';
 import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
 import { iconEl } from '../menu-icons.js';
+import { tierLabel } from '../../systems/mutation-system.js';
+
+const MUTATION_ICONS = {
+  spikes: '🦔', sticky: '🍯', trail: '☠️', wobble: '🌊',
+  dark_aura: '🌑', thin_wide: '⭕', implosion: '🌀', double_ring: '◎',
+  swell_burst: '💥', rhythmic: '💓', green_pulse: '💚', mirror_shine: '🪞',
+  double_shockwave: '🌟', orbiters: '🪐', giant_form: '🦣', chain_ripples: '⛓️',
+  shifting_hue: '🌈', breathing_organism: '🫧',
+};
 
 export function show({ level, choices }) {
   // F21: level-up = SCENE sinematik (bukan modal tiba-tiba) — potret hero +
@@ -18,7 +27,9 @@ export function show({ level, choices }) {
   const heroImg = document.getElementById('levelup-hero');
   if (heroImg) heroImg.src = heroDef.spritePortrait || heroDef.spriteIdle;
   const luName = heroDef.name;
-  document.getElementById('levelup-sub').textContent = `Level ${level} — ${luName} beradaptasi! Pilih evolusi:`;
+  const bio = game.run ? (game.run.bioPoints || 0) : 0;
+  document.getElementById('levelup-sub').textContent =
+    `Level ${level} — ${luName} BERMUTASI! Pilih bentuk baru: (◉ ${bio} BIO)`;
   // retrigger animasi masuk tiap kali scene tampil
   const scene = document.querySelector('#screen-levelup .lu-scene');
   if (scene) {
@@ -34,37 +45,73 @@ export function show({ level, choices }) {
   const syn = synergyFor(heroDef);
 
   for (const def of choices) {
-    const stacks = STATE.meta && game.run ? game.run.upgrades[def.id] || 0 : 0;
-    const isSyn = syn.includes(def.id);
-    // V2 Phase 4: kelas rarity + kartu evolusi (denyut kejutan terlihat)
-    const rar = def.rarity || 'common';
-    const card = el('button', {
-      class: 'choice-card' + (isSyn ? ' synergy' : '') +
-        (rar !== 'common' ? ` rar-${rar}` : '') + (def.isEvo ? ' evo-card' : ''),
-      onclick: () => {
-        game.chooseLevelUp(def.id);
-        // bila masih ada level berlebih, game.js membuka modal baru — render ulang
-        if (STATE.levelUpOpen && game.run && game.run.currentChoices) {
-          show({ level: game.run.level, choices: game.run.currentChoices });
-        }
-      },
-    }, [
-      el('div', { class: 'choice-icon' }, [iconEl(def)]), // ikon bespoke (menu-icons.js), fallback def.icon
-      el('div', { class: 'choice-info' }, [
-        el('b', {}, [
-          el('span', { text: def.name }),
-          isSyn ? el('span', { class: 'syn-badge', title: `Cocok untuk ${heroDef.name}`, text: '✦ Sinergi' }) : null,
-          // V2 Phase 4: label rarity/evo
-          def.isEvo ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: '⚡ EVOLUSI' })
-            : (rar === 'epic' ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: 'EPIC' })
-              : rar === 'rare' ? el('span', { class: 'syn-badge', style: 'background:#7fdbff;color:#0b2a33', text: 'RARE' }) : null),
-        ]),
-        el('p', { text: def.desc }),
-        stacks > 0 ? el('span', { class: 'choice-stack', text: `Dimiliki: ${stacks}x` }) : null,
-      ]),
-    ]);
-    wrap.appendChild(card);
+    if (def.isMutation) {
+      wrap.appendChild(mutationCard(def, bio));
+    } else {
+      wrap.appendChild(upgradeCard(def, heroDef, syn));
+    }
   }
+}
+
+function mutationCard(def, bio) {
+  const locked = !!def.lockedByBio || (def.bioCost || 0) > bio;
+  const icon = MUTATION_ICONS[def.visualChange] || '🧬';
+  const card = el('button', {
+    class: 'choice-card mutation-card tier-' + (def.tier || 1) + (locked ? ' locked' : ''),
+    onclick: () => {
+      if (locked) return;
+      game.chooseLevelUp(def.id);
+      if (STATE.levelUpOpen && game.run && game.run.currentChoices) {
+        show({ level: game.run.level, choices: game.run.currentChoices });
+      }
+    },
+  }, [
+    el('div', { class: 'choice-icon mutation-icon', text: icon }),
+    el('div', { class: 'choice-info' }, [
+      el('b', {}, [
+        el('span', { text: def.name }),
+        el('span', { class: 'syn-badge mut-tier', text: tierLabel(def.tier || 1) }),
+        (def.bioCost || 0) > 0
+          ? el('span', { class: 'syn-badge bio-cost' + (locked ? ' locked' : ''), text: `◉ ${def.bioCost} BIO` })
+          : el('span', { class: 'syn-badge bio-free', text: 'GRATIS' }),
+      ]),
+      el('p', { text: def.desc }),
+      def.lore ? el('p', { class: 'mut-lore', text: def.lore }) : null,
+      locked ? el('span', { class: 'choice-stack', text: 'Bio-Point kurang — engulf lebih banyak!' }) : null,
+    ]),
+  ]);
+  return card;
+}
+
+function upgradeCard(def, heroDef, syn) {
+  const stacks = STATE.meta && game.run ? game.run.upgrades[def.id] || 0 : 0;
+  const isSyn = syn.includes(def.id);
+  const rar = def.rarity || 'common';
+  const card = el('button', {
+    class: 'choice-card safety-card' + (isSyn ? ' synergy' : '') +
+      (rar !== 'common' ? ` rar-${rar}` : '') + (def.isEvo ? ' evo-card' : ''),
+    onclick: () => {
+      game.chooseLevelUp(def.id);
+      if (STATE.levelUpOpen && game.run && game.run.currentChoices) {
+        show({ level: game.run.level, choices: game.run.currentChoices });
+      }
+    },
+  }, [
+    el('div', { class: 'choice-icon' }, [iconEl(def)]),
+    el('div', { class: 'choice-info' }, [
+      el('b', {}, [
+        el('span', { text: def.name }),
+        el('span', { class: 'syn-badge safety-badge', text: 'KLASIK' }),
+        isSyn ? el('span', { class: 'syn-badge', title: `Cocok untuk ${heroDef.name}`, text: '✦ Sinergi' }) : null,
+        def.isEvo ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: '⚡ EVOLUSI' })
+          : (rar === 'epic' ? el('span', { class: 'syn-badge', style: 'background:#c39bd3;color:#2c1a38', text: 'EPIC' })
+            : rar === 'rare' ? el('span', { class: 'syn-badge', style: 'background:#7fdbff;color:#0b2a33', text: 'RARE' }) : null),
+      ]),
+      el('p', { text: def.desc }),
+      stacks > 0 ? el('span', { class: 'choice-stack', text: `Dimiliki: ${stacks}x` }) : null,
+    ]),
+  ]);
+  return card;
 }
 
 export function hide() {}

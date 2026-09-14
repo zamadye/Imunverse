@@ -33,6 +33,9 @@ const store = {
   narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
   characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
+  membrane: null,    // data/membrane.json (PHAGOS: properti medan membran)
+  mutations: null,   // data/mutations.json (PHAGOS: 18 mutasi bentuk hero)
+  enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
 };
 
 import { BUILD } from './version.js';
@@ -72,6 +75,9 @@ export async function loadAllData() {
     narrative: 'data/narrative.json',
     modules: 'data/modules.json',
     characterDesigns: 'data/character-designs.json',
+    membrane: 'data/membrane.json',
+    mutations: 'data/mutations.json',
+    enemyMutations: 'data/enemy-mutations.json',
   };
 
   const entries = await Promise.all(
@@ -251,6 +257,23 @@ export function getModules() {
 // ===== Character Agent: equity hero + mutation visual pathogen =====
 export function getCharacterDesigns() {
   return getData().characterDesigns;
+}
+
+// ===== PHAGOS eksperimen: membran + mutasi hero + mutasi musuh =====
+
+/** Config medan membran (data/membrane.json). */
+export function getMembrane() {
+  return getData().membrane;
+}
+
+/** Daftar mutasi hero (data/mutations.json). */
+export function getMutations() {
+  return getData().mutations;
+}
+
+/** Trait adaptasi patogen (data/enemy-mutations.json). */
+export function getEnemyMutations() {
+  return getData().enemyMutations;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

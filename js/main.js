@@ -653,15 +653,13 @@ async function boot() {
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
-  // Tombol SERANG (Fase 12c): hold = tembak terus; setiap TAP juga langsung merespons.
-  // UI/UX BUILD 42: TAHAN + TARIK tombol ini = mengarahkan serangan (aim stick ala
-  // MLBB) — menggantikan zona aim tak kasatmata di kanan layar. Pointer di-capture
-  // oleh InputHandler (jari meleset keluar tombol tidak memutus tembakan).
+  // PHAGOS: tombol PULSE (SATU TOMBOL) — tiap TEKAN = satu ledakan membran.
+  // Antrean edge-trigger dikonsumsi game.update; onPress memberi respons instan.
   const fireBtn = document.getElementById('btn-fire');
   input.bindFireButton(fireBtn, {
     onPress: () => {
       audio.unlock();
-      game.triggerAttack(); // respons instan di karakter (swing/lunge) meski cd berjalan
+      game.triggerPulse(); // respons instan; cooldown digerbang di membrane-system
     },
   });
   // Pindah layar saat run hidup (menu HUD, level-up, jeda) → lepas semua input
@@ -730,9 +728,11 @@ async function boot() {
       else game.useAbilityBySlot(digitSlot);
       return;
     }
-    if (key === '4' || key.toLowerCase() === 't' || key === ' ') {
+    // PHAGOS: 4 / T = Pulse langsung. SPASI ditangani InputHandler (antrean
+    // edge-trigger) agar tidak memicu ganda — jangan dipanggil di sini.
+    if (key === '4' || key.toLowerCase() === 't' || key.toLowerCase() === 'k') {
       ev.preventDefault();
-      game.triggerAttack();
+      game.triggerPulse();
     }
   });
 

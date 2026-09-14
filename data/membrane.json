@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "doc": "PHAGOS eksperimen — properti dasar medan membran. Semua angka combat membran hidup di sini, bukan hardcode.",
+  "defaults": {
+    "baseRadiusMult": 1.2,
+    "contactTickSec": 0.1,
+    "maxContactTargets": 12,
+    "pulseRadiusMult": 3.0,
+    "pulseDurationSec": 0.4,
+    "pulseExpandSec": 0.15,
+    "pulseHoldSec": 0.1,
+    "pulseShrinkSec": 0.15,
+    "pulseDamageMult": 4.0,
+    "pulseHitStopSec": 0.1,
+    "engulfThreshold": 0.15,
+    "engulfHealPct": 0.07,
+    "bioPointPerEngulf": 1
+  },
+  "squad": {
+    "radiusMult": 0.5,
+    "dpsMult": 0.3,
+    "note": "Opsi A: pasukan punya membran mini kontak-pasif, tanpa Pulse/engulf."
+  },
+  "shapes": {
+    "cone": { "arcDeg": 90, "rangeMult": 1.6 },
+    "tentacles": { "count": 3, "arcDeg": 32, "rangeMult": 1.9, "spacingDeg": 120 },
+    "support": { "damageMult": 0.45, "healPctPerSec": 0.02 },
+    "pulsing": { "minMult": 0.7, "maxMult": 1.3, "periodSec": 2.0 },
+    "trail": { "durationSec": 1.5, "dpsMult": 0.4, "tickSec": 0.25, "radius": 26 }
+  },
+  "heroTuning": {
+    "contactDpsScale": 1.0,
+    "pulseDamageScale": 1.0,
+    "note": "contactDps final = membrane.contactDps hero x (stats.damage / base.damage) x buff. Pulse = contactDps x pulseDamageMult."
+  }
+}

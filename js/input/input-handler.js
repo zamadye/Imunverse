@@ -1,5 +1,5 @@
 /**
- * input-handler.js — Input gerak & arah player.
+ * input-handler.js — Input gerak & PULSE (PHAGOS).
  *
  *  GERAK
  *   1. Joystick virtual mengambang (touch / drag mouse) — di MANA SAJA di canvas:
@@ -9,11 +9,12 @@
  *   2. WASD / panah untuk desktop — hanya ditangkap saat gameplay aktif
  *      (isActive) dan bukan saat mengetik di <input>/<textarea>.
  *
- *  ARAH SERANGAN (aim)
- *   1. Tahan tombol SERANG lalu TARIK → aim stick (ala MLBB: arah dari titik
- *      tekan). Lepas → kembali auto-aim. Dipasang lewat bindFireButton(el).
- *   2. Desktop: mouse bergerak tanpa tekan → arah ke kursor (aimPos).
- *   3. Tidak ada keduanya → { active:false } → auto-aim musuh terdekat.
+ *  PULSE (PHAGOS — SATU TOMBOL)
+ *   1. Tekan tombol PULSE (kanan) → antre SATU ledakan membran (edge-trigger).
+ *      Cooldown 1,5–2,5 dtk per hero; spam ditekan = diabaikan saat cooldown.
+ *   2. Desktop: Spasi / K / klik tombol = PULSE. Aim stick lama dinonaktifkan
+ *      (medan mostly radial; cone mengikuti arah gerak/facing).
+ *   3. game.update mengonsumsi antrean via consumePulse() tiap frame.
  *
  * getMoveVector() mengembalikan vektor {x, y} dengan magnitude 0..1.
  */
@@ -77,9 +78,11 @@ export class InputHandler {
     this.aimStick = { active: false, touchId: null, dx: 0, dy: 0, angle: 0, ox: 0, oy: 0 };
     this.aimDragThreshold = 12; // px: tap biasa ≠ mengarahkan
     this.aimPos = { x: 0, y: 0, t: -1e9 }; // px relatif canvas + timestamp (mouse hover)
-    this.fireButtonHeld = false; // tombol SERANG di HUD (touch/mouse)
+    this.fireButtonHeld = false; // tombol PULSE di HUD (touch/mouse)
     this.fireEl = null;
     this._firePointerId = null;
+    // PHAGOS: antrean PULSE edge-trigger (ditekan → meledak sekali)
+    this._pulseQueued = false;
 
     this.onPauseKey = null; // callback opsional (Esc / P)
     /** Predikat: keyboard gerak hanya ditangkap bila true (di-set main.js). */
@@ -98,6 +101,8 @@ export class InputHandler {
       const action = KEY_MAP[e.code];
       if (action) {
         this.keys.add(action);
+        // PHAGOS: Spasi/K = PULSE edge-trigger (abaikan auto-repeat)
+        if (action === 'fire' && !e.repeat) this._pulseQueued = true;
         e.preventDefault();
       }
       if (e.code === 'Space') e.preventDefault();
@@ -216,12 +221,16 @@ export class InputHandler {
   }
 
   /**
-   * Pasang tombol SERANG: tekan/tahan = menembak, TARIK saat ditahan =
-   * mengarahkan serangan (aim stick), lepas = berhenti & kembali auto-aim.
-   * Pointer di-capture supaya jari yang meleset keluar tombol tidak memutus tembakan.
+   * PHAGOS: pasang tombol PULSE — tiap TEKAN mengantre satu ledakan membran.
+   * Aim-taraf lama (tahan+tarik) dinonaktifkan: PULSE mostly radial, cone
+   * mengikuti arah gerak. Kompat: nama method dipertahankan agar main.js lama
+   * tetap jalan; bindPulseButton adalah alias yang disarankan.
    * @param {HTMLElement} el
-   * @param {{onPress?: Function}} [opts] onPress: respons instan tiap tekan (swing/lunge)
+   * @param {{onPress?: Function}} [opts] onPress: respons instan tiap tekan
    */
+  bindPulseButton(el, opts = {}) {
+    this.bindFireButton(el, opts);
+  }
   bindFireButton(el, opts = {}) {
     if (!el) return;
     this.fireEl = el;
@@ -239,6 +248,8 @@ export class InputHandler {
       this.aimStick.active = false;
       this.fireButtonHeld = true;
       el.classList.add('held');
+      // PHAGOS: tiap tekan = satu PULSE (edge-trigger)
+      this._pulseQueued = true;
       if (opts.onPress) opts.onPress(e);
     };
     this._onFireMove = (e) => {
@@ -287,6 +298,22 @@ export class InputHandler {
     this.keys.clear();
     this._releaseJoystick();
     this._releaseFire();
+    this._pulseQueued = false;
+  }
+
+  /**
+   * PHAGOS: konsumsi antrean PULSE (edge-trigger).
+   * @returns {boolean} true bila ada tekanan PULSE yang belum diproses
+   */
+  consumePulse() {
+    if (!this._pulseQueued) return false;
+    this._pulseQueued = false;
+    return true;
+  }
+
+  /** PHAGOS: antrekan PULSE manual (dipakai harness/self-test). */
+  queuePulse() {
+    this._pulseQueued = true;
   }
 
   /**
@@ -309,12 +336,13 @@ export class InputHandler {
     return { active: false, angle: 0, source: null };
   }
 
-  /** Dipakai self-test/harness: paksa status tombol SERANG. */
+  /** Dipakai self-test/harness: paksa status tombol PULSE. */
   setFire(v) {
     this.fireButtonHeld = !!v;
+    if (v) this._pulseQueued = true;
   }
 
-  /** Sedang menembak? (tombol HUD ATAU Space/K) */
+  /** Sedang menekan PULSE? (tombol HUD ATAU Space/K) — kompat lama. */
   isFiring() {
     return this.fireButtonHeld || this.keys.has('fire');
   }

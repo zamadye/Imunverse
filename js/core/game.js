@@ -1,12 +1,16 @@
 /**
- * game.js — Orkestrator gameplay Imunverse.
+ * game.js — Orkestrator gameplay PHAGOS (eksperimen membran).
  * Memegang state run (entitas, sistem, kamera), loop update/render, dan
- * seluruh alur: spawn → serang → mati → drop → XP → level-up → revive →
- * akhir run → ekonomi → misi → save.
+ * seluruh alur: spawn → membran/PULSE/engulf → mati → drop → XP → mutasi →
+ * revive → akhir run → ekonomi → misi → save.
  *
  * CATATAN ARSITEKTUR: file ini TIDAK mengimpor modul screen UI manapun
  * (kecuali hud-screen yang murni "view adapter" tanpa import balik).
  * Komunikasi ke UI lewat ui-bridge (event) — lihat ui-bridge.js.
+ *
+ * PHAGOS: kata kerja tempur = MEDAN MEMBRAN (kontak pasif) + PULSE (satu
+ * tombol) + ENGULF (fagositosis otomatis). Proyektil hero dinonaktifkan;
+ * sub-sistem proyektil tetap hidup untuk antibodi Bella/Eos + skill.
  */
 
 import { STATE, setPaused, setLevelUpOpen, setScreen } from './state-manager.js';
@@ -29,6 +33,18 @@ import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.j
 import { tagOnHit, cascadeOnDeath } from '../systems/tag-cascade.js'; // R6: Modul D
 import { chemoUpdate } from '../systems/chemotaxis.js'; // R7: Modul E
 import { SkillSystem } from '../systems/skill-system.js';
+// PHAGOS eksperimen: membran + mutasi hero + mutasi musuh
+import {
+  initMembrane, updateMembrane, tryPulse, tryEngulf, getMembraneStats,
+  membraneContains, membraneOnKill, membraneAbsorbDamage, membraneOnPlayerHit,
+  pulseView,
+} from '../systems/membrane-system.js';
+import { rollMutationChoices, applyMutation, isMutationId } from '../systems/mutation-system.js';
+import {
+  onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
+  maybeApplyTrait as enemyMutMaybeApply, updateEnemyMutations,
+  mutationLabelFor,
+} from '../systems/enemy-mutation-system.js';
 
 import { Player } from '../entities/player.js';
 import { Enemy } from '../entities/enemy.js';
@@ -267,13 +283,23 @@ export const game = {
       hitStop: 0,
       // RONDE-7: hit-stop kill digerbang agar tidak berantai tak putus — saat
       // membantai kerumunan (banyak kill/detik) hit-stop 30ms yang di-refresh
-      // tiap kill membekukan game ~30-90% waktu nyata = tombol SERANG terasa
+      // tiap kill membekukan game ~30-90% waktu nyata = tombol PULSE terasa
       // LEMOT persis saat musuh ramai (laporan pemain). Kill pertama tetap
       // punya beat-nya; sisanya menunggu celah 0.24 dtk.
       hitStopCool: 0,
       ended: false,
       stats: { shotsFired: 0 },
+      // PHAGOS: membran + mutasi + bio-point + adaptasi musuh (run-only)
+      activeMutations: [],
+      mutationHistory: [],
+      bioPoints: 0,
+      engulfStats: {},
+      enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
+      membrane: null,
+      _mutationFlashT: 0, // PHAGOS: overlay merah saat patogen bermutasi
     };
+    // PHAGOS: medan membran hero (wajib sebelum HOOK spawn agar stats siap)
+    try { initMembrane(this.run, heroDef); } catch (err) { console.warn('[phagos] initMembrane gagal:', err); }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
@@ -438,7 +464,9 @@ export const game = {
 
     const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
     const cooldown = base.attackCooldown / ((1 + eff('attackSpeed') * 0.12) * squad.attackSpeed) * buffCooldown * evoB.cooldownMult;
-    const speed = base.speed * squad.speed * (1 + eff('moveSpeed') * 0.08) * (tb ? tb.speed.mult : 1);
+    // PHAGOS: Treg memperlambat SEMUA termasuk dirinya sendiri (-10%)
+    const tregSlow = heroDef.id === 'treg' ? 0.9 : 1;
+    const speed = base.speed * squad.speed * (1 + eff('moveSpeed') * 0.08) * (tb ? tb.speed.mult : 1) * tregSlow;
     const attackRange = base.attackRange * squad.attackRange * (1 + eff('attackRange') * 0.12);
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange * (1 + eff('attackRange') * 0.12);
     const maxHP = Math.round((base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) + eff('maxHP') * 20 + (perm.maxHP || 0)) * evoB.maxHPMult);
@@ -496,6 +524,8 @@ export const game = {
 
     // RONDE-7: gerbang hit-stop meluruh juga selama freeze (real-time)
     if (run.hitStopCool > 0) run.hitStopCool -= dt;
+    // PHAGOS: flash merah arena (peringatan mutasi musuh) meluruh real-time
+    if (run._mutationFlashT > 0) run._mutationFlashT -= dt;
     // JUICE hit-stop: freeze singkat saat kill besar (render tetap jalan)
     if (run.hitStop > 0) {
       run.hitStop -= dt;
@@ -613,39 +643,34 @@ export const game = {
     // Squash-stretch decay
     if (player.squash > 0) player.squash -= dt;
 
-    // TEMBAK MANUAL: hanya saat tombol TEMBAK ditekan/tahan
-    if (this.input.isFiring && this.input.isFiring()) {
-      player.tryFire(this);
+    // PHAGOS Tahap 3 — input → PULSE (edge-trigger, bukan hold-to-fire).
+    // Medan kontak selalu aktif; tombol PULSE satu-satunya aksi eksplisit.
+    if (this.input.consumePulse && this.input.consumePulse()) {
+      tryPulse(this, {});
     }
 
-    // PASUKAN: follow player; menembak HANYA saat tomorin SERANG ditahan —
-    // aturan gameplay ronde-5: TIDAK ADA unit milik pemain yang menyerang
-    // otomatis (squad = tambahan DPS dalam ritme tombol, bukan auto-fire).
-    const firingNow = this.input.isFiring && this.input.isFiring();
-    const allyCfg = getData().upgrades.allyUpgrade;
-    const allyLvl = STATE.meta.allyLevel || 0;
+    // PHAGOS Opsi A — PASUKAN: membran mini kontak-pasif (tanpa Pulse/engulf).
+    // Di sini pasukan HANYA follow; damage kontaknya dihitung di membrane-system.
     for (const ally of run.allies) {
-      const shot = firingNow
-        ? ally.update(dt, player, run.enemies, player.stats.damage * (1 + allyCfg.dmgPerLevel * allyLvl))
-        : ally.update(dt, player, [], 0); // tanpa musuh = hanya follow, tak menembak
-      if (shot) {
-        this.spawnProjectile({
-          pattern: 'pierce',
-          x: shot.x,
-          y: shot.y,
-          angle: shot.angle,
-          speed: shot.speed,
-          damage: shot.damage,
-          pierce: 1,
-          radius: 7,
-          color: shot.color,
-        });
-      }
+      ally.update(dt, player, [], 0); // tanpa musuh = hanya follow
     }
 
-    // 1. Input & player (gerak + auto-attack)
-    const move = this.input.getMoveVector();
+    // 1. Input & player (gerak joystick; root saat metamorfosis/Nyx)
+    const rawMove = this.input.getMoveVector();
+    const rooted = run.membrane && run.membrane.metaRootT > 0;
+    const move = rooted ? { x: 0, y: 0, magnitude: 0, source: 'rooted' } : rawMove;
     player.update(dt, move, this);
+    // PHAGOS adaptif virus: +speed sebagai displacement ekstra (tanpa recompute)
+    if (run.membrane) {
+      try {
+        const mst = getMembraneStats(run);
+        if (mst.adaptive && mst.adaptive.speedMult && !rooted) {
+          const ex = (mst.adaptive.speedMult - 1) * dt;
+          player.x += (player.vx || 0) * ex;
+          player.y += (player.vy || 0) * ex;
+        }
+      } catch { /* stats belum siap */ }
+    }
 
     // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi
     // ONLY (tidak menyentuh logic combat/wave). Emit 1× per run; main.js
@@ -661,9 +686,14 @@ export const game = {
     if (events.waveBreak) {
       emit('waveBreak', { wave: run.spawnSys.wave });
     }
+    // PHAGOS: peringatan dini mutasi musuh (5 dtk sebelum wave 6/10/14)
+    try { enemyMutPreWarning(this); } catch { /* abaikan */ }
+    try { updateEnemyMutations(this, dt); } catch { /* abaikan */ }
     if (events.newWave) {
       emit('wave', { wave: run.spawnSys.wave, isBoss: false });
       audio.wave();
+      // PHAGOS: wave mutasi → pilih trait counter build pemain
+      try { enemyMutOnNewWave(this, run.spawnSys.wave); } catch (err) { console.warn('[phagos] enemyMutOnNewWave:', err); }
       const w = run.spawnSys.wave;
       // Fase 17 (trigger 1A): Imun Coin masuk LIVE tiap wave — +perWave, float emas
       const imuWave = getRetention().imuReward.perWave;
@@ -743,6 +773,10 @@ export const game = {
       else audio.hit();
       return died;
     });
+
+    // PHAGOS Tahap 5 — MEDAN MEMBRAN vs musuh (kontak tick + engulf).
+    // Proyektil di atas hanya untuk antibodi Bella/Eos + skill (sub-sistem).
+    try { updateMembrane(this, dt); } catch (err) { console.warn('[phagos] updateMembrane:', err); }
 
     // 7. Separation antar musuh (anti menumpuk)
     run.collision.separateEnemies(run.enemies);
@@ -978,8 +1012,14 @@ export const game = {
 
   openLevelUpModal() {
     const run = this.run;
-    // Fase 17 (trigger 2C): layar berhenti sejenak 0.3 dtk + ledakan emas
-    run.currentChoices = rollLevelUpChoices(run);
+    // PHAGOS Tahap 9 — level-up = MUTASI BENTUK (fallback upgrade lama bila gagal)
+    try {
+      run.currentChoices = rollMutationChoices(run);
+      if (!run.currentChoices || run.currentChoices.length === 0) throw new Error('pool mutasi kosong');
+    } catch (err) {
+      console.warn('[phagos] rollMutationChoices gagal, fallback upgrade:', err);
+      run.currentChoices = rollLevelUpChoices(run);
+    }
     const pfx = getRetention().particles;
     run.effects.spawnBurst(run.player.x, run.player.y, '#ffd93d', pfx.levelUp, 240, 5);
     run.camera.addShake(0.3);
@@ -993,22 +1033,38 @@ export const game = {
     emit('levelup', { level: run.level, choices: run.currentChoices });
   },
 
-  /** Dipanggil dari modal level-up saat pemain memilih satu upgrade. */
+  /** Dipanggil dari modal level-up saat pemain memilih satu mutasi/upgrade. */
   chooseLevelUp(upgradeId) {
     const run = this.run;
     if (!run || !run.currentChoices) return;
-    const result = applyLevelUp(run, upgradeId);
-    this.recomputePlayerStats();
-    if (result.healAmount > 0) run.player.heal(result.healAmount);
-    // V2 Phase 4: EVOLUSI SENJATA diambil → selebrasi besar (momen memorable)
-    if (result.evolved) {
-      showAnnounce(result.evolved.name.toUpperCase() + '!', true);
-      run.effects.spawnBurst(run.player.x, run.player.y, '#c39bd3', 40, 280, 5);
-      run.camera.addShake(0.5);
-      this.hitStopRun(getGameFeel().hitStop.ult);
+    // PHAGOS: kartu mutasi vs kartu upgrade lama (safety net)
+    if (isMutationId(upgradeId)) {
+      const res = applyMutation(run, upgradeId);
+      if (!res.ok) {
+        emit('toast', { message: res.reason || 'Mutasi gagal', kind: 'warn' });
+        return; // jangan tutup modal — pemain pilih kartu lain
+      }
+      showAnnounce(res.mutation.name.toUpperCase() + '!', true);
+      run.effects.spawnBurst(run.player.x, run.player.y, '#8df7d2', 30, 260, 5);
+      run.camera.addShake(0.4);
       audio.evolve();
       buzz('levelup');
-      emit('toast', { message: `EVOLUSI: ${result.evolved.name}!`, kind: 'gold' });
+      emit('toast', { message: `MUTASI: ${res.mutation.name}!`, kind: 'gold' });
+      this.recomputePlayerStats();
+    } else {
+      const result = applyLevelUp(run, upgradeId);
+      this.recomputePlayerStats();
+      if (result.healAmount > 0) run.player.heal(result.healAmount);
+      // V2 Phase 4: EVOLUSI SENJATA diambil → selebrasi besar (momen memorable)
+      if (result.evolved) {
+        showAnnounce(result.evolved.name.toUpperCase() + '!', true);
+        run.effects.spawnBurst(run.player.x, run.player.y, '#c39bd3', 40, 280, 5);
+        run.camera.addShake(0.5);
+        this.hitStopRun(getGameFeel().hitStop.ult);
+        audio.evolve();
+        buzz('levelup');
+        emit('toast', { message: `EVOLUSI: ${result.evolved.name}!`, kind: 'gold' });
+      }
     }
 
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
@@ -1238,6 +1294,11 @@ export const game = {
       audio.hit();
       return;
     }
+    // PHAGOS: membran hidup / immunity / armor Mastia / adaptif spora
+    try {
+      amount = membraneAbsorbDamage(run, amount);
+      if (amount <= 0) return;
+    } catch { /* membran belum siap */ }
     // Fase 12 — SHIELD skill: serap damage dulu
     if (run.shield > 0) {
       const absorbed = Math.min(run.shield, amount);
@@ -1266,6 +1327,7 @@ export const game = {
     buzz('playerHit'); // V2 Phase 1: getaran pola [30,40,30] di HP
     player.squash = 0.28; // JUICE squash saat terkena hit
     passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
+    try { membraneOnPlayerHit(this, amount); } catch { /* abaikan */ } // PHAGOS: reflektor cermin
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -1431,6 +1493,8 @@ export const game = {
     if (!def.isBoss && ((run.spawnSys?.wave || 1) >= 2) && (def.elite || Math.random() < 0.30)) {
       enemy.armShooter();
     }
+    // PHAGOS: inject trait strain bermutasi (wave 6/10/14)
+    try { enemyMutMaybeApply(run, enemy); } catch { /* abaikan */ }
     run.enemies.push(enemy);
     if (def.isBoss) {
       run.boss = enemy;
@@ -1494,11 +1558,15 @@ export const game = {
    * Aktivasi kemampuan aktif via tombol HUD / keyboard (slot 1-4).
    * @returns {boolean} true bila kemampuan terluncur.
    */
-  /** Fase 12: SERANG manual sekali (tombol SERANG / tombol 4). */
-  triggerAttack() {
+  /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
+  triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
-    this.run.player.tryFire(this);
-    return true;
+    return tryPulse(this, {});
+  },
+
+  /** Kompat lama: SERANG manual → kini memicu PULSE. */
+  triggerAttack() {
+    return this.triggerPulse();
   },
 
   useAbilityBySlot(slot) {
@@ -1663,9 +1731,14 @@ export const game = {
     if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
     else if (enemy.def.elite) { this.hitStopRun(gf.hitStop.elite); buzz('elite'); }
     else {
-      // RONDE-7: kill biasa tidak menumpuk freeze — cadence SERANG tetap
+      // RONDE-7: kill biasa tidak menumpuk freeze — cadence PULSE tetap
       // responsif penuh di tengah keroyokan.
-      if (run.hitStopCool <= 0) { this.hitStopRun(gf.hitStop.kill); run.hitStopCool = 0.24; }
+      // PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi).
+      const isMembraneKill = source === null || source === undefined;
+      if (run.hitStopCool <= 0) {
+        this.hitStopRun(isMembraneKill ? (gf.hitStop.membraneKill ?? 0.015) : gf.hitStop.kill);
+        run.hitStopCool = 0.24;
+      }
       buzz('kill');
     }
     // V2 Phase 1: micro shake per kill (biasa/elite; boss sudah shake 0.65 di bawah)
@@ -1760,6 +1833,16 @@ export const game = {
         run.pickups.push(new Pickup(def, enemy.x, enemy.y));
       }
     }
+
+    // PHAGOS: Reaksi Berantai — kill di medan memicu mini-pulse (maks 5 rantai)
+    try {
+      const depth = this._chainDepth || 0;
+      if (depth < 5) {
+        this._chainDepth = depth + 1;
+        membraneOnKill(this, enemy, depth);
+        this._chainDepth = depth;
+      }
+    } catch { /* abaikan */ }
 
     // ---- Splitter: pecah jadi N musuh kecil ----
     const split = enemy.def.splitOnDeath;
@@ -2190,6 +2273,9 @@ export const game = {
       ctx.restore();
     }
 
+    // ===== PHAGOS: LAPISAN MEDAN MEMBRAN (di atas background, di bawah hero) =====
+    try { this.renderMembraneLayer(ctx, run, time, ground, billboard); } catch (err) { console.warn('[phagos] renderMembrane:', err); }
+
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
     const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
@@ -2260,6 +2346,20 @@ export const game = {
           ctx.globalAlpha = 1;
           ctx.restore();
         }
+        // PHAGOS: STRAIN BERMUTASI — tint jelas + ring mutasi (tidak subtle)
+        if (e.mutTrait) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = e.mutTint || '#c39bd3';
+          ctx.globalAlpha = 0.75;
+          ctx.lineWidth = 3.5;
+          ctx.setLineDash([7, 4]);
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.3, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
         billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
         const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
@@ -2285,6 +2385,20 @@ export const game = {
           ctx.strokeText(lbl, e.x, e.y - e.radius - 16);
           ctx.fillText(lbl, e.x, e.y - e.radius - 16);
         }
+        // PHAGOS: label STRAIN BERMUTASI (5 dtk pertama setelah spawn)
+        try {
+          const mutLbl = mutationLabelFor(e);
+          if (mutLbl) {
+            ctx.font = '900 8px Nunito, system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = e.mutTint || '#c39bd3';
+            ctx.strokeStyle = 'rgba(18,63,58,0.9)';
+            ctx.lineWidth = 3;
+            const my = e.y - e.radius - (e.eliteAffix ? 28 : 16);
+            ctx.strokeText(mutLbl, e.x, my);
+            ctx.fillText(mutLbl, e.x, my);
+          }
+        } catch { /* abaikan */ }
         ctx.restore();
       } });
     }
@@ -2297,6 +2411,8 @@ export const game = {
     }
     if (player.alive) {
       draws.push({ y: player.y, fn: () => {
+        // PHAGOS Nyx: menghilang total 0,5 dtk saat Pulse (invincible)
+        if (run.membrane && run.membrane.vanishT > 0) return;
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
@@ -2478,12 +2594,19 @@ export const game = {
     }
 
     // ---- Screen-space overlays ----
+    // PHAGOS: flash merah saat patogen bermutasi (sinyal anti-curang)
+    if (run._mutationFlashT > 0) {
+      ctx.fillStyle = `rgba(214,38,61,${Math.min(0.28, run._mutationFlashT * 0.25)})`;
+      ctx.fillRect(0, 0, w, h);
+    }
     cam.drawBossIndicatorIfOffscreen(ctx, run.boss, w, h, time);
     drawNestHint(ctx, run, cam.x, cam.y, w, h, time); // F26: petunjuk arah sarang terdekat
     drawJoystick(ctx, this.input.joystick, this.input.maxRadius, drawImageAt);
 
     // ---- HUD DOM + minimap ----
     if (STATE.screen === 'gameplay' || STATE.screen === 'gameover') {
+      let pulse = null;
+      try { pulse = run.membrane ? pulseView(run) : null; } catch { pulse = null; }
       updateHUD({
         hpPct: player.hp / player.maxHP,
         hpText: `${Math.ceil(player.hp)}/${player.maxHP}`,
@@ -2491,6 +2614,12 @@ export const game = {
         wave: run.spawnSys.wave,
         abilities: run.skills.getView(run.level),
         combo: run.combo,
+        pulse,
+        bioPoints: run.bioPoints || 0,
+        activeMutations: run.activeMutations || [],
+        membraneLiving: run.membrane && run.membrane.livingMaxHp > 0
+          ? { hp: run.membrane.livingHp, max: run.membrane.livingMaxHp, down: run.membrane.livingDownT > 0 }
+          : null,
         mission: run.objective
           ? { quota: run.objective.quota, kills: run.kills, bossSpawned: run.objective.bossSpawned, bossName: run.chapter && run.chapter.boss ? run.chapter.boss.name : null }
           : null,
@@ -2508,6 +2637,289 @@ export const game = {
         drawMinimap(mmCtx, mmCtx.canvas, run, player, 760);
       }
     }
+  },
+
+  /**
+   * PHAGOS Tahap 11 — render medan membran + efek mutasi kumulatif.
+   * Layer: trail racun → cloud histamin → medan utama (+pulse expand) →
+   * dual-ring → satelit → membran mini pasukan. Semua ground-space.
+   */
+  renderMembraneLayer(ctx, run, time, ground, billboard) {
+    const mem = run.membrane;
+    if (!mem || !run.player.alive) return;
+    const player = run.player;
+    const heroColor = run.heroDef?.color || '#35d0ba';
+    let st = null;
+    try { st = getMembraneStats(run); } catch { return; }
+    const fx = st.fx;
+    const acts = run.activeMutations || [];
+    const has = (id) => acts.includes(id);
+
+    // Warna adaptif (mutasi adaptif): geser sesuai musuh dominan
+    let fieldColor = heroColor;
+    if (st.adaptive?.color) fieldColor = st.adaptive.color;
+    if (has('lengket')) fieldColor = '#6cf2a3';
+    if (has('penyerap')) fieldColor = '#2b3a55';
+    if (has('regenerasi') && mem.activeContacts === 0) fieldColor = '#5eff8a';
+
+    // ---- Jejak toksik (beracun) ----
+    for (const tr of mem.trail) {
+      const fade = 1 - tr.t / tr.life;
+      ground(tr.x, tr.y);
+      ctx.globalAlpha = 0.35 * fade;
+      ctx.fillStyle = '#a8e10c';
+      ctx.beginPath();
+      ctx.arc(tr.x, tr.y, tr.r * (0.7 + 0.3 * fade), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    // ---- Awan histamin (Baso pulse) ----
+    for (const c of mem.clouds) {
+      const fade = 1 - c.t / c.life;
+      ground(c.x, c.y);
+      ctx.globalAlpha = 0.28 * fade;
+      ctx.fillStyle = '#b678e0';
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.5 * fade;
+      ctx.strokeStyle = '#8e44ad';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r * 0.85, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // ---- Medan utama ----
+    const pulsing = mem.pulseAnimT >= 0;
+    const peak = mem.pulsePeak || 0;
+    // Radius visual: idle berdenyut 0.97–1.03 (1.5 dtk), pulse expand ke pulseRadius
+    const idleOsc = has('elastis')
+      ? 0.94 + 0.06 * Math.sin((time / 1.5) * Math.PI * 2) + 0.02 * Math.sin(time * 9)
+      : 0.97 + 0.03 * Math.sin((time / 1.5) * Math.PI * 2);
+    const breathe = has('medan_hidup') ? 1 + 0.05 * Math.sin(time * 2.2) : 1;
+    let visR = st.radius * idleOsc * breathe;
+    let alpha = mem.activeContacts > 0 ? 0.35 : 0.2;
+    if (has('tipis')) alpha *= 0.6;
+    if (pulsing) {
+      visR = st.radius + (st.pulseRadius - st.radius) * peak;
+      alpha = 0.2 + 0.4 * peak;
+    }
+    if (mem.shape === 'pulse_only' && !pulsing) {
+      // Mastia: tidak ada medan pasif — hanya ring cooldown tipis
+      ground(player.x, player.y);
+      ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = heroColor;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 64, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    } else if (mem.shape !== 'pulse_only' && mem.livingDownT <= 0) {
+      const invisible = mem.shape === 'invisible';
+      if (invisible) alpha *= 0.25; // Nyx: nyaris tak terlihat (tetap ada petunjuk samar)
+      this.drawMembraneShape(ctx, ground, player, mem, visR, fieldColor, alpha, time, { pulsing, peak, has, fx, st });
+      // Dual ring: ring luar kedua
+      if (fx.dualRing) {
+        const outerR = st.radius * fx.outerRadiusMult * idleOsc;
+        ground(player.x, player.y);
+        ctx.globalAlpha = 0.14;
+        ctx.fillStyle = fieldColor;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, outerR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.strokeStyle = fieldColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, outerR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+      // Cermin: kilau di permukaan
+      if (has('cermin')) {
+        ground(player.x, player.y);
+        ctx.globalAlpha = 0.35 + 0.2 * Math.sin(time * 4);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, visR * 0.7, time % (Math.PI * 2), (time % (Math.PI * 2)) + 1.2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
+    // Living membrane down: retakan merah
+    if (mem.livingDownT > 0) {
+      ground(player.x, player.y);
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, st.radius * 0.8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // ---- Satelit simbiosis ----
+    for (const s of mem.satellites) {
+      const sx = player.x + Math.cos(s.angle) * s.dist;
+      const sy = player.y + Math.sin(s.angle) * s.dist;
+      ground(sx, sy);
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.radius + 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ---- Membran mini pasukan (Opsi A) ----
+    if (run.allies.length > 0 && st.contactDps > 0) {
+      const sqR = st.radius * 0.5;
+      for (const a of run.allies) {
+        ground(a.x, a.y);
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#4ae3c2';
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, sqR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = '#4ae3c2';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, sqR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
+    void billboard;
+  },
+
+  /**
+   * Gambar bentuk medan sesuai shape hero: circle/support/pulsing/invisible,
+   * cone/cone_trail, tentacles. Tepi bergelombang organik (distorsi sinusoidal).
+   */
+  drawMembraneShape(ctx, ground, player, mem, visR, color, alpha, time, opts) {
+    const { has } = opts;
+    const spikes = has('berduri');
+    const sticky = has('lengket');
+    ground(player.x, player.y);
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    const wob = (ang) => 1 + 0.03 * Math.sin(ang * 5 + time * 3) + 0.02 * Math.sin(ang * 9 - time * 4.2);
+    const traceCircle = (r) => {
+      ctx.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const a = (i / 48) * Math.PI * 2;
+        const rr = r * wob(a);
+        const x = player.x + Math.cos(a) * rr;
+        const y = player.y + Math.sin(a) * rr;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+    };
+    const traceCone = (facing, arc, range) => {
+      ctx.beginPath();
+      ctx.moveTo(player.x, player.y);
+      const steps = 24;
+      for (let i = 0; i <= steps; i++) {
+        const a = facing - arc / 2 + (arc * i) / steps;
+        const rr = range * wob(a);
+        ctx.lineTo(player.x + Math.cos(a) * rr, player.y + Math.sin(a) * rr);
+      }
+      ctx.closePath();
+    };
+    const fillAndStroke = (lineW) => {
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      ctx.globalAlpha = Math.min(1, alpha + 0.25);
+      ctx.lineWidth = lineW;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    };
+    const shape = mem.shape;
+    if (shape === 'cone') {
+      const arc = (mem.shapeParams?.arcDeg ?? 90) * Math.PI / 180;
+      const range = visR * (mem.shapeParams?.rangeMult ?? 1.6);
+      traceCone(player.facing || 0, arc, range);
+      fillAndStroke(sticky ? 5 : 2.5);
+    } else if (shape === 'cone_trail') {
+      const arc = 45 * Math.PI / 180;
+      const range = visR * 1.6;
+      const f = player.facing || 0;
+      traceCone(f, arc, range);
+      fillAndStroke(2.5);
+      traceCone(f + Math.PI, arc, range);
+      ctx.globalAlpha = alpha * 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else if (shape === 'tentacles') {
+      const count = mem.shapeParams?.count ?? 3;
+      const arc = (mem.shapeParams?.arcDeg ?? 32) * Math.PI / 180;
+      const range = visR * (mem.shapeParams?.rangeMult ?? 1.9);
+      const base = player.facing || 0;
+      const sweepOff = mem.sweepT >= 0 ? (1 - mem.sweepT / 0.4) * Math.PI : 0;
+      for (let i = 0; i < count; i++) {
+        const dir = base + sweepOff + (i * Math.PI * 2) / count;
+        traceCone(dir, arc, range);
+        fillAndStroke(2);
+      }
+      // Inti kecil di pusat
+      ctx.globalAlpha = alpha + 0.15;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, visR * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else {
+      // circle / support / pulsing / invisible
+      traceCircle(visR);
+      fillAndStroke(sticky ? 6 : has('tipis') ? 1 : 2.5);
+      // Berduri: duri tajam di tepi
+      if (spikes) {
+        ctx.globalAlpha = Math.min(1, alpha + 0.4);
+        ctx.fillStyle = color;
+        const n = 14;
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * Math.PI * 2 + time * 0.6;
+          const r0 = visR * wob(a);
+          const r1 = r0 + 10 + 4 * Math.sin(time * 6 + i);
+          const bx = player.x + Math.cos(a) * r0;
+          const by = player.y + Math.sin(a) * r0;
+          const tx = player.x + Math.cos(a) * r1;
+          const ty = player.y + Math.sin(a) * r1;
+          const px = -Math.sin(a) * 4, py = Math.cos(a) * 4;
+          ctx.beginPath();
+          ctx.moveTo(bx + px, by + py);
+          ctx.lineTo(tx, ty);
+          ctx.lineTo(bx - px, by - py);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    ctx.restore();
   },
 
   formatTime(seconds) {

@@ -51,7 +51,27 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.macrophage",
-      "equityArchetype": "phagocyte"
+      "equityArchetype": "phagocyte",
+      "membrane": {
+        "shape": "circle",
+        "baseRadius": 72,
+        "contactDps": 14,
+        "pulseCooldown": 2.0,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "heal_bonus",
+        "shapeParams": {
+          "pushMult": 1.6
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_pierce",
+        "patternParams": {
+          "spreadAngle": 0.18
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "dendritic",
@@ -107,7 +127,31 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.dendritic",
-      "equityArchetype": "dendritic"
+      "equityArchetype": "dendritic",
+      "membrane": {
+        "shape": "tentacles",
+        "baseRadius": 48,
+        "contactDps": 12,
+        "pulseCooldown": 2.2,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "mark_nearby",
+        "shapeParams": {
+          "count": 3,
+          "arcDeg": 32,
+          "rangeMult": 1.9,
+          "spacingDeg": 120
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "neutrophil",
@@ -163,7 +207,26 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.neutrophil",
-      "equityArchetype": "net"
+      "equityArchetype": "net",
+      "membrane": {
+        "shape": "circle",
+        "baseRadius": 38,
+        "contactDps": 26,
+        "pulseCooldown": 1.0,
+        "pulseRadiusMult": 2.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "speed_boost",
+        "shapeParams": {}
+      },
+      "_weapon": {
+        "attackPattern": "ranged_pierce",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "eosinophil",
@@ -221,7 +284,30 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.eosinophil",
-      "equityArchetype": "granule_lance"
+      "equityArchetype": "granule_lance",
+      "membrane": {
+        "shape": "cone_trail",
+        "baseRadius": 48,
+        "contactDps": 15,
+        "pulseCooldown": 2.0,
+        "pulseRadiusMult": 2.5,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "parasite_hunter",
+        "shapeParams": {
+          "arcDeg": 45,
+          "rangeMult": 1.6
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.4,
+          "turnRate": 6.5,
+          "antiParasitMult": 1.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "basophil",
@@ -279,7 +365,30 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.basophil",
-      "equityArchetype": "vesicle_cloud"
+      "equityArchetype": "vesicle_cloud",
+      "membrane": {
+        "shape": "pulsing",
+        "baseRadius": 52,
+        "contactDps": 13,
+        "pulseCooldown": 2.2,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "slow_all",
+        "shapeParams": {
+          "minMult": 0.7,
+          "maxMult": 1.3,
+          "periodSec": 2.0
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "mastcell",
@@ -336,7 +445,27 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.mastcell",
-      "equityArchetype": "granule_tank"
+      "equityArchetype": "granule_tank",
+      "membrane": {
+        "shape": "pulse_only",
+        "baseRadius": 0,
+        "contactDps": 16,
+        "pulseCooldown": 4.0,
+        "pulseRadiusMult": 4.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "armor_stack",
+        "shapeParams": {
+          "pulseBaseRadius": 64
+        }
+      },
+      "_weapon": {
+        "attackPattern": "melee_swipe",
+        "patternParams": {
+          "arc": 1.9
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "tcd8",
@@ -393,7 +522,29 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.tcd8",
-      "equityArchetype": "cytotoxic"
+      "equityArchetype": "cytotoxic",
+      "membrane": {
+        "shape": "cone",
+        "baseRadius": 48,
+        "contactDps": 22,
+        "pulseCooldown": 1.8,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.25,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "insta_kill_25",
+        "shapeParams": {
+          "arcDeg": 90,
+          "rangeMult": 1.6
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_pierce",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "tcd4",
@@ -449,7 +600,26 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.tcd4",
-      "equityArchetype": "helper"
+      "equityArchetype": "helper",
+      "membrane": {
+        "shape": "support",
+        "baseRadius": 60,
+        "contactDps": 12,
+        "pulseCooldown": 2.4,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "shield_gain",
+        "shapeParams": {}
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "treg",
@@ -506,7 +676,28 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.treg",
-      "equityArchetype": "regulator"
+      "equityArchetype": "regulator",
+      "membrane": {
+        "shape": "circle",
+        "baseRadius": 56,
+        "contactDps": 11,
+        "pulseCooldown": 2.0,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "balance_slow",
+        "shapeParams": {
+          "selfSlowPct": 0.1
+        }
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "bcell",
@@ -563,7 +754,26 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.bcell",
-      "equityArchetype": "antibody"
+      "equityArchetype": "antibody",
+      "membrane": {
+        "shape": "circle",
+        "baseRadius": 52,
+        "contactDps": 12,
+        "pulseCooldown": 2.2,
+        "pulseRadiusMult": 3.0,
+        "engulfThreshold": 0.15,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "antibody_stack",
+        "shapeParams": {}
+      },
+      "_weapon": {
+        "attackPattern": "ranged_homing",
+        "patternParams": {
+          "spreadAngle": 0.35,
+          "turnRate": 5.5
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     },
     {
       "id": "nkcell",
@@ -618,7 +828,25 @@
       },
       "baseVisualStage": "polos",
       "equityDesignRef": "character-designs.heroes.nkcell",
-      "equityArchetype": "nk_spike"
+      "equityArchetype": "nk_spike",
+      "membrane": {
+        "shape": "invisible",
+        "baseRadius": 52,
+        "contactDps": 20,
+        "pulseCooldown": 2.0,
+        "pulseRadiusMult": 2.5,
+        "engulfThreshold": 0.3,
+        "engulfHealPct": 0.07,
+        "engulfSpecial": "assassin_root",
+        "shapeParams": {}
+      },
+      "_weapon": {
+        "attackPattern": "melee_swipe",
+        "patternParams": {
+          "arc": 2.0
+        },
+        "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      }
     }
   ],
   "tiers": {

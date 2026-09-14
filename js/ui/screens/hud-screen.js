@@ -160,11 +160,10 @@ export function updateAbilityBar(abilities) {
 /** Hint kontrol adaptif per perangkat (touch vs keyboard). */
 function controlHintText() {
   const isTouch = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
-  // UI/UX BUILD 42: copy = perilaku nyata (joystick mengambang di lantai arena;
-  // SERANG = nama tombol yang terlihat; tarik SERANG = mengarahkan)
+  // PHAGOS: SATU TOMBOL — gerak = damage kontak, PULSE = ledakan medan.
   return isTouch
-    ? 'Tarik di lantai arena untuk bergerak · Tahan <span class="k">SERANG</span>, tarik untuk mengarahkan'
-    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse · Serang: <span class="k">Spasi</span> / tahan <span class="k">SERANG</span> (tarik = arah) · Jeda: <span class="k">Esc</span>';
+    ? 'Tarik di lantai arena untuk bergerak — sentuh musuh untuk melukai! · Tekan <span class="k">PULSE</span> untuk meledak'
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse (sentuh = luka) · Pulse: <span class="k">Spasi</span> / <span class="k">PULSE</span> · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */
@@ -241,6 +240,10 @@ export function updateHUD(data) {
 
   updateAbilityBar(data.abilities);
   updateBuffChips();
+  // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
+  try { updatePulseButton(data.pulse); } catch { /* abaikan */ }
+  try { updateBioChip(data.bioPoints, data.activeMutations); } catch { /* abaikan */ }
+  try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
   // Combo pill (juice): tampil saat >= 3 kill beruntun
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
@@ -306,6 +309,98 @@ export function updateHUD(data) {
 function setBar(id, pct) {
   const node = document.getElementById(id);
   if (node) node.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
+}
+
+/**
+ * PHAGOS: indikator radial cooldown PULSE di tombol kanan.
+ * Siap = menyala + label PULSE; cooldown = overlay conic + angka detik.
+ */
+function updatePulseButton(pulse) {
+  const btn = document.getElementById('btn-fire');
+  if (!btn) return;
+  let fill = btn.querySelector('.pulse-cd');
+  let num = btn.querySelector('.pulse-num');
+  let lbl = btn.querySelector('.pulse-label');
+  if (!fill) {
+    fill = document.createElement('div');
+    fill.className = 'pulse-cd';
+    btn.appendChild(fill);
+  }
+  if (!num) {
+    num = document.createElement('span');
+    num.className = 'pulse-num';
+    btn.appendChild(num);
+  }
+  if (!lbl) {
+    lbl = document.createElement('span');
+    lbl.className = 'pulse-label';
+    lbl.textContent = 'PULSE';
+    btn.appendChild(lbl);
+  }
+  if (!pulse) {
+    fill.style.background = 'transparent';
+    num.textContent = '';
+    btn.classList.add('pulse-ready');
+    return;
+  }
+  btn.classList.toggle('pulse-ready', !!pulse.ready);
+  btn.classList.toggle('pulse-meta', !!pulse.metamorphosis);
+  if (pulse.ready) {
+    fill.style.background = 'transparent';
+    num.textContent = '';
+    lbl.textContent = pulse.metamorphosis ? 'META' : 'PULSE';
+  } else {
+    const pct = Math.max(0, Math.min(100, (pulse.cdLeft / Math.max(0.001, pulse.cdTotal)) * 100));
+    fill.style.background = `conic-gradient(rgba(10,40,36,.55) ${pct}%, transparent ${pct}%)`;
+    num.textContent = pulse.cdLeft >= 10 ? Math.ceil(pulse.cdLeft) : pulse.cdLeft.toFixed(1);
+    lbl.textContent = pulse.metamorphosis ? 'META' : 'PULSE';
+  }
+}
+
+/** PHAGOS: chip Bio-Point + ikon mutasi aktif (run-only). */
+function updateBioChip(bio, mutations) {
+  let chip = document.getElementById('hud-bio-chip');
+  if (!chip) {
+    const top = document.querySelector('.hud-top .hud-center');
+    if (!top) return;
+    chip = document.createElement('div');
+    chip.id = 'hud-bio-chip';
+    chip.className = 'hud-bio-chip';
+    chip.title = 'Bio-Point: material mutasi dari engulf';
+    top.appendChild(chip);
+  }
+  const n = bio || 0;
+  const muts = mutations || [];
+  const html = `<span class="bio-dot">◉</span><b>${n}</b><small>BIO</small>` +
+    (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '');
+  if (chip.dataset.html !== html) {
+    chip.innerHTML = html;
+    chip.dataset.html = html;
+  }
+  chip.classList.toggle('rich', n >= 5);
+  chip.classList.toggle('richer', n >= 15);
+}
+
+/** PHAGOS: bar HP membran hidup (mutasi medan_hidup). */
+function updateLivingBar(living) {
+  let wrap = document.getElementById('hud-living-wrap');
+  if (!living || living.max <= 0) {
+    if (wrap) wrap.classList.add('hidden');
+    return;
+  }
+  if (!wrap) {
+    const pill = document.getElementById('hp-pill');
+    if (!pill || !pill.parentNode) return;
+    wrap = document.createElement('div');
+    wrap.id = 'hud-living-wrap';
+    wrap.className = 'hud-living-wrap';
+    wrap.innerHTML = '<span class="hud-living-label">MEMBRAN</span><div class="hud-living-track"><div id="hud-living-fill" class="hud-living-fill"></div></div>';
+    pill.parentNode.insertBefore(wrap, pill.nextSibling);
+  }
+  wrap.classList.remove('hidden');
+  wrap.classList.toggle('down', !!living.down);
+  const fill = document.getElementById('hud-living-fill');
+  if (fill) fill.style.width = `${Math.max(0, Math.min(1, living.hp / living.max)) * 100}%`;
 }
 
 /** Banner pengumuman wave / boss (pill besar ala mockup). */

@@ -11,7 +11,10 @@
     "elite": 0.05,
     "boss": 0.09,
     "crit": 0.025,
-    "ult": 0.06
+    "ult": 0.06,
+    "membraneKill": 0.015,
+    "pulse": 0.1,
+    "engulf": 0.06
   },
   "crit": {
     "chance": 0.08,
@@ -43,12 +46,37 @@
     "kill": 12,
     "elite": 25,
     "crit": 8,
-    "playerHit": [30, 40, 30],
-    "boss": [60, 50, 60],
-    "levelup": [20, 30, 20]
+    "playerHit": [
+      30,
+      40,
+      30
+    ],
+    "boss": [
+      60,
+      50,
+      60
+    ],
+    "levelup": [
+      20,
+      30,
+      20
+    ]
   },
   "lowHp": {
     "threshold": 0.3,
     "heartbeatSec": 1.2
+  },
+  "pulse": {
+    "shake": 0.45,
+    "hitStop": 0.1,
+    "note": "PHAGOS: Pulse = momen aksi utama, shake lebih besar dari kill biasa"
+  },
+  "engulf": {
+    "hitStop": 0.06,
+    "note": "PHAGOS: hit-stop engulf unik — lebih lambat & basah dari kill biasa"
+  },
+  "membrane": {
+    "contactShake": 0.02,
+    "note": "PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi)"
   }
 }

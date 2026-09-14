@@ -2,14 +2,18 @@
  * save-manager.js — Persistensi progress permanen ke localStorage.
  * Seluruh data meta dalam format objek JSON murni (bisa di-serialize dengan
  * JSON.stringify / JSON.parse).
+ *
+ * PHAGOS rebrand: key baru `phagos.save.v1` + migrasi sekali dari key lama
+ * `imunverse.save.v1` (pemain lama tidak kehilangan save).
  */
 
-const SAVE_KEY = 'imunverse.save.v1';
+const SAVE_KEY = 'phagos.save.v1';
+const LEGACY_KEYS = ['imunverse.save.v1'];
 
 /** Cek ketersediaan localStorage (bisa gagal di private mode). */
 export function isStorageAvailable() {
   try {
-    const probe = '__imunverse_probe__';
+    const probe = '__phagos_probe__';
     window.localStorage.setItem(probe, '1');
     window.localStorage.removeItem(probe);
     return true;
@@ -23,10 +27,29 @@ export function isStorageAvailable() {
  * Muat save dari localStorage. Mengembalikan objek meta hasil merge dengan
  * default (agar save lama dari versi sebelumnya tetap valid), atau null
  * bila belum ada save.
+ *
+ * Migrasi PHAGOS: jika key baru kosong tapi key lama berisi data → salin
+ * sekali ke key baru lalu lanjutkan dari key baru.
  */
 export function loadSave() {
   try {
-    const raw = window.localStorage.getItem(SAVE_KEY);
+    let raw = window.localStorage.getItem(SAVE_KEY);
+    if (!raw) {
+      for (const legacy of LEGACY_KEYS) {
+        const old = window.localStorage.getItem(legacy);
+        if (old) {
+          try {
+            const parsed = JSON.parse(old);
+            if (parsed && typeof parsed === 'object') {
+              window.localStorage.setItem(SAVE_KEY, old);
+              console.info(`[save-manager] migrasi save ${legacy} → ${SAVE_KEY}`);
+              raw = old;
+              break;
+            }
+          } catch { /* save lama korup — abaikan */ }
+        }
+      }
+    }
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null) return null;
@@ -57,6 +80,7 @@ export function writeSave(meta) {
 export function clearSave() {
   try {
     window.localStorage.removeItem(SAVE_KEY);
+    for (const legacy of LEGACY_KEYS) window.localStorage.removeItem(legacy);
     return true;
   } catch (err) {
     console.error('[save-manager] gagal menghapus save:', err);
