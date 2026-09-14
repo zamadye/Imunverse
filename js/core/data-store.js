@@ -301,6 +301,7 @@ export function getProgressionBand(waveNumber) {
 
 /** xpToNextLevel = ceil(base * level^exponent), default 10 * level^1.5 */
 export function xpToNextLevel(level) {
-  const { base, exponent } = getData().upgrades.xpCurve;
-  return Math.ceil(base * Math.pow(level, exponent));
+  // PHAGOS Sprint 1 (bible §5.2): linear 80 + 35L (run referensi → level 8)
+  const { base, step } = getData().upgrades.xpCurve;
+  return base + step * level;
 }

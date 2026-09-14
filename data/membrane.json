@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "doc": "PHAGOS eksperimen — properti dasar medan membran. Semua angka combat membran hidup di sini, bukan hardcode.",
   "defaults": {
+    "contactDpsBase": 8,
     "baseRadiusMult": 1.2,
     "contactTickSec": 0.1,
     "maxContactTargets": 12,

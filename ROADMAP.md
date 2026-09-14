@@ -25,12 +25,12 @@ Legenda: ✅ selesai · 🟡 sebagian/butuh verifikasi · ❌ belum · ⚠️ se
 - [~] 🟡 6 trait wave 6/10/14 — data ✅ (waves + warn 5s ✅, seleksi counter ada); ambang trigger vs §4.2 🟡 (verifikasi)
 - [~] 🟡 11 hero bentuk medan unik — struktur ✅, nama ✅ cocok bible; **angka DEVIASI dari tabel §3** (lihat §2.1 — retune wajib)
 - [ ] ❌ 8–9 level up per run referensi — XP curve masih lama (lihat §2.2)
-- [ ] ❌ Run 3–8 menit — belum diukur (ukur di checkpoint Sprint 1)
+- [~] 🟡 Run 3–8 menit — TERUKUR: ±20 mnt/16 wave (AI headless); pacing spawn ×~4 → Sprint 3
 
 ### Progresi & ekonomi
 
 - [ ] ❌ Biokredit ~916/run — earn rate masih lama + ada faucet Genom dari run (lihat §2.3)
-- [ ] ❌ XP curve 80+35L — masih `280·L^0.45` + band + kombo + orb
+- [x] ✅ XP curve 80+35L — `xpNeed = 80+35L`, sumber per tipe kill, band/kombo/orb-tier dicabut
 - [ ] ❌ Siklus Mitosis 30 lv / ~26 hari — masih BP lama (40+10L, 500, tanpa cap)
 - [ ] ❌ Pangkat 13 tier / ~14 hari — masih GP lama (18/2/120/250)
 - [ ] ❌ Hero lv20 / ~8 hari — masih 150/1.35 + scaling shooter
@@ -83,9 +83,9 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 - [x] 5. Pulse — ✅
 - [ ] **6. CHECKPOINT DEVICE (owner): Pulse memuaskan. STOP.**
 - [x] 7. Engulf — ✅ (verifikasi hit-stop 0,15 dtk §2.2 — kode punya 0,1)
-- [~] 8. Pembersihan proyektil — hero `_weapon` beku ✅; verifikasi pipeline `game.js` bersih total
+- [x] 8. Pembersihan proyektil — hero `_weapon` beku ✅; pipeline `game.js` terverifikasi bersih (recon: jalur shooter mati, tidak ada spawn proyektil hero)
 - [ ] 9. **XP curve §5**: `xpNeed = 80+35L`; sumber per TIPE kill (3/5/20/60); cabut band/kombo/orb-tier (D6)
-- [~] 10. Rebrand — teks inti ✅; kosakata §3 + `?v=` diseragamkan (sekarang 3 nilai: 5/50a/54)
+- [x] 10. Rebrand — teks inti + kosakata §3 ✅; `?v=` diseragamkan ✅
 - [ ] Ukur **run referensi PHAGOS** (kill kontak/Pulse/engulf, wave, durasi, BK/run) — fondasi Sprint 3
 
 ### Sprint 2 — Mutasi & hero

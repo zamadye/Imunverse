@@ -1,8 +1,15 @@
 {
   "schemaVersion": 4,
   "xpCurve": {
-    "base": 280,
-    "exponent": 0.45
+    "base": 80,
+    "step": 35
+  },
+  "xpByKillType": {
+    "contact": 3,
+    "pulse": 5,
+    "engulf": 20,
+    "boss": 60,
+    "other": 3
   },
   "levelUpChoices": 3,
   "levelUpPool": [

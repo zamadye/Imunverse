@@ -65,7 +65,7 @@ export function tryDevour(game, ctx) {
   run.effects.spawnBlast(t.x, t.y, t.radius * 2.2, '#ffd93d');
   run.effects.spawnLabel(t.x, t.y - t.radius - 16, 'TELAN!', '#ffd93d');
   addPhagoMeter(run, cfg.meterPerDevour || 25, game);
-  game.onEnemyKilled(t, null);
+  game.onEnemyKilled(t, 'engulf'); // skill devour = engulf (20 XP via devoured branch)
   recordModuleTrigger('phagocytosis', { wave: run.spawnSys ? run.spawnSys.wave : 0, meter: run.phagoMeter });
   emit('phago', phagoHudView(run));
   return true;

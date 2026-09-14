@@ -60,7 +60,7 @@ import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
-import { xpForKill, comboXpMult, applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
+import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import {
@@ -479,6 +479,10 @@ export const game = {
     this.applyMetaMultipliers(stats);
     this.applyBodyModifiers(stats, run.bodyMods || getBodyRunModifiers(STATE.meta));
     run.player.stats = stats;
+    // PHAGOS Sprint 1: sitokin ×1.4 adalah pengali SEMENTARA di atas stats — recompute
+    // mengganti objek stats (pengali hilang) sementara flag sitokinApplied masih owed.
+    // Terapkan ulang agar restore /1.4 saat expiry tidak membelah base (slow permanen 71%).
+    if (run.itemBuffs && run.itemBuffs.sitokinApplied) stats.speed *= 1.4;
     run.player.maxHP = stats.maxHP;
     // pertahankan HP absolut; penambahan maxHP dari upgrade menaikkan selisih
     run.player.hp = Math.min(run.player.hp + Math.max(0, stats.maxHP - oldMax), stats.maxHP);
@@ -686,12 +690,7 @@ export const game = {
       const imuWave = getRetention().imuReward.perWave;
       run.imuAccrued += imuWave;
       run.effects.spawnLabel(player.x, player.y - 46, `+${imuWave} Genom`, '#ffd76a');
-      // Milestone XP tiap kelipatan 10 wave
-      if (w % 10 === 0) {
-        const bonus = 20 + w * 3;
-        this.addXP(bonus);
-        emit('toast', { message: `Wave ${w}! +${bonus} XP`, kind: 'gold' });
-      }
+      // PHAGOS Sprint 1 (bible §5): XP HANYA dari kill — milestone XP wave dicabut.
       // MENANG mode Klasik: wave melewati finalWave (boss wave 10 sudah tumbang)
       if (run.mode && run.mode.finalWave && w > run.mode.finalWave) {
         this.winRun();
@@ -701,7 +700,7 @@ export const game = {
       if (run.mode && run.mode.id === 'endless' && w % 5 === 0) {
         const bonus = Math.round(w * 5 * getProgressionBand(w).rewardMult);
         run.bonusCurrency += bonus;
-        addCurrency(meta, bonus);
+        addCurrency(STATE.meta, bonus); // PHAGOS Sprint 1: fix crash endless (meta tak terdefinisi di scope update)
         emit('toast', { message: `Endless wave ${w}! +${bonus} biokredit`, kind: 'gold' });
       }
       run.wave = run.spawnSys.wave;
@@ -811,7 +810,7 @@ export const game = {
       const dmg = (e.dotSrc || 0) * (e.dotMult || 0) * dt;
       const died = e.takeDamage(dmg);
       this.provokeEnemy(e); // RONDE-4
-      if (died) this.onEnemyKilled(e, null);
+      if (died) this.onEnemyKilled(e, 'dot');
       if (e.dotT <= 0) e.dotMult = 0;
     }
     run.effects.update(dt);
@@ -951,14 +950,13 @@ export const game = {
   },
 
   // =====================================================================
-  // XP & LEVEL-UP (xpToNextLevel = ceil(10 * level^1.5))
+  // XP & LEVEL-UP (PHAGOS Sprint 1: xpToNextLevel = 80 + 35L, bible §5.2)
   // =====================================================================
   addXP(baseAmount) {
     const run = this.run;
-    // Fase 18: kurva XP per band — early 1.6× (cepat naik), late 0.85× (berat)
-    const bandXp = getProgressionBand(run.spawnSys ? run.spawnSys.wave : 1).xpMult;
-    // Fase 17 (trigger 2D): combo ≥3 kill/5 detik → XP ×1.2 (dopamine loop)
-    const gained = baseAmount * run.player.stats.xpMult * comboXpMult(run.combo.count) * bandXp;
+    // PHAGOS Sprint 1 (bible §5, D6): XP MURNI dari kill — pengali band & kombo dicabut.
+    // Hanya xpMult stat (progresi meta) yang berlaku.
+    const gained = baseAmount * run.player.stats.xpMult;
     run.xpGained += gained;
     // Fase 18: GERBANG TERTUTUP (penjaga masih hidup) → XP DITAHAN di bank,
     // tanpa progres level (spesifikasi: naik-level berhenti sampai boss tumbang)
@@ -1126,7 +1124,7 @@ export const game = {
         sourceKind: 'melee',
       });
       if (!e.lastHitAbsorbed) this.onDamageDealt(dmg);
-      if (died) this.onEnemyKilled(e, null);
+      if (died) this.onEnemyKilled(e, 'melee');
     });
   },
 
@@ -1651,7 +1649,7 @@ export const game = {
         // Jurus menembus lapisan armor (Petir Sel NK vs Gram±/Prion)
         const died = enemy.takeDamageRaw ? enemy.takeDamageRaw(dmg) : enemy.takeDamage(dmg);
         this.spawnHitFeedback(enemy, dmg, died, false, { sourceKind: 'skill' });
-        if (died) this.onEnemyKilled(enemy, null);
+        if (died) this.onEnemyKilled(enemy, 'skill');
       },
     });
     // Third-person feel: hentakan halus saat skill meninggalkan tangan (tempur).
@@ -1722,6 +1720,17 @@ export const game = {
   },
 
   /** Musuh mati: kill count, partikel, drop nutrisi, splitter, boss reward. */
+  /** PHAGOS Sprint 1 (bible §5.1): XP dari tipe kill. source = string cause
+   * ('contact'/'pulse'/'engulf'/...) dari membran & skill, objek proj, atau null. */
+  xpForKillCause(enemy, source) {
+    let tbl = null;
+    try { tbl = getData().upgrades.xpByKillType; } catch { /* fallback bawah */ }
+    tbl = tbl || { contact: 3, pulse: 5, engulf: 20, boss: 60, other: 3 };
+    if (enemy.isBoss) return tbl.boss;
+    if (typeof source === 'string' && tbl[source] !== undefined) return tbl[source];
+    return tbl.other;
+  },
+
   onEnemyKilled(enemy, source) {
     const run = this.run;
     run.kills += 1;
@@ -1736,12 +1745,15 @@ export const game = {
       run.combo.count += 1;
       run.combo.timer = getRetention().combo.window;
       run.effects.spawnBurst(enemy.x, enemy.y, '#ffd93d', getRetention().particles.enemyDeath, 150, 4);
+      // PHAGOS Sprint 1 (bible §5.1): korban telan (skill devour) = engulf → 20 XP.
+      // Drop tetap tidak ada (trade-off jalur skill — D9; engulf membran tetap full kill).
+      this.addXP(this.xpForKillCause(enemy, 'engulf'));
       audio.kill();
       return;
     }
 
-    // ---- Fase 17 (trigger 2A): XP per KILL — kecil 5–8, besar 12–15, boss 50 ----
-    const killXp = xpForKill(enemy.def.tier, enemy.isBoss);
+    // ---- PHAGOS Sprint 1 (bible §5.1): XP per TIPE kill — kontak 3, Pulse 5, engulf 20, boss 60 ----
+    const killXp = this.xpForKillCause(enemy, source);
     this.addXP(killXp);
     run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP`, '#cde86b');
 
@@ -1783,8 +1795,8 @@ export const game = {
     run.combo.timer = getRetention().combo.window; // spek: 3+ kill dalam 5 detik
     if (run.combo.count >= 3) audio.combo(run.combo.count);
     if (run.combo.count > 0 && run.combo.count % 10 === 0) {
-      this.addXP(10 + run.combo.count); // bonus XP milestone combo
-      emit('toast', { message: `COMBO x${run.combo.count}! +${10 + run.combo.count} XP`, kind: 'gold' });
+      // PHAGOS Sprint 1 (D6): milestone kombo tanpa XP (juice saja)
+      emit('toast', { message: `COMBO x${run.combo.count}!`, kind: 'gold' });
     }
     audio.kill();
     // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
@@ -1795,7 +1807,7 @@ export const game = {
       // RONDE-7: kill biasa tidak menumpuk freeze — cadence PULSE tetap
       // responsif penuh di tengah keroyokan.
       // PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi).
-      const isMembraneKill = source === null || source === undefined;
+      const isMembraneKill = source == null || typeof source === 'string'; // PHAGOS Sprint 1: cause string = kill membran
       if (run.hitStopCool <= 0) {
         this.hitStopRun(isMembraneKill ? (gf.hitStop.membraneKill ?? 0.015) : gf.hitStop.kill);
         run.hitStopCool = 0.24;
@@ -1844,7 +1856,7 @@ export const game = {
         emit('toast', { message: `${enemy.bossName || 'Boss'} tumbang! Organ bersih!`, kind: 'gold' });
         this.winRun();
       } else {
-        emit('toast', { message: tr(`Sel Kanker dikalahkan! +${enemy.xpPerKill} XP`), kind: 'gold' });
+        emit('toast', { message: tr(`Sel Kanker dikalahkan! +${killXp} XP`), kind: 'gold' });
         // Fase 18 GATEKEEPER: penjaga tumbang → gerbang wave terbuka
         if (run.spawnSys.isGateBlocked()) {
           run.spawnSys.openGate();
@@ -1876,12 +1888,9 @@ export const game = {
       dropPart(rollPartDrop('normal', partMult));
     }
 
-    // ---- Drop orb XP (nilai = xpPerKill musuh; skin sesuai nilai) ----
-    // Nilai nutrisi dipengaruhi kondisi Pencernaan (meta-layer)
-    const nutrMult = run.bodyMods?.nutrientMult ?? 1;
+    // PHAGOS Sprint 1 (bible §5): XP di-grant LANGSUNG saat kill (lihat atas) —
+    // orb XP kill dicabut (sebelumnya double-grant: langsung + orb).
     const nutrients = getData().nutrients;
-    const xpSkin = enemy.xpPerKill >= 5 ? getNutrientDef('amino') : getNutrientDef('glukosa');
-    run.pickups.push(new Pickup(xpSkin, enemy.x, enemy.y, Math.round(enemy.xpPerKill * nutrMult * 10) / 10));
 
     // Fase 9: Toksin hancur → meninggalkan genangan racun (area hazard)
     if (enemy.def.id === 'toksin' && !enemy.isBoss) {

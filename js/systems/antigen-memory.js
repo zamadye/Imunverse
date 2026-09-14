@@ -81,7 +81,7 @@ export function onAntigenKill(run, enemy, game) {
       if (dx * dx + dy * dy <= sp.radius * sp.radius) {
         const died = e.takeDamage(dmg);
         if (run.effects) run.effects.spawnLabel(e.x, e.y - e.radius - 14, Math.round(dmg), '#c39bd3');
-        if (died) game.onEnemyKilled(e, null);
+        if (died) game.onEnemyKilled(e, 'antigen');
       }
     }
   }

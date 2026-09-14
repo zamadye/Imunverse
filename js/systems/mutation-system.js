@@ -40,6 +40,12 @@ export function rollMutationChoices(run) {
     const def = all.find((m) => m.id === id);
     if (def && def.conflicts) for (const c of def.conflicts) conflicts.add(c);
   }
+  // PHAGOS Sprint 1: applyMutation menolak DUA arah (def vs active); filter
+  // tawaran harus sama — kecualikan juga def yang konflik KE active, agar
+  // modal tak pernah menawarkan kartu yang pasti ditolak saat dipilih.
+  for (const m of all) {
+    if (m.conflicts && m.conflicts.some((c) => active.includes(c))) conflicts.add(m.id);
+  }
   const affordable = all.filter((m) =>
     tiers.includes(m.tier) &&
     !active.includes(m.id) &&

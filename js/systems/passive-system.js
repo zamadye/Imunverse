@@ -87,7 +87,7 @@ export function passiveOnPlayerHit(run, game) {
     const dmg = p.params.damage;
     const died = e.takeDamage(dmg);
     game.spawnHitFeedback(e, dmg, died);
-    if (died) game.onEnemyKilled(e, null);
+    if (died) game.onEnemyKilled(e, 'passive');
   }
 }
 

@@ -84,7 +84,7 @@ export function cascadeOnDeath(game, enemy) {
     t.cascadeHopIn = hop + 1;     // pelacak kedalaman rantai (§5.2)
     const died = t.takeDamage(dmg);
     game.spawnHitFeedback(t, dmg, died);
-    if (died) game.onEnemyKilled(t, null); // rekursif → hop berikutnya
+    if (died) game.onEnemyKilled(t, 'cascade'); // rekursif → hop berikutnya
   }
 
   recordModuleTrigger('tagCascade', {

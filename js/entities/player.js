@@ -95,7 +95,7 @@ export class Player {
     // ---- Timers ----
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackFlash > 0) this.attackFlash -= dt;
-    this.attackTimer -= dt;
+    this.attackTimer -= dt; // PHAGOS: sisa cooldown jalur tembak mati (tidak dipakai)
     // RONDE-4: TEMBAK SERANG MANUAL. Blok "auto-attack" DIHAPUS atas arahan
     // pemilik game — hero TIDAK menembak sendiri; semua serangan lewat
     // tombol SERANG (game.js memanggil player.tryFire saat tombol ditekan).
@@ -107,6 +107,8 @@ export class Player {
    * bantu anak-anak: bidik musuh terdekat dalam jangkauan (assist aim).
    */
   tryFire(game) {
+    return;
+    /* PHAGOS Sprint 1 (§13.8): JALUR TEMBAK MATI (tak dipanggil). Dikomentari, bukan dihapus.
     if (!this.alive) return;
     // Fase 12c: tombol SERANG SELALU merespons.
     const aimActive = game.input && game.run && (() => {
@@ -141,10 +143,13 @@ export class Player {
     }
     this.performAttack(target, game);
     this.attackTimer = this.stats.cooldown;
+  */
   }
 
   /** Jalankan attack pattern sesuai data hero. */
   performAttack(target, game, opts = {}) {
+    return;
+    /* PHAGOS Sprint 1 (§13.8): JALUR TEMBAK MATI (tak dipanggil). Dikomentari, bukan dihapus.
     const pattern = this.heroDef.attackPattern;
     if (opts.tap) {
       // Fase 12c: respons sentuhan saat cooldown — swing visual + audio ringan,
@@ -227,6 +232,7 @@ export class Player {
     } else {
       console.warn('[player] attackPattern tidak dikenal:', pattern);
     }
+  */
   }
 
   /** Terima damage dengan i-frames. @returns {boolean} apakah damage diterima */

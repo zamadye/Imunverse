@@ -148,7 +148,7 @@ export class SkillSystem {
           game.spawnHitFeedback(e, damage * (fx.mult || 1), died);
           if (fx.slow) { e.slowT = fx.slow.duration; e.slowMult = fx.slow.mult; }
           if (fx.stun) e.frozen = Math.max(e.frozen, fx.stun);
-          if (died) game.onEnemyKilled(e, null);
+          if (died) game.onEnemyKilled(e, 'skill');
         }
         // R5 Modul C: skill area menumpuk INFLAMASI di lantai (bukan di
         // musuh) — zona DoT yang memanas menuju cytokine storm. Flag OFF
@@ -166,7 +166,7 @@ export class SkillSystem {
           effects.spawnSwipe(px, py, Math.atan2(t0.y - py, t0.x - px), 90, 2.2, '#ffe082');
           const died0 = t0.takeDamage(dmg0);
           game.spawnHitFeedback(t0, dmg0, died0);
-          if (died0) game.onEnemyKilled(t0, null);
+          if (died0) game.onEnemyKilled(t0, 'skill');
         }
         if (fx.heal) player.heal(fx.heal);
         break;
@@ -181,7 +181,7 @@ export class SkillSystem {
         if (fx.stun) t.frozen = Math.max(t.frozen, fx.stun);
         const died = t.takeDamage(dmg);
         game.spawnHitFeedback(t, dmg, died);
-        if (died) game.onEnemyKilled(t, null);
+        if (died) game.onEnemyKilled(t, 'skill');
         break;
       }
       case 'execute': {
@@ -192,7 +192,7 @@ export class SkillSystem {
         effects.spawnBlast(t.x, t.y, 50, lowHP ? '#ff5d73' : '#7fdbff');
         const died = t.takeDamage(dmg);
         game.spawnHitFeedback(t, dmg, died);
-        if (died) game.onEnemyKilled(t, null);
+        if (died) game.onEnemyKilled(t, 'skill');
         break;
       }
       case 'annihilate': {
@@ -202,13 +202,13 @@ export class SkillSystem {
         const died = t.takeDamage(dmg);
         effects.spawnBlast(t.x, t.y, fx.radius, '#c39bd3');
         game.spawnHitFeedback(t, dmg, died);
-        if (died) game.onEnemyKilled(t, null);
+        if (died) game.onEnemyKilled(t, 'skill');
         for (const e of enemies) {
           if (!e.alive || e === t) continue;
           if (Math.hypot(e.x - t.x, e.y - t.y) > fx.radius) continue;
           const d2 = e.takeDamage(damage * 1.2);
           game.spawnHitFeedback(e, damage * 1.2, d2);
-          if (d2) game.onEnemyKilled(e, null);
+          if (d2) game.onEnemyKilled(e, 'skill');
         }
         break;
       }
@@ -219,7 +219,7 @@ export class SkillSystem {
         for (let i = 0; i < (fx.hits || 3); i++) {
           const died = t.alive && t.takeDamage(damage * (fx.mult || 1));
           game.spawnHitFeedback(t, damage * (fx.mult || 1), died);
-          if (died) { game.onEnemyKilled(t, null); break; }
+          if (died) { game.onEnemyKilled(t, 'skill'); break; }
         }
         effects.spawnLabel(t.x, t.y - t.radius - 12, `x${fx.hits}`, s_defColor(run, this));
         break;

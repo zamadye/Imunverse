@@ -173,7 +173,9 @@ run.enemies.slice(-6).forEach((e, i) => {
   e.y = run.player.y + Math.sin(a) * 120;
 });
 input.queuePulse();
-step(3); // 0.05 dtk — animasi expand berjalan
+let pguard = 0;
+while (run.membrane.pulseCdLeft <= 0 && pguard++ < 30) step(1); // tunggu api (hit-stop bisa menelan frame)
+step(2); // animasi expand berjalan
 const peak = run.membrane.pulsePeak;
 const cdLeft = run.membrane.pulseCdLeft;
 game.render(1 / 60, run.time);
@@ -308,9 +310,10 @@ run2.itemBuffs.mukusPool = 0;
 run2.player.iframes = 0; run2.player.hp = run2.player.maxHP * 0.75;
 game.damagePlayer(run2.player.maxHP * 0.1); // → 65%
 log('item-serum', STATE.meta.consumables.serum_awal === 0 && run2.player.hp > run2.player.maxHP * 0.9, `hp=${Math.round(run2.player.hp)}/${run2.player.maxHP}`);
-// Sitokin kedaluwarsa → speed kembali
-for (let i = 0; i < 11 * 60; i++) game.update(1 / 60);
-log('item-sitokin-expire', run2.player.stats.speed >= baseSpeed - 0.001 && !itemBuffs.buffActive(run2, 'sitokin')); // mutasi speed saat sim 11 dtk bisa nambah permanen
+// Sitokin kedaluwarsa → speed kembali (tunggu event, bukan frame tetap — hit-stop bisa membekukan sim)
+let sguard = 0;
+while (itemBuffs.buffActive(run2, 'sitokin') && sguard++ < 1200) game.update(1 / 60);
+log('item-sitokin-expire', sguard < 1200 && run2.player.stats.speed >= baseSpeed - 0.001 && !itemBuffs.buffActive(run2, 'sitokin'), `sg=${sguard} alive=${run2.player.alive} ended=${run2.ended} t=${Math.round(run2.time)} until=${Math.round(run2.itemBuffs.sitokinUntil)} spd=${run2.player.stats.speed.toFixed(2)}/${baseSpeed.toFixed(2)}`);
 
 // ---------- 9. Rename mata uang + kamus (ADDENDUM §4.1) ----------
 const i18n = await mod('js/systems/i18n.js');
@@ -379,6 +382,13 @@ const bcode = buildSys.encodeCurrentBuild({ run: { heroDef: { id: 'tcd8' }, spaw
 const bdec = buildSys.decodeBuild(bcode);
 log('build-roundtrip', !!bcode && bdec.hero === 'tcd8' && bdec.wave === 8 && bdec.mut.length === 1 && bdec.mut[0] === realMut
   && buildSys.decodeBuild('!!!bukan-base64!!!') === null && buildSys.makeBuildUrl(bcode).includes('?build='));
+
+// ---------- 12. XP bible §5 (PHAGOS Sprint 1) ----------
+const { xpToNextLevel: xpNeed1 } = await mod('js/core/data-store.js');
+const xpTbl = getData().upgrades.xpByKillType || {};
+log('xp-curve', xpNeed1(1) === 115 && xpNeed1(8) === 360 && xpNeed1(9) === 395, `L1=${xpNeed1(1)} L8=${xpNeed1(8)}`);
+log('xp-bytype', xpTbl.contact === 3 && xpTbl.pulse === 5 && xpTbl.engulf === 20 && xpTbl.boss === 60, JSON.stringify(xpTbl));
+log('xp-contactdps-fallback', (getData().membrane.defaults.contactDpsBase || 0) === 8);
 
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

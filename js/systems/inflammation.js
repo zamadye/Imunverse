@@ -94,7 +94,7 @@ export function inflamUpdate(game, dt) {
         enemiesHit++;
         const died = e.takeDamage(stormDmg);
         game.spawnHitFeedback(e, stormDmg, died);
-        if (died) game.onEnemyKilled(e, null);
+        if (died) game.onEnemyKilled(e, 'inflam');
       }
       run.effects.spawnBlast(z.x, z.y, z.radius, '#ff5d73');
       run.effects.spawnLabel(z.x, z.y - 40, tr('CYTOKINE STORM!'), '#ff5d73');
@@ -119,7 +119,7 @@ export function inflamUpdate(game, dt) {
       if (Math.hypot(e.x - z.x, e.y - z.y) > z.radius + e.radius) continue;
       const died = e.takeDamage(tickDmg);
       game.spawnHitFeedback(e, tickDmg, died);
-      if (died) game.onEnemyKilled(e, null);
+      if (died) game.onEnemyKilled(e, 'inflam');
     }
   }
 }

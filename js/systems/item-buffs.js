@@ -189,7 +189,7 @@ export function onPlayerDamaged(game, dealt) {
       if (Math.hypot(e.x - player.x, e.y - player.y) > 130 + (e.radius || 0)) continue;
       const died = e.takeDamage(reflect);
       try { game.spawnHitFeedback(e, reflect, died, false, { sourceKind: 'thorns' }); } catch { /* abaikan */ }
-      if (died) { try { game.onEnemyKilled(e, null); } catch { /* abaikan */ } }
+      if (died) { try { game.onEnemyKilled(e, 'item'); } catch { /* abaikan */ } }
     }
   }
   if (!player.alive) return;

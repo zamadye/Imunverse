@@ -962,7 +962,7 @@ async function runAutotest() {
     for (const e of game.run.enemies) {
       if (e.def.elite && e.alive) {
         const died = e.takeDamage(999999);
-        if (died) game.onEnemyKilled(e, null);
+        if (died) game.onEnemyKilled(e, 'autotest');
       }
     }
     for (const p of game.run.pickups) {

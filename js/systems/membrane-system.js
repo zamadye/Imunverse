@@ -34,7 +34,7 @@ export function initMembrane(run, heroDef) {
     shape: m.shape || 'circle',
     // Base dari hero; efektif dihitung tiap frame via getMembraneStats
     baseRadius: m.baseRadius || Math.round((heroDef.baseStats?.radius || 15) * 3.2),
-    baseContactDps: m.contactDps || 12,
+    baseContactDps: m.contactDps || cfg.contactDpsBase || 8, // PHAGOS Sprint 1: hero menang (D10), 8 = fallback bible §2.1
     basePulseCooldown: m.pulseCooldown || 2.0,
     engulfSpecial: m.engulfSpecial || null,
     shapeParams: m.shapeParams || {},
@@ -702,7 +702,7 @@ export function dealMembraneDamage(game, enemy, amount, opts = {}) {
   if (!enemy.lastHitAbsorbed) passiveOnHit(run, enemy, dmg);
   if (opts.silent) {
     // Nyx: tanpa angka/spark (damage disembunyikan)
-    if (died) game.onEnemyKilled(enemy, null);
+    if (died) game.onEnemyKilled(enemy, 'contact');
     return enemy.lastHitAbsorbed ? 0 : dmg;
   }
   // Feedback kecil untuk tick kontak (hierarki: kontak < pulse)
@@ -720,7 +720,7 @@ export function dealMembraneDamage(game, enemy, amount, opts = {}) {
   }
   if (!enemy.lastHitAbsorbed) game.onDamageDealt(dmg);
   if (died) {
-    game.onEnemyKilled(enemy, null);
+    game.onEnemyKilled(enemy, 'contact');
   } else {
     // Cek engulf threshold setiap tick (otomatis!)
     const st = getMembraneStats(run);
@@ -815,7 +815,7 @@ export function tryEngulf(game, enemy, opts = {}) {
       o.lastHitDamage = odmg;
       const odied = o.takeDamage(odmg);
       game.spawnHitFeedback(o, odmg, odied, false, { sourceKind: 'engulf_burst' });
-      if (odied) game.onEnemyKilled(o, null);
+      if (odied) game.onEnemyKilled(o, 'parasit'); // ledakan engulf (parasit) = insidental
     }
   }
 
@@ -829,7 +829,7 @@ export function tryEngulf(game, enemy, opts = {}) {
   applyEngulfSpecial(game, enemy);
 
   // Kill normal (XP, drop, combo, chain) — PHAGOS: engulf tetap kill
-  game.onEnemyKilled(enemy, null);
+  game.onEnemyKilled(enemy, 'engulf');
   try { audio.collect(); } catch { /* headless */ }
   return true;
 }
@@ -854,7 +854,7 @@ function recruitSatellite(game, enemy, fx, st) {
     tick: 0,
   });
   run.effects.spawnLabel(enemy.x, enemy.y - 20, 'SIMBIOSIS!', '#8df7d2');
-  game.onEnemyKilled(enemy, null);
+  game.onEnemyKilled(enemy, 'engulf');
 }
 
 function applyEngulfSpecial(game, enemy) {
@@ -1058,7 +1058,7 @@ export function pulseHit(game, opts = {}) {
         run.effects.spawnLabel(e.x, e.y - e.radius - 10, '+1 BIO', '#8df7d2');
         try { applyEngulfSpecial(game, e); } catch { /* abaikan */ }
       }
-      game.onEnemyKilled(e, null);
+      game.onEnemyKilled(e, 'pulse');
     }
     else {
       // Pulse juga bisa memicu engulf bila musuh sekarat di dalam medan
@@ -1292,7 +1292,7 @@ export function membraneOnKill(game, enemy, depth = 0) {
       // Rantai lanjutan ditangani game.onEnemyKilled → membraneOnKill
       // (dibatasi _chainDepth ≤ 5 di game.js); tanpa rekursi langsung
       // agar tidak ada ledakan ganda pada korban yang sama.
-      game.onEnemyKilled(o, null);
+      game.onEnemyKilled(o, 'rantai'); // rantai = insidental
     }
   });
 }
@@ -1364,7 +1364,7 @@ export function membraneOnPlayerHit(game, amount) {
       best.lastHitDamage = rdmg;
       const died = best.takeDamage(rdmg);
       game.spawnHitFeedback(best, rdmg, died, false, { sourceKind: 'reflect' });
-      if (died) game.onEnemyKilled(best, null);
+      if (died) game.onEnemyKilled(best, 'cermin'); // refleksi = insidental
     }
   }
 }
