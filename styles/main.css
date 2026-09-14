@@ -3001,3 +3001,15 @@ img.lock-badge {
 .mut-lore { font-style: italic; opacity: .75; font-size: 11px; margin-top: 2px; }
 .choice-card.safety-card { border-style: dashed; }
 .safety-badge { background: #8a8a8a; color: #fff; }
+
+/* PHAGOS: ikon sprite mutasi di kartu level-up */
+.choice-mut-sprite {
+  width: 52px; height: 52px; object-fit: contain; flex: none;
+  filter: drop-shadow(0 2px 3px rgba(14,110,98,.35));
+  animation: mut-sprite-bob 2.2s ease-in-out infinite;
+}
+@keyframes mut-sprite-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-3px) rotate(3deg); }
+}
+.choice-card.mutation-card.locked .choice-mut-sprite { filter: grayscale(.8); opacity: .7; animation: none; }

@@ -39,7 +39,7 @@ import {
   membraneContains, membraneOnKill, membraneAbsorbDamage, membraneOnPlayerHit,
   pulseView,
 } from '../systems/membrane-system.js';
-import { rollMutationChoices, applyMutation, isMutationId } from '../systems/mutation-system.js';
+import { rollMutationChoices, applyMutation, isMutationId, mutationDef } from '../systems/mutation-system.js';
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
   maybeApplyTrait as enemyMutMaybeApply, updateEnemyMutations,
@@ -2519,6 +2519,18 @@ export const game = {
             drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           }
           drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
+          // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
+          // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
+          // mahkota/kilau yang orientasinya bermakna).
+          try {
+            const muts = run.activeMutations || [];
+            for (let mi = 0; mi < muts.length; mi++) {
+              const mdef = mutationDef(muts[mi]);
+              if (!mdef || !mdef.sprite) continue;
+              const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
+              drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
+            }
+          } catch { /* abaikan */ }
           // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
           const crownAcc = STATE.meta.cosmetics?.crown
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;

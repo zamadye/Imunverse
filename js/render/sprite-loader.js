@@ -49,6 +49,12 @@ export function collectSpritePaths(data) {
       record(a.icon, '#1f7a70', a.name);
     }
   }
+  // PHAGOS: overlay visual mutasi hero (data/mutations.json → mut_*.png)
+  if (data.mutations) {
+    for (const m of data.mutations.mutations) {
+      record(m.sprite, '#8df7d2', m.name);
+    }
+  }
   return [...paths];
 }
 

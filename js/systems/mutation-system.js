@@ -119,6 +119,16 @@ export function applyMutation(run, mutationId) {
   return { ok: true, mutation: def };
 }
 
+/** Definisi satu mutasi dari data (dipakai renderer overlay). */
+export function mutationDef(id) {
+  try {
+    const all = (getMutations() && getMutations().mutations) || [];
+    return all.find((m) => m.id === id) || null;
+  } catch {
+    return null;
+  }
+}
+
 /** Apakah id adalah mutasi (bukan upgrade lama)? */
 export function isMutationId(id) {
   try {

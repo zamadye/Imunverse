@@ -56,6 +56,10 @@ export function show({ level, choices }) {
 function mutationCard(def, bio) {
   const locked = !!def.lockedByBio || (def.bioCost || 0) > bio;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
+  // PHAGOS: ikon kartu = aset sprite mutasi (emoji hanya cadangan)
+  const iconNode = def.sprite
+    ? el('img', { class: 'choice-mut-sprite', src: def.sprite, alt: '', draggable: 'false' })
+    : el('div', { class: 'choice-icon mutation-icon', text: icon });
   const card = el('button', {
     class: 'choice-card mutation-card tier-' + (def.tier || 1) + (locked ? ' locked' : ''),
     onclick: () => {
@@ -66,7 +70,7 @@ function mutationCard(def, bio) {
       }
     },
   }, [
-    el('div', { class: 'choice-icon mutation-icon', text: icon }),
+    iconNode,
     el('div', { class: 'choice-info' }, [
       el('b', {}, [
         el('span', { text: def.name }),
