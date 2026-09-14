@@ -91,7 +91,7 @@ function renderBriefing(meta) {
   box.appendChild(el('p', { class: 'camp-story', text: `“${ch.story}”` }));
   box.appendChild(el('div', { class: 'camp-brief-meta' }, [
     el('span', { class: 'camp-goal', text: `Tujuan: ${ch.objective}` }),
-    el('span', { class: 'camp-reward', text: `Reward: +${ch.reward} antibodi` }),
+    el('span', { class: 'camp-reward', text: `Reward: +${ch.reward} biokredit` }),
     el('span', { class: 'camp-squad', text: `Pasukan ikut: ${meta.allies || 1} sel imun` }),
   ]));
 

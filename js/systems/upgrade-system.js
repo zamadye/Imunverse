@@ -154,7 +154,7 @@ export function purchaseSquadUpgrade(meta, id) {
   const level = meta.squadUpgrades[id] || 0;
   if (level >= def.maxLevel) return { ok: false, reason: 'Sudah maksimum' };
   const cost = squadUpgradeCost(def, level);
-  if (meta.currency < cost) return { ok: false, reason: 'Antibodi tidak cukup' };
+  if (meta.currency < cost) return { ok: false, reason: 'Biokredit tidak cukup' };
   meta.currency -= cost;
   meta.squadUpgrades[id] = level + 1;
   writeSave(meta); // auto-save setelah pembelian

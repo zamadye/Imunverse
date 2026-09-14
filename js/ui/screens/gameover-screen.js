@@ -222,8 +222,8 @@ export function show(summary) {
   const dblBtn = document.getElementById('btn-double-currency');
   dblBtn.disabled = !game.canDoubleCurrency();
   dblBtn.textContent = game.canDoubleCurrency()
-    ? 'Tonton Iklan → 2x Antibodi'
-    : `Total Antibodi: ${STATE.meta.currency.toLocaleString('id-ID')} `;
+    ? 'Tonton Iklan → 2x Biokredit'
+    : `Total Biokredit: ${STATE.meta.currency.toLocaleString('id-ID')} `;
 }
 
 export function wireButtons() {

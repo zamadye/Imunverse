@@ -312,5 +312,18 @@ log('item-serum', STATE.meta.consumables.serum_awal === 0 && run2.player.hp > ru
 for (let i = 0; i < 11 * 60; i++) game.update(1 / 60);
 log('item-sitokin-expire', Math.abs(run2.player.stats.speed - baseSpeed) < 0.001 && !itemBuffs.buffActive(run2, 'sitokin'));
 
+// ---------- 9. Rename mata uang + kamus (ADDENDUM §4.1) ----------
+const i18n = await mod('js/systems/i18n.js');
+STATE.meta.lang = 'en';
+await i18n.loadLang();
+log('i18n-biokredit', i18n.t('Biokredit didapat:') === 'Biokredit earned:');
+log('i18n-genom', i18n.t('Genom tidak cukup') === 'Not enough Genom' && i18n.t('Buka dengan 150 Genom') === 'Unlock with 150 Genom');
+log('i18n-rule', i18n.t('Quest selesai: +50 Biokredit') === 'Quest complete: +50 Biokredit');
+log('i18n-item', i18n.t('Sitokin Burst: +40% kecepatan!') === 'Cytokine Burst: +40% speed!'
+  && i18n.t('Lapisan Mukus: perisai 30 HP!') === 'Mucus Layer: 30 HP shield!');
+log('i18n-mechanic-kept', i18n.t('Memori Antibodi') === 'Antibody Memory' && i18n.t('Respons Imun') === 'Immune Response');
+STATE.meta.lang = 'id';
+log('i18n-id-passthrough', i18n.t('Biokredit didapat:') === 'Biokredit didapat:');
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

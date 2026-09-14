@@ -52,7 +52,7 @@ const steps = [
   },
   {
     id: 'currency',
-    text: 'CURRENCY: Antibodi & Imuncoin KOSONG di awal — kamu dapat PURE dari bermain: tap tanda "+" untuk panduan cara mengumpulkannya!',
+    text: 'CURRENCY: Biokredit & Genom KOSONG di awal — kamu dapat PURE dari bermain: tap tanda "+" untuk panduan cara mengumpulkannya!',
     target: '#hud-anti-chip',
     info: true,
   },

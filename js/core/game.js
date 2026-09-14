@@ -685,7 +685,7 @@ export const game = {
       // Fase 17 (trigger 1A): Imun Coin masuk LIVE tiap wave — +perWave, float emas
       const imuWave = getRetention().imuReward.perWave;
       run.imuAccrued += imuWave;
-      run.effects.spawnLabel(player.x, player.y - 46, `+${imuWave} Imun`, '#ffd76a');
+      run.effects.spawnLabel(player.x, player.y - 46, `+${imuWave} Genom`, '#ffd76a');
       // Milestone XP tiap kelipatan 10 wave
       if (w % 10 === 0) {
         const bonus = 20 + w * 3;
@@ -702,7 +702,7 @@ export const game = {
         const bonus = Math.round(w * 5 * getProgressionBand(w).rewardMult);
         run.bonusCurrency += bonus;
         addCurrency(meta, bonus);
-        emit('toast', { message: `Endless wave ${w}! +${bonus} antibodi`, kind: 'gold' });
+        emit('toast', { message: `Endless wave ${w}! +${bonus} biokredit`, kind: 'gold' });
       }
       run.wave = run.spawnSys.wave;
     }
@@ -1586,7 +1586,7 @@ export const game = {
     meta.evoParts[chest.partId] = (meta.evoParts[chest.partId] || 0) + (doubled ? 2 : 1);
     writeSave(meta);
     run.bossChest = null;
-    emit('toast', { message: `Peti boss: +${currency} antibodi${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    emit('toast', { message: `Peti boss: +${currency} biokredit${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
     setPaused(false);
     emit('resume');
   },
@@ -1677,7 +1677,7 @@ export const game = {
     if (!canUpgradeSkill(run.level, slot, skill)) return false;
     const cost = skillUpgradeCost(skill);
     if (run.currencyEarned < cost) {
-      emit('toast', { message: `Butuh ${cost} antibodi untuk upgrade skill`, kind: 'warn' });
+      emit('toast', { message: `Butuh ${cost} biokredit untuk upgrade skill`, kind: 'warn' });
       return false;
     }
     if (!run.skills.tryUpgrade(slot, run.level)) return false;
@@ -1749,7 +1749,7 @@ export const game = {
     run.imuAccrued += getRetention().imuReward.perKill;
     if (enemy.isBoss) {
       run.imuAccrued += getRetention().imuReward.perBoss - getRetention().imuReward.perKill;
-      run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 38, `+${getRetention().imuReward.perBoss} Imun`, '#ffd76a');
+      run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 38, `+${getRetention().imuReward.perBoss} Genom`, '#ffd76a');
     }
 
     // EQUITY PER TIER: kecil jarang, MEDIUM sering (koin), HARD pasti koin x2 + nutrisi bonus
@@ -2081,7 +2081,7 @@ export const game = {
     run.masteryGain = masteryRes;
     if (masteryRes.levelsGained > 0) {
       emit('toast', {
-        message: `MASTERY ${run.heroDef.name} Lv ${masteryRes.level}${masteryRes.title ? ` — ${masteryRes.title}` : ''}! +${masteryRes.reward} Imun`,
+        message: `MASTERY ${run.heroDef.name} Lv ${masteryRes.level}${masteryRes.title ? ` — ${masteryRes.title}` : ''}! +${masteryRes.reward} Genom`,
         kind: 'gold',
       });
     }
@@ -2113,7 +2113,7 @@ export const game = {
     // Misi baru selesai → reward otomatis
     const completedMissions = checkMissions(meta);
     for (const m of completedMissions) {
-      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} antibodi`, kind: 'gold' });
+      emit('toast', { message: `Misi "${m.name}" selesai! +${m.reward} biokredit`, kind: 'gold' });
     }
     // Auto-unlock hero dari statistik
     const newlyUnlocked = checkAutoUnlocks(meta);

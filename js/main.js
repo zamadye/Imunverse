@@ -220,7 +220,7 @@ function wireUiBridge() {
           act.textContent = 'KLAIM';
           act.addEventListener('click', () => {
             const reward = claimQuest(meta, q.def.id);
-            if (reward) showToast({ message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
+            if (reward) showToast({ message: `Quest selesai: +${reward} Biokredit`, kind: 'gold' });
             audio.ui();
             renderQuestPanel();
           });
@@ -492,27 +492,27 @@ async function boot() {
   // Daftar sumber penghasilan (jujur ke mekanik eksisting):
   const CUR_GUIDE = {
     anti: {
-      title: 'Cara Mendapatkan Antibodi',
+      title: 'Cara Mendapatkan Biokredit',
       icon: 'assets/icons/cur-antibodi.svg',
       balance: () => STATE.meta.currency || 0,
       tasks: [
-        '<b>Bunuh patogen</b> — tiap kill di gameplay mengeluarkan antibodi.',
+        '<b>Bunuh patogen</b> — tiap kill di gameplay mengeluarkan biokredit.',
         '<b>Selesaikan wave & boss</b> — wave tuntas memberi bonus; boss membuka Peti Boss.',
         '<b>Klaim misi harian / mingguan</b> — dari panel Misi di HUD & dashboard.',
         '<b>Selesaikan bab kampanye</b> — tiap bab bersih memberi hadiah besar.',
-        '<b>Upgrade hero & squad membayar dengan antibodi</b> — kumpulkan lebih banyak per run!',
+        '<b>Upgrade hero & squad membayar dengan biokredit</b> — kumpulkan lebih banyak per run!',
       ],
     },
     imu: {
-      title: 'Cara Mendapatkan Imuncoin',
+      title: 'Cara Mendapatkan Genom',
       icon: 'assets/icons/cur-imun.svg',
       balance: () => Math.floor(STATE.meta.imun || 0),
       tasks: [
-        '<b>Main run berulang</b> — tiap kill patogen memberi Imuncoin kecil.',
-        '<b>Selesaikan tiap wave</b> — bonus Imuncoin per wave tuntas.',
-        '<b>Kalahkan boss</b> — hadiah Imuncoin besar tiap boss tumbang.',
-        '<b>Naikkan Mastery hero</b> — reward Imuncoin di akhir run (sistem Mastery).',
-        '<b>Imuncoin dipakai untuk Battle Pass premium</b> — kumpulkan dari run ke run!',
+        '<b>Main run berulang</b> — tiap kill patogen memberi Genom kecil.',
+        '<b>Selesaikan tiap wave</b> — bonus Genom per wave tuntas.',
+        '<b>Kalahkan boss</b> — hadiah Genom besar tiap boss tumbang.',
+        '<b>Naikkan Mastery hero</b> — reward Genom di akhir run (sistem Mastery).',
+        '<b>Genom dipakai untuk Battle Pass premium</b> — kumpulkan dari run ke run!',
       ],
     },
   };

@@ -22,7 +22,7 @@
     "🏆 TUBUH SEHAT SEMPURNA tercapai!": "🏆 PERFECTLY HEALTHY BODY achieved!",
     "Akhiri Run": "End Run",
     "Ambil Saja": "Just Take It",
-    "Antibodi didapat:": "Antibodies earned:",
+    "Biokredit didapat:": "Biokredit earned:",
     "Bagian Evolusi": "Evolution Parts",
     "Bangkit otomatis batal dalam": "Auto-revive cancels in",
     "Detail Hero": "Hero Detail",
@@ -56,14 +56,14 @@
     "Tidak, Akhiri Run": "No, End Run",
     "TIM": "TEAM",
     "TONTON IKLAN — 2X LOOT": "WATCH AD — 2X LOOT",
-    "Tonton Iklan → 2x Antibodi": "Watch Ad → 2x Antibodies",
+    "Tonton Iklan → 2x Biokredit": "Watch Ad → 2x Biokredit",
     "Tonton video singkat untuk bangkit dengan 50% HP dan membersihkan patogen di sekitarmu.": "Watch a short video to revive with 50% HP and clear nearby pathogens.",
     "Tubuh ini butuh dijaga. Pilih sistem yang ingin dipulihkan run ini — gameplay tetap sama, hasilnya berbeda.": "This body needs care. Pick the system to restore this run — gameplay stays the same, results differ.",
     "Tumbang!": "Down!",
     "Tutup": "Close",
     "Tiap arena punya bonus berbeda. Terbuka sesuai cara kamu bermain.": "Each arena has a different bonus. Unlocked by how you play.",
     "BUAT AKUN & MULAI": "CREATE ACCOUNT & START",
-    "Lab Pasukan — kuatkan hero & pasukanmu dengan Antibodi.": "Squad Lab — empower heroes & squad with Antibodies.",
+    "Lab Pasukan — kuatkan hero & pasukanmu dengan Biokredit.": "Squad Lab — empower heroes & squad with Biokredit.",
     "Laboratorium Tim (senjata, jurus, pertahanan) →": "Team Lab (weapons, abilities, defense) →",
     "(Endless = mutator harian)": "(Endless = daily mutator)",
     "(menentukan sistem tubuh yang dipulihkan)": "(chooses which body system to restore)",
@@ -87,7 +87,7 @@
     "Terbuka lewat progres": "Unlocked via progress",
     "Terbuka sejak awal": "Open from the start",
     "Bagian lengkap! Buka Dashboard → kartu Evolusi → BEREVOLUSI.": "Full set! Open Dashboard → Evolution card → EVOLVE.",
-    "Belum punya consumable — Serum Awal tersedia di Shop.": "No consumables yet — Starter Serum is available in the Shop.",
+    "Belum punya consumable — tersedia di Shop.": "No consumables yet — available in the Shop.",
     "Kalahkan patogen untuk mengumpulkan bagian — musuh elite (Virion & Parasit) drop 5x lebih sering, boss selalu drop.": "Defeat pathogens to collect parts — elite enemies (Virions & Parasites) drop 5x more often, bosses always drop.",
     "Evolusi maksimal — Imun Legenda sejati!": "Max evolution — a true Immune Legend!",
     "Jumlah pasukan bertambah tiap bab kampanye yang dibersihkan (maks 6 sel)": "Squad grows with each campaign chapter cleared (max 6 cells)",
@@ -102,11 +102,14 @@
     "Hampir Sehat": "Nearly Healthy",
     "Zaman Pemulihan": "Recovery Era",
     "Tubuh Mulai Melawan": "Body Fights Back",
-    "Kopi Limfa: +12% kecepatan!": "Lymph Coffee: +12% speed!",
-    "Pelindung Lendir: 1 serangan terserap!": "Mucus Shield: 1 attack absorbed!",
-    "Serum Awal aktif: +25% damage run ini!": "Starter Serum active: +25% damage this run!",
-    "Sinyal Ganda: +50% antibodi run ini!": "Double Signal: +50% antibodies this run!",
-    "Vaksin Awal: +30 HP run ini!": "Starter Vaccine: +30 HP this run!",
+    "Sitokin Burst: +40% kecepatan!": "Cytokine Burst: +40% speed!",
+    "Enzim Litik: membran ganas 8 detik!": "Lytic Enzyme: savage membrane for 8 seconds!",
+    "Ledakan ATP: Pulse tak terbendung!": "ATP Surge: unstoppable Pulse!",
+    "Racun Balik: penyerang kena getah!": "Counter Toxin: attackers take 40% back!",
+    "Sinyal Sinapsis: pasukan menguat!": "Synapse Signal: squad empowered!",
+    "SERUM +35%!": "SERUM +35%!",
+    "MEMBRAN CADANGAN!": "BACKUP MEMBRANE!",
+    "Boss menjatuhkan Marker Opsonin!": "Boss dropped a Marker Opsonin!",
     "Sel regenerasi — lanjutkan pertempuran!": "Cells regenerating — back to battle!",
     "Sinyal sitokin! Semua nutrisi tertarik padamu.": "Cytokine signal! Every nutrient is pulled toward you.",
     "TERLAPIS!": "PEELED!",
@@ -174,7 +177,7 @@
     "Asam Amino": "Amino Acid",
     "Rantai protein padat — orb XP bernilai besar.": "A dense protein chain — a high-value XP orb.",
     "Memulihkan 20 HP membrane seketika.": "Restores 20 membrane HP instantly.",
-    "Antibodi": "Antibody",
+    "Biokredit": "Biokredit",
     "Mata uang permanen. Dipakai untuk unlock hero & upgrade squad.": "Permanent currency. Used to unlock heroes & squad upgrades.",
     "Sinyal Sitokin": "Cytokine Signal",
     "Sinyal kimia yang menarik SEMUA nutrisi di medan menujumu.": "A chemical signal that pulls EVERY nutrient on the field toward you.",
@@ -204,11 +207,16 @@
     "Sitokin Padu": "United Cytokines",
     "Reseptor Panjang": "Long Receptors",
     "Regenerasi Membran": "Membrane Regeneration",
-    "Serum Awal": "Starter Serum",
-    "Vaksin Awal": "Starter Vaccine",
-    "Kopi Limfa": "Lymph Coffee",
-    "Pelindung Lendir": "Mucus Shield",
-    "Sinyal Ganda": "Double Signal",
+    "Serum Regenerasi": "Regeneration Serum",
+    "Enzim Litik": "Lytic Enzyme",
+    "Sitokin Burst": "Cytokine Burst",
+    "Lapisan Mukus": "Mucus Layer",
+    "Marker Opsonin": "Marker Opsonin",
+    "Ledakan ATP": "ATP Surge",
+    "Membran Cadangan": "Backup Membrane",
+    "Racun Balik": "Counter Toxin",
+    "Sinyal Sinapsis": "Synapse Signal",
+    "Katalis Mitosis": "Mitosis Catalyst",
     "+15% damage semua serangan": "+15% damage on all attacks",
     "+12% kecepatan serangan": "+12% attack speed",
     "+8% kecepatan gerak": "+8% move speed",
@@ -224,11 +232,16 @@
     "+6% kecepatan serangan per level (permanen)": "+6% attack speed per level (permanent)",
     "+8% jarak serangan per level (permanen)": "+8% attack range per level (permanent)",
     "+10% XP yang didapat per level (permanen)": "+10% XP gained per level (permanent)",
-    "+25% damage untuk 1 run berikutnya (dipakai otomatis saat run dimulai)": "+25% damage for the next run (auto-used when the run starts)",
-    "+30 HP saat run dimulai (dipakai otomatis)": "+30 HP when the run starts (auto-used)",
-    "+12% kecepatan gerak 1 run (dipakai otomatis)": "+12% move speed for 1 run (auto-used)",
-    "Serap 1 serangan patogen per run (dipakai otomatis)": "Absorb 1 pathogen attack per run (auto-used)",
-    "+50% antibodi dari run ini (dipakai otomatis)": "+50% antibodies from this run (auto-used)",
+    "Pulihkan 35% max HP saat HP di bawah 70% + medan berdenyut (dipakai otomatis)": "Restore 35% max HP when HP drops below 70% + pulsing field (auto-used)",
+    "Contact DPS ×2 selama 8 detik + jauh lebih mudah menelan (dipakai otomatis)": "Contact DPS ×2 for 8 seconds + much easier to engulf (auto-used)",
+    "+40% kecepatan 10 detik + reset cooldown Pulse (dipakai otomatis)": "+40% speed for 10 seconds + Pulse cooldown reset (auto-used)",
+    "Perisai 25% max HP + musuh yang menyentuh melambat 30% (dipakai otomatis)": "Shield for 25% max HP + touching enemies slowed 30% (auto-used)",
+    "Tandai semua musuh di layar 8 detik: mudah ditelan, Pulse +30% (dipakai otomatis)": "Mark all on-screen enemies for 8 seconds: easy to engulf, Pulse +30% (auto-used)",
+    "Pulse instan + 3 Pulse berikut cooldown −60% (dipakai otomatis)": "Instant Pulse + next 3 Pulses −60% cooldown (auto-used)",
+    "Otomatis saat HP <20%: medan kedua 6 detik, sekali per run (dipakai otomatis)": "Auto-triggers below 20% HP: second field for 6 seconds, once per run (auto-used)",
+    "10 detik: 40% damage yang diterima kembali ke penyerang (dipakai otomatis)": "10 seconds: 40% of damage taken returns to attackers (auto-used)",
+    "Medan mini pasukan ×2 selama 12 detik (dipakai otomatis)": "Squad mini-fields ×2 for 12 seconds (auto-used)",
+    "+50% drop run ini + setiap engulf 2× Bio-Point (dipakai otomatis)": "+50% drops this run + every engulf 2× Bio-Points (auto-used)",
     "+6% damage & +8% HP per level (khusus hero ini)": "+6% damage & +8% HP per level (this hero only)",
     "Pasukan menembak +12% lebih sakit & +4% gesit per level": "Squad shoots +12% harder & moves +4% nimbler per level",
     "Tebasan Mitosis": "Mitosis Slash",
@@ -302,13 +315,13 @@
     "Damage kontak musuh +20%, pungut nutrisi +20%.": "Enemy contact damage +20%, nutrient pickup +20%.",
     "Damage player +25%, tapi HP maksimal -12%.": "Player damage +25%, but max HP -12%.",
     "Nutrisi jatuh +35% lebih banyak, musuh sedikit lebih tangguh.": "Nutrient drops +35%, enemies a bit tougher.",
-    "Musuh +18% kecepatan, namun drop antibodi +40%.": "Enemies +18% speed, but antibody drops +40%.",
+    "Musuh +18% kecepatan, namun drop biokredit +40%.": "Enemies +18% speed, but Biokredit drops +40%.",
     "Musuh +20% HP, tapi nutrisi memberi +30% XP.": "Enemies +20% HP, but nutrients give +30% XP.",
     "Player -15% kecepatan gerak, +25% jangkauan pungut nutrisi.": "Player -15% move speed, +25% nutrient pickup range.",
     "Spawn musuh +25% rapat, XP +15%.": "Enemies spawn +25% denser, XP +15%.",
     "Benteng Imun": "Immune Bastion",
     "Bertahan di Oase": "Oasis Stand",
-    "Cadangan Antibodi": "Antibody Reserve",
+    "Cadangan Biokredit": "Biokredit Reserve",
     "Deteksi Dini": "Early Detection",
     "Fagosit Sejati": "True Phagocyte",
     "Gelombang Pertama": "First Wave",
@@ -329,11 +342,11 @@
     "Bertahan total 5 menit": "Survive 5 minutes in total",
     "Kumpulkan 250 nutrisi (total)": "Collect 250 nutrients (total)",
     "Selesaikan 10 run": "Complete 10 runs",
-    "Kumpulkan 2000 antibodi (total)": "Collect 2000 antibodies (total)",
+    "Kumpulkan 2000 biokredit (total)": "Collect 2000 Biokredit (total)",
     "Pasukan Imun": "Immune Squad",
     "Pasukan Virus": "Virus Squad",
     "Paket Pemula": "Starter Pack",
-    "Paket Imun Pro": "Immune Pro Pack",
+    "Paket Genom Pro": "Genom Pro Pack",
     "Paket Legenda": "Legend Pack",
     "Bebas Iklan": "Ad-Free",
     "Legenda Tubuh": "Body Legend",
@@ -347,7 +360,7 @@
     "Tapi perjalanan belum selesai — ada organ lain yang menunggu bantuan...": "The journey isn't over — other organs are still waiting for help...",
     "Tombol ini membawamu ke Peta Tubuh — perjalanan membersihkan organ yang sakit, satu per satu.": "This button opens the Body Map — a journey to cleanse sick organs, one by one.",
     "Pasukanmu: pilih sel imun yang dimainkan. Setiap hero punya bentuk & gaya serangan berbeda.": "Your squad: pick the immune cell you play. Every hero has a different shape & attack style.",
-    "Tukar antibodi hasil battle jadi hero baru, upgrade permanen & suplemen.": "Trade battle antibodies for new heroes, permanent upgrades & supplements.",
+    "Tukar biokredit hasil battle jadi hero baru, upgrade permanen & suplemen.": "Trade battle Biokredit for new heroes, permanent upgrades & supplements.",
     "Consumable & hasil perang disimpan di sini. Cek sebelum battle berikutnya.": "Consumables & battle loot are stored here. Check it before the next battle.",
     "5 sistem tubuh (Sirkulasi, Pencernaan, Saraf, Imun, Limfatik). Racun menurunkannya — menang run memulihkannya. Jaga agar tetap sehat!": "5 body systems (Circulation, Digestion, Nervous, Immune, Lymphatic). Toxin wears them down — winning runs restores them. Keep them healthy!",
     "Satu tubuh, dua pasukan. Buat akunmu — progres, level hero & pembelianmu tersimpan aman dengan nama mu sendiri.": "One body, two squads. Create your account — progress, hero levels & purchases stay safe under your name.",
@@ -576,7 +589,7 @@
     "Beranda": "Home",
     "Battle Pass": "Battle Pass",
     "Pass": "Pass",
-    "DAPATKAN IMUN GRATIS": "GET FREE IMUN",
+    "DAPATKAN GENOM GRATIS": "GET FREE GENOM",
     "Tonton Video Sponsor": "Watch Sponsor Video",
     "Ajak Teman": "Invite Friends",
     "Survei Sponsor": "Sponsor Survey",
@@ -592,21 +605,21 @@
     "⬡ PHAGOS": "⬡ PHAGOS",
     "Mode": "Mode",
     "Arena": "Arena",
-    "Berlaku permanen untuk SEMUA hero — dibayar dengan Imun Coin dari hasil run.": "Permanent for ALL heroes — paid with Imun Coins earned from runs.",
-    "BUKA — {n} Imun": "UNLOCK — {n} Imun",
-    "BUKA DENGAN IMUN": "UNLOCK WITH IMUN",
+    "Berlaku permanen untuk SEMUA hero — dibayar dengan Genom dari hasil run.": "Permanent for ALL heroes — paid with Genom earned from runs.",
+    "BUKA — {n} Genom": "UNLOCK — {n} Genom",
+    "BUKA DENGAN GENOM": "UNLOCK WITH GENOM",
     "SYARAT MISI BELUM": "MISSION NOT MET YET",
     "Hero ini terbuka lewat misi, bukan dibeli": "This hero unlocks via missions, not purchase",
-    "Imun Coin tidak cukup": "Not enough Imun Coins",
-    "Buka dengan 100 Imun Coin": "Unlock with 100 Imun Coins",
-    "Buka dengan 150 Imun Coin": "Unlock with 150 Imun Coins",
-    "Buka dengan 200 Imun Coin": "Unlock with 200 Imun Coins",
+    "Genom tidak cukup": "Not enough Genom",
+    "Buka dengan 100 Genom": "Unlock with 100 Genom",
+    "Buka dengan 150 Genom": "Unlock with 150 Genom",
+    "Buka dengan 200 Genom": "Unlock with 200 Genom",
     "Kalahkan 50 patogen (total)": "Defeat 50 pathogens (total)",
     "Selesaikan 3 run": "Finish 3 runs",
-    "Capai Gel. 8 + 100 Imun Coin": "Reach Wave 8 + 100 Imun Coins",
-    "Kalahkan 300 patogen + 120 Imun Coin": "Defeat 300 pathogens + 120 Imun Coins",
-    "Kalahkan 2 Bos + 130 Imun Coin": "Defeat 2 Bosses + 130 Imun Coins",
-    "Kalahkan 500 patogen + 150 Imun Coin": "Defeat 500 pathogens + 150 Imun Coins",
+    "Capai Gel. 8 + 100 Genom": "Reach Wave 8 + 100 Genom",
+    "Kalahkan 300 patogen + 120 Genom": "Defeat 300 pathogens + 120 Genom",
+    "Kalahkan 2 Bos + 130 Genom": "Defeat 2 Bosses + 130 Genom",
+    "Kalahkan 500 patogen + 150 Genom": "Defeat 500 pathogens + 150 Genom",
     "GLOBAL": "GLOBAL",
     "SYARAT BELUM": "NOT MET YET",
     "KALAHKAN PENJAGA!": "DEFEAT THE GUARDIAN!",
@@ -942,11 +955,11 @@
     "Sensor Sitolitik": "Cytolytic Sensor",
     "Sensor berkala mengungkap musuh yang menyamar.": "Periodic scans reveal disguised enemies.",
     "Selesaikan 15 run": "Complete 15 runs",
-    "Kalahkan 2 Bos + 260 Imun Coin": "Defeat 2 bosses + 260 Immun Coins",
-    "Kalahkan 500 patogen + 700 Imun Coin": "Defeat 500 pathogens + 700 Immun Coins",
+    "Kalahkan 2 Bos + 260 Genom": "Defeat 2 bosses + 260 Genom",
+    "Kalahkan 500 patogen + 700 Genom": "Defeat 500 pathogens + 700 Genom",
     "Kalahkan 500 patogen (total)": "Defeat 500 pathogens total",
-    "Kalahkan 300 patogen + 700 Imun Coin": "Defeat 300 pathogens + 700 Immun Coins",
-    "Capai Gel. 8 + 350 Imun Coin": "Reach Wave 8 + 350 Immun Coins",
+    "Kalahkan 300 patogen + 700 Genom": "Defeat 300 pathogens + 700 Genom",
+    "Capai Gel. 8 + 350 Genom": "Reach Wave 8 + 350 Genom",
     "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Ultimate +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.": "Swallow a dying enemy whole when it pulses yellow: Ultimate fuel +25 and recover 8 HP. Without a dying target: bite for 4x damage and recover 30 HP.",
     "DAM": "DMG",
     "tempo": "speed",
@@ -981,7 +994,7 @@
     "Warna & aksesori visual saja — tidak menambah kekuatan.": "Colors & visual accessories only — no power boost.",
     "Tanpa bayar: tonton sponsor, isi survei, atau ajak teman.": "No payment: watch a sponsor, fill a survey, or invite friends.",
     "Uang sungguhan (simulasi gateway) — mendukung pengembang, tanpa pay-to-win.": "Real money (simulated gateway) — supports the developers, no pay-to-win.",
-    "Kuatkan hero & pasukanmu — HERO/PASUKAN/TIM dibayar Antibodi, GLOBAL dibayar Imun Coin.": "Empower heroes & squad — HERO/SQUAD/TEAM cost Antibodies, GLOBAL costs Imun Coin.",
+    "Kuatkan hero & pasukanmu — HERO/PASUKAN/TIM dibayar Biokredit, GLOBAL dibayar Genom.": "Empower heroes & squad — HERO/SQUAD/TEAM cost Biokredit, GLOBAL costs Genom.",
     "Item": "Items",
     "Gratis": "Free",
     "Premium": "Premium",
@@ -1106,8 +1119,8 @@
       "replace": "Level $1 · Wave $2"
     },
     {
-      "pattern": "^([\\d.,]+) antibodi terkumpul \\(dibawa pulang saat run diakhiri\\)$",
-      "replace": "$1 antibodies collected (brought home when the run ends)"
+      "pattern": "^([\\d.,]+) biokredit terkumpul \\(dibawa pulang saat run diakhiri\\)$",
+      "replace": "$1 Biokredit collected (brought home when the run ends)"
     },
     {
       "pattern": "^(\\d{1,2}:\\d{2}) · (\\d+) patogen$",
@@ -1142,8 +1155,8 @@
       "replace": "Goal: $1"
     },
     {
-      "pattern": "^Reward: \\+([\\d.,]+) antibodi$",
-      "replace": "Reward: +$1 antibodies"
+      "pattern": "^Reward: \\+([\\d.,]+) biokredit$",
+      "replace": "Reward: +$1 Biokredit"
     },
     {
       "pattern": "^Mutator: (.+)$",
@@ -1246,20 +1259,20 @@
       "replace": "Wave $1! +$2 XP"
     },
     {
-      "pattern": "^Endless wave (\\d+)! \\+([\\d.,]+) antibodi$",
-      "replace": "Endless wave $1! +$2 antibodies"
+      "pattern": "^Endless wave (\\d+)! \\+([\\d.,]+) biokredit$",
+      "replace": "Endless wave $1! +$2 Biokredit"
     },
     {
       "pattern": "^Hero baru terbuka: (.+?)!$",
       "replace": "New hero unlocked: $1!"
     },
     {
-      "pattern": "^Misi \"(.+?)\" selesai! \\+([\\d.,]+) antibodi$",
-      "replace": "Mission \"$1\" complete! +$2 antibodies"
+      "pattern": "^Misi \"(.+?)\" selesai! \\+([\\d.,]+) biokredit$",
+      "replace": "Mission \"$1\" complete! +$2 Biokredit"
     },
     {
-      "pattern": "^Peti boss: \\+([\\d.,]+) antibodi( \\(2x!\\))? $",
-      "replace": "Boss chest: +$1 antibodies$2"
+      "pattern": "^Peti boss: \\+([\\d.,]+) biokredit( \\(2x!\\))? $",
+      "replace": "Boss chest: +$1 Biokredit$2"
     },
     {
       "pattern": "^Sel Kanker dikalahkan! \\+([\\d.,]+)$",
@@ -1338,8 +1351,8 @@
       "replace": "$1 restored. Thank you, immune one!"
     },
     {
-      "pattern": "^Peti boss: \\+([\\d.,]+) antibodi( \\(2x!\\))?$",
-      "replace": "Boss chest: +$1 antibodies$2"
+      "pattern": "^Peti boss: \\+([\\d.,]+) biokredit( \\(2x!\\))?$",
+      "replace": "Boss chest: +$1 Biokredit$2"
     },
     {
       "pattern": "^Sel Kanker dikalahkan! \\+([\\d.,]+) XP$",
@@ -1386,16 +1399,28 @@
       "replace": "$1 · $2"
     },
     {
-      "pattern": "^UPGRADE — ([\\d.,]+) antibodi$",
-      "replace": "UPGRADE — $1 antibodies"
+      "pattern": "^UPGRADE — ([\\d.,]+) biokredit$",
+      "replace": "UPGRADE — $1 Biokredit"
     },
     {
-      "pattern": "^BUKA — ([\\d.,]+) Imun$",
-      "replace": "UNLOCK — $1 Immun"
+      "pattern": "^BUKA — ([\\d.,]+) Genom$",
+      "replace": "UNLOCK — $1 Genom"
     },
     {
-      "pattern": "^(.+?) antibodi$",
-      "replace": "$1 antibodies"
+      "pattern": "^Lapisan Mukus: perisai ([\\d.,]+) HP!$",
+      "replace": "Mucus Layer: $1 HP shield!"
+    },
+    {
+      "pattern": "^Marker Opsonin: (\\d+) musuh ditandai!$",
+      "replace": "Marker Opsonin: $1 enemies marked!"
+    },
+    {
+      "pattern": "^Quest selesai: \\+([\\d.,]+) Biokredit$",
+      "replace": "Quest complete: +$1 Biokredit"
+    },
+    {
+      "pattern": "^(.+?) biokredit$",
+      "replace": "$1 Biokredit"
     },
     {
       "pattern": "^MULAI — (.+)$",
@@ -1406,8 +1431,8 @@
       "replace": "$1 — $2"
     },
     {
-      "pattern": "^(\\d+)/(\\d+) hero dimiliki — jalur Imun Coin bisa dibuka di sini, jalur misi lewat progres run\\.$",
-      "replace": "$1/$2 heroes owned — Imun Coin heroes unlock here, mission heroes through run progress."
+      "pattern": "^(\\d+)/(\\d+) hero dimiliki — jalur Genom bisa dibuka di sini, jalur misi lewat progres run\\.$",
+      "replace": "$1/$2 heroes owned — Genom heroes unlock here, mission heroes through run progress."
     },
     {
       "pattern": "^\\+(\\d+) kesehatan sistem per suplemen — kondisi tubuh memengaruhi bonus run\\.$",
@@ -1418,12 +1443,12 @@
       "replace": "$1 is locked — Unlocks at Level $2"
     },
     {
-      "pattern": "^Upgrade ke Rank (\\d+) — (\\d+) antibodi$",
-      "replace": "Upgrade to Rank $1 — $2 antibodies"
+      "pattern": "^Upgrade ke Rank (\\d+) — (\\d+) biokredit$",
+      "replace": "Upgrade to Rank $1 — $2 Biokredit"
     },
     {
-      "pattern": "^Butuh (\\d+) antibodi untuk upgrade skill$",
-      "replace": "Need $1 antibodies to upgrade skill"
+      "pattern": "^Butuh (\\d+) biokredit untuk upgrade skill$",
+      "replace": "Need $1 Biokredit to upgrade skill"
     }
   ]
 }

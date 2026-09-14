@@ -45,7 +45,7 @@ export function buyCosmetic(meta, cosmeticId) {
   const cfg = getData().cosmetics;
   const item = [...cfg.skins, ...cfg.accs].find((c) => c.id === cosmeticId);
   if (!item || ownsCosmetic(meta, cosmeticId)) return { ok: false, error: 'tidak tersedia' };
-  if (item.priceImun > 0 && !spendImun(meta, item.priceImun)) return { ok: false, error: 'Imun tidak cukup' };
+  if (item.priceImun > 0 && !spendImun(meta, item.priceImun)) return { ok: false, error: 'Genom tidak cukup' };
   ensureCosmetics(meta).owned.push(cosmeticId);
   writeSave(meta);
   return { ok: true, item };
@@ -103,7 +103,7 @@ export function ensureFounderReward(meta) {
 export function ensureReferral(meta) {
   if (!meta.referral) {
     const seed = (meta.account?.uid || 'tamu').slice(-5).toUpperCase();
-    meta.referral = { code: `IMUN-${seed}`, applied: [] };
+    meta.referral = { code: `GENOM-${seed}`, applied: [] };
   }
   return meta.referral;
 }
@@ -112,7 +112,7 @@ export function ensureReferral(meta) {
 export function applyReferralCode(meta, raw) {
   const code = String(raw || '').trim().toUpperCase();
   const ref = ensureReferral(meta);
-  if (!/^IMUN-[A-Z0-9]{3,8}$/.test(code)) return { ok: false, error: 'Format kode: IMUN-XXXXX' };
+  if (!/^GENOM-[A-Z0-9]{3,8}$/.test(code)) return { ok: false, error: 'Format kode: GENOM-XXXXX' };
   if (code === ref.code) return { ok: false, error: 'Itu kode kamu sendiri' };
   if (ref.applied.includes(code)) return { ok: false, error: 'Kode itu sudah dipakai' };
   const reward = getData().battlepass.offers.referralAntibodi; // RONDE-4: bonus sosial = soft currency

@@ -54,7 +54,7 @@ export function buyPremiumPass(meta) {
   const cfg = getData().battlepass;
   const bp = ensureBp(meta);
   if (bp.premium) return { ok: false, error: 'Premium sudah aktif' };
-  if ((meta.imun || 0) < cfg.premiumCostImun) return { ok: false, error: 'Imun Coin tidak cukup' };
+  if ((meta.imun || 0) < cfg.premiumCostImun) return { ok: false, error: 'Genom tidak cukup' };
   meta.imun -= cfg.premiumCostImun;
   bp.premium = true;
   writeSave(meta);
@@ -63,8 +63,8 @@ export function buyPremiumPass(meta) {
 
 function rewardLabel(rw) {
   switch (rw.type) {
-    case 'currency': return `+${rw.n} antibodi`;
-    case 'imun': return `+${rw.n} Imun`;
+    case 'currency': return `+${rw.n} biokredit`;
+    case 'imun': return `+${rw.n} Genom`;
     case 'consumable': return `${rw.n}× ${consumableName(rw.id)}`;
     case 'part': return `+${rw.n} ${rw.id.replace(/_/g, ' ')}`;
     default: return cosmeticName(rw.id) || rw.id;
@@ -122,10 +122,10 @@ export function grantReward(meta, rw) {
   switch (rw.type) {
     case 'currency':
       meta.currency += rw.n;
-      return `+${rw.n} antibodi`;
+      return `+${rw.n} biokredit`;
     case 'imun':
       addImun(meta, rw.n);
-      return `+${rw.n} Imun Coin`;
+      return `+${rw.n} Genom`;
     case 'consumable':
       meta.consumables[rw.id] = (meta.consumables[rw.id] || 0) + rw.n;
       return `${rw.n}× ${consumableName(rw.id)}`;

@@ -111,7 +111,7 @@
       "unlock": {
         "type": "imu",
         "imuCost": 150,
-        "label": "Buka dengan 150 Imun Coin"
+        "label": "Buka dengan 150 Genom"
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
@@ -191,7 +191,7 @@
       "unlock": {
         "type": "imu",
         "imuCost": 100,
-        "label": "Buka dengan 100 Imun Coin"
+        "label": "Buka dengan 100 Genom"
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
@@ -349,7 +349,7 @@
         "imuCost": 260,
         "stat": "bossKills",
         "value": 2,
-        "label": "Kalahkan 2 Bos + 260 Imun Coin"
+        "label": "Kalahkan 2 Bos + 260 Genom"
       },
       "shopCost": 130,
       "spritePortrait": "assets/sprites/portrait_basophil.png",
@@ -429,7 +429,7 @@
         "imuCost": 700,
         "stat": "totalKills",
         "value": 500,
-        "label": "Kalahkan 500 patogen + 700 Imun Coin"
+        "label": "Kalahkan 500 patogen + 700 Genom"
       },
       "shopCost": 150,
       "spritePortrait": "assets/sprites/portrait_mastcell.png",
@@ -661,7 +661,7 @@
         "imuCost": 700,
         "stat": "totalKills",
         "value": 300,
-        "label": "Kalahkan 300 patogen + 700 Imun Coin"
+        "label": "Kalahkan 300 patogen + 700 Genom"
       },
       "shopCost": 120,
       "spritePortrait": "assets/sprites/portrait_treg.png",
@@ -739,7 +739,7 @@
         "imuCost": 350,
         "stat": "bestWave",
         "value": 8,
-        "label": "Capai Gel. 8 + 350 Imun Coin"
+        "label": "Capai Gel. 8 + 350 Genom"
       },
       "shopCost": 100,
       "spritePortrait": "assets/sprites/portrait_bcell.png",
@@ -812,7 +812,7 @@
       "unlock": {
         "type": "imu",
         "imuCost": 200,
-        "label": "Buka dengan 200 Imun Coin"
+        "label": "Buka dengan 200 Genom"
       },
       "shopCost": 200,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",

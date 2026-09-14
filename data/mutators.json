@@ -12,7 +12,7 @@
       "id": "mut_demam_tinggi",
       "name": "Demam Tinggi",
       "tier": "major",
-      "description": "Musuh +18% kecepatan, namun drop antibodi +40%.",
+      "description": "Musuh +18% kecepatan, namun drop biokredit +40%.",
       "mods": { "enemySpeedMult": 1.18, "currencyMult": 1.4 }
     },
     {

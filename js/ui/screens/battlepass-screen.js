@@ -71,7 +71,7 @@ export function show() {
     buyBtn.textContent = '✓ PREMIUM AKTIF';
     buyBtn.disabled = true;
   } else {
-    buyBtn.textContent = `PREMIUM — ${cfg.premiumCostImun} IMU`;
+    buyBtn.textContent = `PREMIUM — ${cfg.premiumCostImun} GENOM`;
     buyBtn.disabled = false;
   }
 
@@ -81,8 +81,8 @@ export function show() {
   // Iklan Free-Imun dipasarkan di Shop; BP screen hanya info kecil
   const hint = document.getElementById('bp-hint');
   if (hint) hint.textContent = bp.premium
-    ? 'Total Imun jalur premium > harga pass — musim berikutnya terbiayai!'
-    : `Klaim jalur gratis, atau buka premium (${cfg.premiumCostImun} Imun) untuk hadiah 2× lebih besar.`;
+    ? 'Total Genom jalur premium > harga pass — musim berikutnya terbiayai!'
+    : `Klaim jalur gratis, atau buka premium (${cfg.premiumCostImun} Genom) untuk hadiah 2× lebih besar.`;
 
   if (!wired) {
     wired = true;

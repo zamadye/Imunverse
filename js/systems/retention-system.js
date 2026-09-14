@@ -86,8 +86,8 @@ export function purchaseGlobalUpgrade(id) {
   const lv = globalUpgradeLevel(meta, id);
   if (lv >= def.maxLevel) return { ok: false, reason: 'Level maksimal' };
   const cost = globalUpgradeCost(def, lv);
-  if (meta.imun < cost) return { ok: false, reason: 'Imun Coin tidak cukup' };
-  if (!spendImun(meta, cost)) return { ok: false, reason: 'Imun Coin tidak cukup' };
+  if (meta.imun < cost) return { ok: false, reason: 'Genom tidak cukup' };
+  if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
   meta.globalUpgrades = meta.globalUpgrades || {};
   meta.globalUpgrades[id] = lv + 1;
   writeSave(meta);

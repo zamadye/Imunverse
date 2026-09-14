@@ -18,7 +18,7 @@
      "vaksin_awal": 1
     }
    },
-   "valueNote": "1.500 antibodi + 300 Imun + Skin Pendiri + 3 item — paket awal terbaik"
+   "valueNote": "1.500 biokredit + 300 Genom + Skin Pendiri + 3 item — paket awal terbaik"
   },
   {
    "id": "bundle_pass_m1",
@@ -34,11 +34,11 @@
      "kopi_limfa": 2
     }
    },
-   "valueNote": "500 Imun (buka Pass Premium) + 800 antibodi + 2 Kopi Limfa"
+   "valueNote": "500 Genom (buka Pass Premium) + 800 biokredit + 2 Sitokin Burst"
   },
   {
    "id": "bundle_imun_pro",
-   "name": "Paket Imun Pro",
+   "name": "Paket Genom Pro",
    "priceRp": 45000,
    "priceLabel": "Rp 45rb",
    "badge": "TERBAIK",
@@ -52,7 +52,7 @@
      "kopi_limfa": 2
     }
    },
-   "valueNote": "5.000 antibodi + 150 Imun + 6 item tempur premium"
+   "valueNote": "5.000 biokredit + 150 Genom + 6 item tempur premium"
   },
   {
    "id": "bundle_noads",
@@ -65,7 +65,7 @@
     "noAds": true,
     "imun": 100
    },
-   "valueNote": "Tanpa interupsi iklan selamanya + 100 Imun — dukung pengembang"
+   "valueNote": "Tanpa interupsi iklan selamanya + 100 Genom — dukung pengembang"
   }
  ],
  "methods": [

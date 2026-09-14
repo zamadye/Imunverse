@@ -19,7 +19,7 @@ function stats() {
 /** Label syarat unlock untuk pesan ke pemain. */
 function requirementLabel(g) {
   if (g.requireWave) return `Capai Gelombang ${g.requireWave}`;
-  if (g.requireCurrency) return `Kumpulkan ${g.requireCurrency} Antibodi`;
+  if (g.requireCurrency) return `Kumpulkan ${g.requireCurrency} Biokredit`;
   if (g.requireRuns) return `Selesaikan ${g.requireRuns} run`;
   return '';
 }

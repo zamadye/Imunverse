@@ -133,7 +133,7 @@ export function hide() {}
 function renderGlobalTab(meta) {
   const wrap = document.getElementById('upg-global');
   wrap.textContent = '';
-  wrap.appendChild(el('p', { class: 'upg-note', text: 'Berlaku permanen untuk SEMUA hero — dibayar dengan Imun Coin dari hasil run.' }));
+  wrap.appendChild(el('p', { class: 'upg-note', text: 'Berlaku permanen untuk SEMUA hero — dibayar dengan Genom dari hasil run.' }));
 
   const STAT_FMT = {
     damage: (d) => `+${Math.round(d * 100)}% damage`,
@@ -228,7 +228,7 @@ function renderHeroTab(meta) {
       ? el('button', { class: 'btn btn-primary btn-hl-up', disabled: true, text: 'MAX ✓' })
       : el('button', { class: 'btn btn-primary btn-hl-up', disabled: meta.currency < cost }, [
           el('span', { text: 'LEVEL UP — ' }),
-          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Biokredit' }),
           el('span', { text: cost.toLocaleString('id-ID') }),
         ]),
     el('div', { class: 'hl-nav' }, [
@@ -286,7 +286,7 @@ function renderPasukanTab(meta) {
       ? el('button', { class: 'btn btn-primary btn-hl-up', disabled: true, text: 'MAX ✓' })
       : el('button', { class: 'btn btn-primary btn-hl-up', disabled: meta.currency < cost }, [
           el('span', { text: 'LEVEL UP — ' }),
-          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi' }),
+          el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Biokredit' }),
           el('span', { text: cost.toLocaleString('id-ID') }),
         ]),
     el('span', { class: 'hl-hint', text: 'Jumlah pasukan bertambah tiap bab kampanye yang dibersihkan (maks 6 sel)' }),

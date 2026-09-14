@@ -39,7 +39,7 @@
     },
     {
       "id": "antibodi",
-      "name": "Antibodi",
+      "name": "Biokredit",
       "description": "Mata uang permanen. Dipakai untuk unlock hero & upgrade squad.",
       "sprite": "assets/sprites/item_antibodi.png",
       "color": "#4cc9f0",

@@ -40,12 +40,12 @@ export function getHeroStatus(meta, heroDef) {
   } else if (unlock.type === 'imu') {
     // Buka kapan saja dengan Imun Coin (roster/toko)
     conditionMet = true;
-    conditionLabel = unlock.label || `Buka dengan ${cost} Imun Coin`;
+    conditionLabel = unlock.label || `Buka dengan ${cost} Genom`;
   } else if (unlock.type === 'imu_stat') {
     // Kombinasi: misi terpenuhi + bayar Imun Coin
     const value = metaValue(meta, unlock.stat);
     conditionMet = value >= unlock.value;
-    conditionLabel = unlock.label || `Capai target + ${cost} Imun Coin`;
+    conditionLabel = unlock.label || `Capai target + ${cost} Genom`;
   }
 
   return {

@@ -140,7 +140,7 @@ export function show() {
         const imuCost = heroDef.unlock.imuCost || 0;
         children.push(el('button', {
           class: 'btn btn-gold lock-unlock-btn' + (meta.imun >= imuCost ? '' : ' poor'),
-          text: `BUKA — ${imuCost} Imun`,
+          text: `BUKA — ${imuCost} Genom`,
           onclick: (ev) => {
             ev.stopPropagation(); // jangan buka detail
             const res = purchaseHeroUnlock(meta, heroDef);

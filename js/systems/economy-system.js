@@ -119,7 +119,7 @@ export function purchaseAllyLevel(meta) {
 export function purchaseShopItem(meta, itemId) {
   const def = getData().upgrades.shopItems.find((i) => i.id === itemId);
   if (!def) return { ok: false, reason: 'Item tidak ditemukan' };
-  if (meta.currency < def.cost) return { ok: false, reason: 'Antibodi tidak cukup' };
+  if (meta.currency < def.cost) return { ok: false, reason: 'Biokredit tidak cukup' };
   meta.currency -= def.cost;
   meta.consumables[def.id] = (meta.consumables[def.id] || 0) + 1;
   writeSave(meta); // auto-save setelah pembelian
@@ -144,7 +144,7 @@ export function purchaseHeroUnlock(meta, heroDef) {
     const value = unlock.stat === 'unlockedHeroes' ? meta.unlockedHeroes.length : (meta.stats[unlock.stat] || 0);
     if (value < unlock.value) return { ok: false, reason: 'Syarat misi belum terpenuhi' };
   }
-  if (!spendImun(meta, cost)) return { ok: false, reason: 'Imun Coin tidak cukup' };
+  if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
   meta.unlockedHeroes.push(heroDef.id);
   writeSave(meta); // auto-save setelah unlock
   emit('heroUnlocked', { heroId: heroDef.id }); // E1 poin 9: Amara menjelaskan

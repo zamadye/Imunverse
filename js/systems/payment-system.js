@@ -60,7 +60,7 @@ function grantContents(meta, contents) {
   const granted = [];
   if (contents.currency) {
     meta.currency += contents.currency;
-    granted.push(`+${contents.currency} antibodi`);
+    granted.push(`+${contents.currency} biokredit`);
   }
   if (contents.consumables) {
     meta.consumables = meta.consumables || {};
@@ -80,7 +80,7 @@ function grantContents(meta, contents) {
   // Fase 14: Imun Coin + kosmetik di dalam bundle (ekonomi premium)
   if (contents.imun) {
     meta.imun = (meta.imun || 0) + contents.imun;
-    granted.push(`+${contents.imun} Imun Coin`);
+    granted.push(`+${contents.imun} Genom`);
   }
   if (contents.skin || contents.acc) {
     meta.cosmetics = meta.cosmetics || { owned: [], skin: {}, crown: null, aura: null };

@@ -603,7 +603,7 @@ export function show() {
     ]),
     el('span', { class: 'claim-line' }, claimable ? [
       el('b', { text: `${getData().upgrades.economy.dailyReward}` }),
-      el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'antibodi' }),
+      el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'biokredit' }),
       el('span', { text: ' menantimu — klaim sekarang!' }),
     ] : [el('span', { text: 'Sudah diklaim hari ini. Kembali besok.' })]),
   ]);
@@ -635,7 +635,7 @@ export function show() {
         el('span', { class: 'm-name', text: m.def.name }),
         el('span', { class: 'm-reward' }, [
         el('span', { text: `+${m.def.reward}` }),
-        el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Antibodi', title: 'Antibodi' }),
+        el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'Biokredit', title: 'Biokredit' }),
       ]),
       ]),
       el('div', { class: 'm-row' }, [
@@ -676,7 +676,7 @@ export function show() {
         text: 'KLAIM',
         onclick: () => {
           const reward = claimQuest(meta, q.def.id);
-          if (reward) emit('toast', { message: `Quest selesai: +${reward} Antibodi`, kind: 'gold' });
+          if (reward) emit('toast', { message: `Quest selesai: +${reward} Biokredit`, kind: 'gold' });
           show();
         },
       }));

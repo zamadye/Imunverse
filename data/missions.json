@@ -171,8 +171,8 @@
     },
     {
       "id": "rich_2000",
-      "name": "Cadangan Antibodi",
-      "desc": "Kumpulkan 2000 antibodi (total)",
+      "name": "Cadangan Biokredit",
+      "desc": "Kumpulkan 2000 biokredit (total)",
       "stat": "totalCurrencyEarned",
       "target": 2000,
       "reward": 70
