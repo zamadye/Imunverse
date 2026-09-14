@@ -22,15 +22,42 @@
     "note": "Opsi A: pasukan punya membran mini kontak-pasif, tanpa Pulse/engulf."
   },
   "shapes": {
-    "cone": { "arcDeg": 90, "rangeMult": 1.6 },
-    "tentacles": { "count": 3, "arcDeg": 32, "rangeMult": 1.9, "spacingDeg": 120 },
-    "support": { "damageMult": 0.45, "healPctPerSec": 0.02 },
-    "pulsing": { "minMult": 0.7, "maxMult": 1.3, "periodSec": 2.0 },
-    "trail": { "durationSec": 1.5, "dpsMult": 0.4, "tickSec": 0.25, "radius": 26 }
+    "cone": {
+      "arcDeg": 90,
+      "rangeMult": 1.6
+    },
+    "tentacles": {
+      "count": 3,
+      "arcDeg": 32,
+      "rangeMult": 1.9,
+      "spacingDeg": 120
+    },
+    "support": {
+      "damageMult": 0.45,
+      "healPctPerSec": 0.02
+    },
+    "pulsing": {
+      "minMult": 0.7,
+      "maxMult": 1.3,
+      "periodSec": 2.0
+    },
+    "trail": {
+      "durationSec": 1.5,
+      "dpsMult": 0.4,
+      "tickSec": 0.25,
+      "radius": 26
+    }
   },
   "heroTuning": {
     "contactDpsScale": 1.0,
     "pulseDamageScale": 1.0,
     "note": "contactDps final = membrane.contactDps hero x (stats.damage / base.damage) x buff. Pulse = contactDps x pulseDamageMult."
+  },
+  "arena": {
+    "cx": 0,
+    "cy": 0,
+    "radius": 750,
+    "wallColor": "#7fe3d0",
+    "doc": "PHAGOS: dunia tak lagi tanpa batas — arena = cawan petri melingkar. Naikkan radius bila terlalu sempit."
   }
 }

@@ -163,7 +163,7 @@ function controlHintText() {
   // PHAGOS: SATU TOMBOL — gerak = damage kontak, PULSE = ledakan medan.
   return isTouch
     ? 'Tarik di lantai arena untuk bergerak — sentuh musuh untuk melukai! · Tekan <span class="k">PULSE</span> untuk meledak'
-    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> / tarik mouse (sentuh = luka) · Pulse: <span class="k">Spasi</span> / <span class="k">PULSE</span> · Jeda: <span class="k">Esc</span>';
+    : 'Gerak: <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> (sentuh = luka) · Arah: <span class="k">Mouse</span> · Pulse: <span class="k">Spasi</span> · Jeda: <span class="k">Esc</span>';
 }
 
 /** Reset elemen HUD di awal run (dipanggil via event runstart). */

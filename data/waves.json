@@ -1,40 +1,40 @@
 {
   "schemaVersion": 2,
   "waveDuration": 25,
-  "spawnIntervalBase": 1.8,
-  "spawnIntervalMin": 0.4,
+  "spawnIntervalBase": 1.4,
+  "spawnIntervalMin": 0.3,
   "spawnIntervalWaveDecay": 0.08,
   "enemyHPScalePerWave": 0.105,
   "enemySpeedScalePerWave": 0.015,
   "enemySpeedScaleMax": 1.6,
   "bossWaveEvery": 5,
   "bossHPBonusPerBossIndex": 0.35,
-  "maxAliveEnemies": 250,
+  "maxAliveEnemies": 300,
   "spawnPadding": 90,
   "waveMultipliers": [
     {
       "wave": 1,
-      "spawn": 0.85
+      "spawn": 1.05
     },
     {
       "wave": 4,
-      "spawn": 1.0
+      "spawn": 1.25
     },
     {
       "wave": 8,
-      "spawn": 1.2
+      "spawn": 1.5
     },
     {
       "wave": 12,
-      "spawn": 1.4
+      "spawn": 1.75
     },
     {
       "wave": 18,
-      "spawn": 1.6
+      "spawn": 2.0
     },
     {
       "wave": 30,
-      "spawn": 1.9
+      "spawn": 2.4
     }
   ],
   "bossRoster": [
@@ -55,7 +55,7 @@
     "minWaveTime": 8
   },
   "breakDuration": 2.5,
-  "trickleIntervalMult": 1.55,
+  "trickleIntervalMult": 1.0,
   "elite": {
     "startWave": 3,
     "base": 1,
@@ -103,11 +103,11 @@
   },
   "ecosystem": {
     "enabled": true,
-    "targetBase": 10,
-    "targetPerWave": 11,
-    "targetMax": 180,
+    "targetBase": 16,
+    "targetPerWave": 14,
+    "targetMax": 220,
     "topUpInterval": 1.0,
-    "topUpBatch": 3,
+    "topUpBatch": 4,
     "minPlayerDist": 340,
     "maxPlayerDist": 950,
     "hunterShare": 0.6

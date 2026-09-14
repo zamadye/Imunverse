@@ -5,50 +5,6 @@
       "id": "intro",
       "shots": [
         {
-          "dur": 3400,
-          "bg": [
-            "#fff3e0",
-            "#ffd9b0"
-          ],
-          "text": "Dr. Amara: \"Cuma luka gores kok — tapi kalau kotor sedikit saja, bisa infeksi.\"",
-          "actors": [
-            {
-              "sprite": "assets/sprites/amara_pose_talk.png",
-              "from": [
-                0.09999999999999998,
-                0.52
-              ],
-              "to": [
-                0.3,
-                0.52
-              ],
-              "scale": 0.42
-            }
-          ]
-        },
-        {
-          "dur": 3200,
-          "bg": [
-            "#fff3e0",
-            "#ffd9b0"
-          ],
-          "text": "Dr. Amara: \"Untungnya tubuh kita punya 'pasukan' sendiri yang langsung siaga begitu ada luka.\"",
-          "actors": [
-            {
-              "sprite": "assets/sprites/amara_pose_talk.png",
-              "from": [
-                0.12,
-                0.52
-              ],
-              "to": [
-                0.32,
-                0.52
-              ],
-              "scale": 0.42
-            }
-          ]
-        },
-        {
           "dur": 2600,
           "bg": [
             "#f7c8a8",
@@ -96,28 +52,6 @@
     {
       "id": "onboarding",
       "shots": [
-        {
-          "dur": 3000,
-          "bg": [
-            "#fff3e0",
-            "#ffd9b0"
-          ],
-          "text": "Dr. Amara: \"Tenang ya. Dari dalam sana, ada pasukan yang bertugas jaga siang-malam.\"",
-          "actors": [
-            {
-              "sprite": "assets/sprites/amara_pose_talk.png",
-              "from": [
-                0.09999999999999998,
-                0.52
-              ],
-              "to": [
-                0.3,
-                0.52
-              ],
-              "scale": 0.42
-            }
-          ]
-        },
         {
           "dur": 2600,
           "bg": [

@@ -17,7 +17,7 @@ import { STATE, setPaused, setLevelUpOpen, setScreen } from './state-manager.js'
 import { hidePresenter } from '../ui/presenter.js';
 import {
   getData, getHero, getEnemyDef, getNutrientDef, getWaveConfig,
-  xpToNextLevel,
+  xpToNextLevel, getMembrane,
 } from './data-store.js';
 import { emit } from './ui-bridge.js';
 import { getTintedSprite } from '../render/sprite-loader.js';
@@ -300,6 +300,11 @@ export const game = {
     };
     // PHAGOS: medan membran hero (wajib sebelum HOOK spawn agar stats siap)
     try { initMembrane(this.run, heroDef); } catch (err) { console.warn('[phagos] initMembrane gagal:', err); }
+    // PHAGOS: arena cawan petri (dunia tak lagi tanpa batas) — dari data/membrane.json
+    try {
+      const ab = (getMembrane() && getMembrane().arena) || {};
+      this.run.arenaBounds = { x: ab.cx || 0, y: ab.cy || 0, r: ab.radius || 750 };
+    } catch { this.run.arenaBounds = { x: 0, y: 0, r: 750 }; }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
@@ -672,6 +677,23 @@ export const game = {
       } catch { /* stats belum siap */ }
     }
 
+    // PHAGOS desktop: ARAH = MOUSE (facing mengikuti kursor; cone/tentakel +
+    // dash T-Bolt otomatis mengikutinya), SERANG = KEYBOARD (Spasi/K/4/T —
+    // antrean PULSE di atas). Sentuh/joy-drag tetap memakai arah gerak.
+    run._mouseAimFresh = false;
+    try {
+      const dragging = this.input.joystick && this.input.joystick.active;
+      const sp = run.camera.getPlayerScreen ? run.camera.getPlayerScreen() : null;
+      const aim = sp && this.input.getAimInfo ? this.input.getAimInfo(sp.x, sp.y) : null;
+      if (aim && aim.active && aim.source === 'mouse' && !dragging && player.alive) {
+        player.facing = aim.angle;
+        run._mouseAimFresh = true;
+      }
+    } catch { /* abaikan */ }
+
+    // PHAGOS: jepit player di dalam cawan petri (dash/knockback tak bisa kabur)
+    try { this.arenaClamp(player, player.radius || 15); } catch { /* abaikan */ }
+
     // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi
     // ONLY (tidak menyentuh logic combat/wave). Emit 1× per run; main.js
     // mengecek penanda meta.nft.move (sekali sejak pernah) lalu memutar
@@ -733,6 +755,23 @@ export const game = {
         phagoUpdateEnemy(e, dt); // R4 Modul B: window telan <20% HP
       }
     }
+
+    // PHAGOS: jepit semua entitas di dalam cawan petri (sebelum grid dibangun
+    // ulang agar posisi terjepit yang dipakai semua sistem).
+    try {
+      for (const e of run.enemies) if (e.alive) this.arenaClamp(e, (e.radius || 14) * 0.5);
+      for (const a of run.allies) this.arenaClamp(a, a.radius || 12);
+      for (const h of run.hazards) this.arenaClamp(h, 0);
+      const B = run.arenaBounds;
+      if (B) {
+        for (const p of run.projectiles) {
+          if (p.alive && Math.hypot(p.x - B.x, p.y - B.y) > B.r + 60) p.alive = false;
+        }
+        for (const b of run.ebullets) {
+          if (b.alive && Math.hypot(b.x - B.x, b.y - B.y) > B.r + 60) b.alive = false;
+        }
+      }
+    } catch { /* abaikan */ }
 
     // 4. Bangun ulang spatial grid dari posisi musuh terkini
     run.collision.rebuildEnemyGrid(run.enemies);
@@ -1357,6 +1396,19 @@ export const game = {
     const scalers = run.spawnSys.getScalers();
     scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
+    try {
+      const B = run.arenaBounds;
+      if (B) {
+        const sdx = pos.x - B.x, sdy = pos.y - B.y;
+        const smaxR = Math.max(60, B.r - 60);
+        if (Math.hypot(sdx, sdy) > smaxR) {
+          const sa = Math.atan2(sdy, sdx);
+          pos.x = B.x + Math.cos(sa) * smaxR;
+          pos.y = B.y + Math.sin(sa) * smaxR;
+        }
+      }
+    } catch { /* abaikan */ }
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
     markSeen(bossCfg.id); // Bio-Pedia: boss ditemui
     if (bossCfg.areaAttack) enemy.def = Object.assign({}, def, { areaAttack: bossCfg.areaAttack });
@@ -1471,6 +1523,19 @@ export const game = {
     scalers.hpScale *= 1 + (plvl - 1) * pls.hpPerLevel;
     scalers.speedScale += Math.min(pls.speedMax, (plvl - 1) * pls.speedPerLevel);
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
+    try {
+      const B = run.arenaBounds;
+      if (B) {
+        const sdx = pos.x - B.x, sdy = pos.y - B.y;
+        const smaxR = Math.max(60, B.r - 60);
+        if (Math.hypot(sdx, sdy) > smaxR) {
+          const sa = Math.atan2(sdy, sdx);
+          pos.x = B.x + Math.cos(sa) * smaxR;
+          pos.y = B.y + Math.sin(sa) * smaxR;
+        }
+      }
+    } catch { /* abaikan */ }
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
     markSeen(enemyId); // Bio-Pedia: musuh ditemui
     // Kondisi tubuh: sistem kritis bisa mempercepat musuh (mis. Imun < 20)
@@ -1558,6 +1623,24 @@ export const game = {
    * Aktivasi kemampuan aktif via tombol HUD / keyboard (slot 1-4).
    * @returns {boolean} true bila kemampuan terluncur.
    */
+  /**
+   * PHAGOS: jepit entitas ke dalam lingkaran arena (cawan petri).
+   * @param {object} ent {x, y} yang digeser bila di luar dinding
+   * @param {number} margin jarak aman dari dinding (radius entitas)
+   */
+  arenaClamp(ent, margin = 0) {
+    const B = this.run && this.run.arenaBounds;
+    if (!B || !ent) return;
+    const dx = ent.x - B.x, dy = ent.y - B.y;
+    const maxR = Math.max(50, B.r - (margin || 0));
+    const d = Math.hypot(dx, dy);
+    if (d > maxR) {
+      const k = maxR / (d || 1);
+      ent.x = B.x + dx * k;
+      ent.y = B.y + dy * k;
+    }
+  },
+
   /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
   triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
@@ -2275,6 +2358,7 @@ export const game = {
 
     // ===== PHAGOS: LAPISAN MEDAN MEMBRAN (di atas background, di bawah hero) =====
     try { this.renderMembraneLayer(ctx, run, time, ground, billboard); } catch (err) { console.warn('[phagos] renderMembrane:', err); }
+    try { this.renderArenaWall(ctx, run, time, ground); } catch (err) { console.warn('[phagos] renderArenaWall:', err); }
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
@@ -2644,6 +2728,47 @@ export const game = {
    * Layer: trail racun → cloud histamin → medan utama (+pulse expand) →
    * dual-ring → satelit → membran mini pasukan. Semua ground-space.
    */
+  /**
+   * PHAGOS: dinding kaca cawan petri — lingkaran putus-putus berputar pelan.
+   * Selalu terlihat saat kamera dekat tepi; di luar jangkau = di-skip.
+   */
+  renderArenaWall(ctx, run, time, ground) {
+    const B = run.arenaBounds;
+    if (!B || !B.r) return;
+    const player = run.player;
+    // Skip bila seluruh lingkaran jauh di luar layar (hemat fill-rate)
+    const vw = this.viewW || 900, vh = this.viewH || 600;
+    if (Math.hypot(player.x - B.x, player.y - B.y) > B.r + Math.hypot(vw, vh)) return;
+    let wallColor = '#7fe3d0';
+    try { wallColor = (getMembrane() && getMembrane().arena && getMembrane().arena.wallColor) || wallColor; } catch { /* abaikan */ }
+    ground(B.x, B.y);
+    // Cahaya kaca: ring luar lembut
+    ctx.globalAlpha = 0.10;
+    ctx.strokeStyle = wallColor;
+    ctx.lineWidth = 26;
+    ctx.beginPath();
+    ctx.arc(B.x, B.y, B.r, 0, Math.PI * 2);
+    ctx.stroke();
+    // Dinding: garis putus berputar pelan
+    ctx.globalAlpha = 0.75;
+    ctx.lineWidth = 3.5;
+    ctx.setLineDash([14, 10]);
+    ctx.lineDashOffset = -time * 26;
+    ctx.beginPath();
+    ctx.arc(B.x, B.y, B.r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
+    // Kilau dalam: ring tipis statis
+    ctx.globalAlpha = 0.25;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(B.x, B.y, B.r - 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  },
+
   renderMembraneLayer(ctx, run, time, ground, billboard) {
     const mem = run.membrane;
     if (!mem || !run.player.alive) return;
@@ -2811,6 +2936,26 @@ export const game = {
         ctx.globalAlpha = 1;
         ctx.restore();
       }
+    }
+    // PHAGOS desktop: indikator arah mouse (garis pendek + titik ke facing)
+    if (run._mouseAimFresh && player.alive) {
+      const fx0 = Math.cos(player.facing || 0), fy0 = Math.sin(player.facing || 0);
+      const pr = (player.radius || 15);
+      ground(player.x, player.y);
+      ctx.globalAlpha = 0.4;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(player.x + fx0 * (pr + 4), player.y + fy0 * (pr + 4));
+      ctx.lineTo(player.x + fx0 * (pr + 30), player.y + fy0 * (pr + 30));
+      ctx.stroke();
+      ctx.globalAlpha = 0.65;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(player.x + fx0 * (pr + 34), player.y + fy0 * (pr + 34), 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
     }
     void billboard;
   },
