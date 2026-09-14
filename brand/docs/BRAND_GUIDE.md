@@ -89,32 +89,46 @@ Jangan set ulang dengan font standar.
 
 ---
 
-## 4. Sistem Logo
+## 4. Sistem Logo (MINIMAL — 2 aset inti + turunan ukuran)
 
-| Varian | File | Pakai untuk |
+Sistem logo disederhanakan sesuai kebutuhan implementasi. **Tidak ada varian
+lain.** Kalau butuh bentuk baru, turunkan dari 2 aset inti ini.
+
+### 4.1 Icon (aset inti 1) — untuk foto profil & Play Store
+Mako vs Sel Kanker, clash energi teal×coral, **tanpa ring/bingkaran**,
+full-bleed, komposisi aman di-crop lingkaran.
+
+| File | Ukuran | Pakai untuk |
 |---|---|---|
-| **Wordmark (TRANSPARAN)** | `logo/wordmark.png` (1246×403, PNG alpha) | **Logo teks utama.** Header website, banner, thumbnail, video — di-layer di atas apa pun. Tanpa background. |
-| **Wordmark monokrom** | `logo/wordmark-mono.png` (cream, alpha) | Merchandise, stamp, watermark, latar yang butuh single-color. |
-| **Logo compact (emblem 1:1)** | `logo/logo-compact.png` + 800/512/400/320/200/110 | Ikon app, profile picture semua platform, favicon. (Mako vs Sel Kanker) |
-| **Emblem monokrom** | `logo/logo-mono.png` (cream, transparan) | Watermark, merchandise. |
-| **Watermark** | `logo/logo-watermark-150.png` (40% opacity) | Overlay video/screenshot. |
-| **Logo animasi** | `logo/logo-animasi.mp4` (16:9, 4 dtk, loop) | Intro video, loading, opener TikTok. (wordmark + partikel) |
+| `logo/icon.png` | 1024² | Master |
+| `logo/icon-800.png` | 800² | Profil YouTube |
+| `logo/icon-512.png` | 512² | **Play Store icon** (juga `playstore-icon-512.png`) |
+| `logo/icon-400.png` | 400² | Profil X/Twitter |
+| `logo/icon-320.png` | 320² | Profil Instagram |
+| `logo/icon-200.png` | 200² | Profil TikTok |
+| `logo/icon-110.png` | 110² | Highlight IG |
+| `logo/playstore-icon-48-preview.png` | 48² | QA keterbacaan (jangan di-upload) |
+| `logo/icon-circle-400-preview.png` | 400² | Preview crop lingkaran (jangan di-upload) |
 
-**Aturan pemakaian wordmark (PENTING):**
-- **Sangatkan, jangan di-frame.** Wordmark harus di-layer langsung di atas
-  konten (foto/video/gradient) — TIDAK DIBOLEH tempel di atas panel/kotak
-  background buatan. Glow-nya sudah jadi bagian logo.
-- Di atas foto terang/ramai: tambahkan **scrim teal gelap** (gradient alpha)
-  di balik wordmark agar cream terbaca.
-- Di atas latar putih/terang: pakai `wordmark-mono.png` versi dark teal
-  (reverse) — jangan cream langsung.
-- Safe area: padding minimal 10%. Minimum lebar 320 px.
-- Jangan: rotate, ubah warna, ganti lettering, tambah kotak/background,
-  efek drop shadow berlebihan.
-- Emblem compact (Mako vs Sel Kanker) boleh berdiri sendiri — sudah mengandung
-  konflik inti game.
+### 4.2 Wordmark (aset inti 2) — TRANSPARAN, tanpa background
+Lettering PHAGOS + glow + partikel, PNG alpha murni. **Di-layer langsung di
+atas konten — TIDAK dibungkus panel/kotak background.**
 
----
+| File | Ukuran | Pakai untuk |
+|---|---|---|
+| `logo/wordmark.png` | 1263×433 | Master (header website, banner, video) |
+| `logo/wordmark-800/512/320.png` | turun | Web responsive |
+| `logo/wordmark-mono.png` | 1263×433 | Merch/watermark single-color |
+| `logo/logo-animasi.mp4` | 16:9, 4 dtk | Intro/opener (wordmark + partikel) |
+
+### 4.3 Aturan pemakaian
+- **Icon**: platform yang meng-crop lingkaran/rounded — sudah aman, jangan
+  tambah ring/border sendiri.
+- **Wordmark**: di foto terang/ramai → scrim teal gelap di belakang. Di latar
+  putih → pakai `wordmark-mono` versi dark (reverse). Minimum lebar 320 px.
+- **Jangan**: rotate, ubah warna, ganti lettering, tambah background/kotak,
+  drop shadow berlebihan.
+- **Banner X header**: `banners/twitter/x-header-1500x500.png` (1500×500).
 
 ## 5. Karakter
 

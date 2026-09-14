@@ -6,7 +6,7 @@ from the AI-generated source images in brand/. Run:
   PYTHONPATH=brand/libs python3 brand/tools/build_assets.py
 Requires: Pillow (brand/libs)
 """
-import os, math, random
+import os, math, random, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps, ImageEnhance
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -103,58 +103,10 @@ for i, k in enumerate(need):
 sheet.save('ref/mako-expression-sheet.png', quality=95)
 
 # ---------------------------------------------------------------- 2. PHAGOS logo
-print('[2/7] phagos logo')
-ca = Image.open('logo/phagos-concept.png').convert('RGB')
-caw, cah = ca.size
-# band: Mako + wordmark + coral swoosh (proportional to 1536x864 reference)
-band = ca.crop((int(130 * caw / 1536), int(95 * cah / 864), int(1420 * caw / 1536), int(730 * cah / 864)))
-band.save('logo/phagos-band.png')
-W, Hh = 1600, 900
-full = Image.new('RGB', (W, Hh))
-dp = ImageDraw.Draw(full)
-for y in range(Hh):
-    t = y / Hh
-    dp.line([(0, y), (W, y)], fill=(int(8 + 5 * t), int(46 + 24 * t), int(52 + 28 * t)))
-glow = Image.new('RGB', (W, Hh))
-ImageDraw.Draw(glow).ellipse([W // 2 - 560, Hh // 2 - 330, W // 2 + 560, Hh // 2 + 330], fill=TEAL)
-glow = glow.filter(ImageFilter.GaussianBlur(170))
-full = Image.blend(full, glow, 0.55)
-sc = 1180 / band.width
-band_r = band.resize((int(band.width * sc), int(band.height * sc)), Image.LANCZOS)
-bx = (W - band_r.width) // 2; by = 48
-full.paste(band_r, (bx, by))
-d2 = ImageDraw.Draw(full)
-d2.text((W // 2, by + band_r.height + 56), 'Sel Imun vs Patogen — Selamatkan Tubuh!', fill=CREAM, anchor='mm', font=F('LilitaOne-Regular.ttf', 34))
-full.save('logo/logo-full.png', quality=95)
-# square version
-sq = Image.new('RGB', (1024, 1024), (8, 46, 52))
-sqsc = 860 / ca.width
-sqca = ca.resize((int(ca.width * sqsc), int(ca.height * sqsc)), Image.LANCZOS)
-sq.paste(sqca, ((1024 - sqca.width) // 2, (1024 - sqca.height) // 2 - 30))
-sq.save('logo/logo-full-square.png', quality=95)
+print('[2/7] logos (icon + wordmark)')
+import subprocess
+subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'build_logo.py')], check=True)
 
-# compact emblem + resizes
-cb = Image.open('logo/concept-b.png').convert('RGB')
-cb.save('logo/logo-compact.png')
-for s in (800, 512, 400, 320, 200, 110):
-    cb.resize((s, s), Image.LANCZOS).save(f'logo/logo-compact-{s}.png')
-
-# mono
-ms = Image.open('logo/mono-src.png').convert('RGB')
-mbg = ms.getpixel((3, 3))
-ext = content_extent(ms, mbg)
-mcrop = ms.crop(ext)
-mout = knockout(mcrop, mbg)
-canvas = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-mfs = 1000 / max(mout.size)
-mout2 = mout.resize((int(mout.width * mfs), int(mout.height * mfs)), Image.LANCZOS)
-canvas.paste(mout2, ((1024 - mout2.width) // 2, (1024 - mout2.height) // 2), mout2)
-canvas.save('logo/logo-mono.png')
-wm = canvas.resize((150, 150), Image.LANCZOS)
-wm.putalpha(wm.getchannel('A').point(lambda v: int(v * 0.4)))
-wm.save('logo/logo-watermark-150.png')
-
-# ---------------------------------------------------------------- 3. patterns
 print('[3/7] patterns')
 pat = Image.open('patterns/pattern-biologikal.png').convert('RGB')
 t = Image.new('RGB', (pat.width * 2, pat.height * 2))
