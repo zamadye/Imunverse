@@ -17,6 +17,7 @@ import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
 import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
+import { isCapsulePending } from '../../systems/welcome-box-system.js'; // ADDENDUM §1: Kapsul Membran
 
 let wiringDone = false;
 
@@ -241,7 +242,29 @@ export function wireButtons() {
   });
 
   document.getElementById('btn-retry').addEventListener('click', () => {
-    const meta = STATE.meta;
+    if (capsuleFirst(doRetry)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
+    doRetry();
+  });
+
+  document.getElementById('btn-home').addEventListener('click', () => {
+    if (capsuleFirst(doHome)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
+    doHome();
+  });
+}
+
+// ADDENDUM §1: alihkan ke kapsul bila pending; onLater = alur semula.
+function capsuleFirst(next) {
+  try {
+    if (isCapsulePending(STATE.meta)) {
+      screenManager.show('capsule', { onLater: next });
+      return true;
+    }
+  } catch { /* abaikan */ }
+  return false;
+}
+
+function doRetry() {
+const meta = STATE.meta;
     // Menang kampanye → lanjut bab berikutnya (sinematik clear dulu bila baru)
     const wonCampaign = STATE.lastGameoverSummary && STATE.lastGameoverSummary.victory
       && STATE.lastGameoverSummary.modeId === 'kampanye';
@@ -266,10 +289,10 @@ export function wireButtons() {
       return;
     }
     game.startRun(meta.selectedHero); // 'runstart' → HUD tampil otomatis
-  });
+}
 
-  document.getElementById('btn-home').addEventListener('click', () => {
-    const summary = STATE.lastGameoverSummary;
+function doHome() {
+const summary = STATE.lastGameoverSummary;
     if (summary && summary.victory && summary.modeId === 'kampanye') {
       // R3: bab final → EPILOG (6.4) sebelum pulang
       const cs = getData().cutscenes;
@@ -281,7 +304,6 @@ export function wireButtons() {
       return;
     }
     window.__IMUNVERSE_goDashboard();
-  });
 }
 
 export function hide() {}

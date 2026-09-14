@@ -120,7 +120,7 @@ export function show() {
     ]));
   }
   if (!any) {
-    itemsGrid.appendChild(el('p', { class: 'bag-hint', text: 'Belum punya consumable — Serum Awal tersedia di Shop.' }));
+    itemsGrid.appendChild(el('p', { class: 'bag-hint', text: 'Belum punya consumable — tersedia di Shop.' }));
   }
 
   // ---- Jalan evolusi berikutnya ----

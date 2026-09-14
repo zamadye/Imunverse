@@ -233,6 +233,12 @@ export function getMembraneStats(run) {
     if (adapt.damageMult) contactDps *= adapt.damageMult;
     if (adapt.radiusMult) radius *= adapt.radiusMult;
   }
+  // ADDENDUM §2 — item: Enzim Litik contact ×2; Membran Cadangan = medan
+  // kedua 0,5× radius & 50% DPS ≈ total contact ×1,5 (+ visual cincin kedua)
+  const ibuf = run.itemBuffs || {};
+  const itime = run.time || 0;
+  if (itime < (ibuf.enzimUntil || 0)) contactDps *= 2;
+  if (itime < (ibuf.cadanganUntil || 0)) contactDps *= 1.5;
 
   const heroMem = run.heroDef?.membrane || {};
   const pulseCooldown = mem.basePulseCooldown * fx.pulseCooldownMult;
@@ -244,7 +250,8 @@ export function getMembraneStats(run) {
   const pulseDamage = (mem.shape === 'pulse_only'
     ? mem.baseContactDps * scale * (cfg.pulseDamageMult || 4)
     : contactDps * (cfg.pulseDamageMult || 4));
-  const engulfThreshold = fx.engulfThreshold || (run.heroDef?.membrane?.engulfThreshold) || cfg.engulfThreshold || 0.15;
+  let engulfThreshold = fx.engulfThreshold || (run.heroDef?.membrane?.engulfThreshold) || cfg.engulfThreshold || 0.15;
+  if (itime < (ibuf.enzimUntil || 0)) engulfThreshold = 0.30; // ADDENDUM §2: Enzim Litik
   const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.07) * fx.engulfHealMult;
 
   // Simpan untuk trigger mutasi musuh + HUD
@@ -717,7 +724,7 @@ export function dealMembraneDamage(game, enemy, amount, opts = {}) {
   } else {
     // Cek engulf threshold setiap tick (otomatis!)
     const st = getMembraneStats(run);
-    const thresh = st.engulfThreshold;
+    const thresh = effEngulfThresh(run, st, enemy);
     if (!enemy.isBoss && enemy.hp / enemy.maxHP < thresh) {
       tryEngulf(game, enemy);
     }
@@ -730,6 +737,16 @@ export function dealMembraneDamage(game, enemy, amount, opts = {}) {
 // ---------------------------------------------------------------------
 
 /**
+ * Threshold engulf efektif per musuh (ADDENDUM §2: Opsonin → 35%).
+ * Trait kebal_membran (5%) tetap menang atas segalanya.
+ */
+function effEngulfThresh(run, st, enemy) {
+  if (enemy.mutTrait === 'kebal_membran' || enemy.mutActive === 'kebal_membran') return 0.05;
+  if ((enemy.opsoninUntil || 0) > (run.time || 0)) return Math.max(st.engulfThreshold, 0.35);
+  return st.engulfThreshold;
+}
+
+/**
  * Coba engulf satu musuh. Boss tidak pernah bisa di-engulf.
  * @returns {boolean} true bila terserap
  */
@@ -739,10 +756,8 @@ export function tryEngulf(game, enemy, opts = {}) {
   const player = run.player;
   if (!enemy.alive || enemy.isBoss) return false;
   if (!player.alive) return false;
-  // Trait kebal_membran: threshold 5%
   const st = getMembraneStats(run);
-  let thresh = st.engulfThreshold;
-  if (enemy.mutTrait === 'kebal_membran' || enemy.mutActive === 'kebal_membran') thresh = 0.05;
+  const thresh = effEngulfThresh(run, st, enemy);
   if (!opts.force && enemy.hp / enemy.maxHP >= thresh) return false;
   // T-Bolt insta-kill <25%, Nyx insta-kill <30% (di sini sebagai engulf paksa)
   // (threshold efektif sudah dinaikkan di hero membrane.engulfThreshold)
@@ -767,6 +782,7 @@ export function tryEngulf(game, enemy, opts = {}) {
   let bio = membraneCfg().bioPointPerEngulf || 1;
   if (mem.engulfSpecial === 'heal_bonus') bio = Math.ceil(bio * 1.3);
   if (mem.engulfSpecial === 'parasite_hunter' && enemy.def?.id === 'parasit') bio += 2;
+  if (run.itemBuffs && run.itemBuffs.katalis) bio *= 2; // ADDENDUM §2: Katalis Mitosis (2× final)
   run.bioPoints = (run.bioPoints || 0) + bio;
 
   // Heal
@@ -929,11 +945,18 @@ export function tryPulse(game, opts = {}) {
     return true;
   }
 
-  if (mem.pulseCdLeft > 0) return false;
+  if (mem.pulseCdLeft > 0 && !opts.ignoreCd) return false;
   if (mem.livingDownT > 0) return false;
 
   const dmgMult = opts.dmgMult ?? 1;
-  mem.pulseCdLeft = st.pulseCooldown;
+  // ADDENDUM §2 — Ledakan ATP: pulse instan GRATIS (CD tak diubah) + 3 berikut −60%
+  if (!opts.ignoreCd) {
+    mem.pulseCdLeft = st.pulseCooldown;
+    if (run.itemBuffs && run.itemBuffs.atpPulsesLeft > 0) {
+      run.itemBuffs.atpPulsesLeft -= 1;
+      mem.pulseCdLeft *= 0.4;
+    }
+  }
   mem.pulseAnimT = 0;
   mem.pulseDidHit = false;
   mem.lastPulseWasAuto = !!opts.auto;
@@ -999,6 +1022,7 @@ export function pulseHit(game, opts = {}) {
     // Damage pusat ×2 untuk implosi
     const centerK = 1 - Math.min(1, dist / R);
     let dmg = baseDmg * (pull ? (1 + (centerMult - 1) * centerK) : 1);
+    if ((e.opsoninUntil || 0) > (run.time || 0)) dmg *= 1.3; // ADDENDUM §2: Opsonin
     // Mastia pulse_only: damage dari baseContactDps tetap (contactDps=0!) → pakai fallback
     if (mem.shape === 'pulse_only' && !(dmg > 0)) {
       const scale = st.scale || 1;
@@ -1221,6 +1245,7 @@ function updateSquadMembranes(game, dt) {
   const sq = (cfg && cfg.squad) || { radiusMult: 0.5, dpsMult: 0.3 };
   let buff = 1;
   if (run.membrane.heliaBuffT > 0) buff = 1.2;
+  if (run.itemBuffs && (run.time || 0) < (run.itemBuffs.sinapsisUntil || 0)) buff *= 2; // ADDENDUM §2: Sinapsis
   const r = st.radius * (sq.radiusMult || 0.5);
   const dps = st.contactDps * (sq.dpsMult || 0.3) * buff;
   if (dps <= 0 || r <= 0) return;

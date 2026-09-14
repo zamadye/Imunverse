@@ -40,6 +40,8 @@ import {
   pulseView,
 } from '../systems/membrane-system.js';
 import { rollMutationChoices, applyMutation, isMutationId, mutationDef } from '../systems/mutation-system.js';
+import { onRunComplete as welcomeBoxOnRunComplete } from '../systems/welcome-box-system.js'; // ADDENDUM §1
+import { applyStartConsumables, updateItemBuffs, absorbMukus, isMukusActive, onPlayerDamaged } from '../systems/item-buffs.js'; // ADDENDUM §2
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
   maybeApplyTrait as enemyMutMaybeApply, updateEnemyMutations,
@@ -103,7 +105,6 @@ export const game = {
 
   /** @type {object|null} state run aktif */
   run: null,
-  serumActive: false,
   runFlags: {},
 
   init({ canvas, input }) {
@@ -129,37 +130,10 @@ export const game = {
     meta.selectedHero = heroId;
     writeSave(meta); // simpan pilihan hero
 
-    // Consumable "Serum Awal" dipakai otomatis di awal run
-    this.serumActive = false;
-    if ((meta.consumables.serum_awal || 0) > 0) {
-      meta.consumables.serum_awal -= 1;
-      this.serumActive = true;
-      writeSave(meta);
-      emit('toast', { message: 'Serum Awal aktif: +25% damage run ini!', kind: 'gold' });
-    }
-    // ITEM VARIASI (dipakai otomatis bila dimiliki):
+    // ADDENDUM §2: consumable dipakai otomatis di AKHIR startRun
+    // (applyStartConsumables — butuh player & membran yang sudah jadi).
     this.runFlags = {};
     meta.consumables = meta.consumables || {};
-    if ((meta.consumables.vaksin_awal || 0) > 0) {
-      meta.consumables.vaksin_awal -= 1;
-      this.runFlags.vaksin = true;
-      emit('toast', { message: 'Vaksin Awal: +30 HP run ini!', kind: 'gold' });
-    }
-    if ((meta.consumables.kopi_limfa || 0) > 0) {
-      meta.consumables.kopi_limfa -= 1;
-      this.runFlags.kopi = true;
-      emit('toast', { message: 'Kopi Limfa: +12% kecepatan!', kind: 'gold' });
-    }
-    if ((meta.consumables.pelindung_lendir || 0) > 0) {
-      meta.consumables.pelindung_lendir -= 1;
-      this.runFlags.pelindung = true;
-      emit('toast', { message: 'Pelindung Lendir: 1 serangan terserap!', kind: 'gold' });
-    }
-    if ((meta.consumables.koin_ganda || 0) > 0) {
-      meta.consumables.koin_ganda -= 1;
-      this.runFlags.ganda = true;
-      emit('toast', { message: 'Sinyal Ganda: +50% antibodi run ini!', kind: 'gold' });
-    }
 
     const startX = 0;
     const startY = 0;
@@ -324,15 +298,6 @@ export const game = {
         unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_UPGRADE_LEVEL], // [3, 5, 10, 15]
       };
     }
-    // Item variasi: vaksin (+30 HP) & kopi (+12% speed)
-    const flags = this.runFlags || {};
-    if (flags.vaksin) {
-      player.maxHP += 30;
-      player.hp = Math.min(player.maxHP, player.hp + 30);
-    }
-    if (flags.kopi) {
-      player.stats.speed *= 1.12;
-    }
 
     // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
     for (let gi = 0; gi < 2; gi++) {
@@ -353,12 +318,13 @@ export const game = {
     setLevelUpOpen(false);
     resetNarrativeRun(); // R2: bark boss boleh tampil lagi di run baru
     initAntigenRun(this.run); // R3 Modul A: memori antigen reset tiap run
+    try { applyStartConsumables(this); } catch (err) { console.warn('[item] start:', err); }
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
   },
 
   // =====================================================================
-  // STATISTIK PLAYER (base JSON × squad permanen × upgrade run × serum)
+  // STATISTIK PLAYER (base JSON × squad permanen × upgrade run)
   // =====================================================================
   /**
    * Kalikan stat dasar dengan multiplier META: tahap evolusi hero (damage/HP)
@@ -449,7 +415,6 @@ export const game = {
     const heroCfg = getData().upgrades.heroUpgrade;
     const heroLvl = (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0;
     const up = runUpgrades;
-    const serum = this.serumActive ? 1.25 : 1;
 
     // BUFF TEMPUR: nutrisi (zinc, zat besi, probiotik, serat) — nyata di statistik
     const tb = (this.run && this.run.tempBuffs) || null;
@@ -467,7 +432,7 @@ export const game = {
     // tidak boleh bocor; pakai this.run hanya bila upgrades-nya objek yang sama.
     const evoB = evolutionBoosts(this.run && this.run.upgrades === up ? this.run : null);
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * serum * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + eff('damage') * 0.15) * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage * evoB.damageMult;
     const cooldown = base.attackCooldown / ((1 + eff('attackSpeed') * 0.12) * squad.attackSpeed) * buffCooldown * evoB.cooldownMult;
     // PHAGOS: Treg memperlambat SEMUA termasuk dirinya sendiri (-10%)
     const tregSlow = heroDef.id === 'treg' ? 0.9 : 1;
@@ -816,6 +781,7 @@ export const game = {
     // PHAGOS Tahap 5 — MEDAN MEMBRAN vs musuh (kontak tick + engulf).
     // Proyektil di atas hanya untuk antibodi Bella/Eos + skill (sub-sistem).
     try { updateMembrane(this, dt); } catch (err) { console.warn('[phagos] updateMembrane:', err); }
+    try { updateItemBuffs(this); } catch { /* abaikan */ } // ADDENDUM §2: kedaluwarsa buff
 
     // 7. Separation antar musuh (anti menumpuk)
     run.collision.separateEnemies(run.enemies);
@@ -1304,6 +1270,7 @@ export const game = {
     const lunge = getCombat().contactAttack.lunge;
     enemy.vx += dirX * lunge;
     enemy.vy += dirY * lunge;
+    if (isMukusActive(this.run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
     this.damagePlayer(enemy.damage);
   },
 
@@ -1317,6 +1284,7 @@ export const game = {
     const dy = player.y - enemy.y;
     const rr = cfg.radius + player.radius;
     if (dx * dx + dy * dy < rr * rr) {
+      if (isMukusActive(run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
       this.damagePlayer(cfg.damage);
     }
   },
@@ -1325,13 +1293,16 @@ export const game = {
   damagePlayer(amount) {
     const run = this.run;
     const player = run.player;
-    // PELINDUNG LENDIR (item): serap serangan pertama
-    if (this.runFlags && this.runFlags.pelindung) {
-      this.runFlags.pelindung = false;
-      run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
-      run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
-      audio.hit();
-      return;
+    // ADDENDUM §2 — LAPISAN MUKUS (item): serap dari pool 25% max HP
+    if (isMukusActive(run)) {
+      const before = amount;
+      amount = absorbMukus(run, amount);
+      if (amount < before) {
+        run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
+        run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
+        audio.hit();
+      }
+      if (amount <= 0) return;
     }
     // PHAGOS: membran hidup / immunity / armor Mastia / adaptif spora
     try {
@@ -1367,6 +1338,7 @@ export const game = {
     player.squash = 0.28; // JUICE squash saat terkena hit
     passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
     try { membraneOnPlayerHit(this, amount); } catch { /* abaikan */ } // PHAGOS: reflektor cermin
+    try { onPlayerDamaged(this, amount); } catch { /* abaikan */ } // ADDENDUM §2: serum/cadangan/thorns
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -1647,6 +1619,12 @@ export const game = {
     return tryPulse(this, {});
   },
 
+  /** ADDENDUM §2 — Pulse paksa abaikan cooldown (Ledakan ATP). */
+  triggerPulseForce() {
+    if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
+    return tryPulse(this, { ignoreCd: true });
+  },
+
   /** Kompat lama: SERANG manual → kini memicu PULSE. */
   triggerAttack() {
     return this.triggerPulse();
@@ -1850,6 +1828,13 @@ export const game = {
 
     if (enemy.isBoss) {
       run.bossKills += 1;
+      // ADDENDUM §2.2 — boss bisa menjatuhkan Marker Opsonin (25%)
+      if (Math.random() < 0.25 && STATE.meta) {
+        STATE.meta.consumables = STATE.meta.consumables || {};
+        STATE.meta.consumables.opsonin = (STATE.meta.consumables.opsonin || 0) + 1;
+        try { writeSave(STATE.meta); } catch { /* abaikan */ }
+        emit('toast', { message: 'Boss menjatuhkan Marker Opsonin!', kind: 'gold' });
+      }
       run.boss = null;
       run.camera.addShake(0.65);
       audio.bossDie();
@@ -2034,7 +2019,7 @@ export const game = {
 
     const meta = STATE.meta;
     const bonus = computeRunEndBonus(run);
-    const doubleMult = (this.runFlags && this.runFlags.ganda) ? 1.3 : 1; // Fase 18: cap premium 30%
+    const doubleMult = (run.itemBuffs && run.itemBuffs.katalis) ? 1.5 : 1; // ADDENDUM §2: Katalis Mitosis
     // Fase 12 (spek pemilik): bonus akhir run floor(wave×8 + kills×0.5 + boss×50)
     // Fase 18: × rewardMult band — early 1.5× (reward besar), late 1.3×
     const endBand = getProgressionBand(run.spawnSys ? run.spawnSys.wave : 1);
@@ -2058,6 +2043,7 @@ export const game = {
     meta.stats.bestSurvivalTime = Math.max(meta.stats.bestSurvivalTime, Math.floor(run.time));
     meta.stats.totalSurviveSeconds += Math.floor(run.time);
     meta.stats.totalRuns += 1;
+    try { welcomeBoxOnRunComplete(meta); } catch { /* kapsul opsional */ }
     meta.stats.totalNutrients += run.nutrientsCollected;
     meta.stats.totalXP += Math.floor(run.xpGained);
     // Bagian evolusi yang dikumpulkan selama run → inventory meta
@@ -2427,6 +2413,20 @@ export const game = {
           ctx.beginPath();
           ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.15, 0, Math.PI * 2);
           ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+        // ADDENDUM §2 — Opsonin: cincin emas putus-putus di musuh bertanda
+        if ((e.opsoninUntil || 0) > (this.run.time || 0)) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = '#ffd166';
+          ctx.globalAlpha = 0.9;
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.55, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
           ctx.globalAlpha = 1;
           ctx.restore();
         }
@@ -2862,6 +2862,20 @@ export const game = {
       const invisible = mem.shape === 'invisible';
       if (invisible) alpha *= 0.25; // Nyx: nyaris tak terlihat (tetap ada petunjuk samar)
       this.drawMembraneShape(ctx, ground, player, mem, visR, fieldColor, alpha, time, { pulsing, peak, has, fx, st });
+      // ADDENDUM §2 — Membran Cadangan: cincin kedua 0,5× saat aktif
+      if (this.run && this.run.itemBuffs && (this.run.time || 0) < (this.run.itemBuffs.cadanganUntil || 0)) {
+        ground(player.x, player.y);
+        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(time * 6);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 6]);
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, visR * 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
       // Dual ring: ring luar kedua
       if (fx.dualRing) {
         const outerR = st.radius * fx.outerRadiusMult * idleOsc;

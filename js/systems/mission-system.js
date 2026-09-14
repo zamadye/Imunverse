@@ -89,6 +89,11 @@ export function claimQuest(meta, id) {
   const state = ensureQuestPeriod(meta);
   state.claimed[id] = true;
   addCurrency(meta, item.def.reward);
+  // ADDENDUM §2.2: quest boleh memberi item consumable (mis. Sinapsis mingguan)
+  if (item.def.item && item.def.item.id) {
+    meta.consumables = meta.consumables || {};
+    meta.consumables[item.def.item.id] = (meta.consumables[item.def.item.id] || 0) + (item.def.item.n || 1);
+  }
   writeSave(meta);
   return item.def.reward;
 }

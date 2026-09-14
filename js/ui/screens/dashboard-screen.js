@@ -29,6 +29,7 @@ import { getSession } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
 import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager } from '../screen-manager.js';
+import { isCapsulePending, isCapsuleSnoozed } from '../../systems/welcome-box-system.js'; // ADDENDUM §1
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
@@ -447,6 +448,13 @@ function renderArenaCard(meta) {
 }
 
 export function show() {
+  // ADDENDUM §1: kapsul pending & tak ditunda → alihkan otomatis (sekali per sesi)
+  try {
+    if (isCapsulePending(STATE.meta) && !isCapsuleSnoozed()) {
+      screenManager.show('capsule', { onLater: () => screenManager.show('dashboard') });
+      return;
+    }
+  } catch { /* abaikan */ }
   showHeroNotice(); // Fase 17: perayaan "HERO BARU!" bila ada yang baru terbuka
   if (dashWasHidden) {
     // Fase 15: cegah auto-scroll browser memotong banner saat layar dibuka

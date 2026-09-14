@@ -49,6 +49,7 @@ export function createDefaultMeta() {
     allyLevel: 0,    // level pasukan (damage & gesit)
     coachDone: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
+    guestUid: null, // ADDENDUM §1.5/§3.2: UID tamu utk link referral/share (akun boleh belum ada)
     cinematicsSeen: {},
     // R3 (Narrative-Cinematic): penanda momen "first-time experience" (Task 4)
     // — masing-masing diputar SEKALI SEJAK PERNAH (VO + presenter, non-blocking)
@@ -71,7 +72,10 @@ export function createDefaultMeta() {
       sq_range: 0,
       sq_nutrition: 0,
     },
-    consumables: { serum_awal: 0 },
+    consumables: {
+      serum_awal: 0, vaksin_awal: 0, kopi_limfa: 0, pelindung_lendir: 0, koin_ganda: 0,
+      opsonin: 0, atp_surge: 0, membran_cadangan: 0, toksin_balik: 0, sinapsis: 0,
+    },
     missionsClaimed: [],
     questState: { periodKey: null, accepted: {}, claimed: {}, baseline: {} },
     globalUpgrades: {},   // Fase 17: upgrade permanen global (Imun Coin, semua hero)

@@ -65,7 +65,7 @@ function rewardLabel(rw) {
   switch (rw.type) {
     case 'currency': return `+${rw.n} antibodi`;
     case 'imun': return `+${rw.n} Imun`;
-    case 'consumable': return `${rw.n}× ${rw.id.replace(/_/g, ' ')}`;
+    case 'consumable': return `${rw.n}× ${consumableName(rw.id)}`;
     case 'part': return `+${rw.n} ${rw.id.replace(/_/g, ' ')}`;
     default: return cosmeticName(rw.id) || rw.id;
   }
@@ -107,6 +107,16 @@ export function claimReward(meta, track, lv) {
   return { ok: true, reward: rw, label: granted };
 }
 
+/** Nama display consumable dari data shop (ADDENDUM §2: nama baru). */
+function consumableName(id) {
+  try {
+    const items = getData().upgrades.shopItems || [];
+    const def = items.find((i) => i.id === id);
+    if (def && def.name) return def.name;
+  } catch { /* abaikan */ }
+  return id.replace(/_/g, ' ');
+}
+
 /** Terapkan isi reward ke meta. @returns {string} label hasil. */
 export function grantReward(meta, rw) {
   switch (rw.type) {
@@ -118,7 +128,7 @@ export function grantReward(meta, rw) {
       return `+${rw.n} Imun Coin`;
     case 'consumable':
       meta.consumables[rw.id] = (meta.consumables[rw.id] || 0) + rw.n;
-      return `${rw.n}× ${rw.id.replace(/_/g, ' ')}`;
+      return `${rw.n}× ${consumableName(rw.id)}`;
     case 'part':
       meta.evoParts[rw.id] = (meta.evoParts[rw.id] || 0) + rw.n;
       return `+${rw.n} ${rw.id.replace(/_/g, ' ')}`;

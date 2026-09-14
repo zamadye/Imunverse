@@ -57,6 +57,7 @@ import * as bosschestScreen from './ui/screens/bosschest-screen.js';
 import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
+import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
 import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
@@ -475,6 +476,7 @@ async function boot() {
   screenManager.registerScreen('rank', rankScreen);
   screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
+  screenManager.registerScreen('capsule', capsuleScreen); // ADDENDUM §1: Kapsul Membran
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat

@@ -36,6 +36,7 @@ const store = {
   membrane: null,    // data/membrane.json (PHAGOS: properti medan membran)
   mutations: null,   // data/mutations.json (PHAGOS: 18 mutasi bentuk hero)
   enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
+  welcomeBox: null,  // data/welcome-box.json (ADDENDUM §1: Kapsul Membran)
 };
 
 import { BUILD } from './version.js';
@@ -78,6 +79,7 @@ export async function loadAllData() {
     membrane: 'data/membrane.json',
     mutations: 'data/mutations.json',
     enemyMutations: 'data/enemy-mutations.json',
+    welcomeBox: 'data/welcome-box.json',
   };
 
   const entries = await Promise.all(
@@ -274,6 +276,11 @@ export function getMutations() {
 /** Trait adaptasi patogen (data/enemy-mutations.json). */
 export function getEnemyMutations() {
   return getData().enemyMutations;
+}
+
+/** Kapsul Membran (data/welcome-box.json). */
+export function getWelcomeBox() {
+  return getData().welcomeBox;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

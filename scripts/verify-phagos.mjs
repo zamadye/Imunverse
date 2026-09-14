@@ -244,5 +244,73 @@ localStorage.setItem('imunverse.save.v1', JSON.stringify({ ...createDefaultMeta(
 const migrated = loadSave();
 log('save-migrate', !!migrated && migrated.currency === 777 && !!localStorage.getItem('phagos.save.v1'));
 
+// ---------- 7. Kapsul Membran (ADDENDUM §1) ----------
+const wb = await mod('js/systems/welcome-box-system.js');
+const m2 = createDefaultMeta();
+m2.stats.totalRuns = 1;
+log('capsule-pending', wb.onRunComplete(m2) === true && wb.isCapsulePending(m2) === true);
+const got = wb.rollCapsule(m2);
+log('capsule-roll', !!got && m2.unlockedHeroes.includes(got.heroId), `hero=${got && got.heroId} tier=${got && got.tier} dup=${got && got.duplicate}`);
+log('capsule-once', wb.rollCapsule(m2) === null && wb.isCapsulePending(m2) === false);
+const m3 = createDefaultMeta(); m3.stats.totalRuns = 1; wb.onRunComplete(m3);
+m3.unlockedHeroes = ['neutrophil', 'eosinophil', 'tcd4', 'dendritic', 'bcell', 'basophil'];
+const c0 = m3.currency; const g3 = wb.rollCapsule(m3);
+log('capsule-duplicate', g3.duplicate === true && m3.currency === c0 + 2000, `comp=${g3.compensation}`);
+
+// Distribusi pool ≈ bobot (300 roll, toleransi longgar)
+const counts = {};
+for (let i = 0; i < 300; i++) {
+  const m = createDefaultMeta(); m.stats.totalRuns = 1; wb.onRunComplete(m);
+  const r = wb.rollCapsule(m);
+  counts[r.heroId] = (counts[r.heroId] || 0) + 1;
+}
+const neut = counts.neutrophil || 0, baso = counts.basophil || 0;
+log('capsule-weights', neut >= 60 && neut <= 125 && baso <= 25, `neutrophil=${neut}/300 basophil=${baso}/300`);
+
+// ---------- 8. Consumable membran (ADDENDUM §2) ----------
+const itemBuffs = await mod('js/systems/item-buffs.js');
+const memMod = await mod('js/systems/membrane-system.js');
+// Baseline tanpa item
+STATE.meta.consumables = createDefaultMeta().consumables;
+game.startRun('macrophage');
+const baseDps = memMod.getMembraneStats(game.run).contactDps;
+const baseSpeed = game.run.player.stats.speed;
+// Run penuh dengan semua item
+STATE.meta.consumables = {
+  serum_awal: 1, vaksin_awal: 1, kopi_limfa: 1, pelindung_lendir: 1, koin_ganda: 1,
+  opsonin: 1, atp_surge: 1, membran_cadangan: 1, toksin_balik: 1, sinapsis: 1,
+};
+game.startRun('macrophage');
+const run2 = game.run, ib = run2.itemBuffs;
+log('item-consumed', ['vaksin_awal', 'kopi_limfa', 'pelindung_lendir', 'koin_ganda', 'opsonin', 'atp_surge', 'toksin_balik', 'sinapsis'].every((k) => STATE.meta.consumables[k] === 0));
+log('item-pending', ib.serumPending === true && ib.cadanganPending === true && STATE.meta.consumables.serum_awal === 1);
+log('item-enzim', memMod.getMembraneStats(run2).contactDps === baseDps * 2, `dps=${baseDps}→${memMod.getMembraneStats(run2).contactDps}`);
+log('item-sitokin', run2.player.stats.speed === baseSpeed * 1.4, `spd=${baseSpeed}→${run2.player.stats.speed}`);
+log('item-mukus', ib.mukusPool === Math.round(run2.player.maxHP * 0.25), `pool=${ib.mukusPool}`);
+log('item-katalis', ib.katalis === true);
+log('item-opsonin', run2.enemies.length > 0 && run2.enemies.every((e) => (e.opsoninUntil || 0) > 0), `marked=${run2.enemies.filter((e) => e.opsoninUntil > 0).length}`);
+log('item-atp', ib.atpPulsesLeft === 3);
+log('item-thorns-sinapsis', itemBuffs.buffActive(run2, 'toksin') && itemBuffs.buffActive(run2, 'sinapsis'));
+// ATP: pulse paksa saat CD penuh + diskon 3 berikut
+run2.membrane.pulseCdLeft = 2;
+log('item-atp-force', game.triggerPulseForce() === true && run2.membrane.pulseCdLeft === 2 && ib.atpPulsesLeft === 3);
+run2.membrane.pulseCdLeft = 0;
+game.triggerPulse();
+log('item-atp-discount', Math.abs(run2.membrane.pulseCdLeft - 0.8) < 0.01 && ib.atpPulsesLeft === 2, `cd=${run2.membrane.pulseCdLeft}`);
+// Opsonin: musuh 30% HP bisa ditelan (threshold 35%)
+game.spawnEnemy('bakteri', false);
+const oe = run2.enemies[run2.enemies.length - 1];
+oe.hp = oe.maxHP * 0.3; oe.opsoninUntil = (run2.time || 0) + 8;
+const bioBefore = run2.bioPoints;
+log('item-opsonin-engulf', memMod.tryEngulf(game, oe) === true && run2.bioPoints === bioBefore + 4, `bio=${bioBefore}→${run2.bioPoints}`);
+// Serum: picu saat HP<70% (kuras Mukus dulu agar damage masuk)
+run2.itemBuffs.mukusPool = 0;
+run2.player.iframes = 0; run2.player.hp = run2.player.maxHP * 0.75;
+game.damagePlayer(run2.player.maxHP * 0.1); // → 65%
+log('item-serum', STATE.meta.consumables.serum_awal === 0 && run2.player.hp > run2.player.maxHP * 0.9, `hp=${Math.round(run2.player.hp)}/${run2.player.maxHP}`);
+// Sitokin kedaluwarsa → speed kembali
+for (let i = 0; i < 11 * 60; i++) game.update(1 / 60);
+log('item-sitokin-expire', Math.abs(run2.player.stats.speed - baseSpeed) < 0.001 && !itemBuffs.buffActive(run2, 'sitokin'));
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);
