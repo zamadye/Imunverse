@@ -385,8 +385,6 @@ function wireUiBridge() {
     bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
   });
 
-  // E1 poin 9: AMARA muncul saat pemain MENDAPAT HERO BARU — menjelaskan
-  // spesifikasi (role + skill) dengan bahasa awam, karakter penuh bergestur.
   on('heroUnlocked', ({ heroId }) => {
     const h = getData().heroes.heroes.find((x) => x.id === heroId);
     if (!h) return;
@@ -394,9 +392,7 @@ function wireUiBridge() {
       const sd = getData().skills.skills.find((x) => x.id === sid);
       return sd ? sd.name : sid;
     }).join(', ');
-    setTimeout(() => showPresenter('amara',
-      `Selamat! ${h.name} — ${h.title} — bergabung dengan pasukanmu. Perannya ${h.role}. Jurus andalannya: ${skillNames}. Coba dia di run berikutnya!`,
-      { duration: 9 }), 900);
+    emit('toast', { msg: `${h.name} bergabung! Peran: ${h.role}. Jurus: ${skillNames}.`, color: 'var(--teal)' });
   });
 
   on('bosschest', (payload) => screenManager.show('bosschest', payload));

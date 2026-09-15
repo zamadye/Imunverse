@@ -387,3 +387,67 @@ body.in-run .toast {
   #wave-darkness.on,
   #boss-entrance.on { animation: none !important; opacity: 1; }
 }
+
+/* ---- Background images ---- */
+
+/* Loading screen — teal ocean / hero peeking artwork */
+#screen-loading {
+  background-image: url('../assets/backgrounds/bg_loading.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+#screen-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 17, 26, 0.62);
+  pointer-events: none;
+  z-index: 0;
+}
+#screen-loading .load-box {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dashboard — group hero action art */
+#screen-dashboard {
+  background-image: url('../assets/backgrounds/bg_dashboard.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+#screen-dashboard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(4, 17, 26, 0.35) 0%,
+    rgba(4, 17, 26, 0.58) 45%,
+    rgba(4, 17, 26, 0.90) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+#screen-dashboard .topbar,
+#screen-dashboard .dash-body {
+  position: relative;
+  z-index: 1;
+}
+#screen-dashboard .dock,
+#screen-dashboard .secondary-dock {
+  position: relative;
+  z-index: 2;
+}
+
+/* Override hero-stage gradient — show BG image through semi-transparent stage */
+#screen-dashboard .hero-stage,
+#screen-dashboard .hero-fixed {
+  background:
+    radial-gradient(circle at 50% 60%, rgba(0, 229, 196, 0.12), transparent 55%),
+    rgba(4, 17, 26, 0.28) !important;
+  border: 1px solid rgba(0, 229, 196, 0.15);
+  box-shadow: inset 0 0 60px rgba(0, 229, 196, 0.06), 0 0 40px rgba(4, 17, 26, 0.4);
+}
