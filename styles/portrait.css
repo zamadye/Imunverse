@@ -15,6 +15,7 @@
    Knob 34px translate(-50%) menjulur 17px di luar rel pada 0%/100%.
    Beri margin rel agar knob tak terpotong tepi kartu. */
 #screen-upgrade .upg-slider { margin-left: 17px; margin-right: 17px; }
+#screen-herodetail .upg-slider { margin-left: 15px; margin-right: 15px; }
 
 @media (orientation: portrait) {
 
@@ -188,4 +189,33 @@
      (label sudah menjelaskan; kunci 30px menutup 2 huruf terakhir). */
   #screen-shop .shop-card .s-owned { font-size: 9.5px; }
   #screen-shop .shop-card .s-owned:not(.has) + img.lock-badge { display: none; }
+
+  /* ======== HERODETAIL: grid RoK lanskap → tumpuk vertikal ======== */
+  #screen-herodetail .hero-detail-body {
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen-herodetail .hd-rok {
+    display: flex; flex-direction: column; height: auto; gap: 10px;
+    align-items: stretch;
+  }
+  /* Rel koleksi: strip horizontal di atas (panah diputar). */
+  #screen-herodetail .hd-rok-rail {
+    flex-direction: row; align-self: stretch; justify-content: flex-start;
+    order: 0;
+  }
+  #screen-herodetail .hd-rok-rail-items {
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    max-height: none; max-width: 100%; padding: 2px 4px;
+  }
+  #screen-herodetail .hd-rok-arrow { transform: rotate(-90deg); }
+  #screen-herodetail .hd-rok-hero { width: 52px; height: 52px; }
+  /* Panggung: etalase kompak. */
+  #screen-herodetail .hd-rok-stage { order: 1; height: auto; }
+  #screen-herodetail .hd-rok-figure {
+    width: min(56vw, 230px); height: min(56vw, 230px);
+  }
+  /* Panel info: selebar layar, ikut scroll halaman. */
+  #screen-herodetail .hd-rok-panel {
+    order: 2; overflow: visible; max-height: none; align-self: stretch;
+  }
 }
