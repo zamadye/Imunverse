@@ -11,6 +11,10 @@
    oleh bp-bar dashboard → "Lv 1" liar di tepi kiri. Netralkan di dashboard. */
 #screen-dashboard .bp-bar { position: relative; }
 #screen-dashboard .bp-bar .bp-lv { position: static; transform: none; }
+/* ---------- __fix GLOBAL: knob slider upgrade ----------
+   Knob 34px translate(-50%) menjulur 17px di luar rel pada 0%/100%.
+   Beri margin rel agar knob tak terpotong tepi kartu. */
+#screen-upgrade .upg-slider { margin-left: 17px; margin-right: 17px; }
 
 @media (orientation: portrait) {
 
