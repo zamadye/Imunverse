@@ -92,7 +92,7 @@ import { drawNestHint,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
-import { drawSprite, makoHeroPath, makoMutationPath } from '../render/sprite-loader.js';
+import { drawSprite, makoHeroPath, makoMovementPath, makoMutationPath } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { createMakoMotionState, getMakoMotionStyle, updateMakoMotion } from '../render/mako-animation.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
@@ -2567,9 +2567,14 @@ applyChapterTier(enemy, run) {
           let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
           const artState = makoMotion?.spriteState || (player.attackFlash > 0 ? 'attack' : 'idle');
           const evoStage = run.evoStage?.stage || 0;
-          const makoPath = makoHeroPath(player.heroDef.id, run.spawnSys?.wave || 1, artState, evoStage);
+          const movePath = makoMotion?.movementState
+            ? makoMovementPath(player.heroDef.id, run.spawnSys?.wave || 1, makoMotion.movementState, makoMotion.direction, evoStage)
+            : null;
+          const makoPath = movePath || makoHeroPath(player.heroDef.id, run.spawnSys?.wave || 1, artState, evoStage);
           if (makoPath) path = makoPath;
-          const flip = Math.cos(player.facing) < 0 ? -1 : 1;
+          const flip = makoMotion?.movementState
+            ? (makoMotion.directionMirror ? -1 : 1)
+            : (Math.cos(player.facing) < 0 ? -1 : 1);
           const tilt = makoMotion
             ? pSwingTilt * flip
             : (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * flip;

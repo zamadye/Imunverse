@@ -14,6 +14,22 @@
 
 ## Runtime state mapping
 
+Movement uses five authored source views for each wave/evolution stage:
+
+- `south` — S / front
+- `north` — N / back
+- `east` — E / right profile
+- `northeast` — NE / right three-quarter
+- `southeast` — SE / right three-quarter
+
+The renderer quantizes the continuous joystick/facing angle to the nearest
+45-degree octant. W, NW, and SW use a horizontal mirror of E, NE, and SE;
+movement itself remains continuous and is never snapped.
+
+Generated assets cover `walk` and `run` for all 5 stages and all 5 authored
+views: 50 directional PNGs. The animation layer still supplies procedural
+step compression and bobbing between rendered frames.
+
 | Blueprint state | Mako V2 runtime cue |
 |---|---|
 | Idle | Breathing scale, relaxed weight shift, subtle torso tilt |

@@ -17,6 +17,11 @@ if (manifest.direction !== 'v2_belly_devourer') fail(`direction salah: ${manifes
 if (manifest.stages?.length !== 5) fail(`stage count ${manifest.stages?.length} != 5`);
 if (manifest.mutations?.length !== 18) fail(`mutation count ${manifest.mutations?.length} != 18`);
 if (manifest.skins?.length !== 5) fail(`skin count ${manifest.skins?.length} != 5`);
+const movementDirections = ['south', 'north', 'east', 'northeast', 'southeast'];
+const movementStates = ['walk', 'run'];
+if (JSON.stringify(manifest.movementDirections) !== JSON.stringify(movementDirections)) fail('movement directions tidak sesuai 5-view contract');
+if (JSON.stringify(manifest.movementStates) !== JSON.stringify(movementStates)) fail('movement states tidak sesuai walk/run contract');
+if (manifest.movement?.length !== 25) fail(`movement view count ${manifest.movement?.length} != 25`);
 
 function checkPng(rel) {
   const full = path.join(ROOT, rel);
@@ -35,6 +40,12 @@ for (const stage of manifest.stages) {
 }
 ok('5 evolution stages × 3 states = 15 RGBA PNG');
 
+for (const view of manifest.movement) {
+  if (!movementDirections.includes(view.direction)) fail(`movement direction invalid: ${view.direction}`);
+  for (const state of movementStates) checkPng(view.states[state]);
+}
+ok('5 stages × 5 authored directions × walk/run = 50 RGBA PNG');
+
 for (const mutation of manifest.mutations) checkPng(mutation.path);
 ok('18 mutation overlays = 18 RGBA PNG');
 
@@ -50,5 +61,6 @@ console.log('MAKO_V2_ART_VERIFY', JSON.stringify({
   states: stateNames.length,
   mutations: manifest.mutations.length,
   skins: manifest.skins.length,
-  totalPng: manifest.stages.length * stateNames.length + manifest.mutations.length + manifest.skins.length,
+  movementViews: manifest.movement.length * movementStates.length,
+  totalPng: manifest.stages.length * stateNames.length + manifest.movement.length * movementStates.length + manifest.mutations.length + manifest.skins.length,
 }));

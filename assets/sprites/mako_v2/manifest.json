@@ -3,6 +3,17 @@
   "heroId": "macrophage",
   "heroName": "Mako",
   "direction": "v2_belly_devourer",
+  "movementDirections": [
+    "south",
+    "north",
+    "east",
+    "northeast",
+    "southeast"
+  ],
+  "movementStates": [
+    "walk",
+    "run"
+  ],
   "stages": [
     {
       "stage": 0,
@@ -52,6 +63,208 @@
         "idle": "assets/sprites/mako_v2/mako_stage4_idle.png",
         "attack": "assets/sprites/mako_v2/mako_stage4_attack.png",
         "upgrade": "assets/sprites/mako_v2/mako_stage4_upgrade.png"
+      }
+    }
+  ],
+  "movement": [
+    {
+      "stage": 0,
+      "direction": "south",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage0_south_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage0_south_run.png"
+      }
+    },
+    {
+      "stage": 0,
+      "direction": "north",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage0_north_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage0_north_run.png"
+      }
+    },
+    {
+      "stage": 0,
+      "direction": "east",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage0_east_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage0_east_run.png"
+      }
+    },
+    {
+      "stage": 0,
+      "direction": "northeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage0_northeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage0_northeast_run.png"
+      }
+    },
+    {
+      "stage": 0,
+      "direction": "southeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage0_southeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage0_southeast_run.png"
+      }
+    },
+    {
+      "stage": 1,
+      "direction": "south",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage1_south_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage1_south_run.png"
+      }
+    },
+    {
+      "stage": 1,
+      "direction": "north",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage1_north_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage1_north_run.png"
+      }
+    },
+    {
+      "stage": 1,
+      "direction": "east",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage1_east_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage1_east_run.png"
+      }
+    },
+    {
+      "stage": 1,
+      "direction": "northeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage1_northeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage1_northeast_run.png"
+      }
+    },
+    {
+      "stage": 1,
+      "direction": "southeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage1_southeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage1_southeast_run.png"
+      }
+    },
+    {
+      "stage": 2,
+      "direction": "south",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage2_south_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage2_south_run.png"
+      }
+    },
+    {
+      "stage": 2,
+      "direction": "north",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage2_north_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage2_north_run.png"
+      }
+    },
+    {
+      "stage": 2,
+      "direction": "east",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage2_east_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage2_east_run.png"
+      }
+    },
+    {
+      "stage": 2,
+      "direction": "northeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage2_northeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage2_northeast_run.png"
+      }
+    },
+    {
+      "stage": 2,
+      "direction": "southeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage2_southeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage2_southeast_run.png"
+      }
+    },
+    {
+      "stage": 3,
+      "direction": "south",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage3_south_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage3_south_run.png"
+      }
+    },
+    {
+      "stage": 3,
+      "direction": "north",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage3_north_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage3_north_run.png"
+      }
+    },
+    {
+      "stage": 3,
+      "direction": "east",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage3_east_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage3_east_run.png"
+      }
+    },
+    {
+      "stage": 3,
+      "direction": "northeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage3_northeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage3_northeast_run.png"
+      }
+    },
+    {
+      "stage": 3,
+      "direction": "southeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage3_southeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage3_southeast_run.png"
+      }
+    },
+    {
+      "stage": 4,
+      "direction": "south",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage4_south_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage4_south_run.png"
+      }
+    },
+    {
+      "stage": 4,
+      "direction": "north",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage4_north_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage4_north_run.png"
+      }
+    },
+    {
+      "stage": 4,
+      "direction": "east",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage4_east_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage4_east_run.png"
+      }
+    },
+    {
+      "stage": 4,
+      "direction": "northeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage4_northeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage4_northeast_run.png"
+      }
+    },
+    {
+      "stage": 4,
+      "direction": "southeast",
+      "states": {
+        "walk": "assets/sprites/mako_v2/directions/mako_stage4_southeast_walk.png",
+        "run": "assets/sprites/mako_v2/directions/mako_stage4_southeast_run.png"
       }
     }
   ],

@@ -12,6 +12,8 @@
  * - reactions: hit recoil, low-HP instability, spawn and victory/death pose
  */
 
+import { makoDirection8 } from './sprite-loader.js';
+
 const clamp = (n, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 const easeOut = (t) => 1 - (1 - clamp(t)) ** 3;
 const easeIn = (t) => clamp(t) ** 2;
@@ -92,6 +94,7 @@ export function getMakoMotionStyle(player, run, state, time) {
   const moving = !!player.moving || speed > 4;
   const phase = player.walkPhase || 0;
   const t = state?.age ?? time;
+  const direction = makoDirection8(player.facing);
 
   let scaleX = 1;
   let scaleY = 1;
@@ -100,6 +103,7 @@ export function getMakoMotionStyle(player, run, state, time) {
   let lunge = 0;
   let alpha = 1;
   let spriteState = 'idle';
+  let movementState = moving ? (speed01 >= 0.62 ? 'run' : 'walk') : null;
 
   if (moving) {
     // Heavy foot cadence: the torso compresses on each planted step and
@@ -124,6 +128,7 @@ export function getMakoMotionStyle(player, run, state, time) {
   const mem = run.membrane;
   const pulseT = mem?.pulseAnimT ?? -1;
   if (pulseT >= 0) {
+    movementState = null;
     const duration = 0.4;
     const p = clamp(pulseT / duration);
     const peak = mem?.pulsePeak ?? (p < 0.4 ? easeOut(p / 0.4) : 1 - easeIn((p - 0.4) / 0.6));
@@ -151,6 +156,7 @@ export function getMakoMotionStyle(player, run, state, time) {
       tilt += 0.055 * k;
     }
   } else if (state?.skillT > 0 && state.skillId) {
+    movementState = null;
     const skill = state.skillId;
     const total = skill === 'devour' ? 0.86 : 0.5;
     const p = clamp(1 - state.skillT / total);
@@ -197,6 +203,7 @@ export function getMakoMotionStyle(player, run, state, time) {
   }
 
   if (state?.spawnT > 0) {
+    movementState = null;
     const p = 1 - clamp(state.spawnT / 0.72);
     const k = easeOut(p);
     scaleX *= 0.82 + 0.18 * k;
@@ -206,6 +213,7 @@ export function getMakoMotionStyle(player, run, state, time) {
   }
 
   if (state?.deathAt && !player.alive) {
+    movementState = null;
     const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const p = clamp((now - state.deathAt) / 650);
     scaleX *= 1 + p * 0.1;
@@ -232,5 +240,8 @@ export function getMakoMotionStyle(player, run, state, time) {
     lunge,
     alpha: clamp(alpha),
     spriteState,
+    movementState,
+    direction: direction.source,
+    directionMirror: direction.mirror,
   };
 }

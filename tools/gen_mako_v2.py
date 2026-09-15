@@ -7,6 +7,7 @@ reference/import metadata; it does not change gameplay numbers or state.
 
 Outputs:
 - 5 Mako evolution stages × idle/attack/upgrade
+- 5 authored movement views × walk/run × 5 evolution stages (50 directional PNGs)
 - 18 mutation overlays (6 visual families × 3 tiers, mapped to existing IDs)
 - 5 skin preview sprites
 - assets/sprites/mako_v2/manifest.json
@@ -35,6 +36,8 @@ STAGES = [
     (4, 10, "apex_devourer"),
 ]
 STATES = ("idle", "attack", "upgrade")
+MOVE_STATES = ("walk", "run")
+DIRECTIONS = ("south", "north", "east", "northeast", "southeast")
 
 MUTATIONS = [
     "berduri", "lengket", "beracun", "elastis", "penyerap", "tipis",
@@ -85,8 +88,16 @@ def draw_smile(c: Canvas, cx: float, cy: float, s: float, open_mouth: bool):
         c.polyline(pts, (38, 43, 31), 1.8, 0.9)
 
 
-def draw_mako(stage: int, state: str, skin: str = "default_biological") -> Canvas:
+def draw_mako(
+    stage: int,
+    state: str,
+    skin: str = "default_biological",
+    direction: str = "south",
+    locomotion: str | None = None,
+) -> Canvas:
     c = Canvas(128)
+    direction = direction if direction in DIRECTIONS else "south"
+    locomotion = locomotion if locomotion in MOVE_STATES else None
     body_hex, accent_hex, maw_hex = SKINS[skin]
     body = hex_rgb(body_hex)
     accent = hex_rgb(accent_hex)
@@ -97,17 +108,36 @@ def draw_mako(stage: int, state: str, skin: str = "default_biological") -> Canva
     body_r = 28 + stage * 2
     if state == "attack":
         cx, cy = 60, 60
+    if locomotion == "run":
+        # Run pose is still readable as Mako: wider stride and a small lean.
+        cx, cy = cx + (2 if direction in ("east", "northeast", "southeast") else 0), cy - 1
+        body_r += 1
     if state == "upgrade":
         body_r += 1
         c.ring(64, 62, 39 + stage * 2, accent, 2.0, 0.55)
         c.ring(64, 62, 34 + stage * 1.4, (255, 247, 176), 1.0, 0.42)
 
-    # Sturdy legs behind the torso.
+    # Directional locomotion is authored in five views. West-facing views are
+    # mirrored at runtime, so only the right-facing source is generated.
+    back_view = direction == "north"
+    side_view = direction == "east"
+    three_quarter = direction in ("northeast", "southeast")
+    face_cx = cx + (7 if side_view else 4 if three_quarter else 0)
+    face_cy = cy - (19 if locomotion == "run" else 20)
+    maw_cx = cx + (9 if side_view else 5 if three_quarter else 0)
+    stride = 3 if locomotion == "run" else (1 if locomotion == "walk" else 0)
+
+    # Sturdy legs behind the torso. Run/walk use an asymmetric stride pose;
+    # the runtime bob/scale supplies the in-between motion.
     leg = shade(body, 0.72)
-    c.ellipse(51, 90, 8.0, 13.0, leg, 1)
-    c.ellipse(77, 90, 8.0, 13.0, leg, 1)
-    c.ellipse(50, 101, 10.0, 4.1, shade(body, 0.58), 1)
-    c.ellipse(78, 101, 10.0, 4.1, shade(body, 0.58), 1)
+    left_leg_x = 51 - stride
+    right_leg_x = 77 + stride
+    left_foot_x = 50 - stride * 1.5
+    right_foot_x = 78 + stride * 1.5
+    c.ellipse(left_leg_x, 90, 8.0, 13.0, leg, 1)
+    c.ellipse(right_leg_x, 90, 8.0, 13.0, leg, 1)
+    c.ellipse(left_foot_x, 101 + stride * 0.15, 10.0, 4.1, shade(body, 0.58), 1)
+    c.ellipse(right_foot_x, 101 - stride * 0.15, 10.0, 4.1, shade(body, 0.58), 1)
 
     # Thick arms, with the selected stage and attack pose changing reach.
     arm = shade(body, 0.86)
@@ -127,32 +157,51 @@ def draw_mako(stage: int, state: str, skin: str = "default_biological") -> Canva
 
     draw_membrane(c, cx, cy, body_r, body, stage, skin)
 
-    # Biological yellow seam, not armor.
+    # Biological yellow seam, not armor. The locomotion views intentionally
+    # change the read: south = face, north = dorsal back, east = profile,
+    # diagonal = three-quarter silhouette.
     c.ring(cx, cy + 2, body_r * 0.88, accent, 1.8, 0.5)
-    c.ellipse(cx, cy - 20, 19 + stage * 0.4, 14 + stage * 0.25, shade(body, 1.08), 1)
-    c.ring(cx, cy - 20, 17 + stage * 0.3, accent, 1.5, 0.72)
-    draw_eye(c, cx - 7, cy - 21, 12, iris)
-    draw_eye(c, cx + 7, cy - 21, 12, iris)
-    draw_smile(c, cx, cy - 14, 18, state == "attack")
+    if back_view:
+        c.ellipse(cx, cy - 19, 19 + stage * 0.4, 14 + stage * 0.25, shade(body, 0.94), 1)
+        c.ring(cx, cy - 19, 17 + stage * 0.3, shade(accent, 0.82), 1.5, 0.62)
+        c.ellipse(cx, cy + 1, 11 + stage, 16 + stage * 0.4, shade(maw, 0.68), 0.82)
+        c.ring(cx, cy + 1, 10 + stage, shade(accent, 0.8), 1.1, 0.5)
+    else:
+        c.ellipse(face_cx, face_cy, 19 + stage * 0.4, 14 + stage * 0.25, shade(body, 1.08), 1)
+        c.ring(face_cx, face_cy, 17 + stage * 0.3, accent, 1.5, 0.72)
+        if side_view:
+            draw_eye(c, face_cx + 4, face_cy + 1, 12, iris)
+            draw_smile(c, face_cx + 6, face_cy + 7, 15, state == "attack")
+        elif three_quarter:
+            draw_eye(c, face_cx - 5, face_cy - 1, 11, iris)
+            draw_eye(c, face_cx + 7, face_cy + 1, 9, iris)
+            draw_smile(c, face_cx + 3, face_cy + 7, 17, state == "attack")
+        else:
+            draw_eye(c, face_cx - 7, face_cy - 1, 12, iris)
+            draw_eye(c, face_cx + 7, face_cy - 1, 12, iris)
+            draw_smile(c, face_cx, face_cy + 7, 18, state == "attack")
 
     # Nucleus cue behind/inside the belly maw.
-    c.ellipse(cx, cy + 4, 10 + stage * 0.8, 7 + stage * 0.45, shade(maw, 0.72), 0.92)
-    c.ellipse(cx - 3, cy + 4, 5.5 + stage * 0.4, 6 + stage * 0.3, shade(maw, 0.48), 0.7)
-    c.ellipse(cx + 3, cy + 4, 5.5 + stage * 0.4, 6 + stage * 0.3, shade(maw, 0.48), 0.7)
+    if not back_view:
+        c.ellipse(maw_cx, cy + 4, 10 + stage * 0.8, 7 + stage * 0.45, shade(maw, 0.72), 0.92)
+        c.ellipse(maw_cx - 3, cy + 4, 5.5 + stage * 0.4, 6 + stage * 0.3, shade(maw, 0.48), 0.7)
+        c.ellipse(maw_cx + 3, cy + 4, 5.5 + stage * 0.4, 6 + stage * 0.3, shade(maw, 0.48), 0.7)
 
-    # Signature Belly Devourer maw: grows from a closed intake to a deep open phagosome.
+    # Signature Belly Devourer maw: frontal/three-quarter views expose it;
+    # the north view correctly hides it behind the dorsal membrane.
     maw_w = 15 + stage * 2.8
     maw_h = 7 + stage * 1.5
     if state == "attack":
         maw_w += 4
         maw_h += 3
-    c.ellipse(cx, cy + 16, maw_w + 2, maw_h + 2, accent, 0.95)
-    c.ellipse(cx, cy + 16, maw_w, maw_h, maw, 1)
-    c.ellipse(cx, cy + 17, maw_w * 0.67, maw_h * 0.6, shade(maw, 0.7), 0.9)
-    c.ring(cx, cy + 16, maw_w * 0.88, (255, 235, 120), 1.2, 0.45)
-    if state == "attack" or stage >= 2:
-        c.circle(cx - maw_w * 0.36, cy + 13, 2.0 + stage * 0.25, accent, 0.8)
-        c.circle(cx + maw_w * 0.3, cy + 18, 1.5 + stage * 0.2, (123, 225, 194), 0.75)
+    if not back_view:
+        c.ellipse(maw_cx, cy + 16, maw_w + 2, maw_h + 2, accent, 0.95)
+        c.ellipse(maw_cx, cy + 16, maw_w, maw_h, maw, 1)
+        c.ellipse(maw_cx, cy + 17, maw_w * 0.67, maw_h * 0.6, shade(maw, 0.7), 0.9)
+        c.ring(maw_cx, cy + 16, maw_w * 0.88, (255, 235, 120), 1.2, 0.45)
+        if state == "attack" or stage >= 2:
+            c.circle(maw_cx - maw_w * 0.36, cy + 13, 2.0 + stage * 0.25, accent, 0.8)
+            c.circle(maw_cx + maw_w * 0.3, cy + 18, 1.5 + stage * 0.2, (123, 225, 194), 0.75)
 
     # Internal swallowed prey vacuoles increase with evolution.
     vac_count = min(6, 1 + stage + (1 if state == "upgrade" else 0))
@@ -273,6 +322,7 @@ def write_png(canvas: Canvas, path: Path):
 
 def main():
     stages = []
+    movement = []
     for stage, wave, slug in STAGES:
         entry = {"stage": stage, "wave": wave, "slug": slug, "states": {}}
         for state in STATES:
@@ -280,6 +330,14 @@ def main():
             write_png(draw_mako(stage, state), ROOT / rel)
             entry["states"][state] = rel
         stages.append(entry)
+
+        for direction in DIRECTIONS:
+            move_entry = {"stage": stage, "direction": direction, "states": {}}
+            for move_state in MOVE_STATES:
+                rel = f"assets/sprites/mako_v2/directions/mako_stage{stage}_{direction}_{move_state}.png"
+                write_png(draw_mako(stage, "idle", direction=direction, locomotion=move_state), ROOT / rel)
+                move_entry["states"][move_state] = rel
+            movement.append(move_entry)
 
     mutations = []
     for mutation_id in MUTATIONS:
@@ -298,12 +356,16 @@ def main():
         "heroId": "macrophage",
         "heroName": "Mako",
         "direction": "v2_belly_devourer",
+        "movementDirections": list(DIRECTIONS),
+        "movementStates": list(MOVE_STATES),
         "stages": stages,
+        "movement": movement,
         "mutations": mutations,
         "skins": skins,
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"Generated Mako V2: {len(stages)} stages × {len(STATES)} states")
+    print(f"Generated directional movement: {len(movement)} view entries × {len(MOVE_STATES)} states")
     print(f"Generated mutation overlays: {len(mutations)}")
     print(f"Generated skin previews: {len(skins)}")
     print(f"Manifest: {OUT / 'manifest.json'}")
