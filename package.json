@@ -11,5 +11,8 @@
     "validate": "node tools/validate-catalog.mjs && node tools/validate-retention.mjs",
     "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
     "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.63.0"
   }
 }
