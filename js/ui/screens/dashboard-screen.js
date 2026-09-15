@@ -252,7 +252,7 @@ function fmtTime(sec) {
   return `${m}m ${String(s).padStart(2, '0')}s`;
 }
 
-/** Overlay stage equity di panggung dashboard; stage 0 tetap polos/tanpa ikon. */
+/** Overlay tahap diferensiasi di panggung dashboard; stage 0 tetap polos/tanpa ikon. */
 function renderStageEvoOverlay(meta) {
   let box = document.getElementById('stage-evo');
   if (!box) {
@@ -262,17 +262,17 @@ function renderStageEvoOverlay(meta) {
   box.textContent = '';
   const stage = meta.evoStage || 0;
   const layers = [
-    ['assets/sprites/part_equity_memory_core.png', 'eq-memory', stage >= 4, 'Full Equity'],
-    ['assets/sprites/part_equity_effector.png', 'eq-effector', stage >= 3, 'Equity III'],
-    ['assets/sprites/part_equity_membrane.png', 'eq-membrane', stage >= 2, 'Equity II'],
-    ['assets/sprites/part_equity_receptor.png', 'eq-receptor', stage >= 1, 'Equity I'],
+    ['assets/sprites/part_equity_memory_core.png', 'eq-memory', stage >= 4, 'Diferensiasi IV'],
+    ['assets/sprites/part_equity_effector.png', 'eq-effector', stage >= 3, 'Diferensiasi III'],
+    ['assets/sprites/part_equity_membrane.png', 'eq-membrane', stage >= 2, 'Diferensiasi II'],
+    ['assets/sprites/part_equity_receptor.png', 'eq-receptor', stage >= 1, 'Diferensiasi I'],
   ];
   for (const [src, cls, on, alt] of layers) {
     if (on) box.appendChild(el('img', { class: cls, src, alt }));
   }
 }
 
-/** Kartu evolusi: tahap sekarang, bagian terkumpul, progres & tombol BEREVOLUSI. */
+/** Kartu diferensiasi: tahap sekarang, fragmen terkumpul, progres & tombol BEREVOLUSI. */
 function renderEvoCard(meta) {
   const card = document.getElementById('evo-card');
   card.textContent = '';

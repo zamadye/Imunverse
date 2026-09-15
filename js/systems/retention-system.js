@@ -59,9 +59,14 @@ export function applyGlobalUpgrades(stats) {
   return stats;
 }
 
-/** Biaya upgrade global level berikutnya: round(50 × 1.15^level). */
+/**
+ * Sprint 3.21 (bible §6.3): Homeostasis 25 level — lv 1–10 Biokredit
+ * (Σ701), lv 11–25 Genom (Σ≈111). @returns {{cost:int, currency:'bk'|'genom'}}
+ */
 export function globalUpgradeCost(def, level) {
-  return Math.round(def.baseCost * Math.pow(def.costGrowth, level));
+  if (level < 10) return { cost: Math.round(def.baseCost * Math.pow(def.costGrowth, level)), currency: 'bk' };
+  const i = level - 10;
+  return { cost: Math.round((def.genomBase || 3) * Math.pow(def.genomGrowth || 1.12, i)), currency: 'genom' };
 }
 
 /** Level upgrade global saat ini. */
@@ -70,8 +75,9 @@ export function globalUpgradeLevel(meta, id) {
 }
 
 /**
- * Beli upgrade global dengan Imun Coin (bersifat global — semua hero).
- * @returns {{ok:boolean, reason?:string}}
+ * Beli upgrade global/Homeostasis (global — semua hero). lv 1–10 pakai
+ * Biokredit, lv 11–25 pakai Genom (bible §6.3).
+ * @returns {{ok:boolean, reason?:string, level?:int, cost?:int}}
  */
 export function purchaseGlobalUpgrade(id) {
   const meta = STATE.meta;
@@ -79,13 +85,30 @@ export function purchaseGlobalUpgrade(id) {
   if (!def) return { ok: false, reason: 'Upgrade tidak ditemukan' };
   const lv = globalUpgradeLevel(meta, id);
   if (lv >= def.maxLevel) return { ok: false, reason: 'Level maksimal' };
-  const cost = globalUpgradeCost(def, lv);
-  if (meta.imun < cost) return { ok: false, reason: 'Genom tidak cukup' };
-  if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
+  const { cost, currency } = globalUpgradeCost(def, lv);
+  if (currency === 'genom') {
+    if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
+  } else {
+    if ((meta.currency || 0) < cost) return { ok: false, reason: 'Biokredit tidak cukup' };
+    meta.currency -= cost;
+  }
   meta.globalUpgrades = meta.globalUpgrades || {};
   meta.globalUpgrades[id] = lv + 1;
   writeSave(meta);
   return { ok: true, level: lv + 1, cost };
+}
+
+/**
+ * Sprint 3.21 (bible §9): Reset Homeostasis — nolkan SEMUA jalur (tanpa
+ * refund) seharga 200 Genom. @returns {{ok:boolean, reason?:string}}
+ */
+export function resetHomeostasis() {
+  const meta = STATE.meta;
+  const COST = 200;
+  if (!spendImun(meta, COST)) return { ok: false, reason: 'Butuh 200 Genom untuk reset' };
+  meta.globalUpgrades = {};
+  writeSave(meta);
+  return { ok: true };
 }
 
 /**

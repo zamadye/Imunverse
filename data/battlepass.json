@@ -3,12 +3,14 @@
   "season": 1,
   "name": "Beta Musim 1",
   "doc": "Fase 14 — Battle Pass. XP dari bermain (akhir run: level*40 + wave*15 + kills). Jalur gratis terbuka semua; jalur premium dibeli 500 Imun Coin. Twist: total Imun di jalur premium (525) > harga pass (500) → pass membayar dirinya untuk musim berikutnya. XP naik level butuh 40+10*level.",
-  "premiumCostImun": 500,
+  "premiumCostImun": 800,
   "xpNeed": {
-    "base": 40,
-    "step": 10
+    "base": 120,
+    "step": 30
   },
   "maxLevel": 30,
+  "runXpCap": 150,
+  "dailyRunCap": 450,
   "free": [
     {
       "lv": 1,
@@ -23,7 +25,7 @@
     {
       "lv": 3,
       "type": "consumable",
-      "id": "serum_awal",
+      "id": "serum_regenerasi",
       "n": 1
     },
     {
@@ -50,7 +52,7 @@
     {
       "lv": 8,
       "type": "consumable",
-      "id": "kopi_limfa",
+      "id": "sitokin_burst",
       "n": 1
     },
     {
@@ -77,7 +79,7 @@
     {
       "lv": 13,
       "type": "consumable",
-      "id": "pelindung_lendir",
+      "id": "lapisan_mukus",
       "n": 1
     },
     {
@@ -131,7 +133,7 @@
     {
       "lv": 23,
       "type": "consumable",
-      "id": "vaksin_awal",
+      "id": "enzim_litik",
       "n": 1
     },
     {
@@ -152,7 +154,7 @@
     {
       "lv": 27,
       "type": "consumable",
-      "id": "koin_ganda",
+      "id": "katalis_mitosis",
       "n": 1
     },
     {
@@ -195,7 +197,7 @@
     {
       "lv": 5,
       "type": "consumable",
-      "id": "serum_awal",
+      "id": "serum_regenerasi",
       "n": 2
     },
     {
@@ -221,7 +223,7 @@
     {
       "lv": 10,
       "type": "imun",
-      "n": 50
+      "n": 100
     },
     {
       "lv": 11,
@@ -272,7 +274,7 @@
     {
       "lv": 20,
       "type": "imun",
-      "n": 50
+      "n": 100
     },
     {
       "lv": 21,
@@ -287,7 +289,7 @@
     {
       "lv": 23,
       "type": "consumable",
-      "id": "koin_ganda",
+      "id": "katalis_mitosis",
       "n": 2
     },
     {

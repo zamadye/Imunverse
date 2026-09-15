@@ -440,9 +440,9 @@ async function boot() {
     STATE.meta.currency = 999999;
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
-    STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, true]));
+    STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, 2]));
     STATE.meta.evoStage = 4;
-    STATE.meta.evoParts = { equity_receptor: 999, equity_membrane: 999, equity_effector: 999, equity_memory_core: 999 };
+    STATE.meta.evoParts = { fragmen_diferensiasi: 999 };
     STATE.meta.allies = 6;
     STATE.meta.allyLevel = 99;
     for (const def of (data.upgrades.globalUpgrades || [])) {

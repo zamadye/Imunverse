@@ -15,8 +15,9 @@ import { addImun, ownsCosmetic } from './imun-economy.js';
 export function ensureBp(meta) {
   const cfg = getData().battlepass;
   if (!meta.bp || meta.bp.season !== cfg.season) {
-    meta.bp = { season: cfg.season, xp: 0, level: 1, premium: false, claimedFree: [], claimedPrem: [] };
+    meta.bp = { season: cfg.season, xp: 0, level: 1, premium: false, claimedFree: [], claimedPrem: [], xpDay: { date: '', total: 0 } };
   }
+  if (!meta.bp.xpDay) meta.bp.xpDay = { date: '', total: 0 };
   return meta.bp;
 }
 
@@ -26,11 +27,20 @@ export function xpNeed(level) {
 }
 
 /**
- * Tambah XP BP (dipanggil di akhir run). @returns {{levels:int, from:int, to:int}}
+ * Tambah XP BP. source 'run' (akhir run) dibatasi runXpCap 150/run +
+ * dailyRunCap 450/hari (bible §8.1); 'misi' tidak dibatasi.
+ * @returns {{levels:int, from:int, to:int, granted:int}}
  */
-export function addBpXP(meta, amount) {
+export function addBpXP(meta, amount, source = 'run') {
   const bp = ensureBp(meta);
   const cfg = getData().battlepass;
+  if (source === 'run') {
+    amount = Math.min(amount, cfg.runXpCap || 150);
+    const today = new Date().toISOString().slice(0, 10);
+    if (bp.xpDay.date !== today) bp.xpDay = { date: today, total: 0 };
+    amount = Math.min(amount, Math.max(0, (cfg.dailyRunCap || 450) - bp.xpDay.total));
+    bp.xpDay.total += amount;
+  }
   const from = bp.level;
   bp.xp += amount;
   let levels = 0;
@@ -41,7 +51,7 @@ export function addBpXP(meta, amount) {
   }
   if (bp.level >= cfg.maxLevel) bp.xp = Math.min(bp.xp, xpNeed(cfg.maxLevel));
   writeSave(meta);
-  return { levels, from, to: bp.level };
+  return { levels, from, to: bp.level, granted: amount };
 }
 
 export function isPremium(bpOrMeta) {

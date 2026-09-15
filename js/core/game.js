@@ -57,7 +57,7 @@ import { SpawnSystem } from '../systems/spawn-system.js';
 import { CollisionSystem } from '../systems/collision-system.js';
 import { rollLevelUpChoices, applyLevelUp, squadMultipliers, effectiveStacks } from '../systems/upgrade-system.js';
 import { isDevMode } from './dev-mode.js';
-import { computeRunEndBonus, addCurrency } from '../systems/economy-system.js';
+import { addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
@@ -185,6 +185,7 @@ export const game = {
 
     this.run = {
       heroDef,
+      heroLvl: (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0,
       player,
       enemies: [],
       projectiles: [],
@@ -236,8 +237,9 @@ export const game = {
       mutator: mutatorDef,
       mutatorDate,
       allies: [],
+      chapterTier: chapterDef ? this.getChapterTier(meta) : null,
       objective: chapterDef
-        ? { quota: chapterDef.killQuota, bossSpawned: false, bossDefeated: false }
+        ? { quota: Math.round(chapterDef.killQuota * (this.getChapterTier(meta).quotaMult || 1)), bossSpawned: false, bossDefeated: false }
         : null,
       bonusCurrency: 0,
       victory: false,
@@ -248,7 +250,7 @@ export const game = {
       skills: new SkillSystem(heroDef, { cdMult: (squadMultipliers(meta).jurusCd || 1) * passiveSkillCdMult(heroDef) }),
       // lapisan pertahanan Fase 12: shield → protect → evade
       shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
-      parts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
+      parts: { fragmen_diferensiasi: 0 },
       partsCollectedTotal: 0,
       bossChest: null,
       imuAccrued: 0, // Fase 17: IMU terkumpul live di HUD (akhir run = rumus penuh)
@@ -674,10 +676,10 @@ export const game = {
       // PHAGOS: wave mutasi → pilih trait counter build pemain
       try { enemyMutOnNewWave(this, run.spawnSys.wave); } catch (err) { console.warn('[phagos] enemyMutOnNewWave:', err); }
       const w = run.spawnSys.wave;
-      // Fase 17 (trigger 1A): Imun Coin masuk LIVE tiap wave — +perWave, float emas
-      const imuWave = getRetention().imuReward.perWave;
-      run.imuAccrued += imuWave;
-      run.effects.spawnLabel(player.x, player.y - 46, `+${imuWave} Genom`, '#ffd76a');
+      // Sprint 3.17 (bible §6.2): bonus Biokredit LIVE tiap wave (+10 BK, float emas)
+      const bkWave = getData().upgrades.bkPerWave || 10;
+      run.currencyEarned += bkWave;
+      run.effects.spawnLabel(player.x, player.y - 46, `+${bkWave} BK`, '#ffd76a');
       // PHAGOS Sprint 1 (bible §5): XP HANYA dari kill — milestone XP wave dicabut.
       // MENANG mode Klasik: wave melewati finalWave (boss wave 10 sudah tumbang)
       if (run.mode && run.mode.finalWave && w > run.mode.finalWave) {
@@ -1334,6 +1336,25 @@ export const game = {
     }
   },
 
+/**
+ * Sprint 3.19 (bible §8.5): tingkat kesulitan bab dari meta.selectedTier.
+ */
+getChapterTier(meta) {
+  const tiers = (getData().campaign && getData().campaign.tiers) || [];
+  return tiers.find((t) => t.id === meta.selectedTier) || tiers[0] || { id: 'normal', tier: 0, quotaMult: 1, hpMult: 1, dmgMult: 1 };
+},
+
+/**
+ * Sprint 3.19: terapkan pengali tingkat ke musuh yang baru spawn.
+ */
+applyChapterTier(enemy, run) {
+  const t = run.chapterTier;
+  if (!t || t.id === 'normal') return;
+  enemy.maxHP = Math.max(1, Math.round(enemy.maxHP * (t.hpMult || 1)));
+  enemy.hp = enemy.maxHP;
+  enemy.damage = Math.max(1, Math.round(enemy.damage * (t.dmgMult || 1)));
+},
+
   // =====================================================================
   // SPAWN MUSUH & DROP
   // =====================================================================
@@ -1365,6 +1386,7 @@ export const game = {
     enemy.isBoss = true;
     // PACING D14: boss bab bisa memukul lebih keras (dmgMult per bab)
     if (bossCfg.dmgMult) enemy.damage = Math.max(1, Math.round(enemy.damage * bossCfg.dmgMult));
+    this.applyChapterTier(enemy, run); // Sprint 3.19: HP/damage × tingkat kesulitan
     enemy.bossName = bossCfg.name || def.name;
     enemy.maxHP = Math.round(enemy.maxHP);
     enemy.hp = enemy.maxHP;
@@ -1489,6 +1511,7 @@ export const game = {
       }
     } catch { /* abaikan */ }
     const enemy = new Enemy(def, pos.x, pos.y, scalers);
+    this.applyChapterTier(enemy, run); // Sprint 3.19: HP/damage × tingkat kesulitan
     markSeen(enemyId); // Bio-Pedia: musuh ditemui
     // Kondisi tubuh: sistem kritis bisa mempercepat musuh (mis. Imun < 20)
     if (run.bodyMods && run.bodyMods.enemySpeedMult && run.bodyMods.enemySpeedMult !== 1) {
@@ -1529,7 +1552,7 @@ export const game = {
     const run = this.run;
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
-    const bonusPart = rollPartDrop('boss', 1) || 'equity_receptor';
+    const bonusPart = rollPartDrop('boss', 1) || 'fragmen_diferensiasi';
     run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
     setPaused(true);
     audio.chest();
@@ -1706,6 +1729,15 @@ export const game = {
     if (typeof source === 'string' && tbl[source] !== undefined) return tbl[source];
     return tbl.other;
   },
+  /** Sprint 3.17 (bible §6.2): Biokredit per TIPE kill (cermin xpForKillCause). */
+  bkForKillCause(enemy, source) {
+    let tbl = null;
+    try { tbl = getData().upgrades.bkByKillType; } catch { /* fallback bawah */ }
+    tbl = tbl || { contact: 1, pulse: 1.5, engulf: 2, boss: 60, other: 1 };
+    if (enemy.isBoss) return tbl.boss;
+    if (typeof source === 'string' && tbl[source] !== undefined) return tbl[source];
+    return tbl.other;
+  },
 
   onEnemyKilled(enemy, source) {
     const run = this.run;
@@ -1727,41 +1759,21 @@ export const game = {
       return;
     }
 
-    // ---- PHAGOS Sprint 1 (bible §5.1): XP per TIPE kill — kontak 3, Pulse 5, engulf 20, boss 60 ----
+    // ---- PHAGOS Sprint 1 (bible §5.1): XP per TIPE kill — kontak 3, Pulse 5, engulf 4, boss 60 ----
     const killXp = this.xpForKillCause(enemy, source);
     this.addXP(killXp);
-    run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP`, '#cde86b');
+    // ---- Sprint 3.17 (bible §6.2): Biokredit LANGSUNG per tipe kill ----
+    const killBk = this.bkForKillCause(enemy, source);
+    run.currencyEarned += killBk;
+    run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP · +${killBk} BK`, '#cde86b');
 
-    // ---- Fase 17 (trigger 1A): IMU terkumpul +0.5/kill (chip HUD berdetak) ----
-    run.imuAccrued += getRetention().imuReward.perKill;
-    if (enemy.isBoss) {
-      run.imuAccrued += getRetention().imuReward.perBoss - getRetention().imuReward.perKill;
-      run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 38, `+${getRetention().imuReward.perBoss} Genom`, '#ffd76a');
-    }
-
-    // EQUITY PER TIER: kecil jarang, MEDIUM sering (koin), HARD pasti koin x2 + nutrisi bonus
-    if (!enemy.isBoss) {
-      const tier = enemy.def.tier || 'medium';
-      const coinDef = getData().nutrients.nutrients.find((n) => n.pickupType === 'currency');
-      const dropCoin = (n) => {
-        if (!coinDef) return;
-        for (let ci = 0; ci < n; ci++) {
-          const ang = Math.random() * Math.PI * 2;
-          const dist = 18 + Math.random() * 26;
-          run.pickups.push(new Pickup(coinDef, enemy.x + Math.cos(ang) * dist, enemy.y + Math.sin(ang) * dist));
-        }
-      };
-      if (tier === 'kecil') {
-        if (Math.random() < 0.15) dropCoin(1);
-      } else if (tier === 'hard') {
-        dropCoin(2); // HARD: equity pasti, dobel
-        if (Math.random() < 0.6) {
-          const bonusId = Math.random() < 0.5 ? 'vitamin_c' : 'amino';
-          const bonusDef = getData().nutrients.nutrients.find((n) => n.id === bonusId);
-          if (bonusDef) run.pickups.push(new Pickup(bonusDef, enemy.x + 14, enemy.y - 10));
-        }
-      } else {
-        if (Math.random() < 0.45) dropCoin(1); // medium: sumber utama farm equity
+    // Sprint 3.17: earn BK LANGSUNG per kill (lihat atas) — drop koin per tier
+    // DICABUT (double-count). HARD: nutrisi bonus saja.
+    if (!enemy.isBoss && (enemy.def.tier || 'medium') === 'hard') {
+      if (Math.random() < 0.6) {
+        const bonusId = Math.random() < 0.5 ? 'vitamin_c' : 'amino';
+        const bonusDef = getData().nutrients.nutrients.find((n) => n.id === bonusId);
+        if (bonusDef) run.pickups.push(new Pickup(bonusDef, enemy.x + 14, enemy.y - 10));
       }
     }
 
@@ -1995,13 +2007,10 @@ export const game = {
     run.ended = true;
 
     const meta = STATE.meta;
-    const bonus = computeRunEndBonus(run);
     const doubleMult = (run.itemBuffs && run.itemBuffs.katalis) ? 1.5 : 1; // ADDENDUM §2: Katalis Mitosis
-    // Fase 12 (spek pemilik): bonus akhir run floor(wave×8 + kills×0.5 + boss×50)
-    // Fase 18: × rewardMult band — early 1.5× (reward besar), late 1.3×
-    const endBand = getProgressionBand(run.spawnSys ? run.spawnSys.wave : 1);
-    const waveBonus = Math.floor(((run.spawnSys ? run.spawnSys.wave : run.wave || 1) * 8 + run.kills * 0.5 + (run.bossKills || 0) * 50) * endBand.rewardMult);
-    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0) + bonus + waveBonus) * doubleMult);
+    // Sprint 3.17 (bible §6.2): earn BK sudah LIVE per kill/wave — rumus bonus
+    // akhir run (wave×8 + kills×0.5 + boss×50) DICABUT. Sisa: chapter/endless bonus.
+    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0)) * doubleMult);
     run.earned = earned;
     const victory = !!run.victory;
 
@@ -2010,12 +2019,14 @@ export const game = {
     // KAMPANYE: bab bersih → tandai + pasukan imun permanen bertambah (+1/bab, maks 6)
     if (victory && run.chapter) {
       meta.campaignCleared = meta.campaignCleared || {};
-      meta.campaignCleared[run.chapter.id] = true;
+      const tierIdx = run.chapterTier ? run.chapterTier.tier : 0;
+      meta.campaignCleared[run.chapter.id] = Math.max(meta.campaignCleared[run.chapter.id] || 0, tierIdx);
       const clearedCount = Object.keys(meta.campaignCleared).length;
       meta.allies = Math.min(6, Math.max(meta.allies || 1, 1 + clearedCount));
     }
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
+    meta.stats.totalEngulfs = (meta.stats.totalEngulfs || 0) + ((run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0);
     meta.stats.bestWave = Math.max(meta.stats.bestWave, run.spawnSys.wave);
     meta.stats.bestSurvivalTime = Math.max(meta.stats.bestSurvivalTime, Math.floor(run.time));
     meta.stats.totalSurviveSeconds += Math.floor(run.time);
@@ -2044,7 +2055,7 @@ export const game = {
       kills: run.kills,
       bossKills: run.bossKills,
       victory,
-      chapterId: run.chapter ? run.chapter.id : null,
+      engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
     });
     run.rankGain = rankRes;
 

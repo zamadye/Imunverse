@@ -8,7 +8,7 @@
  *     wave lanjut ke 6.
  *  3. Musuh scaling mengikuti level player (HP beda pada level beda).
  *  4. XP band: early 1.6× lebih besar dari mid.
- *  5. Premium cap 30%: serum 25%, koin_ganda 30%.
+ *  5. Premium cap 30%: serum 25%, katalis_mitosis 30%.
  */
 
 import { createRequire } from 'node:module';
@@ -298,7 +298,7 @@ const prem = await page.evaluate(async () => {
   return { items };
 });
 ok('serum-25pct-within-cap', /25%/.test(prem.items.serum_awal || ''));
-ok('koin-ganda-30pct-within-cap', /30%/.test(prem.items.koin_ganda || ''));
+ok('koin-ganda-30pct-within-cap', /30%/.test(prem.items.katalis_mitosis || ''));
 
 ok('no-pageerrors', pageErrors.length === 0, pageErrors.join(' | '));
 console.log(`\nRESULT: ${passed} PASS, ${failed} FAIL${fails.length ? ' → ' + fails.join(', ') : ''}`);

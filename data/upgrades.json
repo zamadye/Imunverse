@@ -11,6 +11,14 @@
     "boss": 60,
     "other": 3
   },
+  "bkByKillType": {
+    "contact": 1,
+    "pulse": 1.5,
+    "engulf": 2,
+    "boss": 60,
+    "other": 1
+  },
+  "bkPerWave": 10,
   "levelUpChoices": 3,
   "levelUpPool": [
     {
@@ -163,7 +171,7 @@
   ],
   "shopItems": [
     {
-      "id": "serum_awal",
+      "id": "serum_regenerasi",
       "name": "Serum Regenerasi",
       "icon": "assets/sprites/icon_syringe.png",
       "desc": "Pulihkan 35% max HP saat HP di bawah 70% + medan berdenyut (dipakai otomatis)",
@@ -171,35 +179,35 @@
       "type": "consumable"
     },
     {
-      "id": "vaksin_awal",
+      "id": "enzim_litik",
       "name": "Enzim Litik",
       "icon": "assets/sprites/icon_heart.png",
       "desc": "Contact DPS ×2 selama 8 detik + jauh lebih mudah menelan (dipakai otomatis)",
-      "cost": 180,
-      "type": "consumable"
-    },
-    {
-      "id": "kopi_limfa",
-      "name": "Sitokin Burst",
-      "icon": "assets/sprites/icon_boot.png",
-      "desc": "+40% kecepatan 10 detik + reset cooldown Pulse (dipakai otomatis)",
-      "cost": 160,
-      "type": "consumable"
-    },
-    {
-      "id": "pelindung_lendir",
-      "name": "Lapisan Mukus",
-      "icon": "assets/sprites/icon_shield.png",
-      "desc": "Perisai 25% max HP + musuh yang menyentuh melambat 30% (dipakai otomatis)",
       "cost": 250,
       "type": "consumable"
     },
     {
-      "id": "koin_ganda",
+      "id": "sitokin_burst",
+      "name": "Sitokin Burst",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+40% kecepatan 10 detik + reset cooldown Pulse (dipakai otomatis)",
+      "cost": 200,
+      "type": "consumable"
+    },
+    {
+      "id": "lapisan_mukus",
+      "name": "Lapisan Mukus",
+      "icon": "assets/sprites/icon_shield.png",
+      "desc": "Perisai 25% max HP + musuh yang menyentuh melambat 30% (dipakai otomatis)",
+      "cost": 300,
+      "type": "consumable"
+    },
+    {
+      "id": "katalis_mitosis",
       "name": "Katalis Mitosis",
       "icon": "assets/sprites/icon_coin.png",
       "desc": "+50% drop run ini + setiap engulf 2× Bio-Point (dipakai otomatis)",
-      "cost": 300,
+      "cost": 350,
       "type": "consumable"
     },
     {
@@ -212,37 +220,22 @@
     },
     {
       "id": "atp_surge",
+      "currency": "genom",
       "name": "Ledakan ATP",
       "icon": "assets/sprites/icon_bolt.png",
       "desc": "Pulse instan + 3 Pulse berikut cooldown −60% (dipakai otomatis)",
-      "cost": 500,
+      "cost": 200,
       "type": "consumable"
     },
-    {
-      "id": "membran_cadangan",
-      "name": "Membran Cadangan",
-      "icon": "assets/sprites/icon_multi.png",
-      "desc": "Otomatis saat HP <20%: medan kedua 6 detik, sekali per run (dipakai otomatis)",
-      "cost": 600,
-      "type": "consumable"
-    },
-    {
+        {
       "id": "toksin_balik",
       "name": "Racun Balik",
       "icon": "assets/sprites/icon_sword.png",
       "desc": "10 detik: 40% damage yang diterima kembali ke penyerang (dipakai otomatis)",
       "cost": 200,
       "type": "consumable"
-    },
-    {
-      "id": "sinapsis",
-      "name": "Sinyal Sinapsis",
-      "icon": "assets/sprites/icon_squad.png",
-      "desc": "Medan mini pasukan ×2 selama 12 detik (dipakai otomatis)",
-      "cost": 250,
-      "type": "consumable"
     }
-  ],
+    ],
   "economy": {
     "dailyReward": 120,
     "waveBonusPerWave": 12,
@@ -251,12 +244,13 @@
     "currencyDropChance": 0.3
   },
   "heroUpgrade": {
-    "baseCost": 150,
-    "costGrowth": 1.35,
+    "baseCost": 120,
+    "costGrowth": 1.2,
     "maxLevel": 20,
     "dmgPerLevel": 0.06,
     "hpPerLevel": 0.08,
-    "desc": "+6% damage & +8% HP per level (khusus hero ini)"
+    "membranePerLevel": 0.015,
+    "desc": "+6% damage, +8% HP & +1,5% radius membran per level (khusus hero ini)"
   },
   "allyUpgrade": {
     "baseCost": 220,
@@ -277,8 +271,8 @@
       "mode": "percent",
       "perLevel": 0.1,
       "maxLevel": 25,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     },
     {
       "id": "g_vitality",
@@ -289,8 +283,8 @@
       "mode": "flat",
       "perLevel": 15,
       "maxLevel": 25,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     },
     {
       "id": "g_swift",
@@ -300,9 +294,9 @@
       "stat": "moveSpeed",
       "mode": "percent",
       "perLevel": 0.08,
-      "maxLevel": 20,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     },
     {
       "id": "g_rapid",
@@ -312,9 +306,9 @@
       "stat": "attackSpeed",
       "mode": "percent",
       "perLevel": 0.1,
-      "maxLevel": 20,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     },
     {
       "id": "g_range",
@@ -324,9 +318,9 @@
       "stat": "attackRange",
       "mode": "percent",
       "perLevel": 0.12,
-      "maxLevel": 20,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     },
     {
       "id": "g_steal",
@@ -336,9 +330,9 @@
       "stat": "lifeSteal",
       "mode": "percent",
       "perLevel": 0.03,
-      "maxLevel": 15,
-      "baseCost": 50,
-      "costGrowth": 1.15
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
     }
   ],
   "luRules": {

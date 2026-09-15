@@ -12,7 +12,7 @@
  * Tidak menyentuh wave/spawner/ekonomi/save.
  */
 
-import { getMembrane, getGameFeel, getMutations } from '../core/data-store.js';
+import { getData, getMembrane, getGameFeel, getMutations } from '../core/data-store.js';
 import {
   passiveCritBonus, modifyOutgoingDamage, passiveOnHit,
 } from './passive-system.js';
@@ -219,7 +219,10 @@ export function getMembraneStats(run) {
   const curDmg = player?.stats?.damage || baseDmg;
   const scale = baseDmg > 0 ? curDmg / baseDmg : 1;
 
-  let radius = mem.baseRadius * fx.radiusMult;
+  // Sprint 3.19: level hero memperbesar membran (+1,5%/lv — roadmap "scaling membran").
+  const heroCfg = (getData().upgrades && getData().upgrades.heroUpgrade) || {};
+  const heroLvl = run.heroLvl || 0;
+  let radius = mem.baseRadius * fx.radiusMult * (1 + (heroCfg.membranePerLevel || 0) * heroLvl);
   // Baso: radius berdenyut 0.7–1.3× per 2 dtk
   if (mem.shape === 'pulsing') {
     const t = run.time || 0;

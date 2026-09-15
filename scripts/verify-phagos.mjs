@@ -109,7 +109,7 @@ dom.window.Image = RepoImage;
 // ---------- Impor kode game ASLI ----------
 const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
 const { game } = await mod('js/core/game.js');
-const { STATE, createDefaultMeta } = await mod('js/core/state-manager.js');
+const { STATE, createDefaultMeta, mergeMetaDefaults } = await mod('js/core/state-manager.js');
 const { loadAllData, getData } = await mod('js/core/data-store.js');
 const { loadAllSprites } = await mod('js/render/sprite-loader.js');
 const { InputHandler } = await mod('js/input/input-handler.js');
@@ -287,13 +287,13 @@ const baseDps = memMod.getMembraneStats(game.run).contactDps;
 const baseSpeed = game.run.player.stats.speed;
 // Run penuh dengan semua item
 STATE.meta.consumables = {
-  serum_awal: 1, vaksin_awal: 1, kopi_limfa: 1, pelindung_lendir: 1, koin_ganda: 1,
+  serum_regenerasi: 1, enzim_litik: 1, sitokin_burst: 1, lapisan_mukus: 1, katalis_mitosis: 1,
   opsonin: 1, atp_surge: 1, membran_cadangan: 1, toksin_balik: 1, sinapsis: 1,
 };
 game.startRun('macrophage');
 const run2 = game.run, ib = run2.itemBuffs;
-log('item-consumed', ['vaksin_awal', 'kopi_limfa', 'pelindung_lendir', 'koin_ganda', 'opsonin', 'atp_surge', 'toksin_balik', 'sinapsis'].every((k) => STATE.meta.consumables[k] === 0));
-log('item-pending', ib.serumPending === true && ib.cadanganPending === true && STATE.meta.consumables.serum_awal === 1);
+log('item-consumed', ['enzim_litik', 'sitokin_burst', 'lapisan_mukus', 'katalis_mitosis', 'opsonin', 'atp_surge', 'toksin_balik', 'sinapsis'].every((k) => STATE.meta.consumables[k] === 0));
+log('item-pending', ib.serumPending === true && ib.cadanganPending === true && STATE.meta.consumables.serum_regenerasi === 1);
 log('item-enzim', Math.abs(memMod.getMembraneStats(run2).contactDps - baseDps * 2) < baseDps * 2 * 0.25, `dps=${baseDps}→${memMod.getMembraneStats(run2).contactDps}`); // toleransi: variansi antar-run
 log('item-sitokin', run2.player.stats.speed === baseSpeed * 1.4, `spd=${baseSpeed}→${run2.player.stats.speed}`);
 log('item-mukus', ib.mukusPool === Math.round(run2.player.maxHP * 0.25), `pool=${ib.mukusPool}`);
@@ -317,7 +317,7 @@ log('item-opsonin-engulf', memMod.tryEngulf(game, oe) === true && run2.bioPoints
 run2.itemBuffs.mukusPool = 0;
 run2.player.iframes = 0; run2.player.hp = run2.player.maxHP * 0.75;
 game.damagePlayer(run2.player.maxHP * 0.1); // → 65%
-log('item-serum', STATE.meta.consumables.serum_awal === 0 && run2.player.hp > run2.player.maxHP * 0.9, `hp=${Math.round(run2.player.hp)}/${run2.player.maxHP}`);
+log('item-serum', STATE.meta.consumables.serum_regenerasi === 0 && run2.player.hp > run2.player.maxHP * 0.9, `hp=${Math.round(run2.player.hp)}/${run2.player.maxHP}`);
 // Sitokin kedaluwarsa → speed kembali (tunggu event, bukan frame tetap — hit-stop bisa membekukan sim)
 let sguard = 0;
 while (itemBuffs.buffActive(run2, 'sitokin') && sguard++ < 1200) game.update(1 / 60);
@@ -423,6 +423,84 @@ game.fireSkillTrigger('kill');
 log('skill-trigger-kill', run4.skills.slots[1].cdLeft > 0 && run4.skills.slots[0].cdLeft === 0 && run4.skills.slots[2].cdLeft === 0);
 log('skill-rank2-auto', run4.skills.slots[1].rank === 2);
 log('skill-guard-depth', (run4._skillNotifyDepth || 0) === 0);
+
+// ---------- 14. Progresi bible §8 (PHAGOS Sprint 3.19) ----------
+const bpSys = await mod('js/systems/battlepass-system.js');
+const rankSys = await mod('js/systems/rank-system.js');
+const ecoSys = await mod('js/systems/economy-system.js');
+const evoSys = await mod('js/systems/evolution-system.js');
+const bpCfg = getData().battlepass;
+log('prog-bp-need', bpSys.xpNeed(0) === 120 && bpSys.xpNeed(10) === 420 && bpCfg.premiumCostImun === 800 && bpCfg.runXpCap === 150 && bpCfg.dailyRunCap === 450);
+const mBp = createDefaultMeta();
+const g1 = bpSys.addBpXP(mBp, 1000, 'run').granted;
+bpSys.addBpXP(mBp, 150, 'run'); bpSys.addBpXP(mBp, 150, 'run');
+const g4 = bpSys.addBpXP(mBp, 150, 'run').granted;
+log('prog-bp-cap', g1 === 150 && g4 === 0, `g1=${g1} g4=${g4} day=${mBp.bp.xpDay.total}`);
+log('prog-bp-mission', bpSys.addBpXP(mBp, 250, 'misi').granted === 250);
+log('prog-bp-return', bpCfg.premium.filter((x) => x.type === 'imun').reduce((a, x) => a + x.n, 0) === 500);
+log('prog-gp', rankSys.computeRunGP({ wave: 15, kills: 400, bossKills: 3, victory: true, engulfs: 18 }) === 337);
+const heroCfg = getData().upgrades.heroUpgrade;
+let heroTot = 0;
+for (let lv = 0; lv < 20; lv++) heroTot += ecoSys.heroLevelCost(heroCfg, lv);
+log('prog-hero', heroTot === 22404, `total=${heroTot}`);
+const mForm = getData().mastery.xpFormula;
+log('prog-mastery', mForm.perKill === 1.4 && mForm.perWave === 8 && mForm.victoryBonus === 40 && getData().mastery.levels[9] === 6100);
+const evoCfg = getData().evolutions;
+log('prog-fragmen', evoCfg.parts.length === 1 && evoCfg.parts[0].id === 'fragmen_diferensiasi'
+  && evoCfg.dropChanceNormal === 0.004 && evoCfg.dropChanceElite === 0.04 && evoCfg.bossGuaranteedParts === 1
+  && evoCfg.stages.map((x) => Object.values(x.cost || {}).reduce((a, b) => a + b, 0)).join(',') === '0,50,50,50,17'
+  && evoSys.rollPartDrop('boss', 1) === 'fragmen_diferensiasi');
+const tiers = getData().campaign.tiers;
+log('prog-tier-data', tiers.map((t) => t.quotaMult).join(',') === '1,1.6,2.2');
+STATE.meta.selectedMode = 'kampanye';
+STATE.meta.selectedChapter = 'bab_luka';
+STATE.meta.selectedTier = 'brutal';
+game.startRun('macrophage');
+const runT = game.run;
+const lukaQ = getData().campaign.chapters.find((c) => c.id === 'bab_luka').killQuota;
+log('prog-tier-quota', runT.chapterTier.id === 'brutal' && runT.objective.quota === Math.round(lukaQ * 2.2), `quota=${runT.objective.quota}`);
+STATE.meta.selectedTier = 'normal';
+const mMig = mergeMetaDefaults({ campaignCleared: { bab_luka: true }, evoParts: { equity_receptor: 3, silia: 2 }, consumables: { serum_awal: 2 } });
+const { migrateConsumableIds } = await mod('js/save/save-manager.js');
+migrateConsumableIds(mMig);
+log('prog-migrasi', mMig.campaignCleared.bab_luka === 0 && mMig.evoParts.fragmen_diferensiasi === 5 && mMig.consumables.serum_regenerasi === 2);
+
+// ---------- 15. Hero unlock + Homeostasis (PHAGOS Sprint 3.20–21) ----------
+const unSys = await mod('js/systems/unlock-system.js');
+const retSys = await mod('js/systems/retention-system.js');
+const heroes = getData().heroes.heroes;
+const byId = (id) => heroes.find((h) => h.id === id);
+const imuTot = heroes.reduce((a, h) => a + ((h.unlock && h.unlock.imuCost) || 0), 0);
+log('prog-hero-gates', heroes.length === 11 && byId('macrophage').unlock.type === 'default'
+  && heroes.filter((h) => h.unlock.type === 'imu').length === 3
+  && heroes.filter((h) => h.unlock.type === 'stat' || h.unlock.type === 'imu_stat').length === 7
+  && imuTot === 2460 && byId('tcd4').unlock.stat === 'totalEngulfs' && byId('treg').unlock.stat === 'totalEngulfs'
+  && byId('mastcell').unlock.stat === 'bossKills' && byId('mastcell').unlock.value === 8, `imuTot=${imuTot}`);
+const mU = createDefaultMeta();
+mU.stats.totalEngulfs = 150;
+log('prog-engulf-gate', unSys.getHeroStatus(mU, byId('tcd4')).conditionMet === true
+  && unSys.getHeroStatus(mU, byId('treg')).conditionMet === false
+  && mU.stats.totalEngulfs !== undefined && createDefaultMeta().stats.totalEngulfs === 0);
+const gDef = getData().upgrades.globalUpgrades.find((g) => g.id === 'g_damage');
+const hc0 = retSys.globalUpgradeCost(gDef, 0), hc9 = retSys.globalUpgradeCost(gDef, 9);
+const hc10 = retSys.globalUpgradeCost(gDef, 10), hc24 = retSys.globalUpgradeCost(gDef, 24);
+let bkSum = 0, gSum = 0;
+for (let lv = 0; lv < 25; lv++) { const c = retSys.globalUpgradeCost(gDef, lv); if (c.currency === 'bk') bkSum += c.cost; else gSum += c.cost; }
+log('prog-homeo-cost', hc0.cost === 27 && hc0.currency === 'bk' && hc9.currency === 'bk'
+  && hc10.cost === 3 && hc10.currency === 'genom' && hc24.currency === 'genom'
+  && bkSum === 701 && gSum === 111 && getData().upgrades.globalUpgrades.every((g) => g.maxLevel === 25), `bk=${bkSum} g=${gSum}`);
+STATE.meta.currency = 100000;
+STATE.meta.imun = 100000;
+STATE.meta.globalUpgrades = {};
+const buy1 = retSys.purchaseGlobalUpgrade('g_damage');
+STATE.meta.globalUpgrades.g_damage = 10;
+const imuBefore = STATE.meta.imun;
+const buy11 = retSys.purchaseGlobalUpgrade('g_damage');
+const imuAfterBuy = STATE.meta.imun;
+const reset = retSys.resetHomeostasis();
+log('prog-homeo-buy', buy1.ok === true && buy1.level === 1 && STATE.meta.currency === 100000 - 27
+  && buy11.ok === true && buy11.level === 11 && imuAfterBuy === imuBefore - 3 && STATE.meta.imun === imuBefore - 203
+  && reset.ok === true && Object.keys(STATE.meta.globalUpgrades).length === 0, `imu=${STATE.meta.imun}`);
 
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

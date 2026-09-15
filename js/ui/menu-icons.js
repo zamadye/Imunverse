@@ -155,7 +155,7 @@ export const STAT_ICONS = {
 // ---------------------------------------------------------------------------
 export const ITEM_ICONS = {
   /** Serum Awal: jarum suntik teal miring berisi serum koral. */
-  serum_awal: wrap(
+  serum_regenerasi: wrap(
     `<g transform="rotate(-40 32 32)">` +
       `<rect x="14" y="24" width="30" height="16" rx="5" fill="${C.card}" stroke="${C.tealDark}" stroke-width="2.4"/>` +
       `<rect x="17" y="27" width="14" height="10" rx="3" fill="${C.coral}"/>` +
@@ -166,10 +166,10 @@ export const ITEM_ICONS = {
     '</g>' + spark(50, 14, 4.5),
     '"Serum Awal": jarum suntik'),
   /** Vaksin Awal: perisai sage berhati koral (HP awal). */
-  vaksin_awal: wrap(shield(C.sage, C.green) + heart(32, 33, .62, C.coral, C.coralDeep),
+  enzim_litik: wrap(shield(C.sage, C.green) + heart(32, 33, .62, C.coral, C.coralDeep),
     '"Vaksin Awal": perisai sage + hati'),
   /** Kopi Limfa: cangkir teal beruap dengan tetes limfa. */
-  kopi_limfa: wrap(
+  sitokin_burst: wrap(
     stroke('M24 9 Q21 14 24 19 M33 7 Q30 12 33 17', C.tealDeep, 2.6, 'opacity=".6"') +
     `<path d="M12 24 H44 V40 A12 12 0 0 1 32 52 H24 A12 12 0 0 1 12 40 Z" fill="${C.teal}" stroke="${C.tealDark}" stroke-width="2.4" stroke-linejoin="round"/>` +
     `<path d="M44 29 H50 A6 6 0 0 1 50 41 H44" fill="none" stroke="${C.tealDark}" stroke-width="4"/>` +
@@ -177,13 +177,13 @@ export const ITEM_ICONS = {
     shine('M17 34 V41'),
     '"Kopi Limfa": cangkir teal beruap'),
   /** Pelindung Lendir: gelembung lendir sage berkilau di depan perisai teal. */
-  pelindung_lendir: wrap(
+  lapisan_mukus: wrap(
     shield(C.teal, C.tealDark) +
     `<path d="M22 40 C18 34 21 26 28 26 C31 21 40 21 42 27 C48 27 50 36 44 40 Z" fill="${C.sage}" stroke="${C.green}" stroke-width="2.2" stroke-linejoin="round"/>` +
     `<circle cx="27" cy="33" r="1.6" fill="${C.card}"/><circle cx="38" cy="31" r="2.2" fill="${C.card}"/>`,
     '"Pelindung Lendir": gelembung lendir + perisai'),
   /** Koin Ganda: dua koin Antibodi emas bertumpuk. */
-  koin_ganda: wrap(
+  katalis_mitosis: wrap(
     `<circle cx="24" cy="36" r="15" fill="${C.goldDeep}"/><circle cx="24" cy="34" r="15" fill="${C.gold}" stroke="${C.goldInk}" stroke-width="2"/>` +
     yAb(24, 34, 1, C.goldInk) +
     `<circle cx="42" cy="30" r="15" fill="${C.goldDeep}"/><circle cx="42" cy="28" r="15" fill="${C.gold}" stroke="${C.goldInk}" stroke-width="2"/>` +
@@ -241,7 +241,7 @@ const PNG_MAP = {
   'assets/sprites/fx_spark.png': 'damage', 'assets/sprites/icon_heart.png': 'vitality', 'assets/sprites/icon_sword.png': 'weapon',
   'assets/sprites/icon_bolt.png': 'jurus', 'assets/sprites/icon_shield.png': 'armor', 'assets/sprites/icon_boot.png': 'swift',
   'assets/sprites/icon_scope.png': 'range', 'assets/sprites/icon_crosshair.png': 'range', 'assets/sprites/icon_multi.png': 'multi',
-  'assets/sprites/item_glukosa.png': 'nutrition', 'assets/sprites/icon_syringe.png': 'serum_awal', 'assets/sprites/icon_coin.png': 'koin_ganda',
+  'assets/sprites/item_glukosa.png': 'nutrition', 'assets/sprites/icon_syringe.png': 'serum_regenerasi', 'assets/sprites/icon_coin.png': 'katalis_mitosis',
 };
 
 /**

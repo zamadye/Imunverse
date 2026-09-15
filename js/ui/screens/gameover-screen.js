@@ -156,7 +156,7 @@ export function show(summary) {
   if (summary.parts > 0) {
     const partsLine = el('div', { class: 'go-parts' }, [
       el('img', { src: 'assets/sprites/part_equity_memory_core.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
-      el('span', { text: ` ${summary.parts} bagian evolusi dibawa pulang — cek Dashboard!` }),
+      el('span', { text: ` ${summary.parts} fragmen diferensiasi dibawa pulang — cek Dashboard!` }),
     ]);
     grid.insertAdjacentElement('afterend', partsLine);
   }

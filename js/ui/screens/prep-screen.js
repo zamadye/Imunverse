@@ -62,6 +62,8 @@ export function applyPrepDefaults(meta = STATE.meta) {
     changed = true;
   }
   if (meta.focusRun !== 'seimbang') { meta.focusRun = 'seimbang'; changed = true; }
+  // Sprint 3.19: tingkat kesulitan kampanye (normal/sulit/brutal — bible §8.5).
+  if (!['normal', 'sulit', 'brutal'].includes(meta.selectedTier)) { meta.selectedTier = 'normal'; changed = true; }
   if (meta.selectedMode !== 'kampanye') {
     // Endless: arena terbuka TERAKHIR (terbaik) — variasi tanpa bertanya
     const list = getData().arenas.arenas;
@@ -91,6 +93,32 @@ function renderModeRow(meta) {
       modeDef.id === 'endless' ? el('small', { class: 'chip-sub', text: `Mutator: ${mutToday.def.name}` }) : null,
     ]);
     if (!selected) chip.addEventListener('click', () => selectMode(modeDef.id));
+    row.appendChild(chip);
+  }
+}
+
+/** Sprint 3.19: pilih tingkat kesulitan bab (hanya mode kampanye). */
+function renderTierRow(meta) {
+  const block = document.getElementById('prep-tier-block');
+  const row = document.getElementById('prep-tier-row');
+  if (!block || !row) return;
+  row.textContent = '';
+  const tiers = (getData().campaign && getData().campaign.tiers) || [];
+  const show = (meta.selectedMode || 'kampanye') === 'kampanye' && tiers.length >= 2;
+  block.classList.toggle('hidden', !show);
+  if (!show) return;
+  const ch = getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0];
+  for (const t of tiers) {
+    const selected = (meta.selectedTier || 'normal') === t.id;
+    const chip = el('button', { class: `prep-chip mode${selected ? ' selected' : ''}`, title: `Kuota ×${t.quotaMult} · HP musuh ×${t.hpMult} · Damage ×${t.dmgMult}` }, [
+      el('span', { text: t.name }),
+      el('small', { class: 'chip-sub', text: `kuota ${Math.round((ch.killQuota || 0) * (t.quotaMult || 1))}` }),
+    ]);
+    if (!selected) chip.addEventListener('click', () => {
+      meta.selectedTier = t.id;
+      writeSave(meta);
+      renderAll();
+    });
     row.appendChild(chip);
   }
 }
@@ -161,6 +189,7 @@ function renderAll() {
   document.getElementById('prep-currency').textContent = meta.currency.toLocaleString('id-ID');
   renderHeroRow(meta);
   renderModeRow(meta);
+  renderTierRow(meta);
   renderSummary(meta);
   // tombol MULAI
   const heroDef = getData().heroes.heroes.find((h) => h.id === meta.selectedHero);

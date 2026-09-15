@@ -188,9 +188,5 @@
     "zat_besi": 4,
     "omega3": 3
   },
-  "bossGuaranteedDrops": [
-    "vitamin_c",
-    "antibodi",
-    "antibodi"
-  ]
+  "bossGuaranteedDrops": ["vitamin_c"]
 }

@@ -3,8 +3,8 @@
   "imuReward": {
     "perWave": 0,
     "perKill": 0,
-    "perBoss": 20,
-    "victoryBonus": 50
+    "perBoss": 0,
+    "victoryBonus": 0
   },
   "combo": {
     "window": 5,

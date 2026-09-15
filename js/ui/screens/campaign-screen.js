@@ -24,13 +24,13 @@ function chapters() {
 
 export function currentChapterId(meta) {
   const cleared = meta.campaignCleared || {};
-  const next = chapters().find((c) => !cleared[c.id]);
+  const next = chapters().find((c) => cleared[c.id] === undefined);
   return next ? next.id : chapters()[chapters().length - 1].id;
 }
 
 function statusOf(ch, meta) {
   const cleared = meta.campaignCleared || {};
-  if (cleared[ch.id]) return 'cleared';
+  if (cleared[ch.id] !== undefined) return 'cleared';
   return currentChapterId(meta) === ch.id ? 'current' : 'locked';
 }
 
@@ -81,10 +81,13 @@ function renderBriefing(meta) {
   const ch = chapters().find((c) => c.id === meta.selectedChapter) || chapters()[0];
   const status = statusOf(ch, meta);
   const clearedCount = Object.keys(meta.campaignCleared || {}).length;
+  const tiers = (getData().campaign && getData().campaign.tiers) || [];
+  const clearedTier = (meta.campaignCleared || {})[ch.id];
+  const clearedName = clearedTier !== undefined && tiers[clearedTier] ? tiers[clearedTier].name : null;
 
   box.appendChild(el('div', { class: 'camp-brief-head' }, [
     el('b', { text: `${ch.organ} — ${ch.title}` }),
-    status === 'cleared' ? el('span', { class: 'camp-badge done', text: '✓ BERSIH' }) : null,
+    status === 'cleared' ? el('span', { class: 'camp-badge done', text: clearedName ? `✓ BERSIH · ${clearedName.toUpperCase()}` : '✓ BERSIH' }) : null,
     status === 'current' ? el('span', { class: 'camp-badge now', text: 'MISI AKTIF' }) : null,
     status === 'locked' ? el('span', { class: 'camp-badge lock', text: 'TERKUNCI' }) : null,
   ]));

@@ -114,11 +114,11 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 
 ### Sprint 3 — Ekonomi & progresi
 
-- [ ] 17. **Earn rate §6.2** (kontak 1,0 / Pulse 1,5 / engulf 8 / boss 60 / wave 10); **cabut faucet Genom run** (D7)
-- [ ] 18. **Item §7**: rename ID ke `serum_regenerasi` dkk + biaya §7.1; `atp_surge` = 200 Genom; sumber §7.2 (drop boss, BP track, misi mingguan); migrasi save consumable lama
-- [ ] 19. **Retune progresi §8**: Mitosis (120+30L, cap 150/450, misi, 800/500) · Pangkat (4/0,20/4/25/50) · Diferensiasi (ganti sistem equity!) · Hero (120/1,20 + scaling membran) · Kampanye (×2,2 + 3 tingkat + migrasi) · Mastery (6.100 XP, D12)
-- [ ] 20. **Validator greenfield** `tools/validate-catalog.mjs` + `tools/validate-retention.mjs` + `npm run validate`
-- [ ] **21. CHECKPOINT: `npm run validate` HIJAU. STOP bila merah — perbaiki angka, jangan longgarkan tes.**
+- [x] 17. **Earn rate §6.2** (kontak 1,0 / Pulse 1,5 / engulf 8 / boss 60 / wave 10); **cabut faucet Genom run** (D7)
+- [x] 18. **Item §7**: rename ID ke `serum_regenerasi` dkk + biaya §7.1; `atp_surge` = 200 Genom; sumber §7.2 (drop boss, BP track, misi mingguan); migrasi save consumable lama
+- [x] 19. **Retune progresi §8**: Mitosis (120+30L, cap 150/450, misi, 800/500) · Pangkat (4/0,20/4/25/50) · Diferensiasi (ganti sistem equity!) · Hero (120/1,20 + scaling membran) · Kampanye (×2,2 + 3 tingkat + migrasi) · Mastery (6.100 XP, D12)
+- [x] 20. **Validator greenfield** `tools/validate-catalog.mjs` + `tools/validate-retention.mjs` + `npm run validate`
+- [x] **21. CHECKPOINT: `npm run validate` HIJAU. STOP bila merah — perbaiki angka, jangan longgarkan tes.**
 
 ### Sprint 4 — Monetisasi & toko
 

@@ -6,9 +6,9 @@
  * berbasis run.time (tidak perlu tick manual); dua item bersifat reaktif:
  * Serum Regenerasi (picu saat HP<70%) & Membran Cadangan (picu saat HP<20%).
  *
- * ID LAMA DIPERTAHANKAN (kompatibilitas save & hadiah BP):
- *   serum_awal=Serum Regenerasi, vaksin_awal=Enzim Litik, kopi_limfa=Sitokin
- *   Burst, pelindung_lendir=Lapisan Mukus, koin_ganda=Katalis Mitosis.
+ * Sprint 3.18: ID bible §7 (serum_regenerasi, enzim_litik, sitokin_burst,
+ * lapisan_mukus, katalis_mitosis). Stok ID lama (bundle premium) tetap
+ * diambil sebagai fallback — lihat take() di bawah.
  */
 
 import { writeSave } from '../save/save-manager.js';
@@ -66,20 +66,23 @@ export function applyStartConsumables(game) {
   run.itemBuffs = freshBuffs();
   const b = run.itemBuffs;
   const t = run.time || 0;
+  const LEGACY = { serum_regenerasi: 'serum_awal', enzim_litik: 'vaksin_awal', sitokin_burst: 'kopi_limfa', lapisan_mukus: 'pelindung_lendir', katalis_mitosis: 'koin_ganda' };
   const take = (id) => {
     if ((M.consumables[id] || 0) > 0) { M.consumables[id] -= 1; return true; }
+    const leg = LEGACY[id]; // fallback stok ID lama (bundle premium §9.1)
+    if (leg && (M.consumables[leg] || 0) > 0) { M.consumables[leg] -= 1; return true; }
     return false;
   };
   let touched = false;
 
   // Enzim Litik (dulu Vaksin Awal): contact ×2 + telan mudah, 8 dtk
-  if (take('vaksin_awal')) {
+  if (take('enzim_litik')) {
     touched = true;
     b.enzimUntil = t + 8;
     emit('toast', { message: 'Enzim Litik: membran ganas 8 detik!', kind: 'gold' });
   }
   // Sitokin Burst (dulu Kopi Limfa): speed +40% 10 dtk + reset Pulse
-  if (take('kopi_limfa')) {
+  if (take('sitokin_burst')) {
     touched = true;
     b.sitokinUntil = t + 10;
     if (!b.sitokinApplied && run.player && run.player.stats) {
@@ -90,14 +93,14 @@ export function applyStartConsumables(game) {
     emit('toast', { message: 'Sitokin Burst: +40% kecepatan!', kind: 'gold' });
   }
   // Lapisan Mukus (dulu Pelindung Lendir): perisai 25% max HP
-  if (take('pelindung_lendir')) {
+  if (take('lapisan_mukus')) {
     touched = true;
     const pool = Math.round((run.player ? run.player.maxHP : 100) * 0.25);
     b.mukusPool = pool;
     emit('toast', { message: `Lapisan Mukus: perisai ${pool} HP!`, kind: 'gold' });
   }
   // Katalis Mitosis (dulu Sinyal Ganda): drop ×1.5 + engulf 2× bio
-  if (take('koin_ganda')) {
+  if (take('katalis_mitosis')) {
     touched = true;
     b.katalis = true;
     emit('toast', { message: 'Katalis Mitosis: panen ganda run ini!', kind: 'gold' });
@@ -135,7 +138,7 @@ export function applyStartConsumables(game) {
     emit('toast', { message: 'Sinyal Sinapsis: pasukan menguat!', kind: 'gold' });
   }
   // Serum Regenerasi: TIDAK dikonsumsi sekarang — picu saat HP<70%
-  if ((M.consumables.serum_awal || 0) > 0) b.serumPending = true;
+  if ((M.consumables.serum_regenerasi || 0) > 0 || (M.consumables.serum_awal || 0) > 0) b.serumPending = true;
   // Membran Cadangan: TIDAK dikonsumsi sekarang — picu saat HP<20%
   if ((M.consumables.membran_cadangan || 0) > 0) b.cadanganPending = true;
 
@@ -196,9 +199,11 @@ export function onPlayerDamaged(game, dealt) {
   const frac = player.hp / Math.max(1, player.maxHP);
   const meta = STATE.meta;
   // Serum Regenerasi: picu saat HP<70% (konsumsi DI SINI, bukan di awal)
-  if (b.serumPending && frac < 0.7 && meta && (meta.consumables.serum_awal || 0) > 0) {
+  const serumStock = (meta.consumables.serum_regenerasi || 0) + (meta.consumables.serum_awal || 0);
+  if (b.serumPending && frac < 0.7 && meta && serumStock > 0) {
     b.serumPending = false;
-    meta.consumables.serum_awal -= 1;
+    if ((meta.consumables.serum_regenerasi || 0) > 0) meta.consumables.serum_regenerasi -= 1;
+    else meta.consumables.serum_awal -= 1;
     player.heal(Math.round(player.maxHP * 0.35));
     run.effects.spawnLabel(player.x, player.y - 50, 'SERUM +35%!', '#7dff9a');
     run.effects.spawnBlast(player.x, player.y, 90, '#7dff9a');

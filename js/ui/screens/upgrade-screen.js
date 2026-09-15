@@ -8,7 +8,7 @@ import { getData } from '../../core/data-store.js';
 import { squadUpgradeCost, purchaseSquadUpgrade } from '../../systems/upgrade-system.js';
 import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
-import { globalUpgradeCost, globalUpgradeLevel, purchaseGlobalUpgrade } from '../../systems/retention-system.js';
+import { globalUpgradeCost, globalUpgradeLevel, purchaseGlobalUpgrade, resetHomeostasis } from '../../systems/retention-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { el } from '../screen-manager.js';
 import { emit } from '../../core/ui-bridge.js';
@@ -127,13 +127,27 @@ export function show() {
 export function hide() {}
 
 /* ============ TAB GLOBAL (Fase 17): 6 upgrade permanen — Imun Coin, semua hero ============
- * Spek dokumen: stat saat ini + biaya (50×1.15^level) + tombol Tingkatkan (aktif
- * bila Imun Coin cukup). Berlaku GLOBAL ke seluruh hero (applyGlobalUpgrades).
+ * Sprint 3.21: biaya lv 1–10 Biokredit, lv 11–25 Genom (bible §6.3).
+ * Berlaku GLOBAL ke seluruh hero (applyGlobalUpgrades).
  * ======================================================================================== */
 function renderGlobalTab(meta) {
   const wrap = document.getElementById('upg-global');
   wrap.textContent = '';
-  wrap.appendChild(el('p', { class: 'upg-note', text: 'Berlaku permanen untuk SEMUA hero — dibayar dengan Genom dari hasil run.' }));
+  wrap.appendChild(el('p', { class: 'upg-note', text: 'Berlaku permanen untuk SEMUA hero — lv 1–10 Biokredit, lv 11–25 Genom.' }));
+  const resetBtn = el('button', {
+    class: 'btn btn-ghost btn-reset-homeo',
+    disabled: (meta.imun || 0) < 200 || Object.keys(meta.globalUpgrades || {}).length === 0,
+    title: 'Nolkan semua jalur Homeostasis (tanpa refund)',
+    onclick: () => {
+      const res = resetHomeostasis();
+      if (res.ok) show();
+      else if (res.reason) emit('toast', { message: res.reason, kind: 'danger' });
+    },
+  }, [
+    el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: '' }),
+    el('span', { text: 'RESET 200' }),
+  ]);
+  wrap.appendChild(resetBtn);
 
   const STAT_FMT = {
     damage: (d) => `+${Math.round(d * 100)}% damage`,
@@ -147,7 +161,9 @@ function renderGlobalTab(meta) {
   for (const def of getData().upgrades.globalUpgrades || []) {
     const level = globalUpgradeLevel(meta, def.id);
     const maxed = level >= def.maxLevel;
-    const cost = globalUpgradeCost(def, level);
+    const { cost, currency } = globalUpgradeCost(def, level);
+    const coinIcon = currency === 'genom' ? 'assets/icons/cur-imun.svg' : 'assets/icons/cur-antibodi.svg';
+    const afford = currency === 'genom' ? (meta.imun || 0) >= cost : (meta.currency || 0) >= cost;
     const now = def.perLevel * level;
     const next = def.perLevel * (level + 1);
     const pct = (level / def.maxLevel) * 100;
@@ -161,14 +177,14 @@ function renderGlobalTab(meta) {
       ? el('div', { class: 'btn-buy maxed', text: 'MAX ✓' })
       : el('button', {
           class: 'btn btn-gold btn-buy',
-          disabled: (meta.imun || 0) < cost,
+          disabled: !afford,
           onclick: () => {
             const res = purchaseGlobalUpgrade(def.id);
             if (res.ok) show();
             else if (res.reason) emit('toast', { message: res.reason, kind: 'danger' });
           },
         }, [
-          el('img', { class: 'inline-coin', src: 'assets/icons/cur-imun.svg', alt: '' }),
+          el('img', { class: 'inline-coin', src: coinIcon, alt: '' }),
           el('span', { text: cost.toLocaleString('id-ID') }),
         ]);
 

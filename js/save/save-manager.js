@@ -53,11 +53,32 @@ export function loadSave() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null) return null;
+    migrateConsumableIds(parsed); // Sprint 3.18: ID lama → ID bible §7
     return parsed;
   } catch (err) {
     console.error('[save-manager] gagal membaca save:', err);
     return null;
   }
+}
+
+/**
+ * Sprint 3.18 — migrasi sekali jalan ID consumable lama → ID bible §7.
+ * Stok lama dipindah (dijumlah bila kedua ada), kunci lama dihapus.
+ */
+export function migrateConsumableIds(meta) {
+  if (!meta || !meta.consumables) return meta;
+  const map = {
+    serum_awal: 'serum_regenerasi', vaksin_awal: 'enzim_litik',
+    kopi_limfa: 'sitokin_burst', pelindung_lendir: 'lapisan_mukus',
+    koin_ganda: 'katalis_mitosis',
+  };
+  for (const [oldId, newId] of Object.entries(map)) {
+    if (meta.consumables[oldId] > 0) {
+      meta.consumables[newId] = (meta.consumables[newId] || 0) + meta.consumables[oldId];
+      delete meta.consumables[oldId];
+    }
+  }
+  return meta;
 }
 
 /**

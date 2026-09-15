@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "doc": "V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain (docs/v2/phase-06-progression.md). Tidak bisa dibeli.",
   "xpFormula": {
-    "perKill": 2,
-    "perWave": 10,
-    "victoryBonus": 80
+    "perKill": 1.4,
+    "perWave": 8,
+    "victoryBonus": 40
   },
   "levels": [
     100,

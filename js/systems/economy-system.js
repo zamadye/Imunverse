@@ -119,8 +119,14 @@ export function purchaseAllyLevel(meta) {
 export function purchaseShopItem(meta, itemId) {
   const def = getData().upgrades.shopItems.find((i) => i.id === itemId);
   if (!def) return { ok: false, reason: 'Item tidak ditemukan' };
-  if (meta.currency < def.cost) return { ok: false, reason: 'Biokredit tidak cukup' };
-  meta.currency -= def.cost;
+  // Sprint 3.18: item bisa berharga Genom (atp_surge 200G — bible §7.2)
+  if (def.currency === 'genom') {
+    if ((meta.imun || 0) < def.cost) return { ok: false, reason: 'Genom tidak cukup' };
+    meta.imun -= def.cost;
+  } else {
+    if (meta.currency < def.cost) return { ok: false, reason: 'Biokredit tidak cukup' };
+    meta.currency -= def.cost;
+  }
   meta.consumables[def.id] = (meta.consumables[def.id] || 0) + 1;
   writeSave(meta); // auto-save setelah pembelian
   return { ok: true };

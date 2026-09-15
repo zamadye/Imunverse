@@ -7,6 +7,7 @@
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
 import { addCurrency } from './economy-system.js';
+import { addBpXP } from './battlepass-system.js';
 
 /** Nilai progress stat; 'unlockedHeroes' = jumlah hero dimiliki (Fase 17). */
 function statValue(meta, stat) {
@@ -89,6 +90,8 @@ export function claimQuest(meta, id) {
   const state = ensureQuestPeriod(meta);
   state.claimed[id] = true;
   addCurrency(meta, item.def.reward);
+  // Sprint 3.19 (bible §8.1): misi harian +50 / mingguan +250 XP Mitosis.
+  if (item.def.bpXp) addBpXP(meta, item.def.bpXp, 'misi');
   // ADDENDUM §2.2: quest boleh memberi item consumable (mis. Sinapsis mingguan)
   if (item.def.item && item.def.item.id) {
     meta.consumables = meta.consumables || {};

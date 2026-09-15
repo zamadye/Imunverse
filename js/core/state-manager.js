@@ -57,7 +57,7 @@ export function createDefaultMeta() {
     bossRevealSeen: false, // reveal boss bab kanker (cutscene 6.3) — sekali
     leaderboard: [],
     evoStage: 0,
-    evoParts: { equity_receptor: 0, equity_membrane: 0, equity_effector: 0, equity_memory_core: 0 },
+    evoParts: { fragmen_diferensiasi: 0 },
     adDaily: { date: null, count: 0 },
     focusRun: 'seimbang',
     tutorialDone: false,
@@ -73,7 +73,7 @@ export function createDefaultMeta() {
       sq_nutrition: 0,
     },
     consumables: {
-      serum_awal: 0, vaksin_awal: 0, kopi_limfa: 0, pelindung_lendir: 0, koin_ganda: 0,
+      serum_regenerasi: 0, enzim_litik: 0, sitokin_burst: 0, lapisan_mukus: 0, katalis_mitosis: 0,
       opsonin: 0, atp_surge: 0, membran_cadangan: 0, toksin_balik: 0, sinapsis: 0,
     },
     missionsClaimed: [],
@@ -91,6 +91,7 @@ export function createDefaultMeta() {
       totalNutrients: 0,
       totalCurrencyEarned: 0,
       totalXP: 0,
+      totalEngulfs: 0,
     },
     lastDailyClaim: null, // string tanggal "YYYY-MM-DD"
     createdAt: new Date().toISOString(),
@@ -119,7 +120,8 @@ export function mergeMetaDefaults(meta) {
   if (meta.selectedChapter) meta.selectedChapter = mapCh(meta.selectedChapter);
   if (meta.campaignCleared && typeof meta.campaignCleared === 'object') {
     const mc = {};
-    for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = v;
+    // Sprint 3.19: nilai boolean lama = Normal (0); nilai baru = indeks tier tertinggi.
+    for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = (v === true ? 0 : v);
     meta.campaignCleared = mc;
   }
   // R3: merge penanda naratif baru (save lama aman)
@@ -146,13 +148,17 @@ export function mergeMetaDefaults(meta) {
     for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapCh(mapId(k))] = v;
     meta.codexSeen = mapped;
   }
-  // Character Agent: migrasi part evolusi lama ke fragmen equity baru.
+  // Sprint 3.19: semua part lama (era silia & era equity) dilebur jadi Fragmen Diferensiasi.
   if (meta.evoParts && typeof meta.evoParts === 'object') {
     const PART_MAP = {
-      silia: 'equity_receptor',
-      pseudopodia: 'equity_membrane',
-      mikropedang: 'equity_effector',
-      inti_elemen: 'equity_memory_core',
+      silia: 'fragmen_diferensiasi',
+      pseudopodia: 'fragmen_diferensiasi',
+      mikropedang: 'fragmen_diferensiasi',
+      inti_elemen: 'fragmen_diferensiasi',
+      equity_receptor: 'fragmen_diferensiasi',
+      equity_membrane: 'fragmen_diferensiasi',
+      equity_effector: 'fragmen_diferensiasi',
+      equity_memory_core: 'fragmen_diferensiasi',
     };
     const mappedParts = {};
     for (const [k, v] of Object.entries(meta.evoParts)) {

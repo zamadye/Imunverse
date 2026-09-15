@@ -86,11 +86,11 @@ export function ensureRankState(meta) {
 }
 
 /** GP hasil satu run (menang maupun kalah — usaha tetap dihargai). */
-export function computeRunGP({ wave, kills, bossKills, victory, chapterId }) {
+export function computeRunGP({ wave, kills, bossKills, victory, engulfs = 0 }) {
   const pts = getRanks().points;
-  let gp = wave * pts.perWave + kills * pts.perKill + bossKills * pts.perBoss;
+  // Sprint 3.19 (bible §8.2): 4/wave + 0,2/kill + 4/engulf + 25/boss + 50 menang.
+  let gp = wave * pts.perWave + kills * pts.perKill + engulfs * (pts.perEngulf || 0) + bossKills * pts.perBoss;
   if (victory) gp += pts.victoryBonus;
-  if (victory && chapterId) gp += pts.chapterBonus;
   return Math.round(gp);
 }
 
