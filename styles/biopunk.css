@@ -390,31 +390,40 @@ body.in-run .toast {
 
 /* ---- Background images ---- */
 
-/* Loading screen — teal ocean / hero peeking artwork */
+/* Loading screen — hero action splash art (logo sudah ada di image) */
 #screen-loading {
   background-image: url('../assets/backgrounds/bg_loading.png');
   background-size: cover;
-  background-position: center center;
+  background-position: center top;
   background-repeat: no-repeat;
 }
 #screen-loading::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(4, 17, 26, 0.62);
+  background: linear-gradient(
+    180deg,
+    rgba(4, 17, 26, 0.10) 0%,
+    rgba(4, 17, 26, 0.20) 55%,
+    rgba(4, 17, 26, 0.72) 100%
+  );
   pointer-events: none;
   z-index: 0;
 }
 #screen-loading .load-box {
   position: relative;
   z-index: 1;
+  margin-top: auto;
 }
+/* Sembunyikan teks PHAGOS HTML — logo sudah ada di image */
+#screen-loading .load-title,
+#screen-loading .load-stage { display: none; }
 
-/* Dashboard — group hero action art */
+/* Dashboard — teal framed art (center kosong untuk UI) */
 #screen-dashboard {
   background-image: url('../assets/backgrounds/bg_dashboard.png');
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 #screen-dashboard::after {
@@ -423,9 +432,9 @@ body.in-run .toast {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(4, 17, 26, 0.35) 0%,
-    rgba(4, 17, 26, 0.58) 45%,
-    rgba(4, 17, 26, 0.90) 100%
+    rgba(4, 17, 26, 0.28) 0%,
+    rgba(4, 17, 26, 0.42) 40%,
+    rgba(4, 17, 26, 0.82) 100%
   );
   pointer-events: none;
   z-index: 0;
