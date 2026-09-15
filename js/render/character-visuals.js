@@ -188,6 +188,9 @@ function drawOuterHalo(ctx, x, y, r, color, time, alpha = 0.5) {
  * Must be called inside the same billboard transform as the hero sprite.
  */
 export function drawHeroEquity(ctx, heroId, stage, x, y, size, time, baseColor = '#35d0ba') {
+  // Mako V2 uses authored stage sprites; do not stack legacy equity anatomy
+  // over the new humanoid Belly Devourer art.
+  if (heroId === 'macrophage') return;
   stage = clampTier(stage);
   if (stage <= 0) return;
   const d = heroDesign(heroId);

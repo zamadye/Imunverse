@@ -92,7 +92,7 @@ import { drawNestHint,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
-import { drawSprite } from '../render/sprite-loader.js';
+import { drawSprite, makoHeroPath, makoMutationPath } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
@@ -2551,6 +2551,10 @@ applyChapterTier(enemy, run) {
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
           let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          const artState = player.attackFlash > 0 ? 'attack' : 'idle';
+          const evoStage = run.evoStage?.stage || 0;
+          const makoPath = makoHeroPath(player.heroDef.id, run.spawnSys?.wave || 1, artState, evoStage);
+          if (makoPath) path = makoPath;
           const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
@@ -2560,7 +2564,6 @@ applyChapterTier(enemy, run) {
           // (dibeli pemain) yang boleh menyala; default karakter bersih.
           if (auraAcc) drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc.color, time, 0, 0.8);
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
-          const evoStage = run.evoStage?.stage || 0;
           if (skin) {
             const tinted = getTintedSprite(path, skin.color);
             const scale = bodySize / Math.max(tinted.width, tinted.height);
@@ -2568,7 +2571,9 @@ applyChapterTier(enemy, run) {
           } else {
             drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           }
-          drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
+          if (player.heroDef.id !== 'macrophage') {
+            drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
+          }
           // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
           // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
           // mahkota/kilau yang orientasinya bermakna).
@@ -2578,7 +2583,8 @@ applyChapterTier(enemy, run) {
               const mdef = mutationDef(muts[mi]);
               if (!mdef || !mdef.sprite) continue;
               const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
-              drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
+              const overlayPath = makoMutationPath(player.heroDef.id, muts[mi], mdef.sprite) || mdef.sprite;
+              drawSprite(ctx, overlayPath, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
             }
           } catch { /* abaikan */ }
           // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)

@@ -16,6 +16,37 @@ import { isDevMode } from '../core/dev-mode.js'; // #19: placeholder loud hanya 
 const cache = new Map(); // path → {image, isPlaceholder, width, height}
 const metaByPath = new Map(); // path → {color, label} untuk fallback placeholder
 
+// Mako V2 art import contract. Stage milestones are visual-only: the renderer
+// selects a prepared PNG; no combat/stat/wave logic is changed here.
+const MAKO_V2_STAGES = [1, 2, 4, 7, 10];
+const MAKO_V2_STATES = ['idle', 'attack', 'upgrade'];
+const MAKO_V2_MUTATIONS = [
+  'berduri', 'lengket', 'beracun', 'elastis', 'penyerap', 'tipis',
+  'ledakan_dalam', 'membran_ganda', 'parasit', 'medan_pulsa', 'regenerasi', 'cermin',
+  'nova', 'simbiosis', 'evolusi_total', 'rantai', 'adaptif', 'medan_hidup',
+];
+
+export function makoVisualStage(wave = 1, evolutionStage = 0) {
+  const w = Math.max(1, Number(wave) || 1);
+  let stage = 0;
+  for (let i = 0; i < MAKO_V2_STAGES.length; i++) {
+    if (w >= MAKO_V2_STAGES[i]) stage = i;
+  }
+  return Math.max(stage, Math.min(4, Number(evolutionStage) || 0));
+}
+
+export function makoHeroPath(heroId, wave = 1, state = 'idle', evolutionStage = 0) {
+  if (heroId !== 'macrophage') return null;
+  const safeState = MAKO_V2_STATES.includes(state) ? state : 'idle';
+  const stage = makoVisualStage(wave, evolutionStage);
+  return `assets/sprites/mako_v2/mako_stage${stage}_${safeState}.png`;
+}
+
+export function makoMutationPath(heroId, mutationId, fallback = null) {
+  if (heroId !== 'macrophage' || !MAKO_V2_MUTATIONS.includes(mutationId)) return fallback;
+  return `assets/sprites/mako_v2/mutations/mako_${mutationId}.png`;
+}
+
 /** Kumpulkan semua path sprite unik dari data JSON yang dimuat. */
 export function collectSpritePaths(data) {
   const paths = new Set();
@@ -93,6 +124,12 @@ const EXTRA_PRELOAD = [
   'assets/sprites/amara_pose_talk.png',
   'assets/sprites/ria_pose_idle.png',
   'assets/sprites/ria_pose_talk.png',
+  // Mako V2: 5 visual wave/evolution stages × 3 render states.
+  ...MAKO_V2_STAGES.flatMap((_, stage) => MAKO_V2_STATES.map((state) => `assets/sprites/mako_v2/mako_stage${stage}_${state}.png`)),
+  // Mako V2: all 18 mutation layers are preloaded for cumulative rendering.
+  ...MAKO_V2_MUTATIONS.map((id) => `assets/sprites/mako_v2/mutations/mako_${id}.png`),
+  ...['default_biological', 'rare_lime_colony', 'epic_deep_sea', 'legendary_golden_apex', 'event_seasonal']
+    .map((id) => `assets/sprites/mako_v2/skins/mako_${id}_idle.png`),
 ];
 
 /**

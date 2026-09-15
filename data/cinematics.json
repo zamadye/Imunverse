@@ -34,7 +34,7 @@
               "scale": 0.3
             },
             {
-              "sprite": "assets/sprites/hero_macrophage_idle.png",
+              "sprite": "assets/sprites/mako_v2/mako_stage0_idle.png",
               "from": [
                 0.3,
                 0.6

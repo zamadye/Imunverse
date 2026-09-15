@@ -119,10 +119,10 @@ Legenda:
 | Colony building | 7 building × 3 stage | ✅ | 21 PNG di `assets/buildings/`; tetap menjadi track ecosystem terpisah. |
 | Reference colony | 1 sheet | ✅ | `assets/buildings/reference/colony_buildings_reference_sheet.png`. |
 | V2 style lock package | 3 hero + 3 virus + 1 boss | ⬜ | Wajib sebelum produksi penuh menurut brief V2 owner. |
-| Mako V2 concept options | 3 opsi | 🟡 | Opsi A/B/C sudah dibuat sebagai reference-only; belum ada approval. |
+| Mako V2 concept options | 3 opsi | ✅ | Option B — Belly Devourer dipilih owner; Mako production preview/runtime pass sudah diimpor. |
 | Legacy hero/enemy sprites | 11 hero + 13 enemy | 🟡 | Masih ada di `assets/sprites/`; belum diputuskan batch pengganti setelah konsep owner. |
 | Portrait hero | 11 portrait | 🟡 | Asset tersedia; perlu arahan apakah akan dipoles atau diganti total. |
-| Mutation overlay art | 18 mutation | 🟡 | 18 file tersedia; perlu audit kesatuan visual dan konsep kumulatif. |
+| Mutation overlay art | 18 mutation | ✅ | 18 RGBA layer Mako V2 tersedia, tervalidasi, dan dipreload sebagai layer kumulatif. |
 | Equity/evolution art | 4 part + overlay | 🟡 | Fondasi tersedia; perlu konsep final dan review sheet. |
 | Gameplay VFX art | hit/spark/ring/joystick | 🟡 | Asset lama tersedia; hanya dipoles bila masuk brief art. |
 | Item/nutrient art | 13 item | 🟡 | Asset tersedia; menunggu arahan visual baru. |
@@ -168,7 +168,7 @@ pada jalur art-import yang disetujui.
 
 ### PHASE V2-A — Style exploration gate
 
-**Status: 🟡 berjalan; Mako sudah punya 3 opsi, gate belum lengkap**
+**Status: 🟡 berjalan untuk roster penuh; Mako Option B sudah dikunci sebagai exception runtime**
 
 Sesuai brief V2 owner, jangan langsung memproduksi seluruh roster. Paket style
 test minimal yang harus tersedia sebelum style lock:
@@ -190,13 +190,13 @@ Yang belum tersedia:
 - Virus concept 1–3.
 - Boss concept.
 
-Semua hasil fase ini bersifat reference-only. Belum ada penggantian asset runtime.
+Hasil fase ini tetap reference-only untuk roster penuh. Owner sudah menyetujui Mako V2 Option B sebagai exception, sehingga Mako memiliki production preview dan import runtime langsung tanpa mengubah gameplay.
 
 ---
 
 ### PHASE V2-MAKO — Mutation, evolution, dan skin plan
 
-**Status: 🟡 desain art ditetapkan; generator belum dibuat**
+**Status: ✅ Mako Option B art pass dan import runtime selesai; roster penuh tetap menunggu style lock**
 
 Baseline yang dipilih owner: **Mako V2 Option B — Belly Devourer**.
 
@@ -271,9 +271,10 @@ Target output generator:
 - Preview sheet dan gameplay-size sheet.
 - PNG transparan production-ready.
 
-Generator belum dibuat sebelum owner menyetujui silhouette Mako dan style lock
-V2. Concept AI dipakai untuk reference; Python/MJS dipakai untuk output yang
-konsisten dan dapat diulang.
+Untuk Mako, owner sudah menyetujui silhouette Option B. Generator Python/MJS
+sudah menghasilkan output transparan yang konsisten dan dapat diulang di
+`tools/gen_mako_v2.py` dan `scripts/verify-mako-v2.mjs`. Concept AI tetap
+menjadi reference; generator dipakai untuk output runtime Mako saja.
 
 ---
 
@@ -552,7 +553,8 @@ font, culling, economy, atau browser dependency.
 | 2026-09-15 | 2–4 | Existing ecosystem asset audit | ✅ tersedia | `assets/heroes/`, `assets/enemies/`, `assets/buildings/` | Menunggu arahan redesign |
 | 2026-09-15 | 5A | Mako / The Devourer concept exploration | 🟡 reference-only | `assets/heroes/reference/mako_devourer_*.png` | Menunggu approval sebelum production replacement |
 | 2026-09-15 | 5A | Mako silhouette options A–D | 🟡 reference-only | `assets/heroes/reference/mako_option_*.png` | Menunggu pilihan owner |
-| 2026-09-15 | V2-A | Mako V2 humanoid options A–C | 🟡 reference-only | `assets/heroes/reference/mako_v2_option_*.png` | Menunggu pilihan owner/style lock |
+| 2026-09-15 | V2-A | Mako V2 humanoid options A–C | ✅ Option B dipilih | `assets/heroes/reference/mako_v2_option_*.png` | Mako Option B disetujui sebagai baseline |
+| 2026-09-15 | V2-MAKO | Mako Option B runtime art import | ✅ | `assets/sprites/mako_v2/`, `tools/gen_mako_v2.py`, `scripts/verify-mako-v2.mjs` | 38 PNG RGBA tervalidasi; roster penuh tetap menunggu style lock |
 
 ---
 

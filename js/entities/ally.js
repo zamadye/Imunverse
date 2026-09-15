@@ -13,7 +13,7 @@ import { getSprite } from '../render/sprite-loader.js';
 const ALLY_SPRITES = [
   'assets/sprites/hero_bcell_idle.png',
   'assets/sprites/hero_nkcell_idle.png',
-  'assets/sprites/hero_macrophage_idle.png',
+  'assets/sprites/mako_v2/mako_stage0_idle.png',
   'assets/sprites/hero_eosinophil_idle.png',
   'assets/sprites/hero_tcd8_idle.png',
   'assets/sprites/hero_tcd4_idle.png',
