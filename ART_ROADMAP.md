@@ -555,6 +555,7 @@ font, culling, economy, atau browser dependency.
 | 2026-09-15 | 5A | Mako silhouette options A–D | 🟡 reference-only | `assets/heroes/reference/mako_option_*.png` | Menunggu pilihan owner |
 | 2026-09-15 | V2-A | Mako V2 humanoid options A–C | ✅ Option B dipilih | `assets/heroes/reference/mako_v2_option_*.png` | Mako Option B disetujui sebagai baseline |
 | 2026-09-15 | V2-MAKO | Mako Option B runtime art import | ✅ | `assets/sprites/mako_v2/`, `tools/gen_mako_v2.py`, `scripts/verify-mako-v2.mjs` | 38 PNG RGBA tervalidasi; roster penuh tetap menunggu style lock |
+| 2026-09-16 | V2-ANIM | Mako motion identity gameplay pass 1 | 🟡 owner review | `docs/animation/mako-v2-motion.md`, `js/render/mako-animation.js` | Idle/move/pulse/skill/reaction cues dibuat; jangan lanjut hero berikutnya sebelum review |
 
 ---
 

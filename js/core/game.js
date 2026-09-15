@@ -94,6 +94,7 @@ import { drawNestHint,
 } from '../render/shape-renderer.js';
 import { drawSprite, makoHeroPath, makoMutationPath } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { createMakoMotionState, getMakoMotionStyle, updateMakoMotion } from '../render/mako-animation.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
 export const game = {
@@ -271,6 +272,8 @@ export const game = {
       enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
       membrane: null,
       _mutationFlashT: 0, // PHAGOS: overlay merah saat patogen bermutasi
+      // Mako V2 motion identity; visual-only state derived from existing systems.
+      makoMotion: createMakoMotionState(),
     };
     // PHAGOS: medan membran hero (wajib sebelum HOOK spawn agar stats siap)
     try { initMembrane(this.run, heroDef); } catch (err) { console.warn('[phagos] initMembrane gagal:', err); }
@@ -790,6 +793,8 @@ export const game = {
 
     // 10. Efek & partikel (+ cooldown kemampuan aktif)
     run.skills.update(dt);
+    // Mako V2 animation observes skill/pulse/hit state without touching combat.
+    updateMakoMotion(run, dt);
     if (run.protectT > 0) {
       run.protectT -= dt;
       if (run.protectT <= 0) run.protectMult = 1;
@@ -2398,9 +2403,18 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
-    const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
-    const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
-    const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
+    const makoMotion = player.heroDef.id === 'macrophage'
+      ? getMakoMotionStyle(player, run, run.makoMotion, time)
+      : null;
+    const pBob = makoMotion
+      ? makoMotion.bob
+      : (player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1);
+    const pLunge = makoMotion
+      ? makoMotion.lunge
+      : (player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0));
+    const pSwingTilt = makoMotion
+      ? makoMotion.tilt
+      : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0);
     const pBody = {
       x: player.x + (player.alive ? Math.cos(player.facing) * pLunge : 0),
       y: player.y + (player.alive ? Math.sin(player.facing) * pLunge * PERSP.YS : 0),
@@ -2543,7 +2557,7 @@ applyChapterTier(enemy, run) {
         ctx.restore();
       } });
     }
-    if (player.alive) {
+    if (player.alive || (makoMotion && run.makoMotion?.deathAt && makoMotion.alpha > 0)) {
       draws.push({ y: player.y, fn: () => {
         // PHAGOS Nyx: menghilang total 0,5 dtk saat Pulse (invincible)
         if (run.membrane && run.membrane.vanishT > 0) return;
@@ -2551,13 +2565,24 @@ applyChapterTier(enemy, run) {
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
           let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          const artState = player.attackFlash > 0 ? 'attack' : 'idle';
+          const artState = makoMotion?.spriteState || (player.attackFlash > 0 ? 'attack' : 'idle');
           const evoStage = run.evoStage?.stage || 0;
           const makoPath = makoHeroPath(player.heroDef.id, run.spawnSys?.wave || 1, artState, evoStage);
           if (makoPath) path = makoPath;
-          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
+          const tilt = makoMotion
+            ? pSwingTilt * flip
+            : (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * flip;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
+          if (makoMotion) {
+            // Transform the sprite and its authored overlays together. This
+            // is render-only squash/stretch; physics radius is untouched.
+            ctx.save();
+            ctx.translate(pBody.x, pBody.y);
+            ctx.scale(makoMotion.scaleX, makoMotion.scaleY);
+            ctx.translate(-pBody.x, -pBody.y);
+            ctx.globalAlpha = makoMotion.alpha;
+          }
           const auraAcc = STATE.meta.cosmetics?.aura
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
           // E1 poin 5: aura neon default DIHAPUS — hanya aura KOSMETIK
@@ -2606,6 +2631,7 @@ applyChapterTier(enemy, run) {
             ctx.lineTo(pBody.x + cw / 2, cy + ch / 2);
             ctx.closePath(); ctx.fill(); ctx.stroke();
           }
+          if (makoMotion) ctx.restore();
           ctx.restore();
 
           // NAMEPLATE ala MOBA: nama hero + level di atas kepala
