@@ -10,6 +10,33 @@ balance, QA, bug fixing, UI/UX, atau infrastructure.
 
 ---
 
+## 0A. OWNER V2 ART DIRECTION — OVERRIDE TERBARU
+
+Brief terbaru owner adalah arah visual aktif untuk Imunverse V2 dan menjadi
+prioritas di atas eksplorasi Mako sebelumnya.
+
+Perubahan arah yang harus dihormati:
+
+- Hero V2 = **stylized humanoid biological game characters**, bukan sprite sel
+  non-humanoid sebagai arah produksi utama.
+- Target rasa = cute + epic + biological + collectible + gameplay-readable.
+- Hero harus punya head/face, torso, arm, leg, pose, personality, dan combat
+  fantasy yang terbaca.
+- Mako = friendly giant macrophage: torso besar, lengan tebal, kaki pendek,
+  tangan oversized, moss green + biological yellow, dan engulfing mechanism.
+- Virus = chaotic, organic, dangerous, cute, weird, collectible; bukan horror.
+- Setiap karakter wajib berbeda melalui proporsi, siluet, posture, equipment,
+  movement language, dan signature effect — bukan hanya pergantian warna.
+- Skins mempertahankan siluet Hero dan dikembangkan setelah default art lock.
+- Style lock wajib mengikuti urutan owner: 3 Hero + 3 Virus + 1 Boss sebelum
+  produksi roster penuh.
+
+Eksplorasi Mako non-humanoid yang dibuat sebelum brief V2 tetap disimpan sebagai
+arsip/reference dan **bukan** final production direction. Asset runtime belum
+diganti.
+
+---
+
 ## 1. KONTRAK SCOPE ART AGENT
 
 ### 1.1 Yang dikerjakan
@@ -84,13 +111,15 @@ Legenda:
 
 | Area | Target | Status sekarang | Catatan |
 |---|---:|---|---|
-| Visual language & Art Bible | 1 sistem | ✅ | `assets/ART_BIBLE.md` sudah menjadi kontrak visual. |
-| Hero sebagai tower | 11 hero × 3 state | ✅ | 33 PNG di `assets/heroes/towers/`; metadata lengkap. |
-| Reference hero tower | 1 sheet | ✅ | `assets/heroes/reference/hero_tower_reference_sheet.png`. |
-| Pathogen berbasis path | 13 pathogen | ✅ | 13 PNG di `assets/enemies/path/`; metadata lengkap. |
-| Reference pathogen | 1 sheet | ✅ | `assets/enemies/reference/pathogen_path_reference_sheet.png`. |
-| Colony building | 7 building × 3 stage | ✅ | 21 PNG di `assets/buildings/`; metadata lengkap. |
+| Visual language & Art Bible | 1 sistem | 🟡 | Fondasi lama tersedia; brief V2 owner menjadi override dan style lock baru belum final. |
+| Hero sebagai tower | 11 hero × 3 state | 🟡 | 33 PNG tersedia, tetapi merupakan ecosystem pass sebelumnya dan bukan final V2 humanoid direction. |
+| Reference hero tower | 1 sheet | 🟡 | Sheet lama tersedia; perlu reference sheet baru setelah V2 style lock. |
+| Pathogen berbasis path | 13 pathogen | 🟡 | 13 PNG tersedia; V2 virus direction perlu style test baru sebelum produksi roster. |
+| Reference pathogen | 1 sheet | 🟡 | Sheet lama tersedia; perlu direkonsiliasi dengan virus V2. |
+| Colony building | 7 building × 3 stage | ✅ | 21 PNG di `assets/buildings/`; tetap menjadi track ecosystem terpisah. |
 | Reference colony | 1 sheet | ✅ | `assets/buildings/reference/colony_buildings_reference_sheet.png`. |
+| V2 style lock package | 3 hero + 3 virus + 1 boss | ⬜ | Wajib sebelum produksi penuh menurut brief V2 owner. |
+| Mako V2 concept options | 3 opsi | 🟡 | Opsi A/B/C sudah dibuat sebagai reference-only; belum ada approval. |
 | Legacy hero/enemy sprites | 11 hero + 13 enemy | 🟡 | Masih ada di `assets/sprites/`; belum diputuskan batch pengganti setelah konsep owner. |
 | Portrait hero | 11 portrait | 🟡 | Asset tersedia; perlu arahan apakah akan dipoles atau diganti total. |
 | Mutation overlay art | 18 mutation | 🟡 | 18 file tersedia; perlu audit kesatuan visual dan konsep kumulatif. |
@@ -134,6 +163,75 @@ pada jalur art-import yang disetujui.
 - Reference sheet convention.
 
 **Output:** `assets/ART_BIBLE.md` dan metadata art yang sudah tersedia.
+
+---
+
+### PHASE V2-A — Style exploration gate
+
+**Status: 🟡 berjalan; Mako sudah punya 3 opsi, gate belum lengkap**
+
+Sesuai brief V2 owner, jangan langsung memproduksi seluruh roster. Paket style
+test minimal yang harus tersedia sebelum style lock:
+
+- 3 Hero concepts — Mako, Dendri, Neutron.
+- 3 Virus concepts — tiga family berbeda dengan siluet berbeda.
+- 1 Boss concept — satu evolved/mutated family dengan complexity lebih tinggi.
+
+Yang sudah tersedia:
+
+- Mako V2 Option A — Friendly Giant Guardian.
+- Mako V2 Option B — Belly Devourer.
+- Mako V2 Option C — Pseudopod Guardian.
+
+Yang belum tersedia:
+
+- Dendri V2 concept.
+- Neutron V2 concept.
+- Virus concept 1–3.
+- Boss concept.
+
+Semua hasil fase ini bersifat reference-only. Belum ada penggantian asset runtime.
+
+---
+
+### PHASE V2-B — Owner approval & style lock
+
+**Status: ⬜ menunggu paket V2-A lengkap**
+
+Approval harus memeriksa:
+
+- silhouette dalam grayscale;
+- personality dan facial readability;
+- biological inspiration;
+- combat fantasy dan signature effect;
+- gameplay-scale readability;
+- kesatuan Hero versus Virus versus Boss;
+- potensi skin tanpa merusak silhouette.
+
+Tidak lanjut ke produksi roster sebelum owner menyetujui style lock.
+
+---
+
+### PHASE V2-C — Hero production
+
+**Status: ⬜ belum dimulai**
+
+Setelah style lock: produksi 11 Hero V2 dengan identity asset, gameplay asset,
+portrait, icon, expressions, animation state, dan signature VFX secara bertahap.
+
+---
+
+### PHASE V2-D — Virus, variants, boss, VFX, skins
+
+**Status: ⬜ belum dimulai**
+
+Urutan owner:
+
+1. 13 Virus families.
+2. Enemy variants: normal, elite, armored, fast, split, explosive, stealth.
+3. Boss families dan phase presentation.
+4. Hero/Virus VFX language.
+5. Skin architecture dan cosmetic packs.
 
 ---
 
@@ -371,6 +469,7 @@ font, culling, economy, atau browser dependency.
 | 2026-09-15 | 2–4 | Existing ecosystem asset audit | ✅ tersedia | `assets/heroes/`, `assets/enemies/`, `assets/buildings/` | Menunggu arahan redesign |
 | 2026-09-15 | 5A | Mako / The Devourer concept exploration | 🟡 reference-only | `assets/heroes/reference/mako_devourer_*.png` | Menunggu approval sebelum production replacement |
 | 2026-09-15 | 5A | Mako silhouette options A–D | 🟡 reference-only | `assets/heroes/reference/mako_option_*.png` | Menunggu pilihan owner |
+| 2026-09-15 | V2-A | Mako V2 humanoid options A–C | 🟡 reference-only | `assets/heroes/reference/mako_v2_option_*.png` | Menunggu pilihan owner/style lock |
 
 ---
 
