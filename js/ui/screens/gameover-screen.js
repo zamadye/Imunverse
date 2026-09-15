@@ -298,8 +298,8 @@ function renderHookBox(summary) {
   // 2) pangkat berikutnya
   try {
     const rk = playerRank();
-    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gpAfter, need: rk.next.min, unit: 'GP', pct: rk.pct,
-      eta: etaFor('gp', rk.next.min - rk.gpAfter) });
+    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gp, need: rk.next.min, unit: 'GP', pct: rk.pct,
+      eta: etaFor('gp', rk.need) });
   } catch { /* abaikan */ }
   // 3) Mitosis level berikutnya
   try {
@@ -328,6 +328,7 @@ function renderHookBox(summary) {
     return;
   }
   for (const c of top) {
+    if (!c || !Number.isFinite(c.cur) || !Number.isFinite(c.need)) continue;
     const pct = Math.min(99, Math.round(c.pct * 100));
     box.appendChild(el('div', { class: 'go-hook-row' }, [
       el('span', { class: 'go-hook-label', text: `${c.label}: ${c.cur.toLocaleString('id-ID')}/${c.need.toLocaleString('id-ID')} ${c.unit}` }),

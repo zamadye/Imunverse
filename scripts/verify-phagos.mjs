@@ -763,5 +763,24 @@ log('pwa-shell', mani.name === 'Imunverse PHAGOS' && mani.display === 'standalon
   && noBanner === false && yesBanner === true && afterDismiss === false
   && htmlSrc.includes('rel="manifest"') && htmlSrc.includes('pwa-192.png'));
 
+
+// ---------- 18d. Regresi: gameover stat-nol (bug gpAfter) ----------
+STATE.meta.stats = { totalKills: 0, bestWave: 0, bossKills: 0, totalRuns: 0, totalEngulfs: 0, totalNutrients: 0, wins: 0 };
+STATE.meta.unlockedHeroes = ['macrophage'];
+STATE.meta.evoParts = {};
+STATE.meta.rank = { gp: 0 };
+STATE.meta.battlepass = null;
+global.window.localStorage.removeItem('imunverse.metrics.v1');
+let goErr0 = null;
+try {
+  goMod.show({ quit: false, victory: false, modeId: 'normal', heroId: 'macrophage', engulfs: 0, bio: 0,
+    wave: 1, time: 30, kills: 3, bossKills: 0, xpGained: 5, nutrients: 0, parts: 0, level: 1,
+    currencyEarned: 8, imuEarned: 0, bpFrom: null, bpTo: null, newMissions: 0, mastery: null, rank: null });
+} catch (e) { goErr0 = e; }
+log('go-zerostats', goErr0 === null
+  && document.querySelectorAll('#go-hook .go-hook-row').length >= 1
+  && document.querySelectorAll('#go-heroes .go-hero').length === 11,
+  goErr0 ? String(goErr0).slice(0, 140) : `rows=${document.querySelectorAll('#go-hook .go-hook-row').length}`);
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);
