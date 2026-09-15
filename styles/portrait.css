@@ -218,4 +218,9 @@
   #screen-herodetail .hd-rok-panel {
     order: 2; overflow: visible; max-height: none; align-self: stretch;
   }
+
+  /* ======== BP: kepala musim menumpuk ======== */
+  #screen-bp .bp-head { flex-direction: column; align-items: stretch; gap: 8px; }
+  #screen-bp .bp-level-wrap { flex: none; }
+  #screen-bp #btn-bp-premium { width: 100%; min-height: 44px; }
 }
