@@ -205,14 +205,6 @@ h1, h2, h3,
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
-/* Wordmark PHAGOS (ganti teks h1) */
-.title-wordmark {
-  display: block;
-  width: min(72vw, 300px);
-  height: auto;
-  margin: 0 auto;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
-}
 /* Tombol MULAI title — gold hangat selaras dgn art (bukan neon green) */
 #btn-title-start.btn-primary,
 #screen-title .title-start.btn-primary {
