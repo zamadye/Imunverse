@@ -1,0 +1,115 @@
+/* =========================================================
+   portrait.css — UI-REBUILD: PORTRAIT-FIRST (standar genre mobile).
+   File ini dimuat TERAKHIR → menimpa main.css & dashboard-focus.css
+   hanya dalam orientasi portrait. Aturan landscape TIDAK disentuh.
+   Konvensi: semua blok dibungkus @media (orientation: portrait),
+   kecuali perbaikan tabrakan class yang berlaku global (__fix).
+   ========================================================= */
+
+/* ---------- __fix GLOBAL: tabrakan class .bp-lv ----------
+   .bp-lv (main.css) absolute untuk sel track Mitosis, tapi dipakai juga
+   oleh bp-bar dashboard → "Lv 1" liar di tepi kiri. Netralkan di dashboard. */
+#screen-dashboard .bp-bar { position: relative; }
+#screen-dashboard .bp-bar .bp-lv { position: static; transform: none; }
+
+@media (orientation: portrait) {
+
+  /* ======== FONDASI: bingkai layar + area aman ======== */
+  .screen {
+    padding-left: 14px;
+    padding-right: 14px;
+    width: 100%;
+    max-width: 560px; /* tablet portrait: konten tetap ramping & tengah */
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Toast menu: di atas tombol MAIN + dock (tidak menutup konten) */
+  body:not(.in-run) #toasts {
+    bottom: calc(196px + env(safe-area-inset-bottom));
+    width: min(86vw, 360px);
+  }
+
+  /* ======== DASHBOARD: bingkai tetap + konten scroll ======== */
+  #screen-dashboard { overflow: hidden; }
+  #screen-dashboard .topbar { flex: 0 0 auto; }
+  #screen-dashboard .dash-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    padding-bottom: 10px;
+    overscroll-behavior: contain;
+  }
+  #screen-dashboard .dash-scroll { overflow: visible; }
+  #screen-dashboard .dashboard-play { flex: 0 0 auto; }
+  #screen-dashboard .dock { flex: 0 0 auto; }
+
+  /* ======== DASHBOARD: topbar muat 390px ======== */
+  #screen-dashboard .topbar { gap: 6px; max-width: none; }
+  #screen-dashboard .rank-chip {
+    flex: 1 1 auto; min-width: 0;
+    padding: 5px 8px;
+  }
+  #screen-dashboard .rank-chip .rank-meta { min-width: 0; }
+  #screen-dashboard .rank-chip b,
+  #screen-dashboard .rank-chip small {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: block;
+  }
+  #screen-dashboard .rank-chip .rank-emblem { width: 30px; height: 30px; font-size: 15px; }
+  #screen-dashboard .dash-points,
+  #screen-dashboard .currency-chip {
+    flex: 0 0 auto;
+    font-size: 14px;
+    padding: 6px 10px 6px 6px;
+    gap: 6px;
+  }
+  #screen-dashboard .dash-points .coin,
+  #screen-dashboard .currency-chip .coin { width: 20px; height: 20px; }
+  #screen-dashboard .lang-pill {
+    flex: 0 0 auto;
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+
+  /* ======== DASHBOARD: kartu bertumpuk 1 kolom ======== */
+  #screen-dashboard .duo-row { grid-template-columns: 1fr; }
+
+  /* ======== DASHBOARD: banner strain terbaca penuh ======== */
+  #screen-dashboard .strain-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  #screen-dashboard .strain-banner .strain-title,
+  #screen-dashboard .strain-banner .strain-name,
+  #screen-dashboard .strain-banner .strain-desc {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  /* ======== DASHBOARD: tombol MAIN satu baris ======== */
+  #screen-dashboard .dashboard-play-copy { min-width: 0; }
+  #screen-dashboard .dashboard-play-copy b { font-size: 24px; }
+  #screen-dashboard .dashboard-play-copy small {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 62vw;
+    font-size: 11px;
+  }
+
+  /* ======== DASHBOARD: dock 5 label muat ======== */
+  #screen-dashboard .dock { gap: 2px; }
+  #screen-dashboard .dock-btn span:last-child {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  #screen-dashboard .dock-btn .dock-ico { width: 52px; height: 52px; }
+}
