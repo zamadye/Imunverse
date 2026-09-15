@@ -23,6 +23,7 @@ import { encodeCurrentBuild, makeBuildUrl } from '../../systems/build-share-syst
 import { checkMilestone } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
+import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
 import { ensureBp, xpNeed } from '../../systems/battlepass-system.js';
 import { playerRank } from '../../systems/rank-system.js';
 import { getNextEvoStageDef } from '../../systems/evolution-system.js';
@@ -274,6 +275,14 @@ function renderHookBox(summary) {
   if (!box) return;
   box.textContent = '';
   const meta = STATE.meta;
+  // Sprint 6.32 (§10.2): ETA "kurang N run" dari laju pemain sendiri.
+  let pace = null;
+  try { pace = paceAverages(10); } catch { pace = null; }
+  const etaFor = (paceKey, remaining) => {
+    if (!pace || !paceKey) return null;
+    const avg = paceKey === 'runsExact' ? 1 : pace[paceKey];
+    return etaRuns(remaining, avg);
+  };
   const cands = [];
   const STAT_LABEL = { totalKills: 'kill', bestWave: 'Gel.', bossKills: 'Bos', totalRuns: 'run', totalEngulfs: 'telan', totalNutrients: 'nutrisi', wins: 'menang' };
   // 1) unlock hero (gerbang misi terdekat)
@@ -283,19 +292,22 @@ function renderHookBox(summary) {
     if (u.type !== 'stat' && u.type !== 'imu_stat') continue;
     const v = u.stat === 'unlockedHeroes' ? (meta.unlockedHeroes || []).length : ((meta.stats || {})[u.stat] || 0);
     if (v >= u.value) continue;
-    cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value });
+    cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value,
+      eta: etaFor(STAT_PACE[u.stat] || null, u.value - v) });
   }
   // 2) pangkat berikutnya
   try {
     const rk = playerRank();
-    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gpAfter, need: rk.next.min, unit: 'GP', pct: rk.pct });
+    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gpAfter, need: rk.next.min, unit: 'GP', pct: rk.pct,
+      eta: etaFor('gp', rk.next.min - rk.gpAfter) });
   } catch { /* abaikan */ }
   // 3) Mitosis level berikutnya
   try {
     const bp = ensureBp(meta);
     const need = xpNeed(bp.level);
     if (bp.level < getData().battlepass.maxLevel) {
-      cands.push({ label: `Mitosis Lv ${bp.level + 1}`, cur: bp.xp, need, unit: 'XP', pct: bp.xp / need });
+      cands.push({ label: `Mitosis Lv ${bp.level + 1}`, cur: bp.xp, need, unit: 'XP', pct: bp.xp / need,
+        eta: etaFor('bpXp', need - bp.xp) });
     }
   } catch { /* abaikan */ }
   // 4) Diferensiasi tahap berikutnya
@@ -304,7 +316,8 @@ function renderHookBox(summary) {
     if (next) {
       const [[partId, need]] = Object.entries(next.cost);
       const cur = (meta.evoParts || {})[partId] || 0;
-      cands.push({ label: `Diferensiasi ${next.stage}`, cur, need, unit: 'frag', pct: Math.min(1, cur / need) });
+      cands.push({ label: `Diferensiasi ${next.stage}`, cur, need, unit: 'frag', pct: Math.min(1, cur / need),
+        eta: etaFor('frags', need - cur) });
     }
   } catch { /* abaikan */ }
   cands.sort((a, b) => b.pct - a.pct);
@@ -319,7 +332,7 @@ function renderHookBox(summary) {
     box.appendChild(el('div', { class: 'go-hook-row' }, [
       el('span', { class: 'go-hook-label', text: `${c.label}: ${c.cur.toLocaleString('id-ID')}/${c.need.toLocaleString('id-ID')} ${c.unit}` }),
       el('span', { class: 'go-hook-track' }, [el('i', { class: 'go-hook-fill', style: `width:${pct}%` })]),
-      el('b', { class: 'go-hook-pct', text: `${pct}%` }),
+      el('b', { class: 'go-hook-pct', text: c.eta ? `~${c.eta} run` : `${pct}%` }),
     ]));
   }
 }

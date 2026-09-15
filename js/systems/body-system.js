@@ -83,7 +83,8 @@ export function applyDailyDecay(meta = STATE.meta) {
     // TIDAK dirawat pada hari-hari yang berlalu
     const caredElapsed = daysBetween(sys.lastCaredDay, today);
     if (caredElapsed >= 1) {
-      const drop = Math.min(cfg.decayPerDay * Math.min(caredElapsed, 7), sys.health);
+      // Sprint 6.31 (§10.1): peluruhan Imunitas dibatasi 2 hari offline.
+      const drop = Math.min(cfg.decayPerDay * Math.min(caredElapsed, 2), sys.health);
       if (drop > 0) {
         sys.health = clampHealth(sys.health - drop);
         decayed.push(sysDef.id);

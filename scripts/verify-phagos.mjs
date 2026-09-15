@@ -665,5 +665,103 @@ log('kosakata-3', bannedHit.length === 0 && !kalahHit && !riaBad
   && misSrc.includes('Telan'),
   bannedHit.length ? `banned:${bannedHit.join(',')}` : 'bersih');
 
+
+// ---------- 18. Comeback §10.1 (PHAGOS Sprint 6.31) ----------
+const cbSys = await mod('js/systems/comeback-system.js');
+const bodySys = await mod('js/systems/body-system.js');
+// streak: hari 1 → 2 → absen 1 (ampun) → absen 1 lagi (reset) → absen 4 (comeback)
+STATE.meta.loginStreak = { lastDay: null, streak: 0, claimedDay: null, forgaveUsed: false };
+STATE.meta.comeback = { pending: null };
+const r1 = cbSys.recordLoginDay(STATE.meta, '2026-09-10');
+const cl1 = cbSys.claimStreakReward(STATE.meta, '2026-09-10');
+const r2 = cbSys.recordLoginDay(STATE.meta, '2026-09-11');
+const cl2 = cbSys.claimStreakReward(STATE.meta, '2026-09-11');
+const r3 = cbSys.recordLoginDay(STATE.meta, '2026-09-13'); // gap 2 → ampun
+const r4 = cbSys.recordLoginDay(STATE.meta, '2026-09-15'); // gap 2 lagi → reset
+const r5 = cbSys.recordLoginDay(STATE.meta, '2026-09-20'); // gap 5 → absen 4 → comeback
+log('comeback-streak', r1.newDay && r1.streak === 1 && cl1.ok && cl1.bk === 120
+  && r2.streak === 2 && cl2.ok && cl2.bk === 150 && cl2.milestone === 2
+  && r3.streak === 3 && r3.forgiven && !r3.wasReset
+  && r4.streak === 1 && r4.wasReset && !r4.forgiven
+  && r5.absentDays === 4 && r5.comeback && STATE.meta.comeback.pending.tier.bk === 300,
+  `s=${r1.streak},${r2.streak},${r3.streak},${r4.streak} absent=${r5.absentDays}`);
+// klaim comeback → grant + tubuh pulih penuh
+bodySys.getBodyState(STATE.meta).systems[
+  Object.keys(bodySys.getBodyState(STATE.meta).systems)[0]].health = 40;
+const gotCb = cbSys.claimComeback(STATE.meta, '2026-09-20');
+const allFull = Object.values(bodySys.getBodyState(STATE.meta).systems).every((x) => x.health === 100);
+log('comeback-claim', gotCb && gotCb.bk === 300 && allFull && STATE.meta.comeback.pending === null);
+STATE.meta.comeback.pending = { absentDays: 9, tier: cbSys.comebackTier(9) };
+const cbScreen = await mod('js/ui/screens/comeback-screen.js');
+let cbErr = null;
+try { cbScreen.show(); } catch (e) { cbErr = e; }
+log('comeback-modal', cbErr === null
+  && document.getElementById('comeback-desc').textContent.includes('9 hari')
+  && document.getElementById('comeback-reward').textContent.includes('800')
+  && document.getElementById('comeback-reward').textContent.includes('pulih penuh'),
+  cbErr ? String(cbErr).slice(0, 120) : 'ok');
+STATE.meta.comeback.pending = null;
+// tier & putaran: 14 hari → tier 1500+10G; streak 32 → putaran tier 14
+log('comeback-tier-rotate', cbSys.comebackTier(20).bk === 1500 && cbSys.comebackTier(20).genom === 10
+  && cbSys.comebackTier(40).bk === 3000
+  && JSON.stringify(cbSys.streakRewardFor(31)) === JSON.stringify({ bk: 400, genom: 0, milestone: 7, rotated: true })
+  && cbSys.streakRewardFor(33).milestone === 30 && cbSys.streakRewardFor(33).rotated === true
+  && cbSys.streakRewardFor(6).bk === 120 && cbSys.streakRewardFor(6).milestone === null);
+// decay dibatasi 2 hari (§10.1)
+{
+  const st = bodySys.getBodyState(STATE.meta);
+  const ids = Object.keys(st.systems);
+  for (const id of ids) { st.systems[id].health = 100; st.systems[id].lastCaredDay = '2026-09-01'; }
+  st.lastVisitedDay = '2026-09-01';
+  STATE.meta.bodyState = st;
+  const RealDate = Date;
+  global.Date = class extends RealDate { constructor(...a) { super(...(a.length ? a : ['2026-09-15T12:00:00'])); } static now() { return new RealDate('2026-09-15T12:00:00').getTime(); } };
+  const dec = bodySys.applyDailyDecay(STATE.meta);
+  global.Date = RealDate;
+  const cfg = getData().bodySystems;
+  const expect = 100 - Math.min(cfg.decayPerDay * 2, 100);
+  const gotH = bodySys.getBodyState(STATE.meta).systems[ids[0]].health;
+  log('comeback-decay-cap', dec.days === 14 && Math.abs(gotH - expect) < 1e-9, `health=${gotH} expect=${expect}`);
+}
+
+
+// ---------- 18b. Session hook ETA §10.2 (PHAGOS Sprint 6.32) ----------
+const metSys = await mod('js/systems/metrics.js');
+global.window.localStorage.setItem('imunverse.metrics.v1', JSON.stringify({ runs: [
+  { hero: 'macrophage', mode: 'normal', wave: 10, time: 600, kills: 300, engulfs: 50, pulses: 20, bosses: 1, gp: 60, bpXp: 200, frags: 2, nutrients: 30, level: 8, victory: false, quit: false },
+  { hero: 'macrophage', mode: 'normal', wave: 12, time: 700, kills: 300, engulfs: 50, pulses: 22, bosses: 1, gp: 70, bpXp: 220, frags: 3, nutrients: 35, level: 9, victory: true, quit: false },
+  { hero: 'neutrophil', mode: 'normal', wave: 3, time: 60, kills: 10, engulfs: 0, pulses: 1, bosses: 0, gp: 5, bpXp: 10, frags: 0, nutrients: 1, level: 2, victory: false, quit: true },
+], lastGameoverAt: 0 }));
+const pace = metSys.paceAverages(10);
+log('hook-pace', pace.runs === 2 && pace.kills === 300 && pace.engulfs === 50 && pace.bosses === 1
+  && pace.wins === 0.5 && metSys.etaRuns(200, 50) === 4 && metSys.etaRuns(2, 1) === 2
+  && metSys.etaRuns(5, 0) === null && metSys.etaRuns(0, 10) === 0, `runs=${pace.runs}`);
+STATE.meta.stats = Object.assign({}, STATE.meta.stats, { totalKills: 1200, bestWave: 15, bossKills: 6, totalRuns: 12, totalEngulfs: 200, totalNutrients: 90, wins: 2 });
+STATE.meta.unlockedHeroes = ['macrophage', 'neutrophil', 'dendritic'];
+goMod.show({ quit: false, victory: false, modeId: 'normal', heroId: 'neutrophil', engulfs: 22, bio: 7,
+  wave: 15, time: 900, kills: 412, bossKills: 2, xpGained: 300, nutrients: 40, parts: 3, level: 12,
+  currencyEarned: 916, imuEarned: 0, bpFrom: null, bpTo: null, newMissions: 0, mastery: null, rank: null });
+const hookTxt = document.getElementById('go-hook').textContent;
+log('hook-eta', hookTxt.includes('~2 run') && hookTxt.includes('~4 run'), hookTxt.slice(0, 120));
+
+
+// ---------- 18c. PWA (PHAGOS Sprint 6.35) ----------
+const pwaSys = await mod('js/systems/pwa.js');
+const mani = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.webmanifest'), 'utf8'));
+const swSrc = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+const maniIconsOk = mani.icons.length === 3 && mani.icons.every((i) => fs.existsSync(path.join(ROOT, i.src)));
+STATE.meta.stats.totalRuns = 1;
+STATE.meta.pwaDismissed = false;
+const noBanner = pwaSys.shouldShowInstallBanner(STATE.meta, { force: true });
+STATE.meta.stats.totalRuns = 3;
+const yesBanner = pwaSys.shouldShowInstallBanner(STATE.meta, { force: true });
+pwaSys.dismissInstallBanner(STATE.meta);
+const afterDismiss = pwaSys.shouldShowInstallBanner(STATE.meta, { force: true });
+STATE.meta.pwaDismissed = false;
+log('pwa-shell', mani.name === 'Imunverse PHAGOS' && mani.display === 'standalone'
+  && maniIconsOk && swSrc.includes('phagos-v1') && swSrc.includes('skipWaiting')
+  && noBanner === false && yesBanner === true && afterDismiss === false
+  && htmlSrc.includes('rel="manifest"') && htmlSrc.includes('pwa-192.png'));
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

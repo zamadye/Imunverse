@@ -139,11 +139,11 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 
 ### Sprint 6 — Retensi & akuisisi
 
-- [ ] 31. Comeback §10.1 (luruh ≤2 hari, hadiah "Antibodi Selamat Datang", streak + pengampunan + putaran hari-7)
-- [ ] 32. Session hook §10.2 (3 progres, ETA run dari laju pemain — butuh `metrics.js` + field engulf/pulse §14)
+- [x] 31. Comeback §10.1 (luruh ≤2 hari, hadiah "Antibodi Selamat Datang", streak + pengampunan + putaran hari-7)
+- [x] 32. Session hook §10.2 (3 progres, ETA run dari laju pemain — butuh `metrics.js` + field engulf/pulse §14)
 - [x] 33. Strain of the Week — ✅
 - [x] 34. Challenge link — ✅ (MVP localStorage; server = Fase 2)
-- [ ] 35. PWA (manifest + SW + prompt run ke-3 + ikon logo compact)
+- [x] 35. PWA (manifest + SW + prompt run ke-3 + ikon logo compact)
 - [~] 36. Referral — ⚠️ selesai tapi menyimpang (D8: hadiah sekarang vs "nanti")
 - Build share (di luar bible — DIPERTAHANKAN: lolos checklist identity "ingin bagikan")
 

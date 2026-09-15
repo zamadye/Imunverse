@@ -7,7 +7,8 @@
 import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
-import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
+import { recordLoginDay, canClaimStreak, claimStreakReward, streakRewardFor } from '../../systems/comeback-system.js';
+import { shouldShowInstallBanner, promptInstall, dismissInstallBanner } from '../../systems/pwa.js';
 import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest, msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
@@ -430,6 +431,8 @@ export function show() {
       return;
     }
   } catch { /* abaikan */ }
+  // Sprint 6.31 (§10.1): catat login harian (streak + deteksi comeback).
+  try { recordLoginDay(STATE.meta); } catch { /* abaikan */ }
   showHeroNotice(); // Fase 17: perayaan "HERO BARU!" bila ada yang baru terbuka
   if (dashWasHidden) {
     // Fase 15: cegah auto-scroll browser memotong banner saat layar dibuka
@@ -554,6 +557,11 @@ export function show() {
 
   // ---- Decay harian + Kartu KONDISI TUBUH (meta-layer organisme) ----
   applyDailyDecay(meta);
+  // Sprint 6.31 (§10.1): hadiah kembali menanti → modal comeback dulu.
+  if (STATE.meta.comeback && STATE.meta.comeback.pending) {
+    screenManager.show('comeback');
+    return;
+  }
   renderBodyCard(meta);
 
   // ---- Overlay evolusi di panggung (bentuk hero berubah sesuai tahap) ----
@@ -565,18 +573,22 @@ export function show() {
   // ---- Kartu ARENA terpilih + tombol ganti ----
   renderArenaCard(meta);
 
-  // ---- Daily reward (hook monetisasi + logic asli) ----
+  // ---- Bonus harian berbasis STREAK (Sprint 6.31 §10.1) ----
   const dailyCard = document.getElementById('daily-card');
   dailyCard.textContent = '';
   const livesAvailable = checkDailyLives(); // HOOK: ketersediaan "daily lives" dari SDK/backend
-  const claimable = livesAvailable && canClaimDailyReward(meta);
+  const claimable = livesAvailable && canClaimStreak(meta);
+  const streak = (meta.loginStreak && meta.loginStreak.streak) || 0;
+  const rw = streakRewardFor(Math.max(1, streak));
+  const rwBits = [`+${rw.bk.toLocaleString('id-ID')} BK`];
+  if (rw.genom > 0) rwBits.push(`+${rw.genom} Genom`);
   const info = el('div', { class: 'daily-info' }, [
     el('b', { class: 'ico-title' }, [
       el('img', { class: 't-ico', src: 'assets/icons/ui-star.svg', alt: '' }),
-      el('span', { text: 'Bonus Harian' }),
+      el('span', { text: `🔥 Streak Hari ${streak}${rw.milestone ? ` — Milestone ${rw.milestone}!` : ''}` }),
     ]),
     el('span', { class: 'claim-line' }, claimable ? [
-      el('b', { text: `${getData().upgrades.economy.dailyReward}` }),
+      el('b', { text: rwBits.join(' ') }),
       el('img', { class: 'inline-coin', src: 'assets/icons/cur-antibodi.svg', alt: 'biokredit' }),
       el('span', { text: ' menantimu — klaim sekarang!' }),
     ] : [el('span', { text: 'Sudah diklaim hari ini. Kembali besok.' })]),
@@ -586,15 +598,39 @@ export function show() {
     text: claimable ? 'KLAIM' : '✓ DIKLAIM',
     disabled: !claimable,
     onclick: () => {
-      const amount = claimDailyReward(STATE.meta); // logic asli + auto-save
-      if (amount > 0) {
-        emit('toast', { message: `Bonus harian +${amount} !`, kind: 'gold' });
+      const got = claimStreakReward(STATE.meta); // Sprint 6.31 + auto-save
+      if (got.ok) {
+        emit('toast', { message: `Streak hari ${got.streak}: +${got.bk} BK${got.genom ? ` +${got.genom} Genom` : ''}!`, kind: 'gold' });
         show(); // refresh angka currency
       }
     },
   });
   dailyCard.appendChild(info);
   dailyCard.appendChild(btn);
+
+  // ---- Banner PASANG aplikasi (Sprint 6.35: prompt run ke-3) ----
+  document.getElementById('pwa-banner')?.remove();
+  if (shouldShowInstallBanner(meta)) {
+    const pwa = el('div', { id: 'pwa-banner', class: 'card pwa-banner' }, [
+      el('img', { class: 'pwa-ico', src: 'assets/icons/pwa-192.png', alt: '' }),
+      el('div', { class: 'pwa-text' }, [
+        el('b', { text: 'Pasang PHAGOS' }),
+        el('span', { text: 'Main offline + buka lebih cepat.' }),
+      ]),
+      el('button', {
+        class: 'btn btn-primary pwa-btn', text: 'PASANG',
+        onclick: async () => {
+          const ok = await promptInstall();
+          if (ok) document.getElementById('pwa-banner')?.remove();
+        },
+      }),
+      el('button', {
+        class: 'pwa-x', text: '✕', 'aria-label': 'Tutup',
+        onclick: () => { dismissInstallBanner(STATE.meta); document.getElementById('pwa-banner')?.remove(); },
+      }),
+    ]);
+    dailyCard.insertAdjacentElement('afterend', pwa);
+  }
 
   // ---- Misi (3 progres teratas yang belum selesai) ----
   // Sprint 5.30 (§10.4): chip hitung mundur reset harian di judul kartu.

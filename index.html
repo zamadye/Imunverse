@@ -6,7 +6,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#fdf6e3" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icons/pwa-192.png" />
   <meta name="description" content="PHAGOS — Telan. Bermutasi. Bertahan. Roguelike survival membran sel imun di phagos.space!" />
   <title>PHAGOS — Telan. Bermutasi. Bertahan.</title>
   <link rel="stylesheet" href="styles/main.css?v=51a" />
@@ -684,6 +686,16 @@
           </div>
           <p id="capsule-share-note" class="capsule-share-note"></p>
           <button id="capsule-later" class="linklike">buka nanti</button>
+        </div>
+      </section>
+      <section id="screen-comeback" class="screen modal" data-screen="comeback" role="dialog" aria-modal="true" aria-labelledby="comeback-title">
+        <div class="modal-box comeback-box">
+          <div class="comeback-emoji">🛡️</div>
+          <h2 id="comeback-title" class="comeback-title">ANTIBODI SELAMAT DATANG</h2>
+          <p id="comeback-desc" class="comeback-desc">—</p>
+          <p id="comeback-reward" class="comeback-reward">—</p>
+          <button id="btn-comeback-claim" class="btn btn-gold">KLAIM HADIAH</button>
+          <button id="btn-comeback-later" class="linklike">klaim nanti</button>
         </div>
       </section>
 

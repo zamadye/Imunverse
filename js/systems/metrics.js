@@ -78,6 +78,14 @@ export function initMetrics() {
       wave: summary.wave || 0,
       time: summary.time || 0,
       kills: summary.kills || 0,
+      // Sprint 6.32 (§14): field laju pemain untuk ETA session hook.
+      engulfs: summary.engulfs || 0,
+      pulses: summary.pulses || 0,
+      bosses: summary.bossKills || 0,
+      gp: summary.gp || 0,
+      bpXp: summary.bpXp || 0,
+      frags: summary.parts || 0,
+      nutrients: summary.nutrients || 0,
       level: summary.level || 1,
       victory: !!summary.victory,
       quit: !!summary.quit,
@@ -120,6 +128,44 @@ export function getMetricsSummary() {
     victoryRate: runs.length ? runs.filter((r) => r.victory).length / runs.length : 0,
     heroDist,
   };
+}
+
+/**
+ * Sprint 6.32 (§10.2): laju pemain dari N run terakhir (quit dikecualikan —
+ * run quit mendistorsi rata-rata). @returns rata-rata per run per field.
+ */
+export function paceAverages(lastN = 10) {
+  const db = read();
+  const runs = db.runs.filter((r) => !r.quit).slice(-lastN);
+  const fields = ['kills', 'engulfs', 'pulses', 'bosses', 'gp', 'bpXp', 'frags', 'nutrients', 'wave'];
+  const avg = { runs: runs.length };
+  for (const f of fields) {
+    avg[f] = runs.length ? runs.reduce((a, r) => a + (r[f] || 0), 0) / runs.length : 0;
+  }
+  avg.wins = runs.length ? runs.filter((r) => r.victory).length / runs.length : 0;
+  return avg;
+}
+
+/** Peta stat unlock → field laju. null = tak bisa di-ETA (pakai %). */
+export const STAT_PACE = {
+  totalKills: 'kills',
+  totalEngulfs: 'engulfs',
+  bossKills: 'bosses',
+  totalNutrients: 'nutrients',
+  totalRuns: 'runsExact',
+  wins: 'wins',
+  bestWave: null,
+  unlockedHeroes: null,
+};
+
+/**
+ * Estimasi "kurang N run lagi" dari sisa & laju. @returns int ≥1 atau null
+ * (laju nol / tak diketahui → UI fallback ke %).
+ */
+export function etaRuns(remaining, avgPerRun) {
+  if (!(remaining > 0)) return 0;
+  if (!(avgPerRun > 0)) return null;
+  return Math.max(1, Math.ceil(remaining / avgPerRun));
 }
 
 /** Reset metrics (dipakai testing / opsi dev). */

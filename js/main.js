@@ -13,6 +13,7 @@ import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
+import { initPwa } from './systems/pwa.js'; // Sprint 6.35: PWA
 import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
@@ -58,6 +59,7 @@ import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
+import * as comebackScreen from './ui/screens/comeback-screen.js'; // Sprint 6.31: §10.1 Comeback
 import { getChallenge, showChallengeModal } from './systems/challenge-system.js'; // ADDENDUM §3.3
 import { handleRefParam } from './systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { decodeBuild, showBuildModal } from './systems/build-share-system.js'; // ADDENDUM P2 §6.6
@@ -456,6 +458,7 @@ async function boot() {
   game.init({ canvas, input });
   wireUiBridge();
   initMetrics(); // V2 Phase 0: rekam KPI run (localStorage, pasif via event bus)
+  initPwa(); // Sprint 6.35: Service Worker + prompt instal
 
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);
@@ -480,6 +483,7 @@ async function boot() {
   screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
   screenManager.registerScreen('capsule', capsuleScreen); // ADDENDUM §1: Kapsul Membran
+  screenManager.registerScreen('comeback', comebackScreen); // Sprint 6.31: §10.1 Comeback
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
