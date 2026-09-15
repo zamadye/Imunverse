@@ -12,7 +12,7 @@ import { queueHeroNotice } from '../../systems/retention-system.js';
 import { applySuplemen } from '../../systems/body-system.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canWatchAd, trackAdWatch, triggerIAPSuplementPremium, triggerRewardedAdRecovery } from '../../systems/monetization.js';
-import { getCatalog, createOrder, setMethod, payOrder, getMethods, getReceipts } from '../../systems/payment-system.js';
+import { getCatalog, createOrder, setMethod, payOrder, getMethods, getReceipts, hasPaidReceipt, claimGenomDrip } from '../../systems/payment-system.js';
 import { audio } from '../../systems/audio-system.js';
 import { addImun, buyCosmetic, ownsCosmetic, equipSkin, equipAcc, applyReferralCode, ensureReferral, canSurveyToday, markSurveyDone } from '../../systems/imun-economy.js';
 import { triggerRewardedAdOfferwall } from '../../systems/monetization.js';
@@ -457,23 +457,38 @@ export function show() {
   const premSection = sectionEl('prem', 'Uang sungguhan (simulasi gateway) — mendukung pengembang, tanpa pay-to-win.');
   const premGrid = el('div', { class: 'premium-grid' });
   for (const bundle of getCatalog()) {
-    const owned = bundle.contents.noAds && meta.noAds;
+    // Sprint 4.22/23: sekali-per-akun terkunci setelah dibeli; badge 2× hilang setelah dipakai.
+    const owned = (bundle.contents.noAds && meta.noAds)
+      || (bundle.onePerAccount && hasPaidReceipt(meta, bundle.id));
+    const bonusLive = bundle.firstBonus2x && !hasPaidReceipt(meta, bundle.id);
+    const drip = bundle.contents.drip && meta.genomDrip && meta.genomDrip.daysLeft > 0 ? meta.genomDrip : null;
     const card = el('div', { class: 'premium-card', style: `--pc:${bundle.color}` }, [
       bundle.badge ? el('span', { class: 'prem-badge', text: bundle.badge }) : null,
+      bonusLive ? el('span', { class: 'prem-badge bonus2x', text: '2× PERTAMA' }) : null,
       el('img', { class: 'prem-ico', src: 'assets/icons/sec-premium.svg', alt: '' }),
       el('b', { class: 'prem-name', text: bundle.name }),
       el('span', { class: 'prem-value', text: bundle.valueNote }),
+      drip ? el('span', { class: 'prem-drip', text: `Aktif: sisa ${drip.daysLeft} hari` }) : null,
       el('button', {
         class: 'btn btn-prem',
         text: owned ? '✓ DIMILIKI' : bundle.priceLabel,
         disabled: !!owned,
       }),
+      drip ? el('button', { class: 'btn btn-gold btn-drip', text: `KLAIM ${drip.perDay} GENOM` }) : null,
     ]);
     const buyBtn = card.querySelector('.btn-prem');
     if (!owned) {
       buyBtn.addEventListener('click', () => {
         if (!requireAccount('shop')) return; // pembelian wajib akun
         openPayment(bundle);
+      });
+    }
+    const dripBtn = card.querySelector('.btn-drip');
+    if (dripBtn) {
+      dripBtn.addEventListener('click', () => {
+        const res = claimGenomDrip();
+        emit('toast', { message: res.ok ? `+${res.granted} Genom (sisa ${res.daysLeft} hari)` : res.reason, kind: res.ok ? 'gold' : 'danger' });
+        if (res.ok) show();
       });
     }
     premGrid.appendChild(card);

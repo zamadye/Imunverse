@@ -1,76 +1,114 @@
 {
- "schemaVersion": 1,
- "note": "Harga simulasi. Balancing: 1 antibodi dasar ± Rp 10; bundle memberi nilai 1.5-1.8x lipat vs beli satuan (hemat terasa, tetap adil).",
- "bundles": [
-  {
-   "id": "bundle_welcome",
-   "name": "Welcome Bundle",
-   "priceRp": 15000,
-   "priceLabel": "Rp 15rb",
-   "badge": "HEMAT 72%",
-   "color": "#4aa3e0",
-   "contents": {
-    "currency": 1500,
-    "imun": 300,
-    "skin": "skin_pendiri",
-    "consumables": {
-     "serum_awal": 2,
-     "vaksin_awal": 1
+  "schemaVersion": 1,
+  "note": "Sprint 4.22: katalog bible §9.1. Harga simulasi. Tangga Genom tanpa tier whale.",
+  "bundles": [
+    {
+      "id": "kapsul_perdana",
+      "name": "Kapsul Perdana",
+      "priceRp": 15000,
+      "priceLabel": "Rp 15rb",
+      "badge": "STARTER 1×",
+      "color": "#4aa3e0",
+      "onePerAccount": true,
+      "contents": {
+        "currency": 2000,
+        "imun": 400,
+        "skin": "skin_pendiri",
+        "consumables": {
+          "enzim_litik": 2,
+          "serum_regenerasi": 2
+        }
+      },
+      "valueNote": "400 Genom + 2.000 BK + Skin Pendiri + 2 Enzim + 2 Serum — sekali per akun"
+    },
+    {
+      "id": "genom_500",
+      "name": "500 Genom",
+      "priceRp": 15000,
+      "priceLabel": "Rp 15rb",
+      "badge": "TANGGA",
+      "color": "#2f9c8f",
+      "firstBonus2x": true,
+      "contents": {
+        "imun": 500
+      },
+      "valueNote": "500 Genom — pembelian pertama 2× (1.000 Genom)"
+    },
+    {
+      "id": "genom_1000",
+      "name": "1.000 Genom",
+      "priceRp": 25000,
+      "priceLabel": "Rp 25rb",
+      "badge": "TANGGA",
+      "color": "#2f9c8f",
+      "firstBonus2x": true,
+      "contents": {
+        "imun": 1000
+      },
+      "valueNote": "1.000 Genom — pembelian pertama 2× (2.000 Genom)"
+    },
+    {
+      "id": "genom_2500",
+      "name": "2.500 Genom",
+      "priceRp": 55000,
+      "priceLabel": "Rp 55rb",
+      "badge": "TANGGA",
+      "color": "#f5c64f",
+      "contents": {
+        "imun": 2500
+      },
+      "valueNote": "2.500 Genom — nilai terbaik per rupiah di tangga menengah"
+    },
+    {
+      "id": "genom_5000",
+      "name": "5.000 Genom",
+      "priceRp": 99000,
+      "priceLabel": "Rp 99rb",
+      "badge": "TANGGA MAX",
+      "color": "#f5c64f",
+      "contents": {
+        "imun": 5000
+      },
+      "valueNote": "5.000 Genom — tangga tertinggi (tanpa tier whale)"
+    },
+    {
+      "id": "kit_riset",
+      "name": "Kit Riset",
+      "priceRp": 65000,
+      "priceLabel": "Rp 65rb",
+      "badge": "VALUE",
+      "color": "#9b6fd0",
+      "contents": {
+        "currency": 20000,
+        "imun": 2500,
+        "consumables": {
+          "katalis_mitosis": 3,
+          "lapisan_mukus": 3,
+          "sitokin_burst": 4
+        }
+      },
+      "valueNote": "2.500 Genom + 20.000 BK + 3 Katalis + 3 Mukus + 4 Sitokin"
+    },
+    {
+      "id": "genom_harian",
+      "name": "Genom Harian",
+      "priceRp": 29000,
+      "priceLabel": "Rp 29rb",
+      "badge": "30 HARI",
+      "color": "#e06c4a",
+      "contents": {
+        "imun": 300,
+        "drip": {
+          "perDay": 50,
+          "days": 30
+        }
+      },
+      "valueNote": "300 Genom langsung + 50 Genom/hari × 30 hari (total 1.800)"
     }
-   },
-   "valueNote": "1.500 biokredit + 300 Genom + Skin Pendiri + 3 item — paket awal terbaik"
-  },
-  {
-   "id": "bundle_pass_m1",
-   "name": "Pass Premium + 15 Lv",
-   "priceRp": 35000,
-   "priceLabel": "Rp 35rb",
-   "badge": "PALING LARIS",
-   "color": "#2f9c8f",
-   "contents": {
-    "currency": 800,
-    "imun": 500,
-    "consumables": {
-     "kopi_limfa": 2
-    }
-   },
-   "valueNote": "500 Genom (buka Pass Premium) + 800 biokredit + 2 Sitokin Burst"
-  },
-  {
-   "id": "bundle_imun_pro",
-   "name": "Paket Genom Pro",
-   "priceRp": 45000,
-   "priceLabel": "Rp 45rb",
-   "badge": "TERBAIK",
-   "color": "#f5c64f",
-   "contents": {
-    "currency": 5000,
-    "imun": 150,
-    "consumables": {
-     "koin_ganda": 2,
-     "pelindung_lendir": 2,
-     "kopi_limfa": 2
-    }
-   },
-   "valueNote": "5.000 biokredit + 150 Genom + 6 item tempur premium"
-  },
-  {
-   "id": "bundle_noads",
-   "name": "Bebas Iklan",
-   "priceRp": 35000,
-   "priceLabel": "Rp 35rb",
-   "badge": "SEKALI BELI",
-   "color": "#9b6fd0",
-   "contents": {
-    "noAds": true,
-    "imun": 100
-   },
-   "valueNote": "Tanpa interupsi iklan selamanya + 100 Genom — dukung pengembang"
-  }
- ],
- "methods": [
-  "qris",
-  "ewallet",
-  "kartu"
- ]
+  ],
+  "methods": [
+    "qris",
+    "ewallet",
+    "kartu"
+  ]
 }

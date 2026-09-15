@@ -94,7 +94,7 @@ export function rollMutationChoices(run) {
  * Terapkan pilihan mutasi ke run.
  * @returns {{ok:boolean, reason?:string, mutation?:object}}
  */
-export function applyMutation(run, mutationId) {
+export function applyMutation(run, mutationId, opts = {}) {
   const all = (getMutations() && getMutations().mutations) || [];
   const def = all.find((m) => m.id === mutationId);
   if (!def) return { ok: false, reason: 'Mutasi tidak ditemukan' };
@@ -115,10 +115,12 @@ export function applyMutation(run, mutationId) {
       }
     }
   }
-  // Bio cost
+  // Bio cost (Peti Mutasi 150G melewatinya — opts.skipCost)
   const cost = def.bioCost || 0;
-  if ((run.bioPoints || 0) < cost) return { ok: false, reason: `Butuh ${cost} Bio-Point` };
-  run.bioPoints -= cost;
+  if (!opts.skipCost) {
+    if ((run.bioPoints || 0) < cost) return { ok: false, reason: `Butuh ${cost} Bio-Point` };
+    run.bioPoints -= cost;
+  }
   active.push(mutationId);
   run.mutationHistory = run.mutationHistory || [];
   run.mutationHistory.push({ id: mutationId, level: run.level, wave: run.spawnSys ? run.spawnSys.wave : 1 });

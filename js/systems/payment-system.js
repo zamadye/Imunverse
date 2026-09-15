@@ -7,8 +7,8 @@
  * backend nyata CUKUP ganti isi payOrder() dengan fetch ke PSP
  * (Midtrans/Xendit/Play Billing) — satu modul, UI & game tak berubah.
  *
- * Balancing (data/premium.json): nilai bundle 1,5–1,8× lipat vs beli
- * satuan — hemat terasa tapi tidak mematahkan progres gratisan.
+ * Sprint 4.22: katalog bible §9.1 (Kapsul Perdana 1×, 4 tangga Genom,
+ * Kit Riset, Genom Harian/subscription). Bonus pembelian pertama 2× (§9.3).
  */
 
 import { STATE } from '../core/state-manager.js';
@@ -27,10 +27,19 @@ export function getMethods() {
   return getData().premium.methods;
 }
 
+/** Apakah produk sudah pernah dibayar (dari struk tersimpan)? */
+export function hasPaidReceipt(meta, productId) {
+  return (meta.receipts || []).some((r) => r.productId === productId && r.status === 'paid');
+}
+
 /** Buat order baru (menunggu pembayaran). */
 export function createOrder(productId) {
   const bundle = getCatalog().find((b) => b.id === productId);
   if (!bundle) return { ok: false, error: 'Produk tidak ditemukan' };
+  // Sprint 4.22: produk sekali-per-akun (Kapsul Perdana) tak bisa diorder ulang.
+  if (bundle.onePerAccount && hasPaidReceipt(STATE.meta, productId)) {
+    return { ok: false, error: 'Produk ini hanya sekali per akun' };
+  }
   currentOrder = {
     orderId: 'ord_' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36),
     productId,
@@ -57,6 +66,8 @@ export function setMethod(orderId, method) {
 
 /** Terapkan isi bundle ke meta (entitlement). */
 function grantContents(meta, contents) {
+  // Sprint 4.22: ID consumable lama dipetakan ke ID bible §7 saat grant.
+  const LEGACY_ITEM = { serum_awal: 'serum_regenerasi', vaksin_awal: 'enzim_litik', kopi_limfa: 'sitokin_burst', pelindung_lendir: 'lapisan_mukus', koin_ganda: 'katalis_mitosis' };
   const granted = [];
   if (contents.currency) {
     meta.currency += contents.currency;
@@ -64,10 +75,16 @@ function grantContents(meta, contents) {
   }
   if (contents.consumables) {
     meta.consumables = meta.consumables || {};
-    for (const [id, n] of Object.entries(contents.consumables)) {
+    for (let [id, n] of Object.entries(contents.consumables)) {
+      id = LEGACY_ITEM[id] || id;
       meta.consumables[id] = (meta.consumables[id] || 0) + n;
       granted.push(`${n}× ${id.replace(/_/g, ' ')}`);
     }
+  }
+  // Sprint 4.22: drip langganan (Genom Harian: 50/hari × 30 klaim manual).
+  if (contents.drip) {
+    meta.genomDrip = { perDay: contents.drip.perDay, daysLeft: contents.drip.days, lastClaim: null };
+    granted.push(`langganan ${contents.drip.perDay} Genom/hari × ${contents.drip.days} hari`);
   }
   if (contents.noAds) {
     meta.noAds = true;
@@ -123,7 +140,17 @@ export function payOrder(orderId) {
         status: 'paid',
       };
       const bundle = getCatalog().find((b) => b.id === receipt.productId);
-      const granted = grantContents(meta, bundle.contents);
+      // Sprint 4.22/23: sekali-per-akun dicek ulang + bonus pertama 2× (§9.3).
+      if (bundle.onePerAccount && hasPaidReceipt(meta, bundle.id)) {
+        resolve({ ok: false, error: 'Produk ini hanya sekali per akun' });
+        return;
+      }
+      let contents = bundle.contents;
+      if (bundle.firstBonus2x && !hasPaidReceipt(meta, bundle.id)) {
+        contents = Object.assign({}, bundle.contents, { imun: (bundle.contents.imun || 0) * 2 });
+        receipt.firstBonus = true;
+      }
+      const granted = grantContents(meta, contents);
       meta.receipts = meta.receipts || [];
       meta.receipts.unshift(receipt);
       if (meta.receipts.length > 30) meta.receipts.length = 30;
@@ -133,6 +160,23 @@ export function payOrder(orderId) {
       resolve({ ok: true, receipt, granted });
     }, 700);
   });
+}
+
+/**
+ * Sprint 4.22: klaim drip Genom Harian (sekali per hari kalender).
+ * @returns {{ok:boolean, granted?:int, daysLeft?:int, reason?:string}}
+ */
+export function claimGenomDrip() {
+  const meta = STATE.meta;
+  const drip = meta.genomDrip;
+  if (!drip || drip.daysLeft <= 0) return { ok: false, reason: 'Tidak ada langganan aktif' };
+  const today = new Date().toISOString().slice(0, 10);
+  if (drip.lastClaim === today) return { ok: false, reason: 'Sudah diklaim hari ini' };
+  drip.lastClaim = today;
+  drip.daysLeft -= 1;
+  meta.imun = (meta.imun || 0) + drip.perDay;
+  writeSave(meta);
+  return { ok: true, granted: drip.perDay, daysLeft: drip.daysLeft };
 }
 
 /** Riwayat pembelian (transparan, tersimpan di save). */

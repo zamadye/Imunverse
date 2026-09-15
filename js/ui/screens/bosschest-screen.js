@@ -6,6 +6,7 @@
  */
 
 import { game } from '../../core/game.js';
+import { STATE } from '../../core/state-manager.js';
 import { el } from '../screen-manager.js';
 
 export function show(payload) {
@@ -23,6 +24,13 @@ export function show(payload) {
   const adBtn = document.getElementById('btn-chest-ad');
   adBtn.disabled = !payload.adAvailable;
   adBtn.textContent = payload.adAvailable ? 'TONTON IKLAN — 2X LOOT' : 'KUOTA IKLAN HARI INI PENUH';
+  // Sprint 4.24: Peti Mutasi 150 Genom (pity tier-3 tiap ke-5; modal tetap terbuka).
+  const mBtn = document.getElementById('btn-mutasi-chest');
+  if (mBtn) {
+    const pity = STATE.meta.mutasiPity || 0;
+    mBtn.disabled = (STATE.meta.imun || 0) < 150;
+    mBtn.textContent = pity >= 4 ? 'PETI MUTASI — 150G (PITY TIER 3!)' : `PETI MUTASI — 150G (pity ${pity + 1}/5)`;
+  }
 }
 
 export function hide() {}
@@ -33,5 +41,9 @@ export function wire() {
   });
   document.getElementById('btn-chest-keep').addEventListener('click', () => {
     game.claimBossChestKeep();
+  });
+  document.getElementById('btn-mutasi-chest').addEventListener('click', () => {
+    const res = game.openMutasiChest();
+    if (res.ok) show(game.run.bossChest); // segarkan label pity/saldo
   });
 }

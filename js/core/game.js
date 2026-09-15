@@ -60,7 +60,7 @@ import { isDevMode } from './dev-mode.js';
 import { addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
-import { addImun, getEquippedSkin } from '../systems/imun-economy.js';
+import { addImun, getEquippedSkin, spendImun } from '../systems/imun-economy.js';
 import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
@@ -1955,6 +1955,54 @@ applyChapterTier(enemy, run) {
   // =====================================================================
   requestRevive() {
     triggerRewardedAdRevive(() => this.confirmRevive());
+  },
+
+  /**
+   * Sprint 4.24 (bible §9.2): Lanjut Run — bangkit seharga 50 Genom
+   * (alternatif iklan; tetap sekali per run via reviveOffered).
+   */
+  requestReviveGenom() {
+    if (!spendImun(STATE.meta, 50)) {
+      emit('toast', { message: 'Genom tidak cukup (butuh 50)', kind: 'danger' });
+      return;
+    }
+    writeSave(STATE.meta);
+    this.confirmRevive();
+  },
+
+  /**
+   * Sprint 4.24 (bible §9.2): Peti Mutasi — 150 Genom untuk 1 mutasi acak
+   * (tanpa bio-cost). Pity TERPISAH: tiap Peti ke-5 menjamin tier 3.
+   * @returns {{ok:boolean, mutation?:object, pity?:boolean, reason?:string}}
+   */
+  openMutasiChest() {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!run || run.ended) return { ok: false, reason: 'Run sudah berakhir' };
+    const all = (getData().mutations && getData().mutations.mutations) || [];
+    const active = run.activeMutations || [];
+    const byId = Object.fromEntries(all.map((m) => [m.id, m]));
+    const bad = (m) => active.includes(m.id)
+      || (m.conflicts || []).some((c) => active.includes(c))
+      || active.some((a) => ((byId[a] && byId[a].conflicts) || []).includes(m.id));
+    const pool = all.filter((m) => !bad(m));
+    if (!pool.length) return { ok: false, reason: 'Semua mutasi sudah dimiliki' };
+    if ((meta.imun || 0) < 150) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
+    meta.mutasiPity = meta.mutasiPity || 0;
+    const pityHit = meta.mutasiPity >= 4;
+    let sub = pityHit ? pool.filter((m) => m.tier === 3) : pool;
+    if (!sub.length) sub = pool; // pity longgar bila T3 tak tersedia
+    const pick = sub[Math.floor(Math.random() * sub.length)];
+    if (!spendImun(meta, 150)) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
+    meta.mutasiPity = (pityHit || pick.tier === 3) ? 0 : meta.mutasiPity + 1;
+    const res = applyMutation(run, pick.id, { skipCost: true });
+    if (!res.ok) { // seharusnya tak terjadi (pool sudah disaring) — refund
+      meta.imun += 150;
+      return { ok: false, reason: res.reason };
+    }
+    writeSave(meta);
+    emit('toast', { message: `Peti Mutasi: ${pick.name}!${pityHit && pick.tier === 3 ? ' (PITY tier 3)' : ''}`, kind: 'gold' });
+    return { ok: true, mutation: pick, pity: pityHit && pick.tier === 3 };
   },
 
   /** Logic asli setelah iklan "selesai ditonton". */

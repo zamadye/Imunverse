@@ -502,5 +502,48 @@ log('prog-homeo-buy', buy1.ok === true && buy1.level === 1 && STATE.meta.currenc
   && buy11.ok === true && buy11.level === 11 && imuAfterBuy === imuBefore - 3 && STATE.meta.imun === imuBefore - 203
   && reset.ok === true && Object.keys(STATE.meta.globalUpgrades).length === 0, `imu=${STATE.meta.imun}`);
 
+// ---------- 16. Monetisasi §9 (PHAGOS Sprint 4.22–24) ----------
+const paySys = await mod('js/systems/payment-system.js');
+const catalog = paySys.getCatalog();
+log('monet-katalog', catalog.length === 7 && catalog.some((b) => b.id === 'kapsul_perdana' && b.onePerAccount)
+  && catalog.filter((b) => b.firstBonus2x).map((b) => b.id).join(',') === 'genom_500,genom_1000'
+  && catalog.some((b) => b.id === 'genom_harian' && b.contents.drip.perDay === 50 && b.contents.drip.days === 30)
+  && catalog.every((b) => (b.contents.consumables ? Object.keys(b.contents.consumables).every((k) => !['serum_awal', 'vaksin_awal', 'kopi_limfa', 'pelindung_lendir', 'koin_ganda'].includes(k)) : true)));
+STATE.meta.account = { uid: 't1', username: 'tester' };
+STATE.meta.receipts = [];
+STATE.meta.imun = 0;
+let ord = paySys.createOrder('genom_500');
+paySys.setMethod(ord.order.orderId, 'qris');
+const pay1 = await paySys.payOrder(ord.order.orderId);
+ord = paySys.createOrder('genom_500');
+paySys.setMethod(ord.order.orderId, 'qris');
+const pay2 = await paySys.payOrder(ord.order.orderId);
+log('monet-2x', pay1.ok && pay1.receipt.firstBonus === true && pay2.ok && pay2.receipt.firstBonus !== true
+  && STATE.meta.imun === 1500, `imun=${STATE.meta.imun}`);
+ord = paySys.createOrder('kapsul_perdana');
+paySys.setMethod(ord.order.orderId, 'qris');
+await paySys.payOrder(ord.order.orderId);
+const reord = paySys.createOrder('kapsul_perdana');
+log('monet-1x', reord.ok === false && (STATE.meta.consumables.enzim_litik || 0) === 2);
+ord = paySys.createOrder('genom_harian');
+paySys.setMethod(ord.order.orderId, 'qris');
+await paySys.payOrder(ord.order.orderId);
+const drip1 = paySys.claimGenomDrip();
+const drip2 = paySys.claimGenomDrip();
+log('monet-drip', drip1.ok && drip1.granted === 50 && drip1.daysLeft === 29 && drip2.ok === false);
+STATE.meta.selectedMode = 'kampanye';
+STATE.meta.selectedChapter = 'bab_luka';
+STATE.meta.selectedTier = 'normal';
+game.startRun('macrophage');
+STATE.meta.imun = 10000;
+const runM = game.run;
+runM.player.hp = 10;
+game.requestReviveGenom();
+log('monet-revive', runM.player.alive === true && STATE.meta.imun === 9950);
+STATE.meta.mutasiPity = 4;
+const mc = game.openMutasiChest();
+log('monet-mutasi', mc.ok === true && mc.pity === true && mc.mutation.tier === 3
+  && runM.activeMutations.length === 1 && STATE.meta.imun === 9800, `mut=${mc.mutation && mc.mutation.id}`);
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

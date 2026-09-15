@@ -122,9 +122,9 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 
 ### Sprint 4 — Monetisasi & toko
 
-- [ ] 22. **Katalog §9.1** (Kapsul Perdana, 4 tangga, Kit Riset, Genom Harian; whale nonaktif) + `grantContents` tipe baru (drip/subscription)
-- [ ] 23. Bonus pembelian pertama 2× (genom_500/1000, sekali per tier, penanda hilang setelah pakai)
-- [ ] 24. **2 sink**: Lanjut Run 50 (revive modal) + Peti Mutasi 150 (bosschest modal, pity terpisah)
+- [x] 22. **Katalog §9.1** (Kapsul Perdana, 4 tangga, Kit Riset, Genom Harian; whale nonaktif) + `grantContents` tipe baru (drip/subscription)
+- [x] 23. Bonus pembelian pertama 2× (genom_500/1000, sekali per tier, penanda hilang setelah pakai)
+- [x] 24. **2 sink**: Lanjut Run 50 (revive modal) + Peti Mutasi 150 (bosschest modal, pity terpisah)
 - [x] 25. Welcome box — ✅ (kecuali verifikasi "layak direkam" di device)
 - Sink 3–5 (§9.2: loadout/reset/refresh) = **Fase 2** (butuh UI baru) — eksplisit ditunda
 
