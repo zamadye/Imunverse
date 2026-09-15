@@ -396,7 +396,6 @@ body.in-run .toast {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  position: relative;
 }
 #screen-loading::before {
   content: '';
