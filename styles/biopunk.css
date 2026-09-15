@@ -194,10 +194,17 @@ h1, h2, h3,
 .title-card { background: rgba(7, 20, 28, 0.86); border: 1px solid rgba(0, 229, 196, 0.25); }
 .title-logo h1 { color: #00e5c4; text-shadow: 0 0 28px rgba(0, 229, 196, 0.5); }
 #screen-title.active {
-  background:
-    radial-gradient(circle at 20% 15%, rgba(0, 229, 196, 0.18) 0 120px, transparent 121px),
-    radial-gradient(circle at 82% 80%, rgba(167, 139, 250, 0.16) 0 140px, transparent 141px),
-    linear-gradient(165deg, #04111a, #071824);
+  background-image: url('../assets/backgrounds/bg_loading.png') !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+}
+/* .title-card glassmorphism — terlihat di atas foto */
+.title-card {
+  background: rgba(7, 20, 28, 0.82) !important;
+  border: 1px solid rgba(0, 229, 196, 0.28) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Dashboard: dark hero stage + one big CTA */
