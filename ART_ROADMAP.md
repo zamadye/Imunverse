@@ -233,6 +233,24 @@ asset runtime:
 - `assets/heroes/reference/mako_devourer_attack_concept.png`
 - `assets/heroes/reference/mako_devourer_devour_concept.png`
 
+Opsi siluet tambahan untuk dipilih owner:
+
+- **Option A — Ancient Amoeba:** massa rendah dan berat, pseudopod tebal,
+  terasa seperti predator tide-pool purba.
+- **Option B — Tendril Hunter:** tubuh lebih vertikal, empat tendril panjang,
+  paling kuat untuk bahasa "hunter" dan chase.
+- **Option C — Membrane Mantle:** badan lebar seperti selubung hidup,
+  pseudopod pendek melipat ke dalam, terasa seperti perangkap biologis.
+- **Option D — Vacuole Colossus:** badan padat dan besar, vacuole mangsa lebih
+  dominan, terasa paling tank dan imposing.
+
+File opsi:
+
+- `assets/heroes/reference/mako_option_a_ancient_amoeba.png`
+- `assets/heroes/reference/mako_option_b_tendril_hunter.png`
+- `assets/heroes/reference/mako_option_c_membrane_mantle.png`
+- `assets/heroes/reference/mako_option_d_vacuole_colossus.png`
+
 Catatan handoff:
 
 - Concept sheet sudah merangkum lima tahap: Amoeba Muda, Pemburu Aktif,
@@ -352,6 +370,7 @@ font, culling, economy, atau browser dependency.
 | 2026-09-15 | 0 | Scope lock & inventory | ✅ | `ART_ROADMAP.md` | Menunggu konsep berikutnya |
 | 2026-09-15 | 2–4 | Existing ecosystem asset audit | ✅ tersedia | `assets/heroes/`, `assets/enemies/`, `assets/buildings/` | Menunggu arahan redesign |
 | 2026-09-15 | 5A | Mako / The Devourer concept exploration | 🟡 reference-only | `assets/heroes/reference/mako_devourer_*.png` | Menunggu approval sebelum production replacement |
+| 2026-09-15 | 5A | Mako silhouette options A–D | 🟡 reference-only | `assets/heroes/reference/mako_option_*.png` | Menunggu pilihan owner |
 
 ---
 
