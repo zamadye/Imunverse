@@ -475,4 +475,17 @@ Lihat GitHub Issues dengan label `ui-ux` untuk daftar lengkap temuan dari audit 
 
 ---
 
+## 12. ⚠️ Aturan Workflow Penting
+
+### JANGAN Buat Pull Request
+
+**DILARANG membuat PR dari sesi Claude Code.** Setiap kali PR dibuat, sesi kehilangan akses ke GitHub repo dan branch ter-close — owner harus membuka sesi baru dan mengulang seluruh siklus setup.
+
+**Workflow yang benar:**
+1. Push commit ke branch langsung dengan `git push`
+2. Biarkan owner yang buat PR secara manual di GitHub
+3. JANGAN gunakan `mcp__github__create_pull_request` atau `gh pr create`
+
+---
+
 *Document ini dibuat berdasarkan audit kodebase lengkap pada branch `claude/audit-layout-ui-ux-3sph96`. Update dokumen ini setiap ada perubahan signifikan pada arsitektur atau design system.*
