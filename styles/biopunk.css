@@ -397,23 +397,16 @@ body.in-run .toast {
   background-position: center top;
   background-repeat: no-repeat;
 }
-#screen-loading::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(4, 17, 26, 0.10) 0%,
-    rgba(4, 17, 26, 0.20) 55%,
-    rgba(4, 17, 26, 0.72) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
 #screen-loading .load-box {
   position: relative;
   z-index: 1;
   margin-top: auto;
+  background: rgba(4, 17, 26, 0.55);
+  border-radius: var(--r-lg, 26px);
+  padding: 18px 28px 22px;
+  border: 1px solid rgba(0, 229, 196, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 /* Sembunyikan teks PHAGOS HTML — logo sudah ada di image */
 #screen-loading .load-title,
@@ -426,19 +419,6 @@ body.in-run .toast {
   background-position: center center;
   background-repeat: no-repeat;
 }
-#screen-dashboard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(4, 17, 26, 0.28) 0%,
-    rgba(4, 17, 26, 0.42) 40%,
-    rgba(4, 17, 26, 0.82) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
 #screen-dashboard .topbar,
 #screen-dashboard .dash-body {
   position: relative;
@@ -450,12 +430,52 @@ body.in-run .toast {
   z-index: 2;
 }
 
-/* Override hero-stage gradient — show BG image through semi-transparent stage */
+/* Override hero-stage gradient — transparan agar background art terlihat */
 #screen-dashboard .hero-stage,
 #screen-dashboard .hero-fixed {
-  background:
-    radial-gradient(circle at 50% 60%, rgba(0, 229, 196, 0.12), transparent 55%),
-    rgba(4, 17, 26, 0.28) !important;
-  border: 1px solid rgba(0, 229, 196, 0.15);
-  box-shadow: inset 0 0 60px rgba(0, 229, 196, 0.06), 0 0 40px rgba(4, 17, 26, 0.4);
+  background: rgba(4, 17, 26, 0.22) !important;
+  border: 1px solid rgba(0, 229, 196, 0.12);
+  box-shadow: inset 0 0 40px rgba(0, 229, 196, 0.05);
+}
+
+/* Progress gameplay overlay — menggantikan dark gradient overlay */
+.dash-bg-progress {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  pointer-events: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 56px) 14px 10px;
+  background: linear-gradient(180deg, rgba(4,17,26,0.72) 0%, rgba(4,17,26,0.0) 100%);
+}
+.dash-bg-progress .bp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px;
+}
+.dash-bg-progress .bp-stat b {
+  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #00e5c4;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(0, 229, 196, 0.7);
+  letter-spacing: 0.02em;
+}
+.dash-bg-progress .bp-stat span {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(190, 230, 220, 0.75);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dash-bg-progress .bp-divider {
+  width: 1px;
+  background: rgba(0, 229, 196, 0.15);
+  align-self: stretch;
+  margin: 8px 0;
 }
