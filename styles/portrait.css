@@ -112,4 +112,27 @@
     white-space: nowrap;
   }
   #screen-dashboard .dock-btn .dock-ico { width: 52px; height: 52px; }
+
+  /* ======== HUD RUN: klaster atas tanpa tabrakan ======== */
+  /* Chip Diferensiasi: JANGAN absolute-centered (main.css menaruhnya di
+     tengah bar → menabrak HP). Jadikan item flex normal dalam aliran baris. */
+  #screen-hud .hud-center .hud-equity-stage {
+    position: static; left: auto; top: auto; transform: none;
+    font-size: 10px; padding: 3px 9px; letter-spacing: .04em;
+  }
+  /* Angka HP: sembunyi di portrait (bar + avatar cukup, hemat ruang). */
+  #screen-hud .hud-center .hud-hp-text { display: none; }
+  /* XP: bar tipis selebar layar di tepi atas (standar genre). */
+  #screen-hud .hud-xp-top {
+    top: 0; left: 0; right: 0; width: auto; height: 6px;
+  }
+  #screen-hud .hud-xp-top .hud-xp-ico { display: none; }
+  #screen-hud .hud-xp-top .hud-xp-track { height: 6px; border-radius: 0 0 4px 4px; }
+  /* Toggle menu: bawah panel kanan (dulu menutup kill-count). */
+  #screen-hud #hud-menu-toggle { top: 112px; right: 8px; width: 36px; height: 36px; }
+  /* Misi: kiri atas bawah panel (dulu tengah layar menutup arena). */
+  #screen-hud .hud-quests { top: 112px; left: 8px; }
+  #screen-hud .hud-quests-head { font-size: 11px; padding: 5px 9px; }
+  /* Petunjuk tutorial: ramping, tidak melebar ke tengah. */
+  #screen-hud .hud-hint { max-width: 180px; font-size: 11px; line-height: 1.45; }
 }
