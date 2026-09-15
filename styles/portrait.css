@@ -135,4 +135,28 @@
   #screen-hud .hud-quests-head { font-size: 11px; padding: 5px 9px; }
   /* Petunjuk tutorial: ramping, tidak melebar ke tengah. */
   #screen-hud .hud-hint { max-width: 180px; font-size: 11px; line-height: 1.45; }
+
+  /* ======== GAMEOVER: CTA muat + toast tak menutup kartu ======== */
+  /* Bintang: di dalam kartu (margin negatif dulu terpotong). */
+  #screen-gameover .go-stars { margin-top: 0; }
+  #screen-gameover .go-stars .star { width: 36px; height: 36px; }
+  /* Rel hero: jangan ikut menciut (scroll-container min-size 0 → rel
+     kolaps ke padding saat kartu penuh; dulu rail h=10px tak terlihat). */
+  #screen-gameover .go-heroes { flex: 0 0 auto; align-items: flex-start; }
+  /* Kartu hasil: izinkan scroll sentuh (base overflow:hidden memotong CTA
+     di layar pendek; modal-box semula overflow-y:auto). */
+  #screen-gameover .go-card { overflow-y: auto; }
+  /* 4 tombol aksi: Main Lagi penuh, sisanya sebaris di bawahnya. */
+  #screen-gameover .btn-row { flex-wrap: wrap; gap: 8px; }
+  #screen-gameover #btn-retry { flex: 1 1 100%; min-height: 50px; font-size: 16px; }
+  #screen-gameover .btn-row .btn:not(#btn-retry) {
+    flex: 1 1 0; min-width: 0; font-size: 12px; min-height: 42px; padding: 8px 4px;
+  }
+  #screen-gameover .btn-row .btn-ico { width: 16px; height: 16px; }
+  /* Modal terbuka: toast pindah ke atas (dulu menutup tengah kartu).
+     #toasts bukan sibling layar → pakai :has (Chromium modern OK). */
+  #app:has(.screen.modal.active) #toasts {
+    top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto;
+    flex-direction: column; width: min(86vw, 360px);
+  }
 }
