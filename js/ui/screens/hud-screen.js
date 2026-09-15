@@ -175,6 +175,7 @@ export function resetHUD() {
   document.getElementById('hud-timer-text').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
   document.getElementById('hp-pill').classList.remove('low');
+  document.getElementById('hp-crit-vignette')?.classList.remove('critical');
   buildAbilityBar();
 
   // Portrait hero: pakai aset potret khusus (bukan sprite tubuh penuh)
@@ -210,6 +211,8 @@ export function updateHUD(data) {
   setBar('hud-hp-fill', data.hpPct);
   document.getElementById('hud-hp-text').textContent = data.hpText;
   document.getElementById('hp-pill').classList.toggle('low', data.hpPct < 0.3);
+  const critV = document.getElementById('hp-crit-vignette');
+  if (critV) critV.classList.toggle('critical', data.hpPct > 0 && data.hpPct < 0.25);
   const pct = Math.max(0, Math.min(1, data.xpPct || 0));
   // Ghost trail: kalau fill melonjak (banyak orb terambil), trail putih menyusul pelan
   if (pct < lastXpPct - 0.05) xpGhost = 1;       // naik level → mulai penuh lalu menyusut

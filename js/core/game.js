@@ -93,7 +93,7 @@ import { drawNestHint,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite } from '../render/sprite-loader.js';
-import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { drawHeroEquity, drawHeroRunForm, drawPathogenFamily, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
 export const game = {
@@ -1815,6 +1815,11 @@ applyChapterTier(enemy, run) {
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
     const killKind = run.evoStage.killFx || 'ring';
     run.effects.spawnKillFx(killKind, enemy.x, enemy.y, run.evoStage.tierColor, Math.random() * 10);
+    if (source === 'pulse') {
+      run.effects.spawnKillFx('pulse_shock', enemy.x, enemy.y, '#00e5c4', Math.random() * 10);
+    } else if (source !== 'engulf') {
+      run.effects.spawnKillFx('lyse', enemy.x, enemy.y, enemy.def.color || '#a8e63d', Math.random() * 10);
+    }
     if (killKind === 'legend' || enemy.isBoss) {
       run.effects.spawnBurst(enemy.x, enemy.y, run.evoStage.tierColor, 10, 220, 4);
     }
@@ -2503,6 +2508,7 @@ applyChapterTier(enemy, run) {
           flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
         });
         drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
+        drawPathogenFamily(ctx, e, time);
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)
         ctx.restore();
@@ -2510,7 +2516,7 @@ applyChapterTier(enemy, run) {
         drawHealthBar(ctx, e.x, e.y - e.radius - 10, Math.max(30, e.radius * 2), 5, e.hp / e.maxHP, e.isBoss ? '#ff5d73' : '#ffd93d');
         // V2 Phase 5: label affix elite di atas HP bar
         if (e.eliteAffix) {
-          ctx.font = '900 9px Nunito, system-ui, sans-serif';
+          ctx.font = '900 9px Barlow Condensed, Inter, system-ui, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillStyle = e.affixCfg.color || '#ffd93d';
           ctx.strokeStyle = 'rgba(18,63,58,0.85)';
@@ -2523,7 +2529,7 @@ applyChapterTier(enemy, run) {
         try {
           const mutLbl = mutationLabelFor(e);
           if (mutLbl) {
-            ctx.font = '900 8px Nunito, system-ui, sans-serif';
+            ctx.font = '900 8px Barlow Condensed, Inter, system-ui, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillStyle = e.mutTint || '#c39bd3';
             ctx.strokeStyle = 'rgba(18,63,58,0.9)';
@@ -2569,6 +2575,7 @@ applyChapterTier(enemy, run) {
             drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           }
           drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
+          drawHeroRunForm(ctx, pBody.x, pBody.y, bodySize, time, player.heroDef.color, run.level);
           // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
           // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
           // mahkota/kilau yang orientasinya bermakna).
@@ -2712,23 +2719,23 @@ applyChapterTier(enemy, run) {
     {
       const fog = this.depthFog = (this.depthFog && this.depthFog.h === h) ? this.depthFog : (this.depthFog = (() => {
         const g = ctx.createLinearGradient(0, 0, 0, h * 0.5);
-        g.addColorStop(0, 'rgba(215,244,236,0.36)');
-        g.addColorStop(0.35, 'rgba(214,242,234,0.14)');
-        g.addColorStop(1, 'rgba(214,242,234,0)');
+        g.addColorStop(0, 'rgba(4,17,26,0.55)');
+        g.addColorStop(0.35, 'rgba(4,17,26,0.18)');
+        g.addColorStop(1, 'rgba(4,17,26,0)');
         return { g, h };
       })());
       ctx.fillStyle = fog.g;
       ctx.fillRect(0, 0, w, h * 0.5);
       // Foreground: dasar layar di-teduhkan (air dekat lebih gelap di foto ref)
       const gr2 = ctx.createLinearGradient(0, h * 0.82, 0, h);
-      gr2.addColorStop(0, 'rgba(6,42,38,0)');
-      gr2.addColorStop(1, 'rgba(6,42,38,0.22)');
+      gr2.addColorStop(0, 'rgba(2,8,14,0)');
+      gr2.addColorStop(1, 'rgba(2,8,14,0.42)');
       ctx.fillStyle = gr2;
       ctx.fillRect(0, h * 0.82, w, h * 0.18);
       // Vignette sudut ringan (depth cue perifer)
       const vg = ctx.createRadialGradient(w / 2, h * 0.6, h * 0.5, w / 2, h * 0.6, h * 1.05);
-      vg.addColorStop(0, 'rgba(6,30,28,0)');
-      vg.addColorStop(1, 'rgba(6,30,28,0.16)');
+      vg.addColorStop(0, 'rgba(4,17,26,0)');
+      vg.addColorStop(1, 'rgba(4,17,26,0.35)');
       ctx.fillStyle = vg;
       ctx.fillRect(0, 0, w, h);
     }

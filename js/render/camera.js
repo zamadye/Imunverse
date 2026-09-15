@@ -177,7 +177,7 @@ export class Camera {
     // Trauma meluruh; offset shake proporsional kuadrat trauma (terasa lebih alami)
     if (this.shakeTrauma > 0) {
       this.shakeTrauma = Math.max(0, this.shakeTrauma - 1.6 * dt);
-      const s = this.shakeTrauma * this.shakeTrauma * 16;
+      const s = Math.min(10, this.shakeTrauma * this.shakeTrauma * 14);
       this.shakeX = (Math.random() * 2 - 1) * s;
       this.shakeY = (Math.random() * 2 - 1) * s;
     } else {

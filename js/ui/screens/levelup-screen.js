@@ -40,6 +40,7 @@ export function show({ level, choices }) {
 
   const wrap = document.getElementById('levelup-choices');
   wrap.textContent = '';
+  previewMutation(null);
 
   // Fase 17 (trigger 3C): sinergi = upgrade yang cocok dgn peran hero terpilih
   const syn = synergyFor(heroDef);
@@ -84,6 +85,10 @@ function mutationCard(def, bio) {
       locked ? el('span', { class: 'choice-stack', text: 'Bio-Point kurang — engulf lebih banyak!' }) : null,
     ]),
   ]);
+  card.addEventListener('pointerenter', () => previewMutation(def));
+  card.addEventListener('pointerleave', () => previewMutation(null));
+  card.addEventListener('focus', () => previewMutation(def));
+  card.addEventListener('blur', () => previewMutation(null));
   return card;
 }
 
@@ -118,4 +123,99 @@ function upgradeCard(def, heroDef, syn) {
   return card;
 }
 
-export function hide() {}
+export function hide() { previewMutation(null); }
+
+
+function previewMutation(def) {
+  const name = document.getElementById('mut-preview-name');
+  const desc = document.getElementById('mut-preview-desc');
+  const cv = document.getElementById('mut-preview-canvas');
+  if (!name || !desc) return;
+  if (!def) {
+    name.textContent = 'Pratinjau mutasi';
+    desc.textContent = 'Mutasi ini akan mengubah bentuk membranmu.';
+    drawMutPreview(cv, null);
+    return;
+  }
+  name.textContent = def.name;
+  desc.textContent = def.lore || def.desc || 'Mutasi ini akan mengubah bentuk membranmu.';
+  drawMutPreview(cv, def);
+}
+
+function drawMutPreview(cv, def) {
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const w = cv.width;
+  const h = cv.height;
+  ctx.clearRect(0, 0, w, h);
+  const bg = ctx.createRadialGradient(w / 2, h / 2, 8, w / 2, h / 2, w * 0.7);
+  bg.addColorStop(0, '#0a2430');
+  bg.addColorStop(1, '#04111a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+  const x = w / 2;
+  const y = h / 2;
+  const r = 28;
+  const vis = def && def.visualChange;
+  const col = vis === 'dark_aura' ? '#a78bfa' : vis === 'spikes' ? '#ff3d5a' : vis === 'green_pulse' ? '#a8e63d' : '#00e5c4';
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const halo = ctx.createRadialGradient(x, y, r * 0.2, x, y, r * 1.6);
+  halo.addColorStop(0, col);
+  halo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 1.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 0.9;
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  if (vis === 'wobble' || vis === 'breathing_organism') {
+    for (let i = 0; i <= 28; i++) {
+      const a = (i / 28) * Math.PI * 2;
+      const wob = 1 + 0.12 * Math.sin(a * 4);
+      const px = x + Math.cos(a) * r * wob;
+      const py = y + Math.sin(a) * r * wob;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  } else {
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  if (vis === 'spikes') {
+    for (let i = 0; i < 10; i++) {
+      const a = i * 0.628;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      ctx.lineTo(x + Math.cos(a) * r * 1.45, y + Math.sin(a) * r * 1.45);
+      ctx.stroke();
+    }
+  } else if (vis === 'double_ring' || vis === 'double_shockwave') {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.28, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (vis === 'orbiters') {
+    for (let i = 0; i < 3; i++) {
+      const a = i * 2.094;
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(a) * r * 1.35, y + Math.sin(a) * r * 1.35, 4, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+    }
+  } else if (vis === 'trail') {
+    ctx.globalAlpha = 0.45;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 1.4, y + 8);
+    ctx.quadraticCurveTo(x, y + 18, x + r * 1.4, y + 8);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.fillStyle = '#ffd166';
+  ctx.beginPath();
+  ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ctx.fill();
+}

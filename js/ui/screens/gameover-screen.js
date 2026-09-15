@@ -99,7 +99,7 @@ export function show(rawSummary) {
   }
   const title = document.getElementById('gameover-title');
   if (summary.victory) title.textContent = 'MENANG!';
-  else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
+  else title.textContent = summary.quit ? 'Run Diakhiri' : 'Organisme runtuh.';
   title.className = 'gameover-title' + (summary.victory || summary.quit ? ' win' : '');
   // Info mode + mutator + rekor (liveops)
   const oldMeta = document.getElementById('go-mode-line');
@@ -116,9 +116,9 @@ export function show(rawSummary) {
   }
 
   document.getElementById('gameover-sub').textContent =
-    summary.wave >= 10
-      ? 'Luar biasa! Sistem imun mengingat jasamu.'
-      : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+    summary.victory
+      ? 'Kamu bertahan. Membran menolak kematian.'
+      : 'Sistem imun mengingat pengorbananmu.';
 
   // Sprint 5.28 (§11.3): headline ringkas run.
   let head = document.getElementById('go-headline');

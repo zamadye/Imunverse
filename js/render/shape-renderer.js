@@ -208,14 +208,14 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
   ctx.save();
   ctx.translate(joy.originX, joy.originY);
   ctx.lineWidth = 4;
-  ctx.strokeStyle = 'rgba(18,63,58,0.55)';      // garis gelap kontras (kaca kabut kamera)
-  ctx.fillStyle = 'rgba(18,63,58,0.30)';
+  ctx.strokeStyle = 'rgba(0,229,196,0.45)';      // cyan fluorescence ring
+  ctx.fillStyle = 'rgba(4,17,26,0.55)';
   ctx.beginPath();
   ctx.arc(0, 0, maxRadius, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
   ctx.lineWidth = 2.5;
-  ctx.strokeStyle = '#fffdf4';                   // cincin putih cerah di garis gelap
+  ctx.strokeStyle = '#00e5c4';                   // cincin cyan di void
   ctx.beginPath();
   ctx.arc(0, 0, maxRadius + 4, 0, Math.PI * 2);
   ctx.stroke();
@@ -224,8 +224,8 @@ export function drawJoystick(ctx, joy, maxRadius, drawImageFn) {
     const a = Math.atan2(dy, dx);
     ctx.rotate(a);
     ctx.translate(maxRadius + 12, 0);
-    ctx.fillStyle = '#fffdf4';
-    ctx.strokeStyle = 'rgba(18,63,58,0.5)';
+    ctx.fillStyle = '#00e5c4';
+    ctx.strokeStyle = 'rgba(0,229,196,0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(9, 0); ctx.lineTo(-6, 8); ctx.lineTo(-3, 0); ctx.lineTo(-6, -8);
@@ -245,7 +245,7 @@ export function drawDamageNumber(ctx, n, time) {
   const t = Math.max(0, n.life / n.maxLife);
   const pop = 1 + (1 - t) * 0.35;
   ctx.globalAlpha = Math.min(1, t * 1.6);
-  ctx.font = `900 ${Math.round(n.size * pop * 1.3)}px Nunito, "Segoe UI", system-ui, sans-serif`;
+  ctx.font = `900 ${Math.round(n.size * pop * 1.3)}px Barlow Condensed, Inter, "Segoe UI", system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineWidth = 4;
@@ -983,6 +983,63 @@ export function drawKillFx(ctx, fx, time) {
     ctx.fillStyle = fx.color;
     ctx.beginPath();
     ctx.arc(fx.x, fx.y, 40 + t * 110, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (fx.kind === 'lyse') {
+    const r = 22 + t * 54;
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = alpha * 0.55;
+    ctx.fillStyle = fx.color;
+    for (let i = 0; i < 8; i++) {
+      const a = fx.seed + i * 0.785;
+      const d = r * 0.7;
+      ctx.beginPath();
+      ctx.arc(fx.x + Math.cos(a) * d, fx.y + Math.sin(a) * d, 3.2 * alpha, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  if (fx.kind === 'engulf_wrap') {
+    const r = 36 * (1 - t * 0.72);
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 4 * alpha + 1;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 5; i++) {
+      const a = fx.seed + i * 1.256 + t * 2.2;
+      ctx.beginPath();
+      ctx.arc(fx.x, fx.y, r * (0.7 + i * 0.08), a, a + 1.8);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha * 0.22;
+    ctx.fillStyle = fx.color;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r * 0.42, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (fx.kind === 'pulse_shock') {
+    const r = 18 + t * 90;
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 5 * (1 - t) + 1;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = alpha * 0.45;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r * 0.62, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = alpha * 0.16;
+    ctx.fillStyle = fx.color;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, r * 0.35, 0, Math.PI * 2);
     ctx.fill();
   }
 

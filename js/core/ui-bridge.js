@@ -14,6 +14,7 @@
  *  - 'toast'          : {message, kind}
  *  - 'playerHit'      : {damage} → flash vignette
  *  - 'wave'           : {wave, isBoss} → announce banner
+ *  - 'pulseFlash'     : Pulse overlay flash (visual-only)
  */
 
 const handlers = new Map();

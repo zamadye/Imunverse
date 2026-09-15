@@ -68,7 +68,7 @@ export class EffectsSystem {
    */
   spawnKillFx(kind, x, y, color, seed = 0) {
     if (this.effects.length >= MAX_EFFECTS) this.effects.shift();
-    const life = kind === 'legend' ? 0.5 : kind === 'bolt' ? 0.3 : 0.4;
+    const life = kind === 'legend' ? 0.5 : kind === 'bolt' ? 0.3 : kind === 'engulf_wrap' ? 0.38 : kind === 'pulse_shock' ? 0.32 : kind === 'lyse' ? 0.36 : 0.4;
     this.effects.push({ type: 'killfx', kind, x, y, color, seed, life, maxLife: life });
   }
 

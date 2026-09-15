@@ -1,0 +1,389 @@
+/* ============================================================
+   PHAGOS — biopunk overlay (BUILD 53a)
+   Dark & Intense / fluorescence microscope. Loaded LAST so
+   leftover cream HUD/dashboard rules lose the cascade.
+   Tokens remap :root; glow instead of drop-shadow.
+   ============================================================ */
+
+:root {
+  --void: #04111a;
+  --cyan: #00e5c4;
+  --red: #ff3d5a;
+  --violet: #a78bfa;
+  --gold: #ffd166;
+  --acid: #a8e63d;
+
+  --cream: #04111a;
+  --cream-2: #071824;
+  --card: #0c1e2a;
+  --ink: #e8f4f0;
+  --ink-soft: #8fb8b0;
+  --teal: #00e5c4;
+  --teal-deep: #00b8a0;
+  --teal-dark: #7fe3d0;
+  --teal-light: #0a2a32;
+  --mint: #0d241c;
+  --mint-2: #102820;
+  --sage: #a8e63d;
+  --green: #7ed957;
+  --coral: #ff3d5a;
+  --coral-deep: #d12645;
+  --coral-light: #ff6b81;
+  --gold-deep: #e0a72e;
+  --heart: #ff3d5a;
+  --cream-deep: #0a1820;
+
+  --shadow-card: 0 0 22px rgba(0, 229, 196, 0.12), 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 0 40px rgba(0, 229, 196, 0.22), 0 18px 44px rgba(0, 0, 0, 0.5);
+  --shadow-dock: 0 0 28px rgba(0, 229, 196, 0.16);
+
+  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Barlow Condensed", "Inter", Impact, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, monospace;
+  --font-head: "Barlow Condensed", "Inter", Impact, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+#game { background: #04111a; }
+
+h1, h2, h3,
+.load-title, .title-logo h1, .levelup-title, .gameover-title,
+.modal-title, .screen-title, .wave-pill, .hud-announce,
+.dashboard-play-copy b, .capsule-title, .comeback-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#hud-timer-text, #hud-kills, #hud-currency, #hud-imu, #hud-hp-text,
+#hud-level, .cd-num, .pulse-num, .summary-cell b, #gameover-currency-num,
+.go-hook-pct, .bp-xp-text {
+  font-family: var(--font-data);
+}
+
+/* ---- Combat overlays (P3 / P5) ---- */
+#damage-vignette {
+  box-shadow: inset 0 0 120px 40px rgba(255, 61, 90, 0.55);
+  z-index: 6;
+}
+
+#hp-crit-vignette {
+  position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(255, 61, 90, 0.28) 100%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+#hp-crit-vignette.critical {
+  opacity: 1;
+  animation: hp-crit-breathe 1.15s ease-in-out infinite;
+}
+@keyframes hp-crit-breathe {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+#pulse-flash {
+  position: absolute; inset: 0; pointer-events: none; z-index: 7;
+  background: radial-gradient(circle at 50% 55%, rgba(0, 229, 196, 0.42), rgba(0, 229, 196, 0.08) 46%, transparent 70%);
+  opacity: 0;
+}
+#pulse-flash.on { animation: pulse-flash-pop 0.16s ease-out; }
+@keyframes pulse-flash-pop {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+#wave-darkness {
+  position: absolute; inset: 0; pointer-events: none; z-index: 8;
+  opacity: 0;
+}
+#wave-darkness .wave-darkness-veil {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(4, 17, 26, 0.15), rgba(4, 17, 26, 0.82) 70%);
+}
+#wave-darkness .wave-darkness-label {
+  position: absolute; left: 50%; top: 28%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-weight: 800; letter-spacing: 0.28em;
+  color: #00e5c4;
+  text-shadow: 0 0 22px rgba(0, 229, 196, 0.7);
+  font-size: clamp(18px, 5vw, 34px);
+}
+#wave-darkness.on { animation: wave-dark 0.9s ease forwards; }
+@keyframes wave-dark {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  70% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+#boss-entrance {
+  position: absolute; inset: 0; pointer-events: none; z-index: 9;
+  opacity: 0;
+}
+#boss-entrance .boss-entrance-ring {
+  position: absolute; left: 50%; top: 48%;
+  width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border: 2px solid #ff3d5a;
+  border-radius: 50%;
+  box-shadow: 0 0 40px rgba(255, 61, 90, 0.55);
+}
+#boss-entrance .boss-entrance-title {
+  position: absolute; left: 50%; top: 22%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-weight: 900; letter-spacing: 0.32em;
+  color: #ff3d5a;
+  text-shadow: 0 0 28px rgba(255, 61, 90, 0.85);
+  font-size: clamp(20px, 6vw, 40px);
+}
+#boss-entrance.on { animation: boss-enter 1.4s ease forwards; }
+#boss-entrance.on .boss-entrance-ring { animation: boss-ring 1.4s ease-out; }
+@keyframes boss-enter {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes boss-ring {
+  0% { transform: scale(0.2); opacity: 1; }
+  100% { transform: scale(18); opacity: 0; }
+}
+
+/* ---- Screens & chrome ---- */
+.screen { background: var(--void); }
+.screen.modal { background: rgba(4, 17, 26, 0.78); }
+.modal-box {
+  background: #07141c;
+  border: 1px solid rgba(0, 229, 196, 0.28);
+  box-shadow: 0 0 36px rgba(0, 229, 196, 0.16), 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+.card, .currency-chip, .stat-cell, .summary-cell, .toast {
+  background: var(--card);
+  border: 1px solid rgba(0, 229, 196, 0.18);
+}
+.progress-track, .mission-track, .body-track, .upg-slider {
+  background: #102028 !important;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #00e5c4, #00b8a0);
+  color: #04111a;
+  text-shadow: none;
+  box-shadow: 0 0 22px rgba(0, 229, 196, 0.35);
+}
+.btn-danger {
+  background: linear-gradient(180deg, #ff3d5a, #d12645);
+  box-shadow: 0 0 22px rgba(255, 61, 90, 0.35);
+}
+.btn-gold {
+  background: linear-gradient(180deg, #ffd166, #e0a72e);
+  color: #2a1c00;
+  box-shadow: 0 0 22px rgba(255, 209, 102, 0.35);
+}
+
+.load-title { color: #00e5c4; text-shadow: 0 0 24px rgba(0, 229, 196, 0.45); }
+.load-title span { color: #ff3d5a; }
+.title-card { background: rgba(7, 20, 28, 0.86); border: 1px solid rgba(0, 229, 196, 0.25); }
+.title-logo h1 { color: #00e5c4; text-shadow: 0 0 28px rgba(0, 229, 196, 0.5); }
+#screen-title.active {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(0, 229, 196, 0.18) 0 120px, transparent 121px),
+    radial-gradient(circle at 82% 80%, rgba(167, 139, 250, 0.16) 0 140px, transparent 141px),
+    linear-gradient(165deg, #04111a, #071824);
+}
+
+/* Dashboard: dark hero stage + one big CTA */
+#screen-dashboard .hero-stage,
+#screen-dashboard .hero-fixed {
+  background:
+    radial-gradient(circle at 50% 60%, rgba(0, 229, 196, 0.16), transparent 55%),
+    linear-gradient(165deg, #061820, #04111a) !important;
+  box-shadow: inset 0 0 80px rgba(0, 229, 196, 0.08);
+  border: 1px solid rgba(0, 229, 196, 0.18);
+}
+#screen-dashboard .stage-info {
+  background: rgba(4, 17, 26, 0.82) !important;
+  border: 1px solid rgba(0, 229, 196, 0.3);
+}
+#screen-dashboard .dashboard-play,
+#screen-dashboard .dashboard-play.main-coral {
+  background: linear-gradient(165deg, #00e5c4, #00b8a0) !important;
+  color: #04111a !important;
+  box-shadow: 0 0 32px rgba(0, 229, 196, 0.5), 0 12px 0 rgba(0, 90, 80, 0.35) !important;
+}
+#screen-dashboard .dashboard-play-copy b {
+  font-family: var(--font-display);
+  letter-spacing: 0.14em;
+  color: #04111a;
+}
+#screen-dashboard .dock.dock-5 {
+  background: #061018 !important;
+  box-shadow: 0 -8px 28px rgba(0, 229, 196, 0.12);
+}
+#screen-dashboard .dock-btn.dock-main .dock-ico {
+  background: linear-gradient(165deg, #00e5c4, #00b8a0) !important;
+  box-shadow: 0 0 22px rgba(0, 229, 196, 0.55) !important;
+}
+
+/* HUD glass — void, cyan glow */
+#screen-hud .hud-center,
+#screen-hud .hud-kills,
+#screen-hud .hud-currency-run,
+#screen-hud .hud-xp-top,
+#screen-hud .hud-quests-head,
+#screen-hud .hud-quests-body,
+#screen-hud .hud-menu-toggle,
+#screen-hud .hud-menu2-toggle,
+#screen-hud .hud-game-menu,
+#screen-hud .hud-game-menu2,
+#screen-hud #btn-pause {
+  background: rgba(4, 17, 26, 0.78) !important;
+  border-color: rgba(0, 229, 196, 0.28) !important;
+  color: #e8f4f0 !important;
+  box-shadow: 0 0 16px rgba(0, 229, 196, 0.12) !important;
+}
+#screen-hud .hud-center .hud-equity-stage,
+#screen-hud .hud-center .wave-pill {
+  color: #00e5c4 !important;
+  text-shadow: 0 0 10px rgba(0, 229, 196, 0.45);
+}
+#screen-hud .ability-btn .sk-plate .pl-face { fill: #0c1e2a !important; }
+#screen-hud .ability-btn .sk-plate .pl-ink { fill: #00e5c4 !important; }
+#screen-hud .pulse-btn {
+  background: radial-gradient(circle at 35% 30%, #2bfff0, #00b8a0) !important;
+  box-shadow: 0 0 28px rgba(0, 229, 196, 0.55), 0 6px 0 #007a6e !important;
+  border-color: #00e5c4 !important;
+}
+#screen-hud .hp-pill.low,
+#screen-hud #hp-pill.low {
+  box-shadow: 0 0 0 4px rgba(255, 61, 90, 0.35), 0 0 18px rgba(255, 61, 90, 0.45) !important;
+}
+
+/* Level-up: full-screen dark cards rising from below */
+#screen-levelup {
+  background: radial-gradient(ellipse at 50% 80%, rgba(0, 229, 196, 0.14), #04111a 68%) !important;
+}
+#screen-levelup .lu-scene {
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(0, 229, 196, 0.18) 0 140px, transparent 210px),
+    linear-gradient(180deg, #071824, #04111a) !important;
+  border: 1px solid rgba(0, 229, 196, 0.28);
+  box-shadow: 0 0 48px rgba(0, 229, 196, 0.18);
+}
+#screen-levelup .levelup-title {
+  color: #00e5c4 !important;
+  text-shadow: 0 0 22px rgba(0, 229, 196, 0.55);
+}
+#screen-levelup .choice-card,
+#screen-levelup .choice-card:nth-child(1),
+#screen-levelup .choice-card:nth-child(2),
+#screen-levelup .choice-card:nth-child(3),
+.choice-card.mutation-card.tier-1,
+.choice-card.mutation-card.tier-2,
+.choice-card.mutation-card.tier-3 {
+  background: #0c1e2a !important;
+  color: #e8f4f0;
+  border: 1px solid rgba(0, 229, 196, 0.35) !important;
+  box-shadow: 0 0 20px rgba(0, 229, 196, 0.16) !important;
+}
+#screen-levelup .choice-card:hover,
+#screen-levelup .choice-card:focus-visible {
+  border-color: #00e5c4 !important;
+  box-shadow: 0 0 28px rgba(0, 229, 196, 0.4) !important;
+  transform: translateY(-2px);
+}
+#screen-levelup .choice-info b { color: #e8f4f0; }
+#screen-levelup .choice-info p { color: #8fb8b0; }
+#screen-levelup .lu-scene.anim .choice-card {
+  animation: lu-rise 0.5s cubic-bezier(0.2, 0.85, 0.2, 1) forwards;
+}
+@keyframes lu-rise {
+  0% { transform: translateY(48px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.mut-preview {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(4, 17, 26, 0.7);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  min-height: 72px;
+}
+.mut-preview canvas {
+  width: 72px; height: 72px; flex: 0 0 auto;
+  border-radius: 12px;
+  background: #04111a;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
+}
+.mut-preview b {
+  display: block;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  color: #a78bfa;
+  font-size: 14px;
+}
+.mut-preview p { margin: 2px 0 0; font-size: 11px; color: #8fb8b0; font-weight: 600; }
+
+/* Game Over — emotional dark */
+#screen-gameover .go-card {
+  background: linear-gradient(180deg, #0a141c, #04111a);
+  border: 1px solid rgba(255, 61, 90, 0.28);
+  box-shadow: 0 0 40px rgba(255, 61, 90, 0.12);
+}
+.gameover-title {
+  color: #ff3d5a !important;
+  text-shadow: 0 0 22px rgba(255, 61, 90, 0.5);
+}
+.gameover-title.win {
+  color: #00e5c4 !important;
+  text-shadow: 0 0 22px rgba(0, 229, 196, 0.5);
+}
+.gameover-title::before, .gameover-title::after { color: rgba(0, 229, 196, 0.35); }
+.go-hook {
+  background: rgba(4, 17, 26, 0.85) !important;
+  border-color: rgba(0, 229, 196, 0.35) !important;
+}
+#screen-gameover .btn-row { background: transparent !important; }
+
+/* Leftover cream hardcodes from dashboard-focus */
+#screen-hud .hud-menu-link,
+#screen-hud .hud-menu2-link img,
+#screen-hud .hud-quests-head,
+#screen-roster .hero-card,
+#screen-shop .shop-section,
+#screen-upgrade .upg-tabs {
+  background: rgba(7, 24, 36, 0.88) !important;
+  color: #e8f4f0 !important;
+}
+#screen-hud .ability-btn .sk-name { color: #e8f4f0 !important; text-shadow: 0 1px 0 #04111a; }
+
+.shop-card.c-teal { background: linear-gradient(170deg, #0c2a2a, #083030) !important; }
+.shop-card.c-green { background: linear-gradient(170deg, #14240c, #1a3010) !important; }
+.shop-card.c-coral { background: linear-gradient(170deg, #2a1014, #301218) !important; }
+
+body.in-run .toast {
+  background: #0c1e2a;
+  color: #e8f4f0;
+  border-color: rgba(0, 229, 196, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hp-crit-vignette.critical,
+  #pulse-flash.on,
+  #wave-darkness.on,
+  #boss-entrance.on { animation: none !important; opacity: 1; }
+}

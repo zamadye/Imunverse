@@ -70,6 +70,16 @@ import { vo } from './systems/vo-system.js'; // R3: lapisan VO
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
+const pulseFlashEl = document.getElementById('pulse-flash');
+const waveDarkEl = document.getElementById('wave-darkness');
+const bossEnterEl = document.getElementById('boss-entrance');
+
+function retriggerOverlay(el, cls = 'on') {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
 
 // ---------------------------------------------------------------------
 // Canvas sizing (DPR-aware, cap 2 untuk performa)
@@ -152,7 +162,13 @@ function wireUiBridge() {
     setTimeout(() => vignette.classList.remove('flash'), 60);
   });
 
+  on('pulseFlash', () => retriggerOverlay(pulseFlashEl, 'on'));
+
   on('runstart', () => {
+    pulseFlashEl?.classList.remove('on');
+    waveDarkEl?.classList.remove('on');
+    bossEnterEl?.classList.remove('on');
+    document.getElementById('hp-crit-vignette')?.classList.remove('critical');
     hudScreen.resetHUD();
     document.getElementById('hud-antigen')?.classList.add('hidden'); // R3: chip reset
     document.getElementById('phago-meter')?.classList.add('hidden'); // R4: meter reset
@@ -170,7 +186,9 @@ function wireUiBridge() {
   });
 
   on('wave', ({ wave, isBoss }) => {
-    hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
+    hudScreen.showAnnounce(isBoss ? 'PATOGEN APEX' : `WAVE ${wave}`, isBoss);
+    if (isBoss) retriggerOverlay(bossEnterEl, 'on');
+    else retriggerOverlay(waveDarkEl, 'on');
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
   /**
