@@ -29,6 +29,14 @@
   --gold: #f5c64f;
   --gold-deep: #e0a72e;
   --heart: #f0685a;
+  --cream-deep: #f6ecd4;
+
+  /* --- Rarity tier tokens --- */
+  --rar-common:    #9db3ae;
+  --rar-uncommon:  #7cb86a;
+  --rar-rare:      #4db5e8;
+  --rar-epic:      #b47fd6;
+  --rar-legendary: #f5c64f;
 
   /* --- Token bentuk & bayangan --- */
   --r-xl: 34px;
@@ -622,9 +630,13 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 .lu-stars { display: flex; gap: 8px; align-items: center; }
 .lu-stars img { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(245, 198, 79, 0.7)); }
 .lu-stars img:nth-child(2) { width: 38px; height: 38px; }
-.levelup-title { color: var(--coral); font-size: 27px; }
+.levelup-title {
+  color: var(--coral); font-size: 30px; font-weight: 900;
+  text-shadow: 0 2px 12px rgba(242,130,92,0.4);
+  letter-spacing: 0.03em;
+}
 .levelup-title::before, .levelup-title::after { content: "—"; color: var(--coral-light); margin: 0 8px; }
-.levelup-sub { color: var(--ink-soft); font-size: 13px; font-weight: 800; }
+.levelup-sub { color: var(--ink-soft); font-size: 12.5px; font-weight: 800; line-height: 1.4; }
 .choice-grid { display: flex; flex-direction: column; gap: 11px; width: 100%; margin-top: 2px; }
 .choice-card {
   display: flex; align-items: center; gap: 13px; text-align: left; width: 100%;
@@ -1041,7 +1053,13 @@ img.lock-badge {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 205, 90, 0.5); }
   50% { box-shadow: 0 0 10px 2px rgba(255, 205, 90, 0.65); }
 }
-.choice-card.synergy { border-color: #ffcd5a; box-shadow: 0 6px 18px rgba(232, 166, 20, 0.25); }
+.choice-card.synergy { border-color: #ffcd5a !important; box-shadow: 0 6px 18px rgba(232, 166, 20, 0.35) !important; }
+
+/* Rarity badge pills */
+.rar-badge-uncommon  { background: var(--rar-uncommon); color: #0d3208; animation: none; }
+.rar-badge-rare      { background: var(--rar-rare);     color: #042233; animation: none; }
+.rar-badge-epic      { background: var(--rar-epic);     color: #210d38; animation: none; }
+.rar-badge-legendary { background: var(--rar-legendary); color: #3d2b00; animation: none; }
 
 /* Overlay perayaan HERO BARU (trigger 1B) */
 #hero-notice {
@@ -2002,16 +2020,22 @@ img.lock-badge {
 .title-login { min-width: 200px; font-size: 12px; }
 .title-lang { position: absolute; right: 14px; bottom: -20px; }
 
-/* --- LEVEL-UP jadi SCENE (bukan modal tiba-tiba) --- */
+/* --- LEVEL-UP jadi SCENE FULL-SCREEN (bukan modal tiba-tiba) --- */
+#screen-levelup {
+  background: rgba(8, 28, 24, 0.86);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
 #screen-levelup .lu-scene {
-  position: relative; width: min(94vw, 560px); height: calc(100dvh - 16px);
+  position: relative; width: min(96vw, 520px);
+  max-height: calc(100dvh - 20px);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; text-align: center; padding: 14px 18px;
-  border-radius: 26px; overflow: hidden;
+  gap: 9px; text-align: center; padding: 18px 18px 20px;
+  border-radius: 28px; overflow: hidden; overflow-y: auto;
   background:
-    radial-gradient(circle at 50% 30%, rgba(255, 217, 61, 0.28) 0 120px, transparent 160px),
-    linear-gradient(170deg, rgba(242, 248, 232, 0.96), rgba(191, 234, 226, 0.96));
-  box-shadow: var(--shadow-pop);
+    radial-gradient(ellipse at 50% 20%, rgba(255, 217, 61, 0.32) 0 130px, transparent 200px),
+    linear-gradient(168deg, rgba(240, 250, 234, 0.98) 0%, rgba(185, 232, 222, 0.98) 100%);
+  box-shadow: 0 24px 64px rgba(8, 34, 30, 0.5), 0 0 0 2px rgba(255,217,61,0.18);
 }
 #screen-levelup .lu-scene.anim .lu-hero { animation: lu-hero-in 0.6s cubic-bezier(0.2, 1.5, 0.4, 1); }
 #screen-levelup .lu-scene.anim .levelup-title { animation: lu-title-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0.12s backwards; }
@@ -2584,8 +2608,33 @@ img.lock-badge {
 @media (max-width:390px){#screen-hud .hud-hint{bottom:74px}}
 
 /* V2 Phase 4 — rarity kartu level-up + kartu evolusi senjata */
-.choice-card.rar-rare { border-color: #7fdbff; box-shadow: 0 0 12px rgba(127,219,255,0.35); }
-.choice-card.rar-epic { border-color: #c39bd3; box-shadow: 0 0 14px rgba(195,155,211,0.45); }
+.choice-card { border: 2px solid transparent; }
+.choice-card.rar-common    { border-color: rgba(157,179,174,0.4); }
+.choice-card.rar-uncommon  {
+  border-color: var(--rar-uncommon);
+  background: linear-gradient(160deg, #eaf5dc, #d4edbe) !important;
+  box-shadow: 0 0 10px rgba(124,184,106,0.3), var(--shadow-card);
+}
+.choice-card.rar-rare      {
+  border-color: var(--rar-rare);
+  background: linear-gradient(160deg, #e0f3ff, #c4e7fa) !important;
+  box-shadow: 0 0 14px rgba(77,181,232,0.4), var(--shadow-card);
+}
+.choice-card.rar-epic      {
+  border-color: var(--rar-epic);
+  background: linear-gradient(160deg, #f2e8fc, #e4ccf5) !important;
+  box-shadow: 0 0 16px rgba(180,127,214,0.45), var(--shadow-card);
+}
+.choice-card.rar-legendary {
+  border-color: var(--rar-legendary);
+  background: linear-gradient(160deg, #fff8dc, #fdeab0) !important;
+  box-shadow: 0 0 22px rgba(245,198,79,0.55), var(--shadow-card);
+  animation: choice-in 0.35s ease forwards, legendary-shimmer 2.4s ease-in-out infinite;
+}
+@keyframes legendary-shimmer {
+  0%,100% { box-shadow: 0 0 16px rgba(245,198,79,0.45), var(--shadow-card); }
+  50%      { box-shadow: 0 0 28px rgba(245,198,79,0.75), var(--shadow-card); }
+}
 .choice-card.evo-card {
   border-color: #c39bd3;
   background: linear-gradient(135deg, rgba(195,155,211,0.18), rgba(255,217,61,0.12));
@@ -2926,18 +2975,35 @@ img.lock-badge {
 
 /* --- Kartu mutasi level-up --- */
 .choice-card.mutation-card { text-align: left; border-width: 3px; }
-.choice-card.mutation-card.tier-1 { border-color: #8df7d2; background: linear-gradient(160deg, #e6fbf3, #c8f2e2) !important; }
-.choice-card.mutation-card.tier-2 { border-color: #7fdbff; background: linear-gradient(160deg, #e8f7ff, #c9ecff) !important; }
-.choice-card.mutation-card.tier-3 { border-color: #c39bd3; background: linear-gradient(160deg, #f4e9fa, #e4cff0) !important; }
-.choice-card.mutation-card.locked { filter: grayscale(.6); opacity: .72; cursor: not-allowed; }
+.choice-card.mutation-card.tier-1 {
+  border-color: #52d9b0;
+  background: linear-gradient(160deg, #e2fcf3, #b8f0dc) !important;
+  box-shadow: 0 0 12px rgba(82,217,176,0.35), var(--shadow-card);
+}
+.choice-card.mutation-card.tier-2 {
+  border-color: var(--rar-rare);
+  background: linear-gradient(160deg, #dff3ff, #bde8fa) !important;
+  box-shadow: 0 0 16px rgba(77,181,232,0.45), var(--shadow-card);
+}
+.choice-card.mutation-card.tier-3 {
+  border-color: var(--rar-epic);
+  background: linear-gradient(160deg, #f2e6fc, #dfc8f5) !important;
+  box-shadow: 0 0 20px rgba(180,127,214,0.55), var(--shadow-card);
+  animation: choice-in 0.35s ease forwards, epic-pulse 1.8s ease-in-out infinite;
+}
+@keyframes epic-pulse {
+  0%,100% { box-shadow: 0 0 14px rgba(180,127,214,0.45), var(--shadow-card); }
+  50%      { box-shadow: 0 0 28px rgba(180,127,214,0.72), var(--shadow-card); }
+}
+.choice-card.mutation-card.locked { filter: grayscale(.6); opacity: .72; cursor: not-allowed; animation: none; }
 .mutation-icon { font-size: 34px !important; line-height: 1; }
 .mut-tier { background: #0e6e62; color: #eafff8; }
 .bio-cost { background: #ffd93d; color: #5b4303; }
 .bio-cost.locked { background: #d7263d; color: #fff; }
 .bio-free { background: #8df7d2; color: #0b3d33; }
 .mut-lore { font-style: italic; opacity: .75; font-size: 11px; margin-top: 2px; }
-.choice-card.safety-card { border-style: dashed; }
-.safety-badge { background: #8a8a8a; color: #fff; }
+.choice-card.safety-card { border-style: dashed; border-width: 2px; }
+.safety-badge { background: var(--rar-common); color: #fff; }
 
 /* PHAGOS: ikon sprite mutasi di kartu level-up */
 .choice-mut-sprite {

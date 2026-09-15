@@ -51,7 +51,17 @@ function countUp(node, target) {
   requestAnimationFrame(tick);
 }
 
-export function show(summary) {
+export function show(rawSummary) {
+  const summary = {
+    wave: 0, kills: 0, time: 0, xp: 0, xpGained: 0, heroId: '',
+    currencyEarned: 0, bossKills: 0, nutrients: 0, level: 1,
+    engulfs: 0, bio: 0, parts: 0, victory: false, quit: false,
+    modeId: null, mutatorName: null, isRecord: false, stars: 0,
+    bpFrom: null, bpTo: null, mastery: null, rank: null, chapterId: null,
+    ...rawSummary,
+  };
+  summary.currencyEarned = Number.isFinite(summary.currencyEarned) ? summary.currencyEarned : 0;
+  summary.xpGained = summary.xpGained || summary.xp || 0;
   STATE.lastGameoverSummary = { ...summary };
   // ADDENDUM P2 §3.4 — bonus milestone referral (wave 5 pertama)
   try {
