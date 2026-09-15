@@ -130,12 +130,12 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 
 ### Sprint 5 — UI overhaul
 
-- [ ] 26. **Dashboard §11.1** (hero 40% + medan berdenyut, topbar 4 slot, BP bar, kapsul kondisional, MAIN coral, dock solid `[Hero][Tas][MAIN][Squad][Lab Genom]`)
-- [ ] 27. **HUD §11.2** (dua bar semi-opaque; atas: HP/wave/kill/timer/BK/G; bawah: misi/item/Pulse+cd) — cabut chip warisan
-- [ ] 28. **Gameover §11.3** (hook §10.2 + kartu hero swipe + MAIN LAGI + iklan/share/home)
-- [ ] 29. Font kustom heading/angka (self-host, bukan Google Fonts CDN — offline PWA)
-- [ ] 30. Hitung mundur reset (dashboard, gameover, panel misi; urgensi <4 jam)
-- [ ] Sapuan kosakata §3 + radius ≥12px + nada RIA (identity)
+- [x] 26. **Dashboard §11.1** (hero 40% + medan berdenyut, topbar 4 slot, BP bar, kapsul kondisional, MAIN coral, dock solid `[Hero][Tas][MAIN][Squad][Lab Genom]`)
+- [x] 27. **HUD §11.2** (dua bar semi-opaque; atas: HP/wave/kill/timer/BK/G; bawah: misi/item/Pulse+cd) — cabut chip warisan
+- [x] 28. **Gameover §11.3** (hook §10.2 + kartu hero swipe + MAIN LAGI + iklan/share/home)
+- [x] 29. Font kustom heading/angka (self-host, bukan Google Fonts CDN — offline PWA)
+- [x] 30. Hitung mundur reset (dashboard, gameover, panel misi; urgensi <4 jam)
+- [x] Sapuan kosakata §3 + radius ≥12px + nada RIA (identity)
 
 ### Sprint 6 — Retensi & akuisisi
 

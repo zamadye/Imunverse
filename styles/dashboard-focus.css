@@ -341,49 +341,16 @@
 }
 
 /* ---------------------------------------------------------------
-   F24 — HOME LAUNCHER SINEMATIK
-   Home hanya: chip akun/rank (topbar) + tombol PLAY besar.
-   Banner carousel jadi BACKGROUND "video" sinematik fullscreen
-   (mesin cine-banner: duel imun vs patogen loop — tanpa file video).
-   Semua menu lama disembunyikan dari home (pindah ke menu gameplay, F25).
+   F24 — HOME LAUNCHER SINEMATIK — DIPENSIUNKAN Sprint 5.26.
+   Bible §11.1 butuh dashboard kaya konten (hero tetap + bar Mitosis +
+   kapsul + kartu), bukan launcher 1 tombol. Aturan sembunyi-F24 di bawah
+   dimatikan; cine-banner tetap jalan di dalam .hero-fixed.
    --------------------------------------------------------------- */
-#screen-dashboard .dash-scroll > :not(#dash-banner) { display: none; }  /* quick-row, play-row, stats, daily, duo-row */
-#screen-dashboard .secondary-dock { display: none; } /* dock utama TETAP tampil: bottom menu gaya RoK (lihat blok akhir file) */
-#screen-dashboard .dash-body { max-width: none; }
-#screen-dashboard .dash-scroll { padding: 0; margin: 0; }
-
-/* Banner = panggung sinematik fullscreen */
-#screen-dashboard .banner-carousel {
-  position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%;
-  background: var(--cream);
-}
-#screen-dashboard .banner-track { height: 100%; transform: none !important; }
-#screen-dashboard .banner-slide[data-slide="1"],
-#screen-dashboard .banner-slide[data-slide="2"],
-#screen-dashboard .banner-dots { display: none; }
-#screen-dashboard .banner-slide.on { display: block; height: 100%; }
-#screen-dashboard .hero-stage {
-  height: 100%; width: 100%; border-radius: 0; border: 0; box-shadow: none;
-  padding: 0; margin: 0; overflow: hidden; background: transparent;
-}
-#screen-dashboard .stage-cine {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  border-radius: 0; opacity: 1;
-}
-/* Bersihkan overlay panggung: home murni sinematik + PLAY */
-#screen-dashboard .stage-badge,
-#screen-dashboard .stage-info,
-#screen-dashboard .stage-enemies,
-#screen-dashboard .hero-stage .deco { display: none; }
-
-/* Topbar & PLAY melayang di atas sinematik */
-#screen-dashboard .topbar { position: relative; z-index: 3; background: transparent; box-shadow: none; border: 0; }
-#screen-dashboard .dashboard-play {
-  position: fixed; left: 50%; bottom: max(30px, env(safe-area-inset-bottom));
-  transform: translateX(-50%); z-index: 3;
-  width: min(92vw, 430px); min-height: 86px;
-}
-#screen-dashboard .dashboard-play:active { transform: translateX(-50%) translateY(4px) scale(.98); }
+/* F24-off: #screen-dashboard .dash-scroll > :not(#dash-banner) { display: none; }
+   F24-off: #screen-dashboard .secondary-dock { display: none; }
+   F24-off: banner-carousel fullscreen + .hero-stage 100% + .stage-cine inset-0
+   F24-off: .stage-badge/.stage-info/.stage-enemies/.deco { display: none; }
+   F24-off: .topbar transparan + .dashboard-play fixed melayang */
 
 /* ---------------------------------------------------------------
    F25 — DUA MENU GAMEPLAY + QUEST PANEL + HAPUS WAVE/TIMER ATAS
@@ -1894,3 +1861,261 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-curguide .curguide-tasks li { font-size: 11px; line-height: 1.3; }
   #screen-curguide .modal-box { padding: 10px 14px 12px; gap: 4px; }
 }
+
+/* =====================================================================
+ * Sprint 5.26 — DASHBOARD §11.1: hero tetap 40% + medan berdenyut, MAIN
+ * coral, dock 5 [Hero][Tas][MAIN][Squad][Lab Genom], bar Mitosis, kapsul.
+ * ===================================================================== */
+#screen-dashboard .hero-fixed {
+  height: clamp(220px, 40vh, 340px);
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+}
+/* Medan berdenyut: dua cincin mengembang dari tengah panggung (warna hero). */
+#screen-dashboard .medan-pulse {
+  --medan: #4ae3c2;
+  position: absolute; left: 50%; top: 55%;
+  width: 120px; height: 120px; margin: -60px 0 0 -60px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--medan) 26%, transparent) 0%, transparent 70%);
+}
+#screen-dashboard .medan-pulse::before,
+#screen-dashboard .medan-pulse::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid var(--medan);
+  animation: medan-ping 2.4s ease-out infinite;
+}
+#screen-dashboard .medan-pulse::after { animation-delay: 1.2s; }
+@keyframes medan-ping {
+  0% { transform: scale(.55); opacity: .75; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+/* MAIN coral: tombol aksi terkuat di layar. */
+#screen-dashboard .dashboard-play.main-coral {
+  background: linear-gradient(165deg, var(--coral) 0%, #e86a4c 60%, #d5573a 100%);
+  box-shadow: 0 11px 0 rgba(182,76,52,.28), 0 16px 26px rgba(233,106,76,.35);
+  color: #fff;
+}
+/* Dock 5: MAIN tengah terangkat. */
+#screen-dashboard .dock.dock-5 { grid-template-columns: repeat(5, 1fr); align-items: end; }
+#screen-dashboard .dock-btn.dock-main { margin-top: -18px; }
+#screen-dashboard .dock-btn.dock-main .dock-ico {
+  width: 60px; height: 60px; border-radius: 20px;
+  background: linear-gradient(165deg, var(--coral), #d5573a);
+  box-shadow: 0 6px 14px rgba(233,106,76,.45);
+}
+#screen-dashboard .dock-btn.dock-main .dock-ico img { width: 30px; height: 30px; filter: brightness(0) invert(1); }
+#screen-dashboard .dock-btn.dock-main span:last-child { color: var(--coral-deep, #c24a2e); font-weight: 900; }
+#screen-dashboard .dock-btn .dock-ico { position: relative; }
+#screen-dashboard .dock-badge {
+  position: absolute; top: -4px; right: -6px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 9px; background: #e5484d; color: #fff;
+  font-size: 11px; font-weight: 900; line-height: 18px; text-align: center;
+  box-shadow: 0 0 0 2px var(--cream, #f7f3e8);
+}
+/* Bar Siklus Mitosis. */
+#screen-dashboard .bp-bar {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  margin-top: 10px; padding: 10px 14px;
+  border-radius: 14px; border: 1px solid rgba(47,156,143,.35);
+  background: linear-gradient(120deg, rgba(47,156,143,.14), rgba(47,156,143,.05));
+  cursor: pointer; color: inherit; font: inherit; text-align: left;
+}
+#screen-dashboard .bp-tag { font-size: 10px; font-weight: 900; letter-spacing: .08em; color: var(--teal-deep); white-space: nowrap; }
+#screen-dashboard .bp-lv { font-size: 14px; white-space: nowrap; }
+#screen-dashboard .bp-track { flex: 1; height: 10px; border-radius: 6px; background: rgba(20,88,79,.15); overflow: hidden; display: block; }
+#screen-dashboard .bp-fill { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--teal), #4ae3c2); }
+#screen-dashboard .bp-pct { font-size: 12px; font-weight: 800; color: var(--teal-deep); }
+/* Kartu kapsul kondisional. */
+#screen-dashboard .kapsul-card {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  margin-top: 10px; padding: 12px 14px;
+  border-radius: 14px; border: 2px dashed #c9a227;
+  background: linear-gradient(120deg, rgba(245,198,79,.22), rgba(245,198,79,.06));
+  cursor: pointer; color: inherit; font: inherit; text-align: left;
+}
+#screen-dashboard .kapsul-ico { width: 34px; height: 34px; }
+#screen-dashboard .kapsul-txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+#screen-dashboard .kapsul-txt small { opacity: .75; }
+#screen-dashboard .kapsul-go { font-weight: 900; color: #9a7b1a; white-space: nowrap; }
+#screen-dashboard #strain-slot { margin-top: 10px; }
+#screen-dashboard #strain-slot:empty { display: none; }
+
+/* =====================================================================
+ * Sprint 5.27 — HUD §11.2: dua bar semi-opaque.
+ * Atas: HP/wave/kill/timer/BK/G (+ chip Diferensiasi + boss). F25 yang
+ * menyembunyikan .hud-center dicabut di sini (kaskade: blok ini paling akhir).
+ * Bawah: misi + item (buff) tengah-bawah; Pulse+cd tetap kanan-bawah.
+ * ===================================================================== */
+#screen-hud .hud-center {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 12px !important;
+  padding: 6px 14px !important;
+  min-width: 0 !important;
+  max-width: min(94vw, 720px);
+  margin: 0 auto;
+  background: rgba(255, 253, 244, 0.82);
+  border: 1.5px solid rgba(47, 156, 143, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(31, 95, 87, 0.18);
+  backdrop-filter: blur(2px);
+}
+/* HP di bar atas: ringkas horizontal (portrait kecil + bar). */
+#screen-hud .hud-center .hud-hero-status {
+  position: static !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: auto;
+  gap: 6px !important;
+}
+#screen-hud .hud-center .avatar-wrap { width: 34px !important; height: 34px !important; flex-basis: 34px !important; }
+#screen-hud .hud-center .hud-portrait { width: 34px !important; height: 34px !important; }
+#screen-hud .hud-center .level-badge { font-size: 8px !important; padding: 1px 5px !important; bottom: -4px !important; right: -7px !important; }
+#screen-hud .hud-center .status-bars { width: 110px !important; }
+#screen-hud .hud-center .hud-equity-stage { top: -11px; }
+#screen-hud .hud-center .hud-currency-run { pointer-events: auto; }
+#screen-hud .hud-center .hud-boss-wrap { flex-basis: 100%; }
+/* Bar bawah: misi + buff item, tengah-bawah, semi-opaque. */
+#screen-hud .hud-mission {
+  top: auto !important;
+  bottom: 56px;
+  background: rgba(255, 253, 244, 0.85);
+}
+#screen-hud .hud-buffs {
+  top: auto !important;
+  bottom: 14px;
+  left: 90px !important;
+  right: 200px !important;
+  background: rgba(255, 253, 244, 0.6);
+  border-radius: 12px;
+  padding: 3px 8px;
+}
+#screen-hud .hud-buffs:empty { display: none; }
+
+/* =====================================================================
+ * Sprint 5.28a — PRINSIP §11.4: dock SOLID GELAP (#1a2332), ikon outline
+ * putih, label putih bold. Menimpa dock terang RoK di atas (kaskade).
+ * ===================================================================== */
+#screen-dashboard .dock.dock-5 {
+  background: #1a2332;
+  border-radius: 18px 18px 0 0;
+  max-width: none;
+  margin: 4px 0 0;
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 16px rgba(10, 15, 25, 0.35);
+}
+#screen-dashboard .dock.dock-5 .dock-btn .dock-ico {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+#screen-dashboard .dock.dock-5 .dock-btn .dock-ico img,
+#screen-dashboard .dock.dock-5 .dock-btn .dock-ico svg {
+  filter: brightness(0) invert(1);
+}
+#screen-dashboard .dock.dock-5 .dock-btn > span:last-child {
+  color: #fff !important;
+  font-weight: 900;
+  text-shadow: none;
+}
+#screen-dashboard .dock.dock-5 .dock-btn.dock-main .dock-ico {
+  background: linear-gradient(165deg, var(--coral), #d5573a);
+  box-shadow: 0 6px 14px rgba(233, 106, 76, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+#screen-dashboard .dock.dock-5 .dock-btn.dock-main span:last-child { color: #ffd9cd !important; }
+#screen-dashboard .dock.dock-5 .dock-badge { box-shadow: 0 0 0 2px #1a2332; }
+
+/* Sprint 5.28a — PRINSIP §11.4: dua bar HUD gelap (#0d1117 @75%). */
+#screen-hud .hud-center {
+  background: rgba(13, 17, 23, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+#screen-hud .hud-center .wave-pill {
+  background: linear-gradient(180deg, #7fe3d0, #2fb3a2) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+#screen-hud .hud-center .timer-chip { color: #cfe9e4 !important; }
+#screen-hud .hud-center .timer-chip img { filter: brightness(0) invert(1); }
+#screen-hud .hud-center .hud-kills { color: #ff8f9a !important; }
+#screen-hud .hud-center .hud-kills img { filter: brightness(0) invert(1); }
+#screen-hud .hud-center .hud-currency-run { color: #f5c64f !important; }
+#screen-hud .hud-center .hud-hp-text { color: #fff !important; }
+#screen-hud .hud-center .hp-row .heart { filter: brightness(0) invert(1); }
+#screen-hud .hud-mission { background: rgba(13, 17, 23, 0.75) !important; border-color: rgba(127, 227, 208, 0.5) !important; }
+#screen-hud .hud-mission-text { color: #d9f5ef !important; }
+#screen-hud .hud-buffs { background: rgba(13, 17, 23, 0.6) !important; }
+
+/* ============ Sprint 5.28 — §11.3 RUN SELESAI (gameover) ============ */
+.go-headline{margin:2px 0 8px;font-size:12px;font-weight:700;color:#9fb2cc;text-align:center}
+/* Hook box "kurang sedikit lagi" (§10.2 hook) */
+.go-hook{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(13,17,23,.78);
+  border:1px solid rgba(74,227,194,.35);display:flex;flex-direction:column;gap:6px}
+.go-hook-title{font-size:11px;letter-spacing:.08em;color:#4ae3c2}
+.go-hook-empty{font-size:12px;color:#9fb2cc}
+.go-hook-row{display:grid;grid-template-columns:1fr 90px 38px;gap:8px;align-items:center;font-size:12px}
+.go-hook-label{color:#e8eef7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go-hook-track{display:block;height:8px;border-radius:99px;background:#242e42;overflow:hidden}
+.go-hook-fill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2f9c8f,#4ae3c2)}
+.go-hook-pct{color:#ffd93d;text-align:right;font-size:12px}
+/* Rel hero geser */
+.go-heroes-head{margin:10px 0 6px;font-size:10px;letter-spacing:.1em;color:#9fb2cc;text-align:center;font-weight:800}
+.go-heroes{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.go-hero{position:relative;flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 4px 6px;border-radius:12px;background:rgba(26,35,50,.9);border:1px solid #2c3a55;
+  color:#e8eef7;cursor:pointer}
+.go-hero.selected{border-color:#ffd93d;box-shadow:0 0 0 1px #ffd93d}
+.go-hero.last .go-portrait{outline:2px solid #4ae3c2;outline-offset:2px}
+.go-hero.locked{filter:grayscale(1);opacity:.55}
+.go-medan{width:30px;height:30px;margin-bottom:-24px;z-index:0}
+.go-medan.ring{border:2px solid var(--medan);border-radius:50%}
+.go-medan.wedge{border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:24px solid var(--medan);opacity:.6;width:0;height:0;margin-bottom:-20px}
+.go-medan.dots{border:2px dotted var(--medan);border-radius:50%}
+.go-portrait{width:34px;height:34px;border-radius:50%;background:#0d1117;z-index:1;position:relative}
+.go-name{font-size:9px;font-weight:700;white-space:nowrap;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+.go-mark{font-size:10px;color:#4ae3c2}
+.go-hero.locked .go-mark{color:#9fb2cc}
+
+/* ============ Sprint 5.29 — Font self-host (offline PWA, tanpa CDN) ============
+   TODO-ASET: jatuhkan file woff2 ke assets/fonts/ (Binari tidak bisa diunduh
+   di sandbox ini — firewall). Sampai file ada, stack sistem rounded dipakai.
+   Rekomendasi: Nunito-ExtraBold (heading) + Nunito-Black atau "Baloo 2" (angka). */
+@font-face{
+  font-family:'Imunverse Head';font-weight:800 900;font-style:normal;font-display:swap;
+  src:url('../assets/fonts/imunverse-head.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Imunverse Num';font-weight:700 900;font-style:normal;font-display:swap;
+  src:url('../assets/fonts/imunverse-num.woff2') format('woff2');
+}
+:root{
+  --font-head:'Imunverse Head','Nunito','Quicksand','Varela Round',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-num:'Imunverse Num','Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+}
+/* Heading + angka memakai font self-host */
+h1,h2,h3,.gameover-title,.card-title,.dock-label,.btn,.quest-heading,.go-hook-title,
+.missions-card .card-title,.hud-label,.hud-value,#hud-timer-text,#hud-wave,#hud-kills,
+#hud-currency,#hud-imu,.summary-cell b,#gameover-currency-num,.bp-text,.reset-chip,
+.go-hook-pct,.lvlup-title,.shop-title{font-family:var(--font-head)}
+.hud-value,#hud-timer-text,#hud-wave,#hud-kills,#hud-currency,#hud-imu,.summary-cell b,
+#gameover-currency-num,.bp-text,.go-hook-pct,.mission-more{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+
+/* ============ Sprint 5.30 — §10.4 Countdown reset harian ============ */
+.reset-chip{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:99px;font-size:11px;
+  font-weight:800;background:rgba(47,156,143,.16);border:1px solid rgba(74,227,194,.4);color:#4ae3c2;
+  white-space:nowrap;vertical-align:middle}
+.reset-chip.urgent{background:rgba(242,130,92,.18);border-color:#f2825c;color:#ff9d7a;animation:resetPulse 1.2s infinite}
+@keyframes resetPulse{50%{box-shadow:0 0 0 4px rgba(242,130,92,.25)}}
+.go-reset{margin:6px 0 2px;text-align:center}
+.go-reset .reset-chip{margin-left:0}
+.active-quests .reset-chip{margin:0 0 6px}

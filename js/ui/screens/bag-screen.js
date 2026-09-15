@@ -116,11 +116,11 @@ export function show() {
       iconEl(def, 'bag-sprite'), // ikon bespoke (menu-icons.js), fallback def.icon
       el('b', { text: def.name }),
       el('span', { class: `bag-count${owned > 0 ? ' ok' : ''}`, text: `×${owned}` }),
-      el('small', { text: owned > 0 ? 'dipakai otomatis saat run' : 'beli di Shop' }),
+      el('small', { text: owned > 0 ? 'dipakai otomatis saat run' : 'beli di Lab Genom' }),
     ]));
   }
   if (!any) {
-    itemsGrid.appendChild(el('p', { class: 'bag-hint', text: 'Belum punya consumable — tersedia di Shop.' }));
+    itemsGrid.appendChild(el('p', { class: 'bag-hint', text: 'Belum punya consumable — tersedia di Lab Genom.' }));
   }
 
   // ---- Jalan evolusi berikutnya ----
@@ -130,10 +130,10 @@ export function show() {
     evoBox.appendChild(el('b', { text: `Berikutnya: ${next.name} (${next.tier})` }));
     evoBox.appendChild(el('p', { text: 'Kalahkan patogen untuk mengumpulkan bagian — musuh elite (Virion & Parasit) drop 5x lebih sering, boss selalu drop.' }));
     if (canEvolve(meta)) {
-      evoBox.appendChild(el('p', { class: 'bag-ready', text: 'Bagian lengkap! Buka Dashboard → kartu Evolusi → BEREVOLUSI.' }));
+      evoBox.appendChild(el('p', { class: 'bag-ready', text: 'Bagian lengkap! Buka Dashboard → kartu Diferensiasi → BERDIFERENSIASI.' }));
     }
   } else {
-    evoBox.appendChild(el('b', { text: 'Evolusi maksimal — Imun Legenda sejati!' }));
+    evoBox.appendChild(el('b', { text: 'Diferensiasi maksimal — Imun Legenda sejati!' }));
   }
   appendDesignCollection(evoBox, meta);
 }

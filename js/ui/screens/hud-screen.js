@@ -18,6 +18,12 @@ import { emit } from '../../core/ui-bridge.js';
 import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
 
 export function show() {
+  // Sprint 5.27 (§11.2): HP pindah ke bar atas (HP/wave/kill/timer/BK/G).
+  try {
+    const top = document.querySelector('#screen-hud .hud-top .hud-center');
+    const pill = document.getElementById('hp-pill');
+    if (top && pill && pill.parentElement !== top) top.prepend(pill);
+  } catch { /* abaikan */ }
   // Combat HUD hanya menampilkan informasi yang berguna selama pertarungan.
   // Level meta hero/pasukan tetap tersedia di layar roster dan tidak diulang di arena.
 }
@@ -186,7 +192,7 @@ export function resetHUD() {
     const cue = stage > 0 ? (design?.equity || []).find((e) => e.stage === stage) : null;
     const color = cue?.color || stageDef?.tierColor || heroDef?.color || '#35d0ba';
     // Label ringkas (chip TOP-CENTER): tidak perlu dua kata — "Stage 0 Polos" kesulitan ruang.
-    eqNode.textContent = stageDef?.collectionLabelShort || stageDef?.name?.replace(/^Stage\s*\d+\s*/i, '') || (stage > 0 ? `Equity ${stage}` : 'Polos');
+    eqNode.textContent = stageDef?.collectionLabelShort || stageDef?.name?.replace(/^Stage\s*\d+\s*/i, '') || (stage > 0 ? `Diferensiasi ${stage}` : 'Polos');
     eqNode.title = stage > 0 ? `${cue?.name || eqNode.textContent}: ${cue?.visualCue || ''}` : (design?.baseCue || 'Stage 0 polos');
     eqNode.style.setProperty('--eq', color);
   }

@@ -515,7 +515,7 @@ async function boot() {
         '<b>Selesaikan tiap wave</b> — bonus Genom per wave tuntas.',
         '<b>Kalahkan boss</b> — hadiah Genom besar tiap boss tumbang.',
         '<b>Naikkan Mastery hero</b> — reward Genom di akhir run (sistem Mastery).',
-        '<b>Genom dipakai untuk Battle Pass premium</b> — kumpulkan dari run ke run!',
+        '<b>Genom dipakai untuk Siklus Mitosis premium</b> — kumpulkan dari run ke run!',
       ],
     },
   };
@@ -741,7 +741,8 @@ async function boot() {
         return;
       }
       audio.ui();
-      screenManager.show(btn.dataset.nav);
+      // Sprint 5.26: dock bisa deep-link tab (Squad→pasukan, Lab Genom→global).
+      screenManager.show(btn.dataset.nav, btn.dataset.tab || undefined);
     });
   });
   // (handler data-back sudah kontekstual di atas — duplikasi dihapus E1 poin 4)

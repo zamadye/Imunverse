@@ -44,6 +44,8 @@ global.document = dom.window.document;
 Object.defineProperty(global, 'navigator', { value: dom.window.navigator, configurable: true });
 global.localStorage = dom.window.localStorage;
 global.HTMLElement = dom.window.HTMLElement;
+global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
+global.HTMLImageElement = dom.window.HTMLImageElement;
 global.HTMLMediaElement = dom.window.HTMLMediaElement;
 global.requestAnimationFrame = (fn) => setTimeout(() => fn(Date.now()), 16);
 global.cancelAnimationFrame = (id) => clearTimeout(id);
@@ -566,6 +568,102 @@ game.startRun('macrophage');
 const st0 = memSys.getMembraneStats(game.run);
 log('d11-homeo-membran', stH.radius > st0.radius && stH.pulseCooldown < st0.pulseCooldown && stH.engulfHealPct > st0.engulfHealPct,
   `r=${st0.radius.toFixed(0)}->${stH.radius.toFixed(0)} cd=${st0.pulseCooldown.toFixed(2)}->${stH.pulseCooldown.toFixed(2)} heal=${(st0.engulfHealPct * 100).toFixed(1)}->${(stH.engulfHealPct * 100).toFixed(1)}`);
+
+// ---------- 17. Dashboard §11.1 (PHAGOS Sprint 5.26) ----------
+const dashMod = await mod('js/ui/screens/dashboard-screen.js');
+STATE.meta.currency = 5000;
+STATE.meta.imun = 500;
+STATE.meta.consumables = { serum_regenerasi: 2 };
+STATE.meta.welcomeBox = {};
+let dashErr = null;
+try {
+  dashMod.show();
+} catch (e) { dashErr = e; }
+const bpBar = document.getElementById('bp-bar');
+const kapsul = document.getElementById('kapsul-card');
+const dockBtns = document.querySelectorAll('#screen-dashboard .dock-btn');
+const strainB = document.getElementById('strain-banner');
+const medan = document.getElementById('stage-medan');
+log('dash-11.1', dashErr === null && bpBar && bpBar.textContent.includes('MITOSIS')
+  && kapsul && !kapsul.classList.contains('hidden') && dockBtns.length === 5
+  && strainB && strainB.textContent.includes('STRAIN') && medan
+  && (medan.style.getPropertyValue('--medan') || '').length > 0
+  && document.getElementById('badge-bag') && !document.getElementById('badge-bag').classList.contains('hidden'),
+  dashErr ? String(dashErr).slice(0, 120) : `dock=${dockBtns.length} bp=${(bpBar.textContent || '').slice(0, 30)}`);
+STATE.meta.welcomeBox = { opened: true };
+dashMod.show();
+log('dash-kapsul-conditional', document.getElementById('kapsul-card').classList.contains('hidden'));
+
+// ---------- 17b. HUD §11.2 (PHAGOS Sprint 5.27) ----------
+const hudMod = await mod('js/ui/screens/hud-screen.js');
+hudMod.show();
+const hpPill = document.getElementById('hp-pill');
+log('hud-11.2', hpPill && hpPill.parentElement && hpPill.parentElement.classList.contains('hud-center')
+  && !!document.getElementById('hud-wave') && !!document.getElementById('hud-kills')
+  && !!document.getElementById('hud-timer-text') && !!document.getElementById('hud-currency')
+  && !!document.getElementById('hud-imu') && !!document.getElementById('btn-pulse')
+  && !!document.getElementById('hud-mission') && !!document.getElementById('hud-buffs'));
+
+
+// ---------- 17c. Gameover §11.3 (PHAGOS Sprint 5.28) ----------
+const goMod = await mod('js/ui/screens/gameover-screen.js');
+STATE.meta.stats = Object.assign({}, STATE.meta.stats, { totalKills: 1200, bestWave: 15, bossKills: 6, totalRuns: 12, totalEngulfs: 200, totalNutrients: 90, wins: 2 });
+STATE.meta.unlockedHeroes = ['macrophage', 'neutrophil', 'dendritic'];
+STATE.meta.selectedHero = 'neutrophil';
+STATE.meta.evoParts = {};
+let goErr = null;
+try {
+  goMod.show({ quit: false, victory: false, modeId: 'normal', heroId: 'neutrophil', engulfs: 22, bio: 7,
+    wave: 15, time: 900, kills: 412, bossKills: 2, xpGained: 300, nutrients: 40, parts: 3, level: 12,
+    currencyEarned: 916, imuEarned: 0, bpFrom: null, bpTo: null, newMissions: 0, mastery: null, rank: null });
+} catch (e) { goErr = e; }
+const goHead = document.getElementById('go-headline');
+const hookRows = document.querySelectorAll('#go-hook .go-hook-row');
+const heroCards = document.querySelectorAll('#go-heroes .go-hero');
+const lastCard = document.querySelector('#go-heroes .go-hero.last');
+const lockedCards = document.querySelectorAll('#go-heroes .go-hero.locked');
+log('go-11.3', goErr === null && goHead && goHead.textContent.includes('Wave 15')
+  && goHead.textContent.includes('22 telan') && goHead.textContent.includes('BK +916')
+  && hookRows.length >= 1 && hookRows.length <= 3 && heroCards.length === 11
+  && !!lastCard && lockedCards.length === 8
+  && !!document.getElementById('btn-double-currency') && !!document.getElementById('btn-retry')
+  && !!document.getElementById('btn-home'),
+  goErr ? String(goErr).slice(0, 160) : `hook=${hookRows.length} heroes=${heroCards.length} locked=${lockedCards.length}`);
+
+
+// ---------- 17d. Reset countdown §10.4 + font self-host (Sprint 5.29-30) ----------
+const misSys = await mod('js/systems/mission-system.js');
+const msR = misSys.msUntilDailyReset(new Date('2026-09-15T10:00:00Z'));
+dashMod.show();
+goMod.show({ quit: false, victory: false, modeId: 'normal', heroId: 'neutrophil', engulfs: 1, bio: 0,
+  wave: 3, time: 120, kills: 50, bossKills: 0, xpGained: 40, nutrients: 5, parts: 0, level: 3,
+  currencyEarned: 100, imuEarned: 0, bpFrom: null, bpTo: null, newMissions: 0, mastery: null, rank: null });
+const css = fs.readFileSync(path.join(ROOT, 'styles/dashboard-focus.css'), 'utf8');
+log('reset-10.4', msR > 13 * 3600e3 && msR < 15 * 3600e3
+  && misSys.formatResetCountdown(3 * 3600e3 + 600e3) === '3j 10m'
+  && misSys.formatResetCountdown(90e3) === '1m'
+  && !!document.getElementById('dash-reset')
+  && document.querySelector('.active-quests .reset-chip') !== null
+  && document.querySelector('#go-reset .reset-chip') !== null
+  && css.includes('@font-face') && css.includes('assets/fonts/imunverse-head.woff2') && css.includes('--font-num'),
+  `ms=${Math.round(msR / 3600e3)}j`);
+
+
+// ---------- 17e. Sapuan kosakata §3 + nada RIA (Sprint 5) ----------
+const langKeys = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/lang.json'), 'utf8')).strings);
+const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const misSrc = fs.readFileSync(path.join(ROOT, 'data/missions.json'), 'utf8');
+const nar = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/narrative.json'), 'utf8'));
+const banned = ['Battle Pass', 'BEREVOLUSI', 'kartu Evolusi', 'Bagian Evolusi', 'di Shop', 'dibeli di Toko', '>Shop<', 'fuel Ultimate', 'TEMBAK'];
+const hayAll = langKeys.join('\n') + '\n' + htmlSrc + '\n' + misSrc;
+const bannedHit = banned.filter((b) => hayAll.includes(b));
+const kalahHit = /kalahkan|bersihkan/i.test(misSrc) || langKeys.some((k) => /kalahkan|bersihkan/i.test(k) && /patogen|kanker|raja|ratu|jenderal|parasit/i.test(k));
+const riaBad = [...(nar.winBarks || []), ...(nar.loseBarks || [])].some((b) => /nggak|aduh|jago|gara-gara/i.test(b));
+log('kosakata-3', bannedHit.length === 0 && !kalahHit && !riaBad
+  && langKeys.includes('Siklus Mitosis') && langKeys.includes('Lab Genom')
+  && htmlSrc.includes('Siklus Mitosis') && htmlSrc.includes('HOMEOSTASIS') && htmlSrc.includes('Lab Genom')
+  && misSrc.includes('Telan'),
+  bannedHit.length ? `banned:${bannedHit.join(',')}` : 'bersih');
 
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

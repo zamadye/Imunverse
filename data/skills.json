@@ -37,7 +37,7 @@
   {
    "id": "devour",
    "name": "Devour",
-   "description": "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Ultimate +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.",
+   "description": "TELAN musuh sekarat (berdenyut kuning) bulat-bulat: fuel Pulse +25 & pulih 8 HP. Tanpa target sekarat: lahapan biasa 4x damage + pulih 30 HP.",
    "cooldown": 20,
    "trigger": "engulf",
    "color": "#d4a017",
@@ -249,7 +249,7 @@
   {
    "id": "barrier",
    "name": "Barrier",
-   "description": "Perisai menyerap 30 damage.",
+   "description": "Membran menyerap 30 damage.",
    "cooldown": 9,
    "trigger": "damaged",
    "color": "#a03328",
@@ -414,8 +414,8 @@
   },
   {
    "id": "shield_ally",
-   "name": "Shield",
-   "description": "Perisai 25 HP untukmu & pasukan dekat.",
+   "name": "Membran",
+   "description": "Membran 25 HP untukmu & pasukan dekat.",
    "cooldown": 8,
    "trigger": "damaged",
    "color": "#27ae60",

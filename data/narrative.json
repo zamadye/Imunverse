@@ -57,14 +57,14 @@
     "default": "RIA: Musuh besar terdeteksi! Fokus, jangan serakah — hit and run!"
   },
   "winBarks": [
-    "RIA: Kerja bagus! Suhu Inang turun sedikit — itu gara-gara kamu.",
-    "RIA: Area bersih! Di dunia atas, monitor Inang berdetak lebih tenang.",
-    "RIA: Menang! Satu langkah lagi Inang bisa pulang."
+    "RIA: Patogen dibersihkan. Suhu Inang stabil.",
+    "RIA: Membran utuh. Monitor Inang tenang.",
+    "RIA: Run selesai. Inang selangkah lebih dekat pulang."
   ],
   "loseBarks": [
-    "RIA: Kamu tumbang, tapi belum kalah — sel memori mencatat semuanya. Ronde berikutnya kita lebih jago.",
-    "RIA: Mundur dulu! Inang masih bertahan... tapi jangan biarkan dia menunggu lama.",
-    "RIA: Aduh! Nggak apa-apa — pasukan baru sudah diproduksi. Satu run lagi?"
+    "RIA: Membran jebol. Sel memori mencatat — ulangi run.",
+    "RIA: Mundur. Inang bertahan — jangan biarkan menunggu.",
+    "RIA: Unit hilang. Pasukan baru diproduksi — satu run lagi."
   ],
   "hostHints": {
     "bab_luka": "Di dunia atas: sebuah plester kecil bergambar kartun ditempel pelan-pelan.",

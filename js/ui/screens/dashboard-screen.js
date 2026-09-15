@@ -8,12 +8,15 @@ import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
 import { canClaimDailyReward, claimDailyReward } from '../../systems/economy-system.js';
-import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest } from '../../systems/mission-system.js';
+import { getMissionProgressList, getQuestProgress, acceptQuest, claimQuest, msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { checkDailyLives } from '../../systems/monetization.js';
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { markSeen } from '../../systems/codex-system.js';
 import { drainHeroNotices } from '../../systems/retention-system.js';
+import { ensureBp, xpNeed } from '../../systems/battlepass-system.js';
+import { globalUpgradeCost, globalUpgradeLevel } from '../../systems/retention-system.js';
+import { heroLevelCost, allyLevelCost } from '../../systems/economy-system.js';
 import { getEvoStageDef, getNextEvoStageDef, canEvolve, evolve } from '../../systems/evolution-system.js';
 import {
   getBodyState, getCriticalSystems, getMilestoneProgress, getNarrativeStage,
@@ -23,7 +26,7 @@ import { canWatchAd, trackAdWatch, triggerRewardedAdRecovery } from '../../syste
 import { playerRank } from '../../systems/rank-system.js';
 import { applyGateVisual, gateFor } from '../../systems/feature-gate.js';
 import { arenaUnlockStatus } from './arena-screen.js';
-import { getLeaderboard, getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
+import { getModeUnlockStatus, getTodayMutator } from '../../systems/liveops-system.js';
 import { currentChapterId } from './campaign-screen.js';
 import { getSession } from '../../systems/account-system.js';
 import { heroLevelBadge, allyLevelBadge } from '../../systems/economy-system.js';
@@ -44,22 +47,13 @@ const ORGAN_ICONS = {
   saraf: 'assets/sprites/icon_saraf.png',
 };
 
-let bannerTimer = null;
 let dashWasHidden = true; // Fase 15 audit: reset scroll hanya saat masuk layar
-let bannerIdx = 0;
 
-function setBannerSlide(i) {
-  const slides = document.querySelectorAll('#dash-banner .banner-slide');
-  const dots = document.querySelectorAll('#banner-dots .b-dot');
-  if (!slides.length) return;
-  bannerIdx = i % slides.length;
-  slides.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
-  dots.forEach((el, k) => el.classList.toggle('on', k === bannerIdx));
-  // Fase 15: cinematic hanya jalan saat slide panggung (0) tampil
+/** Sprint 5.26 (§11.1): panggung TETAP — cinematic selalu jalan (tanpa carousel). */
+function startStageCine() {
   import('../../render/cine-banner.js').then((m) => {
     const cv = document.getElementById('dash-cine');
-    if (bannerIdx === 0 && cv) m.startBannerCine(cv);
-    else m.stopBannerCine();
+    if (cv) m.startBannerCine(cv);
   }).catch((e) => console.error('cine-banner import gagal:', e));
 }
 
@@ -95,94 +89,6 @@ function showHeroNotice() {
   }
   clearTimeout(showHeroNotice._t);
   showHeroNotice._t = setTimeout(() => { layer.className = ''; }, 3200);
-}
-
-function stopBannerTimer() {
-  if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
-}
-
-/** Fase 13: banner carousel 3 slide — panggung hero, bab berikutnya, ancaman/endless. */
-function renderBanner(meta) {
-  const dots = document.getElementById('banner-dots');
-  dots.textContent = '';
-  document.querySelectorAll('#dash-banner .banner-slide').forEach((_, k) => {
-    dots.appendChild(el('button', { class: `b-dot${k === 0 ? ' on' : ''}`, 'aria-label': `Slide ${k + 1}` }));
-  });
-  [...dots.children].forEach((d, k) => d.addEventListener('click', () => { stopBannerTimer(); setBannerSlide(k); }));
-
-  // Slide 2: bab kampanye berikutnya
-  const chapters = getData().campaign.chapters;
-  const ch = chapters.find((c) => !STATE.meta.campaignCleared?.[c.id]) || chapters[chapters.length - 1];
-  const chIdx = chapters.indexOf(ch);
-  const doneCount = chapters.filter((c) => STATE.meta.campaignCleared?.[c.id]).length;
-  const sl2 = document.getElementById('banner-chapter');
-  sl2.textContent = '';
-  sl2.appendChild(el('img', { class: 'bn-organ', src: ORGAN_ICONS[ch.arenaId] || 'assets/sprites/deco_star_pop.png', alt: '' }));
-  sl2.appendChild(el('div', { class: 'bn-tag', text: `BAB ${chIdx + 1}/${chapters.length}` }));
-  sl2.appendChild(el('b', { class: 'bn-title', text: ch.organ }));
-  sl2.appendChild(el('span', { class: 'bn-sub', text: `${ch.title} · ${ch.objective}` }));
-  sl2.appendChild(el('button', {
-    class: 'btn btn-primary bn-cta',
-    text: doneCount ? 'LANJUT BAB' : 'MULAI BAB',
-    onclick: () => screenManager.show('campaign'),
-  }));
-
-  // Slide 3: ancaman / mode endless
-  const endless = getData().modes.modes.find((m) => m.id === 'endless');
-  const status = getModeUnlockStatus(endless, meta);
-  const mut = getTodayMutator();
-  const bossDef = getData().enemies.enemies.find((e) => e.id === 'sel_kanker') || getData().enemies.enemies[0];
-  const sl3 = document.getElementById('banner-endless');
-  sl3.classList.add('bn-danger');
-  sl3.textContent = '';
-  sl3.appendChild(el('img', { class: 'bn-organ', src: spriteToDataURL(bossDef.spriteIdle || bossDef.sprite), alt: bossDef.name }));
-  sl3.appendChild(el('div', { class: 'bn-tag', text: 'ANCAMAN HARI INI' }));
-  sl3.appendChild(el('b', { class: 'bn-title', text: 'Mode Endless' }));
-  sl3.appendChild(el('span', { class: 'bn-sub', text: status.unlocked ? `Mutator: ${mut.def.name}` : status.label }));
-  sl3.appendChild(el('button', {
-    class: 'btn ' + (status.unlocked ? 'btn-gold bn-cta' : 'btn bn-cta'),
-    text: status.unlocked ? 'TANTANG' : 'TERKUNCI',
-    onclick: () => {
-      if (!status.unlocked) { screenManager.show('campaign'); return; }
-      STATE.meta.selectedMode = 'endless';
-      writeSave(STATE.meta);
-      screenManager.show('prep');
-    },
-  }));
-
-  setBannerSlide(0);
-  stopBannerTimer();
-  // F24: home launcher sinematik — carousel berhenti di slide panggung (cine fullscreen permanen)
-  // bannerTimer = setInterval(() => setBannerSlide(bannerIdx + 1), 5200);
-}
-
-  /** Dashboard focus: empat pintu sekunder; daily/misi tetap hidup sebagai notifikasi di bawah. */
-function renderQuickRow(meta) {
-  const row = document.getElementById('quick-row');
-  row.textContent = '';
-  const tiles = [
-    // RONDE-6: SATU LAPIS — dari dashboard langsung ke DETAIL hero (rail kiri
-    // untuk ganti hero), tanpa melewati grid roster.
-    { key: 'herodetail', ico: 'assets/icons/menu-heroes.svg', label: 'Heroes', badge: '', act: () => screenManager.show('herodetail') },
-    { key: 'shop', ico: 'assets/icons/menu-shop.svg', label: 'Shop', badge: '', act: () => screenManager.show('shop') },
-    { key: 'codex', ico: 'assets/icons/menu-codex.svg', label: 'Collection', badge: '', act: () => screenManager.show('codex') },
-    { key: 'rank', ico: 'assets/icons/menu-rank.svg', label: 'Stats', badge: '', act: () => screenManager.show('rank') },
-  ];
-  for (const tl of tiles) {
-    const t = el('button', { class: 'quick-tile', title: tl.label }, [
-      tl.badge ? el('span', { class: 'qt-badge', text: tl.badge }) : null,
-      el('img', { src: tl.ico, alt: '' }),
-      el('span', { class: 'qt-label', text: tl.label }),
-    ]);
-    // F21: gerbang bertahap — tile terkunci menampilkan syarat & toast (buka via main)
-    const gate = gateFor('quick', tl.key);
-    if (gate && gate.locked) {
-      // R1: progressive disclosure — tile terkunci TIDAK dirender (muncul saat unlock)
-      continue;
-    }
-    t.addEventListener('click', tl.act);
-    row.appendChild(t);
-  }
 }
 
 /** Fase 13: kartu KAMPANYE besar (bab aktif + tombol MULAI #btn-play-big). */
@@ -304,14 +210,14 @@ function renderEvoCard(meta) {
 
   if (next) {
     const ready = canEvolve(meta);
-    card.appendChild(el('div', { class: 'evo-progress', text: `Berevolusi ke ${next.name} (${next.tier}) — buka kemampuan baru & bentuk baru!` }));
-    const btn = el('button', { class: 'btn btn-primary', text: ready ? `BEREVOLUSI → ${next.name.toUpperCase()}` : 'KUMPULKAN BAGIAN EVOLUSI' });
+    card.appendChild(el('div', { class: 'evo-progress', text: `Berdiferensiasi ke ${next.name} (${next.tier}) — buka kemampuan baru & bentuk baru!` }));
+    const btn = el('button', { class: 'btn btn-primary', text: ready ? `DIFERENSIASI → ${next.name.toUpperCase()}` : 'KUMPULKAN BAGIAN DIFERENSIASI' });
     btn.disabled = !ready;
     btn.addEventListener('click', () => {
       const newStage = evolve(meta);
       if (newStage) {
         audio.evolve();
-        emit('toast', { message: `Hero berevolusi: ${newStage.name} (${newStage.tier})!`, kind: 'gold' });
+        emit('toast', { message: `Hero berdiferensiasi: ${newStage.name} (${newStage.tier})!`, kind: 'gold' });
         renderEvoCard(meta);
         renderStageEvoOverlay(meta);
       }
@@ -326,32 +232,6 @@ function renderEvoCard(meta) {
  * Kartu KONDISI TUBUH: 5 sistem bar kesehatan + meter energi/racun + label
  * naratif + progres milestone "Sehat Sempurna" + tombol fokus & pemulihan iklan.
  */
-/** Papan rekor lokal (top-3 ditampilkan) dari leaderboard per mode. */
-function renderLeaderboardCard(meta) {
-  const card = document.getElementById('leaderboard-card');
-  if (!card) return;
-  card.textContent = '';
-  const runs = getLeaderboard(meta, 'normal').slice(0, 3);
-  card.appendChild(el('h3', { class: 'card-title ico-title' }, [
-    el('img', { class: 't-ico', src: 'assets/icons/menu-quest.svg', alt: '' }),
-    el('span', { text: 'Papan Rekor — Klasik' }),
-  ]));
-  if (!runs.length) {
-    card.appendChild(el('p', { class: 'lb-empty', text: 'Belum ada rekor. Selesaikan run pertamamu!' }));
-    return;
-  }
-  const list = el('ol', { class: 'lb-list' });
-  runs.forEach((r, i) => {
-    list.appendChild(el('li', { class: `lb-row${i === 0 ? ' best' : ''}` }, [
-      el('b', { class: 'lb-rank', text: `#${i + 1}` }),
-      el('span', { class: 'lb-hero', text: r.heroName }),
-      el('span', { class: 'lb-wave', text: `Wave ${r.wave}` }),
-      el('span', { class: 'lb-time', text: `${Math.floor(r.time / 60)}m ${r.time % 60}s` }),
-    ]));
-  });
-  card.appendChild(list);
-}
-
 function renderBodyCard(meta) {
   const card = document.getElementById('body-card');
   card.textContent = '';
@@ -365,7 +245,7 @@ function renderBodyCard(meta) {
   const focusDef = cfg.focusRuns.find((f) => f.id === (meta.focusRun || 'seimbang'));
   card.appendChild(el('div', { class: 'body-head' }, [
     el('div', { class: 'body-title-wrap' }, [
-      el('b', { class: 'body-title', text: `Kondisi Tubuh: ${narrative.label}` }),
+      el('b', { class: 'body-title', text: `Imunitas: ${narrative.label}` }),
       el('span', { class: 'body-sub', text: 'Jaga 5 sistem — tubuh adalah universe-nya.' }),
     ]),
     el('button', { class: 'btn btn-primary btn-sm', text: 'FOKUS', onclick: () => screenManager.show('prep') }),
@@ -451,15 +331,13 @@ function renderArenaCard(meta) {
 
 // ADDENDUM §3.5 — banner Strain of the Week di puncak dashboard.
 function renderStrainBanner() {
-  const sc = document.querySelector('#screen-dashboard .dash-scroll');
-  if (!sc) return;
-  let b = document.getElementById('strain-banner');
-  if (!b) {
-    b = document.createElement('div');
-    b.id = 'strain-banner';
-    b.className = 'strain-banner';
-    sc.prepend(b);
-  }
+  const slot = document.getElementById('strain-slot');
+  if (!slot) return;
+  slot.textContent = '';
+  const b = document.createElement('div');
+  b.id = 'strain-banner';
+  b.className = 'strain-banner';
+  slot.appendChild(b);
   const name = traitDisplayName(currentStrainId());
   b.innerHTML = '';
   const tag = document.createElement('span');
@@ -470,6 +348,78 @@ function renderStrainBanner() {
   const hint = document.createElement('small');
   hint.textContent = '15% musuh wave 4+ membawa trait ini. Sesuaikan mutasimu!';
   b.append(tag, nm, hint);
+}
+
+/** Sprint 5.26 (§11.1): bar progres Siklus Mitosis → tap buka Pass. */
+function renderBpBar(meta) {
+  const bar = document.getElementById('bp-bar');
+  if (!bar) return;
+  const bp = ensureBp(meta);
+  const need = xpNeed(bp.level);
+  const pct = Math.min(100, Math.round((bp.xp / Math.max(1, need)) * 100));
+  bar.textContent = '';
+  bar.appendChild(el('span', { class: 'bp-tag', text: '⬡ SIKLUS MITOSIS' }));
+  bar.appendChild(el('b', { class: 'bp-lv', text: `Lv ${bp.level}` }));
+  bar.appendChild(el('span', { class: 'bp-track' }, [el('i', { class: 'bp-fill', style: `width:${pct}%` })]));
+  bar.appendChild(el('span', { class: 'bp-pct', text: `${pct}%` }));
+  bar.onclick = () => { audio.ui(); screenManager.show('bp'); };
+}
+
+/** Sprint 5.26 (§11.1): kartu Kapsul Membran — hanya bila belum dibuka. */
+function renderKapsul(meta) {
+  const card = document.getElementById('kapsul-card');
+  if (!card) return;
+  if (meta.welcomeBox && meta.welcomeBox.opened) {
+    card.classList.add('hidden');
+    card.textContent = '';
+    return;
+  }
+  card.classList.remove('hidden');
+  card.textContent = '';
+  card.appendChild(el('img', { class: 'kapsul-ico', src: 'assets/icons/ui-chest.svg', alt: '' }));
+  card.appendChild(el('span', { class: 'kapsul-txt' }, [
+    el('b', { text: 'Kapsul Membran belum dibuka!' }),
+    el('small', { text: 'Hero gratis menunggumu' }),
+  ]));
+  card.appendChild(el('span', { class: 'kapsul-go', text: 'BUKA ▸' }));
+  card.onclick = () => { audio.ui(); screenManager.show('capsule'); };
+}
+
+/** Sprint 5.26 (§11.1): badge dock — jujur (hanya muncul bila ada aksi). */
+function renderDockBadges(meta) {
+  const set = (id, txt) => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    if (!txt) { b.classList.add('hidden'); b.textContent = ''; return; }
+    b.classList.remove('hidden');
+    b.textContent = txt;
+  };
+  const hu = getData().upgrades.heroUpgrade;
+  const heroOk = (meta.unlockedHeroes || []).some((hid) => {
+    const lv = (meta.heroLevels || {})[hid] || 0;
+    return lv < hu.maxLevel && (meta.currency || 0) >= heroLevelCost(hu, lv);
+  });
+  set('badge-hero', heroOk ? '•' : '');
+  const nItem = Object.values(meta.consumables || {}).reduce((a, b) => a + (b || 0), 0);
+  set('badge-bag', nItem > 0 ? String(Math.min(99, nItem)) : '');
+  const au = getData().upgrades.allyUpgrade;
+  const allyLv = meta.allyLevel || 0;
+  set('badge-squad', au && allyLv < au.maxLevel && (meta.currency || 0) >= allyLevelCost(au, allyLv) ? '•' : '');
+  const labOk = (getData().upgrades.globalUpgrades || []).some((def) => {
+    const lv = globalUpgradeLevel(meta, def.id);
+    if (lv >= def.maxLevel) return false;
+    const { cost, currency } = globalUpgradeCost(def, lv);
+    return currency === 'genom' ? (meta.imun || 0) >= cost : (meta.currency || 0) >= cost;
+  });
+  set('badge-lab', labOk ? '•' : '');
+}
+
+/** Sprint 5.26 (§11.1): medan berdenyut di belakang hero (warna hero). */
+function renderMedan(heroDef) {
+  const m = document.getElementById('stage-medan');
+  if (!m) return;
+  const c = (heroDef && heroDef.color) || '#4ae3c2';
+  m.style.setProperty('--medan', c);
 }
 
 export function show() {
@@ -512,11 +462,7 @@ export function show() {
     }
   }
 
-  // F21: GERBANG MENU BERTAHAP — side-nav & quick-menu terbuka sesuai bestWave
-  document.querySelectorAll('.side-btn').forEach((b) => {
-    const id = b.id.replace('side-', '');
-    applyGateVisual(b, 'side', id);
-  });
+  // F21: GERBANG MENU BERTAHAP — dock terbuka sesuai bestWave
   document.querySelectorAll('.dock-btn[data-nav]').forEach((b) => {
     applyGateVisual(b, 'dock', b.dataset.nav);
   });
@@ -565,7 +511,8 @@ export function show() {
   }
 
   // CTA MULAI: bila kampanye → tunjuk bab aktif (tujuan jelas sejak dashboard)
-  const playSub = document.getElementById('play-big-sub');
+  renderMedan(heroDef);
+  const playSub = document.getElementById('play-sub') || document.getElementById('play-big-sub');
   if (playSub) {
     if ((meta.selectedMode || 'kampanye') === 'kampanye' && getData().campaign) {
       const ch = getData().campaign.chapters.find((c) => c.id === (meta.selectedChapter || currentChapterId(meta)))
@@ -587,9 +534,10 @@ export function show() {
   const scr = document.getElementById('screen-dashboard');
   if (scr) scr.classList.toggle('minimal-home', (meta.stats.totalRuns || 0) < 3);
 
-  renderLeaderboardCard(meta);
-  renderBanner(meta); // Fase 13: banner carousel
-  renderQuickRow(meta); // Fase 13: quick menu
+  startStageCine(); // Sprint 5.26: panggung tetap (§11.1)
+  renderBpBar(meta); // Sprint 5.26: bar Mitosis (§11.1)
+  renderKapsul(meta); // Sprint 5.26: kapsul kondisional (§11.1)
+  renderDockBadges(meta); // Sprint 5.26: badge dock (§11.1)
   renderCampaignCard(meta); // Fase 13: kartu kampanye besar
   renderModeStack(meta); // Fase 13: kolom mode
   // Fase 13: avatar profil di topbar
@@ -649,6 +597,19 @@ export function show() {
   dailyCard.appendChild(btn);
 
   // ---- Misi (3 progres teratas yang belum selesai) ----
+  // Sprint 5.30 (§10.4): chip hitung mundur reset harian di judul kartu.
+  const mCard = document.querySelector('.missions-card .card-title');
+  if (mCard && !document.getElementById('dash-reset')) {
+    const ms = msUntilDailyReset();
+    const chip = el('span', { id: 'dash-reset', class: 'reset-chip' + (ms < 4 * 3600e3 ? ' urgent' : ''),
+      text: `⏳ Reset ${formatResetCountdown(ms)}` });
+    mCard.appendChild(chip);
+  } else if (mCard) {
+    const ms = msUntilDailyReset();
+    const chip = document.getElementById('dash-reset');
+    chip.textContent = `⏳ Reset ${formatResetCountdown(ms)}`;
+    chip.classList.toggle('urgent', ms < 4 * 3600e3);
+  }
   const list = document.getElementById('dash-missions');
   list.textContent = '';
   const progress = getMissionProgressList(meta);
@@ -682,6 +643,12 @@ export function show() {
   // Daily/weekly quest aktif: pemain memilih quest, lalu claim reward Antibodi.
   const questBox = el('div', { class: 'active-quests' });
   questBox.appendChild(el('b', { class: 'quest-heading', text: 'Quest Pilihan' }));
+  {
+    // Sprint 5.30 (§10.4): countdown juga di panel quest.
+    const ms = msUntilDailyReset();
+    questBox.appendChild(el('span', { class: 'reset-chip' + (ms < 4 * 3600e3 ? ' urgent' : ''),
+      text: `⏳ Reset harian ${formatResetCountdown(ms)}` }));
+  }
   // E2 poin 5: quest auto-aktif — tanpa tombol AMBIL; tombol hanya KLAIM.
   for (const q0 of getQuestProgress(meta)) {
     if (!q0.accepted && !q0.claimed) acceptQuest(meta, q0.def.id);
@@ -715,7 +682,6 @@ export function show() {
 }
 
 export function hide() {
-  stopBannerTimer();
   dashWasHidden = true;
   import('../../render/cine-banner.js').then((m) => m.stopBannerCine()).catch(() => {});
 }

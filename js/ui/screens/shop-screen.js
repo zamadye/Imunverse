@@ -323,7 +323,7 @@ export function show() {
 
   // ============ 4) SUPLEMEN SISTEM TUBUH (meta-layer kondisi tubuh) ============
   const bodyCfg = getData().bodySystems;
-  const supSection = sectionEl('sup', `+${bodyCfg.suplemenGain} kesehatan sistem per suplemen — kondisi tubuh memengaruhi bonus run.`);
+  const supSection = sectionEl('sup', `+${bodyCfg.suplemenGain} kesehatan sistem per suplemen — imunitas memengaruhi bonus run.`);
   const supGrid = el('div', { class: 'shop-grid' });
   bodyCfg.systems.forEach((sysDef, i) => {
     const card = el('div', { class: `shop-card ${PASTEL[i % PASTEL.length]}` }, [
@@ -374,7 +374,7 @@ export function show() {
   // RONDE-4: ini SOFT currency. Imun Coin premium hanya dari bundle di atas
   // & reward Battle Pass — tidak dari video/survei/referral.
   const offers = getData().battlepass.offers;
-  const freeSection = sectionEl('free', 'Bonus Biokredit: tonton sponsor, isi survei, atau ajak teman. Genom (premium) tersedia lewat pembelian & musim Battle Pass.');
+  const freeSection = sectionEl('free', 'Bonus Biokredit: tonton sponsor, isi survei, atau ajak teman. Genom (premium) tersedia lewat pembelian & musim Siklus Mitosis.');
   const freeGrid = el('div', { class: 'free-grid' });
 
   const adTile = el('div', { class: 'free-tile' }, [

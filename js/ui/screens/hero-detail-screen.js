@@ -90,7 +90,7 @@ function describeSkillEffects(def) {
       case 'instant_multi': return tr(`Hantam ${fx.count || 3} target terdekat sekaligus`);
       case 'instant_hits': return tr(`Hantaman beruntun ×${fx.hits || 3}`);
       case 'annihilate': return tr(`Anihilasi target + percikan area`);
-      case 'shield_self': return tr(`Perisai +${fx.amount}`);
+      case 'shield_self': return tr(`Membran +${fx.amount}`);
       default: return fx.kind;
     }
   });

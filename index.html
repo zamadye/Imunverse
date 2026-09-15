@@ -85,59 +85,25 @@
         </header>
 
         <div class="dash-body">
-          <!-- ===== SIDEBAR NAV (kiri, ala MLBB) ===== -->
-          <nav class="side-nav" aria-label="Navigasi fitur">
-            <button class="side-btn active" id="side-home" title="Beranda">
-              <img src="assets/icons/ui-home.svg" alt="" /><span>Home</span>
-            </button>
-            <button class="side-btn" id="side-campaign" title="Peta Tubuh — Kampanye">
-              <img src="assets/icons/menu-campaign.svg" alt="" /><span>Kampanye</span>
-            </button>
-            <button class="side-btn" id="side-codex" title="Bio-Pedia">
-              <img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span>
-            </button>
-            <button class="side-btn" id="side-bp" title="Battle Pass">
-              <img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span>
-            </button>
-            <button class="side-btn" id="side-records" title="Papan Rekor">
-              <img src="assets/icons/menu-rank.svg" alt="" /><span>Rekor</span>
-            </button>
-            <button class="side-btn" id="side-body" title="Kondisi Tubuh">
-              <img src="assets/icons/ui-heart.svg" alt="" /><span>Tubuh</span>
-            </button>
-          </nav>
-
           <div class="dash-scroll">
-            <!-- ===== BANNER CAROUSEL ===== -->
-            <section id="dash-banner" class="banner-carousel" aria-label="Sorotan">
-              <div class="banner-track">
-                <!-- Slide 1: panggung hero (elemen asli dipertahankan) -->
-                <div class="banner-slide on" data-slide="0">
-                  <section class="hero-stage" id="dash-stage">
-                    <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
-                    <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
-                    <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
-                    <div id="stage-enemies" class="stage-enemies"></div>
-                    <canvas id="dash-cine" class="stage-cine" aria-label="Cinematic: pasukan imun melawan patogen"></canvas>
-                    <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
-                    <div class="stage-badge lvl" id="dash-level-badge" role="button" aria-label="Buka Lab Pasukan"></div>
-                    <div class="stage-info">
-                      <b id="dash-hero-name">—</b>
-                      <span id="dash-hero-title">—</span>
-                    </div>
-                  </section>
-                </div>
-                <!-- Slide 2: bab kampanye berikutnya (diisi JS) -->
-                <div class="banner-slide" data-slide="1" id="banner-chapter"></div>
-                <!-- Slide 3: mode endless / ancaman (diisi JS) -->
-                <div class="banner-slide" data-slide="2" id="banner-endless"></div>
+            <!-- ===== §11.1: HERO TETAP (40%) + MEDAN BERDENYUT ===== -->
+            <section class="hero-stage hero-fixed" id="dash-stage">
+              <div class="medan-pulse" id="stage-medan" aria-hidden="true"></div>
+              <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
+              <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
+              <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
+              <div id="stage-enemies" class="stage-enemies"></div>
+              <canvas id="dash-cine" class="stage-cine" aria-label="Cinematic: pasukan imun melawan patogen"></canvas>
+              <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
+              <div class="stage-badge lvl" id="dash-level-badge" role="button" aria-label="Buka Lab Pasukan"></div>
+              <div class="stage-info">
+                <b id="dash-hero-name">—</b>
+                <span id="dash-hero-title">—</span>
               </div>
-              <div class="banner-dots" id="banner-dots"></div>
             </section>
-
-            <!-- ===== QUICK MENU ===== -->
-            <div id="quick-row" class="quick-row"><!-- diisi JS --></div>
-
+            <div id="strain-slot"></div>
+            <button id="bp-bar" class="bp-bar" aria-label="Buka Siklus Mitosis"><!-- diisi JS --></button>
+            <div id="kapsul-card" class="kapsul-card hidden"><!-- diisi JS --></div>
             <!-- ===== BARIS PLAY: kartu bab besar + kolom mode ===== -->
             <div class="play-row">
               <section class="card campaign-card" id="campaign-card"><!-- diisi JS --></section>
@@ -161,48 +127,43 @@
             </div>
 
             <div class="duo-row" id="duo-lb">
-              <div id="leaderboard-card" class="card lb-card"><!-- diisi JS --></div>
               <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
             </div>
           </div>
         </div>
 
         <!-- CTA utama dipisah dari navigasi utilitas agar fokus visual tidak bercampur. -->
-        <button class="dashboard-play" id="btn-play" aria-label="Mulai run">
+        <button class="dashboard-play main-coral" id="btn-play" aria-label="Main sekarang">
           <span class="dashboard-play-icon"><img src="assets/icons/ui-play.svg" alt="" /></span>
-          <span class="dashboard-play-copy"><b>PLAY</b><small>Mulai run sekarang</small></span>
+          <span class="dashboard-play-copy"><b>MAIN</b><small id="play-sub">Mulai run sekarang</small></span>
         </button>
         <!-- Dock navigasi utilitas -->
-        <nav class="dock">
-          <button class="dock-btn" data-nav="herodetail" aria-label="Detail hero">
-            <span class="dock-ico">
-              <img src="assets/icons/menu-heroes.svg" alt="" />
-            </span>
-            <span>Heroes</span>
+        <nav class="dock dock-5">
+          <button class="dock-btn" data-nav="roster" aria-label="Hero">
+            <span class="dock-ico"><img src="assets/icons/menu-heroes.svg" alt="" /><span class="dock-badge hidden" id="badge-hero"></span></span>
+            <span>Hero</span>
           </button>
-          <button class="dock-btn" data-nav="bag" aria-label="Tas & inventaris">
-            <span class="dock-ico">
-              <img src="assets/icons/sec-item.svg" alt="" />
-            </span>
-            <span>Bag</span>
+          <button class="dock-btn" data-nav="bag" aria-label="Tas">
+            <span class="dock-ico"><img src="assets/icons/sec-item.svg" alt="" /><span class="dock-badge hidden" id="badge-bag"></span></span>
+            <span>Tas</span>
           </button>
-          <button class="dock-btn" data-nav="upgrade" aria-label="Upgrade squad">
-            <span class="dock-ico">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20 5v6.2c0 4.6-3.2 8.4-8 9.8-4.8-1.4-8-5.2-8-9.8V5l8-2.5zm-1.2 6v2.3H8.5v2.4h2.3v2.3h2.4v-2.3h2.3v-2.4h-2.3V8.5h-2.4z"/></svg>
-            </span>
+          <button class="dock-btn dock-main" data-nav="prep" aria-label="Main">
+            <span class="dock-ico"><img src="assets/icons/ui-play.svg" alt="" /></span>
+            <span>MAIN</span>
+          </button>
+          <button class="dock-btn" data-nav="upgrade" data-tab="pasukan" aria-label="Squad">
+            <span class="dock-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20 5v6.2c0 4.6-3.2 8.4-8 9.8-4.8-1.4-8-5.2-8-9.8V5l8-2.5zm-1.2 6v2.3H8.5v2.4h2.3v2.3h2.4v-2.3h2.3v-2.4h-2.3V8.5h-2.4z"/></svg><span class="dock-badge hidden" id="badge-squad"></span></span>
             <span>Squad</span>
           </button>
-          <button class="dock-btn" data-nav="shop" aria-label="Toko">
-            <span class="dock-ico">
-              <img src="assets/icons/menu-shop.svg" alt="" />
-            </span>
-            <span>Shop</span>
+          <button class="dock-btn" data-nav="upgrade" data-tab="global" aria-label="Lab Genom">
+            <span class="dock-ico"><img src="assets/icons/menu-squad.svg" alt="" /><span class="dock-badge hidden" id="badge-lab"></span></span>
+            <span>Lab Genom</span>
           </button>
         </nav>
         <!-- Fitur sekunder tetap tersedia tanpa mengambil fokus dari Play. -->
         <nav class="secondary-dock" aria-label="Fitur sekunder">
           <button data-nav="campaign" title="Kampanye"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Campaign</span></button>
-          <button data-nav="bp" title="Battle Pass"><img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span></button>
+          <button data-nav="bp" title="Siklus Mitosis"><img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span></button>
           <button data-nav="codex" title="Bio-Pedia"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span></button>
           <button data-nav="rank" title="Pangkat"><img src="assets/icons/menu-rank.svg" alt="" /><span>Rank</span></button>
         </nav>
@@ -218,7 +179,7 @@
             <div class="currency-chip imu-chip small"><img class="coin" src="assets/icons/cur-imun.svg" alt="" /><span id="roster-imun">0</span></div>
           </div>
         </header>
-        <p class="screen-subtitle">Pilih sel imun-mu. Yang terkunci bisa dibuka lewat progres misi atau dibeli di Toko.</p>
+        <p class="screen-subtitle">Pilih sel imun-mu. Yang terkunci bisa dibuka lewat progres misi atau dibeli di Lab Genom.</p>
         <div id="roster-grid" class="roster-grid"><!-- diisi JS --></div>
         <div class="screen-footer">
           <button id="btn-start-run" class="btn btn-primary btn-xl" disabled>MULAI</button>
@@ -239,7 +200,7 @@
         <p class="screen-subtitle">Kuatkan hero & pasukanmu — HERO/PASUKAN/TIM dibayar Biokredit, GLOBAL dibayar Genom.</p>
         <div id="upg-tabs" class="upg-tabs">
           <button class="upg-tab active" data-tab="hero"><span class="ut-ico" data-tab-ico="hero"></span><span>HERO</span></button>
-          <button class="upg-tab" data-tab="global"><span class="ut-ico" data-tab-ico="global"></span><span>GLOBAL</span></button>
+          <button class="upg-tab" data-tab="global"><span class="ut-ico" data-tab-ico="global"></span><span>HOMEOSTASIS</span></button>
           <button class="upg-tab" data-tab="pasukan"><span class="ut-ico" data-tab-ico="pasukan"></span><span>PASUKAN</span></button>
           <button class="upg-tab" data-tab="tim"><span class="ut-ico" data-tab-ico="tim"></span><span>TIM</span></button>
         </div>
@@ -271,7 +232,7 @@
         <header class="topbar ui-head">
           <button class="btn-back" id="btn-bp-back" data-back="dashboard" aria-label="Kembali"><img src="assets/icons/ui-back.svg" alt="" /></button>
           <span class="ui-head-ico"><img src="assets/icons/menu-pass.svg" alt="" /></span>
-          <h1 class="screen-title">Battle Pass</h1>
+          <h1 class="screen-title">Siklus Mitosis</h1>
           <div class="ui-head-right"><div class="currency-chip imu-chip small"><img class="coin" src="assets/icons/cur-imun.svg" alt="" /><span id="bp-imun">0</span></div></div>
         </header>
         <div class="bp-body">
@@ -309,7 +270,7 @@
         <header class="screen-header ui-head">
           <button class="btn-back" data-back="dashboard" aria-label="Kembali"><img src="assets/icons/ui-back.svg" alt="" /></button>
           <span class="ui-head-ico"><img src="assets/icons/menu-shop.svg" alt="" /></span>
-          <h2>Shop</h2>
+          <h2>Lab Genom</h2>
           <div class="ui-head-right">
             <div class="currency-chip small"><img class="coin" src="assets/icons/cur-antibodi.svg" alt="" /><span id="shop-currency">0</span></div>
             <div class="currency-chip imu-chip small"><img class="coin" src="assets/icons/cur-imun.svg" alt="" /><span id="shop-imun">0</span></div>
@@ -449,7 +410,7 @@
           <div class="ui-head-right"><div class="currency-chip small"><img class="coin" src="assets/icons/cur-antibodi.svg" alt="" /><span id="bag-currency">0</span></div></div>
         </header>
         <div class="bag-scroll">
-          <h3 class="bag-section-title">Bagian Evolusi</h3>
+          <h3 class="bag-section-title">Bagian Diferensiasi</h3>
           <div id="bag-parts" class="bag-grid"><!-- diisi JS --></div>
           <h3 class="bag-section-title">Consumable</h3>
           <div id="bag-items" class="bag-grid"><!-- diisi JS --></div>
@@ -490,14 +451,14 @@
           <button class="hud-menu-link" data-menu-screen="campaign"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Peta Tubuh</span></button>
           <button class="hud-menu-link" data-menu-screen="rank"><img src="assets/icons/menu-rank.svg" alt="" /><span>Pangkat</span></button>
           <button class="hud-menu-link" data-menu-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
-          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Battle Pass</span></button>
+          <button class="hud-menu-link" data-menu-screen="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Siklus Mitosis</span></button>
         </div>
         <!-- UI/UX: MENU 2 — "Regu Hero" (bawah, kiri grid skill; membuka ke atas): hero, koleksi, toko, arena, lab -->
         <button id="hud-menu2-toggle" class="hud-menu2-toggle" aria-label="Menu regu hero" aria-expanded="false"><img src="assets/icons/menu-heroes.svg" alt="" /><span id="menu2-badge" class="menu-badge hidden"></span></button>
         <div id="hud-game-menu2" class="hud-game-menu2 hidden" aria-label="Menu regu hero">
           <button class="hud-menu2-link" data-menu2-screen="roster"><img src="assets/icons/menu-heroes.svg" alt="" /><span>Heroes</span></button>
           <button class="hud-menu2-link" data-menu2-screen="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Koleksi</span></button>
-          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/icons/menu-shop.svg" alt="" /><span>Shop</span></button>
+          <button class="hud-menu2-link" data-menu2-screen="shop"><img src="assets/icons/menu-shop.svg" alt="" /><span>Lab Genom</span></button>
           <button class="hud-menu2-link" data-menu2-screen="arena"><img src="assets/icons/menu-battle.svg" alt="" /><span>Arena</span></button>
           <button class="hud-menu2-link" data-menu2-screen="upgrade"><img src="assets/icons/menu-squad.svg" alt="" /><span>Lab Pasukan</span></button>
         </div>
@@ -683,6 +644,10 @@
             <strong id="gameover-currency"><img class="coin-sm" src="assets/icons/cur-antibodi.svg" alt="" /><span id="gameover-currency-num">0</span></strong>
             <img class="go-chest" src="assets/icons/ui-chest.svg" alt="" />
           </div>
+          <div id="go-hook" class="go-hook"><!-- diisi JS: 3 progres terdekat §10.2 --></div>
+          <div id="go-reset" class="go-reset"><!-- diisi JS: countdown reset §10.4 --></div>
+          <div class="go-heroes-head">PILIH HERO UNTUK RUN BERIKUTNYA</div>
+          <div id="go-heroes" class="go-heroes"><!-- diisi JS: kartu hero swipe §11.3 --></div>
           <button id="btn-double-currency" class="btn btn-gold">Tonton Iklan → 2x Biokredit</button>
           <div class="btn-row">
             <button id="btn-retry" class="btn btn-primary"><img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />Main Lagi</button>

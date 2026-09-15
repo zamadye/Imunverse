@@ -31,7 +31,13 @@ function wireTabs() {
   }));
 }
 
-export function show() {
+export function show(tab) {
+  // Sprint 5.26: deep-link tab dari dock (§11.1 Squad / Lab Genom).
+  if (typeof tab === 'string' && ['hero', 'global', 'pasukan', 'tim'].includes(tab)) {
+    activeTab = tab;
+    const tabs = document.getElementById('upg-tabs');
+    if (tabs) tabs.querySelectorAll('.upg-tab').forEach((x) => x.classList.toggle('active', x.dataset.tab === tab));
+  }
   const meta = STATE.meta;
   wireTabs();
   document.getElementById('upgrade-currency').textContent = meta.currency.toLocaleString('id-ID');

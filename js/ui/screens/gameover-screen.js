@@ -22,6 +22,12 @@ import { saveCurrentRun, copyText } from '../../systems/challenge-system.js'; //
 import { encodeCurrentBuild, makeBuildUrl } from '../../systems/build-share-system.js'; // ADDENDUM P2 §6.6
 import { checkMilestone } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { emit } from '../../core/ui-bridge.js';
+import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
+import { ensureBp, xpNeed } from '../../systems/battlepass-system.js';
+import { playerRank } from '../../systems/rank-system.js';
+import { getNextEvoStageDef } from '../../systems/evolution-system.js';
+import { getHeroStatus } from '../../systems/unlock-system.js';
+import { spriteToDataURL } from '../../render/sprite-loader.js';
 
 let wiringDone = false;
 
@@ -103,6 +109,16 @@ export function show(summary) {
       ? 'Luar biasa! Sistem imun mengingat jasamu.'
       : 'Setiap run membuat squad semakin kuat. Coba lagi!';
 
+  // Sprint 5.28 (§11.3): headline ringkas run.
+  let head = document.getElementById('go-headline');
+  if (!head) {
+    head = document.createElement('p');
+    head.id = 'go-headline';
+    head.className = 'go-headline';
+    document.getElementById('gameover-sub').insertAdjacentElement('afterend', head);
+  }
+  head.textContent = `Wave ${summary.wave} · ${summary.kills} kill · ${summary.engulfs || 0} telan — BK +${summary.currencyEarned} · Bio ${summary.bio || 0}`;
+
   // Bintang rating ala mockup victory (aset PNG: empty → filled)
   const stars = starsFor(summary);
   document.querySelectorAll('#gameover-stars .star').forEach((s, i) => {
@@ -167,8 +183,8 @@ export function show(summary) {
   // diberikan dari hasil run (premium hanya dari pembelian & reward pass).
   if (summary.bpFrom !== null) {
     const bits = [];
-    if (summary.bpTo > summary.bpFrom) bits.push(`Battle Pass Lv ${summary.bpFrom} → ${summary.bpTo}`);
-    else bits.push(`Battle Pass Lv ${summary.bpTo}`);
+    if (summary.bpTo > summary.bpFrom) bits.push(`Siklus Mitosis Lv ${summary.bpFrom} → ${summary.bpTo}`);
+    else bits.push(`Siklus Mitosis Lv ${summary.bpTo}`);
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-imu' }, [
       el('img', { src: 'assets/icons/menu-battle.svg', alt: '', style: 'width:16px;vertical-align:-3px' }),
       el('span', { text: ` ${bits.join(' · ')}` }),
@@ -228,11 +244,128 @@ export function show(summary) {
     homeBtn.lastChild.textContent = 'Dashboard';
   }
 
+  renderHookBox(summary);
+  renderHeroRail(summary);
+  {
+    // Sprint 5.30 (§10.4): countdown reset harian di gameover.
+    const ms = msUntilDailyReset();
+    const r = document.getElementById('go-reset');
+    if (r) {
+      r.textContent = '';
+      r.appendChild(el('span', { class: 'reset-chip' + (ms < 4 * 3600e3 ? ' urgent' : ''),
+        text: `⏳ Misi reset dalam ${formatResetCountdown(ms)} — selesaikan sebelum hilang!` }));
+    }
+  }
+
   const dblBtn = document.getElementById('btn-double-currency');
   dblBtn.disabled = !game.canDoubleCurrency();
   dblBtn.textContent = game.canDoubleCurrency()
     ? 'Tonton Iklan → 2x Biokredit'
     : `Total Biokredit: ${STATE.meta.currency.toLocaleString('id-ID')} `;
+}
+
+/**
+ * Sprint 5.28 (§11.3 + §10.2): kotak "KURANG N RUN LAGI" — 3 progres
+ * terdekat dari semua sistem. Item 32 (Sprint 6) menambah ETA run dari
+ * laju pemain (metrics.js); versi ini memakai % penyelesaian.
+ */
+function renderHookBox(summary) {
+  const box = document.getElementById('go-hook');
+  if (!box) return;
+  box.textContent = '';
+  const meta = STATE.meta;
+  const cands = [];
+  const STAT_LABEL = { totalKills: 'kill', bestWave: 'Gel.', bossKills: 'Bos', totalRuns: 'run', totalEngulfs: 'telan', totalNutrients: 'nutrisi', wins: 'menang' };
+  // 1) unlock hero (gerbang misi terdekat)
+  for (const h of getData().heroes.heroes) {
+    if ((meta.unlockedHeroes || []).includes(h.id)) continue;
+    const u = h.unlock || {};
+    if (u.type !== 'stat' && u.type !== 'imu_stat') continue;
+    const v = u.stat === 'unlockedHeroes' ? (meta.unlockedHeroes || []).length : ((meta.stats || {})[u.stat] || 0);
+    if (v >= u.value) continue;
+    cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value });
+  }
+  // 2) pangkat berikutnya
+  try {
+    const rk = playerRank();
+    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gpAfter, need: rk.next.min, unit: 'GP', pct: rk.pct });
+  } catch { /* abaikan */ }
+  // 3) Mitosis level berikutnya
+  try {
+    const bp = ensureBp(meta);
+    const need = xpNeed(bp.level);
+    if (bp.level < getData().battlepass.maxLevel) {
+      cands.push({ label: `Mitosis Lv ${bp.level + 1}`, cur: bp.xp, need, unit: 'XP', pct: bp.xp / need });
+    }
+  } catch { /* abaikan */ }
+  // 4) Diferensiasi tahap berikutnya
+  try {
+    const next = getNextEvoStageDef(meta);
+    if (next) {
+      const [[partId, need]] = Object.entries(next.cost);
+      const cur = (meta.evoParts || {})[partId] || 0;
+      cands.push({ label: `Diferensiasi ${next.stage}`, cur, need, unit: 'frag', pct: Math.min(1, cur / need) });
+    }
+  } catch { /* abaikan */ }
+  cands.sort((a, b) => b.pct - a.pct);
+  const top = cands.slice(0, 3);
+  box.appendChild(el('b', { class: 'go-hook-title', text: '⬡ KURANG SEDIKIT LAGI' }));
+  if (!top.length) {
+    box.appendChild(el('span', { class: 'go-hook-empty', text: 'Semua progres utama selesai — legenda!' }));
+    return;
+  }
+  for (const c of top) {
+    const pct = Math.min(99, Math.round(c.pct * 100));
+    box.appendChild(el('div', { class: 'go-hook-row' }, [
+      el('span', { class: 'go-hook-label', text: `${c.label}: ${c.cur.toLocaleString('id-ID')}/${c.need.toLocaleString('id-ID')} ${c.unit}` }),
+      el('span', { class: 'go-hook-track' }, [el('i', { class: 'go-hook-fill', style: `width:${pct}%` })]),
+      el('b', { class: 'go-hook-pct', text: `${pct}%` }),
+    ]));
+  }
+}
+
+/**
+ * Sprint 5.28 (§11.3): rel kartu hero geser — portrait + outline medan +
+ * nama. ● = baru dimainkan, ○ = unlocked, 🔒 = greyed aspirasional.
+ * Tap hero unlocked → pilih untuk run berikutnya.
+ */
+function renderHeroRail(summary) {
+  const rail = document.getElementById('go-heroes');
+  if (!rail) return;
+  rail.textContent = '';
+  const meta = STATE.meta;
+  const heroes = getData().heroes.heroes;
+  for (const h of heroes) {
+    const unlocked = (meta.unlockedHeroes || []).includes(h.id) || (h.unlock || {}).type === 'default';
+    const lastPlayed = summary.heroId === h.id;
+    const selected = meta.selectedHero === h.id;
+    const shape = (h.membrane || {}).shape || 'circle';
+    const shapeCls = shape.includes('pulse') ? 'dots' : (shape.includes('cone') || shape.includes('wedge') ? 'wedge' : 'ring');
+    const st = unlocked ? null : getHeroStatus(meta, h);
+    let portrait = '';
+    try { portrait = spriteToDataURL(h.spritePortrait || h.spriteIdle) || ''; } catch { portrait = ''; }
+    const card = el('button', {
+      class: `go-hero${unlocked ? '' : ' locked'}${lastPlayed ? ' last' : ''}${selected ? ' selected' : ''}`,
+      title: unlocked ? h.name : `${h.name} — ${st ? st.conditionLabel : 'terkunci'}`,
+    }, [
+      el('span', { class: `go-medan ${shapeCls}`, style: `--medan:${h.color || '#4ae3c2'}` }),
+      el('img', { class: 'go-portrait', src: portrait, alt: h.name }),
+      el('b', { class: 'go-name', text: h.name }),
+      el('span', { class: 'go-mark', text: lastPlayed ? '●' : (unlocked ? '○' : '🔒') }),
+    ]);
+    card.addEventListener('click', () => {
+      if (!unlocked) {
+        const s2 = getHeroStatus(STATE.meta, h);
+        emit('toast', { message: `${h.name}: ${s2 ? s2.conditionLabel : 'terkunci'}`, kind: 'warn' });
+        return;
+      }
+      STATE.meta.selectedHero = h.id;
+      try { writeSave(STATE.meta); } catch { /* abaikan */ }
+      audio.ui();
+      renderHeroRail(summary);
+    });
+    rail.appendChild(card);
+  }
 }
 
 export function wireButtons() {

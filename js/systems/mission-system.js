@@ -114,3 +114,21 @@ export function getMissionProgressList(meta) {
     };
   });
 }
+
+/**
+ * Sprint 5.30 (bible §10.4): hitung mundur reset harian. Misi harian
+ * memakai periodKey UTC (`d:YYYY-MM-DD`) → reset = tengah malam UTC.
+ */
+export function msUntilDailyReset(now = new Date()) {
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return next - now;
+}
+
+export function formatResetCountdown(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}j ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${s}d`;
+}

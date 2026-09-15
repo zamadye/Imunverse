@@ -198,7 +198,7 @@
       "id": "lapisan_mukus",
       "name": "Lapisan Mukus",
       "icon": "assets/sprites/icon_shield.png",
-      "desc": "Perisai 25% max HP + musuh yang menyentuh melambat 30% (dipakai otomatis)",
+      "desc": "Lapisan membran: +25% max HP & musuh yang menyentuh melambat 30% (dipakai otomatis)",
       "cost": 300,
       "type": "consumable"
     },

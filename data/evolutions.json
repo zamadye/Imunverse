@@ -6,7 +6,7 @@
       "sprite": "assets/sprites/part_equity_memory_core.png",
       "dropWeight": 100,
       "collectionTag": "Diferensiasi",
-      "description": "Fragmen sel untuk Diferensiasi (tahap evolusi) hero. Dikumpulkan dari semua musuh."
+      "description": "Fragmen sel untuk Diferensiasi (tahap diferensiasi) hero. Dikumpulkan dari semua musuh."
     }
   ],
   "stages": [
