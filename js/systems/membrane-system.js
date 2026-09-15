@@ -222,7 +222,11 @@ export function getMembraneStats(run) {
   // Sprint 3.19: level hero memperbesar membran (+1,5%/lv — roadmap "scaling membran").
   const heroCfg = (getData().upgrades && getData().upgrades.heroUpgrade) || {};
   const heroLvl = run.heroLvl || 0;
-  let radius = mem.baseRadius * fx.radiusMult * (1 + (heroCfg.membranePerLevel || 0) * heroLvl);
+  // D11: jalur Homeostasis membran (data-driven dari globalUpgrades).
+  const gdefs = (getData().upgrades && getData().upgrades.globalUpgrades) || [];
+  const gper = (id) => (gdefs.find((g) => g.id === id) || {}).perLevel || 0;
+  const gh = run.globalHomeo || { cdr: 0, radius: 0, engulf: 0 };
+  let radius = mem.baseRadius * fx.radiusMult * (1 + (heroCfg.membranePerLevel || 0) * heroLvl) * (1 + gper('g_range') * gh.radius);
   // Baso: radius berdenyut 0.7–1.3× per 2 dtk
   if (mem.shape === 'pulsing') {
     const t = run.time || 0;
@@ -255,7 +259,7 @@ export function getMembraneStats(run) {
   if (itime < (ibuf.cadanganUntil || 0)) contactDps *= 1.5;
 
   const heroMem = run.heroDef?.membrane || {};
-  const pulseCooldown = mem.basePulseCooldown * fx.pulseCooldownMult * pulseSafety;
+  const pulseCooldown = mem.basePulseCooldown * fx.pulseCooldownMult * pulseSafety / (1 + gper('g_rapid') * gh.cdr);
   // Mastia (pulse_only): radius kontak 0, tapi pulse punya basis sendiri
   const pulseBase = mem.shape === 'pulse_only'
     ? (heroMem.shapeParams?.pulseBaseRadius || 64) * fx.radiusMult
@@ -266,7 +270,7 @@ export function getMembraneStats(run) {
     : contactDps * (cfg.pulseDamageMult || 4));
   let engulfThreshold = fx.engulfThreshold || (run.heroDef?.membrane?.engulfThreshold) || cfg.engulfThreshold || 0.15;
   if (itime < (ibuf.enzimUntil || 0)) engulfThreshold = 0.30; // ADDENDUM §2: Enzim Litik
-  const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.02) * fx.engulfHealMult * engulfSafety;
+  const engulfHealPct = (((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.02) + gper('g_steal') * gh.engulf) * fx.engulfHealMult * engulfSafety;
 
   // Simpan untuk trigger mutasi musuh + HUD
   mem.stats.totalRadiusMult = fx.radiusMult * (mem.metaActiveT > 0 ? fx.metaRadiusMult : 1);
@@ -817,7 +821,7 @@ export function tryEngulf(game, enemy, opts = {}) {
   // --- Serap! ---
   enemy.alive = false;
   enemy.hp = 0;
-  enemy.devoured = false; // PHAGOS engulf = kill normal + bonus (XP/drop tetap jalan agar run 3-8 mnt terjaga)
+  enemy.devoured = false; // D9: engulf = kill + heal/Bio/XP/BK, TANPA drop fisik (trade-off)
   mem.stats.engulfCount += 1;
   const fam = engulfFamilyOf(enemy);
   run.engulfStats = run.engulfStats || {};

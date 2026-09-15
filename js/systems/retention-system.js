@@ -38,7 +38,8 @@ export function xpForKill(tier, isBoss) {
 
 /**
  * Terapkan UPGRADE GLOBAL (semua hero) ke statistik dasar run.
- * damage/moveSpeed/attackSpeed/attackRange = persen; maxHP = flat; lifeSteal = persen.
+ * D11: hanya damage/maxHP/moveSpeed di sini; pulseCdr/membraneRadius/
+ * engulfHeal diterapkan di membrane-system via run.globalHomeo.
  */
 export function applyGlobalUpgrades(stats) {
   const meta = STATE.meta;
@@ -50,13 +51,17 @@ export function applyGlobalUpgrades(stats) {
     if (def.stat === 'damage') stats.damage *= 1 + def.perLevel * lv;
     else if (def.stat === 'maxHP') stats.maxHP += def.perLevel * lv;
     else if (def.stat === 'moveSpeed') stats.speed *= 1 + def.perLevel * lv;
-    else if (def.stat === 'attackSpeed') stats.cooldown /= 1 + def.perLevel * lv;
-    else if (def.stat === 'attackRange') {
-      stats.attackRange *= 1 + def.perLevel * lv;
-      stats.swipeRadius *= 1 + def.perLevel * lv;
-    } else if (def.stat === 'lifeSteal') stats.lifeSteal += def.perLevel * lv;
   }
   return stats;
+}
+
+/**
+ * D11: level jalur Homeostasis membran untuk run ini.
+ * @returns {{cdr:int, radius:int, engulf:int}}
+ */
+export function globalHomeoLevels(meta = STATE.meta) {
+  const owned = (meta && meta.globalUpgrades) || {};
+  return { cdr: owned.g_rapid || 0, radius: owned.g_range || 0, engulf: owned.g_steal || 0 };
 }
 
 /**

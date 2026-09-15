@@ -61,7 +61,7 @@ import { addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
 import { addBpXP } from '../systems/battlepass-system.js';
 import { addImun, getEquippedSkin, spendImun } from '../systems/imun-economy.js';
-import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
+import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor, globalHomeoLevels } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
 import {
@@ -186,6 +186,7 @@ export const game = {
     this.run = {
       heroDef,
       heroLvl: (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0,
+      globalHomeo: globalHomeoLevels(STATE.meta), // D11: cdr/radius/engulf
       player,
       enemies: [],
       projectiles: [],
@@ -1848,6 +1849,9 @@ applyChapterTier(enemy, run) {
       }
     }
 
+    // D9 (roadmap): korban TELAN = trade-off — heal+Bio, TANPA drop fisik.
+    // (XP + BK cause tetap jalan; boss chest/opsonin tidak diganggu.)
+    const devoured = source === 'engulf' && !enemy.isBoss;
     // ---- Drop BAGIAN EVOLUSI (item upgrade hero, bukan sekadar poin) ----
     const partMult = run.arena.bonus.partMult || 1;
     const dropPart = (partId, ox = 0, oy = 0) => {
@@ -1858,7 +1862,9 @@ applyChapterTier(enemy, run) {
       pickup.partId = partDef.id;
       run.pickups.push(pickup);
     };
-    if (enemy.isBoss) {
+    if (devoured) {
+      // D9: ditelan utuh — fragmen ikut tercerna, tidak ada drop
+    } else if (enemy.isBoss) {
       for (let i = 0; i < getData().evolutions.bossGuaranteedParts; i++) {
         dropPart(rollPartDrop('boss', partMult), (Math.random() - 0.5) * 70, (Math.random() - 0.5) * 70);
       }
@@ -1878,7 +1884,9 @@ applyChapterTier(enemy, run) {
     }
 
     // ---- Bonus drop (heal/currency/magnet) ----
-    if (enemy.isBoss) {
+    if (devoured) {
+      // D9: tidak ada bonus drop dari korban telan
+    } else if (enemy.isBoss) {
       for (const itemId of nutrients.bossGuaranteedDrops) {
         const def = getNutrientDef(itemId);
         run.pickups.push(new Pickup(def, enemy.x + (Math.random() - 0.5) * 60, enemy.y + (Math.random() - 0.5) * 60));

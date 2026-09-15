@@ -37,7 +37,8 @@ ok('hero-cost', hu.baseCost === 120 && hu.costGrowth === 1.2 && hu.maxLevel === 
   && hu.dmgPerLevel === 0.06 && hu.hpPerLevel === 0.08 && hu.membranePerLevel === 0.015);
 const gs = up.globalUpgrades || [];
 ok('homeo-tracks', gs.length === 6 && gs.every((g) => g.maxLevel === 25
-  && g.baseCost === 27 && g.costGrowth === 1.2 && g.genomBase === 3 && g.genomGrowth === 1.12),
+  && g.baseCost === 27 && g.costGrowth === 1.2 && g.genomBase === 3 && g.genomGrowth === 1.12)
+  && gs.map((g) => g.stat).join(',') === 'damage,maxHP,moveSpeed,pulseCdr,membraneRadius,engulfHeal',
   gs.map((g) => g.id).join(','));
 
 // ---------- heroes.json ----------

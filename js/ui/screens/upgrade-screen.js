@@ -153,9 +153,9 @@ function renderGlobalTab(meta) {
     damage: (d) => `+${Math.round(d * 100)}% damage`,
     maxHP: (d) => `+${Math.round(d)} HP`,
     moveSpeed: (d) => `+${Math.round(d * 100)}% gerak`,
-    attackSpeed: (d) => `+${Math.round(d * 100)}% serang`,
-    attackRange: (d) => `+${Math.round(d * 100)}% jarak`,
-    lifeSteal: (d) => `+${Math.round(d * 100)}% life steal`,
+    pulseCdr: (d) => `−${Math.round(d * 100)}% cd Pulse`,
+    membraneRadius: (d) => `+${Math.round(d * 100)}% radius`,
+    engulfHeal: (d) => `+${(d * 100).toFixed(1)}% heal telan`,
   };
 
   for (const def of getData().upgrades.globalUpgrades || []) {

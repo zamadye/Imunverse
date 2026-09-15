@@ -545,5 +545,27 @@ const mc = game.openMutasiChest();
 log('monet-mutasi', mc.ok === true && mc.pity === true && mc.mutation.tier === 3
   && runM.activeMutations.length === 1 && STATE.meta.imun === 9800, `mut=${mc.mutation && mc.mutation.id}`);
 
+// ---------- 16b. D9 engulf-tanpa-drop + D11 Homeostasis membran ----------
+game.startRun('macrophage');
+const runD = game.run;
+const pickBefore = runD.pickups.length;
+const fakeFo = { x: runD.player.x + 30, y: runD.player.y, radius: 10, hp: 0, maxHP: 10, alive: true, isBoss: false, def: getData().enemies.enemies.find((e) => !e.boss), elite: false, eliteAffix: null };
+runD.enemies.push(fakeFo);
+game.onEnemyKilled(fakeFo, 'engulf');
+const pickAfterEngulf = runD.pickups.length;
+const fakeFo2 = Object.assign({}, fakeFo, { alive: true });
+runD.enemies.push(fakeFo2);
+game.onEnemyKilled(fakeFo2, 'contact');
+log('d9-engulf-tanpa-drop', pickAfterEngulf === pickBefore, `pick=${pickBefore}->${pickAfterEngulf}`);
+STATE.meta.globalUpgrades = { g_rapid: 10, g_range: 10, g_steal: 10 };
+game.startRun('macrophage');
+const runH = game.run;
+const stH = memSys.getMembraneStats(runH);
+STATE.meta.globalUpgrades = {};
+game.startRun('macrophage');
+const st0 = memSys.getMembraneStats(game.run);
+log('d11-homeo-membran', stH.radius > st0.radius && stH.pulseCooldown < st0.pulseCooldown && stH.engulfHealPct > st0.engulfHealPct,
+  `r=${st0.radius.toFixed(0)}->${stH.radius.toFixed(0)} cd=${st0.pulseCooldown.toFixed(2)}->${stH.pulseCooldown.toFixed(2)} heal=${(st0.engulfHealPct * 100).toFixed(1)}->${(stH.engulfHealPct * 100).toFixed(1)}`);
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);
