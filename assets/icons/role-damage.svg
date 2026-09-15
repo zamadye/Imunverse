@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · peran "Damage": ledakan koral bersudut bulat dengan dua antibodi-Y krem bersilang. -->
+  <ellipse cx="32" cy="59" rx="16" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <path d="M32 7 L36.5 18.5 L47.5 12.5 L44 24.5 L56.5 26.5 L46 33 L55 42 L42.5 41 L43 53.5 L33 46 L25 55 L22.5 42.5 L10 44.5 L18 34.5 L7.5 27 L20 25 L15.5 13.5 L27 18.5 Z" fill="#f2825c" stroke="#e96a4c" stroke-width="2.4" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="12.5" fill="#e96a4c" opacity=".5"/>
+  <path d="M25 41 L34 27 M34 27 L30 21 M34 27 L40 25" fill="none" stroke="#123f3a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M25 41 L34 27 M34 27 L30 21 M34 27 L40 25" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 41 L31 27" fill="none" stroke="#123f3a" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+  <path d="M40 41 L31 27" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

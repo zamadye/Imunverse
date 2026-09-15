@@ -1,0 +1,95 @@
+{
+  "parts": [
+    {
+      "id": "fragmen_diferensiasi",
+      "name": "Fragmen Diferensiasi",
+      "sprite": "assets/sprites/part_equity_memory_core.png",
+      "dropWeight": 100,
+      "collectionTag": "Diferensiasi",
+      "description": "Fragmen sel untuk Diferensiasi (tahap diferensiasi) hero. Dikumpulkan dari semua musuh."
+    }
+  ],
+  "stages": [
+    {
+      "stage": 0,
+      "id": "polos",
+      "name": "Polos Base",
+      "tier": "Base",
+      "tierColor": "#9db1a8",
+      "cost": {},
+      "damageMult": 1.0,
+      "maxHPMult": 1.0,
+      "killFx": "ring",
+      "ability": "tebasan",
+      "collectionLabel": "Stage 0 Polos",
+      "visualRule": "Tanpa overlay diferensiasi; hanya tubuh dasar hero."
+    },
+    {
+      "stage": 1,
+      "id": "diferensiasi_1",
+      "name": "Diferensiasi I",
+      "tier": "Uncommon",
+      "tierColor": "#63c76a",
+      "cost": {
+        "fragmen_diferensiasi": 50
+      },
+      "damageMult": 1.08,
+      "maxHPMult": 1.06,
+      "killFx": "slash",
+      "ability": "tebasan",
+      "collectionLabel": "Diferensiasi I",
+      "visualRule": "Cue anatomi pertama per hero muncul jelas di siluet."
+    },
+    {
+      "stage": 2,
+      "id": "diferensiasi_2",
+      "name": "Diferensiasi II",
+      "tier": "Rare",
+      "tierColor": "#4aa3e0",
+      "cost": {
+        "fragmen_diferensiasi": 50
+      },
+      "damageMult": 1.16,
+      "maxHPMult": 1.12,
+      "killFx": "wind",
+      "ability": "siklon",
+      "collectionLabel": "Diferensiasi II",
+      "visualRule": "Organela/alat membran kedua aktif sesuai desain hero."
+    },
+    {
+      "stage": 3,
+      "id": "diferensiasi_3",
+      "name": "Diferensiasi III",
+      "tier": "Epic",
+      "tierColor": "#b07ae0",
+      "cost": {
+        "fragmen_diferensiasi": 50
+      },
+      "damageMult": 1.25,
+      "maxHPMult": 1.18,
+      "killFx": "bolt",
+      "ability": "petir",
+      "collectionLabel": "Diferensiasi III",
+      "visualRule": "Payoff ofensif/defensif hero terbaca dan lebih agresif."
+    },
+    {
+      "stage": 4,
+      "id": "diferensiasi_4",
+      "name": "Diferensiasi IV",
+      "tier": "Legendary",
+      "tierColor": "#f5c64f",
+      "cost": {
+        "fragmen_diferensiasi": 17
+      },
+      "damageMult": 1.35,
+      "maxHPMult": 1.25,
+      "killFx": "legend",
+      "ability": "beku",
+      "collectionLabel": "Diferensiasi IV",
+      "visualRule": "Seluruh diferensiasi aktif; mahkota inti diferensiasi muncul."
+    }
+  ],
+  "dropChanceNormal": 0.004,
+  "dropChanceElite": 0.04,
+  "bossGuaranteedParts": 1
+}

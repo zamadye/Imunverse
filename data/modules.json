@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "doc": "R3+: feature flag 5 modul combat differentiation (combat doc §8) — jangan hardcode pemenang; evaluasi via instrumentasi metrics. Modul dinyalakan bertahap R3→R7.",
+  "modules": {
+    "antigenMemory": {
+      "enabled": true
+    },
+    "phagocytosis": {
+      "enabled": true
+    },
+    "inflammationZone": {
+      "enabled": true
+    },
+    "tagCascade": {
+      "enabled": true
+    },
+    "chemotaxisTrail": {
+      "enabled": true
+    }
+  },
+  "antigenMemory": {
+    "baseKills": 15,
+    "tierExp": 1.3,
+    "maxTier": 3,
+    "tierDamage": [
+      0.15,
+      0.3,
+      0.5
+    ],
+    "ignoreArmorChance": 0.1,
+    "splash": {
+      "radius": 70,
+      "dmgPct": 0.35
+    },
+    "upgradeHintPct": 0.7
+  },
+  "phagocytosis": {
+    "hpThreshold": 0.2,
+    "windowSec": 1.8,
+    "range": 160,
+    "healOnDevour": 8,
+    "meterPerDevour": 25,
+    "meterMax": 100
+  },
+  "inflammationZone": {
+    "baseRate": 2.0,
+    "intensityExp": 1.2,
+    "maxIntensity": 10,
+    "stormThreshold": 8,
+    "dotTickSec": 0.5,
+    "dotDmgPct": 0.08,
+    "stormMult": 2.5,
+    "heroSplashDamage": 12,
+    "radius": 90,
+    "maxZones": 3
+  },
+  "tagCascade": {
+    "radius": 120,
+    "dmgPct": 0.5,
+    "decay": 0.6,
+    "maxHops": 4,
+    "tier3Targets": 3,
+    "hitStopSec": 0.07,
+    "punchZoom": 0.09,
+    "punchDurSec": 0.28,
+    "maxConcurrent": 3,
+    "windowSec": 0.6
+  },
+  "chemotaxisTrail": {
+    "segmentIntervalSec": 0.15,
+    "minSegDist": 18,
+    "lifetimeSec": 4,
+    "segmentRadius": 26,
+    "speedMult": 1.18,
+    "activeSec": 6,
+    "minAgeForBuff": 0.5,
+    "maxSegments": 60
+  }
+}

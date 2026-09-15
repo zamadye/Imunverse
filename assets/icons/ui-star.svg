@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Bintang" (klaim / rating): bintang emas gemuk bersudut bulat, outline gold-deep, kilau krem. -->
+  <ellipse cx="32" cy="59" rx="16" ry="2.6" fill="#123f3a" opacity=".14"/>
+  <path d="M32 9 L37.9 25.9 L54.8 26.6 L41.5 37.1 L46.1 53.4 L32 44 L17.9 53.4 L22.5 37.1 L9.2 26.6 L26.1 25.9 Z" fill="#f5c64f" stroke="#e0a72e" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M25 30 L30 17.5" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
+</svg>

@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 4,
+  "xpCurve": {
+    "base": 80,
+    "step": 35
+  },
+  "xpByKillType": {
+    "contact": 3,
+    "pulse": 5,
+    "engulf": 4,
+    "boss": 60,
+    "other": 3
+  },
+  "bkByKillType": {
+    "contact": 1,
+    "pulse": 1.5,
+    "engulf": 2,
+    "boss": 60,
+    "other": 1
+  },
+  "bkPerWave": 10,
+  "levelUpChoices": 3,
+  "levelUpPool": [
+    {
+      "id": "hp_boost",
+      "name": "Sitoskeleton",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+15% HP maksimum & pulih 15% (rangka sel kokoh)",
+      "stat": "maxHP",
+      "mode": "percent",
+      "amount": 0.15,
+      "maxStacks": 99,
+      "rarity": "common"
+    },
+    {
+      "id": "speed_boost",
+      "name": "Kemotaksis",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+10% kecepatan gerak (kejar patogen)",
+      "stat": "speed",
+      "mode": "percent",
+      "amount": 0.10,
+      "maxStacks": 99,
+      "rarity": "common"
+    },
+    {
+      "id": "contact_boost",
+      "name": "Enzim Lisosom",
+      "icon": "assets/sprites/fx_spark.png",
+      "desc": "+20% damage kontak membran (lelehkan musuh)",
+      "stat": "contactDps",
+      "mode": "percent",
+      "amount": 0.20,
+      "maxStacks": 99,
+      "rarity": "common"
+    },
+    {
+      "id": "pulse_boost",
+      "name": "Sinyal Kalsium",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "Pulse 15% lebih cepat (cooldown −15%)",
+      "stat": "pulseCooldown",
+      "mode": "percent",
+      "amount": -0.15,
+      "maxStacks": 99,
+      "rarity": "common"
+    },
+    {
+      "id": "engulf_boost",
+      "name": "Pseudopodia",
+      "icon": "assets/sprites/icon_magnet.png",
+      "desc": "+15% heal tiap menelan (lengan sel rakus)",
+      "stat": "engulfHeal",
+      "mode": "percent",
+      "amount": 0.15,
+      "maxStacks": 99,
+      "rarity": "common"
+    }
+  ],
+  "squadUpgrades": [
+    {
+      "id": "sq_damage",
+      "name": "Kekuatan Squad",
+      "icon": "assets/sprites/fx_spark.png",
+      "desc": "+8% damage per level (permanen)",
+      "perLevel": 0.08,
+      "maxLevel": 10,
+      "baseCost": 120,
+      "costGrowth": 1.6
+    },
+    {
+      "id": "sq_vitality",
+      "name": "Vitalitas",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+10% HP maksimum per level (permanen)",
+      "perLevel": 0.1,
+      "maxLevel": 10,
+      "baseCost": 100,
+      "costGrowth": 1.55
+    },
+    {
+      "id": "sq_weapon",
+      "name": "Senjata Tajam",
+      "icon": "assets/sprites/icon_sword.png",
+      "desc": "+10% damage senjata per level (permanen)",
+      "perLevel": 0.1,
+      "maxLevel": 10,
+      "baseCost": 160,
+      "costGrowth": 1.6
+    },
+    {
+      "id": "sq_jurus",
+      "name": "Master Jurus",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "Jurus: cooldown -6% & area +8% per level (permanen)",
+      "perLevel": 0.06,
+      "maxLevel": 8,
+      "baseCost": 180,
+      "costGrowth": 1.65
+    },
+    {
+      "id": "sq_armor",
+      "name": "Membran Keras",
+      "icon": "assets/sprites/icon_shield.png",
+      "desc": "Damage diterima -5% per level (permanen)",
+      "perLevel": 0.05,
+      "maxLevel": 8,
+      "baseCost": 150,
+      "costGrowth": 1.6
+    },
+    {
+      "id": "sq_swift",
+      "name": "Kecepatan",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+5% kecepatan gerak per level (permanen)",
+      "perLevel": 0.05,
+      "maxLevel": 8,
+      "baseCost": 110,
+      "costGrowth": 1.5
+    },
+    {
+      "id": "sq_attack",
+      "name": "Tempo Serang",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "+6% kecepatan serangan per level (permanen)",
+      "perLevel": 0.06,
+      "maxLevel": 10,
+      "baseCost": 140,
+      "costGrowth": 1.6
+    },
+    {
+      "id": "sq_range",
+      "name": "Jangkauan",
+      "icon": "assets/sprites/icon_scope.png",
+      "desc": "+8% jarak serangan per level (permanen)",
+      "perLevel": 0.08,
+      "maxLevel": 8,
+      "baseCost": 130,
+      "costGrowth": 1.55
+    },
+    {
+      "id": "sq_nutrition",
+      "name": "Metabolisme",
+      "icon": "assets/sprites/item_glukosa.png",
+      "desc": "+10% XP yang didapat per level (permanen)",
+      "perLevel": 0.1,
+      "maxLevel": 8,
+      "baseCost": 150,
+      "costGrowth": 1.6
+    }
+  ],
+  "shopItems": [
+    {
+      "id": "serum_regenerasi",
+      "name": "Serum Regenerasi",
+      "icon": "assets/sprites/icon_syringe.png",
+      "desc": "Pulihkan 35% max HP saat HP di bawah 70% + medan berdenyut (dipakai otomatis)",
+      "cost": 200,
+      "type": "consumable"
+    },
+    {
+      "id": "enzim_litik",
+      "name": "Enzim Litik",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "Contact DPS ×2 selama 8 detik + jauh lebih mudah menelan (dipakai otomatis)",
+      "cost": 250,
+      "type": "consumable"
+    },
+    {
+      "id": "sitokin_burst",
+      "name": "Sitokin Burst",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+40% kecepatan 10 detik + reset cooldown Pulse (dipakai otomatis)",
+      "cost": 200,
+      "type": "consumable"
+    },
+    {
+      "id": "lapisan_mukus",
+      "name": "Lapisan Mukus",
+      "icon": "assets/sprites/icon_shield.png",
+      "desc": "Lapisan membran: +25% max HP & musuh yang menyentuh melambat 30% (dipakai otomatis)",
+      "cost": 300,
+      "type": "consumable"
+    },
+    {
+      "id": "katalis_mitosis",
+      "name": "Katalis Mitosis",
+      "icon": "assets/sprites/icon_coin.png",
+      "desc": "+50% drop run ini + setiap engulf 2× Bio-Point (dipakai otomatis)",
+      "cost": 350,
+      "type": "consumable"
+    },
+    {
+      "id": "opsonin",
+      "name": "Marker Opsonin",
+      "icon": "assets/sprites/icon_scope.png",
+      "desc": "Tandai semua musuh di layar 8 detik: mudah ditelan, Pulse +30% (dipakai otomatis)",
+      "cost": 350,
+      "type": "consumable"
+    },
+    {
+      "id": "atp_surge",
+      "currency": "genom",
+      "name": "Ledakan ATP",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "Pulse instan + 3 Pulse berikut cooldown −60% (dipakai otomatis)",
+      "cost": 200,
+      "type": "consumable"
+    },
+        {
+      "id": "toksin_balik",
+      "name": "Racun Balik",
+      "icon": "assets/sprites/icon_sword.png",
+      "desc": "10 detik: 40% damage yang diterima kembali ke penyerang (dipakai otomatis)",
+      "cost": 200,
+      "type": "consumable"
+    }
+    ],
+  "economy": {
+    "dailyReward": 120,
+    "waveBonusPerWave": 12,
+    "killBonusCurrency": 1,
+    "adDailyLimit": 6,
+    "currencyDropChance": 0.3
+  },
+  "heroUpgrade": {
+    "baseCost": 120,
+    "costGrowth": 1.2,
+    "maxLevel": 20,
+    "dmgPerLevel": 0.06,
+    "hpPerLevel": 0.08,
+    "membranePerLevel": 0.015,
+    "desc": "+6% damage, +8% HP & +1,5% radius membran per level (khusus hero ini)"
+  },
+  "allyUpgrade": {
+    "baseCost": 220,
+    "costGrowth": 1.4,
+    "maxLevel": 10,
+    "dmgPerLevel": 0.12,
+    "speedPerLevel": 0.04,
+    "desc": "Pasukan menembak +12% lebih sakit & +4% gesit per level",
+    "membersPerLevels": 3
+  },
+  "globalUpgrades": [
+    {
+      "id": "g_damage",
+      "name": "DPS Membran",
+      "icon": "assets/sprites/fx_spark.png",
+      "desc": "+10% damage kontak & Pulse SEMUA hero per level",
+      "stat": "damage",
+      "mode": "percent",
+      "perLevel": 0.1,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    },
+    {
+      "id": "g_vitality",
+      "name": "Vitalitas",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+15 HP maks SEMUA hero per level",
+      "stat": "maxHP",
+      "mode": "flat",
+      "perLevel": 15,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    },
+    {
+      "id": "g_swift",
+      "name": "Motilitas",
+      "icon": "assets/sprites/icon_boot.png",
+      "desc": "+8% kecepatan gerak SEMUA hero per level",
+      "stat": "moveSpeed",
+      "mode": "percent",
+      "perLevel": 0.08,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    },
+    {
+      "id": "g_rapid",
+      "name": "Pulsa Cepat",
+      "icon": "assets/sprites/icon_bolt.png",
+      "desc": "-3% cooldown Pulse SEMUA hero per level",
+      "stat": "pulseCdr",
+      "mode": "percent",
+      "perLevel": 0.03,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    },
+    {
+      "id": "g_range",
+      "name": "Membran Luas",
+      "icon": "assets/sprites/icon_crosshair.png",
+      "desc": "+2% radius membran SEMUA hero per level",
+      "stat": "membraneRadius",
+      "mode": "percent",
+      "perLevel": 0.02,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    },
+    {
+      "id": "g_steal",
+      "name": "Pencernaan Dalam",
+      "icon": "assets/sprites/icon_heart.png",
+      "desc": "+0,2% heal menelan SEMUA hero per level",
+      "stat": "engulfHeal",
+      "mode": "flat",
+      "perLevel": 0.002,
+      "maxLevel": 25,
+      "baseCost": 27,
+      "costGrowth": 1.2, "genomBase": 3, "genomGrowth": 1.12
+    }
+  ],
+  "luRules": {
+    "rarityWeights": {
+      "common": 70,
+      "rare": 24,
+      "epic": 6
+    },
+    "pityRolls": 2,
+    "synergyBonus": 0.25
+  }
+}

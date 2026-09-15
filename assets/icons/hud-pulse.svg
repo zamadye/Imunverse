@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · tombol "SERANG" (HUD): antibodi-Y krem (outline ink) menghantam virus koral mungil
+       (kawaii, mata silang) — bintang benturan emas di titik kontak. Bahasa visual = menu-*.svg;
+       dirancang untuk latar teal tombol SERANG (kontras krem/ink) dan terbaca pada 28–44 px. -->
+  <!-- antibodi-Y besar, condong ke kanan-atas (arah virus) -->
+  <g transform="rotate(22 29 38)">
+    <path d="M29 58 V38 M29 38 L18 24 M29 38 L40 24" stroke="#123f3a" stroke-width="12.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M29 58 V38 M29 38 L18 24 M29 38 L40 24" stroke="#fffdf4" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- engsel & ujung pengikat antigen (teal) -->
+    <circle cx="29" cy="38" r="3.1" fill="#2f9c8f"/>
+    <circle cx="18" cy="24" r="2.5" fill="#2f9c8f"/>
+    <circle cx="40" cy="24" r="2.5" fill="#2f9c8f"/>
+  </g>
+  <!-- bintang benturan (6 sudut) tepat di ujung lengan kanan Y -->
+  <polygon points="44.5,18.5 46.8,25.0 53.6,23.8 49.1,29.0 53.6,34.2 46.8,33.0 44.5,39.5 42.2,33.0 35.4,34.2 39.9,29.0 35.4,23.8 42.2,25.0" fill="#f5c64f" stroke="#c9891f" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- virus koral mungil terpental, K.O. -->
+  <g transform="translate(52.5 15.5)">
+    <path d="M0 -6.6 V-9.8 M0 6.6 V9.8 M-6.6 0 H-9.8 M6.6 0 H9.8 M-4.7 -4.7 L-6.9 -6.9 M4.7 4.7 L6.9 6.9 M4.7 -4.7 L6.9 -6.9 M-4.7 4.7 L-6.9 6.9" stroke="#e96a4c" stroke-width="2.2" stroke-linecap="round"/>
+    <circle r="6.6" fill="#f2825c" stroke="#e96a4c" stroke-width="2"/>
+    <path d="M-4 -2.2 L-1.6 0.2 M-1.6 -2.2 L-4 0.2 M1.6 -2.2 L4 0.2 M4 -2.2 L1.6 0.2" stroke="#123f3a" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="0" cy="3" rx="1.8" ry="1.2" fill="#123f3a"/>
+  </g>
+  <!-- kilau kecil di sisi kosong -->
+  <polygon points="12,10 13.7,14.6 18.3,16.3 13.7,18 12,22.6 10.3,18 5.7,16.3 10.3,14.6" fill="#f5c64f"/>
+</svg>

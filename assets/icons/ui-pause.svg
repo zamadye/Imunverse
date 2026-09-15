@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Jeda": dua batang krem bersudut bulat ber-outline teal-deep dengan kilau — untuk tombol teal HUD. -->
+  <ellipse cx="32" cy="59.5" rx="17" ry="2.6" fill="#123f3a" opacity=".14"/>
+  <rect x="13.5" y="10" width="14.5" height="43" rx="6" fill="#fffdf4" stroke="#14584f" stroke-width="2.8"/>
+  <rect x="36" y="10" width="14.5" height="43" rx="6" fill="#fffdf4" stroke="#14584f" stroke-width="2.8"/>
+  <path d="M19 17 V29 M41.5 17 V29" fill="none" stroke="#eaf4dd" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

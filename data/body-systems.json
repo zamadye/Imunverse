@@ -1,0 +1,64 @@
+{
+  "decayPerDay": 1,
+  "criticalThreshold": 20,
+  "perfectThreshold": 80,
+  "perfectDays": 3,
+  "racunPerKill": 0.3,
+  "racunCleansePerLimfatik": 0.02,
+  "racunToxicSeep": 2,
+  "detoxCleanseBase": 10,
+  "focusGainWon": 10,
+  "focusGainShort": 3,
+  "passiveGainWon": 2,
+  "energiPerRun": 8,
+  "energiMax": 100,
+  "racunMax": 100,
+  "recoveryAdGain": 18,
+  "suplemenGain": 20,
+  "suplemenCost": 250,
+  "systems": [
+    {
+      "id": "sirkulasi", "name": "Sirkulasi", "icon": "assets/sprites/icon_sirkulasi.png",
+      "color": "#f2825c", "role": "Distribusi energi & kecepatan respons imun",
+      "startHealth": 65,
+      "critical": { "label": "Respons imun lambat", "modifier": { "playerCooldownMult": 1.25 } },
+      "inRun": { "desc": "Respons serangan cepat", "stat": "cooldownScale" }
+    },
+    {
+      "id": "pencernaan", "name": "Pencernaan", "icon": "assets/sprites/icon_pencernaan.png",
+      "color": "#f5c64f", "role": "Sumber energi & nilai nutrisi",
+      "startHealth": 55,
+      "critical": { "label": "Nutrisi berkurang", "modifier": { "nutrientMult": 0.7 } },
+      "inRun": { "desc": "Nilai nutrisi naik", "stat": "nutrientMult" }
+    },
+    {
+      "id": "saraf", "name": "Saraf", "icon": "assets/sprites/icon_saraf.png",
+      "color": "#b07ae0", "role": "Deteksi dini ancaman (radar wave)",
+      "startHealth": 45,
+      "critical": { "label": "Deteksi lambat — XP turun", "modifier": { "xpMult": 0.75 } },
+      "inRun": { "desc": "Deteksi dini: XP naik", "stat": "xpMult" }
+    },
+    {
+      "id": "imun", "name": "Imun", "icon": "assets/sprites/icon_imun.png",
+      "color": "#2f9c8f", "role": "Garis pertahanan aktif (kekuatan hero)",
+      "startHealth": 70,
+      "critical": { "label": "Patogen makin agresif", "modifier": { "enemySpeedMult": 1.2 } },
+      "inRun": { "desc": "Damage hero naik", "stat": "damageMult" }
+    },
+    {
+      "id": "limfatik", "name": "Limfatik", "icon": "assets/sprites/icon_limfatik.png",
+      "color": "#7fcdEC", "role": "Pembersih racun sisa pertarungan",
+      "startHealth": 50,
+      "critical": { "label": "Racun menumpuk cepat", "modifier": { "racunMult": 1.5 } },
+      "inRun": { "desc": "Racun lebih cepat bersih", "stat": "racunCleanse" }
+    }
+  ],
+  "focusRuns": [
+    { "id": "seimbang", "name": "Run Seimbang", "icon": "assets/sprites/icon_play.png", "target": null, "desc": "Tanpa fokus khusus — semua sistem +1 saat menang" },
+    { "id": "sirkulasi", "name": "Run Respons Cepat", "icon": "assets/sprites/icon_sirkulasi.png", "target": "sirkulasi", "desc": "Fokus pulihkan Sirkulasi" },
+    { "id": "pencernaan", "name": "Run Nutrisi", "icon": "assets/sprites/icon_pencernaan.png", "target": "pencernaan", "desc": "Fokus pulihkan Pencernaan" },
+    { "id": "saraf", "name": "Run Radar", "icon": "assets/sprites/icon_saraf.png", "target": "saraf", "desc": "Fokus pulihkan Saraf" },
+    { "id": "imun", "name": "Run Pertahanan", "icon": "assets/sprites/icon_imun.png", "target": "imun", "desc": "Fokus pulihkan Imun" },
+    { "id": "limfatik", "name": "Run Detoksifikasi", "icon": "assets/sprites/icon_limfatik.png", "target": "limfatik", "desc": "Racun dibersihkan ekstra — selamatkan Limfatik" }
+  ]
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Markas / Dashboard": rumah sel — atap teal gemuk, badan krem, jendela heksagon Imun, pintu koral. -->
+  <ellipse cx="32" cy="59.5" rx="19" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <path d="M9 32 L32 11 L55 32 Z" fill="#fffdf4"/>
+  <path d="M15 30 H49 V51 Q49 56 44 56 H20 Q15 56 15 51 Z" fill="#fffdf4" stroke="#14584f" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M9 32 L32 11 L55 32" fill="none" stroke="#14584f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9 32 L32 11 L55 32" fill="none" stroke="#2f9c8f" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="32,20.5 36,22.8 36,27.4 32,29.7 28,27.4 28,22.8" fill="#7fd8c8" stroke="#14584f" stroke-width="1.6"/>
+  <path d="M26 56 V45 Q26 38.5 32 38.5 Q38 38.5 38 45 V56 Z" fill="#f2825c" stroke="#e96a4c" stroke-width="2"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Peti hadiah" (peti boss, ringkasan run): peti teal berpita emas dengan gembok emas + kilau krem & emas. -->
+  <ellipse cx="32" cy="60" rx="21" ry="3" fill="#123f3a" opacity=".14"/>
+  <path d="M12 30 V27 Q12 17 22 17 H42 Q52 17 52 27 V30 Z" fill="#2f9c8f" stroke="#14584f" stroke-width="2.6" stroke-linejoin="round"/>
+  <rect x="11" y="30" width="42" height="26" rx="6" fill="#1f7a70" stroke="#14584f" stroke-width="2.6"/>
+  <rect x="11" y="30" width="42" height="6" fill="#14584f" opacity=".4"/>
+  <rect x="27" y="17" width="10" height="39" fill="#f5c64f"/>
+  <rect x="28.5" y="33" width="7" height="8.5" rx="2.4" fill="#e0a72e"/>
+  <circle cx="32" cy="36.5" r="1.6" fill="#14584f"/>
+  <path d="M13 8 L14.3 11.5 L17.8 12.8 L14.3 14.1 L13 17.6 L11.7 14.1 L8.2 12.8 L11.7 11.5 Z" fill="#fffdf4"/>
+  <path d="M51 5 L52.6 9.4 L57 11 L52.6 12.6 L51 17 L49.4 12.6 L45 11 L49.4 9.4 Z" fill="#f5c64f" stroke="#e0a72e" stroke-width="1.2" stroke-linejoin="round"/>
+</svg>

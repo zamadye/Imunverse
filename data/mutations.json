@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "doc": "PHAGOS eksperimen — 18 mutasi bentuk hero (3 tier). Dipilih saat level-up, kumulatif se-run, dengan konflik.",
+  "tierRules": {
+    "tierByLevel": [
+      {
+        "maxLevel": 4,
+        "tiers": [
+          1
+        ]
+      },
+      {
+        "maxLevel": 8,
+        "tiers": [
+          2
+        ]
+      },
+      {
+        "maxLevel": 99,
+        "tiers": [
+          2,
+          3
+        ]
+      }
+    ],
+    "safetyNet": {
+      "levels": [
+        2,
+        3,
+        4
+      ],
+      "mutations": 2,
+      "upgrades": 1,
+      "note": "Level 2-4: 2 mutasi + 1 upgrade stat lama sebagai jaring pengaman."
+    }
+  },
+  "mutations": [
+    {
+      "id": "berduri",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Membran Berduri",
+      "desc": "Kontak damage ×2, radius −20%, musuh terpental saat menyentuh medan.",
+      "effects": {
+        "radiusMult": 0.8,
+        "contactDmgMult": 2.0,
+        "knockbackOnContact": true,
+        "knockbackForce": 180
+      },
+      "visualChange": "spikes",
+      "conflicts": [
+        "lengket"
+      ],
+      "lore": "Membran mengeras dan menumbuhkan duri molekular.",
+      "sprite": "assets/sprites/mut_berduri.png"
+    },
+    {
+      "id": "lengket",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Membran Lengket",
+      "desc": "Radius +30%. Musuh di dalam melambat 50% dan tertarik pelan ke pusat.",
+      "effects": {
+        "radiusMult": 1.3,
+        "contactSlowPct": 0.5,
+        "pullToCenter": 60
+      },
+      "visualChange": "sticky",
+      "conflicts": [
+        "berduri"
+      ],
+      "lore": "Permukaan menjadi lengket seperti jaring lendir.",
+      "sprite": "assets/sprites/mut_lengket.png"
+    },
+    {
+      "id": "beracun",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Jejak Toksik",
+      "desc": "Meninggalkan jejak racun 1,5 dtk saat bergerak (DPS 40% contact).",
+      "effects": {
+        "trailPoison": true,
+        "trailDpsMult": 0.4,
+        "trailDurationSec": 1.5
+      },
+      "visualChange": "trail",
+      "conflicts": [],
+      "lore": "Kelenjar racun bocor ke lantai arena.",
+      "sprite": "assets/sprites/mut_beracun.png"
+    },
+    {
+      "id": "elastis",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Membran Elastis",
+      "desc": "Pulse radius ×1,5, tapi cooldown +40%.",
+      "effects": {
+        "pulseRadiusMult": 1.5,
+        "pulseCooldownMult": 1.4
+      },
+      "visualChange": "wobble",
+      "conflicts": [],
+      "lore": "Membran menjadi super-elastis dan bergetar.",
+      "sprite": "assets/sprites/mut_elastis.png"
+    },
+    {
+      "id": "penyerap",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Membran Penyerap",
+      "desc": "Engulf threshold naik ke 25%, heal +50%.",
+      "effects": {
+        "engulfThreshold": 0.25,
+        "engulfHealMult": 1.5
+      },
+      "visualChange": "dark_aura",
+      "conflicts": [],
+      "lore": "Mulut-mulut mikro terbuka di seluruh permukaan.",
+      "sprite": "assets/sprites/mut_penyerap.png"
+    },
+    {
+      "id": "tipis",
+      "tier": 1,
+      "bioCost": 0,
+      "name": "Membran Tipis",
+      "desc": "Radius ×1,8, tapi contact DPS −50%. Jangkauan vs intensitas.",
+      "effects": {
+        "radiusMult": 1.8,
+        "contactDmgMult": 0.5
+      },
+      "visualChange": "thin_wide",
+      "conflicts": [
+        "berduri"
+      ],
+      "lore": "Membran menipis dan melebar seperti selaput.",
+      "sprite": "assets/sprites/mut_tipis.png"
+    },
+    {
+      "id": "ledakan_dalam",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Implosi",
+      "desc": "Pulse MENARIK musuh ke pusat (bukan mendorong). Damage di pusat ×2.",
+      "effects": {
+        "pulsePull": true,
+        "pulseCenterDmgMult": 2.0
+      },
+      "visualChange": "implosion",
+      "conflicts": [
+        "nova"
+      ],
+      "lore": "Medan runtuh ke dalam sebelum meledak.",
+      "sprite": "assets/sprites/mut_ledakan_dalam.png"
+    },
+    {
+      "id": "membran_ganda",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Dua Lapis",
+      "desc": "Dua ring: dalam (0,8×, DPS tinggi) + luar (1,5×, DPS rendah + slow).",
+      "effects": {
+        "dualRing": true,
+        "innerRadiusMult": 0.8,
+        "innerDmgMult": 1.6,
+        "outerRadiusMult": 1.5,
+        "outerDmgMult": 0.4,
+        "outerSlowPct": 0.3
+      },
+      "visualChange": "double_ring",
+      "conflicts": [
+        "tipis"
+      ],
+      "lore": "Membran membelah menjadi dua lapisan konsentris.",
+      "sprite": "assets/sprites/mut_membran_ganda.png"
+    },
+    {
+      "id": "parasit",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Infeksi Balik",
+      "desc": "Musuh yang di-engulf MELEDAK, melukai sekitarnya (AOE 2×).",
+      "effects": {
+        "engulfExplode": true,
+        "engulfExplodeMult": 2.0,
+        "engulfExplodeRadius": 90
+      },
+      "visualChange": "swell_burst",
+      "conflicts": [
+        "simbiosis"
+      ],
+      "lore": "Korban yang ditelan menjadi bom biologis.",
+      "sprite": "assets/sprites/mut_parasit.png"
+    },
+    {
+      "id": "medan_pulsa",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Auto-Pulse",
+      "desc": "Pulse otomatis tiap 4 dtk (60% damage). Tombol manual tetap penuh.",
+      "effects": {
+        "autoPulse": true,
+        "autoPulseIntervalSec": 4.0,
+        "autoPulseDmgMult": 0.6
+      },
+      "visualChange": "rhythmic",
+      "conflicts": [],
+      "lore": "Jantung membran berdenyut dengan ritme sendiri.",
+      "sprite": "assets/sprites/mut_medan_pulsa.png",
+      "spin": false
+    },
+    {
+      "id": "regenerasi",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Regenerasi Membran",
+      "desc": "Pulihkan 2% max HP/dtk saat TIDAK ada musuh di medan. Main hit-and-run!",
+      "effects": {
+        "regenWhenClearPct": 0.02
+      },
+      "visualChange": "green_pulse",
+      "conflicts": [],
+      "lore": "Membran memperbaiki diri saat tenang.",
+      "sprite": "assets/sprites/mut_regenerasi.png"
+    },
+    {
+      "id": "cermin",
+      "tier": 2,
+      "bioCost": 5,
+      "name": "Membran Reflektor",
+      "desc": "30% damage yang diterima dipantulkan ke musuh terdekat di medan.",
+      "effects": {
+        "reflectPct": 0.3
+      },
+      "visualChange": "mirror_shine",
+      "conflicts": [],
+      "lore": "Permukaan menjadi cermin molekular yang memantulkan luka.",
+      "sprite": "assets/sprites/mut_cermin.png",
+      "spin": false
+    },
+    {
+      "id": "nova",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Supernova",
+      "desc": "Pulse 2 gelombang: dorong, lalu 0,3 dtk kemudian TARIK. Combo devastasi.",
+      "effects": {
+        "doubleWave": true,
+        "secondWaveDelaySec": 0.3,
+        "secondWavePull": true
+      },
+      "visualChange": "double_shockwave",
+      "conflicts": [
+        "ledakan_dalam"
+      ],
+      "lore": "Bintang membran meledak dua kali.",
+      "sprite": "assets/sprites/mut_nova.png"
+    },
+    {
+      "id": "simbiosis",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Fusi Simbiosis",
+      "desc": "Engulf menambah SATELIT (maks 3) yang mengorbit & melukai musuh 8 dtk.",
+      "effects": {
+        "engulfSatellite": true,
+        "maxSatellites": 3,
+        "satelliteDurationSec": 8.0,
+        "satelliteDpsMult": 0.8
+      },
+      "visualChange": "orbiters",
+      "conflicts": [
+        "parasit"
+      ],
+      "lore": "Mangsa tidak dicerna — direkrut.",
+      "sprite": "assets/sprites/mut_simbiosis.png"
+    },
+    {
+      "id": "evolusi_total",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Metamorfosis",
+      "desc": "Menggantikan Pulse: radius ×2,5, diam 3 dtk, damage masif + engulf <30%. CD 30 dtk.",
+      "effects": {
+        "metamorphosis": true,
+        "metaRadiusMult": 2.5,
+        "metaRootSec": 3.0,
+        "metaCooldownSec": 30.0,
+        "metaEngulfThreshold": 0.3,
+        "metaDmgMult": 6.0
+      },
+      "visualChange": "giant_form",
+      "conflicts": [],
+      "lore": "Transformasi total — bentuk akhir fagosit.",
+      "sprite": "assets/sprites/mut_evolusi_total.png",
+      "spin": false
+    },
+    {
+      "id": "rantai",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Reaksi Berantai",
+      "desc": "Kill di medan memicu mini-pulse (0,5× radius, 30%). Berantai maks 5.",
+      "effects": {
+        "chainOnKill": true,
+        "chainRadiusMult": 0.5,
+        "chainDmgMult": 0.3,
+        "chainMax": 5
+      },
+      "visualChange": "chain_ripples",
+      "conflicts": [],
+      "lore": "Kematian menular dari satu korban ke korban lain.",
+      "sprite": "assets/sprites/mut_rantai.png"
+    },
+    {
+      "id": "adaptif",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Membran Adaptif",
+      "desc": "Meniru musuh paling banyak di-engulf: bakteri→dmg, virus→speed, parasit→radius, spora→armor, kanker→heal.",
+      "effects": {
+        "adaptive": true
+      },
+      "visualChange": "shifting_hue",
+      "conflicts": [],
+      "lore": "Membran belajar dari apa yang dimakannya.",
+      "sprite": "assets/sprites/mut_adaptif.png"
+    },
+    {
+      "id": "medan_hidup",
+      "tier": 3,
+      "bioCost": 15,
+      "name": "Membran Hidup",
+      "desc": "Medan punya HP (50% max hero). Aktif = hero KEBAL. Habis = hilang 5 dtk lalu regen.",
+      "effects": {
+        "livingMembrane": true,
+        "membraneHpPct": 0.5,
+        "membraneDownSec": 5.0
+      },
+      "visualChange": "breathing_organism",
+      "conflicts": [
+        "cermin"
+      ],
+      "lore": "Medan menjadi organisme terpisah yang bernapas.",
+      "sprite": "assets/sprites/mut_medan_hidup.png"
+    }
+  ]
+}

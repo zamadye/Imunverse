@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · peran "Support": hati biru neutrofil bertanda tambah krem + kilau (penyembuh & penguat regu). -->
+  <ellipse cx="32" cy="59" rx="16" ry="2.8" fill="#123f3a" opacity=".14"/>
+  <path d="M32 54 C22 46 9 38 9 24.5 C9 16.5 15 11 22 11 C26.5 11 30 13.5 32 17 C34 13.5 37.5 11 42 11 C49 11 55 16.5 55 24.5 C55 38 42 46 32 54 Z" fill="#8fb7d6" stroke="#5b86a6" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M15 24 Q16 17.5 22 16" fill="none" stroke="#fffdf4" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
+  <path d="M32 22 V40 M23 31 H41" fill="none" stroke="#fffdf4" stroke-width="6.5" stroke-linecap="round"/>
+  <path d="M50 42 L51.3 45.7 L55 47 L51.3 48.3 L50 52 L48.7 48.3 L45 47 L48.7 45.7 Z" fill="#f5c64f"/>
+</svg>

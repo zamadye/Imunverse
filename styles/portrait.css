@@ -1,0 +1,226 @@
+/* =========================================================
+   portrait.css — UI-REBUILD: PORTRAIT-FIRST (standar genre mobile).
+   File ini dimuat TERAKHIR → menimpa main.css & dashboard-focus.css
+   hanya dalam orientasi portrait. Aturan landscape TIDAK disentuh.
+   Konvensi: semua blok dibungkus @media (orientation: portrait),
+   kecuali perbaikan tabrakan class yang berlaku global (__fix).
+   ========================================================= */
+
+/* ---------- __fix GLOBAL: tabrakan class .bp-lv ----------
+   .bp-lv (main.css) absolute untuk sel track Mitosis, tapi dipakai juga
+   oleh bp-bar dashboard → "Lv 1" liar di tepi kiri. Netralkan di dashboard. */
+#screen-dashboard .bp-bar { position: relative; }
+#screen-dashboard .bp-bar .bp-lv { position: static; transform: none; }
+/* ---------- __fix GLOBAL: knob slider upgrade ----------
+   Knob 34px translate(-50%) menjulur 17px di luar rel pada 0%/100%.
+   Beri margin rel agar knob tak terpotong tepi kartu. */
+#screen-upgrade .upg-slider { margin-left: 17px; margin-right: 17px; }
+#screen-herodetail .upg-slider { margin-left: 15px; margin-right: 15px; }
+
+@media (orientation: portrait) {
+
+  /* ======== FONDASI: bingkai layar + area aman ======== */
+  .screen {
+    padding-left: 14px;
+    padding-right: 14px;
+    width: 100%;
+    max-width: 560px; /* tablet portrait: konten tetap ramping & tengah */
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Toast menu: di atas tombol MAIN + dock (tidak menutup konten) */
+  body:not(.in-run) #toasts {
+    bottom: calc(196px + env(safe-area-inset-bottom));
+    width: min(86vw, 360px);
+  }
+
+  /* ======== DASHBOARD: bingkai tetap + konten scroll ======== */
+  #screen-dashboard { overflow: hidden; }
+  #screen-dashboard .topbar { flex: 0 0 auto; }
+  #screen-dashboard .dash-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    padding-bottom: 10px;
+    overscroll-behavior: contain;
+  }
+  #screen-dashboard .dash-scroll { overflow: visible; }
+  #screen-dashboard .dashboard-play { flex: 0 0 auto; }
+  #screen-dashboard .dock { flex: 0 0 auto; }
+
+  /* ======== DASHBOARD: topbar muat 390px ======== */
+  #screen-dashboard .topbar { gap: 6px; max-width: none; }
+  #screen-dashboard .rank-chip {
+    flex: 1 1 auto; min-width: 0;
+    padding: 5px 8px;
+  }
+  #screen-dashboard .rank-chip .rank-meta { min-width: 0; }
+  #screen-dashboard .rank-chip b,
+  #screen-dashboard .rank-chip small {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: block;
+  }
+  #screen-dashboard .rank-chip .rank-emblem { width: 30px; height: 30px; font-size: 15px; }
+  #screen-dashboard .dash-points,
+  #screen-dashboard .currency-chip {
+    flex: 0 0 auto;
+    font-size: 14px;
+    padding: 6px 10px 6px 6px;
+    gap: 6px;
+  }
+  #screen-dashboard .dash-points .coin,
+  #screen-dashboard .currency-chip .coin { width: 20px; height: 20px; }
+  #screen-dashboard .lang-pill {
+    flex: 0 0 auto;
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+
+  /* ======== DASHBOARD: kartu bertumpuk 1 kolom ======== */
+  #screen-dashboard .duo-row { grid-template-columns: 1fr; }
+
+  /* ======== DASHBOARD: banner strain terbaca penuh ======== */
+  #screen-dashboard .strain-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  #screen-dashboard .strain-banner .strain-title,
+  #screen-dashboard .strain-banner .strain-name,
+  #screen-dashboard .strain-banner .strain-desc {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  /* ======== DASHBOARD: tombol MAIN satu baris ======== */
+  #screen-dashboard .dashboard-play-copy { min-width: 0; }
+  #screen-dashboard .dashboard-play-copy b { font-size: 24px; }
+  #screen-dashboard .dashboard-play-copy small {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 62vw;
+    font-size: 11px;
+  }
+
+  /* ======== DASHBOARD: dock 5 label muat ======== */
+  #screen-dashboard .dock { gap: 2px; }
+  #screen-dashboard .dock-btn span:last-child {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  #screen-dashboard .dock-btn .dock-ico { width: 52px; height: 52px; }
+
+  /* ======== HUD RUN: klaster atas tanpa tabrakan ======== */
+  /* Chip Diferensiasi: JANGAN absolute-centered (main.css menaruhnya di
+     tengah bar → menabrak HP). Jadikan item flex normal dalam aliran baris. */
+  #screen-hud .hud-center .hud-equity-stage {
+    position: static; left: auto; top: auto; transform: none;
+    font-size: 10px; padding: 3px 9px; letter-spacing: .04em;
+  }
+  /* Angka HP: sembunyi di portrait (bar + avatar cukup, hemat ruang). */
+  #screen-hud .hud-center .hud-hp-text { display: none; }
+  /* XP: bar tipis selebar layar di tepi atas (standar genre). */
+  #screen-hud .hud-xp-top {
+    top: 0; left: 0; right: 0; width: auto; height: 6px;
+  }
+  #screen-hud .hud-xp-top .hud-xp-ico { display: none; }
+  #screen-hud .hud-xp-top .hud-xp-track { height: 6px; border-radius: 0 0 4px 4px; }
+  /* Toggle menu: bawah panel kanan (dulu menutup kill-count). */
+  #screen-hud #hud-menu-toggle { top: 112px; right: 8px; width: 36px; height: 36px; }
+  /* Misi: kiri atas bawah panel (dulu tengah layar menutup arena). */
+  #screen-hud .hud-quests { top: 112px; left: 8px; }
+  #screen-hud .hud-quests-head { font-size: 11px; padding: 5px 9px; }
+  /* Petunjuk tutorial: ramping, tidak melebar ke tengah. */
+  #screen-hud .hud-hint { max-width: 180px; font-size: 11px; line-height: 1.45; }
+
+  /* ======== GAMEOVER: CTA muat + toast tak menutup kartu ======== */
+  /* Bintang: di dalam kartu (margin negatif dulu terpotong). */
+  #screen-gameover .go-stars { margin-top: 0; }
+  #screen-gameover .go-stars .star { width: 36px; height: 36px; }
+  /* Rel hero: jangan ikut menciut (scroll-container min-size 0 → rel
+     kolaps ke padding saat kartu penuh; dulu rail h=10px tak terlihat). */
+  #screen-gameover .go-heroes { flex: 0 0 auto; align-items: flex-start; }
+  /* Kartu hasil: izinkan scroll sentuh (base overflow:hidden memotong CTA
+     di layar pendek; modal-box semula overflow-y:auto). */
+  #screen-gameover .go-card { overflow-y: auto; }
+  /* 4 tombol aksi: Main Lagi penuh, sisanya sebaris di bawahnya. */
+  #screen-gameover .btn-row { flex-wrap: wrap; gap: 8px; }
+  #screen-gameover #btn-retry { flex: 1 1 100%; min-height: 50px; font-size: 16px; }
+  #screen-gameover .btn-row .btn:not(#btn-retry) {
+    flex: 1 1 0; min-width: 0; font-size: 12px; min-height: 42px; padding: 8px 4px;
+  }
+  #screen-gameover .btn-row .btn-ico { width: 16px; height: 16px; }
+  /* Modal terbuka: toast pindah ke atas (dulu menutup tengah kartu).
+     #toasts bukan sibling layar → pakai :has (Chromium modern OK). */
+  #app:has(.screen.modal.active) #toasts {
+    top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto;
+    flex-direction: column; width: min(86vw, 360px);
+  }
+
+  /* ======== KEPALA LAYAR (semua menu): judul tak terpotong ======== */
+  .ui-head { gap: 7px; }
+  .ui-head .btn-back, .ui-head .back-btn { width: 38px; height: 38px; min-height: 38px; }
+  .ui-head .btn-back img, .ui-head .back-btn img { width: 22px; height: 22px; }
+  .ui-head-ico { width: 34px; height: 34px; border-radius: 11px; }
+  .ui-head-ico img { width: 25px; height: 25px; }
+  .ui-head h1, .ui-head h2 { font-size: 17px; }
+  .ui-head .currency-chip.small { font-size: 12px; padding: 4px 9px 4px 4px; gap: 5px; }
+  .ui-head .currency-chip.small .coin { width: 19px; height: 19px; }
+
+  /* ======== SHOP: 4 tab muat + tombol kartu tak meluap ======== */
+  #screen-shop .shop-nav { gap: 5px; }
+  #screen-shop .shop-chip {
+    font-size: 11px; padding: 5px 10px 5px 6px; gap: 5px; min-height: 34px;
+  }
+  #screen-shop .shop-chip img { width: 20px; height: 20px; }
+  #screen-shop .btn-buy {
+    font-size: 11.5px; min-height: 38px; padding: 8px 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* Label "Buka via misi": kecilkan + kunci absolut disembunyikan
+     (label sudah menjelaskan; kunci 30px menutup 2 huruf terakhir). */
+  #screen-shop .shop-card .s-owned { font-size: 9.5px; }
+  #screen-shop .shop-card .s-owned:not(.has) + img.lock-badge { display: none; }
+
+  /* ======== HERODETAIL: grid RoK lanskap → tumpuk vertikal ======== */
+  #screen-herodetail .hero-detail-body {
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen-herodetail .hd-rok {
+    display: flex; flex-direction: column; height: auto; gap: 10px;
+    align-items: stretch;
+  }
+  /* Rel koleksi: strip horizontal di atas (panah diputar). */
+  #screen-herodetail .hd-rok-rail {
+    flex-direction: row; align-self: stretch; justify-content: flex-start;
+    order: 0;
+  }
+  #screen-herodetail .hd-rok-rail-items {
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    max-height: none; max-width: 100%; padding: 2px 4px;
+  }
+  #screen-herodetail .hd-rok-arrow { transform: rotate(-90deg); }
+  #screen-herodetail .hd-rok-hero { width: 52px; height: 52px; }
+  /* Panggung: etalase kompak. */
+  #screen-herodetail .hd-rok-stage { order: 1; height: auto; }
+  #screen-herodetail .hd-rok-figure {
+    width: min(56vw, 230px); height: min(56vw, 230px);
+  }
+  /* Panel info: selebar layar, ikut scroll halaman. */
+  #screen-herodetail .hd-rok-panel {
+    order: 2; overflow: visible; max-height: none; align-self: stretch;
+  }
+
+  /* ======== BP: kepala musim menumpuk ======== */
+  #screen-bp .bp-head { flex-direction: column; align-items: stretch; gap: 8px; }
+  #screen-bp .bp-level-wrap { flex: none; }
+  #screen-bp #btn-bp-premium { width: 100%; min-height: 44px; }
+}
