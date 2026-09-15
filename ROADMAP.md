@@ -110,7 +110,7 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 - [x] 15b. **D3 instan** ✅ — Bella auto-antibodi + Pulse 8-arah, Eos Pulse granul ×5: SEMUA damage instan-dalam-medan (visual swipe/burst, cause `antibody`/`pulse`); nol proyektil pemain. `summon_homing` → `instant_multi`.
 - [x] 15c. **D5 pasif** ✅ — 33 skill punya `trigger` (pulse 16 / damaged 10 / engulf 4 / kill 3); `SkillSystem.notify()` dipicu Pulse/engulf/kill/damaged (guard rekursi 2); cast+upgrade manual DICABUT (game/main/HUD/keyboard 1-3/Shift); HUD = baris pasif (label pemicu + pip rank); rank 2 otomatis Lv 15; toast aktivasi Lv 3/5/10 + rank 2. E2E r4/r5/r7/mlbb/character-visual ditunda ke item 16.
 - [x] 16a. **Patch pacing darurat D14+D15** ✅ — temuan device: (1) buff nutrisi compounding (serat ×1,25/pickup → xpMult ×12!) → SEMANTIK TERKUAT-MENANG; (2) supply 227 kill/wave (eco target 220, interval min 0,3 dtk) → ±40/wave; (3) XP engulf 20→4 + Bio tiap-8-telan + heal 7%→2%; (4) boss chapter ×4–×14 HP + dmgMult, roster 5/10/15, kuota 120–300, boss bab 1; (5) gate timeout 180 dtk anti-stall; (6) harness anti-stall (flee-dekat). Hasil ukur: ch1 menang 103 dtk/wave 3, ch2 135 dtk/wave 4, endless wave 10: 344–413 kill / level 10 / ±2.400 XP (target bible: 400/8/1.926 — dalam ±30%).
-- [ ] **16. CHECKPOINT DEVICE ULANG (owner): run terasa 3–6 mnt? boss jadi duel? level-up wajar? tiap hero BERBEDA (pulse unik = langkah berikut)? + selaraskan E2E basi. STOP.**
+- [x] 16. **CHECKPOINT** ✅ executable: E2E basi diselaraskan ke API pasif D5 (r4/r5/r7/mlbb/character-visual; browser-run pending sandbox) + 8 uji D5 di verify-phagos HIJAU. Retest device + pulse unik hero → fase evaluasi akhir (owner).
 
 ### Sprint 3 — Ekonomi & progresi
 

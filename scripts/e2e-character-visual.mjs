@@ -245,7 +245,7 @@ async function captureHudAndSkills() {
         }
       });
       game.run.skills.slots.forEach((slot) => { if (slot) { slot.unlocked = true; slot.cdLeft = 0; } });
-      game.useAbilityBySlot(slotIndex);
+      game.fireSkillTrigger(game.run.skills.slots[slotIndex].def.trigger); // D5 pasif
       for (const fx of game.run.effects.effects) {
         if (fx.type === 'abilityCharge') fx.life = fx.maxLife * 0.52;
         if (fx.type === 'abilityPayoff') fx.life = fx.maxLife * 0.62;

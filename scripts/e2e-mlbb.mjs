@@ -135,11 +135,11 @@ await page.fill('#auth-username', 'PemainHebat');
   }
   log('drag-moves-player', dragOk ? `phase ${p3d.walkPhase0.toFixed(1)}→${moveInfo.phase.toFixed(1)}` : false);
 
-  // ---------- KLIK RIIL 3 skill ----------
+  // ---------- D5: 3 skill PASIF (tanpa cast manual) ----------
   // Fase 17: hero default kini Mako — skill 2/3 terkunci di evolusi awal.
-  // Uji ini menverifikasi KLIK → cooldown. RONDE-7: unlocked dihitung dari
-  // LEVEL (getSkillUnlockState), bukan flag slot → naikkan level run ke 6
-  // (slot 3 terbuka di Lv 5) — jalur unlock yang dipakai gameplay nyata.
+  // D5: KLIK tombol skill = info (BUKAN cast); skill menyala via pemicunya
+  // (game.fireSkillTrigger) → cooldown. Unlocked dihitung dari LEVEL
+  // (isSkillUnlocked) → naikkan level run ke 6 (slot 3 terbuka di Lv 5).
   await page.evaluate(() => {
     const g = window.__IMUNVERSE.game;
     if (g.run) {
@@ -147,7 +147,7 @@ await page.fill('#auth-username', 'PemainHebat');
       if (g.run.skills) g.run.skills.slots.forEach((s) => { if (s) s.unlocked = true; });
     }
   });
-  { const d0 = await page.evaluate(() => { const g = window.__IMUNVERSE.game; const v = g.run ? g.run.skills.getView(g.run.level) : []; return { lvl: g.run ? g.run.level : null, locks: v.map((x) => x.lockState), flag: g.run && g.run.skills ? g.run.skills.slots.map((s) => !!s.unlocked) : null }; });
+  { const d0 = await page.evaluate(() => { const g = window.__IMUNVERSE.game; const v = g.run ? g.run.skills.getView(g.run.level) : []; return { lvl: g.run ? g.run.level : null, locks: v.map((x) => x.locked), flag: g.run && g.run.skills ? g.run.skills.slots.map((s) => !!s.unlocked) : null }; });
     console.log('  unlock-diag:', JSON.stringify(d0)); }
   const ensureGameplay = async () => {
     for (let k = 0; k < 12; k++) {
@@ -179,18 +179,18 @@ await page.fill('#auth-username', 'PemainHebat');
     console.log('  pre-skill-click diag:', JSON.stringify(pre));
   }
   for (let i = 0; i < 3; i++) {
-    // Fase 18: XP per kill memicu level-up lebih sering — modal bisa menyela
-    // di tengah klik → tutup & ulangi. Setup deterministik: reset cd slot ini
-    // ke 0 sebelum KLIK RIIL (skill bisa saja masih memanas dari trigger lain),
-    // lalu klik harus men-set cd slot itu sendiri (>0) — bukan membanding hitungan.
+    // D5: skill pasif menyala via PEMICU (bukan klik). Setup: reset cd slot
+    // ini ke 0 (bisa memanas dari trigger lain), tembakkan pemicunya, lalu
+    // cd slot itu harus >0. Modal level-up bisa menyela → tutup & ulangi.
     let triggered = false;
     for (let attempt = 0; attempt < 4 && !triggered; attempt++) {
       await ensureGameplay();
       await page.evaluate((idx) => {
-        const slots = window.__IMUNVERSE.game.run.skills.slots.filter(Boolean);
-        if (slots[idx]) slots[idx].cdLeft = 0; // setup: pastikan slot siap diklik
+        const g = window.__IMUNVERSE.game;
+        const slots = g.run.skills.slots.filter(Boolean);
+        if (slots[idx]) slots[idx].cdLeft = 0; // setup: pastikan slot siap
+        if (slots[idx]) g.fireSkillTrigger(slots[idx].def.trigger); // D5: picu!
       }, i);
-      await page.locator('#ability-bar .ability-btn').nth(i).click({ timeout: 6000 });
       await page.waitForTimeout(400);
       triggered = await page.evaluate((idx) => {
         const slots = window.__IMUNVERSE.game.run.skills.slots.filter(Boolean);
@@ -213,6 +213,15 @@ await page.fill('#auth-username', 'PemainHebat');
     }
     log(`skill-${i + 1}-oncd`, triggered);
     if (i < 2) await page.waitForTimeout(8200);
+  }
+  // D5: KLIK tombol skill TIDAK me-cast — cd tidak boleh melonjak penuh.
+  {
+    await ensureGameplay();
+    const cdBefore = await page.evaluate(() => window.__IMUNVERSE.game.run.skills.slots.filter(Boolean)[0].cdLeft);
+    await page.locator('#ability-bar .ability-btn').nth(0).click({ timeout: 6000 });
+    await page.waitForTimeout(400);
+    const cdAfter = await page.evaluate(() => window.__IMUNVERSE.game.run.skills.slots.filter(Boolean)[0].cdLeft);
+    log('skill-click-no-cast', cdAfter <= cdBefore + 0.5, `cd ${cdBefore.toFixed(1)}→${cdAfter.toFixed(1)}`);
   }
   await ensureGameplay();
   await page.waitForTimeout(400);

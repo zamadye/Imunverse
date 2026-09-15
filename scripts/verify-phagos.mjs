@@ -398,5 +398,31 @@ log('xp-curve', xpNeed1(1) === 115 && xpNeed1(8) === 360 && xpNeed1(9) === 395, 
 log('xp-bytype', xpTbl.contact === 3 && xpTbl.pulse === 5 && xpTbl.engulf === 4 && xpTbl.boss === 60, JSON.stringify(xpTbl)); // D14: engulf 4
 log('xp-contactdps-fallback', (getData().membrane.defaults.contactDpsBase || 0) === 8);
 
+// ---------- 13. Skill pasif D5 (trigger otomatis, tanpa cast) ----------
+game.startRun('nkcell'); // pulse / damaged / engulf
+const run3 = game.run;
+log('skill-locked-lv1', run3.skills.getView(1).every((x) => x.locked === true));
+log('skill-matrix-356', run3.skills.getView(3).map((x) => !x.locked).join('') === 'truefalsefalse'
+  && run3.skills.getView(6).map((x) => !x.locked).join('') === 'truetruefalse'
+  && run3.skills.getView(10).every((x) => !x.locked));
+run3.level = 6;
+run3.skills.slots.forEach((s) => { if (s) { s.unlocked = true; s.cdLeft = 0; } });
+game.fireSkillTrigger('pulse');
+log('skill-trigger-pulse', run3.skills.slots[0].cdLeft > 0 && run3.skills.slots[1].cdLeft === 0 && run3.skills.slots[2].cdLeft === 0);
+run3.skills.slots.forEach((s) => { if (s) s.cdLeft = 0; });
+game.fireSkillTrigger('damaged');
+log('skill-trigger-damaged', run3.skills.slots[1].cdLeft > 0 && run3.skills.slots[0].cdLeft === 0 && run3.skills.slots[2].cdLeft === 0);
+run3.skills.slots.forEach((s) => { if (s) s.cdLeft = 0; });
+game.fireSkillTrigger('engulf');
+log('skill-trigger-engulf', run3.skills.slots[2].cdLeft > 0 && run3.skills.slots[0].cdLeft === 0 && run3.skills.slots[1].cdLeft === 0);
+game.startRun('neutrophil'); // slot 1 = adrenaline (kill)
+const run4 = game.run;
+run4.level = 15;
+run4.skills.slots.forEach((s) => { if (s) { s.unlocked = true; s.cdLeft = 0; } });
+game.fireSkillTrigger('kill');
+log('skill-trigger-kill', run4.skills.slots[1].cdLeft > 0 && run4.skills.slots[0].cdLeft === 0 && run4.skills.slots[2].cdLeft === 0);
+log('skill-rank2-auto', run4.skills.slots[1].rank === 2);
+log('skill-guard-depth', (run4._skillNotifyDepth || 0) === 0);
+
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);
 process.exit(fails === 0 ? 0 : 1);

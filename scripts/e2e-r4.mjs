@@ -113,7 +113,7 @@ try {
     const slot = run.skills.slots.findIndex((s) => s.def.id === 'devour');
     if (slot < 0) return { skip: true };
     run.skills.slots[slot].cdLeft = 0;
-    g.useAbilityBySlot(slot);
+    g.fireSkillTrigger('engulf'); // D5: devour = skill pasif pemicu engulf
     return { skip: false, damaged: t.hp < hp0 || !t.alive };
   });
   log('devour-fallback-strike', fb.skip ? 'SKIP' : fb.damaged === true);
