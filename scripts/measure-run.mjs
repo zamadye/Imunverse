@@ -126,7 +126,8 @@ while (!run.ended && frames < MAX_FRAMES) {
   }
   if (best) {
     // kite primitif: HP<35% → menjauh (survive), else dekati (contact DPS)
-    const flee = run.player.hp < run.player.maxHP * 0.35 ? -1 : 1;
+    // Anti-stall: kabur hanya bila musuh DEKAT; bila jauh → hadapi (kill+heal atau mati jujur).
+    const flee = (run.player.hp < run.player.maxHP * 0.35 && bd < 350 * 350) ? -1 : 1;
     const dx = (best.x - run.player.x) * flee;
     const dy = (best.y - run.player.y) * flee;
     if (dx > 20) input.keys.add('right'); else if (dx < -20) input.keys.add('left');

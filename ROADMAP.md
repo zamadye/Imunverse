@@ -109,7 +109,8 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 - [x] 15. **Retune 11 hero ke tabel §3** ✅ (radius + cooldown; D3 + D5 selesai — lihat bawah)
 - [x] 15b. **D3 instan** ✅ — Bella auto-antibodi + Pulse 8-arah, Eos Pulse granul ×5: SEMUA damage instan-dalam-medan (visual swipe/burst, cause `antibody`/`pulse`); nol proyektil pemain. `summon_homing` → `instant_multi`.
 - [x] 15c. **D5 pasif** ✅ — 33 skill punya `trigger` (pulse 16 / damaged 10 / engulf 4 / kill 3); `SkillSystem.notify()` dipicu Pulse/engulf/kill/damaged (guard rekursi 2); cast+upgrade manual DICABUT (game/main/HUD/keyboard 1-3/Shift); HUD = baris pasif (label pemicu + pip rank); rank 2 otomatis Lv 15; toast aktivasi Lv 3/5/10 + rank 2. E2E r4/r5/r7/mlbb/character-visual ditunda ke item 16.
-- [ ] **16. CHECKPOINT DEVICE (owner): tiap hero terasa BERBEDA + putuskan D4 (squad A/B) + selaraskan E2E basi (r4/r5/r7/mlbb/character-visual). STOP.**
+- [x] 16a. **Patch pacing darurat D14+D15** ✅ — temuan device: (1) buff nutrisi compounding (serat ×1,25/pickup → xpMult ×12!) → SEMANTIK TERKUAT-MENANG; (2) supply 227 kill/wave (eco target 220, interval min 0,3 dtk) → ±40/wave; (3) XP engulf 20→4 + Bio tiap-8-telan + heal 7%→2%; (4) boss chapter ×4–×14 HP + dmgMult, roster 5/10/15, kuota 120–300, boss bab 1; (5) gate timeout 180 dtk anti-stall; (6) harness anti-stall (flee-dekat). Hasil ukur: ch1 menang 103 dtk/wave 3, ch2 135 dtk/wave 4, endless wave 10: 344–413 kill / level 10 / ±2.400 XP (target bible: 400/8/1.926 — dalam ±30%).
+- [ ] **16. CHECKPOINT DEVICE ULANG (owner): run terasa 3–6 mnt? boss jadi duel? level-up wajar? tiap hero BERBEDA (pulse unik = langkah berikut)? + selaraskan E2E basi. STOP.**
 
 ### Sprint 3 — Ekonomi & progresi
 
@@ -270,6 +271,8 @@ Sapuan dilakukan di Sprint 5 + setiap sprint untuk string yang disentuhnya.
 | D11 | 6 jalur Homeostasis apa? + "31.998" satuannya? | Radius·DPS·Pulse·Engulf·Vitalitas·Speed; 31.998 = ekuivalen BK total | Sprint 3.19 |
 | D12 | Split mastery 6.100 XP (perKill/perWave/victory/engulf?) | Turunkan di Sprint 3 dari run referensi terukur | Sprint 3.19 |
 | D13 | Sinapsis ikut D4 | Otomatis ikut hasil D4 | Sprint 3.18 |
+| D14 | Banjir XP pasca-Sprint 1 (buff compounding ×12, supply 227/wave, engulf 53%) vs bible §5 | **Jangkar ulang ke total/run bible**: buff terkuat-menang, supply → ±40/wave, XP engulf 20→4, Bio tiap-8-telan, heal 7%→2% | Sprint 2.16a |
+| D15 | Boss chapter/sekarang mati 1 hit vs duel ±25 dtk | **Buff HP (×4–×14) + dmgMult**; roster wave 5/10/15 = toksin→kanker→kanker; kuota 120–300 + boss bab 1 | Sprint 2.16a |
 | D14 | Audio/tutorial/server-save/whale (bible §15) | Ikuti bible (tunda semua) | — |
 
 **SUDAH TERJAWAB:** `AGENT-GAMEPLAY-EXPERIMENT.md` (dirujuk §4.1) tidak ada

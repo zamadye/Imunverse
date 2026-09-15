@@ -906,19 +906,21 @@ export const game = {
     const v = p.value;
     const dur = p.def.buffDuration || 20;
     const B = run.tempBuffs;
+    // PACING D14: buff TERKUAT menang + durasi refresh — TIDAK compounding
+    // (mult *= tiap pickup + refresh = eksponensial tak terbatas → XP/dmg meledak).
     if (t === 'buff_damage') {
-      B.damage.mult *= 1 + v / 100;
-      B.damage.t = Math.max(B.damage.t, dur);
+      B.damage.mult = Math.max(B.damage.mult, 1 + v / 100);
+      B.damage.t = dur;
       run.effects.spawnLabel(p.x, p.y - 10, tr(`+${v}% Damage!`), '#f2825c');
       this.recomputePlayerStats();
     } else if (t === 'buff_cooldown') {
-      B.cooldown.mult *= Math.max(0.5, 1 - v / 100);
-      B.cooldown.t = Math.max(B.cooldown.t, dur);
+      B.cooldown.mult = B.cooldown.t > 0 ? Math.min(B.cooldown.mult, Math.max(0.5, 1 - v / 100)) : Math.max(0.5, 1 - v / 100);
+      B.cooldown.t = dur;
       run.effects.spawnLabel(p.x, p.y - 10, tr('Serangan makin cepat!'), '#7bdff2');
       this.recomputePlayerStats();
     } else if (t === 'buff_xp') {
-      B.xp.mult *= 1 + v;
-      B.xp.t = Math.max(B.xp.t, dur);
+      B.xp.mult = Math.max(B.xp.mult, 1 + v);
+      B.xp.t = dur;
       run.effects.spawnLabel(p.x, p.y - 10, tr(`+${Math.round(v * 100)}% XP!`), '#8fe8d2');
     } else if (t === 'buff_maxhp') {
       run.permBoost.maxHP += v;
@@ -1361,6 +1363,8 @@ export const game = {
     markSeen(bossCfg.id); // Bio-Pedia: boss ditemui
     if (bossCfg.areaAttack) enemy.def = Object.assign({}, def, { areaAttack: bossCfg.areaAttack });
     enemy.isBoss = true;
+    // PACING D14: boss bab bisa memukul lebih keras (dmgMult per bab)
+    if (bossCfg.dmgMult) enemy.damage = Math.max(1, Math.round(enemy.damage * bossCfg.dmgMult));
     enemy.bossName = bossCfg.name || def.name;
     enemy.maxHP = Math.round(enemy.maxHP);
     enemy.hp = enemy.maxHP;
@@ -1697,7 +1701,7 @@ export const game = {
   xpForKillCause(enemy, source) {
     let tbl = null;
     try { tbl = getData().upgrades.xpByKillType; } catch { /* fallback bawah */ }
-    tbl = tbl || { contact: 3, pulse: 5, engulf: 20, boss: 60, other: 3 };
+    tbl = tbl || { contact: 3, pulse: 5, engulf: 4, boss: 60, other: 3 }; // D14: engulf 4
     if (enemy.isBoss) return tbl.boss;
     if (typeof source === 'string' && tbl[source] !== undefined) return tbl[source];
     return tbl.other;
@@ -1716,7 +1720,7 @@ export const game = {
     // TANPA drop XP/Biokredit/Genom normal — efek visual tetap.
     if (enemy.devoured) {
       run.effects.spawnBurst(enemy.x, enemy.y, '#ffd93d', getRetention().particles.enemyDeath, 150, 4);
-      // PHAGOS Sprint 1 (bible §5.1): korban telan (skill devour) = engulf → 20 XP.
+      // PACING D14: korban telan (skill devour) = engulf → 4 XP.
       // Drop tetap tidak ada (trade-off jalur skill — D9; engulf membran tetap full kill).
       this.addXP(this.xpForKillCause(enemy, 'engulf'));
       audio.kill();

@@ -59,7 +59,7 @@
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "heal_bonus",
         "shapeParams": {
           "pushMult": 1.6
@@ -135,7 +135,7 @@
         "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "mark_nearby",
         "shapeParams": {
           "count": 3,
@@ -215,7 +215,7 @@
         "pulseCooldown": 1.0,
         "pulseRadiusMult": 2.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "speed_boost",
         "shapeParams": {}
       },
@@ -292,7 +292,7 @@
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 2.5,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "parasite_hunter",
         "shapeParams": {
           "arcDeg": 45,
@@ -373,7 +373,7 @@
         "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "slow_all",
         "shapeParams": {
           "minMult": 0.7,
@@ -453,7 +453,7 @@
         "pulseCooldown": 4.0,
         "pulseRadiusMult": 4.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "armor_stack",
         "shapeParams": {
           "pulseBaseRadius": 56
@@ -530,7 +530,7 @@
         "pulseCooldown": 1.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.25,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "insta_kill_25",
         "shapeParams": {
           "arcDeg": 90,
@@ -608,7 +608,7 @@
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "shield_gain",
         "shapeParams": {}
       },
@@ -684,7 +684,7 @@
         "pulseCooldown": 3.0,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "balance_slow",
         "shapeParams": {
           "selfSlowPct": 0.1
@@ -762,7 +762,7 @@
         "pulseCooldown": 2.5,
         "pulseRadiusMult": 3.0,
         "engulfThreshold": 0.15,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "antibody_stack",
         "shapeParams": {}
       },
@@ -836,7 +836,7 @@
         "pulseCooldown": 2.0,
         "pulseRadiusMult": 2.5,
         "engulfThreshold": 0.3,
-        "engulfHealPct": 0.07,
+        "engulfHealPct": 0.02,
         "engulfSpecial": "assassin_root",
         "shapeParams": {}
       },

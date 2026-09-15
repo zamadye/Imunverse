@@ -150,10 +150,10 @@ shot('01-start');
 
 // ---------- 2. joystick-only kill (TANPA input serang) ----------
 // Musuh ditaruh di dalam medan; hero diam; kontak harus membunuh.
-const k0 = run.kills, b0 = run.bioPoints;
-for (let i = 0; i < 4; i++) game.spawnEnemy('bakteri', false);
-run.enemies.slice(-4).forEach((e, i) => {
-  const a = (i / 4) * Math.PI * 2;
+const k0 = run.kills;
+for (let i = 0; i < 8; i++) game.spawnEnemy('bakteri', false); // D14: Bio tiap 8 telan
+run.enemies.slice(-8).forEach((e, i) => {
+  const a = (i / 8) * Math.PI * 2;
   e.x = run.player.x + Math.cos(a) * 40;
   e.y = run.player.y + Math.sin(a) * 40;
 });
@@ -161,7 +161,15 @@ step(240); // 4 detik kontak murni
 game.render(1 / 60, run.time);
 shot('02-contact-kills');
 log('contact-kills', run.kills > k0, `kills=${k0}→${run.kills}`);
-log('engulf-bio', run.bioPoints > b0, `bio=${b0}→${run.bioPoints}`);
+// D14: Bio tiap 8 telan — uji deterministik via tryEngulf langsung
+const b1 = run.bioPoints;
+for (let i = 0; i < 8; i++) {
+  game.spawnEnemy('bakteri', false);
+  const oe2 = run.enemies[run.enemies.length - 1];
+  oe2.hp = oe2.maxHP * 0.1;
+  memSys.tryEngulf(game, oe2);
+}
+log('engulf-bio', run.bioPoints > b1, `bio=${b1}→${run.bioPoints}`);
 
 // ---------- 3. PULSE via antrean keyboard ----------
 run.enemies.slice().forEach((e) => { e.alive = false; });
@@ -387,7 +395,7 @@ log('build-roundtrip', !!bcode && bdec.hero === 'tcd8' && bdec.wave === 8 && bde
 const { xpToNextLevel: xpNeed1 } = await mod('js/core/data-store.js');
 const xpTbl = getData().upgrades.xpByKillType || {};
 log('xp-curve', xpNeed1(1) === 115 && xpNeed1(8) === 360 && xpNeed1(9) === 395, `L1=${xpNeed1(1)} L8=${xpNeed1(8)}`);
-log('xp-bytype', xpTbl.contact === 3 && xpTbl.pulse === 5 && xpTbl.engulf === 20 && xpTbl.boss === 60, JSON.stringify(xpTbl));
+log('xp-bytype', xpTbl.contact === 3 && xpTbl.pulse === 5 && xpTbl.engulf === 4 && xpTbl.boss === 60, JSON.stringify(xpTbl)); // D14: engulf 4
 log('xp-contactdps-fallback', (getData().membrane.defaults.contactDpsBase || 0) === 8);
 
 console.log(fails === 0 ? '\nSEMUA VERIFIKASI LOLOS ✔' : `\n${fails} VERIFIKASI GAGAL ✘`);

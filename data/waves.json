@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
   "waveDuration": 25,
-  "spawnIntervalBase": 1.4,
-  "spawnIntervalMin": 0.3,
-  "spawnIntervalWaveDecay": 0.08,
-  "enemyHPScalePerWave": 0.105,
+  "spawnIntervalBase": 1.9,
+  "spawnIntervalMin": 1.0,
+  "spawnIntervalWaveDecay": 0.04,
+  "enemyHPScalePerWave": 0.14,
   "enemySpeedScalePerWave": 0.015,
   "enemySpeedScaleMax": 1.6,
   "bossWaveEvery": 5,
   "bossHPBonusPerBossIndex": 0.35,
-  "maxAliveEnemies": 300,
+  "maxAliveEnemies": 60,
   "spawnPadding": 90,
   "waveMultipliers": [
     {
@@ -38,8 +38,9 @@
     }
   ],
   "bossRoster": [
+    "toksin_raksasa",
     "sel_kanker",
-    "toksin_raksasa"
+    "sel_kanker"
   ],
   "explore": {
     "aggroRadius": 380,
@@ -49,9 +50,9 @@
     "farNestDist": 620,
     "nestsBase": 2,
     "nestsAddEveryWaves": 4,
-    "nestsMax": 10,
+    "nestsMax": 4,
     "packSize": 3,
-    "packPerWave": 0.9,
+    "packPerWave": 0.3,
     "minWaveTime": 8
   },
   "breakDuration": 2.5,
@@ -103,11 +104,11 @@
   },
   "ecosystem": {
     "enabled": true,
-    "targetBase": 16,
-    "targetPerWave": 14,
-    "targetMax": 220,
-    "topUpInterval": 1.0,
-    "topUpBatch": 4,
+    "targetBase": 5,
+    "targetPerWave": 0.5,
+    "targetMax": 16,
+    "topUpInterval": 3.0,
+    "topUpBatch": 2,
     "minPlayerDist": 340,
     "maxPlayerDist": 950,
     "hunterShare": 0.6

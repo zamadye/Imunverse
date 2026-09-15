@@ -13,8 +13,9 @@
     "pulseShrinkSec": 0.15,
     "pulseDamageMult": 4.0,
     "engulfThreshold": 0.15,
-    "engulfHealPct": 0.07,
-    "bioPointPerEngulf": 1
+    "engulfHealPct": 0.02,
+    "bioPointPerEngulf": 1,
+  "bioPointEveryEngulf": 8
   },
   "squad": {
     "radiusMult": 0.5,

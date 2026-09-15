@@ -27,6 +27,7 @@ export class SpawnSystem {
     this.rampTimer = 0;         // HOOK: wave 1 mulai ramai (tidak sepi)
     this.rampMult = 0.45;       // spawn interval dikali ini (naik ke 1 dalam ±15 dtk)
     this.gateOpen = true;       // Fase 18: gerbang wave — tertutup saat PENJAGA hidup
+    this.gateBlockedT = 0;        // PACING D14: pengaman anti-stall (gerbang paksa buka)
     this.waveClearing = false;  // wave berhenti spawn setelah durasi habis
     this.breakTimer = 0;        // jeda singkat agar pemain bisa mengumpulkan nutrisi
     this.nestsSpawnedForWave = 0; // F26: sarang per wave (explore MMORPG)
@@ -41,6 +42,7 @@ export class SpawnSystem {
   /** Boss penjaga tumbang → gerbang wave terbuka (dipanggil dari game.js). */
   openGate() {
     this.gateOpen = true;
+    this.gateBlockedT = 0;
   }
 
   /**
@@ -94,6 +96,14 @@ export class SpawnSystem {
     // reguler hanya menetes (trickle) supaya arena tetap hidup. ----
     if (!this.gateOpen) {
       const gk = getProgression().gatekeeper;
+      // PACING D14: pengaman — gerbang tak boleh mengunci selamanya (hero lemah
+      // vs boss / farm trickle tanpa akhir). Normal: boss mati jauh sebelum ini.
+      this.gateBlockedT += dt;
+      if (this.gateBlockedT >= (gk.gateTimeoutSec || 180)) {
+        this.bossSpawnedForWave = this.wave; // jangan spawn penjaga ganda
+        this.openGate();
+        return events;
+      }
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
         this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * gk.trickleSpawnMult / (this.mods.spawnMult || 1);

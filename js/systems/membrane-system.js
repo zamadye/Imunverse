@@ -114,7 +114,7 @@ function membraneCfg() {
     pulseRadiusMult: 3.0, pulseDurationSec: 0.4,
     pulseExpandSec: 0.15, pulseHoldSec: 0.1, pulseShrinkSec: 0.15,
     pulseDamageMult: 4.0,
-    engulfThreshold: 0.15, engulfHealPct: 0.07, bioPointPerEngulf: 1,
+    engulfThreshold: 0.15, engulfHealPct: 0.02, bioPointPerEngulf: 1,
   };
 }
 
@@ -263,7 +263,7 @@ export function getMembraneStats(run) {
     : contactDps * (cfg.pulseDamageMult || 4));
   let engulfThreshold = fx.engulfThreshold || (run.heroDef?.membrane?.engulfThreshold) || cfg.engulfThreshold || 0.15;
   if (itime < (ibuf.enzimUntil || 0)) engulfThreshold = 0.30; // ADDENDUM §2: Enzim Litik
-  const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.07) * fx.engulfHealMult * engulfSafety;
+  const engulfHealPct = ((run.heroDef?.membrane?.engulfHealPct) ?? cfg.engulfHealPct ?? 0.02) * fx.engulfHealMult * engulfSafety;
 
   // Simpan untuk trigger mutasi musuh + HUD
   mem.stats.totalRadiusMult = fx.radiusMult * (mem.metaActiveT > 0 ? fx.metaRadiusMult : 1);
@@ -771,6 +771,27 @@ function effEngulfThresh(run, st, enemy) {
  * Coba engulf satu musuh. Boss tidak pernah bisa di-engulf.
  * @returns {boolean} true bila terserap
  */
+/**
+ * PACING D14 - hibah Bio-Point engulf. Engulf umum (laju nyata +-50%, bukan
+ * 5% asumsi bible) hanya memberi Bio tiap ke-N (bioPointEveryEngulf = 8,
+ * hasil +-20 Bio/run sesuai ekonomi bible S4). Korban OPSONIN selalu
+ * memberi (jendela panen konsumabel). @returns {number} Bio yang dihibahkan
+ */
+function grantEngulfBio(game, enemy) {
+  const run = game.run;
+  const mem = run.membrane;
+  const cfg = membraneCfg();
+  const every = Math.max(1, cfg.bioPointEveryEngulf || 8);
+  const opsonin = (enemy.opsoninUntil || 0) > (run.time || 0);
+  run.bioEngulfCounter = (run.bioEngulfCounter || 0) + 1;
+  if (!opsonin && run.bioEngulfCounter % every !== 0) return 0;
+  let bio = cfg.bioPointPerEngulf || 1;
+  if (mem.engulfSpecial === 'heal_bonus') bio = Math.ceil(bio * 1.3);
+  if (run.itemBuffs && run.itemBuffs.katalis) bio *= 2; // ADDENDUM S2: Katalis Mitosis (2x final)
+  run.bioPoints = (run.bioPoints || 0) + bio;
+  return bio;
+}
+
 export function tryEngulf(game, enemy, opts = {}) {
   const run = game.run;
   const mem = run.membrane;
@@ -799,11 +820,8 @@ export function tryEngulf(game, enemy, opts = {}) {
   run.engulfStats = run.engulfStats || {};
   run.engulfStats[fam] = (run.engulfStats[fam] || 0) + 1;
 
-  // Bio-Point (run-only)
-  let bio = membraneCfg().bioPointPerEngulf || 1;
-  if (mem.engulfSpecial === 'heal_bonus') bio = Math.ceil(bio * 1.3);
-  if (run.itemBuffs && run.itemBuffs.katalis) bio *= 2; // ADDENDUM §2: Katalis Mitosis (2× final)
-  run.bioPoints = (run.bioPoints || 0) + bio;
+  // Bio-Point (run-only) — via counter D14 (opsonin selalu hibah)
+  const bio = grantEngulfBio(game, enemy);
 
   // Heal
   let healPct = st.engulfHealPct;
@@ -813,7 +831,7 @@ export function tryEngulf(game, enemy, opts = {}) {
 
   // Visual engulf: tarikan + partikel hijau + flash
   run.effects.spawnBurst(enemy.x, enemy.y, '#5ce8c8', 10, 160, 3);
-  run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 10, `+${bio} BIO`, '#8df7d2');
+  if (bio > 0) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 10, `+${bio} BIO`, '#8df7d2');
   player.squash = Math.max(player.squash, 0.12);
 
   // Hit-stop UNIK engulf: lebih lambat, lebih "basah"
@@ -1078,10 +1096,10 @@ export function pulseHit(game, opts = {}) {
       // kill via Pulse DIANGGAP engulf-lite agar ekonomi Bio & stack armor
       // tetap jalan (Pulse ADALAH cara ia menelan).
       if (mem.shape === 'pulse_only') {
-        run.bioPoints = (run.bioPoints || 0) + 1;
+        const bioLite = grantEngulfBio(game, e);
         mem.stats.engulfCount += 1;
         player.heal(player.maxHP * st.engulfHealPct);
-        run.effects.spawnLabel(e.x, e.y - e.radius - 10, '+1 BIO', '#8df7d2');
+        if (bioLite > 0) run.effects.spawnLabel(e.x, e.y - e.radius - 10, `+${bioLite} BIO`, '#8df7d2');
         try { applyEngulfSpecial(game, e); } catch { /* abaikan */ }
       }
       game.onEnemyKilled(e, 'pulse');

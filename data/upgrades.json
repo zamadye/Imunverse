@@ -7,7 +7,7 @@
   "xpByKillType": {
     "contact": 3,
     "pulse": 5,
-    "engulf": 20,
+    "engulf": 4,
     "boss": 60,
     "other": 3
   },

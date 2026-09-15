@@ -39,6 +39,7 @@
   },
   "gatekeeper": {
     "trickleSpawnMult": 2.2,
+   "gateTimeoutSec": 180,
     "xpBankRatio": 1.0
   },
   "premiumPowerCapPct": 30
