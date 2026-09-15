@@ -194,6 +194,89 @@ Semua hasil fase ini bersifat reference-only. Belum ada penggantian asset runtim
 
 ---
 
+### PHASE V2-MAKO — Mutation, evolution, dan skin plan
+
+**Status: 🟡 desain art ditetapkan; generator belum dibuat**
+
+Baseline yang dipilih owner: **Mako V2 Option B — Belly Devourer**.
+
+#### Jumlah visual mutation Mako
+
+Untuk Mako ditetapkan:
+
+- **5 visual evolution stages** — bentuk dasar yang berkembang sepanjang run.
+- **18 visual mutations** — 6 mutation families × 3 tiers.
+- **5 skin families** — terpisah dari mutation dan tidak mengubah stat.
+
+Angka 18 sengaja selaras dengan pool mutation yang sudah ada di repository.
+Mapping visual ke ID gameplay dilakukan setelah style lock; fase ini tidak
+mengubah `data/mutations.json` dan tidak menambah mechanic baru.
+
+#### Lima evolution stages
+
+| Stage | Milestone art | Nama visual | Perubahan utama |
+|---|---|---|---|
+| 0 | Wave 1 | Belly Devourer | Torso besar, maw perut tertutup, tangan oversized, nucleus cue. |
+| 1 | **Wave 2** | First Hunger | Maw mulai terbuka, rim kuning lebih kuat, satu vacuole terlihat. |
+| 2 | Wave 4 | Phagosome Brute | Torso lebih lebar, maw berlapis, lengan mulai membentuk pseudopod. |
+| 3 | Wave 7 | Pseudopod Breaker | Siluet asimetris, lengan memanjang/bercabang, vacuole bertambah. |
+| 4 | Wave 10+ | Apex Devourer | Bentuk paling besar, multi-pseudopod, golden-biological glow, nucleus lebih padat. |
+
+Milestone di atas adalah kontrak visual art. Trigger gameplay final tetap milik
+agent gameplay; Art Agent hanya menyediakan bentuk dan layer yang diperlukan.
+
+#### Enam mutation families × tiga tiers
+
+Setiap family harus bersifat additive agar dapat dirender sebagai layer dan tetap
+mempertahankan silhouette Mako:
+
+1. **Rahang Fagosom** — maw rim, lipatan, dan depth engulf.
+2. **Lengan Lapar** — arm stretch, split pseudopod, wrap silhouette.
+3. **Vakuola Panen** — jumlah, ukuran, warna, dan glow vacuole mangsa.
+4. **Membran Benteng** — shoulder pad biologis, layered membrane, body mass.
+5. **Inti Purba** — nucleus visibility, density, internal glow, core state.
+6. **Amukan Sitoplasma** — asymmetry, bulge, extra appendage, mutation growth.
+
+Tier 1 = cue kecil yang terbaca di gameplay.  
+Tier 2 = perubahan silhouette dan material yang jelas.  
+Tier 3 = perubahan besar dengan tetap mempertahankan identitas Mako.
+
+#### Skin families
+
+Skin dibuat setelah default Mako dan mutation language dikunci:
+
+1. **Default Biological** — moss green + biological yellow.
+2. **Rare Lime Colony** — variasi palette/material ringan.
+3. **Epic Deep Sea** — teal gelap, cyan glow, vacuole bioluminescent.
+4. **Legendary Golden Apex** — golden membrane accents dan devour VFX khusus.
+5. **Event Seasonal** — slot untuk tema musiman; silhouette Mako tetap dipertahankan.
+
+Skin tidak boleh mengubah hitbox, stat, role, atau silhouette inti Mako.
+
+#### Rencana generator art
+
+Generator akan dipisah menjadi dua tanggung jawab:
+
+- **Python + Pillow** untuk compositing raster: body, face, maw, arm,
+  pseudopod, nucleus, vacuole, mutation layers, skin palette, alpha cleanup,
+  resize gameplay, dan sprite sheet.
+- **MJS** untuk membaca manifest/metadata, membuat daftar kombinasi yang sah,
+  memeriksa file output, dan menyiapkan path import tanpa mengubah gameplay.
+
+Target output generator:
+
+- 5 stage base Mako.
+- 18 mutation layer/variant set.
+- 5 skin variants.
+- Preview sheet dan gameplay-size sheet.
+- PNG transparan production-ready.
+
+Generator belum dibuat sebelum owner menyetujui silhouette Mako dan style lock
+V2. Concept AI dipakai untuk reference; Python/MJS dipakai untuk output yang
+konsisten dan dapat diulang.
+
+---
+
 ### PHASE V2-B — Owner approval & style lock
 
 **Status: ⬜ menunggu paket V2-A lengkap**
