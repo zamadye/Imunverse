@@ -170,8 +170,6 @@ export function resetHUD() {
   setBar('hud-xp-fill', 0);
   document.getElementById('hud-kills').textContent = '0';
   document.getElementById('hud-currency').textContent = '0';
-  const imuEl0 = document.getElementById('hud-imu');
-  if (imuEl0) imuEl0.textContent = '0';
   document.getElementById('hud-timer-text').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
   document.getElementById('hp-pill').classList.remove('low');
@@ -224,17 +222,6 @@ export function updateHUD(data) {
   document.getElementById('hud-timer-text').textContent = data.timerText;
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
-  // Fase 17: chip Imun Coin live (pulse halus saat angka berubah)
-  const imuEl = document.getElementById('hud-imu');
-  if (imuEl && imuEl.textContent !== String(data.imu ?? 0)) {
-    imuEl.textContent = data.imu ?? 0;
-    const chipEl = document.getElementById('hud-imu-chip');
-    if (chipEl) {
-      chipEl.classList.remove('imu-pulse');
-      void chipEl.offsetWidth;
-      chipEl.classList.add('imu-pulse');
-    }
-  }
 
   updateAbilityBar(data.abilities);
   updateBuffChips();

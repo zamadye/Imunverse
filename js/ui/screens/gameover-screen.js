@@ -17,15 +17,9 @@ import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
 import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
-import { isCapsulePending } from '../../systems/welcome-box-system.js'; // ADDENDUM §1: Kapsul Membran
-import { saveCurrentRun, copyText } from '../../systems/challenge-system.js'; // ADDENDUM §3.3
-import { encodeCurrentBuild, makeBuildUrl } from '../../systems/build-share-system.js'; // ADDENDUM P2 §6.6
-import { checkMilestone } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
-import { ensureBp, xpNeed } from '../../systems/battlepass-system.js';
-import { playerRank } from '../../systems/rank-system.js';
 import { getNextEvoStageDef } from '../../systems/evolution-system.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
@@ -53,11 +47,6 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
-  // ADDENDUM P2 §3.4 — bonus milestone referral (wave 5 pertama)
-  try {
-    const ms = checkMilestone(game.run, STATE.meta);
-    if (ms > 0) setTimeout(() => emit('toast', { message: `Bonus referral: +${ms} Biokredit! \u{1F389}`, kind: 'gold' }), 800);
-  } catch { /* abaikan */ }
   // R2: 1 baris bark kontekstual RIA — non-blocking (story doc §7.3)
   const oldBark = document.getElementById('go-ria-bark');
   if (oldBark) oldBark.remove();
@@ -295,22 +284,7 @@ function renderHookBox(summary) {
     cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value,
       eta: etaFor(STAT_PACE[u.stat] || null, u.value - v) });
   }
-  // 2) pangkat berikutnya
-  try {
-    const rk = playerRank();
-    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gp, need: rk.next.min, unit: 'GP', pct: rk.pct,
-      eta: etaFor('gp', rk.need) });
-  } catch { /* abaikan */ }
-  // 3) Mitosis level berikutnya
-  try {
-    const bp = ensureBp(meta);
-    const need = xpNeed(bp.level);
-    if (bp.level < getData().battlepass.maxLevel) {
-      cands.push({ label: `Mitosis Lv ${bp.level + 1}`, cur: bp.xp, need, unit: 'XP', pct: bp.xp / need,
-        eta: etaFor('bpXp', need - bp.xp) });
-    }
-  } catch { /* abaikan */ }
-  // 4) Diferensiasi tahap berikutnya
+  // 2) Diferensiasi tahap berikutnya
   try {
     const next = getNextEvoStageDef(meta);
     if (next) {
@@ -397,46 +371,10 @@ export function wireButtons() {
     });
   });
 
-  document.getElementById('btn-retry').addEventListener('click', () => {
-    if (capsuleFirst(doRetry)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
-    doRetry();
-  });
-
-  document.getElementById('btn-home').addEventListener('click', () => {
-    if (capsuleFirst(doHome)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
-    doHome();
-  });
-  // ADDENDUM §3.3 — Challenge link (onclick agar tak dobel-bind tiap show)
-  // ADDENDUM P2 §6.6 — bagikan build (onclick agar tak dobel-bind)
-  document.getElementById('btn-build').onclick = async () => {
-    const code = encodeCurrentBuild(game);
-    if (!code) {
-      emit('toast', { message: 'Gagal membuat kode build.', kind: 'warn' });
-      return;
-    }
-    const ok = await copyText(makeBuildUrl(code));
-    emit('toast', { message: ok ? 'Link build tersalin! \u{1F9EC}' : 'Salin manual: ' + makeBuildUrl(code), kind: 'gold' });
-  };
-  document.getElementById('btn-challenge').onclick = async () => {
-    const saved = saveCurrentRun(game);
-    if (!saved) {
-      emit('toast', { message: 'Gagal membuat tantangan.', kind: 'warn' });
-      return;
-    }
-    const ok = await copyText(saved.url);
-    emit('toast', { message: ok ? 'Link tantangan tersalin! ⚔️' : 'Salin manual: ' + saved.url, kind: 'gold' });
-  };
-}
-
-// ADDENDUM §1: alihkan ke kapsul bila pending; onLater = alur semula.
-function capsuleFirst(next) {
-  try {
-    if (isCapsulePending(STATE.meta)) {
-      screenManager.show('capsule', { onLater: next });
-      return true;
-    }
-  } catch { /* abaikan */ }
-  return false;
+  // V2: tombol hasil run langsung menjalankan alurnya (kapsul & tautan
+  // challenge/build dihapus bersama sistem lama).
+  document.getElementById('btn-retry').addEventListener('click', () => doRetry());
+  document.getElementById('btn-home').addEventListener('click', () => doHome());
 }
 
 function doRetry() {
@@ -458,7 +396,7 @@ const meta = STATE.meta;
       if (next) {
         meta.selectedChapter = next.id;
         writeSave(meta);
-        playOnce('clear_' + wonChapter, () => screenManager.show('prep'));
+        playOnce('clear_' + wonChapter, () => screenManager.show('dashboard'));
         return;
       }
       playOnce('clear_' + wonChapter, () => screenManager.show('campaign'));

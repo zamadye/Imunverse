@@ -18,12 +18,9 @@ export function show() {
   btn.disabled = false;
   btn.textContent = 'Tonton Iklan & Bangkit';
   document.getElementById('btn-skip-revive').disabled = false;
-  // Sprint 4.24: Lanjut Run 50 Genom (butuh saldo cukup).
-  const gbtn = document.getElementById('btn-genom-revive');
-  if (gbtn) {
-    gbtn.disabled = (STATE.meta.imun || 0) < 50;
-    gbtn.textContent = `Bangkit — 50 Genom (${STATE.meta.imun || 0})`;
-  }
+  // V2: bangkit berbayar Genom DIHAPUS — yang tersisa: iklan (rewarded ad)
+  // atau lewati. Imun/Genom bukan lagi mata uang (IAP §4).
+  document.getElementById('btn-genom-revive')?.remove();
 
   let left = 5;
   document.getElementById('revive-countdown').textContent = left;
@@ -63,18 +60,6 @@ export function wireButtons() {
     }, 3000);
   });
 
-  document.getElementById('btn-genom-revive').addEventListener('click', () => {
-    if (busy) return;
-    busy = true;
-    clearInterval(countdown);
-    countdown = null;
-    game.requestReviveGenom();
-    // modal ditutup lewat event 'resume' bila sukses; gagal → countdown lanjut
-    setTimeout(() => {
-      if (STATE.screen === 'gameplay' && !STATE.paused) return;
-      busy = false;
-    }, 500);
-  });
 
   document.getElementById('btn-skip-revive').addEventListener('click', () => {
     clearInterval(countdown);

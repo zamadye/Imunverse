@@ -189,17 +189,17 @@ API.screenManager.show('dashboard');
 await sleep(400);
 // dashboard bisa mengalihkan ke layar kapsul sambutan bila ada yang tertunda
 const a2 = aktif();
-const menuSah = a2.length === 1 && ['dashboard', 'capsule'].includes(a2[0]);
-cek('kembali ke menu (dashboard/kapsul)', menuSah, 'aktif=' + a2);
+const menuSah = a2.length === 1 && a2[0] === 'dashboard'; // V2: kapsul sambutan dihapus
+cek('kembali ke menu (dashboard)', menuSah, 'aktif=' + a2);
 
 // 5. tiap layar menu: hanya satu yang aktif.
 //    P0 V2: layar yang dibekukan (data/v2-freeze.json) justru TIDAK BOLEH aktif.
-const beku = (() => {
-  try {
-    return (JSON.parse(fs.readFileSync(path.join(ROOT, 'data/v2-freeze.json'), 'utf8')).frozenScreens) || [];
-  } catch { return []; }
-})();
-for (const id of ['roster', 'campaign', 'upgrade', 'bag', 'codex', 'bp', 'prep', 'shop', 'profile']) {
+// V2 P0: layar lama sudah DIHAPUS (bukan dibekukan) — lengkap dengan
+// section, modul layar, sistem dan datanya. Daftar ini menjaga agar tidak
+// ada satu pun yang tumbuh kembali.
+const LAYAR_LAMA_DAFTAR = ['upgrade', 'shop', 'bp', 'bag', 'bosschest', 'rank', 'capsule', 'comeback', 'campaign', 'arena', 'prep'];
+const beku = LAYAR_LAMA_DAFTAR;
+for (const id of ['roster', 'codex', 'profile']) {
   API.screenManager.show(id);
   await sleep(150);
   const a = aktif();
@@ -221,6 +221,16 @@ cek('tombol ke layar beku disembunyikan', navBekuTerlihat.length === 0,
   `${navBeku.length} tombol beku, ${navBekuTerlihat.length} masih terlihat`);
 const dock = [...d.querySelectorAll('.dock-4 .dock-btn')].filter((b) => !b.classList.contains('hidden'));
 cek('dock dashboard = 4 menu', dock.length === 4, 'terlihat=' + dock.length);
+
+
+// 5c. V2: layar lama tidak hanya dibekukan — SECTION-nya harus benar-benar
+//     hilang dari index.html, dan tak boleh ada tombol yang menujunya.
+const sisa = LAYAR_LAMA_DAFTAR.filter((id) => d.querySelector(`[data-screen="${id}"]`));
+cek('section layar lama dihapus dari DOM', sisa.length === 0, 'masih ada: ' + sisa.join(', '));
+const tautanLama = [...d.querySelectorAll('[data-nav],[data-menu-screen],[data-menu2-screen]')]
+  .map((b) => b.dataset.nav || b.dataset.menuScreen || b.dataset.menu2Screen)
+  .filter((t) => LAYAR_LAMA_DAFTAR.includes(t));
+cek('tidak ada tombol ke layar lama', tautanLama.length === 0, 'masih ada: ' + tautanLama.join(', '));
 
 console.error = realErr;
 console.log(JSON.stringify(hasil, null, 2));

@@ -113,11 +113,12 @@
         "overcharge"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 150,
-        "label": "Buka dengan 150 Genom"
+        "type": "stat",
+        "label": "Kalahkan 250 patogen (total)",
+        "stat": "totalKills",
+        "value": 250
       },
-      "shopCost": 150,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
       "tier": "rare",
       "passive": {
@@ -197,11 +198,12 @@
         "blitz"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 100,
-        "label": "Buka dengan 100 Genom"
+        "type": "stat",
+        "label": "Selesaikan 5 run",
+        "stat": "totalRuns",
+        "value": 5
       },
-      "shopCost": 100,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
       "tier": "uncommon",
       "passive": {
@@ -361,13 +363,12 @@
         "chemical_storm"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 260,
+        "type": "stat",
         "stat": "bossKills",
         "value": 2,
-        "label": "Kalahkan 2 Bos + 260 Genom"
+        "label": "Kalahkan 2 Bos"
       },
-      "shopCost": 130,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_basophil.png",
       "tier": "rare",
       "passive": {
@@ -445,13 +446,12 @@
         "anaphylaxis"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 700,
+        "type": "stat",
         "stat": "bossKills",
         "value": 8,
-        "label": "Kalahkan 8 Bos + 700 Genom"
+        "label": "Kalahkan 8 Bos"
       },
-      "shopCost": 150,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_mastcell.png",
       "tier": "epic",
       "passive": {
@@ -689,13 +689,12 @@
         "truce"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 700,
+        "type": "stat",
         "stat": "totalEngulfs",
         "value": 400,
-        "label": "Serap 400 patogen + 700 Genom"
+        "label": "Serap 400 patogen (total)"
       },
-      "shopCost": 120,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_treg.png",
       "tier": "epic",
       "passive": {
@@ -771,13 +770,12 @@
         "plasma_rain"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 350,
+        "type": "stat",
         "stat": "bestWave",
         "value": 8,
-        "label": "Capai Gel. 8 + 350 Genom"
+        "label": "Capai Gelombang 8"
       },
-      "shopCost": 100,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_bcell.png",
       "tier": "rare",
       "passive": {
@@ -850,11 +848,12 @@
         "annihilate"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 200,
-        "label": "Buka dengan 200 Genom"
+        "type": "stat",
+        "label": "Kalahkan 3 Bos",
+        "stat": "bossKills",
+        "value": 3
       },
-      "shopCost": 200,
+      "shopCost": 0,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",
       "tier": "legend",
       "passive": {

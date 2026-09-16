@@ -12,7 +12,7 @@
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
-import { applyFreeze } from './systems/v2-freeze.js';
+import { applyRunDefaults } from './systems/chapters.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
 import { initPwa } from './systems/pwa.js'; // Sprint 6.35: PWA
 import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
@@ -34,37 +34,23 @@ import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
 import * as dashboardScreen from './ui/screens/dashboard-screen.js';
 import * as rosterScreen from './ui/screens/roster-screen.js';
-import * as upgradeScreen from './ui/screens/upgrade-screen.js';
-import * as shopScreen from './ui/screens/shop-screen.js';
 import * as hudScreen from './ui/screens/hud-screen.js';
 import * as levelupScreen from './ui/screens/levelup-screen.js';
 import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
-import * as arenaScreen from './ui/screens/arena-screen.js';
-import * as prepScreen from './ui/screens/prep-screen.js';
 import { onRunStart as tutorialOnRunStart, isTutorialActive } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
 import { cinematic, playOnce } from './ui/cinematic.js';
-import * as campaignScreen from './ui/screens/campaign-screen.js';
 import * as codexScreen from './ui/screens/codex-screen.js';
-import * as battlepassScreen from './ui/screens/battlepass-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
 import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
-import * as bagScreen from './ui/screens/bag-screen.js';
-import * as bosschestScreen from './ui/screens/bosschest-screen.js';
-import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
-import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
-import * as comebackScreen from './ui/screens/comeback-screen.js'; // Sprint 6.31: §10.1 Comeback
 import * as missionsScreen from './ui/screens/missions-screen.js'; // UI-REBUILD P8: modal Misi & Quest
-import { getChallenge, showChallengeModal } from './systems/challenge-system.js'; // ADDENDUM §3.3
-import { handleRefParam } from './systems/referral-system.js'; // ADDENDUM P2 §3.4
-import { decodeBuild, showBuildModal } from './systems/build-share-system.js'; // ADDENDUM P2 §6.6
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
 import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
@@ -393,7 +379,6 @@ function wireUiBridge() {
       { duration: 9 }), 900);
   });
 
-  on('bosschest', (payload) => screenManager.show('bosschest', payload));
   on('pause', () => { if (!waveCineActive() && !cutsceneActive()) screenManager.show('pause'); }); // E2 poin 6 + R3: cinematic ≠ modal pause
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
@@ -430,9 +415,6 @@ async function boot() {
   const data = await loadAllData();
   loadingScreen.setProgress(12, 'Data patogen dimuat…');
 
-  // 1a) P0 V2: bekukan layar/HUD sistem lama (data/v2-freeze.json) sebelum
-  //     screen dirender — tombol & section lama tidak pernah muncul.
-  applyFreeze();
 
   // 1b) Dwibahasa: muat kamus + pasang observer DOM (bahasa diterapkan setelah save dimuat)
   await loadLang();
@@ -454,7 +436,6 @@ async function boot() {
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
   if (isDevMode()) {
     // In-memory only: dev access never overwrites the player's real save.
-    STATE.meta.imun = 999999;
     STATE.meta.currency = 999999;
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
@@ -479,31 +460,18 @@ async function boot() {
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);
   screenManager.registerScreen('roster', rosterScreen);
-  screenManager.registerScreen('upgrade', upgradeScreen);
-  screenManager.registerScreen('shop', shopScreen);
   screenManager.registerScreen('hud', hudScreen);
   screenManager.registerScreen('levelup', levelupScreen);
   screenManager.registerScreen('pause', pauseScreen);
   screenManager.registerScreen('revive', reviveScreen);
   screenManager.registerScreen('gameover', gameoverScreen);
-  screenManager.registerScreen('arena', arenaScreen);
-  screenManager.registerScreen('prep', prepScreen);
-  screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('codex', codexScreen);
-  screenManager.registerScreen('bp', battlepassScreen);
   screenManager.registerScreen('auth', authScreen);
   screenManager.registerScreen('herodetail', heroDetailScreen);
-  screenManager.registerScreen('bag', bagScreen);
-  screenManager.registerScreen('bosschest', bosschestScreen);
-  screenManager.registerScreen('rank', rankScreen);
   screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
-  screenManager.registerScreen('capsule', capsuleScreen); // ADDENDUM §1: Kapsul Membran
-  screenManager.registerScreen('comeback', comebackScreen); // Sprint 6.31: §10.1 Comeback
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   screenManager.registerScreen('missions', missionsScreen); // UI-REBUILD P8: modal Misi & Quest (footer)
-  bosschestScreen.wire();
-  rankScreen.wire(); // Fase 19: modal pangkat
   titleScreen.wire(); // F21: layar judul gameplay-first
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
@@ -525,18 +493,6 @@ async function boot() {
         '<b>Klaim misi harian / mingguan</b> — dari panel Misi di HUD & dashboard.',
         '<b>Selesaikan bab kampanye</b> — tiap bab bersih memberi hadiah besar.',
         '<b>Upgrade hero & squad membayar dengan biokredit</b> — kumpulkan lebih banyak per run!',
-      ],
-    },
-    imu: {
-      title: 'Cara Mendapatkan Genom',
-      icon: 'assets/icons/cur-imun.svg',
-      balance: () => Math.floor(STATE.meta.imun || 0),
-      tasks: [
-        '<b>Main run berulang</b> — tiap kill patogen memberi Genom kecil.',
-        '<b>Selesaikan tiap wave</b> — bonus Genom per wave tuntas.',
-        '<b>Kalahkan boss</b> — hadiah Genom besar tiap boss tumbang.',
-        '<b>Naikkan Mastery hero</b> — reward Genom di akhir run (sistem Mastery).',
-        '<b>Genom dipakai untuk Siklus Mitosis premium</b> — kumpulkan dari run ke run!',
       ],
     },
   };
@@ -577,16 +533,10 @@ async function boot() {
   }
 
   const antiChip = document.getElementById('hud-anti-chip');
-  const imuChip = document.getElementById('hud-imu-chip');
   if (antiChip) {
     antiChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('anti'); });
     antiChip.addEventListener('click', () => openCurGuide('anti'));
     antiChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('anti'); } });
-  }
-  if (imuChip) {
-    imuChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('imu'); });
-    imuChip.addEventListener('click', () => openCurGuide('imu'));
-    imuChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('imu'); } });
   }
   const cgClose = document.getElementById('btn-curguide-close');
   if (cgClose) cgClose.addEventListener('click', closeCurGuide);
@@ -647,35 +597,21 @@ async function boot() {
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
-  document.getElementById('btn-arena-close').addEventListener('click', () => backToContext());
   // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
   // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
   // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
+  // V2 §34: PLAY = langsung masuk perjalanan (tanpa layar pilih stage/bab).
   // Fase 13: tombol dirender ulang saat dashboard tampil → pakai delegasi
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#btn-play-big')) return;
-    const meta = STATE.meta;
-    const runs = (meta.stats && meta.stats.totalRuns) || 0;
-    if (runs >= 3) {
-      screenManager.show('campaign'); // pemain sudah paham loop → boleh memilih
-      return;
-    }
-    // Default otomatis: bab pertama yang belum tamat, mode kampanye
-    const chapters = (getData().campaign && getData().campaign.chapters) || [];
-    const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
-    if (ch) { meta.selectedChapter = ch.id; meta.selectedMode = 'kampanye'; }
-    const heroDef = getHero(meta.selectedHero);
-    const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
-    game.startRun(unlocked ? heroDef.id : (getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0]).id);
+    startRunFromDashboard();
   });
   // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
   if (sideHome) sideHome.addEventListener('click', () => {
     document.getElementById('map-viewport')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
   document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
-  document.getElementById('side-bp')?.addEventListener('click', () => screenManager.show('bp'));
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
@@ -884,27 +820,31 @@ async function boot() {
   try { handleAcquisitionParams(); } catch { /* abaikan */ }
 }
 
+/**
+ * V2 §34: PLAY = langsung masuk perjalanan. Tidak ada layar persiapan/stage
+ * select di antara dashboard dan run; hero dipilih dari dashboard (P7 nanti).
+ */
+function startRunFromDashboard() {
+  const meta = STATE.meta;
+  applyRunDefaults(meta, writeSave);
+  const chapters = (getData().campaign && getData().campaign.chapters) || [];
+  const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
+  if (ch) meta.selectedChapter = ch.id;
+  const heroDef = getHero(meta.selectedHero);
+  const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
+  const fallback = getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0];
+  game.startRun(unlocked ? heroDef.id : fallback.id);
+}
+
+// V2: ?play=1 → langsung mulai run (tanpa layar persiapan).
+// Referral, challenge & build share dihapus — non-goal Economy V2 (IAP §38).
 // ADDENDUM §3.1/§3.2/§3.3 — link marketing & referral (query, ramah hosting statis).
 function handleAcquisitionParams() {
   const q = new URLSearchParams(location.search);
   const meta = STATE.meta;
-  // Referral: simpan pengundang + catat hadiah dua arah (outbox klaim).
-  const ref = (q.get('ref') || '').slice(0, 32);
-  if (ref && meta) handleRefParam(meta, ref);
-  // Zero friction: ?play=1 → langsung layar persiapan run
-  if (q.get('play') === '1') screenManager.show('prep');
-  // Challenge: tampilkan modal perbandingan di atas layar aktif
-  const ch = (q.get('challenge') || '').slice(0, 64);
-  if (ch) {
-    const summary = getChallenge(ch);
-    if (summary) setTimeout(() => showChallengeModal(summary), 600);
-  }
-  // Build share: tampilkan modal resep build
-  const b = (q.get('build') || '').slice(0, 1024);
-  if (b) {
-    const build = decodeBuild(b);
-    if (build) setTimeout(() => showBuildModal(build), 600);
-  }
+  // V2: ?play=1 → langsung mulai run (tanpa layar persiapan).
+  // Referral, challenge & build share dihapus — non-goal Economy V2 (IAP §38).
+  if (q.get('play') === '1') startRunFromDashboard();
 }
 
 // ---------------------------------------------------------------------

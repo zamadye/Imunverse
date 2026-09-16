@@ -5,8 +5,7 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { getData, getCharacterDesigns } from '../../core/data-store.js';
-import { getHeroStatus, isPurchasable } from '../../systems/unlock-system.js';
-import { purchaseHeroUnlock } from '../../systems/economy-system.js';
+import { getHeroStatus } from '../../systems/unlock-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
 import { emit } from '../../core/ui-bridge.js';
 import { t as tr } from '../../systems/i18n.js';
@@ -77,8 +76,6 @@ export function show() {
   const meta = STATE.meta;
   const grid = document.getElementById('roster-grid');
   grid.textContent = '';
-  const imuEl = document.getElementById('roster-imun');
-  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   // Fase 13.1: chip progres koleksi di subtitle (x/11 terbuka)
   const heroesAll = getData().heroes.heroes;
@@ -135,25 +132,8 @@ export function show() {
       avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: tr(status.conditionLabel) }));
-      // Fase 17 (trigger 1B): hero jalur Imun Coin bisa DIBUKA langsung di roster
-      if (isPurchasable(meta, heroDef)) {
-        const imuCost = heroDef.unlock.imuCost || 0;
-        children.push(el('button', {
-          class: 'btn btn-gold lock-unlock-btn' + (meta.imun >= imuCost ? '' : ' poor'),
-          text: `BUKA — ${imuCost} Genom`,
-          onclick: (ev) => {
-            ev.stopPropagation(); // jangan buka detail
-            const res = purchaseHeroUnlock(meta, heroDef);
-            if (res.ok) {
-              emit('toast', { message: `${heroDef.name} bergabung dengan pasukan!`, kind: 'gold' });
-              queueHeroNotice(heroDef.id);
-              show();
-            } else {
-              emit('toast', { message: res.reason, kind: 'danger' });
-            }
-          },
-        }));
-      }
+      // V2 §3 + IAP §22: hero TIDAK dibuka dengan mata uang premium.
+      // Pembukaan murni dari progress bermain (lihat unlock-system).
     }
 
     const card = el('div', {

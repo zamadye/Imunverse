@@ -18,14 +18,11 @@ const store = {
   upgrades: null,   // data/upgrades.json
   missions: null,   // data/missions.json
   evolutions: null, // data/evolutions.json
-  battlepass: null, // data/battlepass.json (Fase 14: Battle Pass + offerwall)
-  cosmetics: null,  // data/cosmetics.json (Fase 14: skin & aksesori)
   abilities: null,  // data/abilities.json
   arenas: null,     // data/arenas.json
   bodySystems: null, // data/body-systems.json (meta-layer kondisi tubuh)
   retention: null,  // data/retention.json (Fase 17: parameter 5 retention trigger)
   progression: null, // data/progression.json (Fase 18: kurva early/mid/late + gatekeeper)
-  ranks: null,       // data/ranks.json (Fase 19: pangkat penjaga — tujuan pemain)
   features: null,    // data/features.json (F21: gerbang unlock menu bertahap)
   gamefeel: null,    // data/gamefeel.json (V2 Phase 1: rantai feedback game feel)
   combat: null,      // data/combat.json (V2 Phase 2: movement/targeting/contact attack)
@@ -36,14 +33,12 @@ const store = {
   membrane: null,    // data/membrane.json (PHAGOS: properti medan membran)
   mutations: null,   // data/mutations.json (PHAGOS: 18 mutasi bentuk hero)
   enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
-  welcomeBox: null,  // data/welcome-box.json (ADDENDUM §1: Kapsul Membran)
   audio: null,       // data/audio.json (peta MP3 + volume; CC0)
   // ===== V2 (ROADMAP.md §2) — kerangka data baru, diisi bertahap P1–P5 =====
   attacks: null,     // data/attacks.json (8 archetype serangan + telegraph)
   zones: null,       // data/zones.json (rute biologis kontinu + landmark)
   transitions: null, // data/transitions.json (aturan campur zona saat bertempur)
   economy: null,     // data/economy.json (Antibody, biaya mutasi, Reserve, ads — tunable)
-  v2Freeze: null,    // data/v2-freeze.json (P0: layar/HUD lama yang dibekukan)
 };
 
 import { BUILD } from './version.js';
@@ -59,23 +54,18 @@ export async function loadAllData() {
     upgrades: 'data/upgrades.json',
     missions: 'data/missions.json',
     evolutions: 'data/evolutions.json',
-    battlepass: 'data/battlepass.json',
-    cosmetics: 'data/cosmetics.json',
     abilities: 'data/abilities.json',
     arenas: 'data/arenas.json',
-    modes: 'data/modes.json',
     mutators: 'data/mutators.json',
     campaign: 'data/campaign.json',
     cinematics: 'data/cinematics.json',
     cutscenes: 'data/cutscenes.json', // R3 (Narrative-Cinematic): cutscene produksi + VO
     coach: 'data/coach.json',
     factions: 'data/factions.json',
-    premium: 'data/premium.json',
     bodySystems: 'data/body-systems.json',
     codex: 'data/codex.json',
     retention: 'data/retention.json',
     progression: 'data/progression.json',
-    ranks: 'data/ranks.json',
     features: 'data/features.json',
     gamefeel: 'data/gamefeel.json',
     combat: 'data/combat.json',
@@ -86,14 +76,12 @@ export async function loadAllData() {
     membrane: 'data/membrane.json',
     mutations: 'data/mutations.json',
     enemyMutations: 'data/enemy-mutations.json',
-    welcomeBox: 'data/welcome-box.json',
     audio: 'data/audio.json', // Audio: peta file MP3 + rantai volume (CC0)
     // V2
     attacks: 'data/attacks.json',
     zones: 'data/zones.json',
     transitions: 'data/transitions.json',
     economy: 'data/economy.json',
-    v2Freeze: 'data/v2-freeze.json',
   };
 
   const entries = await Promise.all(
@@ -231,10 +219,6 @@ export function getFeatures() {
 }
 
 /** Seluruh config pangkat (tier ladder, formula GP, musim). */
-export function getRanks() {
-  return getData().ranks;
-}
-
 // ===== V2 Phase 1: game feel (data/gamefeel.json) =====
 
 /** Seluruh config rantai feedback (knockback/hit-stop/crit/haptic/dll). */
@@ -293,10 +277,6 @@ export function getEnemyMutations() {
 }
 
 /** Kapsul Membran (data/welcome-box.json). */
-export function getWelcomeBox() {
-  return getData().welcomeBox;
-}
-
 /** Peta file audio MP3 + rantai volume (data/audio.json). */
 export function getAudio() {
   return getData().audio;
@@ -322,11 +302,6 @@ export function getTransitions() {
 /** Parameter ekonomi V2 yang bisa dituning (data/economy.json). */
 export function getEconomy() {
   return getData().economy;
-}
-
-/** Daftar layar/HUD lama yang dibekukan selama transisi V2 (data/v2-freeze.json). */
-export function getV2Freeze() {
-  return getData().v2Freeze;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

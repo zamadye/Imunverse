@@ -7,7 +7,6 @@
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
 import { emit } from '../core/ui-bridge.js'; // E1 poin 9
-import { spendImun } from './imun-economy.js';
 
 export function getEconomyConfig() {
   return getData().upgrades.economy;
@@ -119,40 +118,12 @@ export function purchaseAllyLevel(meta) {
 export function purchaseShopItem(meta, itemId) {
   const def = getData().upgrades.shopItems.find((i) => i.id === itemId);
   if (!def) return { ok: false, reason: 'Item tidak ditemukan' };
-  // Sprint 3.18: item bisa berharga Genom (atp_surge 200G — bible §7.2)
-  if (def.currency === 'genom') {
-    if ((meta.imun || 0) < def.cost) return { ok: false, reason: 'Genom tidak cukup' };
-    meta.imun -= def.cost;
-  } else {
-    if (meta.currency < def.cost) return { ok: false, reason: 'Biokredit tidak cukup' };
-    meta.currency -= def.cost;
-  }
+  // V2: tidak ada lagi mata uang premium (IAP §4). Item toko dibayar Biokredit.
+  if (def.currency === 'genom') return { ok: false, reason: 'Jalur Genom dihapus di V2' };
+  if (meta.currency < def.cost) return { ok: false, reason: 'Biokredit tidak cukup' };
+  meta.currency -= def.cost;
+ 
   meta.consumables[def.id] = (meta.consumables[def.id] || 0) + 1;
   writeSave(meta); // auto-save setelah pembelian
-  return { ok: true };
-}
-
-/**
- * Beli unlock hero di toko (jalur alternatif selain kondisi misi).
- * @returns {{ok:boolean, reason?:string}}
- */
-export function purchaseHeroUnlock(meta, heroDef) {
-  const unlock = heroDef.unlock || {};
-  const type = unlock.type;
-  const cost = unlock.imuCost || heroDef.shopCost || 0;
-  if (meta.unlockedHeroes.includes(heroDef.id)) return { ok: false, reason: 'Sudah terbuka' };
-  // Fase 17: pembukaan hero memakai IMUN COIN (jalur imu & imu_stat).
-  if (type !== 'imu' && type !== 'imu_stat') {
-    return { ok: false, reason: 'Hero ini terbuka lewat misi, bukan dibeli' };
-  }
-  if (cost <= 0) return { ok: false, reason: 'Hero ini tidak dijual' };
-  if (type === 'imu_stat') {
-    const value = unlock.stat === 'unlockedHeroes' ? meta.unlockedHeroes.length : (meta.stats[unlock.stat] || 0);
-    if (value < unlock.value) return { ok: false, reason: 'Syarat misi belum terpenuhi' };
-  }
-  if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
-  meta.unlockedHeroes.push(heroDef.id);
-  writeSave(meta); // auto-save setelah unlock
-  emit('heroUnlocked', { heroId: heroDef.id }); // E1 poin 9: Amara menjelaskan
   return { ok: true };
 }

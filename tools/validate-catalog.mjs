@@ -44,10 +44,10 @@ ok('homeo-tracks', gs.length === 6 && gs.every((g) => g.maxLevel === 25
 // ---------- heroes.json ----------
 const heroes = load('data/heroes.json').heroes || [];
 const types = heroes.map((h) => (h.unlock || {}).type);
+// V2 §33 + IAP §22: hero TIDAK dibuka dengan mata uang premium — semua dari progress bermain.
 ok('hero-census', heroes.length === 11 && types.filter((t) => t === 'default').length === 1
-  && types.filter((t) => t === 'imu').length === 3
-  && types.filter((t) => t === 'stat' || t === 'imu_stat').length === 7);
-ok('hero-genom-wall', heroes.reduce((a, h) => a + ((h.unlock && h.unlock.imuCost) || 0), 0) === 2460);
+  && types.filter((t) => t === 'stat').length === 10);
+ok('hero-tanpa-harga-premium', heroes.every((h) => !h.unlock?.imuCost && !h.shopCost));
 ok('hero-membrane', heroes.every((h) => h.membrane && typeof h.membrane === 'object'));
 
 // ---------- evolutions.json ----------
@@ -55,20 +55,6 @@ const evo = load('data/evolutions.json');
 ok('diferensiasi', evo.parts.length === 1 && evo.parts[0].id === 'fragmen_diferensiasi'
   && evo.dropChanceNormal === 0.004 && evo.dropChanceElite === 0.04 && evo.bossGuaranteedParts === 1
   && evo.stages.map((s) => Object.values(s.cost || {}).reduce((a, b) => a + b, 0)).join(',') === '0,50,50,50,17');
-
-// ---------- battlepass.json ----------
-const bp = load('data/battlepass.json');
-ok('mitosis-config', bp.premiumCostImun === 800 && bp.xpNeed?.base === 120 && bp.xpNeed?.step === 30
-  && bp.maxLevel === 30 && bp.runXpCap === 150 && bp.dailyRunCap === 450
-  && (bp.premium || []).length === 30 && (bp.free || []).length === 30);
-ok('mitosis-return', (bp.premium || []).filter((x) => x.type === 'imun').reduce((a, x) => a + (x.n || 0), 0) === 500);
-
-// ---------- ranks.json ----------
-const rk = load('data/ranks.json');
-const pts = rk.points || {};
-ok('pangkat', pts.perWave === 4 && pts.perKill === 0.2 && pts.perEngulf === 4
-  && pts.perBoss === 25 && pts.victoryBonus === 50 && pts.chapterBonus === undefined
-  && Math.max(...(rk.tiers || []).map((t) => t.min)) === 12000);
 
 // ---------- mastery.json ----------
 const my = load('data/mastery.json');

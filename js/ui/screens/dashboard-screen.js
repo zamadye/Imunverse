@@ -21,7 +21,6 @@
 import { STATE } from '../../core/state-manager.js';
 import { getData, getHero } from '../../core/data-store.js';
 import { writeSave } from '../../save/save-manager.js';
-import { recordLoginDay } from '../../systems/comeback-system.js';
 import { shouldShowInstallBanner, promptInstall, dismissInstallBanner } from '../../systems/pwa.js';
 import {
   getMissionProgressList, getQuestProgress, acceptQuest, claimQuest,
@@ -32,16 +31,12 @@ import { music } from '../../systems/music-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { markSeen } from '../../systems/codex-system.js';
 import { drainHeroNotices } from '../../systems/retention-system.js';
-import { playerRank } from '../../systems/rank-system.js';
 import { applyGateVisual } from '../../systems/feature-gate.js';
 import { getSession } from '../../systems/account-system.js';
-import { ensureFounderReward } from '../../systems/imun-economy.js';
 import { screenManager, el } from '../screen-manager.js';
-import { currentChapterId, chapterStatus } from './campaign-screen.js';
+import { currentChapterId, chapterStatus } from '../../systems/chapters.js';
 import { emit } from '../../core/ui-bridge.js';
-import { isCapsulePending, isCapsuleSnoozed } from '../../systems/welcome-box-system.js';
 import { currentStrainId } from '../../systems/weekly-strain-system.js';
-import { hudFrozen } from '../../systems/v2-freeze.js';
 import { traitDisplayName } from '../../systems/enemy-mutation-system.js';
 
 let chapterIndex = 0; // indeks slide aktif (bukan selalu = bab terpilih)
@@ -260,8 +255,6 @@ function updateMissionBadge() {
 
 function renderTopbar(meta) {
   document.getElementById('dash-currency').textContent = (meta.currency || 0).toLocaleString('id-ID');
-  const imuEl = document.getElementById('dash-imun');
-  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   const session = getSession();
   const chip = document.getElementById('account-chip');
@@ -274,22 +267,9 @@ function renderTopbar(meta) {
     }
   }
 
-  const rankChip = document.getElementById('rank-chip');
-  // P0 V2: chip pangkat dibekukan (data/v2-freeze.json) — jangan dihidupkan lagi.
-  if (rankChip && rankChip.hasAttribute('data-v2-frozen')) {
-    rankChip.classList.add('hidden');
-  } else if (rankChip && !hudFrozen('rank-chip')) {
-    const rk = playerRank();
-    rankChip.classList.remove('hidden');
-    const em = document.getElementById('rank-emblem');
-    em.textContent = rk.tier.insignia;
-    em.style.background = `linear-gradient(160deg, ${rk.tier.color}, ${rk.tier.color}cc)`;
-    document.getElementById('rank-tier-name').textContent = tr(rk.tier.name);
-    document.getElementById('rank-bar-fill').style.width = `${Math.round(rk.pct * 100)}%`;
-    document.getElementById('rank-sub').textContent = rk.next
-      ? `${rk.points} / ${rk.nextAt} GP`
-      : 'Pangkat tertinggi';
-  }
+  // V2: chip pangkat DIHAPUS (bukan sekadar disembunyikan) — pangkat bukan
+  // progresi V2; tujuan pemain adalah mutasi berikutnya (IAP §24).
+  document.getElementById('rank-chip')?.remove();
 }
 
 function applyGates() {
@@ -369,19 +349,9 @@ function showHeroNotice() {
 // ---------------------------------------------------------------------
 
 export function show() {
-  // ADDENDUM §1: kapsul pending & tak ditunda → alihkan otomatis (sekali per sesi)
-  try {
-    if (isCapsulePending(STATE.meta) && !isCapsuleSnoozed()) {
-      screenManager.show('capsule', { onLater: () => screenManager.show('dashboard') });
-      return;
-    }
-  } catch { /* abaikan */ }
-
-  try { recordLoginDay(STATE.meta); } catch { /* abaikan */ }
   showHeroNotice();
 
   const meta = STATE.meta;
-  ensureFounderReward(meta);
   // Bio-Pedia: peta tubuh selalu menampilkan 5 sistem → tandai sudah ditemui.
   for (const sid of ['sirkulasi', 'pencernaan', 'saraf', 'imun', 'limfatik']) markSeen(sid);
 

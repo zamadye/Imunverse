@@ -8,7 +8,6 @@
 import { getData } from '../core/data-store.js';
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
-import { spendImun } from './imun-economy.js';
 
 /** Konfigurasi trigger (data/retention.json). */
 export function getRetention() {
@@ -91,12 +90,9 @@ export function purchaseGlobalUpgrade(id) {
   const lv = globalUpgradeLevel(meta, id);
   if (lv >= def.maxLevel) return { ok: false, reason: 'Level maksimal' };
   const { cost, currency } = globalUpgradeCost(def, lv);
-  if (currency === 'genom') {
-    if (!spendImun(meta, cost)) return { ok: false, reason: 'Genom tidak cukup' };
-  } else {
-    if ((meta.currency || 0) < cost) return { ok: false, reason: 'Biokredit tidak cukup' };
-    meta.currency -= cost;
-  }
+  if (currency === 'genom') return { ok: false, reason: 'Jalur Genom dihapus di V2' }; // V2: premium currency nonaktif
+  if ((meta.currency || 0) < cost) return { ok: false, reason: 'Biokredit tidak cukup' };
+  meta.currency -= cost;
   meta.globalUpgrades = meta.globalUpgrades || {};
   meta.globalUpgrades[id] = lv + 1;
   writeSave(meta);
@@ -104,13 +100,12 @@ export function purchaseGlobalUpgrade(id) {
 }
 
 /**
- * Sprint 3.21 (bible §9): Reset Homeostasis — nolkan SEMUA jalur (tanpa
- * refund) seharga 200 Genom. @returns {{ok:boolean, reason?:string}}
+ * V2: Reset Homeostasis berbayar Genom DIHAPUS (mata uang premium nonaktif,
+ * IAP §4). Reset tetap tersedia tanpa biaya.
+ * @returns {{ok:boolean, reason?:string}}
  */
 export function resetHomeostasis() {
   const meta = STATE.meta;
-  const COST = 200;
-  if (!spendImun(meta, COST)) return { ok: false, reason: 'Butuh 200 Genom untuk reset' };
   meta.globalUpgrades = {};
   writeSave(meta);
   return { ok: true };

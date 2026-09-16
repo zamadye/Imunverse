@@ -24,7 +24,6 @@ import { getTintedSprite } from '../render/sprite-loader.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
-import { applyRunGP } from '../systems/rank-system.js';
 import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
 import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
@@ -40,7 +39,6 @@ import {
   pulseView,
 } from '../systems/membrane-system.js';
 import { rollMutationChoices, applyMutation, isMutationId, mutationDef } from '../systems/mutation-system.js';
-import { onRunComplete as welcomeBoxOnRunComplete } from '../systems/welcome-box-system.js'; // ADDENDUM §1
 import { applyStartConsumables, updateItemBuffs, absorbMukus, isMukusActive, onPlayerDamaged } from '../systems/item-buffs.js'; // ADDENDUM §2
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
@@ -59,8 +57,6 @@ import { rollLevelUpChoices, applyLevelUp, squadMultipliers, effectiveStacks } f
 import { isDevMode } from './dev-mode.js';
 import { addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
-import { addBpXP } from '../systems/battlepass-system.js';
-import { addImun, getEquippedSkin, spendImun } from '../systems/imun-economy.js';
 import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor, globalHomeoLevels } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
@@ -76,7 +72,6 @@ import {
 import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
 import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
-import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
 } from '../systems/body-system.js';
@@ -144,11 +139,12 @@ export const game = {
     const bodyMods = getBodyRunModifiers(meta);
     this.lastBodyDecay = decayInfo;
 
-    // LIVEOPS: mode (Kampanye/Endless) + mutator harian seeded (khusus Endless)
-    const modes = (getData().modes && getData().modes.modes) || [];
-    const modeDef = modes.find((m) => m.id === (meta.selectedMode || 'kampanye')) || modes[0] || null;
+    // V2 §21/§34: tidak ada lagi "pilih mode" (kampanye/endless) — run selalu
+    // mengikuti bab aktif di Peta Tubuh sampai model perjalanan kontinu (P4)
+    // menggantikannya sepenuhnya.
+    const modeDef = { id: 'kampanye' };
     // KAMPANYE: bab aktif dari Peta Tubuh (cerita organ sakit → bersihkan → boss)
-    const chapterDef = modeDef && modeDef.id === 'kampanye' && getData().campaign
+    const chapterDef = getData().campaign
       ? getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0]
       : null;
     let mutatorDef = null;
@@ -386,22 +382,18 @@ export const game = {
   getRunArena() {
     const meta = STATE.meta;
     const list = getData().arenas.arenas;
-    // MAP: pilihan pemain (prep/arena-screen) MENANG bila terbuka — di SEMUA
-    // mode termasuk kampanye. selectedArena menentukan environment render.
+    // V2 §21: model "pilih stage/arena" DIBUANG. selectedArena hanya dipakai
+    // renderer sebagai penentu environment, bukan sebagai pilihan pemain:
+    // kampanye menurunkannya dari organ bab aktif.
     const chosen = list.find((a) => a.id === meta.selectedArena);
-    if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
-    // Kampanye: organ bab menentukan arena (DEFAULT bila pilihan terkunci /
-    // tak dikenal; prep-screen me-default-kan picker ke organ bab).
+    if (chosen) return chosen;
     if (meta.selectedMode === 'kampanye' && getData().campaign) {
       const ch = getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0];
       const chArena = list.find((a) => a.id === ch.arenaId);
-      if (chArena) return chArena;
+      if (chArena) { meta.selectedArena = chArena.id; return chArena; }
     }
-    const fallback = list.find((a) => arenaUnlockStatus(a, meta).unlocked);
-    if (chosen || !fallback) {
-      meta.selectedArena = (fallback || list[0]).id;
-    }
-    return fallback || list[0];
+    meta.selectedArena = list[0].id;
+    return list[0];
   },
 
   computePlayerStats(heroDef, runUpgrades) {
@@ -1972,53 +1964,7 @@ applyChapterTier(enemy, run) {
     triggerRewardedAdRevive(() => this.confirmRevive());
   },
 
-  /**
-   * Sprint 4.24 (bible §9.2): Lanjut Run — bangkit seharga 50 Genom
-   * (alternatif iklan; tetap sekali per run via reviveOffered).
-   */
-  requestReviveGenom() {
-    if (!spendImun(STATE.meta, 50)) {
-      emit('toast', { message: 'Genom tidak cukup (butuh 50)', kind: 'danger' });
-      return;
-    }
-    writeSave(STATE.meta);
-    this.confirmRevive();
-  },
 
-  /**
-   * Sprint 4.24 (bible §9.2): Peti Mutasi — 150 Genom untuk 1 mutasi acak
-   * (tanpa bio-cost). Pity TERPISAH: tiap Peti ke-5 menjamin tier 3.
-   * @returns {{ok:boolean, mutation?:object, pity?:boolean, reason?:string}}
-   */
-  openMutasiChest() {
-    const run = this.run;
-    const meta = STATE.meta;
-    if (!run || run.ended) return { ok: false, reason: 'Run sudah berakhir' };
-    const all = (getData().mutations && getData().mutations.mutations) || [];
-    const active = run.activeMutations || [];
-    const byId = Object.fromEntries(all.map((m) => [m.id, m]));
-    const bad = (m) => active.includes(m.id)
-      || (m.conflicts || []).some((c) => active.includes(c))
-      || active.some((a) => ((byId[a] && byId[a].conflicts) || []).includes(m.id));
-    const pool = all.filter((m) => !bad(m));
-    if (!pool.length) return { ok: false, reason: 'Semua mutasi sudah dimiliki' };
-    if ((meta.imun || 0) < 150) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
-    meta.mutasiPity = meta.mutasiPity || 0;
-    const pityHit = meta.mutasiPity >= 4;
-    let sub = pityHit ? pool.filter((m) => m.tier === 3) : pool;
-    if (!sub.length) sub = pool; // pity longgar bila T3 tak tersedia
-    const pick = sub[Math.floor(Math.random() * sub.length)];
-    if (!spendImun(meta, 150)) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
-    meta.mutasiPity = (pityHit || pick.tier === 3) ? 0 : meta.mutasiPity + 1;
-    const res = applyMutation(run, pick.id, { skipCost: true });
-    if (!res.ok) { // seharusnya tak terjadi (pool sudah disaring) — refund
-      meta.imun += 150;
-      return { ok: false, reason: res.reason };
-    }
-    writeSave(meta);
-    emit('toast', { message: `Peti Mutasi: ${pick.name}!${pityHit && pick.tier === 3 ? ' (PITY tier 3)' : ''}`, kind: 'gold' });
-    return { ok: true, mutation: pick, pity: pityHit && pick.tier === 3 };
-  },
 
   /** Logic asli setelah iklan "selesai ditonton". */
   confirmRevive() {
@@ -2096,7 +2042,6 @@ applyChapterTier(enemy, run) {
     meta.stats.bestSurvivalTime = Math.max(meta.stats.bestSurvivalTime, Math.floor(run.time));
     meta.stats.totalSurviveSeconds += Math.floor(run.time);
     meta.stats.totalRuns += 1;
-    try { welcomeBoxOnRunComplete(meta); } catch { /* kapsul opsional */ }
     meta.stats.totalNutrients += run.nutrientsCollected;
     meta.stats.totalXP += Math.floor(run.xpGained);
     // Bagian evolusi yang dikumpulkan selama run → inventory meta
@@ -2105,24 +2050,8 @@ applyChapterTier(enemy, run) {
     }
     addCurrency(meta, earned);
 
-    // FASE 14 — hasil run mengalir ke Battle Pass (XP) & Antibodi (soft).
-    // RONDE-4 (ekonomi premium ketat): Imun Coin TIDAK lagi diberikan dari
-    // hasil run — coin premium hanya dari PEMBELIAN & reward Battle Pass
-    // (aturan platform revenue; blueprint: premium ≠ gampang digratiskan).
-    const bpRes = addBpXP(meta, run.level * 40 + run.spawnSys.wave * 15 + run.kills);
-    run.bpGain = bpRes; // ringkasan akhir run
-    run.imuEarned = 0;
-
-    // Fase 19 — TUJUAN PEMAIN: GP Pangkat Penjaga (setiap run menghasilkan GP;
-    // kenaikan pangkat = momen emosional ala naik-rank, tanpa demosi utk anak)
-    const rankRes = applyRunGP(meta, {
-      wave: run.spawnSys.wave,
-      kills: run.kills,
-      bossKills: run.bossKills,
-      victory,
-      engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
-    });
-    run.rankGain = rankRes;
+    // V2: Battle Pass & Pangkat DIHAPUS. Hasil run hanya mengalir ke Antibodi
+    // (satu-satunya resource) — sudah dilakukan oleh addCurrency() di atas.
 
     recordAntigenMeta(meta, run); // R3: encounter record memori antigen (collection)
     // V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain
@@ -2196,16 +2125,11 @@ applyChapterTier(enemy, run) {
       engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
       bio: run.bioPoints || 0,
       pulses: (run.membrane && run.membrane.stats && run.membrane.stats.pulseCount) || 0,
-      gp: rankRes ? rankRes.gained : 0,
-      bpXp: run.bpGain ? run.bpGain.granted : 0,
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,
       parts: run.partsCollectedTotal,
       level: run.level,
       currencyEarned: earned,
-      imuEarned: run.imuEarned || 0,
-      bpFrom: run.bpGain ? run.bpGain.from : null,
-      bpTo: run.bpGain ? run.bpGain.to : null,
       newMissions: completedMissions.length,
       // V2 Phase 6: mastery hero yang dipakai run ini
       mastery: run.masteryGain ? {
@@ -2215,17 +2139,6 @@ applyChapterTier(enemy, run) {
         levelsGained: run.masteryGain.levelsGained,
         title: run.masteryGain.title,
       } : null,
-      rank: {
-        gained: rankRes.gained,
-        gpAfter: rankRes.gpAfter,
-        tierUp: rankRes.tierUp,
-        tierName: rankRes.toTier.name,
-        tierColor: rankRes.toTier.color,
-        insignia: rankRes.toTier.insignia,
-        prevTierName: rankRes.fromTier.name,
-        need: rankRes.need,
-        nextName: rankRes.nextName,
-      },
     });
   },
 
@@ -2567,7 +2480,6 @@ applyChapterTier(enemy, run) {
         if (run.membrane && run.membrane.vanishT > 0) return;
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
-          const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
           // UI-REBUILD P8: BENTUK MUTASI = foto karakter itu sendiri (bukan lagi
           // overlay mut_*.png yang ditumpuk). Kalau fotonya belum tersedia untuk
           // hero ini, pakai sprite dasar seperti sediakala.
@@ -2609,20 +2521,10 @@ applyChapterTier(enemy, run) {
           const sx = 1 + _depth * 0.05;   // mendekat → sedikit melebar
           const sy = 1 - _depth * 0.03;   // dan sedikit merapat
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt, sx, sy });
-          const auraAcc = STATE.meta.cosmetics?.aura
-            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
-          // E1 poin 5: aura neon default DIHAPUS — hanya aura KOSMETIK
-          // (dibeli pemain) yang boleh menyala; default karakter bersih.
-          if (auraAcc) drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc.color, time, 0, 0.8);
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
           const evoStage = run.evoStage?.stage || 0;
-          if (skin) {
-            const tinted = getTintedSprite(path, skin.color);
-            const scale = bodySize / Math.max(tinted.width, tinted.height);
-            ctx.drawImage(tinted, pBody.x - (tinted.width * scale) / 2, pBody.y - (tinted.height * scale) / 2, tinted.width * scale, tinted.height * scale);
-          } else {
-            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
-          }
+          // (skin kosmetik berbayar dihapus di V2 — identitas dari mutasi)
+          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
           // UI-REBUILD P8: overlay mut_*.png DICABUT — mutasi kini mengganti
           // FOTO karakter (lihat pemilihan `path` di atas). Yang tersisa cuma
@@ -2634,12 +2536,12 @@ applyChapterTier(enemy, run) {
             const _glowA = Math.min(0.55, 0.12 + _muts.length * 0.07);
             drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.35, _glowColor, time, 0, _glowA);
           }
-          // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
-          const crownAcc = STATE.meta.cosmetics?.crown
-            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
-          if (crownAcc) {
+          // V2: aksesori kosmetik (aura/mahkota) DIHAPUS — identitas karakter
+          // berasal dari evolusi/mutasi, bukan dari toko skin (V2 §3).
+          if (false) {
             const cy = pBody.y - bodySize * 0.62 + Math.sin(time * 2.4) * 1.5;
             const cw = bodySize * 0.3, ch = bodySize * 0.14;
+            const crownAcc = null;
             ctx.fillStyle = crownAcc.color;
             ctx.strokeStyle = 'rgba(122,73,4,0.8)';
             ctx.lineWidth = Math.max(1, bodySize * 0.012);
@@ -2824,7 +2726,6 @@ applyChapterTier(enemy, run) {
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,
-        imu: Math.floor((STATE.meta.imun || 0) + (run.imuAccrued || 0)), // F20: saldo total, bukan akruan run saja
         gate: run.spawnSys.isGateBlocked(),
         gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,

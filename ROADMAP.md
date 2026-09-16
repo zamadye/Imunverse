@@ -139,25 +139,37 @@ Semuanya masih bisa dipulihkan dari riwayat git bila ternyata diperlukan.
 Menggabungkan prioritas blueprint gameplay (Fase 1–8) dengan prioritas economy
 (P0–P9). **Jangan kerjakan semuanya sekaligus.**
 
-### P0 — Audit & pondasi V2 **[SELESAI — BUILD 52g]**
+### P0 — Audit & pondasi V2 **[SELESAI — BUILD 52h]**
 - inventarisasi dependensi sistem lama (upgrade/squad/shop/battlepass/unlock/economy lama)
-- bekukan fitur lama (UI disembunyikan, jalan kode tetap aman) sebelum dihapus
+- **hapus benar-benar** (bukan dibekukan): layar, sistem, data, aset, CSS, dan skrip uji lama
 - rapikan `data/` sesuai arsitektur §2
 - **Exit:** `npm run check` hijau, game masih bisa dimainkan end-to-end, tidak ada
-  referensi ke layar yang sudah disembunyikan.
+  referensi ke layar yang sudah dihapus.
 
-Yang sudah dikerjakan:
+> Keputusan: pembekuan (UI disembunyikan) ditinggalkan — ia meninggalkan jalan kode
+> mati yang bisa bocor. Yang dihapus sekarang **benar-benar hilang** dari repo.
 
-| Langkah | Hasil |
+| Yang dihapus | Rincian |
 |---|---|
-| Pembekuan terdata | `data/v2-freeze.json` berisi 10 layar lama (`upgrade`, `shop`, `bp`, `capsule`, `rank`, `arena`, `bosschest`, `comeback`, `campaign`, `bag`) + 3 chip HUD (`rank-chip`, `imu-chip`, `hud-imu-chip`) beserta alasannya — bukan hardcode di kode |
-| Penahan navigasi | `js/systems/v2-freeze.js` + penjaga di `screen-manager.show()`: layar beku tidak pernah aktif walau masih ada jalan kode lama yang memanggilnya |
-| Dashboard tetap 4 menu | dock lama **Tas → Bio-Pedia (codex)** dan **Lab Genom → Profil (profile)**; tombol “…” disembunyikan; Kampanye & Siklus Mitosis dicabut dari menu |
-| Kerangka data V2 | `data/attacks.json` (8 archetype + telegraph), `data/zones.json` (rute 12 zona + landmark + mekanik), `data/transitions.json` (transisi 20–60 dtk, event masuk jantung), `data/economy.json` (Antibody, kurva biaya mutasi, 3 fase, Reserve, ads, telemetri, non-goals) — semua terdaftar di `js/core/data-store.js` dengan getter `getAttacks/getZones/getTransitions/getEconomy/getV2Freeze` |
-| Pemeriksa baru | `tools/verify-screens.mjs` kini menegaskan: layar beku **tidak** boleh aktif, tidak ada tombol nav terlihat yang menuju layar beku, dan dock dashboard = 4 menu |
+| 11 layar | `upgrade`, `shop`, `arena`, `campaign`, `prep` (pilih stage/mode), `battlepass`, `bag`, `bosschest`, `rank`, `capsule`, `comeback` — berikut `<section>`-nya di `index.html`, modul `js/ui/screens/*`, registrasi & wiring di `main.js`, dan tombol/menu HUD yang menujunya |
+| 9 sistem | `upgrade-system` (jalur premium), `battlepass-system`, `rank-system`, `comeback-system`, `welcome-box-system` (kapsul), `referral-system`, `challenge-system`, `build-share-system`, `payment-system`, `imun-economy` |
+| Mata uang premium | Genom/Imun Coin dicabut dari HUD, dashboard, roster, profil, revive, toko item, unlock hero, kosmetik (aura/mahkota), panduan currency, dan dev-mode |
+| Model data lama | `battlepass.json`, `ranks.json`, `welcome-box.json`, `premium.json`, `cosmetics.json`, `modes.json` + getter & daftar `data-store.js`; jalur `imu`/`imu_stat` di `unlock-system`; `hero.unlock` di `heroes.json` dikonversi jadi syarat main murni dan `shopCost` dinolkan |
+| Sisa engine | `getRunArena` tak lagi bergantung pada pilihan arena pemain; `openMutasiChest` (gacha) & bangkit berbayar dihapus; payload akhir run tanpa BP/pangkat |
+| Skrip uji lama | `tools/validate-retention.mjs` + 16 skrip `scripts/e2e-*` untuk model lama (eco/premium, retention, ui-nav, onboarding, progression, balance, r1–r6) |
+| Aset & CSS | 13 aset tak terpakai (ikon Genom/toko/pasukan/skin/peti) + 636 aturan CSS mati dihapus (main.css 534, dashboard-focus.css 102); satu `}` nyasar di `dashboard-focus.css` diperbaiki |
+| Dipertahankan sementara | `upgrade-system` + modal level-up (satu-satunya progresi run sampai P1–P2 menggantinya dengan mutasi), `retention-system` (notis hero), `mastery-system`, `skill-unlock`, `liveops` (mutator harian) |
 
-Semua angka di `economy.json` / `zones.json` / `attacks.json` adalah **draf awal** yang
-akan divalidasi saat P3–P5 (dokumen: “bukan angka final”).
+| Kerangka data V2 (baru) | Isi |
+|---|---|
+| `data/attacks.json` | 8 archetype serangan + tahap telegraph + hierarki game feel |
+| `data/zones.json` | 12 zona biologis berurutan + mekanik + landmark |
+| `data/transitions.json` | transisi 20–60 dtk saat bertempur + event masuk jantung |
+| `data/economy.json` | Antibody, kurva biaya mutasi, 3 fase ekonomi, Reserve, rewarded ad, IAP mock, telemetri, non-goals |
+
+Penjaga regresi di `tools/verify-screens.mjs`: layar lama **tidak boleh** muncul lagi di
+DOM, tidak boleh ada tombol yang menujunya, dashboard tetap 4 menu, dan MAIN harus
+langsung masuk run (tanpa layar persiapan).
 
 ### P1 — Core combat
 - 11 hero punya **identity**: strength / weakness / combat identity / scaling identity

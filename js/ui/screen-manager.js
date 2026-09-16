@@ -7,7 +7,6 @@
  */
 
 import { setScreen } from '../core/state-manager.js';
-import { screenFrozen } from '../systems/v2-freeze.js';
 
 const registry = new Map();
 let currentId = null;
@@ -20,12 +19,6 @@ const APP_STATE_BY_SCREEN = {
   loading: 'loading',
   dashboard: 'dashboard',
   roster: 'roster',
-  upgrade: 'upgrade',
-  shop: 'shop',
-  arena: 'dashboard', // modal di atas dashboard — state tetap dashboard
-  focus: 'dashboard',
-  prep: 'dashboard',  // layar persiapan (bagian dari alur dashboard)
-  bag: 'dashboard',
   herodetail: 'roster', // detail upgrade hero (bagian alur Heroes)
   hud: 'gameplay',
   gameover: 'gameover',
@@ -45,13 +38,6 @@ export function registerScreen(id, mod) {
  * Tampilkan screen. Bila modul punya show(), panggil dengan params.
  */
 export function show(id, params) {
-  // P0 V2: layar lama yang dibekukan tidak boleh lagi ditampilkan walau
-  // masih ada jalan kode yang memanggilnya (ROADMAP.md §4 P0).
-  if (screenFrozen(id)) {
-    const el = elFor(id);
-    if (el) el.classList.remove('active');
-    return;
-  }
   const record = registry.get(id);
   if (!record) throw new Error('Screen tidak terdaftar: ' + id);
   if (currentId && currentId !== id) {
