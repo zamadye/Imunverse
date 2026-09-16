@@ -74,6 +74,31 @@ for (const name of fs.readdirSync(dataDir)) {
   }
 }
 
+// — Regresi layar: aturan ID #screen-* yang memaksa display tanpa .active —
+// Selektor ID menang dari `.screen { display:none }` → layar itu akan SELALU
+// terlihat dan menutupi layar lain (pernah: dashboard menutupi gameplay).
+console.log('— CSS layar —');
+{
+  const cssFiles = ['styles/main.css', 'styles/dashboard-focus.css', 'styles/portrait.css', 'styles/dashboard-map.css'];
+  let masalah = 0;
+  for (const rel of cssFiles) {
+    const p2 = path.join(ROOT, rel);
+    if (!fs.existsSync(p2)) continue;
+    const css = fs.readFileSync(p2, 'utf8');
+    const re = /([^{}]+)\{([^{}]*)\}/g;
+    let m;
+    while ((m = re.exec(css))) {
+      const sel = m[1].trim().split('\n').pop().trim();
+      if (!/^#screen-[a-z0-9-]+$/i.test(sel)) continue;
+      if (/display\s*:/.test(m[2])) {
+        fail(`${rel}: ${sel} mengatur "display" tanpa .active — layar akan selalu tampil & menutupi layar lain`);
+        masalah++;
+      }
+    }
+  }
+  if (!masalah) ok('aturan #screen-* aman (display hanya saat .active)');
+}
+
 console.log('— Sprite assets —');
 // Laporkan foto mutasi yang BELUM ada sebagai INFO (bukan kegagalan).
 let mutReady = 0;

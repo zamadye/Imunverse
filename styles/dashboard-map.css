@@ -60,12 +60,19 @@
   background-repeat: no-repeat;
 }
 
-/* Dashboard: tata letak vertikal — topbar · peta tubuh · MAIN · dock */
-#screen-dashboard {
+/* Dashboard: tata letak vertikal — topbar · peta tubuh · MAIN · dock
+   PENTING: aturan ini WAJIB bertakik `.active`. Selektor ID (#screen-dashboard)
+   lebih kuat dari `.screen { display: none }`, jadi tanpa `.active` dashboard
+   tetap terlihat dan — karena anak-anaknya punya z-index 2 — ia menutupi
+   gameplay/HUD saat pemain menekan MAIN. */
+#screen-dashboard.active {
   display: flex;
   flex-direction: column;
   padding: 0;
   overflow: hidden;
+  /* Cegah anak (z-index 2: topbar/peta/MAIN/dock) keluar dari konteks
+     bertumpuk dashboard dan menembus layar lain. */
+  isolation: isolate;
 }
 
 #screen-dashboard > .topbar,
