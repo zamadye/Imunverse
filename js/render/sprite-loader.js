@@ -30,6 +30,9 @@ export function collectSpritePaths(data) {
     record(h.spriteIdle, h.color, h.name);
     record(h.spriteAttack, h.color, h.name);
     record(h.spritePortrait, h.color, h.name);
+    // UI-REBUILD P8: foto bentuk MUTASI per hero (pengganti overlay mut_*.png)
+    record(h.spriteMutIdle, h.color, h.name);
+    record(h.spriteMutAttack, h.color, h.name);
   }
   for (const e of data.enemies.enemies) {
     record(e.sprite, e.color, e.name);
@@ -183,6 +186,18 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
     ctx.fill();
   }
   ctx.restore();
+}
+
+/**
+ * Apakah sprite ini benar-benar tersedia (bukan placeholder fallback)?
+ * Dipakai renderer sebelum mengganti sprite dasar dengan varian khusus
+ * (mis. bentuk mutasi) — kalau fotonya belum ada, pakai sprite dasar saja
+ * daripada menampilkan placeholder.
+ */
+export function hasSprite(path) {
+  if (!path) return false;
+  const entry = cache.get(path);
+  return !!entry && !entry.isPlaceholder;
 }
 
 /** Fase 14: cache tint skin — {src|color} → canvas. */

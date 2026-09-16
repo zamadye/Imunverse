@@ -11,6 +11,7 @@ import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
 import { iconEl } from '../menu-icons.js';
 import { tierLabel } from '../../systems/mutation-system.js';
+import { hasSprite } from '../../render/sprite-loader.js'; // UI-REBUILD P8: foto bentuk mutasi
 
 const MUTATION_ICONS = {
   spikes: '🦔', sticky: '🍯', trail: '☠️', wobble: '🌊',
@@ -25,7 +26,14 @@ export function show({ level, choices }) {
   // subjudul cerita, animasi masuk halus di CSS (.lu-scene)
   const heroDef = getHero(STATE.meta.selectedHero) || getData().heroes.heroes[0];
   const heroImg = document.getElementById('levelup-hero');
-  if (heroImg) heroImg.src = heroDef.spritePortrait || heroDef.spriteIdle;
+  // UI-REBUILD P8: bila hero sudah bermutasi, potret adegan = foto bentuk
+  // mutasinya (bukan potret dasar) — mutasi terlihat sebagai wujud karakter.
+  const _muts = (game.run && game.run.activeMutations) || [];
+  if (heroImg) {
+    heroImg.src = (_muts.length > 0 && hasSprite(heroDef.spriteMutIdle))
+      ? heroDef.spriteMutIdle
+      : (heroDef.spritePortrait || heroDef.spriteIdle);
+  }
   const luName = heroDef.name;
   const bio = game.run ? (game.run.bioPoints || 0) : 0;
   document.getElementById('levelup-sub').textContent =
@@ -46,20 +54,24 @@ export function show({ level, choices }) {
 
   for (const def of choices) {
     if (def.isMutation) {
-      wrap.appendChild(mutationCard(def, bio));
+      wrap.appendChild(mutationCard(def, bio, heroDef));
     } else {
       wrap.appendChild(upgradeCard(def, heroDef, syn));
     }
   }
 }
 
-function mutationCard(def, bio) {
+function mutationCard(def, bio, heroDef) {
   const locked = !!def.lockedByBio || (def.bioCost || 0) > bio;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
-  // PHAGOS: ikon kartu = aset sprite mutasi (emoji hanya cadangan)
-  const iconNode = def.sprite
-    ? el('img', { class: 'choice-mut-sprite', src: def.sprite, alt: '', draggable: 'false' })
-    : el('div', { class: 'choice-icon mutation-icon', text: icon });
+  // PHAGOS: ikon kartu = aset sprite mutasi (emoji hanya cadangan).
+  // UI-REBUILD P8: kalau hero punya FOTO bentuk mutasi, itu yang dipakai —
+  // pemain melihat wujud barunya, bukan ikon generik.
+  const iconNode = (heroDef && hasSprite(heroDef.spriteMutIdle))
+    ? el('img', { class: 'choice-mut-sprite mut-form', src: heroDef.spriteMutIdle, alt: '', draggable: 'false' })
+    : def.sprite
+      ? el('img', { class: 'choice-mut-sprite', src: def.sprite, alt: '', draggable: 'false' })
+      : el('div', { class: 'choice-icon mutation-icon', text: icon });
   const card = el('button', {
     class: 'choice-card mutation-card tier-' + (def.tier || 1) + (locked ? ' locked' : ''),
     onclick: () => {

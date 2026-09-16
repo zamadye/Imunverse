@@ -44,6 +44,7 @@ ok(`${jsFiles.length} file JS diperiksa`);
 console.log('— Data JSON —');
 const dataDir = path.join(ROOT, 'data');
 const spritePaths = new Set();
+const optionalSpritePaths = new Set(); // foto mutasi: boleh belum ada (fallback sprite dasar)
 for (const name of fs.readdirSync(dataDir)) {
   if (!name.endsWith('.json')) continue;
   const p = path.join(dataDir, name);
@@ -54,8 +55,13 @@ for (const name of fs.readdirSync(dataDir)) {
       if (Array.isArray(obj)) { obj.forEach(scan); return; }
       if (obj && typeof obj === 'object') {
         for (const [k, v] of Object.entries(obj)) {
+          // UI-REBUILD P8: foto bentuk mutasi per hero ikut diperiksa, tapi
+          // bersifat OPSIONAL (belum semua hero punya foto) → kumpulan terpisah.
           if (['sprite', 'spriteIdle', 'spriteAttack'].includes(k) && typeof v === 'string') {
             spritePaths.add(v);
+          }
+          if (['spriteMutIdle', 'spriteMutAttack'].includes(k) && typeof v === 'string') {
+            optionalSpritePaths.add(v);
           }
           scan(v);
         }
@@ -69,6 +75,16 @@ for (const name of fs.readdirSync(dataDir)) {
 }
 
 console.log('— Sprite assets —');
+// Laporkan foto mutasi yang BELUM ada sebagai INFO (bukan kegagalan).
+let mutReady = 0;
+for (const sp of optionalSpritePaths) {
+  const p = path.join(ROOT, sp);
+  if (fs.existsSync(p)) mutReady += 1;
+}
+if (optionalSpritePaths.size > 0) {
+  ok(`foto mutasi: ${mutReady}/${optionalSpritePaths.size} tersedia (sisanya pakai sprite dasar)`);
+}
+
 for (const sp of spritePaths) {
   const p = path.join(ROOT, sp);
   if (!fs.existsSync(p)) fail(`sprite hilang: ${sp}`);

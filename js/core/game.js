@@ -92,7 +92,7 @@ import { drawNestHint,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
-import { drawSprite } from '../render/sprite-loader.js';
+import { drawSprite, hasSprite } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
@@ -2559,7 +2559,17 @@ applyChapterTier(enemy, run) {
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
+          // UI-REBUILD P8: BENTUK MUTASI = foto karakter itu sendiri (bukan lagi
+          // overlay mut_*.png yang ditumpuk). Kalau fotonya belum tersedia untuk
+          // hero ini, pakai sprite dasar seperti sediakala.
+          const _muts = run.activeMutations || [];
+          const _mutOn = _muts.length > 0
+            && hasSprite(player.heroDef.spriteMutIdle)
+            && hasSprite(player.heroDef.spriteMutAttack);
           let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          if (_mutOn) {
+            path = player.attackFlash > 0 ? player.heroDef.spriteMutAttack : player.heroDef.spriteMutIdle;
+          }
           const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
@@ -2578,18 +2588,16 @@ applyChapterTier(enemy, run) {
             drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
           }
           drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
-          // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
-          // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
-          // mahkota/kilau yang orientasinya bermakna).
-          try {
-            const muts = run.activeMutations || [];
-            for (let mi = 0; mi < muts.length; mi++) {
-              const mdef = mutationDef(muts[mi]);
-              if (!mdef || !mdef.sprite) continue;
-              const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
-              drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
-            }
-          } catch { /* abaikan */ }
+          // UI-REBUILD P8: overlay mut_*.png DICABUT — mutasi kini mengganti
+          // FOTO karakter (lihat pemilihan `path` di atas). Yang tersisa cuma
+          // aura kanvas tipis yang ikut jumlah mutasi (bukan tempelan gambar):
+          // makin banyak mutasi, rim energi makin terang.
+          if (_muts.length > 0) {
+            const _tier = _muts.reduce((mx, id) => Math.max(mx, (mutationDef(id)?.tier) || 1), 1);
+            const _glowColor = _tier >= 3 ? '#ffd166' : (_tier === 2 ? '#8df7d2' : '#7fe3d0');
+            const _glowA = Math.min(0.55, 0.12 + _muts.length * 0.07);
+            drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.35, _glowColor, time, 0, _glowA);
+          }
           // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
           const crownAcc = STATE.meta.cosmetics?.crown
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
