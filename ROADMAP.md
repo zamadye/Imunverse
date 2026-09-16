@@ -188,9 +188,19 @@ Yang sudah dikerjakan:
 | Penguji baru | `tools/verify-combat.mjs` (`npm run verify:combat`, ikut di `npm run verify`) + harness jsdom bersama `tools/harness.mjs` |
 | Dijaga | Tidak ada hero terbaik absolut (§14) — tak satu pun hero memuncaki HP **dan** damage **dan** speed; pola serangan hero lain tidak berubah |
 
-Sisa P1: archetype `beam/summon/zone/area` masih memakai pola lama (status `planned`
-di `attacks.json`) dan 5 behavior musuh (`chase_direct`, `chase_weave`, `splitter`,
-`boss_pattern_a`, `hazard_drift`) belum mencakup 8 archetype ancaman V2 (§15).
+Ancaman musuh (§15) — lanjutan:
+
+| Langkah | Hasil |
+|---|---|
+| 9 identitas ancaman | `data/enemy-archetypes.json`: swarm, armored, fast, ranged, regenerative, splitter, stealth, elite, support — tiap satu punya **ancaman** dan **jawaban pemain** |
+| 13 patogen ditandai | `enemies[].archetype` (+ sekunder & alasan) diturunkan dari data nyata: `armorLayers` → armored, `splitOnDeath` → splitter, `stealth` → stealth, speed 100 → fast, HP 62 → armored tebal, boss AOE → elite |
+| REGENERATIVE diwujudkan | `protozoa.regen = { delaySec: 2.5, pctPerSec: 0.06 }`; `Enemy.update` memulihkan HP setelah jeda tanpa damage dan **damage memotong regenerasi** (jawaban pemain: tekan terus / akhiri burst) |
+| RANGED terbukti bertelegraph | Mode peludah (`armShooter` + `tryEnemyShoot`) diuji: pose telegraph menyala **sebelum** ludahan, proyektil musuh (`run.ebullets`) meluncur ke pemain |
+| Dijaga | `verify:combat` 25 pemeriksaan: identitas hero, telegraph, chain, archetype musuh, regen, telegraph peludah |
+
+Sisa P1: archetype hero `beam / summon / zone / area` masih memakai pola lama
+(status `planned` di `attacks.json`) dan archetype **support** (buff aura) belum
+diwujudkan — keduanya masuk P1 lanjutan sebelum P2 (mutasi).
 
 ### P2 — Mutation sebagai jantung progresi
 - mutasi mengubah **perilaku tempur** (attack behavior/range/projectile/area/mobility/

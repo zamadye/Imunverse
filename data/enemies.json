@@ -20,7 +20,10 @@
       "orientToMovement": true,
       "tier": "medium",
       "visualFamily": "bacterium",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri",
+      "archetype": "swarm",
+      "archetypeSecondary": null,
+      "archetypeReason": "HP 20, lambat, jumlah banyak"
     },
     {
       "id": "bakteri_gp",
@@ -41,7 +44,10 @@
       "orientToMovement": true,
       "tier": "hard",
       "visualFamily": "armored_bacterium",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gp"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gp",
+      "archetype": "armored",
+      "archetypeSecondary": null,
+      "archetypeReason": "armorLayers bawaan (Gram positif)"
     },
     {
       "id": "virus",
@@ -69,7 +75,10 @@
       "orientToMovement": false,
       "tier": "medium",
       "visualFamily": "virus",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.virus"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.virus",
+      "archetype": "splitter",
+      "archetypeSecondary": null,
+      "archetypeReason": "splitOnDeath → virion"
     },
     {
       "id": "virion",
@@ -91,7 +100,10 @@
       "elite": true,
       "tier": "kecil",
       "visualFamily": "virus",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.virion"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.virion",
+      "archetype": "swarm",
+      "archetypeSecondary": "fast",
+      "archetypeReason": "hasil belahan, speed 95"
     },
     {
       "id": "parasit",
@@ -117,7 +129,10 @@
       "elite": true,
       "tier": "hard",
       "visualFamily": "parasite",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.parasit"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.parasit",
+      "archetype": "fast",
+      "archetypeSecondary": null,
+      "archetypeReason": "speed 100 tertinggi di kelas reguler"
     },
     {
       "id": "spora",
@@ -138,7 +153,10 @@
       "orientToMovement": false,
       "tier": "hard",
       "visualFamily": "fungus",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.spora"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.spora",
+      "archetype": "armored",
+      "archetypeSecondary": null,
+      "archetypeReason": "HP 62 paling tebal di kelas reguler"
     },
     {
       "id": "sel_kanker",
@@ -166,7 +184,10 @@
       "weight": 0,
       "orientToMovement": false,
       "visualFamily": "cancer",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_kanker"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_kanker",
+      "archetype": "elite",
+      "archetypeSecondary": null,
+      "archetypeReason": "boss, AOE ter-telegraf"
     },
     {
       "id": "protozoa",
@@ -191,7 +212,14 @@
       "orientToMovement": true,
       "tier": "medium",
       "visualFamily": "protozoa",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.protozoa"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.protozoa",
+      "archetype": "regenerative",
+      "archetypeSecondary": null,
+      "archetypeReason": "memulihkan diri bila dibiarkan",
+      "regen": {
+        "delaySec": 2.5,
+        "pctPerSec": 0.06
+      }
     },
     {
       "id": "bakteri_gn",
@@ -213,7 +241,10 @@
       "armorLayers": 1,
       "tier": "medium",
       "visualFamily": "toxic_bacterium",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gn"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri_gn",
+      "archetype": "armored",
+      "archetypeSecondary": null,
+      "archetypeReason": "armorLayers (Gram negatif)"
     },
     {
       "id": "toksin",
@@ -234,7 +265,10 @@
       "orientToMovement": false,
       "tier": "medium",
       "visualFamily": "toxin",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin",
+      "archetype": "swarm",
+      "archetypeSecondary": null,
+      "archetypeReason": "hazard lambat, area"
     },
     {
       "id": "prion",
@@ -258,7 +292,10 @@
       "convertInterval": 6,
       "tier": "hard",
       "visualFamily": "crystal",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.prion"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.prion",
+      "archetype": "armored",
+      "archetypeSecondary": null,
+      "archetypeReason": "armorLayers 3 — paling berlapis"
     },
     {
       "id": "sel_abnormal",
@@ -280,7 +317,10 @@
       "stealth": true,
       "tier": "hard",
       "visualFamily": "abnormal_cell",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_abnormal"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.sel_abnormal",
+      "archetype": "stealth",
+      "archetypeSecondary": "fast",
+      "archetypeReason": "stealth + speed 84"
     },
     {
       "id": "toksin_raksasa",
@@ -313,7 +353,11 @@
         "radius": 46
       },
       "visualFamily": "toxin_boss",
-      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin_raksasa"
+      "mutationVisualRef": "character-designs.pathogens.enemyMap.toksin_raksasa",
+      "archetype": "elite",
+      "archetypeSecondary": null,
+      "archetypeReason": "boss, AOE ter-telegraf"
     }
-  ]
+  ],
+  "docArchetype": "V2 §15: identitas ancaman per patogen (lihat data/enemy-archetypes.json)."
 }

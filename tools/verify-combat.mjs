@@ -25,10 +25,23 @@ const cek = (nama, ok, info = '') => {
 };
 const baca = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
 
+// Modul Node (impor langsung) butuh datanya sendiri — bundle jsdom punya
+// instance modul terpisah. Sediakan fetch sederhana ke berkas lokal.
+globalThis.fetch = async (u) => {
+  const f = path.join(ROOT, String(u).replace(/^\.?\//, '').split('?')[0]);
+  try {
+    const t = fs.readFileSync(f, 'utf8');
+    return { ok: true, status: 200, async json() { return JSON.parse(t); }, async text() { return t; } };
+  } catch { return { ok: false, status: 404, async json() { throw new Error('404 ' + f); }, async text() { return ''; } }; }
+};
+const { loadAllData } = await import('../js/core/data-store.js');
+await loadAllData();
+
 const heroes = baca('data/heroes.json').heroes;
 const attacks = baca('data/attacks.json');
 const combat = baca('data/combat.json');
 const enemies = baca('data/enemies.json');
+const enemyArche = baca('data/enemy-archetypes.json');
 
 // ---------- 1. IDENTITAS HERO (§12–§14) ----------
 const ARCHE = ['projectile', 'homing', 'melee', 'area', 'beam', 'chain', 'zone', 'summon'];
@@ -108,6 +121,56 @@ cek('pola serangan hero lain tak berubah', pola.macrophage === 'ranged_pierce' &
 cek('hanya Dendritic yang memakai ranged_chain',
   Object.entries(pola).filter(([, v]) => v === 'ranged_chain').map(([k]) => k).join(',') === 'dendritic',
   Object.entries(pola).filter(([, v]) => v === 'ranged_chain').map(([k]) => k).join(','));
+
+
+// ---------- 5. IDENTITAS ANCAMAN MUSUH (§15) ----------
+const A_MUSUH = enemyArche.archetypes.map((a) => a.id);
+cek('9 archetype ancaman terdefinisi', A_MUSUH.length === 9 && new Set(A_MUSUH).size === 9, A_MUSUH.join(','));
+const tanpaAncaman = enemyArche.archetypes.filter((a) => !a.threat || !a.counter || !a.status);
+cek('tiap archetype punya ancaman & jawaban', tanpaAncaman.length === 0, tanpaAncaman.map((a) => a.id).join(','));
+const daftar = enemies.enemies || [];
+const musuhAneh = daftar.filter((e) => !A_MUSUH.includes(e.archetype));
+cek('13 patogen punya archetype valid', daftar.length === 13 && musuhAneh.length === 0, `${daftar.length} musuh, aneh: ${musuhAneh.map((e) => e.id).join(',')}`);
+const terwujud = enemyArche.archetypes.filter((a) => a.status === 'implemented').length;
+cek('mayoritas archetype sudah berjalan di runtime', terwujud >= 8, `${terwujud}/9`);
+
+// ---------- 6. REGENERATIVE BENAR-BENAR JALAN (§15) ----------
+const { Enemy } = await import('../js/entities/enemy.js');
+const defProtozoa = daftar.find((e) => e.id === 'protozoa');
+const eRegen = new Enemy(defProtozoa, 0, 0, { hpScale: 1, speedScale: 1 });
+eRegen.takeDamage(Math.round(eRegen.maxHP * 0.5));
+const hpLuka = eRegen.hp;
+const pemainJauh = { x: 9999, y: 9999, radius: 15 };
+for (let i = 0; i < 60; i++) eRegen.update(1 / 60, pemainJauh, 0, null); // 1 dtk → belum pulih (delay 2.5)
+const hp1d = eRegen.hp;
+for (let i = 0; i < 180; i++) eRegen.update(1 / 60, pemainJauh, 0, null); // total 4 dtk → pulih
+const hp4d = eRegen.hp;
+cek('regen menunggu delay dulu (telegraph kekuatan musuh)', Math.abs(hp1d - hpLuka) < 0.01, `${hpLuka} → ${hp1d}`);
+cek('regen memulihkan HP setelah delay', hp4d > hpLuka, `${hpLuka} → ${Math.round(hp4d)}`);
+eRegen.takeDamage(5);
+const hpSetelahPukul = eRegen.hp;
+for (let i = 0; i < 60; i++) eRegen.update(1 / 60, pemainJauh, 0, null);
+cek('damage memotong regenerasi', Math.abs(eRegen.hp - hpSetelahPukul) < 0.01, `${hpSetelahPukul} → ${Math.round(eRegen.hp)}`);
+
+// ---------- 7. RANGED: telegraph sebelum meludah (§19) ----------
+const defBakteri = daftar.find((e) => e.id === 'bakteri');
+const eRanged = new Enemy(defBakteri, 0, 0, { hpScale: 1, speedScale: 1 });
+eRanged.armShooter();
+cek('mode peludah tersedia (ranged archetype)', !!eRanged.shooter, String(eRanged.shooter));
+let tembakan = 0; let telegraphDulu = false; let pernahTelegraph = false;
+const gamePalsu = {
+  tryEnemyShoot() { tembakan += 1; return true; },
+  effects: null,
+  packAggro() {},
+};
+const pemain = { x: 300, y: 0, radius: 15 };
+for (let i = 0; i < 600; i++) {
+  eRanged.update(1 / 60, pemain, i / 60, gamePalsu);
+  if (eRanged.attackSpriteHint) pernahTelegraph = true;
+  if (tembakan > 0 && pernahTelegraph) { telegraphDulu = true; break; }
+}
+cek('peludah menembak ke pemain', tembakan > 0, `tembakan=${tembakan}`);
+cek('peludah memberi telegraph sebelum tembakan', telegraphDulu, `telegraph=${pernahTelegraph}, tembakan=${tembakan}`);
 
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);

@@ -36,6 +36,7 @@ const store = {
   audio: null,       // data/audio.json (peta MP3 + volume; CC0)
   // ===== V2 (ROADMAP.md §2) — kerangka data baru, diisi bertahap P1–P5 =====
   attacks: null,     // data/attacks.json (8 archetype serangan + telegraph)
+  enemyArchetypes: null, // data/enemy-archetypes.json (V2 §15: 9 identitas ancaman patogen)
   zones: null,       // data/zones.json (rute biologis kontinu + landmark)
   transitions: null, // data/transitions.json (aturan campur zona saat bertempur)
   economy: null,     // data/economy.json (Antibody, biaya mutasi, Reserve, ads — tunable)
@@ -79,6 +80,7 @@ export async function loadAllData() {
     audio: 'data/audio.json', // Audio: peta file MP3 + rantai volume (CC0)
     // V2
     attacks: 'data/attacks.json',
+    enemyArchetypes: 'data/enemy-archetypes.json',
     zones: 'data/zones.json',
     transitions: 'data/transitions.json',
     economy: 'data/economy.json',
@@ -287,6 +289,11 @@ export function getAudio() {
 /** Bahasa serangan V2: 8 archetype + telegraph (data/attacks.json). */
 export function getAttacks() {
   return getData().attacks;
+}
+
+/** Identitas ancaman patogen V2 §15 (data/enemy-archetypes.json). */
+export function getEnemyArchetypes() {
+  return getData().enemyArchetypes;
 }
 
 /** Rute biologis kontinu + landmark (data/zones.json). */

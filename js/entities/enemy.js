@@ -97,6 +97,11 @@ export class Enemy {
     this.usesContactTelegraph = !def.isBoss && def.behavior !== 'hazard_drift' && def.behavior !== 'boss_pattern_a';
 
     // V2 Phase 5 — ELITE affix & boss enrage
+    // V2 §15 REGENERATIVE: pulih setelah beberapa detik tanpa damage.
+    // Diatur dari data/enemies.json → regen: { delaySec, pctPerSec }
+    this.regenCfg = def.regen || null;
+    this.sinceHit = 0;
+
     this.eliteAffix = null;   // 'brute'|'swift'|'regen'|'volatile' (via makeElite)
     this.affixCfg = null;     // params affix dari waves.json
     this.windupOverride = 0;  // swift: windup lebih singkat
@@ -167,6 +172,15 @@ export class Enemy {
   update(dt, playerPos, time, game) {
     if (!this.alive) return;
     if (this.hitFlash > 0) this.hitFlash -= dt;
+
+    // V2 §15 REGENERATIVE: musuh memulihkan diri bibiarkan tanpa damage.
+    // Jawaban pemain: tekan terus atau akhiri dengan burst.
+    if (this.regenCfg && this.hp < this.maxHP) {
+      this.sinceHit += dt;
+      if (this.sinceHit >= this.regenCfg.delaySec) {
+        this.hp = Math.min(this.maxHP, this.hp + this.maxHP * this.regenCfg.pctPerSec * dt);
+      }
+    }
 
     // V2 Phase 5: affix REGEN — elite pulih 2%/dtk (jawaban pemain: fokus burst)
     if (this.eliteAffix === 'regen' && this.hp < this.maxHP) {
@@ -399,6 +413,7 @@ export class Enemy {
    */
   takeDamage(amount) {
     if (!this.alive) return false;
+    this.sinceHit = 0; // V2 §15: damage memotong regenerasi
     // ARMOR (Gram Positif/Negatif/Prion): lapisan luar menyerap satu tepukan
     if (this.armorLayers > 0) {
       this.armorLayers -= 1;
@@ -423,6 +438,7 @@ export class Enemy {
    */
   takeDamageRaw(amount) {
     if (!this.alive) return false;
+    this.sinceHit = 0; // V2 §15: damage memotong regenerasi
     this.lastHitAbsorbed = false;
     this.hp -= amount;
     this.hitFlash = 0.12;
