@@ -1,0 +1,1176 @@
+{
+  "berkas": {
+    "hero": 11,
+    "foto": 44,
+    "gagal": 0
+  },
+  "runtime": {
+    "hero": 11,
+    "baris": [
+      {
+        "hero": "macrophage",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_macrophage_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_macrophage_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_macrophage_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_macrophage_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "dendritic",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_dendritic_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_dendritic_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_dendritic_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_dendritic_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "neutrophil",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_neutrophil_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_neutrophil_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_neutrophil_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_neutrophil_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "eosinophil",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_eosinophil_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_eosinophil_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_eosinophil_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_eosinophil_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "basophil",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_basophil_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_basophil_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_basophil_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_basophil_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "mastcell",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_mastcell_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_mastcell_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_mastcell_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_mastcell_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "tcd8",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_tcd8_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_tcd8_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_tcd8_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_tcd8_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "tcd4",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_tcd4_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_tcd4_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_tcd4_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_tcd4_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "treg",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_treg_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_treg_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_treg_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_treg_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "bcell",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_bcell_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_bcell_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_bcell_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_bcell_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      },
+      {
+        "hero": "nkcell",
+        "langkah": [
+          {
+            "kasus": "tanpa mutasi (dasar)",
+            "file": "assets/sprites/hero_nkcell_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "128x128",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 idle",
+            "file": "assets/sprites/hero_nkcell_mut1_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 1 serang",
+            "file": "assets/sprites/hero_nkcell_mut1_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 idle",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 serang",
+            "file": "assets/sprites/hero_nkcell_mut2_attack.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 518.63,
+            "dasar": 551.68,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 menghadap kiri",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 551.68,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
+            "w": 56.81,
+            "h": 56.81,
+            "cx": 512,
+            "dasar": 552.39,
+            "flip": 1,
+            "img": "256x256",
+            "status": "OK"
+          }
+        ],
+        "delta": {
+          "lebar": 0,
+          "idlePusatX": 0,
+          "idlePusatY": 0,
+          "serangPusatX": 0,
+          "serangPusatY": 0,
+          "balikPusatX": 0,
+          "balikPusatY": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.71,
+          "bobGeserSamping": 0,
+          "bobUkuran": 0
+        }
+      }
+    ]
+  },
+  "ringkasan": {
+    "fotoBerkas": 44,
+    "berkasGagal": 0,
+    "heroDiuji": 11,
+    "kasusDiuji": 77,
+    "totalError": 0
+  },
+  "levelup": [
+    {
+      "hero": "macrophage",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_macrophage_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_macrophage_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_macrophage_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_macrophage_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "dendritic",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_dendritic_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_dendritic_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_dendritic_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_dendritic_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "neutrophil",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_neutrophil_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_neutrophil_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_neutrophil_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_neutrophil_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "eosinophil",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_eosinophil_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_eosinophil_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_eosinophil_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_eosinophil_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "basophil",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_basophil_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_basophil_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_basophil_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_basophil_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "mastcell",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_mastcell_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_mastcell_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_mastcell_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_mastcell_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "tcd8",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_tcd8_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_tcd8_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_tcd8_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_tcd8_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "tcd4",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_tcd4_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_tcd4_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_tcd4_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_tcd4_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "treg",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_treg_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_treg_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_treg_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_treg_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "bcell",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_bcell_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_bcell_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_bcell_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_bcell_mut2_idle.png",
+      "status": "OK"
+    },
+    {
+      "hero": "nkcell",
+      "potret": null,
+      "kartu": {},
+      "potretTier1": "assets/sprites/hero_nkcell_mut1_idle.png",
+      "kartuTier1": "assets/sprites/hero_nkcell_mut1_idle.png",
+      "potretTier2": "assets/sprites/hero_nkcell_mut2_idle.png",
+      "kartuTier2": "assets/sprites/hero_nkcell_mut2_idle.png",
+      "status": "OK"
+    }
+  ]
+}

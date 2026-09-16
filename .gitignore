@@ -17,3 +17,6 @@ image-search/
 tools/.mutsrc/
 # Sumber audio mentah (tools/build-audio.sh)
 tools/.audiosrc/
+
+# bundle sementara untuk verifikasi runtime (npm run verify:photos)
+.tmp-bundle.js

@@ -25,6 +25,27 @@ python3 tools/make-contact-sheet.py       # lembar kontak
 > `python3 tools/build-mutation-sprites.py` (tanpa argumen) supaya semua foto
 > hero itu dijepit frame-nya dengan acuan yang sama.
 
+## Verifikasi (wajib setelah menambah/mengubah foto)
+
+```
+npm i -D jsdom                                              # sekali (opsional)
+npx esbuild --bundle js/main.js --outfile=.tmp-bundle.js --format=iife
+PHAGOS_BUNDLE=.tmp-bundle.js npm run verify:photos
+```
+
+Pemeriksa tiga lapis (`tools/verify-mutation-photos.mjs`, laporan:
+`tools/mutation-art/VERIFY-REPORT.json`):
+
+- **A. Berkas** — struktur PNG valid (signature/IHDR/CRC), 256×256 RGBA, bisa
+  di-decode, tanpa sisa latar magenta, isi 8–60 % kanvas.
+- **B. Runtime** — untuk tiap hero dijalankan 7 kasus (dasar, mut1 idle/serang,
+  mut2 idle/serang, menghadap kiri, bob di waktu lain): game harus MEMILIH foto
+  yang tepat, dan titik pusat/lebar gambar tidak boleh berubah (>0,5 px).
+- **C. Kartu level-up** — potret adegan & ikon kartu memakai foto mut1/mut2.
+
+Terakhir dijalankan: **44/44 foto, 77 kasus runtime, 0 error** (Δ ukuran &
+pusat = 0 px; balik kiri terdeteksi; bob vertikal 0,71 px tanpa geser samping).
+
 ## Penjepit frame — WAJIB biar animasi tidak melompat
 `build-mutation-sprites.py` mengunci tiap foto mutasi ke frame sprite dasar
 hero-nya (rata-rata `hero_<id>_idle` + `hero_<id>_attack`): **tinggi isi**,
