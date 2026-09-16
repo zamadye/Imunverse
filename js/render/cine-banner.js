@@ -4,7 +4,7 @@
  * Loop 6 detik ala trailer: pasukan imun (T-Bolt) melawan virus —
  * tembakan homing, ledakan partikel, shockwave ultimate, screen shake,
  * spawn virus baru. Digambar prosedural Canvas 2D (palet pastel game),
- * tanpa aset video → ringan & selalu tajam. Loop hanya saat dashboard
+ * tanpa aset video → ringan & selalu tajam. Palet biopunk void. Loop hanya saat dashboard
  * tampil & slide banner 1 terlihat (startBannerCine/stopBannerCine).
  */
 
@@ -12,12 +12,12 @@ import { t as tr } from '../systems/i18n.js'; // alias: hindari shadow dgn param
 let rafId = 0;
 let running = false;
 
-const TEAL = '#35b3a0';
-const TEAL_DEEP = '#1f7a70';
-const GOLD = '#f5c64f';
-const RED = '#f0685a';
-const PURPLE = '#a06fd0';
-const INK = '#123f3a';
+const TEAL = '#00e5c4';
+const TEAL_DEEP = '#00b8a0';
+const GOLD = '#ffd166';
+const RED = '#ff3d5a';
+const PURPLE = '#a78bfa';
+const INK = '#04111a';
 
 function blob(ctx, x, y, r, color, squash = 1) {
   const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.4, r * 0.2, x, y, r);
@@ -122,8 +122,8 @@ export function startBannerCine(canvas) {
   if (running) stopBannerCine(); // Fase 15: ganti instance — jangan biarkan start dibatalkan diam-diam
   running = true;
   // pre-load pemain & musuh (sprite gameplay asli)
-  const HERO_IDLE = cineImg('assets/sprites/hero_macrophage_idle.png');
-  const HERO_ATK = cineImg('assets/sprites/hero_macrophage_attack.png');
+  const HERO_IDLE = cineImg('assets/sprites/mako_v2/mako_stage0_idle.png');
+  const HERO_ATK = cineImg('assets/sprites/mako_v2/mako_stage0_attack.png');
   const VIRUS_A = cineImg('assets/sprites/enemy_virus.png');
   const VIRUS_B = cineImg('assets/sprites/enemy_bakteri.png');
   const VIRUS_C = cineImg('assets/sprites/enemy_virion.png');
@@ -175,14 +175,14 @@ export function startBannerCine(canvas) {
     // jantung (seluruh dunia "berdenyut" halus 72 bpm) = hook biologis nyata.
     const beat = Math.pow(Math.max(0, Math.sin(now / 833 * Math.PI * 2)), 6); // ~72bpm
     const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, mix('#f3d9cf', '#f6c9bd', beat * 0.5));
-    bg.addColorStop(0.5, mix('#eecfc4', '#f0bfb3', beat * 0.5));
-    bg.addColorStop(1, mix('#e2bdb2', '#e6aca0', beat * 0.5));
+    bg.addColorStop(0, mix('#04111a', '#071824', beat * 0.5));
+    bg.addColorStop(0.5, mix('#06141c', '#0a1c28', beat * 0.5));
+    bg.addColorStop(1, mix('#030c12', '#0a0818', beat * 0.5));
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
     // DINDING PEMBULUH atas & bawah — lengkung organik berdenyut
-    ctx.fillStyle = mix('#d89a8c', '#e08a7a', beat * 0.6);
+    ctx.fillStyle = mix('#0a1820', '#122030', beat * 0.6);
     ctx.globalAlpha = 0.55;
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -204,14 +204,14 @@ export function startBannerCine(canvas) {
       const rx = c.u * W, ry = c.v * H + Math.sin(now / 700 + c.ph) * H * 0.02;
       const rr = H * 0.055 * c.s;
       ctx.globalAlpha = 0.5;
-      ctx.fillStyle = '#e0655a';
+      ctx.fillStyle = '#ff3d5a';
       ctx.beginPath(); ctx.ellipse(rx, ry, rr, rr * 0.72, 0.3, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#c94f45';
+      ctx.fillStyle = '#9b1c32';
       ctx.beginPath(); ctx.ellipse(rx, ry, rr * 0.45, rr * 0.3, 0.3, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
     }
     // plankton plasma halus
-    ctx.fillStyle = 'rgba(255,246,238,0.5)';
+    ctx.fillStyle = 'rgba(0,229,196,0.22)';
     for (const pp of plasma) {
       pp.u += pp.sp * 0.0012;
       if (pp.u > 1.05) pp.u = -0.05;
@@ -219,8 +219,8 @@ export function startBannerCine(canvas) {
     }
     // vignette organik — fokus mata ke tengah panggung
     const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
-    vg.addColorStop(0, 'rgba(120,40,30,0)');
-    vg.addColorStop(1, 'rgba(120,40,30,0.22)');
+    vg.addColorStop(0, 'rgba(4,17,26,0)');
+    vg.addColorStop(1, 'rgba(4,17,26,0.55)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
 

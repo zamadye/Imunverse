@@ -1052,7 +1052,14 @@
     "Mereka menancapkan diri! Tahan mereka di medan >2 detik sebelum Pulse!": "They anchored themselves! Hold them in your membrane for 2+ seconds before Pulsing!",
     "Strain Pemurni membersihkan jejakmu dan menyembuhkan kawanannya! Ubah taktik!": "Purifier strains cleanse your trails and heal their allies! Change tactics!",
     "Mereka tak bisa menebakmu — jadi mereka bermutasi ACAK! Tetap beradaptasi!": "They cannot read you — so they mutate RANDOMLY! Keep adapting!",
-    "Getaran aneh... mereka BERUBAH! Siap-siap!": "Strange tremors... they are CHANGING! Get ready!"
+    "Getaran aneh... mereka BERUBAH! Siap-siap!": "Strange tremors... they are CHANGING! Get ready!",
+    "PATOGEN APEX": "APEX PATHOGEN",
+    "WAVE DATANG": "WAVE INCOMING",
+    "Pratinjau mutasi": "Mutation preview",
+    "Mutasi ini akan mengubah bentuk membranmu.": "This mutation will reshape your membrane.",
+    "BERMUTASI!": "MUTATE!",
+    "Organisme runtuh.": "The organism collapsed.",
+    "Kamu bertahan. Membran menolak kematian.": "You endured. The membrane refused death."
   },
   "rules": [
     {

@@ -51,7 +51,17 @@ function countUp(node, target) {
   requestAnimationFrame(tick);
 }
 
-export function show(summary) {
+export function show(rawSummary) {
+  const summary = {
+    wave: 0, kills: 0, time: 0, xp: 0, xpGained: 0, heroId: '',
+    currencyEarned: 0, bossKills: 0, nutrients: 0, level: 1,
+    engulfs: 0, bio: 0, parts: 0, victory: false, quit: false,
+    modeId: null, mutatorName: null, isRecord: false, stars: 0,
+    bpFrom: null, bpTo: null, mastery: null, rank: null, chapterId: null,
+    ...rawSummary,
+  };
+  summary.currencyEarned = Number.isFinite(summary.currencyEarned) ? summary.currencyEarned : 0;
+  summary.xpGained = summary.xpGained || summary.xp || 0;
   STATE.lastGameoverSummary = { ...summary };
   // ADDENDUM P2 §3.4 — bonus milestone referral (wave 5 pertama)
   try {
@@ -89,7 +99,7 @@ export function show(summary) {
   }
   const title = document.getElementById('gameover-title');
   if (summary.victory) title.textContent = 'MENANG!';
-  else title.textContent = summary.quit ? 'Run Diakhiri' : 'Tumbang!';
+  else title.textContent = summary.quit ? 'Run Diakhiri' : 'Organisme runtuh.';
   title.className = 'gameover-title' + (summary.victory || summary.quit ? ' win' : '');
   // Info mode + mutator + rekor (liveops)
   const oldMeta = document.getElementById('go-mode-line');
@@ -106,9 +116,9 @@ export function show(summary) {
   }
 
   document.getElementById('gameover-sub').textContent =
-    summary.wave >= 10
-      ? 'Luar biasa! Sistem imun mengingat jasamu.'
-      : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+    summary.victory
+      ? 'Kamu bertahan. Membran menolak kematian.'
+      : 'Sistem imun mengingat pengorbananmu.';
 
   // Sprint 5.28 (§11.3): headline ringkas run.
   let head = document.getElementById('go-headline');

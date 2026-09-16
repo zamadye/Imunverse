@@ -5,15 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#0d1117" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#04111a" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="assets/icons/pwa-192.png" />
   <meta name="description" content="PHAGOS — Telan. Bermutasi. Bertahan. Roguelike survival membran sel imun di phagos.space!" />
   <title>PHAGOS — Telan. Bermutasi. Bertahan.</title>
-  <link rel="stylesheet" href="styles/main.css?v=51a" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=51a" />
-  <link rel="stylesheet" href="styles/portrait.css?v=51a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
+  <link rel="stylesheet" href="styles/main.css?v=54f" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=54f" />
+  <link rel="stylesheet" href="styles/portrait.css?v=54f" />
+  <link rel="stylesheet" href="styles/biopunk.css?v=54f" />
 </head>
 <body>
   <div id="app">
@@ -22,6 +26,16 @@
 
     <!-- Overlay kerusakan (flash coral saat player kena hit) -->
     <div id="damage-vignette" aria-hidden="true"></div>
+    <div id="hp-crit-vignette" aria-hidden="true"></div>
+    <div id="pulse-flash" aria-hidden="true"></div>
+    <div id="wave-darkness" aria-hidden="true">
+      <div class="wave-darkness-veil"></div>
+      <div class="wave-darkness-label" data-i18n="WAVE DATANG">WAVE DATANG</div>
+    </div>
+    <div id="boss-entrance" aria-hidden="true">
+      <div class="boss-entrance-ring"></div>
+      <div class="boss-entrance-title" data-i18n="PATOGEN APEX">PATOGEN APEX</div>
+    </div>
 
     <!-- Layer semua screen UI (HTML/CSS overlay di atas canvas) -->
     <div id="ui">
@@ -51,8 +65,6 @@
         </div>
         <div class="title-card">
           <div class="title-logo">
-            <span class="title-star">⬢</span>
-            <h1>PHAGOS</h1>
             <p class="title-tag" data-i18n="Telan. Bermutasi. Bertahan.">Telan. Bermutasi. Bertahan.</p>
           </div>
           <button id="btn-title-start" class="btn btn-primary btn-xl title-start">
@@ -572,6 +584,13 @@
           <h2 class="levelup-title">BERMUTASI!</h2>
           <p id="levelup-sub" class="levelup-sub">Pilih bentuk baru!</p>
           <div id="levelup-choices" class="choice-grid"><!-- diisi JS --></div>
+          <div id="mut-preview" class="mut-preview" aria-live="polite">
+            <canvas id="mut-preview-canvas" width="140" height="140"></canvas>
+            <div>
+              <b id="mut-preview-name" data-i18n="Pratinjau mutasi">Pratinjau mutasi</b>
+              <p id="mut-preview-desc" data-i18n="Mutasi ini akan mengubah bentuk membranmu.">Mutasi ini akan mengubah bentuk membranmu.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -713,6 +732,6 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=51a"></script>
+  <script type="module" src="js/main.js?v=54f"></script>
 </body>
 </html>

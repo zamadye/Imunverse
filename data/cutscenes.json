@@ -12,7 +12,7 @@
       "shots3d": [
         { "id": "ruang_estab", "t0": 0, "t1": 7.2, "env": "ruang",
           "cam": { "from": [0, 0.3, 6.4], "to": [0, 0.35, 6.0], "lookFrom": [0, 0.1, 0], "lookTo": [0.1, 0.0, 0] },
-          "actors": [ { "who": "amara", "x": -1.7, "y": 0.25, "z": 0.4, "s": 1.15 } ],
+          "actors": [],
           "props": [ { "type": "bed" }, { "type": "wound", "tFrom": 6.4 } ] },
         { "id": "close_luka", "t0": 7.2, "t1": 14.0, "env": "ruang",
           "cam": { "from": [0, 0.35, 6.0], "to": [0.55, 0.12, 0.5], "lookFrom": [0.1, 0.0, 0], "lookTo": [0.55, 0.02, 0.25] },
@@ -32,7 +32,7 @@
       "shots2d": [
         { "id": "ruang_estab", "t0": 0, "t1": 7.2, "env": "ruang",
           "cam": { "zoom": [0.92, 1.0] },
-          "actors": [ { "who": "amara", "x": 0.24, "y": 0.55, "s": 0.5 } ],
+          "actors": [],
           "props": [ { "type": "bed" }, { "type": "hand", "tFrom": 6.4 } ] },
         { "id": "close_luka", "t0": 7.2, "t1": 14.0, "env": "ruang",
           "cam": { "zoom": [1.0, 2.3], "pan": [0, 0, 0.06, -0.05] },
@@ -49,9 +49,6 @@
           "props": [] }
       ],
       "dialog": [
-        { "t": 1.0, "who": "amara", "dur": 20.8,
-          "vo": "assets/audio/narration/amara_cutscene_pembuka.mp3",
-          "text": "Cuma luka gores kok, tapi tetap harus diperhatikan — kalau kotor sedikit saja, bisa infeksi. Untungnya tubuh kita udah ada pasukan sendiri yang langsung siaga begitu ada luka." },
         { "t": 18.5, "who": "ria", "dur": 15.3,
           "vo": "assets/audio/narration/ria_cutscene_pembuka.mp3",
           "text": "Woy, bangun! Ada celah masuk di lengan sebelah sini, dan bakteri udah mulai nyusup duluan. Lo satu-satunya yang deket lokasi — gerak sekarang, gih!" }

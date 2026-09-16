@@ -401,3 +401,116 @@ export function drawPathogenMutation(ctx, enemy, tier, time) {
 
   ctx.restore();
 }
+
+
+/**
+ * Run-level silhouette (P2, visual-only). lv1–2 blob → mid tendrils/armor → lv10+ apex gold.
+ * Stats stay in data/*.json; this only paints fluorescence-microscope form.
+ */
+export function drawHeroRunForm(ctx, x, y, size, time, color = '#00e5c4', runLevel = 1) {
+  const lv = Math.max(1, runLevel | 0);
+  const r = size * 0.42;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  if (lv <= 2) {
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i <= 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const wob = 1 + 0.08 * Math.sin(a * 3 + time * 3);
+      const px = x + Math.cos(a) * r * wob;
+      const py = y + Math.sin(a) * r * wob;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+  } else if (lv <= 4) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3.2;
+    ctx.globalAlpha = 0.55;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 4; i++) {
+      const a = time * 0.8 + i * 1.57;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r * 0.4, y + Math.sin(a) * r * 0.4);
+      ctx.quadraticCurveTo(
+        x + Math.cos(a) * r,
+        y + Math.sin(a) * r,
+        x + Math.cos(a + 0.3) * r * 1.25,
+        y + Math.sin(a + 0.3) * r * 1.25,
+      );
+      ctx.stroke();
+    }
+  } else if (lv <= 6) {
+    ctx.globalAlpha = 0.42;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.08, 0, Math.PI * 2);
+    ctx.stroke();
+    orb(ctx, x, y, r * 0.18, color, 0.45);
+  } else if (lv <= 9) {
+    drawSpikeRing(ctx, x, y, r * 0.95, color, 10, time * 0.4, 0.42);
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = '#00e5c4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.2, time, time + Math.PI * 1.6);
+    ctx.stroke();
+  } else {
+    drawOuterHalo(ctx, x, y, r * 1.35, '#ffd166', time, 0.7);
+    drawCrown(ctx, x, y - r * 1.05, r * 0.55, '#ffd166');
+    orb(ctx, x, y, r * 0.2, '#ffd166', 0.5);
+  }
+  ctx.restore();
+}
+
+/**
+ * Pathogen family overlay (P2): bacteria = acid rods + flagella, virus = red spikes,
+ * cancer = dark-violet mass. Applied after mutation overlay; visual-only.
+ */
+export function drawPathogenFamily(ctx, enemy, time) {
+  if (!enemy) return;
+  const family = pathogenFamily(enemy);
+  const x = enemy.x;
+  const y = enemy.y;
+  const r = enemy.radius;
+  const rot = time * 1.1 + (enemy.uid || 0) * 0.2;
+  ctx.save();
+  if (family === 'virus') {
+    drawSpikeRing(ctx, x, y, r * 0.82, '#ff3d5a', 10, rot, 0.55);
+  } else if (family === 'bacterium' || family === 'armored_bacterium' || family === 'toxic_bacterium') {
+    ctx.strokeStyle = '#a8e63d';
+    ctx.lineWidth = 2.4;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r * 1.15, r * 0.55, rot * 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.lineCap = 'round';
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(x + side * r * 1.05, y);
+      ctx.quadraticCurveTo(
+        x + side * r * 1.5,
+        y + Math.sin(time * 6) * 8,
+        x + side * r * 1.9,
+        y + Math.sin(time * 8 + side) * 12,
+      );
+      ctx.stroke();
+    }
+  } else if (family === 'cancer' || family === 'abnormal_cell') {
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#a78bfa';
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = '#5b21b6';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}

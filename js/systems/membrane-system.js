@@ -20,6 +20,7 @@ import { antigenDamageMult, antigenIgnoreArmor } from './antigen-memory.js';
 import { tagOnHit } from './tag-cascade.js';
 import { audio } from './audio-system.js';
 import { buzz } from './haptics.js';
+import { emit } from '../core/ui-bridge.js';
 
 // ---------------------------------------------------------------------
 // INIT & STATS
@@ -838,13 +839,14 @@ export function tryEngulf(game, enemy, opts = {}) {
 
   // Visual engulf: tarikan + partikel hijau + flash
   run.effects.spawnBurst(enemy.x, enemy.y, '#5ce8c8', 10, 160, 3);
+  run.effects.spawnKillFx('engulf_wrap', enemy.x, enemy.y, '#00e5c4', Math.random() * 10);
   if (bio > 0) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 10, `+${bio} BIO`, '#8df7d2');
   player.squash = Math.max(player.squash, 0.12);
 
   // Hit-stop UNIK engulf: lebih lambat, lebih "basah"
   try {
     const gf = getGameFeel();
-    const es = gf.engulf?.hitStop ?? 0.06;
+    const es = gf.engulf?.hitStop ?? 0.15;
     if (run.hitStopCool <= 0) { game.hitStopRun(es); run.hitStopCool = 0.3; }
   } catch { /* abaikan */ }
 
@@ -1036,6 +1038,8 @@ export function tryPulse(game, opts = {}) {
     else game.hitStopRun(0.03);
     audio.evolve();
     buzz('elite');
+    emit('pulseFlash', { auto: !!opts.auto });
+    try { run.effects.spawnKillFx('pulse_shock', run.player.x, run.player.y, '#00e5c4', Math.random() * 10); } catch { /* abaikan */ }
   } catch { /* headless */ }
 
   // Per-hero pulse behavior

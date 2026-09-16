@@ -233,6 +233,9 @@ const ID_MAP = {
   // levelUpPool (pilihan naik level in-run) — per id, bukan per PNG generik
   damage: 'damage', attackSpeed: 'attack', moveSpeed: 'swift', maxHP: 'vitality', attackRange: 'range',
   projectileCount: 'multi', lifeSteal: 'steal', pierce: 'pierce', critChance: 'crit', magnet: 'magnet', antigen_boost: 'antigen',
+  // levelUpPool actual data IDs (upgrades.json)
+  hp_boost: 'vitality', speed_boost: 'swift', contact_boost: 'damage',
+  pulse_boost: 'jurus', engulf_boost: 'nutrition',
   // evolutions (kartu evolusi level-up)
   evo_storm: 'evo', evo_fortress: 'evo', evo_swarm: 'evo',
 };

@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<title>PHAGOS — Design Build Plan</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+:root {
+  --void:       #04111a;
+  --surface:    #071e24;
+  --surface-2:  #0c2b30;
+  --surface-3:  #112e30;
+  --border:     #1a4048;
+  --border-2:   #245060;
+
+  --cyan:       #00e5c4;
+  --cyan-dim:   #009e8a;
+  --cyan-glow:  rgba(0,229,196,.18);
+  --red:        #ff3d5a;
+  --red-glow:   rgba(255,61,90,.18);
+  --violet:     #a78bfa;
+  --violet-glow:rgba(167,139,250,.18);
+  --gold:       #ffd166;
+  --gold-glow:  rgba(255,209,102,.18);
+  --acid:       #a8e63d;
+  --acid-glow:  rgba(168,230,61,.15);
+
+  --text:       #d4f0e8;
+  --text-2:     #6b9e94;
+  --text-3:     #3d6660;
+
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding: 0 0 80px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+
+/* ── HEADER ── */
+.doc-header {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+.doc-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 80px);
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.doc-title span { color: var(--cyan); }
+.doc-subtitle {
+  margin-top: 14px;
+  font-size: 16px;
+  color: var(--text-2);
+  max-width: 560px;
+}
+.doc-meta {
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: .08em;
+}
+.meta-chip b { color: var(--text-2); }
+
+/* ── SECTIONS ── */
+.section {
+  margin-bottom: 64px;
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+p { color: var(--text-2); margin-bottom: 12px; }
+p strong { color: var(--text); }
+
+/* ── PROBLEM BOX ── */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.problem-card .tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 8px;
+  display: block;
+}
+.problem-card h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.problem-card p { font-size: 12px; margin: 0; }
+
+/* ── PALETTE ── */
+.palette-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.swatch {
+  flex: 1;
+  min-width: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.swatch-color {
+  height: 72px;
+}
+.swatch-info {
+  background: var(--surface);
+  padding: 10px 12px;
+}
+.swatch-name {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+}
+.swatch-hex {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+}
+.swatch-role {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* ── TYPOGRAPHY SAMPLES ── */
+.type-sample {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 10px;
+}
+.type-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.type-display { font-family: var(--font-display); font-size: 42px; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; color: var(--text); line-height: 1; }
+.type-body { font-family: var(--font-body); font-size: 15px; color: var(--text-2); line-height: 1.65; }
+.type-mono { font-family: var(--font-mono); font-size: 13px; color: var(--cyan); }
+
+/* ── ARENA CONCEPT ── */
+.arena-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+@media (max-width: 600px) { .arena-compare { grid-template-columns: 1fr; } }
+.arena-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.arena-preview {
+  height: 180px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.arena-now {
+  background: #c8dcbc;
+}
+.arena-target {
+  background: #04111a;
+  background-image:
+    radial-gradient(ellipse at 30% 60%, rgba(0,229,196,.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 30%, rgba(167,139,250,.05) 0%, transparent 45%);
+}
+.arena-label-bar {
+  background: var(--surface-2);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.arena-label-bar.now { color: #9cba80; }
+.arena-label-bar.target { color: var(--cyan); }
+
+/* CURRENT ARENA ELEMENTS */
+.a-bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: .35;
+}
+.a-hero-now {
+  width: 32px; height: 32px;
+  background: #5cb5a0;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.2);
+}
+.a-enemy-oval {
+  position: absolute;
+  width: 28px; height: 18px;
+  background: rgba(255,255,255,.55);
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.4);
+}
+.a-enemy-rod {
+  position: absolute;
+  width: 12px; height: 34px;
+  background: #3a5a3a;
+  border-radius: 4px;
+  opacity: .6;
+}
+.a-vessel {
+  position: absolute;
+  border-radius: 40px;
+  background: #a8c8a0;
+  opacity: .3;
+}
+
+/* TARGET ARENA ELEMENTS */
+.t-hero {
+  width: 36px; height: 36px;
+  background: radial-gradient(circle, #00e5c4 20%, #009e8a 70%, transparent);
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 18px rgba(0,229,196,.7), 0 0 36px rgba(0,229,196,.3);
+  animation: pulse-hero 2s ease-in-out infinite;
+}
+@keyframes pulse-hero {
+  0%,100% { box-shadow: 0 0 14px rgba(0,229,196,.6), 0 0 30px rgba(0,229,196,.25); }
+  50%      { box-shadow: 0 0 22px rgba(0,229,196,.9), 0 0 48px rgba(0,229,196,.4); }
+}
+.t-enemy-oval {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,61,90,.4);
+  background: rgba(255,61,90,.12);
+  box-shadow: 0 0 8px rgba(255,61,90,.3);
+}
+.t-bacteria {
+  position: absolute;
+  border-radius: 4px;
+  background: rgba(168,230,61,.15);
+  border: 1px solid rgba(168,230,61,.35);
+  box-shadow: 0 0 6px rgba(168,230,61,.25);
+}
+.t-particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--cyan);
+  opacity: .4;
+}
+.t-vessel {
+  position: absolute;
+  border-radius: 40px;
+  border: 1px solid rgba(0,229,196,.12);
+  background: rgba(0,229,196,.03);
+}
+
+/* ── CHARACTER EVOLUTION ── */
+.evo-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.evo-card {
+  flex-shrink: 0;
+  width: 120px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+}
+.evo-cell {
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  position: relative;
+}
+.evo-level {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.evo-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.evo-trait {
+  font-size: 10px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+/* ── REFERENCE CARDS ── */
+.ref-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.ref-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.ref-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.ref-card.dd::before  { background: linear-gradient(90deg, #8b0000, #dc143c); }
+.ref-card.dc::before  { background: linear-gradient(90deg, #e85c00, #ff9500); }
+.ref-card.ret::before { background: linear-gradient(90deg, #00b4d8, #0077b6); }
+.ref-card.isc::before { background: linear-gradient(90deg, #7b2d8b, #c77dff); }
+.ref-card.osm::before { background: linear-gradient(90deg, #00e5c4, #009e8a); }
+.ref-card.spr::before { background: linear-gradient(90deg, #74b816, #a8e63d); }
+
+.ref-game {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.ref-genre {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.ref-borrow {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ref-borrow li {
+  font-size: 12px;
+  color: var(--text-2);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.4;
+}
+.ref-borrow li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--cyan-dim);
+  font-size: 11px;
+}
+
+/* ── GAMEPLAY IMPROVEMENTS ── */
+.feel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.feel-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.feel-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--border-2);
+  line-height: 1.2;
+}
+.feel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.feel-desc { font-size: 12px; margin: 0; }
+
+/* ── PRIORITY PLAN ── */
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 20px;
+  position: relative;
+}
+.phase-list::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: var(--border);
+}
+.phase-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding-bottom: 28px;
+  position: relative;
+}
+.phase-dot {
+  width: 40px;
+  height: 40px;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.phase-dot.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+.phase-content { padding-top: 8px; }
+.phase-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.phase-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.phase-items li {
+  font-size: 12px;
+  color: var(--text-2);
+  padding-left: 12px;
+  position: relative;
+}
+.phase-items li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--text-3);
+}
+.phase-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.phase-tag.art     { background: rgba(167,139,250,.15); color: var(--violet); }
+.phase-tag.ui      { background: rgba(0,229,196,.12);   color: var(--cyan);   }
+.phase-tag.gameplay{ background: rgba(255,209,102,.12); color: var(--gold);   }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+/* ── ACCENT CALLOUT ── */
+.callout {
+  border-left: 3px solid var(--cyan);
+  background: var(--cyan-glow);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 20px 0;
+}
+.callout.danger { border-color: var(--red);    background: var(--red-glow);    }
+.callout.gold   { border-color: var(--gold);   background: var(--gold-glow);   }
+.callout.violet { border-color: var(--violet); background: var(--violet-glow); }
+.callout p { margin: 0; font-size: 13px; }
+.callout p strong { color: var(--text); }
+</style>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<div class="doc-header">
+  <div class="doc-eyebrow">PHAGOS · IMUNVERSE — Design Build Document v1.0</div>
+  <h1 class="doc-title">GAME ART &<br><span>UX REDESIGN</span><br>PLAN</h1>
+  <p class="doc-subtitle">Direction: Dark & Intense — Survival Horror, Organik, Visceral. Sel imun yang berjuang hidup dalam kegelapan jaringan tubuh.</p>
+  <div class="doc-meta">
+    <span class="meta-chip">Dibuat <b>Sep 2026</b></span>
+    <span class="meta-chip">Branch <b>claude/audit-layout-ui-ux-3sph96</b></span>
+    <span class="meta-chip">Status <b>Planning Phase</b></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ 1. MASALAH SEKARANG -->
+<section class="section">
+  <div class="section-label">01</div>
+  <h2 class="section-title">Masalah Saat Ini</h2>
+  <p>Berdasarkan screenshot gameplay nyata dan analisis visual langsung. <strong>Semua masalah ini observable, bukan asumsi dari code.</strong></p>
+
+  <div class="callout danger">
+    <p><strong>Core Problem:</strong> Game punya tema yang kuat (sel imun melawan patogen dalam tubuh) tapi visual language-nya bertentangan total — arena terang seperti game anak-anak, bukan survival horror biologis.</p>
+  </div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <span class="tag">Arena · Kritis</span>
+      <h4>Background Terlalu Terang & Flat</h4>
+      <p>Arena berwarna kuning-hijau pucat (#c8dcbc). Tidak ada depth, tidak ada atmosphere, tidak ada sense of danger. Terasa seperti salad bowl, bukan dalam jaringan tubuh.</p>
+    </div>
+    <div class="problem-card">
+      <span class="tag">Arena · Kritis</span>
+      <h4>Zero Contrast — Semua Melebur</h4>
+      <p>Hero, musuh (oval putih), bakteri (hijau tua), dan background semua di value brightness yang sama. Mata tidak tahu harus fokus ke mana.</p>
+    </div>
+    <div class="problem-card">
+      <span class="tag">Karakter · Tinggi</span>
+      <h4>Hero Terlalu Kecil & Tidak Bernyawa</h4>
+      <p>Mako (macrophage) terlihat sebagai blob kecil yang pasif. Tidak ada pseudopod, tidak ada gerak organik. Tidak terasa seperti sel imun yang "berburu".</p>
+    </div>
+    <div class="problem-card">
+      <span class="tag">Gameplay · Tinggi</span>
+      <h4>Leveling Tidak Terasa</h4>
+      <p>Setelah naik level, tidak ada perubahan visual yang dirasakan player. Hero terlihat sama dari level 1 ke level 8. Tidak ada momen "power fantasy".</p>
+    </div>
+    <div class="problem-card">
+      <span class="tag">Musuh · Medium</span>
+      <h4>Patogen Tidak Mengancam</h4>
+      <p>Bakteri (batang hitam) dan sel oval putih tidak terasa berbahaya. Mereka tidak punya visual personality yang membuat player ingin menghindari atau agresif menyerang.</p>
+    </div>
+    <div class="problem-card">
+      <span class="tag">UI/UX · Medium</span>
+      <h4>Palette Cream Bertentangan</h4>
+      <p>Seluruh UI (dashboard, menu, kartu) menggunakan warna cream yang ramah dan soft — bertolak belakang dengan survival horror tone yang diinginkan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 2. IDENTITY -->
+<section class="section">
+  <div class="section-label">02</div>
+  <h2 class="section-title">Brand Identity: Biopunk Horror</h2>
+
+  <p><strong>Satu kalimat positioning:</strong> PHAGOS adalah roguelike survival tentang organisme mikroskopis yang berjuang di dunia gelap dan visceral di dalam tubuh manusia — terasa seperti Darkest Dungeon, tapi diset di bawah lensa mikroskop fluorescence.</p>
+
+  <div class="callout violet">
+    <p><strong>Visual Metaphor:</strong> Bayangkan lab gelap malam hari. Kamu melihat melalui lensa mikroskop fluorescence. Di dalam, sel-sel bercahaya dari dalam — bioluminescent — melawan bakteri yang memancarkan cahaya racun. Background adalah kegelapan void biologis, bukan permukaan terang.</p>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:600;color:var(--text);margin:24px 0 6px">Palette Warna Baru</h3>
+  <p>Buang cream sepenuhnya untuk elemen gameplay dan utama. Ini sistem warna yang diusulkan:</p>
+
+  <div class="palette-row">
+    <div class="swatch">
+      <div class="swatch-color" style="background:#04111a"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Void</div>
+        <div class="swatch-hex">#04111a</div>
+        <div class="swatch-role">Background utama</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#00e5c4"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Biolum Cyan</div>
+        <div class="swatch-hex">#00e5c4</div>
+        <div class="swatch-role">Hero · HP · Progress</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#ff3d5a"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Infeksi Red</div>
+        <div class="swatch-hex">#ff3d5a</div>
+        <div class="swatch-role">Bahaya · HP kritis</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#a78bfa"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Mutasi Violet</div>
+        <div class="swatch-hex">#a78bfa</div>
+        <div class="swatch-role">Mutation cards · Rare</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#ffd166"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Reward Gold</div>
+        <div class="swatch-hex">#ffd166</div>
+        <div class="swatch-role">Reward · XP · Legendary</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#a8e63d"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Acid Green</div>
+        <div class="swatch-hex">#a8e63d</div>
+        <div class="swatch-role">Racun · Patogen toxin</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:600;color:var(--text);margin:28px 0 6px">Tipografi Baru</h3>
+  <p>Nunito terlalu bulat dan ramah. Tipografi baru harus punya karakter commanding, scientifc, dan ada sedikit edge.</p>
+
+  <div class="type-sample">
+    <div class="type-meta">Display Font — Barlow Condensed 900</div>
+    <div class="type-display" style="color:var(--cyan)">MAKROFAG<br>BERMUTASI</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta">Body Font — Inter 400/500</div>
+    <div class="type-body">Setiap serangan memantulkan duri ke musuh terdekat dalam radius 80px. Struktur spike permukaan memaksimalkan kontak litik dengan membran patogen.</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta">Data Font — JetBrains Mono 400</div>
+    <div class="type-mono">HP 120/120 · WAVE 04 · KILLS 047 · XP 3.2K</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 3. ARENA -->
+<section class="section">
+  <div class="section-label">03</div>
+  <h2 class="section-title">Arena Redesign Concept</h2>
+
+  <p>Perbandingan visual konsep sekarang vs arah target. <strong>Background bukan permukaan kosong — ia adalah dunia biologis yang hidup dan mengancam.</strong></p>
+
+  <div class="arena-compare">
+    <div class="arena-card">
+      <div class="arena-preview arena-now">
+        <!-- Current state elements -->
+        <div class="a-vessel" style="width:200px;height:60px;bottom:20px;left:-20px"></div>
+        <div class="a-vessel" style="width:120px;height:40px;top:10px;right:-10px"></div>
+        <div class="a-enemy-oval" style="top:40px;right:40px"></div>
+        <div class="a-enemy-oval" style="bottom:50px;left:50px"></div>
+        <div class="a-enemy-rod" style="bottom:20px;left:20px;transform:rotate(20deg)"></div>
+        <div class="a-enemy-rod" style="bottom:15px;left:35px;transform:rotate(-10deg)"></div>
+        <div class="a-hero-now"></div>
+      </div>
+      <div class="arena-label-bar now">✗ SEKARANG — Flat, terang, tidak ada atmosphere</div>
+    </div>
+    <div class="arena-card">
+      <div class="arena-preview arena-target">
+        <!-- Target state elements -->
+        <div class="t-vessel" style="width:220px;height:55px;bottom:25px;left:-30px;transform:rotate(-5deg)"></div>
+        <div class="t-vessel" style="width:130px;height:38px;top:15px;right:-15px;transform:rotate(8deg)"></div>
+        <div class="t-particle" style="top:30px;left:30px;opacity:.6"></div>
+        <div class="t-particle" style="top:50px;right:60px;background:var(--violet);opacity:.5"></div>
+        <div class="t-particle" style="bottom:60px;left:70px;opacity:.4"></div>
+        <div class="t-particle" style="bottom:40px;right:80px;background:var(--acid);opacity:.5"></div>
+        <div class="t-enemy-oval" style="width:36px;height:22px;top:35px;right:35px"></div>
+        <div class="t-enemy-oval" style="width:28px;height:18px;bottom:55px;left:45px;border-color:rgba(168,230,61,.4);background:rgba(168,230,61,.1);box-shadow:0 0 8px rgba(168,230,61,.3)"></div>
+        <div class="t-bacteria" style="width:10px;height:30px;bottom:25px;left:25px;transform:rotate(20deg)"></div>
+        <div class="t-bacteria" style="width:10px;height:28px;bottom:20px;left:40px;transform:rotate(-8deg)"></div>
+        <div class="t-hero"></div>
+      </div>
+      <div class="arena-label-bar target">✓ TARGET — Dark void biologis, semua elemen glowing</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:20px">
+    <p><strong>Prinsip Arena:</strong> Background gelap bukan kosong. Ia harus punya 3 layer visual: (1) kegelapan void dengan subtle particle organik yang melayang perlahan, (2) pembuluh darah / dinding jaringan sebagai border organik yang redup, (3) semua elemen aktif (hero, musuh) bercahaya dengan warna identitasnya masing-masing.</p>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:600;color:var(--text);margin:24px 0 12px">Desain Elemen per Arena</h3>
+
+  <div class="feel-list">
+    <div class="feel-item">
+      <div class="feel-num" style="color:var(--cyan-dim)">LF</div>
+      <div>
+        <div class="feel-title">Limfe — Bioluminescent Deep Blue-Teal</div>
+        <p class="feel-desc">Background: deep navy-teal #030d14. Dinding: pembuluh limfe transparan bercahaya cyan redup. Partikel: limfosit kecil melayang. Musuh: patogen berpendar merah-orange di tengah kegelapan.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num" style="color:#ff8fa3">JT</div>
+      <div>
+        <div class="feel-title">Jantung — Pulsing Blood Red</div>
+        <p class="feel-desc">Background: #120408, deep blood void. Dinding: myocardium yang berdenyut perlahan, merah gelap. Partikel: eritrosit mengalir mengikuti arus. Setiap wave dimulai dengan pulse visual yang sinkron dengan detak jantung.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num" style="color:#74c0fc">PR</div>
+      <div>
+        <div class="feel-title">Paru — Oxygen Mist Void</div>
+        <p class="feel-desc">Background: #040c16 dengan subtle shimmer biru-putih. Alveoli sebagai gelembung semi-transparan yang floating. Ketika hero kill musuh, ada micro burst oksigen bercahaya. Patogen paru terlihat seperti viral cluster yang saling menempel.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num" style="color:#da77f2">SR</div>
+      <div>
+        <div class="feel-title">Saraf — Electric Neural Purple</div>
+        <p class="feel-desc">Background: #07051a dengan garis-garis akson yang redup. Sinyal elektrik sesekali bergerak seperti lightning di background. Musuh (patogen saraf) menyebar mengikuti jalur akson, bukan random. Palette: violet-electric.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 4. CHARACTER DESIGN -->
+<section class="section">
+  <div class="section-label">04</div>
+  <h2 class="section-title">Character & Visual Progression</h2>
+
+  <p>Masalah terbesar yang dilaporkan: <strong>"naik level terasa sama saja, tidak ada yang berubah."</strong> Solusinya: setiap tier level harus mengubah visual hero secara nyata, bukan hanya stat.</p>
+
+  <div class="callout gold">
+    <p><strong>Referensi terbaik:</strong> Spore (Cell Stage) — saat kamu makan lebih banyak, sel kamu tumbuh dan berubah bentuk secara real-time. Player merasakan progress secara visual, bukan hanya lewat angka.</p>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:600;color:var(--text);margin:20px 0 4px">Makrofag (Mako) — Evolusi Visual per Tier</h3>
+  <p>Lima tahap visual yang harus terasa berbeda secara signifikan:</p>
+
+  <div class="evo-row">
+    <div class="evo-card">
+      <div class="evo-level">LV 1–2</div>
+      <div class="evo-cell" style="width:48px;height:48px;background:radial-gradient(circle,#00b09b,#006b5e);box-shadow:0 0 10px rgba(0,176,155,.4)"></div>
+      <div class="evo-name">Amoeba Dasar</div>
+      <div class="evo-trait">Blob sederhana. Satu pseudopod pendek. Ukuran kecil.</div>
+    </div>
+    <div class="evo-card">
+      <div class="evo-level">LV 3–4</div>
+      <div class="evo-cell" style="width:56px;height:52px;background:radial-gradient(circle,#00c9b0,#007a6e);box-shadow:0 0 14px rgba(0,201,176,.5);border-radius:50% 44% 56% 48%"></div>
+      <div class="evo-name">Pemburu Aktif</div>
+      <div class="evo-trait">Dua pseudopod. Mulai tidak simetris, terasa "lapar".</div>
+    </div>
+    <div class="evo-card">
+      <div class="evo-level">LV 5–6</div>
+      <div class="evo-cell" style="width:64px;height:60px;background:radial-gradient(circle,#00e5c4,#009e8a);box-shadow:0 0 20px rgba(0,229,196,.6);border-radius:44% 56% 50% 60%"></div>
+      <div class="evo-name">Phagosit Kuat</div>
+      <div class="evo-trait">Tiga pseudopod. Nukleus visible sebagai core yang lebih terang.</div>
+    </div>
+    <div class="evo-card" style="border-color:rgba(167,139,250,.3)">
+      <div class="evo-level">LV 7–9</div>
+      <div class="evo-cell" style="width:72px;height:68px;background:radial-gradient(circle,#a78bfa,#6d4fc4);box-shadow:0 0 24px rgba(167,139,250,.6);border-radius:56% 44% 62% 38%"></div>
+      <div class="evo-name">Mutan Berevolusi</div>
+      <div class="evo-trait">Multi-pseudopod. Warna berubah per mutasi yang dipilih.</div>
+    </div>
+    <div class="evo-card" style="border-color:rgba(255,209,102,.3)">
+      <div class="evo-level">LV 10+</div>
+      <div class="evo-cell" style="width:80px;height:76px;background:radial-gradient(circle,#ffd166,#cc8800);box-shadow:0 0 30px rgba(255,209,102,.7);border-radius:48% 60% 40% 64%;animation:pulse-hero 1.5s ease-in-out infinite"></div>
+      <div class="evo-name">APEX PHAGOCYTE</div>
+      <div class="evo-trait">Besar, dominan, golden glow. Musuh kecil flee secara otomatis.</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:600;color:var(--text);margin:28px 0 12px">Desain Musuh yang Mengancam</h3>
+  <div class="feel-list">
+    <div class="feel-item">
+      <div class="feel-num" style="color:var(--acid)">BK</div>
+      <div>
+        <div class="feel-title">Bakteri — Rod Luminescent Hijau Asam</div>
+        <p class="feel-desc">Bukan lagi batang hitam diam. Bakteri harus bergerak dengan gerakan berputar (flagella animation), berpendar hijau-asam di background gelap. Saat berkelompok, mereka membentuk chain yang terlihat menyeramkan. Ketika mati: burst acid green particles.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num" style="color:var(--red)">VR</div>
+      <div>
+        <div class="feel-title">Virus — Spiky Red Cluster</div>
+        <p class="feel-desc">Cluster spike protein yang menyerupai model SARS-CoV. Bergerak lebih cepat dari bakteri, spike-nya berputar. Berpendar merah di tengah, hitam di tepi. Ketika ada banyak, efek crowd visual mereka menciptakan sense of "overrun".</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num" style="color:var(--violet)">SK</div>
+      <div>
+        <div class="feel-title">Sel Kanker — Dark Mutant Purple</div>
+        <p class="feel-desc">Boss-tier enemy. Besar, pulsing, tidak simetris. Warna: ungu gelap dengan inti hitam dan pinggiran yang berkedip-kedip tidak teratur. Terasa "rusak" dan "salah secara biologis". Aura membuat area sekitarnya terasa corrupt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 5. GAMEPLAY FEEL -->
+<section class="section">
+  <div class="section-label">05</div>
+  <h2 class="section-title">Gameplay Feel Improvements</h2>
+
+  <p>Mechanics sudah benar secara biologis (membran, mutasi, engulf). Yang kurang adalah <strong>game feel</strong> — feedback visual dan audio yang membuat setiap action terasa impactful.</p>
+
+  <div class="feel-list">
+    <div class="feel-item">
+      <div class="feel-num">01</div>
+      <div>
+        <div class="feel-title">Pulse Ability — Harusnya Dramatis</div>
+        <p class="feel-desc">Sekarang: klik Pulse, musuh mati. Target: klik Pulse → screen flash cyan → shockwave ring melebar dari hero → musuh terdorong dan dissolved dalam particle burst → brief slow-motion impact frame. Referensi: Returnal's dash kill effect.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num">02</div>
+      <div>
+        <div class="feel-title">Engulf / Devour — Visceral & Satisfying</div>
+        <p class="feel-desc">Sekarang: musuh menghilang saat DEVOUR diklik. Target: pseudopod extend → wrap musuh → pull ke dalam body hero → musuh "dimakan" dengan animasi meleleh ke dalam → hero briefly glows brighter setelah engulf. Size increase yang terasa walau hanya +2%.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num">03</div>
+      <div>
+        <div class="feel-title">Level Up — Full Screen Event, Bukan Modal</div>
+        <p class="feel-desc">Gameplay BERHENTI total. Screen menjadi gelap. Hero di tengah dalam pose "evolusi". Tiga kartu mutasi muncul dari bawah dengan dramatik. Pilih satu → hero berubah secara visual seketika. Seluruh layar jadi "stage" untuk momen ini.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num">04</div>
+      <div>
+        <div class="feel-title">HP Kritis — Screen Vignette Merah</div>
+        <p class="feel-desc">Ketika HP &lt; 25%: screen edge mulai glowing merah dan berdenyut. Hero visual berubah (lebih redup, pseudopod lebih lambat). Musiknya berubah ke tension. Setiap serangan yang diterima ada screen shake kecil. Membuat player benar-benar merasakan bahwa sel mereka sekarat.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num">05</div>
+      <div>
+        <div class="feel-title">Kill Feedback — Tiered Visual Response</div>
+        <p class="feel-desc">Kill biasa: particle burst kecil sesuai warna musuh + bounce angka kill. Kill dengan skill: larger burst + hit stop (2–4 frame pause) + sound cue berbeda. Boss kill: full screen burst + dramatic pause + gold shower particle. Setiap jenis kill harus terasa BERBEDA.</p>
+      </div>
+    </div>
+    <div class="feel-item">
+      <div class="feel-num">06</div>
+      <div>
+        <div class="feel-title">Wave Transition — Momentary Dread</div>
+        <p class="feel-desc">Sebelum wave baru dimulai: brief darkness (0.5s) + bass rumble + kemudian patogen baru muncul dari tepi arena dengan emergence animation (bukan spawn begitu saja). Membuat player siap-siap, bukan terkejut tiba-tiba.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 6. REFERENCES -->
+<section class="section">
+  <div class="section-label">06</div>
+  <h2 class="section-title">Reference Games & Yang Dipinjam</h2>
+
+  <div class="ref-grid">
+    <div class="ref-card dd">
+      <div class="ref-game">Darkest Dungeon</div>
+      <div class="ref-genre">Roguelike · Gothic Horror · UI Reference</div>
+      <ul class="ref-borrow">
+        <li>UI sendiri menciptakan tekanan (bukan hanya gameplay)</li>
+        <li>Character stress system yang terasa di visual portrait</li>
+        <li>Setiap screen punya weight dan atmosphere yang sama</li>
+        <li>Typography Gothic yang membuat bahaya terasa nyata</li>
+        <li>Death dan konsekuensi terasa "berat" lewat UI</li>
+      </ul>
+    </div>
+
+    <div class="ref-card dc">
+      <div class="ref-game">Dead Cells</div>
+      <div class="ref-genre">Roguelike · Action · Level-up Reference</div>
+      <ul class="ref-borrow">
+        <li>Card selection: dark bg, tiga pilihan besar dengan glow per-rarity</li>
+        <li>Kill feedback yang crisp dan satisfying</li>
+        <li>Setiap ability punya distinct visual signature</li>
+        <li>Mutation system yang terasa dalam perubahan gameplay</li>
+        <li>HUD minimal — hanya yang perlu ada</li>
+      </ul>
+    </div>
+
+    <div class="ref-card ret">
+      <div class="ref-game">Returnal</div>
+      <div class="ref-genre">Roguelike · Sci-fi Horror · Game Feel</div>
+      <ul class="ref-borrow">
+        <li>HUD yang terasa seperti bagian dari dunia, bukan overlay</li>
+        <li>Visual feedback yang dramatis untuk setiap ability</li>
+        <li>Arena yang hostile dan atmospheric</li>
+        <li>Biological horror aesthetic (body horror dalam sci-fi)</li>
+        <li>Camera shake dan screen effect yang terukur</li>
+      </ul>
+    </div>
+
+    <div class="ref-card isc">
+      <div class="ref-game">Binding of Isaac</div>
+      <div class="ref-genre">Roguelike · Body Horror · Item Design</div>
+      <ul class="ref-borrow">
+        <li>Setting organ tubuh — konten biologis tanpa sensor</li>
+        <li>Setiap item punya personality lewat ikon kecil saja</li>
+        <li>Synergy system yang terasa saat ditemukan player</li>
+        <li>Boss design: unik, mengancam, punya attack pattern</li>
+        <li>Visual language yang konsisten walau aset sederhana</li>
+      </ul>
+    </div>
+
+    <div class="ref-card osm">
+      <div class="ref-game">Osmos</div>
+      <div class="ref-genre">Ambient · Biology · Arena Feel</div>
+      <ul class="ref-borrow">
+        <li>Dark fluid background yang langsung terasa "dalam sel"</li>
+        <li>Semua organisme glowing di atas darkness</li>
+        <li>Size hierarchy yang visual dan intuitif</li>
+        <li>Absorb mechanic yang satisfying secara visual</li>
+        <li>Atmospheric audio yang membuat dunia terasa real</li>
+      </ul>
+    </div>
+
+    <div class="ref-card spr">
+      <div class="ref-game">Spore Cell Stage</div>
+      <div class="ref-genre">Evolution · Biology · Progression</div>
+      <ul class="ref-borrow">
+        <li>Visual evolution yang NYATA setelah makan/level up</li>
+        <li>Size change yang memberi power fantasy</li>
+        <li>Predator-prey dynamic terasa di visual</li>
+        <li>Mikroskop underwater aesthetic yang organik</li>
+        <li>Growth feedback yang membuat player terus ingin makan</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 7. PRIORITY PLAN -->
+<section class="section">
+  <div class="section-label">07</div>
+  <h2 class="section-title">Priority Implementation Plan</h2>
+
+  <p>Urutan berdasarkan <strong>impact vs effort</strong>. Screen yang player lihat paling sering dan memiliki dampak terbesar pada first impression dikerjakan duluan.</p>
+
+  <div class="phase-list">
+
+    <div class="phase-item">
+      <div class="phase-dot active">P1</div>
+      <div class="phase-content">
+        <div class="phase-tag art">Art Foundation</div>
+        <div class="phase-title">Design Token Rebuild — Buang Cream, Masuk Dark</div>
+        <ul class="phase-items">
+          <li>Ganti seluruh palette ke Biopunk Horror tokens</li>
+          <li>Ganti Nunito → Barlow Condensed (display) + Inter (body)</li>
+          <li>Definisikan shadow system baru: glow bukan drop shadow</li>
+          <li>Base arena background: dark void dengan micro-particle system</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot">P2</div>
+      <div class="phase-content">
+        <div class="phase-tag art">Arena & Character</div>
+        <div class="phase-title">Arena Atmosphere + Hero Visual Tiers</div>
+        <ul class="phase-items">
+          <li>Arena background: dark layered (void → tissue walls → particle layer)</li>
+          <li>Hero visual per-level tier (5 tahap dari blob ke apex)</li>
+          <li>Musuh redesign: bakteri glow acid, virus red spike cluster</li>
+          <li>Per-arena color accent (limfe=cyan, jantung=red, paru=blue, saraf=violet)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot">P3</div>
+      <div class="phase-content">
+        <div class="phase-tag gameplay">Game Feel</div>
+        <div class="phase-title">Kill Feedback + Ability Effects</div>
+        <ul class="phase-items">
+          <li>Tiered kill particles (biasa vs skill vs boss)</li>
+          <li>Pulse: shockwave ring + particle burst + brief screen flash</li>
+          <li>Engulf/Devour: pseudopod animation + absorption visual</li>
+          <li>HP kritis: screen vignette merah yang berdenyut</li>
+          <li>Wave transition: darkness + emergence animation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot">P4</div>
+      <div class="phase-content">
+        <div class="phase-tag ui">UI Screens</div>
+        <div class="phase-title">Level-Up Full Screen + Dashboard Rebuild</div>
+        <ul class="phase-items">
+          <li>Level-up: full screen dark stage, kartu dramatis dari bawah</li>
+          <li>Dashboard: dark hero stage yang dominan, satu CTA besar</li>
+          <li>Semua card system menggunakan dark palette + glow borders</li>
+          <li>Game Over: emotional resolution, bukan data dump</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot">P5</div>
+      <div class="phase-content">
+        <div class="phase-tag gameplay">Polish</div>
+        <div class="phase-title">Audio-Visual Sync + Micro-animations</div>
+        <ul class="phase-items">
+          <li>Boss entrance: full screen event, tidak tiba-tiba spawn</li>
+          <li>Mutation selection: hero preview berubah real-time saat hover kartu</li>
+          <li>Screen shake yang terukur (tidak berlebihan)</li>
+          <li>Particle pool optimization agar 60fps stabil</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout gold" style="margin-top:12px">
+    <p><strong>Catatan Penting:</strong> P1 adalah foundation — tanpa palette dan tipografi yang benar, P2–P5 tidak akan terasa kohesif. Jangan skip ke arena sebelum design tokens selesai. Visual language yang konsisten adalah yang membuat game terasa "sengaja didesain", bukan asal jadi.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ FOOTER -->
+<div class="divider"></div>
+<div style="text-align:center;padding-bottom:20px">
+  <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase">
+    PHAGOS · Design Build Plan · Sep 2026 · Branch: claude/audit-layout-ui-ux-3sph96
+  </div>
+  <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-top:4px">
+    Direction: Dark & Intense · Biopunk Horror · Survival Roguelike
+  </div>
+</div>

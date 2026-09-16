@@ -70,6 +70,16 @@ import { vo } from './systems/vo-system.js'; // R3: lapisan VO
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
+const pulseFlashEl = document.getElementById('pulse-flash');
+const waveDarkEl = document.getElementById('wave-darkness');
+const bossEnterEl = document.getElementById('boss-entrance');
+
+function retriggerOverlay(el, cls = 'on') {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
 
 // ---------------------------------------------------------------------
 // Canvas sizing (DPR-aware, cap 2 untuk performa)
@@ -152,7 +162,13 @@ function wireUiBridge() {
     setTimeout(() => vignette.classList.remove('flash'), 60);
   });
 
+  on('pulseFlash', () => retriggerOverlay(pulseFlashEl, 'on'));
+
   on('runstart', () => {
+    pulseFlashEl?.classList.remove('on');
+    waveDarkEl?.classList.remove('on');
+    bossEnterEl?.classList.remove('on');
+    document.getElementById('hp-crit-vignette')?.classList.remove('critical');
     hudScreen.resetHUD();
     document.getElementById('hud-antigen')?.classList.add('hidden'); // R3: chip reset
     document.getElementById('phago-meter')?.classList.add('hidden'); // R4: meter reset
@@ -170,7 +186,9 @@ function wireUiBridge() {
   });
 
   on('wave', ({ wave, isBoss }) => {
-    hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
+    hudScreen.showAnnounce(isBoss ? 'PATOGEN APEX' : `WAVE ${wave}`, isBoss);
+    if (isBoss) retriggerOverlay(bossEnterEl, 'on');
+    else retriggerOverlay(waveDarkEl, 'on');
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
   /**
@@ -367,8 +385,6 @@ function wireUiBridge() {
     bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
   });
 
-  // E1 poin 9: AMARA muncul saat pemain MENDAPAT HERO BARU — menjelaskan
-  // spesifikasi (role + skill) dengan bahasa awam, karakter penuh bergestur.
   on('heroUnlocked', ({ heroId }) => {
     const h = getData().heroes.heroes.find((x) => x.id === heroId);
     if (!h) return;
@@ -376,9 +392,7 @@ function wireUiBridge() {
       const sd = getData().skills.skills.find((x) => x.id === sid);
       return sd ? sd.name : sid;
     }).join(', ');
-    setTimeout(() => showPresenter('amara',
-      `Selamat! ${h.name} — ${h.title} — bergabung dengan pasukanmu. Perannya ${h.role}. Jurus andalannya: ${skillNames}. Coba dia di run berikutnya!`,
-      { duration: 9 }), 900);
+    emit('toast', { msg: `${h.name} bergabung! Peran: ${h.role}. Jurus: ${skillNames}.`, color: 'var(--teal)' });
   });
 
   on('bosschest', (payload) => screenManager.show('bosschest', payload));

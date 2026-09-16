@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PHAGOS — Roadmap Rebuild Biopunk</title>
+  <meta name="theme-color" content="#04111a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" />
+  <style>
+    :root {
+      --void: #04111a;
+      --cyan: #00e5c4;
+      --red: #ff3d5a;
+      --violet: #a78bfa;
+      --gold: #ffd166;
+      --acid: #a8e63d;
+      --ink: #d7f6ef;
+      --mute: #7aa3a0;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; min-height: 100%;
+      background: radial-gradient(ellipse at 50% 0%, #0a2430 0%, var(--void) 55%);
+      color: var(--ink);
+      font-family: Inter, system-ui, sans-serif;
+    }
+    body { padding: 28px 18px 64px; }
+    a { color: var(--cyan); }
+    header {
+      max-width: 920px; margin: 0 auto 28px;
+      border: 1px solid rgba(0,229,196,0.28);
+      box-shadow: 0 0 40px rgba(0,229,196,0.12);
+      border-radius: 18px; padding: 22px 24px;
+      background: rgba(4,17,26,0.72);
+    }
+    .kicker {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      letter-spacing: 0.22em; font-size: 11px; color: var(--cyan);
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: "Barlow Condensed", Impact, sans-serif;
+      font-weight: 900; letter-spacing: 0.04em;
+      font-size: clamp(32px, 6vw, 56px); margin: 6px 0 8px;
+      text-shadow: 0 0 22px rgba(0,229,196,0.35);
+    }
+    .sub { color: var(--mute); max-width: 62ch; line-height: 1.5; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+    }
+    .chip {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 11px; padding: 4px 9px; border-radius: 999px;
+      border: 1px solid rgba(0,229,196,0.35); color: var(--cyan);
+    }
+    .chip.gold { border-color: rgba(255,209,102,0.45); color: var(--gold); }
+    .chip.violet { border-color: rgba(167,139,250,0.45); color: var(--violet); }
+    main { max-width: 920px; margin: 0 auto; display: grid; gap: 14px; }
+    section {
+      background: rgba(7,24,32,0.86);
+      border: 1px solid rgba(167,139,250,0.22);
+      border-radius: 16px; padding: 16px 18px 14px;
+    }
+    section h2 {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 22px; letter-spacing: 0.06em; margin: 0 0 8px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .done {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 11px; color: var(--acid);
+      border: 1px solid rgba(168,230,61,0.4);
+      padding: 2px 8px; border-radius: 999px;
+    }
+    ul { margin: 0; padding: 0 0 0 18px; }
+    li { margin: 5px 0; line-height: 1.45; }
+    li code, p code {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.86em; color: var(--gold);
+    }
+    footer {
+      max-width: 920px; margin: 22px auto 0; color: var(--mute); font-size: 13px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+    .token {
+      padding: 10px 12px; border-radius: 12px;
+      background: #04111a; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .swatch { width: 100%; height: 10px; border-radius: 99px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="kicker">http://roadmap.mu · live progress</div>
+    <h1>PHAGOS REBUILD — DARK &amp; INTENSE</h1>
+    <p class="sub">
+      Arah desain: biopunk horror / fluorescence microscope. Sumber kebenaran:
+      <a href="docs/PHAGOS-DESIGN-PLAN.html">docs/PHAGOS-DESIGN-PLAN.html</a>.
+      Gameplay numbers tetap di <code>data/*.json</code>. Build cache-bust seragam <code>53a</code>.
+    </p>
+    <div class="meta">
+      <span class="chip">BUILD 53a</span>
+      <span class="chip gold">P1–P5 landed</span>
+      <span class="chip violet">overlay last-load biopunk.css</span>
+      <span class="chip">branch arena/01a0a556-imunverse</span>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>Tokens <span class="done">DONE</span></h2>
+      <div class="grid">
+        <div class="token">void #04111a<div class="swatch" style="background:#04111a;border:1px solid #00e5c4"></div></div>
+        <div class="token">cyan #00e5c4<div class="swatch" style="background:#00e5c4"></div></div>
+        <div class="token">red #ff3d5a<div class="swatch" style="background:#ff3d5a"></div></div>
+        <div class="token">violet #a78bfa<div class="swatch" style="background:#a78bfa"></div></div>
+        <div class="token">gold #ffd166<div class="swatch" style="background:#ffd166"></div></div>
+        <div class="token">acid #a8e63d<div class="swatch" style="background:#a8e63d"></div></div>
+      </div>
+      <p>Display Barlow Condensed · body Inter · data JetBrains Mono. Glow, bukan drop-shadow.</p>
+    </section>
+
+    <section>
+      <h2>P1 — Foundation <span class="done">DONE</span></h2>
+      <ul>
+        <li>Void arena <code>#04111a</code>, theme-color &amp; apple status bar gelap.</li>
+        <li><code>styles/biopunk.css?v=53a</code> load terakhir setelah portrait.</li>
+        <li>Background wash 0.72 + cyan pulse glow + micro-particle fluorescence.</li>
+        <li>Depth fog canvas di-remap ke void, bukan mint/cream.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>P2 — Characters &amp; arena <span class="done">DONE</span></h2>
+      <ul>
+        <li>Hero 5 run-tier: blob → tendril → armor → spikes → apex gold (<code>drawHeroRunForm</code>).</li>
+        <li>Pathogen family: bakteri acid+flagella, virus red spikes, kanker violet mass.</li>
+        <li>Arena accents tetap dari JSON (<code>limfe</code> cyan, <code>jantung</code> red, <code>paru</code> blue, <code>saraf</code> violet). <code>bonus.*</code> tidak diubah.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>P3 — Combat juice <span class="done">DONE</span></h2>
+      <ul>
+        <li>Kill FX bertingkat + kinds baru: <code>lyse</code>, <code>engulf_wrap</code>, <code>pulse_shock</code>.</li>
+        <li>Pulse: shockwave canvas + overlay <code>#pulse-flash.on</code>.</li>
+        <li>Engulf wrap + absorb; hit-stop fallback <code>0.15</code>.</li>
+        <li>HP &lt; 25% vignette persisten <code>#hp-crit-vignette.critical</code>.</li>
+        <li>Wave darkness + boss entrance overlays.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>P4 — Screens <span class="done">DONE</span></h2>
+      <ul>
+        <li>Level-up cards gelap (overlay CSS) + CTA <code>BERMUTASI!</code>.</li>
+        <li>Dashboard / HUD cream di-cover biopunk overlay.</li>
+        <li>Game Over emosional: <em>Organisme runtuh.</em> / <em>Kamu bertahan. Membran menolak kematian.</em></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>P5 — Polish <span class="done">DONE</span></h2>
+      <ul>
+        <li>Boss entrance ring + title <code>PATOGEN APEX</code>.</li>
+        <li>Mutation hover preview di <code>#mut-preview-canvas</code>.</li>
+        <li>Screen shake di-cap terukur (max 10px).</li>
+        <li>Particle/effect pool swap-remove, cap 400/110, target 60fps.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Guardrails</h2>
+      <ul>
+        <li>String UI baru lewat <code>data/lang.json</code> (kunci ID, terjemahan EN).</li>
+        <li>Gameplay → UI hanya via <code>ui-bridge</code> (<code>pulseFlash</code>, <code>wave</code>, <code>playerHit</code>).</li>
+        <li>Tidak ada PR dari sesi ini — commit &amp; push branch Arena saja.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Canonical live page: <a href="http://roadmap.mu">http://roadmap.mu</a> · local file <code>roadmap.html</code> · PHAGOS build 53a.
+  </footer>
+</body>
+</html>

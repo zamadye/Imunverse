@@ -112,7 +112,7 @@ function roundHexPath(ctx, cx, cy, R, round) {
 // Palet arena aktif — diganti saat run dimulai lewat setArenaPalette()
 // (dari data/arenas.json). Semua key punya fallback agar aman.
 let PALETTE = {
-  hex: '#e2ecc9', vignette: 'rgba(24,70,52,0.28)',
+  hex: '#04111a', vignette: 'rgba(4,17,26,0.62)',
   props: ['prop_weed.png', 'prop_cell.png'],
 };
 
@@ -125,8 +125,8 @@ const AMBIENT_DEFAULTS = {
   drift: 9,        // kecepatan hanyut ke atas (px/detik)
   opacity: 0.16,   // alpha maksimum — rendah agar tak ganggu combat
   parallax: 0.08,  // paling lambat = paling "jauh"
-  tint: '255,255,255', // triplet rgb badan partikel
-  shade: '16,64,58',   // triplet rgb inti (efek sel darah: inti gelap)
+  tint: '0,229,196', // micro-particle fluorescence
+  shade: '4,17,26',   // inti void
 };
 const PULSE_DEFAULTS = {
   bpm: 64,         // detak per menit saat tenang
@@ -182,8 +182,8 @@ const ELEMENT_DEFAULTS = {
   parallax: 0.3,   // midground — antara reef jauh & dekat
 };
 const BUBBLE_DEFAULTS = {
-  c1: 'rgba(255,255,255,0.10)',
-  c2: 'rgba(255,255,255,0.16)',
+  c1: 'rgba(0,229,196,0.10)',
+  c2: 'rgba(167,139,250,0.12)',
 };
 
 function elementCfg() {
@@ -224,9 +224,9 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   // Gradien halus memberi kedalaman; isi anatomi (lipatan/makanan/sel)
   // digambar world-anchored di drawArena3D mengikuti kamera.
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, hexShade(PALETTE.hex, 1.03));
-  g.addColorStop(0.5, PALETTE.hex || '#e2ecc9');
-  g.addColorStop(1, hexShade(PALETTE.hex, 0.86));
+  g.addColorStop(0, hexShade(PALETTE.hex, 0.72));
+  g.addColorStop(0.5, PALETTE.hex || '#04111a');
+  g.addColorStop(1, hexShade(PALETTE.hex, 0.52));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
@@ -260,15 +260,15 @@ export function drawBackground(ctx, camX, camY, w, h, time) {
   // Satu gradient + satu fill per frame; alpha puncak kecil (default 0.05).
   if (govLevel === 1 && pc.glowAlpha > 0 && beat > 0.01) {
     const br = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.7);
-    br.addColorStop(0, `rgba(255,255,255,${(pc.glowAlpha * beat).toFixed(3)})`);
-    br.addColorStop(1, 'rgba(255,255,255,0)');
+    br.addColorStop(0, `rgba(0,229,196,${(pc.glowAlpha * beat).toFixed(3)})`);
+    br.addColorStop(1, 'rgba(0,229,196,0)');
     ctx.fillStyle = br;
     ctx.fillRect(0, 0, w, h);
   }
 
   // ---- vignette lembut tepi layar ----
   const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
-  vg.addColorStop(0, 'rgba(16,64,58,0)');
+  vg.addColorStop(0, 'rgba(4,17,26,0)');
   vg.addColorStop(1, PALETTE.vignette);
   ctx.fillStyle = vg;
   ctx.fillRect(0, 0, w, h);

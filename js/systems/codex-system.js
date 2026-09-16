@@ -19,6 +19,19 @@ export function isSeen(id) {
   return !!(STATE.meta.codexSeen && STATE.meta.codexSeen[id]);
 }
 
+// Batch toast: collect newly unlocked codex names, flush as one toast after 400ms
+let _pendingCodexNames = [];
+let _codexFlushTimer = null;
+function _flushCodexToast() {
+  _codexFlushTimer = null;
+  if (!_pendingCodexNames.length) return;
+  const names = _pendingCodexNames.splice(0);
+  const message = names.length === 1
+    ? `Bio-Pedia: kartu ${names[0]} tercatat!`
+    : `Bio-Pedia: ${names.length} kartu baru tercatat!`;
+  emit('toast', { message, kind: 'gold' });
+}
+
 /** Tandai entitas pernah ditemui. @returns {boolean} true bila BARU terbuka. */
 export function markSeen(id) {
   if (!id) return false;
@@ -31,7 +44,9 @@ export function markSeen(id) {
   // cermin ke stats agar sistem misi existing bisa menghitungnya
   meta.stats.codexCards = (meta.stats.codexCards || 0) + 1;
   writeSave(meta);
-  emit('toast', { message: `Bio-Pedia: kartu ${def.id} tercatat!`, kind: 'gold' });
+  _pendingCodexNames.push(def.id);
+  clearTimeout(_codexFlushTimer);
+  _codexFlushTimer = setTimeout(_flushCodexToast, 400);
   return true;
 }
 
