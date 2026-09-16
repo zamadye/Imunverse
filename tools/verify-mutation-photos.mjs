@@ -290,6 +290,13 @@ if (API?.game) {
         player.attackFlash = attack ? 0.12 : 0; // detik (bukan piksel)
         player.swing = 0;
         player.facing = facing;
+        // flip sekarang DIHALUSKAN (animFlip lewat 0 saat berbalik) — jalankan
+        // beberapa tick update tanpa input supaya balikannya selesai sebelum
+        // kita mengukur (tanpa ini flip masih ≈ +1 dan tes keliru).
+        for (let _i = 0; _i < 40; _i++) {
+          player.update(1 / 60, { x: 0, y: 0, magnitude: 0 }, game);
+          player.attackFlash = attack ? 0.12 : 0; // update mengurangi timer
+        }
         draws.length = 0;
         game.render(16, time);
         await sleep(10);

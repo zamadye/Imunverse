@@ -2278,12 +2278,12 @@ applyChapterTier(enemy, run) {
     drawArena3D(ctx, P, time);
 
     /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
-    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0 } = {}) => {
+    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1 } = {}) => {
       const q = P.project(x, y);
       ctx.save();
       ctx.translate(q.x, q.y - lift * q.s);
       if (tilt) ctx.rotate(tilt);
-      ctx.scale(q.s * flip, q.s);
+      ctx.scale(q.s * flip * sx, q.s * sy);
       ctx.translate(-x, -y);
       return q;
     };
@@ -2407,7 +2407,16 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
-    const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
+    // UI-REBUILD P8: rumus bob MENERUS — dulu memilih antara dua rumus
+    // (jalan vs diam) sehingga nilai melompat saat tombol dilepas. Sekarang
+    // mengambang dasar selalu ada, dan langkah jalan ditambahkan perlahan
+    // sebesar `moveAmt` (0..1) yang dihaluskan di player.update().
+    const pMove = Math.max(0, Math.min(1, player.moveAmt || 0));
+    // Bentuk gelombang sin²((1 - cos 2x)/2): sama "mantul"-nya seperti |sin|,
+    // tapi TANPA patahan di titik nol — jadi tidak ada frame yang melompat.
+    const pStep = (1 - Math.cos((player.walkPhase || 0) * 2)) / 2;
+    const pBob = Math.sin(time * 2.1) * 1.1 + pMove * pStep * 3.4;
+    bobOf.player = pBob;
     const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
     const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
     const pBody = {
@@ -2582,9 +2591,24 @@ applyChapterTier(enemy, run) {
               if (fallback && hasSprite(fallback)) { path = fallback; break; }
             }
           }
-          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
-          const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
+          // UI-REBUILD P8: gerakan NATURAL ke semua arah.
+          //  · flip dihaluskan (animFlip lewat 0 saat berbalik → badan menipis
+          //    sesaat, bukan langsung jump ke sisi lain).
+          //  · condong searah jalan (kiri/kanan) — dikalikan animFlip karena
+          //    mirror membalik arah rotasi.
+          //  · ayunan halus saat berjalan + tebasan saat Pulse.
+          //  · gerak vertikal (atas/bawah) jadi squash-stretch halus (sx/sy),
+          //    jadi mendekat terasa "membesar" dan menjauh "mengecil".
+          const _rawFlip = typeof player.animFlip === 'number' ? player.animFlip : (Math.cos(player.facing) < 0 ? -1 : 1);
+          const _sgn = _rawFlip < 0 ? -1 : 1;
+          const flip = _sgn * Math.max(0.14, Math.abs(_rawFlip)); // jangan pernah 0 (sprite hilang)
+          const _lean = (player.lean || 0) * _rawFlip;
+          const sway = Math.sin((player.walkPhase || 0) * 2) * 0.05 * pMove;
+          const tilt = _lean + sway + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
+          const _depth = Math.max(-1, Math.min(1, player.depth || 0));
+          const sx = 1 + _depth * 0.05;   // mendekat → sedikit melebar
+          const sy = 1 - _depth * 0.03;   // dan sedikit merapat
+          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt, sx, sy });
           const auraAcc = STATE.meta.cosmetics?.aura
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
           // E1 poin 5: aura neon default DIHAPUS — hanya aura KOSMETIK

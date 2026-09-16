@@ -12,6 +12,8 @@
     "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
     "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs",
     "verify:photos": "node tools/verify-mutation-photos.mjs",
-    "verify:screens": "node tools/verify-screens.mjs"
+    "verify:screens": "node tools/verify-screens.mjs",
+    "verify:animasi": "node tools/verify-animasi.mjs",
+    "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi"
   }
 }

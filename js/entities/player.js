@@ -38,6 +38,14 @@ export class Player {
     this.moving = false;
     this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
     this.stepT = 0;     // jeda antar langkah (debu kaki)
+    // ---- ANIMASI HALUS (UI-REBUILD P8) ----
+    // Dulu sprite hanya dibalik kiri↔kanan secara instan (flip = ±1), jadi
+    // gerakan terasa kaku dan tidak pernah bereaksi ke arah atas/bawah.
+    // Sekarang semua ditahan oleh smoothing berbasis dt:
+    this.animFlip = 1;  // -1..1, lewat 0 saat berputar → sprite "menipis" = berbalik
+    this.moveAmt = 0;   // 0..1 seberapa kuat sedang berjalan (untuk bob & ayun)
+    this.lean = 0;      // miring ke arah jalan (rad) — kiri/kanan
+    this.depth = 0;     // -1..1 gerakan vertikal (menjauh → -1, mendekat → +1)
     this.vx = 0;        // V2 Phase 2: velocity smoothing (accel/decel)
     this.vy = 0;
     this.alive = true;
@@ -78,11 +86,36 @@ export class Player {
     }
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+    // ---- Animasi halus: semua arah (kiri/kanan/atas/bawah) ----
+    // Nilai mentah dihitung dari kecepatan (bukan tombol), lalu dihaluskan
+    // dengan peluruhan eksponensial supaya transisi tidak pernah melompat.
+    {
+      const spd = Math.max(1, this.stats.speed || 1);
+      const vlen = Math.hypot(this.vx, this.vy);
+      const targetMove = Math.min(1, vlen / spd);
+      const targetFlip = Math.cos(this.facing) < 0 ? -1 : 1;
+      // miring searah jalan (dibatasi) — terasa seperti mencondongkan badan
+      const targetLean = Math.max(-1, Math.min(1, this.vx / spd)) * 0.13;
+      // vertikal: + = mendekat ke kamera (bawah layar), - = menjauh
+      const targetDepth = Math.max(-1, Math.min(1, this.vy / spd));
+      const ease = (cur, target, rate) => cur + (target - cur) * (1 - Math.exp(-rate * dt));
+      this.moveAmt = ease(this.moveAmt, targetMove, 7);
+      this.animFlip = ease(this.animFlip, targetFlip, 11);
+      this.lean = ease(this.lean, targetLean, 8);
+      this.depth = ease(this.depth, targetDepth, 6);
+    }
+
     if (hasInput) {
       this.facing = Math.atan2(move.y, move.x);
       this.moving = true;
-      // Fase 12b: animasi jalan — bobbing + debu langkah kecil
-      this.walkPhase += dt * (this.stats.speed / 16);
+      // Fase 12b: animasi jalan — bobbing + debu langkah kecil.
+      // UI-REBUILD P8: laju langkah 3–9 rad/dtk mengikuti kecepatan AKTUAL
+      // (≈2–3 langkah/dtk). Rumus lama (speed/16 ≈ 30 rad/dtk) membuat
+      // mantulan terlalu cepat sampai 2 px/frame — terlihat bergetar, bukan
+      // berjalan.
+      const _spdRef = Math.max(1, this.stats.speed || 1);
+      const _ratio = Math.min(1, Math.hypot(this.vx, this.vy) / _spdRef);
+      this.walkPhase += dt * (3 + 6 * _ratio);
       this.stepT -= dt;
       if (this.stepT <= 0 && game && game.run) {
         this.stepT = 0.24;

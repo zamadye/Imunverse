@@ -14,6 +14,32 @@
    Tubuh, modal Misi, dan menu "…".
    ===================================================================== */
 
+
+/* ---------------------------------------------------------------
+   0. TOKEN PALET — diekstrak dari aset latar
+   (assets/ui/bg-dashboard.jpg & bg-loading.jpg: dominan #052426 / #031b1d
+   dengan sorot teal #173736 · #264947 · #386964).
+   Semua permukaan (kartu peta, dock, tombol MAIN, modal misi, layar loading)
+   WAJIB memakai token ini supaya konsisten dengan latar foto.
+   --------------------------------------------------------------- */
+:root {
+  --dash-bg-deep:  #031b1d;
+  --dash-bg-mid:   #052426;
+  --dash-bg-tint:  #173736;
+  --dash-glass:    rgba(5, 36, 38, 0.72);
+  --dash-glass-2:  rgba(6, 30, 28, 0.92);
+  --dash-glass-3:  rgba(10, 38, 36, 0.72);
+  --dash-edge:     rgba(127, 227, 208, 0.22);
+  --dash-edge-2:   rgba(127, 227, 208, 0.42);
+  --dash-ink:      #e6fbf5;
+  --dash-ink-soft: rgba(198, 236, 227, 0.78);
+  --dash-accent:   #7fe3d0;
+  --dash-accent-2: #35d0ba;
+  --dash-gold:     #ffd166;
+  --dash-coral:    #ff7a5c;
+  --dash-shadow:   0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
 /* ---------------------------------------------------------------
    1. LATAR FOTO
    Ganti file assets/ui/bg-dashboard.jpg / bg-loading.jpg untuk
@@ -52,13 +78,42 @@
 }
 
 #screen-loading {
+  /* Latar foto loading — warna kartu di bawah mengikuti palet foto ini. */
+  background-color: var(--dash-bg-deep);
   background-image:
-    linear-gradient(180deg, rgba(4, 22, 21, 0.78), rgba(4, 22, 21, 0.92)),
+    linear-gradient(180deg, rgba(4, 22, 21, 0.72), rgba(4, 22, 21, 0.90)),
     url('../assets/ui/bg-loading.jpg');
   background-size: cover, cover;
   background-position: center, center;
   background-repeat: no-repeat;
 }
+
+/* Kartu loading: kaca gelap teal — SAMA dengan permukaan dashboard supaya
+   transisi loading → dashboard tidak berubah palet. */
+#screen-loading .load-box {
+  padding: clamp(18px, 3vh, 30px) clamp(20px, 5vw, 40px);
+  border-radius: 24px;
+  background: var(--dash-glass);
+  border: 1px solid var(--dash-edge);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+#screen-loading .load-title { color: var(--dash-ink); }
+#screen-loading .load-title span { color: var(--dash-accent); }
+#screen-loading .loading-label { color: var(--dash-ink-soft); }
+
+#screen-loading .progress-track {
+  background: rgba(3, 27, 29, 0.85);
+  border: 1px solid var(--dash-edge);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+#screen-loading .progress-fill {
+  background: linear-gradient(90deg, var(--dash-accent-2), var(--dash-accent));
+}
+
+#screen-loading .load-emblem { filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.55)); }
 
 /* Dashboard: tata letak vertikal — topbar · peta tubuh · MAIN · dock
    PENTING: aturan ini WAJIB bertakik `.active`. Selektor ID (#screen-dashboard)
@@ -87,8 +142,8 @@
    2. PETA TUBUH — slideshow bab
    --------------------------------------------------------------- */
 #screen-dashboard .body-map {
-  flex: 1 1 auto;
-  min-height: 0;
+  /* Peta tubuh TIDAK diregangkan: tingginya mengikuti kotak 1:1 di bawah. */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -120,9 +175,9 @@
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  border: 1px solid rgba(127, 227, 208, 0.35);
-  background: rgba(6, 32, 30, 0.72);
-  color: #dff7f0;
+  border: 1px solid var(--dash-edge-2);
+  background: var(--dash-glass);
+  color: var(--dash-ink);
   font-size: 18px;
   line-height: 1;
   font-weight: 900;
@@ -141,13 +196,18 @@
   text-align: center;
   font-size: 11px;
   font-weight: 800;
-  color: #cfeee4;
+  color: var(--dash-ink-soft);
   letter-spacing: 0.06em;
 }
 
 #screen-dashboard .map-viewport {
-  flex: 1 1 auto;
-  min-height: 0;
+  /* OVERLAY 1:1 — kotak sempurna. Lebar = tinggi yang tersedia, jadi slide
+     tidak pernah gepeng/terpotong dan info bab selalu menempel di posisi
+     yang sama (object-fit: cover merapikan foto 16:9 ke dalam kotak). */
+  flex: 0 0 auto;
+  width: min(100%, 42vh);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -169,11 +229,12 @@
 #screen-dashboard .chap-slide {
   position: relative;
   flex: 0 0 100%;
+  height: 100%;
   scroll-snap-align: center;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(127, 227, 208, 0.22);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--dash-edge);
+  box-shadow: var(--dash-shadow);
   cursor: pointer;
   isolation: isolate;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
@@ -268,9 +329,9 @@
   letter-spacing: 0.08em;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(6, 32, 30, 0.78);
-  border: 1px solid rgba(127, 227, 208, 0.28);
-  color: #d9f6ee;
+  background: var(--dash-glass);
+  border: 1px solid var(--dash-edge);
+  color: var(--dash-ink);
   backdrop-filter: blur(6px);
 }
 
@@ -413,15 +474,15 @@
 #screen-dashboard .dock-4 .dock-btn {
   min-height: 52px;
   border-radius: 16px;
-  background: rgba(8, 34, 32, 0.72);
-  border: 1px solid rgba(127, 227, 208, 0.20);
+  background: var(--dash-glass);
+  border: 1px solid var(--dash-edge);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  color: #dff7f0;
+  color: var(--dash-ink);
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
@@ -466,15 +527,15 @@
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(127, 227, 208, 0.28);
-  background: rgba(6, 32, 30, 0.7);
+  border: 1px solid var(--dash-edge-2);
+  background: var(--dash-glass);
   display: grid;
   place-items: center;
   cursor: pointer;
   backdrop-filter: blur(6px);
 }
 
-#screen-dashboard .topbar-more svg { width: 16px; height: 16px; fill: #dff7f0; }
+#screen-dashboard .topbar-more svg { width: 16px; height: 16px; fill: var(--dash-ink); }
 
 #screen-dashboard .more-menu {
   position: absolute;
@@ -484,8 +545,8 @@
   min-width: 176px;
   padding: 6px;
   border-radius: 14px;
-  background: rgba(6, 30, 28, 0.96);
-  border: 1px solid rgba(127, 227, 208, 0.26);
+  background: var(--dash-glass-2);
+  border: 1px solid var(--dash-edge);
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
@@ -500,7 +561,7 @@
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: #e6f7f1;
+  color: var(--dash-ink);
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
@@ -520,8 +581,8 @@
   flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(180deg, #0c2b28 0%, #08211f 100%);
-  border: 1px solid rgba(127, 227, 208, 0.28);
+  background: linear-gradient(180deg, var(--dash-bg-tint) 0%, var(--dash-bg-mid) 60%, var(--dash-bg-deep) 100%);
+  border: 1px solid var(--dash-edge);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6);
 }
 
@@ -563,9 +624,9 @@
   width: 28px;
   height: 28px;
   border-radius: 9px;
-  border: 1px solid rgba(127, 227, 208, 0.24);
-  background: rgba(6, 32, 30, 0.7);
-  color: #dff7f0;
+  border: 1px solid var(--dash-edge);
+  background: var(--dash-glass);
+  color: var(--dash-ink);
   font-size: 13px;
   cursor: pointer;
 }
@@ -580,9 +641,9 @@
   flex: 1;
   padding: 8px 6px;
   border-radius: 10px;
-  border: 1px solid rgba(127, 227, 208, 0.18);
-  background: rgba(8, 34, 32, 0.6);
-  color: #bfe8dd;
+  border: 1px solid var(--dash-edge);
+  background: var(--dash-glass);
+  color: var(--dash-ink-soft);
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
@@ -604,8 +665,8 @@
 
 .miss-card {
   border-radius: 14px;
-  border: 1px solid rgba(127, 227, 208, 0.16);
-  background: rgba(10, 38, 36, 0.72);
+  border: 1px solid var(--dash-edge);
+  background: var(--dash-glass-3);
   padding: 10px 12px;
   display: flex;
   flex-direction: column;

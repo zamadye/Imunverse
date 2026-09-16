@@ -140,6 +140,17 @@ cek('dashboard tampil', aktif().includes('dashboard') && aktif().length === 1, '
   await sleep(300);
 }
 
+// 1b2. Peta tubuh harus 1:1 (overlay kotak sempurna)
+{
+  const css = fs.readFileSync(path.join(ROOT, 'styles/dashboard-map.css'), 'utf8');
+  const blok = css.match(/#screen-dashboard \.map-viewport\s*\{([^}]*)\}/);
+  const isi = blok ? blok[1] : '';
+  cek('peta tubuh 1:1 (aspect-ratio)', /aspect-ratio:\s*1\s*\/\s*1/.test(isi), 'aturan .map-viewport: ' + isi.replace(/\s+/g, ' ').trim().slice(0, 90));
+  cek('peta tidak diregangkan (flex: 0 0 auto)', /flex:\s*0\s+0\s+auto/.test(isi), 'aturan .map-viewport: ' + isi.replace(/\s+/g, ' ').trim().slice(0, 90));
+  const slide = css.match(/#screen-dashboard \.chap-slide\s*\{([^}]*)\}/);
+  cek('slide mengisi tinggi viewport', /height:\s*100%/.test(slide ? slide[1] : ''), 'aturan .chap-slide: ' + (slide ? slide[1].replace(/\s+/g, ' ').trim().slice(0, 80) : 'tidak ada'));
+}
+
 // 1c. Modal misi dari footer
 {
   d.getElementById('dock-missions')?.click();
