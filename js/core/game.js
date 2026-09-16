@@ -2563,12 +2563,24 @@ applyChapterTier(enemy, run) {
           // overlay mut_*.png yang ditumpuk). Kalau fotonya belum tersedia untuk
           // hero ini, pakai sprite dasar seperti sediakala.
           const _muts = run.activeMutations || [];
-          const _mutOn = _muts.length > 0
-            && hasSprite(player.heroDef.spriteMutIdle)
-            && hasSprite(player.heroDef.spriteMutAttack);
-          let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          if (_mutOn) {
-            path = player.attackFlash > 0 ? player.heroDef.spriteMutAttack : player.heroDef.spriteMutIdle;
+          // UI-REBUILD P8: mutasi BERTINGKAT — tier 2/3 memakai foto bentuk
+          // LANJUT (mut2), sisanya bentuk DASAR (mut1). Bila foto tingkat itu
+          // belum ada, turun ke tingkat di bawahnya; terakhir ke sprite dasar.
+          const _topTier = _muts.reduce((mx, id) => Math.max(mx, (mutationDef(id)?.tier) || 1), 0);
+          const _wantStage = _topTier >= 2 ? 2 : 1;
+          const _attacking = player.attackFlash > 0;
+          const _mutPair = (stage) => [
+            _attacking ? player.heroDef[`spriteMut${stage}Attack`] : player.heroDef[`spriteMut${stage}Idle`],
+            _attacking ? player.heroDef[`spriteMut${stage}Idle`] : null, // cadangan satu pose bila pose ini belum ada
+          ];
+          let path = _attacking ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          if (_muts.length > 0) {
+            const stages = _wantStage === 2 ? [2, 1] : [1];
+            for (const st of stages) {
+              const [main, fallback] = _mutPair(st);
+              if (hasSprite(main)) { path = main; break; }
+              if (fallback && hasSprite(fallback)) { path = fallback; break; }
+            }
           }
           const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;

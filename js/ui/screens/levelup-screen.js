@@ -10,7 +10,7 @@ import { game } from '../../core/game.js';
 import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
 import { iconEl } from '../menu-icons.js';
-import { tierLabel } from '../../systems/mutation-system.js';
+import { tierLabel, mutationDef as mutationDefById } from '../../systems/mutation-system.js';
 import { hasSprite } from '../../render/sprite-loader.js'; // UI-REBUILD P8: foto bentuk mutasi
 
 const MUTATION_ICONS = {
@@ -29,10 +29,11 @@ export function show({ level, choices }) {
   // UI-REBUILD P8: bila hero sudah bermutasi, potret adegan = foto bentuk
   // mutasinya (bukan potret dasar) — mutasi terlihat sebagai wujud karakter.
   const _muts = (game.run && game.run.activeMutations) || [];
+  const _topTier = _muts.reduce((mx, id) => Math.max(mx, (mutationDefById(id)?.tier) || 1), 0);
   if (heroImg) {
-    heroImg.src = (_muts.length > 0 && hasSprite(heroDef.spriteMutIdle))
-      ? heroDef.spriteMutIdle
-      : (heroDef.spritePortrait || heroDef.spriteIdle);
+    const stage = _muts.length === 0 ? 0 : (_topTier >= 2 ? 2 : 1);
+    const mut = stage ? heroDef[`spriteMut${stage}Idle`] : null;
+    heroImg.src = (mut && hasSprite(mut)) ? mut : (heroDef.spritePortrait || heroDef.spriteIdle);
   }
   const luName = heroDef.name;
   const bio = game.run ? (game.run.bioPoints || 0) : 0;
@@ -67,8 +68,12 @@ function mutationCard(def, bio, heroDef) {
   // PHAGOS: ikon kartu = aset sprite mutasi (emoji hanya cadangan).
   // UI-REBUILD P8: kalau hero punya FOTO bentuk mutasi, itu yang dipakai —
   // pemain melihat wujud barunya, bukan ikon generik.
-  const iconNode = (heroDef && hasSprite(heroDef.spriteMutIdle))
-    ? el('img', { class: 'choice-mut-sprite mut-form', src: heroDef.spriteMutIdle, alt: '', draggable: 'false' })
+  // Bentuk yang dijanjikan kartu mengikuti TIER-nya: tier 1 → foto mutasi
+  // dasar, tier 2/3 → foto mutasi lanjut (kalau sudah tersedia).
+  const _cardStage = (def.tier || 1) >= 2 ? 2 : 1;
+  const _form = heroDef ? (heroDef[`spriteMut${_cardStage}Idle`] || heroDef.spriteMut1Idle) : null;
+  const iconNode = (heroDef && _form && hasSprite(_form))
+    ? el('img', { class: 'choice-mut-sprite mut-form', src: _form, alt: '', draggable: 'false' })
     : def.sprite
       ? el('img', { class: 'choice-mut-sprite', src: def.sprite, alt: '', draggable: 'false' })
       : el('div', { class: 'choice-icon mutation-icon', text: icon });

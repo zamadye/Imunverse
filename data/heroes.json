@@ -72,8 +72,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_macrophage_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_macrophage_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_macrophage_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_macrophage_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_macrophage_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_macrophage_mut2_attack.png"
     },
     {
       "id": "dendritic",
@@ -154,8 +156,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_dendritic_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_dendritic_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_dendritic_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_dendritic_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_dendritic_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_dendritic_mut2_attack.png"
     },
     {
       "id": "neutrophil",
@@ -231,8 +235,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_neutrophil_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_neutrophil_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_neutrophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_neutrophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_neutrophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_neutrophil_mut2_attack.png"
     },
     {
       "id": "eosinophil",
@@ -314,8 +320,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_eosinophil_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_eosinophil_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_eosinophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_eosinophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_eosinophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_eosinophil_mut2_attack.png"
     },
     {
       "id": "basophil",
@@ -397,8 +405,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_basophil_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_basophil_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_basophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_basophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_basophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_basophil_mut2_attack.png"
     },
     {
       "id": "mastcell",
@@ -476,8 +486,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_mastcell_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_mastcell_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_mastcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_mastcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_mastcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_mastcell_mut2_attack.png"
     },
     {
       "id": "tcd8",
@@ -557,8 +569,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_tcd8_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_tcd8_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_tcd8_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_tcd8_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_tcd8_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_tcd8_mut2_attack.png"
     },
     {
       "id": "tcd4",
@@ -634,8 +648,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_tcd4_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_tcd4_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_tcd4_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_tcd4_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_tcd4_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_tcd4_mut2_attack.png"
     },
     {
       "id": "treg",
@@ -714,8 +730,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_treg_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_treg_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_treg_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_treg_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_treg_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_treg_mut2_attack.png"
     },
     {
       "id": "bcell",
@@ -792,8 +810,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_bcell_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_bcell_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_bcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_bcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_bcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_bcell_mut2_attack.png"
     },
     {
       "id": "nkcell",
@@ -867,8 +887,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMutIdle": "assets/sprites/hero_nkcell_mut_idle.png",
-      "spriteMutAttack": "assets/sprites/hero_nkcell_mut_attack.png"
+      "spriteMut1Idle": "assets/sprites/hero_nkcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_nkcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_nkcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_nkcell_mut2_attack.png"
     }
   ],
   "tiers": {
@@ -897,5 +919,6 @@
       "color": "#f2b93e",
       "statMult": 1.35
     }
-  }
+  },
+  "doc": "· UI-REBUILD P8: spriteMut1* = foto bentuk MUTASI DASAR (tier 1), spriteMut2* = foto bentuk MUTASI LANJUT (tier 2-3). Bila foto belum tersedia, renderer memakai sprite dasar."
 }

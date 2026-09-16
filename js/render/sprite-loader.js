@@ -31,8 +31,11 @@ export function collectSpritePaths(data) {
     record(h.spriteAttack, h.color, h.name);
     record(h.spritePortrait, h.color, h.name);
     // UI-REBUILD P8: foto bentuk MUTASI per hero (pengganti overlay mut_*.png)
-    record(h.spriteMutIdle, h.color, h.name);
-    record(h.spriteMutAttack, h.color, h.name);
+    // mut1 = MUTASI DASAR (tier 1) · mut2 = MUTASI LANJUT (tier 2-3)
+    record(h.spriteMut1Idle, h.color, h.name);
+    record(h.spriteMut1Attack, h.color, h.name);
+    record(h.spriteMut2Idle, h.color, h.name);
+    record(h.spriteMut2Attack, h.color, h.name);
   }
   for (const e of data.enemies.enemies) {
     record(e.sprite, e.color, e.name);

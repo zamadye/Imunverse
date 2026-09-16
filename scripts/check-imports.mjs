@@ -60,7 +60,7 @@ for (const name of fs.readdirSync(dataDir)) {
           if (['sprite', 'spriteIdle', 'spriteAttack'].includes(k) && typeof v === 'string') {
             spritePaths.add(v);
           }
-          if (['spriteMutIdle', 'spriteMutAttack'].includes(k) && typeof v === 'string') {
+          if (['spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack'].includes(k) && typeof v === 'string') {
             optionalSpritePaths.add(v);
           }
           scan(v);
