@@ -4,14 +4,22 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v1';
+const CACHE_VER = 'phagos-v2';
 const PRECACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './styles/main.css',
   './styles/dashboard-focus.css',
+  './styles/dashboard-map.css',
+  './styles/portrait.css',
   './js/main.js',
+  // Latar foto dashboard & loading (UI-REBUILD P8)
+  './assets/ui/bg-dashboard.jpg',
+  './assets/ui/bg-loading.jpg',
+  // Musik CC0 (data/audio.json) — diputar saat menu & run
+  './assets/audio/music/bgm_menu.mp3',
+  './assets/audio/music/bgm_run.mp3',
 ];
 
 self.addEventListener('install', (event) => {
@@ -37,7 +45,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // CDN/bayar: biarkan network
   event.respondWith(
-    caches.match(req, { ignoreSearch: false }).then((hit) => {
+    // ignoreSearch:true — aset diminta dengan cache-buster `?v=BUILD`; tanpa
+    // ini setiap bump versi menghasilkan entri cache baru dan precache sia-sia.
+    caches.match(req, { ignoreSearch: true }).then((hit) => {
       if (hit) return hit;
       return fetch(req).then((res) => {
         if (res && res.ok) {

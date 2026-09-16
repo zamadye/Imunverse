@@ -60,6 +60,7 @@ import * as profileScreen from './ui/screens/profile-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
 import * as comebackScreen from './ui/screens/comeback-screen.js'; // Sprint 6.31: §10.1 Comeback
+import * as missionsScreen from './ui/screens/missions-screen.js'; // UI-REBUILD P8: modal Misi & Quest
 import { getChallenge, showChallengeModal } from './systems/challenge-system.js'; // ADDENDUM §3.3
 import { handleRefParam } from './systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { decodeBuild, showBuildModal } from './systems/build-share-system.js'; // ADDENDUM P2 §6.6
@@ -495,6 +496,7 @@ async function boot() {
   screenManager.registerScreen('capsule', capsuleScreen); // ADDENDUM §1: Kapsul Membran
   screenManager.registerScreen('comeback', comebackScreen); // Sprint 6.31: §10.1 Comeback
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
+  screenManager.registerScreen('missions', missionsScreen); // UI-REBUILD P8: modal Misi & Quest (footer)
   bosschestScreen.wire();
   rankScreen.wire(); // Fase 19: modal pangkat
   titleScreen.wire(); // F21: layar judul gameplay-first
@@ -664,13 +666,13 @@ async function boot() {
   // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
   if (sideHome) sideHome.addEventListener('click', () => {
-    document.querySelector('.dash-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('map-viewport')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
   document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
   document.getElementById('side-bp')?.addEventListener('click', () => screenManager.show('bp'));
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
   // PHAGOS: tombol PULSE (SATU TOMBOL) — tiap TEKAN = satu ledakan membran.
   // Antrean edge-trigger dikonsumsi game.update; onPress memberi respons instan.

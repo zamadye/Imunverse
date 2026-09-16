@@ -11,9 +11,10 @@
   <link rel="apple-touch-icon" href="assets/icons/pwa-192.png" />
   <meta name="description" content="PHAGOS — Telan. Bermutasi. Bertahan. Roguelike survival membran sel imun di phagos.space!" />
   <title>PHAGOS — Telan. Bermutasi. Bertahan.</title>
-  <link rel="stylesheet" href="styles/main.css?v=51a" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=51a" />
-  <link rel="stylesheet" href="styles/portrait.css?v=51a" />
+  <link rel="stylesheet" href="styles/main.css?v=52a" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=52a" />
+  <link rel="stylesheet" href="styles/portrait.css?v=52a" />
+  <link rel="stylesheet" href="styles/dashboard-map.css?v=52a" />
 </head>
 <body>
   <div id="app">
@@ -65,9 +66,16 @@
       </section>
 
       <!-- ============ DASHBOARD ============ -->
+      <!-- UI-REBUILD P8 (owner): dashboard BERSIH — latar foto + PETA TUBUH
+           (slideshow bab, geser kiri/kanan) + tombol MAIN besar + 4 menu footer.
+           Semua kartu lama (kampanye/mode/stat/daily/evo/body/strain/BP/kapsul)
+           DICABUT: nilainya pindah ke Peta Tubuh, modal Misi, dan menu "…". -->
       <section id="screen-dashboard" class="screen" data-screen="dashboard">
+        <div class="dash-bg" aria-hidden="true"></div>
+        <div class="dash-bg-veil" aria-hidden="true"></div>
+
         <header class="topbar">
-          <button id="account-chip" class="account-chip hidden" title="Ganti akun" aria-label="Akun">
+          <button id="account-chip" class="account-chip hidden" title="Profil" aria-label="Buka profil">
             <img id="dash-avatar" class="dash-avatar" src="assets/sprites/portrait_tcd8.png" alt="" />
             <span class="acct-id">
               <b id="account-name">—</b>
@@ -85,63 +93,41 @@
           <div class="dash-points" title="Biokredit dari gameplay"><img class="coin" src="assets/icons/cur-antibodi.svg" alt="Biokredit" /><span id="dash-currency">0</span></div>
           <div class="currency-chip imu-chip" title="Genom premium"><img class="coin" src="assets/icons/cur-imun.svg" alt="Genom" /><span id="dash-imun">0</span></div>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
+          <button id="btn-dash-more" class="topbar-more" aria-label="Semua fitur" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <nav id="dash-more-menu" class="more-menu hidden" aria-label="Semua fitur">
+            <button data-nav="campaign"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Kampanye</span></button>
+            <button data-nav="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Siklus Mitosis</span></button>
+            <button data-nav="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
+            <button data-nav="profile"><img src="assets/icons/ui-heart.svg" alt="" /><span>Profil</span></button>
+          </nav>
         </header>
 
-        <div class="dash-body">
-          <div class="dash-scroll">
-            <!-- ===== §11.1: HERO TETAP (40%) + MEDAN BERDENYUT ===== -->
-            <section class="hero-stage hero-fixed" id="dash-stage">
-              <div class="medan-pulse" id="stage-medan" aria-hidden="true"></div>
-              <img class="deco stage-germ sg1" src="assets/sprites/deco_germ_sage.png" alt="" />
-              <img class="deco stage-germ sg2" src="assets/sprites/deco_germ_teal.png" alt="" />
-              <img id="stage-aura" class="stage-aura" src="assets/sprites/deco_aura.png" alt="" />
-              <div id="stage-enemies" class="stage-enemies"></div>
-              <canvas id="dash-cine" class="stage-cine" aria-label="Cinematic: pasukan imun melawan patogen"></canvas>
-              <div class="stage-badge" id="dash-best-badge">🏆 Gel. 0</div>
-              <div class="stage-badge lvl" id="dash-level-badge" role="button" aria-label="Buka Lab Pasukan"></div>
-              <div class="stage-info">
-                <b id="dash-hero-name">—</b>
-                <span id="dash-hero-title">—</span>
-              </div>
-            </section>
-            <div id="strain-slot"></div>
-            <button id="bp-bar" class="bp-bar" aria-label="Buka Siklus Mitosis"><!-- diisi JS --></button>
-            <div id="kapsul-card" class="kapsul-card hidden"><!-- diisi JS --></div>
-            <!-- ===== BARIS PLAY: kartu bab besar + kolom mode ===== -->
-            <div class="play-row">
-              <section class="card campaign-card" id="campaign-card"><!-- diisi JS --></section>
-              <div class="mode-stack">
-                <section class="card mode-card" id="mode-endless"><!-- diisi JS --></section>
-                <section id="arena-card" class="card arena-card"><!-- diisi JS --></section>
-                <section class="card mode-card" id="mode-lab"><!-- diisi JS --></section>
-              </div>
-            </div>
-
-            <div id="dash-stats" class="stat-strip"><!-- diisi JS --></div>
-
-            <div id="daily-card" class="card daily-card"><!-- diisi JS --></div>
-
-            <div class="duo-row" id="duo-evo">
-              <div id="evo-card" class="card evo-card"><!-- diisi JS --></div>
-              <div class="card missions-card">
-                <h3 class="card-title ico-title"><img class="t-ico" src="assets/icons/menu-quest.svg" alt="" /><span>Misi &amp; Prestasi</span></h3>
-                <div id="dash-missions" class="mission-list"><!-- diisi JS --></div>
-              </div>
-            </div>
-
-            <div class="duo-row" id="duo-lb">
-              <div id="body-card" class="card body-card"><!-- diisi JS: kondisi tubuh --></div>
+        <!-- ===== PETA TUBUH: slideshow bab (geser ke samping) ===== -->
+        <section class="body-map" id="body-map" aria-label="Peta Tubuh — pilih bab">
+          <div class="map-head">
+            <span class="map-kicker">PETA TUBUH</span>
+            <div class="map-nav">
+              <button id="map-prev" class="map-arrow" aria-label="Bab sebelumnya">‹</button>
+              <span id="map-pos" class="map-pos">BAB 1/6</span>
+              <button id="map-next" class="map-arrow" aria-label="Bab berikutnya">›</button>
             </div>
           </div>
-        </div>
+          <div class="map-viewport" id="map-viewport">
+            <div class="map-track" id="chapter-track"><!-- diisi dashboard-screen.js --></div>
+          </div>
+          <div class="map-dots" id="map-dots"><!-- diisi dashboard-screen.js --></div>
+        </section>
 
-        <!-- CTA utama dipisah dari navigasi utilitas agar fokus visual tidak bercampur. -->
-        <button class="dashboard-play main-coral" id="btn-play" aria-label="Main sekarang">
-          <span class="dashboard-play-icon"><img src="assets/icons/ui-play.svg" alt="" /></span>
-          <span class="dashboard-play-copy"><b>MAIN</b><small id="play-sub">Mulai run sekarang</small></span>
+        <!-- Satu-satunya CTA: MAIN (tombol dobel di navbar sudah dicabut) -->
+        <button class="dash-play" id="btn-play" aria-label="Main sekarang">
+          <span class="dash-play-ring" aria-hidden="true"></span>
+          <img src="assets/icons/ui-play.svg" alt="" />
+          <span class="dash-play-copy"><b>MAIN</b><small id="play-sub">Mulai run sekarang</small></span>
         </button>
-        <!-- Dock navigasi utilitas -->
-        <nav class="dock dock-5">
+
+        <nav class="dock dock-4" aria-label="Menu utama">
           <button class="dock-btn" data-nav="roster" aria-label="Hero">
             <span class="dock-ico"><img src="assets/icons/menu-heroes.svg" alt="" /><span class="dock-badge hidden" id="badge-hero"></span></span>
             <span>Hero</span>
@@ -150,25 +136,14 @@
             <span class="dock-ico"><img src="assets/icons/sec-item.svg" alt="" /><span class="dock-badge hidden" id="badge-bag"></span></span>
             <span>Tas</span>
           </button>
-          <button class="dock-btn dock-main" data-nav="prep" aria-label="Main">
-            <span class="dock-ico"><img src="assets/icons/ui-play.svg" alt="" /></span>
-            <span>MAIN</span>
+          <button class="dock-btn dock-misi" id="dock-missions" aria-label="Misi &amp; Quest" aria-haspopup="dialog">
+            <span class="dock-ico"><img src="assets/icons/menu-quest.svg" alt="" /><span class="dock-badge hidden" id="badge-missions"></span></span>
+            <span>Misi</span>
           </button>
-          <button class="dock-btn" data-nav="upgrade" data-tab="pasukan" aria-label="Squad">
-            <span class="dock-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 20 5v6.2c0 4.6-3.2 8.4-8 9.8-4.8-1.4-8-5.2-8-9.8V5l8-2.5zm-1.2 6v2.3H8.5v2.4h2.3v2.3h2.4v-2.3h2.3v-2.4h-2.3V8.5h-2.4z"/></svg><span class="dock-badge hidden" id="badge-squad"></span></span>
-            <span>Squad</span>
-          </button>
-          <button class="dock-btn" data-nav="upgrade" data-tab="global" aria-label="Lab Genom">
+          <button class="dock-btn" data-nav="upgrade" data-tab="pasukan" aria-label="Lab Genom">
             <span class="dock-ico"><img src="assets/icons/menu-squad.svg" alt="" /><span class="dock-badge hidden" id="badge-lab"></span></span>
             <span>Lab Genom</span>
           </button>
-        </nav>
-        <!-- Fitur sekunder tetap tersedia tanpa mengambil fokus dari Play. -->
-        <nav class="secondary-dock" aria-label="Fitur sekunder">
-          <button data-nav="campaign" title="Kampanye"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Campaign</span></button>
-          <button data-nav="bp" title="Siklus Mitosis"><img src="assets/icons/menu-pass.svg" alt="" /><span>Pass</span></button>
-          <button data-nav="codex" title="Bio-Pedia"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio</span></button>
-          <button data-nav="rank" title="Pangkat"><img src="assets/icons/menu-rank.svg" alt="" /><span>Rank</span></button>
         </nav>
       </section>
 
@@ -563,6 +538,24 @@
         </div>
       </section>
 
+      <!-- ============ MODAL: MISI & QUEST (dari footer "Misi") ============ -->
+      <section id="screen-missions" class="screen modal" data-screen="missions" role="dialog" aria-modal="true" aria-labelledby="missions-title">
+        <div class="miss-sheet">
+          <header class="miss-head">
+            <span class="miss-ico"><img src="assets/icons/menu-quest.svg" alt="" /></span>
+            <h2 id="missions-title">MISI &amp; QUEST</h2>
+            <small id="miss-reset">—</small>
+            <button class="miss-close" id="miss-close" aria-label="Tutup">✕</button>
+          </header>
+          <div class="miss-tabs" role="tablist">
+            <button class="miss-tab active" data-miss-tab="daily" role="tab">Harian</button>
+            <button class="miss-tab" data-miss-tab="weekly" role="tab">Mingguan</button>
+            <button class="miss-tab" data-miss-tab="achievement" role="tab">Prestasi</button>
+          </div>
+          <div class="miss-body" id="missions-body"><!-- diisi missions-screen.js --></div>
+        </div>
+      </section>
+
       <!-- ============ MODAL MUTASI (LEVEL UP) ============ -->
       <section id="screen-levelup" class="screen modal" data-screen="levelup">
         <div class="lu-scene">
@@ -713,6 +706,6 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=51a"></script>
+  <script type="module" src="js/main.js?v=52a"></script>
 </body>
 </html>
