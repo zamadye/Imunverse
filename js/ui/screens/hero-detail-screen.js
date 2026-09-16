@@ -294,7 +294,7 @@ function selectHero(dir = 0) {
   const troops = [
     { name: 'Sel B', src: spriteToDataURL('assets/sprites/hero_bcell_idle.png'), desc: tr('Spesialis antibodi — proyektil pemburu otomatis.') },
     { name: 'Sel NK', src: spriteToDataURL('assets/sprites/hero_nkcell_idle.png'), desc: tr('Pembunuh alami — agresif ke target sekarat.') },
-    { name: 'Makrofag', src: spriteToDataURL('assets/sprites/hero_macrophage_idle.png'), desc: tr('Fagosit garis depan — menyerap dan menghabisi patogen.') },
+    { name: 'Makrofag', src: spriteToDataURL('assets/sprites/mako_v2/mako_stage0_idle.png'), desc: tr('Fagosit garis depan — menyerap dan menghabisi patogen.') },
   ];
   const allyVisible = Math.max(0, Math.min(6, Math.max(meta.allies || 1, 1 + Math.floor(aLvl / (allyCfg.membersPerLevels || 3)))));
 

@@ -7,9 +7,9 @@
       "title": "Vanguard Rakus",
       "role": "Tank",
       "description": "Mako — Vanguard Rakus. Peran Tank.",
-      "sprite": "assets/sprites/hero_macrophage_idle.png",
-      "spriteIdle": "assets/sprites/hero_macrophage_idle.png",
-      "spriteAttack": "assets/sprites/hero_macrophage_attack.png",
+      "sprite": "assets/sprites/mako_v2/mako_stage0_idle.png",
+      "spriteIdle": "assets/sprites/mako_v2/mako_stage0_idle.png",
+      "spriteAttack": "assets/sprites/mako_v2/mako_stage0_attack.png",
       "color": "#4a7c59",
       "roleColor": "#2ecc71",
       "attackPattern": "ranged_pierce",
@@ -39,7 +39,7 @@
         "type": "default"
       },
       "shopCost": 0,
-      "spritePortrait": "assets/sprites/portrait_macrophage.png",
+      "spritePortrait": "assets/sprites/mako_v2/mako_stage0_idle.png",
       "tier": "common",
       "passive": {
         "type": "lifesteal_kill",

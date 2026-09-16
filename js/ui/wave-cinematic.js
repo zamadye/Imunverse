@@ -46,8 +46,8 @@ export function playWaveCinematic(wave, onDone) {
   if (playing) { onDone && onDone(); return; }
   playing = true;
 
-  const HERO = img('assets/sprites/hero_macrophage_idle.png');
-  const HERO_ATK = img('assets/sprites/hero_macrophage_attack.png');
+  const HERO = img('assets/sprites/mako_v2/mako_stage0_idle.png');
+  const HERO_ATK = img('assets/sprites/mako_v2/mako_stage0_attack.png');
   const V1 = img('assets/sprites/enemy_virus.png');
   const V2 = img('assets/sprites/enemy_bakteri.png');
   const V3 = img('assets/sprites/enemy_virion.png');

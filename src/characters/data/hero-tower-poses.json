@@ -12,8 +12,8 @@
       "archetype": "phagocyte",
       "identityRule": "rooted engulfing pseudopodia",
       "legacySprites": {
-        "idle": "assets/sprites/hero_macrophage_idle.png",
-        "attack": "assets/sprites/hero_macrophage_attack.png",
+        "idle": "assets/sprites/mako_v2/mako_stage0_idle.png",
+        "attack": "assets/sprites/mako_v2/mako_stage0_attack.png",
         "portrait": null
       },
       "towerSprites": {
