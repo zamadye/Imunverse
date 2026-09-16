@@ -4,7 +4,9 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v1';
+// Bump for the Mako V2 art import so an installed PWA cannot keep the
+// legacy hero sprite/data shell after the runtime path changes.
+const CACHE_VER = 'phagos-v1-mako-v2';
 const PRECACHE = [
   './',
   './index.html',

@@ -122,8 +122,8 @@ export function startBannerCine(canvas) {
   if (running) stopBannerCine(); // Fase 15: ganti instance — jangan biarkan start dibatalkan diam-diam
   running = true;
   // pre-load pemain & musuh (sprite gameplay asli)
-  const HERO_IDLE = cineImg('assets/sprites/hero_macrophage_idle.png');
-  const HERO_ATK = cineImg('assets/sprites/hero_macrophage_attack.png');
+  const HERO_IDLE = cineImg('assets/sprites/mako_v2/mako_stage0_idle.png');
+  const HERO_ATK = cineImg('assets/sprites/mako_v2/mako_stage0_attack.png');
   const VIRUS_A = cineImg('assets/sprites/enemy_virus.png');
   const VIRUS_B = cineImg('assets/sprites/enemy_bakteri.png');
   const VIRUS_C = cineImg('assets/sprites/enemy_virion.png');

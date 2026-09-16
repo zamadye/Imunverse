@@ -92,8 +92,9 @@ import { drawNestHint,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
-import { drawSprite } from '../render/sprite-loader.js';
+import { drawSprite, makoHeroPath, makoMovementPath, makoMutationPath } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawHeroRunForm, drawPathogenFamily, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { createMakoMotionState, getMakoMotionStyle, updateMakoMotion } from '../render/mako-animation.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 
 export const game = {
@@ -271,6 +272,8 @@ export const game = {
       enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
       membrane: null,
       _mutationFlashT: 0, // PHAGOS: overlay merah saat patogen bermutasi
+      // Mako V2 motion identity; visual-only state derived from existing systems.
+      makoMotion: createMakoMotionState(),
     };
     // PHAGOS: medan membran hero (wajib sebelum HOOK spawn agar stats siap)
     try { initMembrane(this.run, heroDef); } catch (err) { console.warn('[phagos] initMembrane gagal:', err); }
@@ -790,6 +793,8 @@ export const game = {
 
     // 10. Efek & partikel (+ cooldown kemampuan aktif)
     run.skills.update(dt);
+    // Mako V2 animation observes skill/pulse/hit state without touching combat.
+    updateMakoMotion(run, dt);
     if (run.protectT > 0) {
       run.protectT -= dt;
       if (run.protectT <= 0) run.protectMult = 1;
@@ -2403,9 +2408,18 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
-    const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
-    const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
-    const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
+    const makoMotion = player.heroDef.id === 'macrophage'
+      ? getMakoMotionStyle(player, run, run.makoMotion, time)
+      : null;
+    const pBob = makoMotion
+      ? makoMotion.bob
+      : (player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1);
+    const pLunge = makoMotion
+      ? makoMotion.lunge
+      : (player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0));
+    const pSwingTilt = makoMotion
+      ? makoMotion.tilt
+      : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0);
     const pBody = {
       x: player.x + (player.alive ? Math.cos(player.facing) * pLunge : 0),
       y: player.y + (player.alive ? Math.sin(player.facing) * pLunge * PERSP.YS : 0),
