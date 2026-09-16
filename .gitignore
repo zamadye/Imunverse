@@ -12,3 +12,8 @@ __pycache__/
 shots/
 screenshots/
 image-search/
+
+# Sumber foto mutasi mentah (latar magenta) — hanya dipakai tools/build-mutation-sprites.py
+tools/.mutsrc/
+# Sumber audio mentah (tools/build-audio.sh)
+tools/.audiosrc/
