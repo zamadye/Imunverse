@@ -25,6 +25,11 @@ export class Projectile {
     this.life = 2.2;                     // detik hidup maksimum
     this.alive = true;
     this.hitSet = new Set();             // uid musuh yang sudah kena
+    // V2 §17 archetype CHAIN: sisa lompatan, radius & peluruhan damage per lompatan
+    this.chainHops = opts.chainHops || 0;
+    this.chainRadius = opts.chainRadius || 0;
+    this.chainDecay = opts.chainDecay || 0;
+    this.chainLinks = 0;
     this.vx = Math.cos(this.angle) * this.speed;
     this.vy = Math.sin(this.angle) * this.speed;
   }

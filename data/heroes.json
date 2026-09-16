@@ -75,7 +75,22 @@
       "spriteMut1Idle": "assets/sprites/hero_macrophage_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_macrophage_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_macrophage_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_macrophage_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_macrophage_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Survivability",
+          "Swarm control",
+          "Sustain"
+        ],
+        "weakness": [
+          "Mobility",
+          "Ranged threats",
+          "Chasing fast targets"
+        ],
+        "combatIdentity": "Menelan jarak dekat + zona pencernaan; makin lama hidup, makin banyak yang disapu.",
+        "scalingIdentity": "Radius zona & sustain naik; mutasi memperlebar cakupan, bukan menambah damage tunggal."
+      }
     },
     {
       "id": "dendritic",
@@ -88,7 +103,7 @@
       "spriteAttack": "assets/sprites/hero_dendritic_attack.png",
       "color": "#ff8c00",
       "roleColor": "#3498db",
-      "attackPattern": "ranged_homing",
+      "attackPattern": "ranged_chain",
       "baseStats": {
         "maxHP": 80,
         "speed": 150,
@@ -105,7 +120,9 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "hops": 2,
+        "hopRadius": 120
       },
       "skills": [
         "mark_target",
@@ -160,7 +177,22 @@
       "spriteMut1Idle": "assets/sprites/hero_dendritic_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_dendritic_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_dendritic_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_dendritic_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_dendritic_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "chain",
+        "strength": [
+          "Multi-target",
+          "Control",
+          "Assist/scaling tim"
+        ],
+        "weakness": [
+          "Burst damage",
+          "Fragile (HP 80)",
+          "Butuh musuh berdekatan"
+        ],
+        "combatIdentity": "Serangan berantai: satu tembakan menyambung ke target terdekat di sekitarnya.",
+        "scalingIdentity": "Jumlah lompatan (hops) & radius rantai naik; bukan damage per target."
+      }
     },
     {
       "id": "neutrophil",
@@ -240,7 +272,23 @@
       "spriteMut1Idle": "assets/sprites/hero_neutrophil_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_neutrophil_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_neutrophil_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_neutrophil_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_neutrophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Swarm clearing",
+          "Burst jarak dekat",
+          "Tempo serangan cepat"
+        ],
+        "weakness": [
+          "Jarak (range 90)",
+          "Sustain",
+          "Mobility"
+        ],
+        "combatIdentity": "Ledakan granula jarak dekat; kuat saat musuh mengerumun.",
+        "scalingIdentity": "Radius & kepadatan ledakan; bukan jangkauan.",
+        "flavor": "burst"
+      }
     },
     {
       "id": "eosinophil",
@@ -325,7 +373,22 @@
       "spriteMut1Idle": "assets/sprites/hero_eosinophil_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_eosinophil_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_eosinophil_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_eosinophil_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_eosinophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "projectile",
+        "strength": [
+          "Single-target",
+          "Kecepatan",
+          "Anti-parasit (×1.5)"
+        ],
+        "weakness": [
+          "Sangat rapuh (HP 75)",
+          "Swarm",
+          "Sustain"
+        ],
+        "combatIdentity": "Tembakan cepat berprioritas target bernilai; unggul pada parasit.",
+        "scalingIdentity": "Kecepatan tembak & pengali anti-parasit; tetap rapuh."
+      }
     },
     {
       "id": "basophil",
@@ -409,7 +472,22 @@
       "spriteMut1Idle": "assets/sprites/hero_basophil_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_basophil_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_basophil_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_basophil_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_basophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "zone",
+        "strength": [
+          "Area denial",
+          "Control",
+          "Durasi"
+        ],
+        "weakness": [
+          "Damage terendah",
+          "Cooldown panjang (0.8s)",
+          "Tidak ada burst"
+        ],
+        "combatIdentity": "Awan histamin: zona yang melumpuhkan gerakan musuh di dalamnya.",
+        "scalingIdentity": "Ukuran & durasi zona; bukan damage."
+      }
     },
     {
       "id": "mastcell",
@@ -489,7 +567,22 @@
       "spriteMut1Idle": "assets/sprites/hero_mastcell_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_mastcell_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_mastcell_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_mastcell_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_mastcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Tank (HP 130)",
+          "Close-range",
+          "Degranulasi area"
+        ],
+        "weakness": [
+          "Paling lambat (110)",
+          "Ranged threats",
+          "Mengejar target cepat"
+        ],
+        "combatIdentity": "Degranulasi: sapuan area di sekitar tubuhnya sendiri.",
+        "scalingIdentity": "Radius sapuan & damage reduction; mobilitas tetap terburuk."
+      }
     },
     {
       "id": "tcd8",
@@ -572,7 +665,22 @@
       "spriteMut1Idle": "assets/sprites/hero_tcd8_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_tcd8_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_tcd8_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_tcd8_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_tcd8_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "beam",
+        "strength": [
+          "Pierce (2)",
+          "Single-target",
+          "Jarak (160)"
+        ],
+        "weakness": [
+          "Rapuh (HP 85)",
+          "Butuh posisi lurus",
+          "Lemah saat dikepung"
+        ],
+        "combatIdentity": "Tembakan menembus lurus; menghukum barisan musuh segaris.",
+        "scalingIdentity": "Jumlah tembusan (pierce) & panjang garis; bukan kecepatan."
+      }
     },
     {
       "id": "tcd4",
@@ -651,7 +759,22 @@
       "spriteMut1Idle": "assets/sprites/hero_tcd4_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_tcd4_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_tcd4_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_tcd4_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_tcd4_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "summon",
+        "strength": [
+          "Dukungan",
+          "Scaling",
+          "Memerintah entitas"
+        ],
+        "weakness": [
+          "Damage rendah",
+          "Bergantung pada entitas",
+          "Butuh ruang"
+        ],
+        "combatIdentity": "Memanggil entitas biologis/dukungan; kekuatan datang dari apa yang dibantunya.",
+        "scalingIdentity": "Jumlah & daya tahan entitas; bukan damage langsung."
+      }
     },
     {
       "id": "treg",
@@ -732,7 +855,23 @@
       "spriteMut1Idle": "assets/sprites/hero_treg_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_treg_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_treg_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_treg_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_treg_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "zone",
+        "strength": [
+          "Control",
+          "Menekan kerusakan",
+          "Menahan area"
+        ],
+        "weakness": [
+          "Damage terendah",
+          "Tidak ada burst",
+          "Lambat membersihkan"
+        ],
+        "combatIdentity": "Menekan pergerakan & agresi musuh; mengubah pertempuran jadi terkendali.",
+        "scalingIdentity": "Kuatnya & lamanya efek tekanan; bukan damage.",
+        "flavor": "control"
+      }
     },
     {
       "id": "bcell",
@@ -811,7 +950,22 @@
       "spriteMut1Idle": "assets/sprites/hero_bcell_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_bcell_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_bcell_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_bcell_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_bcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "homing",
+        "strength": [
+          "Konsisten",
+          "Auto-aim",
+          "Memori antibodi"
+        ],
+        "weakness": [
+          "Burst rendah",
+          "Rapuh (HP 70)",
+          "Cooldown menengah"
+        ],
+        "combatIdentity": "Proyektil penjejak: stabil dan tidak pernah meleset.",
+        "scalingIdentity": "Jumlah proyektil & kecepatan penjejak; tetap tanpa burst besar."
+      }
     },
     {
       "id": "nkcell",
@@ -889,7 +1043,22 @@
       "spriteMut1Idle": "assets/sprites/hero_nkcell_mut1_idle.png",
       "spriteMut1Attack": "assets/sprites/hero_nkcell_mut1_attack.png",
       "spriteMut2Idle": "assets/sprites/hero_nkcell_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_nkcell_mut2_attack.png"
+      "spriteMut2Attack": "assets/sprites/hero_nkcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "melee",
+        "strength": [
+          "Burst tertinggi (22)",
+          "Mobility (180)",
+          "Sapuan lebar (arc 2.0)"
+        ],
+        "weakness": [
+          "Sangat rapuh (HP 80)",
+          "Kesalahan mahal",
+          "Harus masuk jarak dekat"
+        ],
+        "combatIdentity": "Sapuan mematikan jarak dekat; masuk, menghajar, keluar.",
+        "scalingIdentity": "Kerusakan sapuan & kecepatan; tetap berisiko tinggi."
+      }
     }
   ],
   "tiers": {
@@ -919,5 +1088,6 @@
       "statMult": 1.35
     }
   },
-  "doc": "· UI-REBUILD P8: spriteMut1* = foto bentuk MUTASI DASAR (tier 1), spriteMut2* = foto bentuk MUTASI LANJUT (tier 2-3). Bila foto belum tersedia, renderer memakai sprite dasar."
+  "doc": "· UI-REBUILD P8: spriteMut1* = foto bentuk MUTASI DASAR (tier 1), spriteMut2* = foto bentuk MUTASI LANJUT (tier 2-3). Bila foto belum tersedia, renderer memakai sprite dasar.",
+  "docHeroIdentity": "V2 P1 (§12-§14): tiap hero punya kekuatan, kelemahan, identitas tempur dan identitas scaling yang BERBEDA — tidak ada hero terbaik absolut."
 }

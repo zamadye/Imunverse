@@ -2,7 +2,13 @@
   "schemaVersion": 1,
   "doc": "V2 attack language (PHAGOS_V2_REBUILD.txt §17-§20). Delapan archetype serangan + aturan telegraph. Angka = tunable; belum dikonsumsi runtime sampai P1/P6.",
   "telegraph": {
-    "stages": ["anticipation", "telegraph", "execution", "impact", "recovery"],
+    "stages": [
+      "anticipation",
+      "telegraph",
+      "execution",
+      "impact",
+      "recovery"
+    ],
     "defaultSec": 0.3,
     "minSec": 0.18,
     "rule": "Setiap serangan penting wajib melewati anticipation → telegraph → execution (§19)"
@@ -13,16 +19,89 @@
     "elite": "strongerReaction",
     "ultimate": "majorResponse",
     "boss": "cinematicResponse",
-    "components": ["animation", "vfx", "sfx", "enemyReaction", "cameraResponse"]
+    "components": [
+      "animation",
+      "vfx",
+      "sfx",
+      "enemyReaction",
+      "cameraResponse"
+    ]
   },
   "archetypes": [
-    { "id": "projectile", "shape": "straight", "readable": "● ─────→ musuh", "telegraphSec": 0.2 },
-    { "id": "homing", "shape": "seeking", "readable": "● ↘↗ musuh", "telegraphSec": 0.25, "turnRate": 3.2 },
-    { "id": "melee", "shape": "arc", "readable": "◎ musuh", "telegraphSec": 0.18, "arcDeg": 110 },
-    { "id": "area", "shape": "ringAroundSelf", "readable": "○ HERO ○", "telegraphSec": 0.35 },
-    { "id": "beam", "shape": "line", "readable": "HERO ═══════ musuh", "telegraphSec": 0.45 },
-    { "id": "chain", "shape": "hop", "readable": "A → B → C → D", "telegraphSec": 0.22, "maxHops": 4, "decay": 0.6 },
-    { "id": "zone", "shape": "groundArea", "readable": "┌ DANGER ┐", "telegraphSec": 0.6 },
-    { "id": "summon", "shape": "spawnEntity", "readable": "✦ entitas biologis", "telegraphSec": 0.5, "maxEntities": 3 }
-  ]
+    {
+      "id": "projectile",
+      "shape": "straight",
+      "readable": "● ─────→ musuh",
+      "telegraphSec": 0.2,
+      "status": "planned"
+    },
+    {
+      "id": "homing",
+      "shape": "seeking",
+      "readable": "● ↘↗ musuh",
+      "telegraphSec": 0.25,
+      "turnRate": 3.2,
+      "status": "planned"
+    },
+    {
+      "id": "melee",
+      "shape": "arc",
+      "readable": "◎ musuh",
+      "telegraphSec": 0.18,
+      "arcDeg": 110,
+      "status": "planned"
+    },
+    {
+      "id": "area",
+      "shape": "ringAroundSelf",
+      "readable": "○ HERO ○",
+      "telegraphSec": 0.35,
+      "status": "planned"
+    },
+    {
+      "id": "beam",
+      "shape": "line",
+      "readable": "HERO ═══════ musuh",
+      "telegraphSec": 0.45,
+      "status": "planned"
+    },
+    {
+      "id": "chain",
+      "shape": "hop",
+      "readable": "A → B → C → D",
+      "telegraphSec": 0.22,
+      "maxHops": 2,
+      "decay": 0.4,
+      "hopRadius": 120,
+      "implementation": "ranged_chain",
+      "status": "implemented",
+      "heroSample": "dendritic"
+    },
+    {
+      "id": "zone",
+      "shape": "groundArea",
+      "readable": "┌ DANGER ┐",
+      "telegraphSec": 0.6,
+      "status": "planned"
+    },
+    {
+      "id": "summon",
+      "shape": "spawnEntity",
+      "readable": "✦ entitas biologis",
+      "telegraphSec": 0.5,
+      "maxEntities": 3,
+      "status": "planned"
+    }
+  ],
+  "telegraphPhases": {
+    "anticipation": 0.12,
+    "telegraph": 0.25,
+    "execution": 0.08,
+    "impact": 0.06,
+    "recovery": 0.18
+  },
+  "statusLegend": {
+    "implemented": "sudah dipakai runtime",
+    "planned": "menunggu P1/P2"
+  }
 }

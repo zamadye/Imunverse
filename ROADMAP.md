@@ -171,12 +171,26 @@ Penjaga regresi di `tools/verify-screens.mjs`: layar lama **tidak boleh** muncul
 DOM, tidak boleh ada tombol yang menujunya, dashboard tetap 4 menu, dan MAIN harus
 langsung masuk run (tanpa layar persiapan).
 
-### P1 — Core combat
+### P1 — Core combat **[BERJALAN — BUILD 52i]**
 - 11 hero punya **identity**: strength / weakness / combat identity / scaling identity
 - 8 archetype serangan (projectile, homing, melee, area/burst, beam, chain, zone, summon)
 - telegraph wajib: anticipation → telegraph → execution → impact → recovery
 - damage model + threat model
 - **Exit:** identitas hero terbaca dari cara membunuh, bukan dari angka.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Identitas 11 hero | `heroes[].identity` berisi `attackArchetype`, `strength[]`, `weakness[]`, `combatIdentity`, `scalingIdentity` — diturunkan dari **angka nyata** `baseStats`/`patternParams` tiap hero (bukan karangan). Semua 8 archetype terpakai: area 3, zone 2, chain/projectile/beam/summon/homing/melee masing-masing 1 |
+| Bahasa serangan + telegraph | `data/attacks.json` bertambah `telegraphPhases` (anticipation 0.12 · telegraph 0.25 · execution 0.08 · impact 0.06 · recovery 0.18) dan status `implemented/planned` per archetype |
+| Archetype CHAIN jalan | Pattern baru `ranged_chain` (Dendritic): proyektil melompat ke musuh terdekat berikutnya dengan `chainHops`, `chainRadius`, dan peluruhan damage per lompatan (`attacks.json → chain.decay`). Implementasi di `Projectile` + `CollisionSystem.handleProjectileHits` (filter target pada `findNearestEnemy`) |
+| Penguji baru | `tools/verify-combat.mjs` (`npm run verify:combat`, ikut di `npm run verify`) + harness jsdom bersama `tools/harness.mjs` |
+| Dijaga | Tidak ada hero terbaik absolut (§14) — tak satu pun hero memuncaki HP **dan** damage **dan** speed; pola serangan hero lain tidak berubah |
+
+Sisa P1: archetype `beam/summon/zone/area` masih memakai pola lama (status `planned`
+di `attacks.json`) dan 5 behavior musuh (`chase_direct`, `chase_weave`, `splitter`,
+`boss_pattern_a`, `hazard_drift`) belum mencakup 8 archetype ancaman V2 (§15).
 
 ### P2 — Mutation sebagai jantung progresi
 - mutasi mengubah **perilaku tempur** (attack behavior/range/projectile/area/mobility/

@@ -260,6 +260,32 @@ export class Player {
         });
       }
       game.run.stats.shotsFired += n;
+    } else if (pattern === 'ranged_chain') {
+      // V2 §17 archetype CHAIN: tembakan yang menyambung ke musuh terdekat
+      // di sekitar target pertama (identitas Dendritic: multi-target & kontrol).
+      const chain = game.getAttackArchetype('chain') || {};
+      const n = this.stats.projectileCount;
+      const spread = (this.heroDef.patternParams.spreadAngle || 0.5) * (n - 1);
+      const turnRate = this.heroDef.patternParams.turnRate || 4;
+      for (let i = 0; i < n; i++) {
+        const angle = this.facing - spread / 2 + (n === 1 ? 0 : (spread / (n - 1)) * i);
+        game.spawnProjectile({
+          pattern: 'homing',
+          x: this.x + Math.cos(angle) * this.radius,
+          y: this.y + Math.sin(angle) * this.radius,
+          angle,
+          speed: this.stats.projectileSpeed,
+          damage: this.stats.damage,
+          pierce: 1 + (this.heroDef.patternParams.hops || chain.maxHops || 2),
+          turnRate,
+          antiParasitMult: this.heroDef.patternParams.antiParasitMult || 0,
+          color: this.heroDef.color,
+          chainHops: this.heroDef.patternParams.hops || chain.maxHops || 2,
+          chainRadius: this.heroDef.patternParams.hopRadius || chain.hopRadius || 120,
+          chainDecay: (chain.decay != null ? chain.decay : 0.4),
+        });
+      }
+      game.run.stats.shotsFired += n;
     } else {
       console.warn('[player] attackPattern tidak dikenal:', pattern);
     }

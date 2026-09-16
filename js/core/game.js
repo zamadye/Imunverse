@@ -1061,6 +1061,12 @@ export const game = {
   // =====================================================================
   // SERANGAN & DAMAGE
   // =====================================================================
+
+  /** V2 §17: konfigurasi satu archetype serangan dari data/attacks.json. */
+  getAttackArchetype(id) {
+    const list = (getData().attacks && getData().attacks.archetypes) || [];
+    return list.find((a) => a.id === id) || null;
+  },
   /** Dipakai Player untuk spawn proyektil. */
   spawnProjectile(opts) {
     const proj = new Projectile(opts);
