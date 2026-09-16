@@ -129,9 +129,9 @@ hero_{id}_mut2_idle.png     hero_{id}_mut2_attack.png
 
 | # | Hero | mut1_idle | mut1_attack | mut2_idle | mut2_attack |
 |---|---|---|---|---|---|
-| 1 | macrophage | ✅ selesai | ⬜ | ⬜ | ⬜ |
-| 2 | dendritic | ⬜ | ⬜ | ⬜ | ⬜ |
-| 3 | neutrophil | ⬜ | ⬜ | ⬜ | ⬜ |
+| 1 | macrophage | ✅ | ✅ | ✅ | ✅ |
+| 2 | dendritic | ✅ | ✅ | ✅ | ✅ |
+| 3 | neutrophil | ✅ | ✅ | ✅ | ⬜ |
 | 4 | eosinophil | ⬜ | ⬜ | ⬜ | ⬜ |
 | 5 | basophil | ⬜ | ⬜ | ⬜ | ⬜ |
 | 6 | mastcell | ⬜ | ⬜ | ⬜ | ⬜ |
