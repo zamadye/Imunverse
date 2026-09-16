@@ -37,6 +37,7 @@ const store = {
   mutations: null,   // data/mutations.json (PHAGOS: 18 mutasi bentuk hero)
   enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
   welcomeBox: null,  // data/welcome-box.json (ADDENDUM §1: Kapsul Membran)
+  audio: null,       // data/audio.json (peta MP3 + volume; CC0)
 };
 
 import { BUILD } from './version.js';
@@ -80,6 +81,7 @@ export async function loadAllData() {
     mutations: 'data/mutations.json',
     enemyMutations: 'data/enemy-mutations.json',
     welcomeBox: 'data/welcome-box.json',
+    audio: 'data/audio.json', // Audio: peta file MP3 + rantai volume (CC0)
   };
 
   const entries = await Promise.all(
@@ -281,6 +283,11 @@ export function getEnemyMutations() {
 /** Kapsul Membran (data/welcome-box.json). */
 export function getWelcomeBox() {
   return getData().welcomeBox;
+}
+
+/** Peta file audio MP3 + rantai volume (data/audio.json). */
+export function getAudio() {
+  return getData().audio;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

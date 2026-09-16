@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "doc": "AUDIO — peta file MP3 + rantai volume. Semua angka volume hidup di sini (kontrak repo: angka di data/, bukan di js/). Sumber aset: assets/audio/CREDITS.md (semua CC0-1.0 / public domain). Bila sebuah file gagal dimuat, audio-system jatuh ke synth prosedural WebAudio (0 KB) supaya game tetap bersuara offline.",
+  "volumes": {
+    "master": 0.9,
+    "music": 0.5,
+    "note": "master 0.9 (sebelumnya 0.5) — permintaan owner: audio harus lebih keras. music 0.5 = musik tetap di bawah SFX/VO."
+  },
+  "fadeSec": 0.55,
+  "duckGain": 0.25,
+  "tracks": {
+    "menu": "assets/audio/music/bgm_menu.mp3",
+    "run": "assets/audio/music/bgm_run.mp3",
+    "boss": "assets/audio/music/bgm_boss.mp3",
+    "dark": "assets/audio/music/bgm_dark.mp3"
+  },
+  "chapterTracks": {
+    "luka": "run",
+    "demam": "run",
+    "racun": "run",
+    "alergi": "run",
+    "kanker": "dark",
+    "final": "dark"
+  },
+  "sfx": {
+    "ui": { "file": "assets/audio/sfx/ui.mp3", "gain": 0.55 },
+    "ui_confirm": { "file": "assets/audio/sfx/ui_confirm.mp3", "gain": 0.6 },
+    "ui_hover": { "file": "assets/audio/sfx/ui_hover.mp3", "gain": 0.32 },
+    "hit": { "file": "assets/audio/sfx/hit.mp3", "gain": 0.5 },
+    "hit_crit": { "file": "assets/audio/sfx/hit_crit.mp3", "gain": 0.6 },
+    "kill": { "file": "assets/audio/sfx/kill.mp3", "gain": 0.55 },
+    "engulf": { "file": "assets/audio/sfx/engulf.mp3", "gain": 0.7 },
+    "collect": { "file": "assets/audio/sfx/collect.mp3", "gain": 0.5 },
+    "collect_big": { "file": "assets/audio/sfx/collect_big.mp3", "gain": 0.6 },
+    "coin": { "file": "assets/audio/sfx/coin.mp3", "gain": 0.5 },
+    "levelup": { "file": "assets/audio/sfx/levelup.mp3", "gain": 0.8 },
+    "mutation": { "file": "assets/audio/sfx/mutation.mp3", "gain": 0.85 },
+    "pulse": { "file": "assets/audio/sfx/pulse.mp3", "gain": 0.9 },
+    "ability": { "file": "assets/audio/sfx/ability.mp3", "gain": 0.8 },
+    "evolve": { "file": "assets/audio/sfx/evolve.mp3", "gain": 0.85 },
+    "player_hit": { "file": "assets/audio/sfx/player_hit.mp3", "gain": 0.9 },
+    "heartbeat": { "file": "assets/audio/sfx/heartbeat.mp3", "gain": 0.6 },
+    "boss_spawn": { "file": "assets/audio/sfx/boss_spawn.mp3", "gain": 0.95 },
+    "boss_die": { "file": "assets/audio/sfx/boss_die.mp3", "gain": 0.95 },
+    "boss_blast": { "file": "assets/audio/sfx/boss_blast.mp3", "gain": 0.8 },
+    "wave": { "file": "assets/audio/sfx/wave.mp3", "gain": 0.7 },
+    "chest": { "file": "assets/audio/sfx/chest.mp3", "gain": 0.8 },
+    "revive": { "file": "assets/audio/sfx/revive.mp3", "gain": 0.85 },
+    "gameover": { "file": "assets/audio/sfx/gameover.mp3", "gain": 0.9 },
+    "victory": { "file": "assets/audio/sfx/victory.mp3", "gain": 0.9 },
+    "shoot": { "file": "assets/audio/sfx/shoot.mp3", "gain": 0.45 },
+    "strain": { "file": "assets/audio/sfx/strain.mp3", "gain": 0.7 },
+    "capsule": { "file": "assets/audio/sfx/capsule.mp3", "gain": 0.8 },
+    "warn": { "file": "assets/audio/sfx/warn.mp3", "gain": 0.6 }
+  },
+  "sfxNote": "Kenapa suaranya lebih keras: tiap file sudah dinormalisasi EBU R128 (I=-13 LUFS, true peak -1 dB) saat dibangun (tools/build-audio.sh), lalu dikalikan gain di atas dan master 0.9 (lama 0.5)."
+}

@@ -1044,7 +1044,7 @@ export const game = {
       showAnnounce(res.mutation.name.toUpperCase() + '!', true);
       run.effects.spawnBurst(run.player.x, run.player.y, '#8df7d2', 30, 260, 5);
       run.camera.addShake(0.4);
-      audio.evolve();
+      audio.mutation();
       buzz('levelup');
       emit('toast', { message: `MUTASI: ${res.mutation.name}!`, kind: 'gold' });
       this.recomputePlayerStats();
@@ -1197,6 +1197,7 @@ export const game = {
       size *= gf.crit.sizeMult;
       color = gf.crit.color;
       this.hitStopRun(gf.hitStop.crit); // jeda mikro "berat" khusus crit
+      audio.crit(); // bunyi khusus crit (lebih tajam dari hit biasa)
       buzz('crit');
     }
     run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
@@ -1259,6 +1260,7 @@ export const game = {
     const run = this.run;
     run.effects.spawnBlast(enemy.x, enemy.y, cfg.radius, '#ff4059');
     run.camera.addShake(0.55);
+    audio.bossBlast();
     const player = run.player;
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
@@ -1620,13 +1622,17 @@ applyChapterTier(enemy, run) {
   /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
   triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
-    return tryPulse(this, {});
+    const ok = tryPulse(this, {});
+    if (ok) audio.pulse(); // PHAGOS: Pulse = momen aksi utama → bunyi paling tebal
+    return ok;
   },
 
   /** ADDENDUM §2 — Pulse paksa abaikan cooldown (Ledakan ATP). */
   triggerPulseForce() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
-    return tryPulse(this, { ignoreCd: true });
+    const ok = tryPulse(this, { ignoreCd: true });
+    if (ok) audio.pulse();
+    return ok;
   },
 
   /**
@@ -1756,7 +1762,7 @@ applyChapterTier(enemy, run) {
       // PACING D14: korban telan (skill devour) = engulf → 4 XP.
       // Drop tetap tidak ada (trade-off jalur skill — D9; engulf membran tetap full kill).
       this.addXP(this.xpForKillCause(enemy, 'engulf'));
-      audio.kill();
+      audio.engulf();
       return;
     }
 
@@ -1779,7 +1785,8 @@ applyChapterTier(enemy, run) {
     }
 
     // ---- JUICE: hit-stop + SFX kill ----
-    audio.kill();
+    // PHAGOS: korban yang DITELAN beda bunyi dari kill kontak/Pulse (basah).
+    if (source === 'engulf') audio.engulf(); else audio.kill();
     // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
     const gf = getGameFeel();
     if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
@@ -2022,6 +2029,7 @@ applyChapterTier(enemy, run) {
     player.alive = true;
     player.hp = Math.round(player.maxHP * 0.5);
     player.iframes = 2.0;
+    audio.revive();
 
     // Bersihkan musuh di sekitar (tanpa drop — anti exploit)
     const clearRadius = 320;
@@ -2053,7 +2061,7 @@ applyChapterTier(enemy, run) {
     if (!run || run.ended) return;
     run.victory = true;
     if (run.chapter) run.bonusCurrency = (run.bonusCurrency || 0) + (run.chapter.reward || 0);
-    audio.evolve(); // fanfare kemenangan
+    audio.victory(); // fanfare kemenangan
     this.finishRun(false);
   },
 
@@ -2061,6 +2069,7 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     if (!run || run.ended) return;
     run.ended = true;
+    if (!run.victory) audio.gameover(); // fanfare kalah (menang sudah bunyi di winRun)
 
     const meta = STATE.meta;
     const doubleMult = (run.itemBuffs && run.itemBuffs.katalis) ? 1.5 : 1; // ADDENDUM §2: Katalis Mitosis

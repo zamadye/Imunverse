@@ -12,6 +12,7 @@
 import { getEnemyMutations } from '../core/data-store.js';
 import { emit } from '../core/ui-bridge.js';
 import { showPresenter } from '../ui/presenter.js';
+import { audio } from './audio-system.js';
 import { currentStrainId, WEEKLY_STRAIN_CHANCE, WEEKLY_STRAIN_MIN_WAVE } from './weekly-strain-system.js'; // ADDENDUM §3.5
 
 function cfg() {
@@ -125,6 +126,7 @@ export function checkPreWarning(game) {
   if (run.enemyMutation.warnedWave === next) return;
   run.enemyMutation.warnedWave = next;
   emit('toast', { message: 'PATOGEN BERMUTASI...', kind: 'danger' });
+  audio.strain(); // peringatan audio: patogen beradaptasi
   // Flash merah arena sesaat
   run._mutationFlashT = 1.2;
   try {

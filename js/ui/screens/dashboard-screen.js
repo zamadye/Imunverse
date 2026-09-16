@@ -39,6 +39,7 @@ import { traitDisplayName } from '../../systems/enemy-mutation-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { emit } from '../../core/ui-bridge.js';
 import { el } from '../screen-manager.js';
+import { music } from '../../systems/music-system.js';
 
 /** Fase 13: ikon organ per arena (untuk kartu & banner kampanye). */
 const ORGAN_ICONS = {
@@ -434,6 +435,9 @@ export function show() {
   // Sprint 6.31 (§10.1): catat login harian (streak + deteksi comeback).
   try { recordLoginDay(STATE.meta); } catch { /* abaikan */ }
   showHeroNotice(); // Fase 17: perayaan "HERO BARU!" bila ada yang baru terbuka
+  // AUDIO: trek menu menyambung saat pemain berada di dashboard (MP3 CC0,
+  // fallback ke chiptune prosedural bila berkas belum termuat).
+  try { music.setTrack('menu'); music.start(); } catch { /* abaikan */ }
   if (dashWasHidden) {
     // Fase 15: cegah auto-scroll browser memotong banner saat layar dibuka
     requestAnimationFrame(() => {

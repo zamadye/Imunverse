@@ -22,7 +22,7 @@ import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
 import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
-import { getHero } from './core/data-store.js';
+import { getHero, getAudio } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
 import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
@@ -171,6 +171,16 @@ function wireUiBridge() {
 
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
+    // AUDIO: duel boss punya trek sendiri; gelombang biasa balik ke trek bab.
+    try {
+      if (isBoss) {
+        music.setTrack('boss');
+      } else {
+        const chId = (STATE.meta.selectedChapter || '').replace('bab_', '');
+        const map = getAudio()?.chapterTracks || {};
+        music.setTrack(map[chId] || 'run');
+      }
+    } catch { /* musik tak boleh memecat gameplay */ }
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
   /**

@@ -14,18 +14,23 @@
 
 import { audio } from './audio-system.js';
 import { music } from './music-system.js';
+import { getAudio } from '../core/data-store.js';
 
 const cache = new Map(); // path -> Promise<AudioBuffer>
 const active = new Set(); // source nodes aktif
 let ducking = 0; // jumlah VO aktif yang sedang duck (refcount)
-const MUSIC_GAIN_NORMAL = 0.09;
-const MUSIC_GAIN_DUCKED = 0.03;
+// Level musik kini dibaca dari musik itu sendiri (data/audio.json volumes.music)
+// supaya perubahan volume tidak perlu disinkronkan manual di dua tempat.
+const duckFactor = () => {
+  try { return getAudio()?.duckGain ?? 0.25; } catch { return 0.25; }
+};
 
 function setDuck(on) {
   ducking = Math.max(0, ducking + (on ? 1 : -1));
   const g = music.gain;
   if (!g || !audio.ctx) return;
-  const target = ducking > 0 ? MUSIC_GAIN_DUCKED : MUSIC_GAIN_NORMAL;
+  const normal = music.normalGain;
+  const target = ducking > 0 ? normal * duckFactor() : normal;
   try {
     g.gain.cancelScheduledValues(audio.ctx.currentTime);
     g.gain.setTargetAtTime(target, audio.ctx.currentTime, 0.12);
