@@ -82,7 +82,10 @@ for (const sp of optionalSpritePaths) {
   if (fs.existsSync(p)) mutReady += 1;
 }
 if (optionalSpritePaths.size > 0) {
-  ok(`foto mutasi: ${mutReady}/${optionalSpritePaths.size} tersedia (sisanya pakai sprite dasar)`);
+  const total = optionalSpritePaths.size;
+  ok(mutReady === total
+    ? `foto mutasi: LENGKAP ${mutReady}/${total}`
+    : `foto mutasi: ${mutReady}/${total} tersedia (sisanya pakai sprite dasar)`);
 }
 
 for (const sp of spritePaths) {

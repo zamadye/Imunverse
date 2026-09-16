@@ -9,11 +9,21 @@ satu resep per hero per pose. Dipakai bersama `tools/build-mutation-sprites.py`.
    chroma-key), mengikuti resep di bawah. Simpan ke `tools/.mutsrc/<nama>.png`.
 2. Jalankan `python3 tools/build-mutation-sprites.py` → menghasilkan
    `assets/sprites/<nama>.png` (RGBA 256 px, latar dibuang, isi di-crop & dipad).
-3. `npm run check` → baris "foto mutasi: N/44 tersedia" harus naik.
+3. `npm run check` → baris "foto mutasi: LENGKAP 44/44".
 
-> **Progres: 41/44** (macrophage, dendritic, neutrophil, eosinophil, basophil,
-> mastcell, tcd8, tcd4, treg, bcell lengkap 4/4; nkcell tinggal mut1_attack,
-> mut2_idle, mut2_attack).
+Lembar kontak `tools/mutation-art/CONTACT-SHEET.png` berisi 44 foto mutasi
+(11 baris hero × 5 kolom: dasar, mut1 idle/serang, mut2 idle/serang) —
+dipakai untuk memeriksa semua foto sekaligus. Bangkitkan ulang dengan:
+
+```
+python3 tools/build-mutation-sprites.py   # sprite
+python3 tools/make-contact-sheet.py       # lembar kontak
+```
+
+> **Progres: 44/44 — SELESAI.** Semua 11 hero punya 4 foto (mut1/mut2 × idle/attack).
+> Menambah hero baru? Salin pola prompt di atas, lalu jalankan ulang
+> `python3 tools/build-mutation-sprites.py` (tanpa argumen) supaya semua foto
+> hero itu dijepit frame-nya dengan acuan yang sama.
 
 ## Penjepit frame — WAJIB biar animasi tidak melompat
 `build-mutation-sprites.py` mengunci tiap foto mutasi ke frame sprite dasar
@@ -153,7 +163,7 @@ hero_{id}_mut2_idle.png     hero_{id}_mut2_attack.png
 | 8 | tcd4 | ✅ | ✅ | ✅ | ✅ |
 | 9 | treg | ✅ | ✅ | ✅ | ✅ |
 | 10 | bcell | ✅ | ✅ | ✅ | ✅ |
-| 11 | nkcell | ✅ | ⬜ | ⬜ | ⬜ |
+| 11 | nkcell | ✅ | ✅ | ✅ | ✅ |
 
 ## Catatan renderer
 

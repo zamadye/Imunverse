@@ -162,7 +162,7 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 - [x] 44. **Misi & Quest → modal** dari tombol Misi di footer (tab Harian/Mingguan/Prestasi + KLAIM + hitung mundur reset + badge)
 - [x] 45. **Fitur sekunder** (Kampanye · Siklus Mitosis · Bio-Pedia · Profil) dipindah ke menu "…" topbar
 - [x] 46. **Audio**: `data/audio.json` (peta file + rantai volume), `tools/build-audio.sh`, `assets/audio/CREDITS.md`
-- [~] 47. **Foto mutasi per hero** — overlay `mut_*.png` DICABUT; 44 foto (2 tingkat × 2 pose × 11 hero) via `tools/mutation-art/PROMPTS.md` + `tools/build-mutation-sprites.py`. Progres: **41/44** — frame terkunci ke sprite dasar (Δ ≤ 0.01) supaya animasi idle/attack, balik kiri-kanan & bob tidak melompat
+- [x] 47. **Foto mutasi per hero** — overlay `mut_*.png` DICABUT; **44/44 SELESAI** (2 tingkat × 2 pose × 11 hero) via `tools/mutation-art/PROMPTS.md` + `tools/build-mutation-sprites.py`; frame terkunci ke sprite dasar (Δ ≤ 0.012) supaya animasi idle/attack, balik kiri-kanan & bob tidak melompat; 0 sisa magenta
 - [~] 48. **Latar foto dashboard/loading** — jalur siap (`assets/ui/bg-dashboard.jpg`, `bg-loading.jpg`); menunggu berkas owner (saat ini placeholder generated)
 
 > Catatan P8: alat pembuat gambar dibatasi **10 gambar per giliran**, jadi item 47
