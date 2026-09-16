@@ -16,7 +16,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -27,7 +27,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -38,7 +38,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -49,7 +49,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -60,7 +60,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -68,38 +68,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_macrophage_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_macrophage_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -111,7 +111,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -122,7 +122,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -133,7 +133,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -144,7 +144,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -155,7 +155,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -163,38 +163,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_dendritic_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_dendritic_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -206,7 +206,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -217,7 +217,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -228,7 +228,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -239,7 +239,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -250,7 +250,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -258,38 +258,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -301,7 +301,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -312,7 +312,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -323,7 +323,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -334,7 +334,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -345,7 +345,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -353,38 +353,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -396,7 +396,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -407,7 +407,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -418,7 +418,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -429,7 +429,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -440,7 +440,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -448,38 +448,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_basophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_basophil_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -491,7 +491,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -502,7 +502,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -513,7 +513,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -524,7 +524,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -535,7 +535,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -543,38 +543,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_mastcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_mastcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -586,7 +586,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -597,7 +597,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -608,7 +608,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -619,7 +619,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -630,7 +630,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -638,38 +638,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_tcd8_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_tcd8_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -681,7 +681,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -692,7 +692,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -703,7 +703,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -714,7 +714,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -725,7 +725,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -733,38 +733,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_tcd4_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_tcd4_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -776,7 +776,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -787,7 +787,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -798,7 +798,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -809,7 +809,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -820,7 +820,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -828,38 +828,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_treg_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_treg_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -871,7 +871,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -882,7 +882,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -893,7 +893,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -904,7 +904,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -915,7 +915,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -923,38 +923,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_bcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_bcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       },
       {
@@ -966,7 +966,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 551.26,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
@@ -977,7 +977,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 552.27,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -988,7 +988,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 554.16,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -999,7 +999,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.68,
+            "dasar": 553.78,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -1010,7 +1010,7 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.68,
+            "dasar": 551.77,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
@@ -1018,38 +1018,38 @@
           {
             "kasus": "tier 2/3 menghadap kiri",
             "file": "assets/sprites/hero_nkcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.68,
+            "h": 56.68,
             "cx": 512,
-            "dasar": 551.66,
-            "flip": -1,
+            "dasar": 551.4,
+            "flip": 1,
             "img": "256x256",
             "status": "OK"
           },
           {
             "kasus": "tier 2/3 bob (waktu beda)",
             "file": "assets/sprites/hero_nkcell_mut2_idle.png",
-            "w": 56.77,
-            "h": 56.77,
+            "w": 56.81,
+            "h": 56.81,
             "cx": 512,
-            "dasar": 552.37,
+            "dasar": 553.37,
             "flip": 1,
             "img": "256x256",
             "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.04,
+          "lebar": 0.12,
           "idlePusatX": 0,
-          "idlePusatY": 0,
+          "idlePusatY": 2.53,
           "serangPusatX": 0,
-          "serangPusatY": 0,
+          "serangPusatY": 2.39,
           "balikPusatX": 0,
-          "balikPusatY": 0,
-          "flipKiri": "OK",
-          "bobNaikTurun": 0.71,
+          "balikPusatY": 2.32,
+          "flipKiri": "flip=1",
+          "bobNaikTurun": 0.41,
           "bobGeserSamping": 0,
-          "bobUkuran": 0.04
+          "bobUkuran": 0
         }
       }
     ]
@@ -1059,7 +1059,7 @@
     "berkasGagal": 0,
     "heroDiuji": 11,
     "kasusDiuji": 77,
-    "totalError": 0
+    "totalError": 44
   },
   "levelup": [
     {

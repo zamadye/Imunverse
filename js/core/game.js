@@ -2326,15 +2326,12 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
-    // UI-REBUILD P8: rumus bob MENERUS — dulu memilih antara dua rumus
-    // (jalan vs diam) sehingga nilai melompat saat tombol dilepas. Sekarang
-    // mengambang dasar selalu ada, dan langkah jalan ditambahkan perlahan
-    // sebesar `moveAmt` (0..1) yang dihaluskan di player.update().
-    const pMove = Math.max(0, Math.min(1, player.moveAmt || 0));
-    // Bentuk gelombang sin²((1 - cos 2x)/2): sama "mantul"-nya seperti |sin|,
-    // tapi TANPA patahan di titik nol — jadi tidak ada frame yang melompat.
-    const pStep = (1 - Math.cos((player.walkPhase || 0) * 2)) / 2;
-    const pBob = Math.sin(time * 2.1) * 1.1 + pMove * pStep * 3.4;
+    // LOCOMOTION V2: bob / condong / squash dihitung di player.update() —
+    // SATU sumber kebenaran, entah dari rig Rive (data/…/hero-locomotion.riv)
+    // atau rumus cadangannya. game.js hanya MEMAKAI nilai itu supaya tidak
+    // pernah ada dua rumus yang tidak sinkron antara update dan render.
+    const pAnim = player.anim || { bob: 0, tilt: 0, sx: 1, sy: 1 };
+    const pBob = pAnim.bob || 0;
     bobOf.player = pBob;
     const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
     const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
@@ -2520,12 +2517,13 @@ applyChapterTier(enemy, run) {
           const _rawFlip = typeof player.animFlip === 'number' ? player.animFlip : (Math.cos(player.facing) < 0 ? -1 : 1);
           const _sgn = _rawFlip < 0 ? -1 : 1;
           const flip = _sgn * Math.max(0.14, Math.abs(_rawFlip)); // jangan pernah 0 (sprite hilang)
-          const _lean = (player.lean || 0) * _rawFlip;
-          const sway = Math.sin((player.walkPhase || 0) * 2) * 0.05 * pMove;
-          const tilt = _lean + sway + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
-          const _depth = Math.max(-1, Math.min(1, player.depth || 0));
-          const sx = 1 + _depth * 0.05;   // mendekat → sedikit melebar
-          const sy = 1 - _depth * 0.03;   // dan sedikit merapat
+          const _flipAbs = Math.max(0.14, Math.abs(_rawFlip));
+          // condong sudah termasuk lean searah jalan + ayunan langkah +
+          // miring ke arah belokan (inersia). Dikalikan arah mirror karena
+          // sprite yang dibalik membalik arah rotasi.
+          const tilt = (pAnim.tilt || 0) * _sgn * _flipAbs + pSwingTilt * _sgn;
+          const sx = pAnim.sx || 1;   // squash-stretch dari rig (atau cadangan)
+          const sy = pAnim.sy || 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt, sx, sy });
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
           const evoStage = run.evoStage?.stage || 0;

@@ -9,7 +9,8 @@
 import { PERSP } from '../render/camera.js';
 
 import { audio } from '../systems/audio-system.js';
-import { getCombat } from '../core/data-store.js';
+import { getCombat, getLocomotion } from '../core/data-store.js';
+import { ensureRig, updateRig } from '../render/rive-rig.js';
 
 let nextPlayerId = 1;
 
@@ -37,7 +38,19 @@ export class Player {
     this.swing = 0;           // Fase 12c: animasi tebasan respons tombol
     this.moving = false;
     this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
-    this.stepT = 0;     // jeda antar langkah (debu kaki)
+    this.stepT = 0;     // (dipertahankan untuk pemanggil lama; debu kaki kini
+                        //  dipicu oleh momen kaki menapak — lihat stepEvent)
+    this.time = 0;      // waktu hidup hero (napas saat diam)
+    // ---- LOCOMOTION V2 (foot-planting, putaran halus, bob & lean) ----
+    this.facingTarget = 0;  // sudut yang DIKEJAR (bukan langsung diset)
+    this.facingVel = 0;     // laju putar aktual (rad/dtk) → sumber lean belok
+    this.turnLean = 0;      // condong ke arah belokan (inersia), rad
+    this.stepIndex = 0;     // hitungan langkah (naik tiap kaki menapak)
+    this.stepEvent = 0;     // 1 pada frame kaki menapak (untuk debu)
+    this.stridePx = 48;     // panjang satu langkah (dihitung dari data)
+    this.nominalSpeed = 144;// kecepatan saat animasi jalan berputar 1×
+    this.rigActive = false; // true bila gerakan datang dari rig Rive
+    this.anim = { bob: 0, tilt: 0, sx: 1, sy: 1, legSwing: 0, armSwing: 0, headTilt: 0 };
     // ---- ANIMASI HALUS (UI-REBUILD P8) ----
     // Dulu sprite hanya dibalik kiri↔kanan secara instan (flip = ±1), jadi
     // gerakan terasa kaku dan tidak pernah bereaksi ke arah atas/bawah.
@@ -84,18 +97,23 @@ export class Player {
       this.vx = 0;
       this.vy = 0;
     }
+    const _prevX = this.x;
+    const _prevY = this.y;
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+    const _dist = Math.hypot(this.x - _prevX, this.y - _prevY); // jarak TEMPUH frame ini
     // ---- Animasi halus: semua arah (kiri/kanan/atas/bawah) ----
     // Nilai mentah dihitung dari kecepatan (bukan tombol), lalu dihaluskan
     // dengan peluruhan eksponensial supaya transisi tidak pernah melompat.
+    const loco = getLocomotion() || {};
     {
       const spd = Math.max(1, this.stats.speed || 1);
       const vlen = Math.hypot(this.vx, this.vy);
       const targetMove = Math.min(1, vlen / spd);
       const targetFlip = Math.cos(this.facing) < 0 ? -1 : 1;
       // miring searah jalan (dibatasi) — terasa seperti mencondongkan badan
-      const targetLean = Math.max(-1, Math.min(1, this.vx / spd)) * 0.13;
+      const tiltCfg = loco.tilt || {};
+      const targetLean = Math.max(-1, Math.min(1, this.vx / spd)) * (tiltCfg.moveLean != null ? tiltCfg.moveLean : 0.13);
       // vertikal: + = mendekat ke kamera (bawah layar), - = menjauh
       const targetDepth = Math.max(-1, Math.min(1, this.vy / spd));
       const ease = (cur, target, rate) => cur + (target - cur) * (1 - Math.exp(-rate * dt));
@@ -105,24 +123,87 @@ export class Player {
       this.depth = ease(this.depth, targetDepth, 6);
     }
 
-    if (hasInput) {
-      this.facing = Math.atan2(move.y, move.x);
-      this.moving = true;
-      // Fase 12b: animasi jalan — bobbing + debu langkah kecil.
-      // UI-REBUILD P8: laju langkah 3–9 rad/dtk mengikuti kecepatan AKTUAL
-      // (≈2–3 langkah/dtk). Rumus lama (speed/16 ≈ 30 rad/dtk) membuat
-      // mantulan terlalu cepat sampai 2 px/frame — terlihat bergetar, bukan
-      // berjalan.
-      const _spdRef = Math.max(1, this.stats.speed || 1);
-      const _ratio = Math.min(1, Math.hypot(this.vx, this.vy) / _spdRef);
-      this.walkPhase += dt * (3 + 6 * _ratio);
-      this.stepT -= dt;
-      if (this.stepT <= 0 && game && game.run) {
-        this.stepT = 0.24;
-        game.run.effects.spawnBurst(this.x, this.y + this.radius * 0.75, 'rgba(224,244,236,0.85)', 1, 30, 2.2);
+    if (hasInput) this.facingTarget = Math.atan2(move.y, move.x);
+    // ---- Putaran halus (smooth rotation) ----
+    // Dulu `facing` langsung diset ke sudut input → badan berputar seketika
+    // (patah-patah saat pemain mengetuk arah). Sekarang sudut DIKEJAR dengan
+    // batas laju putar (turn.rate rad/dtk) lewat jalan terpendek di lingkaran
+    // 360°, lalu selisihnya jadi "condong ke arah belokan" (inersia).
+    {
+      const turn = loco.turn || {};
+      const rate = turn.rate || 13;
+      let d = this.facingTarget - this.facing;
+      while (d > Math.PI) d -= Math.PI * 2;   // jalan terpendek: kiri atau kanan
+      while (d < -Math.PI) d += Math.PI * 2;
+      const step = Math.max(-rate * dt, Math.min(rate * dt, d));
+      this.facing += step;
+      if (this.facing > Math.PI) this.facing -= Math.PI * 2;
+      if (this.facing < -Math.PI) this.facing += Math.PI * 2;
+      this.facingVel = dt > 0 ? step / dt : 0;
+      const targetTurnLean = Math.max(-1, Math.min(1, this.facingVel / rate)) * (turn.leanMax || 0.087);
+      const kLean = 1 - Math.exp(-(turn.leanRate || 9) * dt);
+      this.turnLean += (targetTurnLean - this.turnLean) * kLean;
+    }
+
+    // ---- Foot-planting: fase langkah dikunci ke JARAK, bukan ke waktu ----
+    // 1 langkah = π rad fase; jadi kaki menapak TE PAT setiap kali hero
+    // menempuh satu `stride` (data/locomotion.json). Kalau fase digerakkan
+    // waktu saja, kaki "menyapu" lebih cepat/lambat dari badan bergerak —
+    // itulah kesan foto digeser yang dihilangkan di sini.
+    const strideCfg = loco.stride || {};
+    this.stridePx = Math.max(strideCfg.minPx || 34, Math.min(strideCfg.maxPx || 72, this.radius * (strideCfg.radiusFactor || 3.2)));
+    this.nominalSpeed = (2 * this.stridePx) / (strideCfg.nominalCycleSec || 0.667);
+    {
+      const prevStep = this.stepIndex;
+      this.walkPhase += (_dist / this.stridePx) * Math.PI;
+      this.stepIndex = Math.floor(this.walkPhase / Math.PI);
+      this.stepEvent = this.stepIndex !== prevStep ? 1 : 0;
+    }
+
+    // ---- Rig Rive (sumber gerakan) + cadangan analitik ----
+    if (!this._rigAsked) { this._rigAsked = true; ensureRig(); }
+    const _vlen = Math.hypot(this.vx, this.vy);
+    const pose = updateRig(dt, { moveAmt: this.moveAmt, speed: _vlen, nominalSpeed: this.nominalSpeed, cfg: loco });
+    this.rigActive = !!pose;
+    {
+      const bobCfg = loco.bob || {};
+      const tiltCfg = loco.tilt || {};
+      const stepCurve = (1 - Math.cos(this.walkPhase * 2)) / 2; // 2 puncak/siklus
+      if (pose) {
+        // Rig Rive yang mengatur bob/condong/squash; depth kamera tetap
+        // ditambahkan supaya mendekat terasa membesar & menjauh mengecil.
+        this.anim.bob = pose.bob;
+        this.anim.tilt = pose.tilt + this.turnLean;
+        this.anim.sx = pose.sx * (1 + this.depth * (tiltCfg.depthX || 0.05));
+        this.anim.sy = pose.sy * (1 - this.depth * (tiltCfg.depthY || 0.03));
+        this.anim.legSwing = pose.legSwing;
+        this.anim.armSwing = pose.armSwing;
+        this.anim.headTilt = pose.headTilt;
+      } else {
+        // CADANGAN (rig belum siap / gagal dimuat): rumus lama yang sudah
+        // terbukti mulus — sekarang fase langkahnya ikut jarak (lihat atas).
+        this.time += dt;
+        const idleAmp = bobCfg.idleAmp != null ? bobCfg.idleAmp : 1.1;
+        const stepAmp = bobCfg.stepAmp != null ? bobCfg.stepAmp : 3.4;
+        const swayAmp = tiltCfg.swayAmp != null ? tiltCfg.swayAmp : 0.05;
+        this.anim.bob = Math.sin(this.time * (bobCfg.idleHz || 2.1)) * idleAmp + this.moveAmt * stepCurve * stepAmp;
+        this.anim.tilt = this.lean + Math.sin(this.walkPhase * 2) * swayAmp * this.moveAmt + this.turnLean;
+        this.anim.sx = 1 + this.depth * (tiltCfg.depthX || 0.05);
+        this.anim.sy = 1 - this.depth * (tiltCfg.depthY || 0.03);
+        this.anim.legSwing = Math.sin(this.walkPhase) * 0.42;
+        this.anim.armSwing = -Math.sin(this.walkPhase) * 0.32;
+        this.anim.headTilt = -Math.sin(this.walkPhase) * 0.022;
       }
-    } else {
-      this.moving = Math.hypot(this.vx, this.vy) > 4; // masih meluncur pelan
+    }
+
+    // ---- Debu langkah: TE PAT saat kaki menapak, di kaki yang menapak ----
+    this.moving = _vlen > 4;
+    if (this.stepEvent && game && game.run && _vlen > 12) {
+      const st = loco.step || {};
+      const side = (this.stepIndex % 2 === 0 ? 1 : -1) * this.radius * (st.dustSideOffset != null ? st.dustSideOffset : 0.45);
+      const fx = this.x - Math.sin(this.facing) * side;      // kaki kiri/kanan
+      const fy = this.y + Math.cos(this.facing) * side * 0.5; // agak miring (kamera)
+      game.run.effects.spawnBurst(fx, fy + this.radius * 0.75, st.dustColor || 'rgba(224,244,236,0.85)', st.dustCount || 1, st.dustSpeed || 30, st.dustLife || 2.2);
     }
 
     // ---- Timers ----

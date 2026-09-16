@@ -3,7 +3,11 @@
 **HTML5 biological survival adventure** — kamu masuk ke tubuh manusia sebagai sel imun,
 bertahan melawan ekosistem patogen yang berevolusi, bermutasi jadi bentuk yang makin
 kuat, dan terus menembus lebih dalam sampai sumber infeksi lenyap.
-Vanilla JavaScript + Canvas 2D API murni, **tanpa framework/library eksternal**.
+Vanilla JavaScript + Canvas 2D API murni, **tanpa framework UI eksternal**.
+Satu pengecualian: **Rive** (`@rive-app/canvas`, runtime MIT) dipakai khusus
+menjalankan animasi jalan hero; rig-nya dibuat dari kode lewat
+`npm run rive` (lihat `ROADMAP.md` → P1) dan runtime-nya di-vendor di
+`js/vendor/rive/` supaya tetap offline.
 
 ![genre](https://img.shields.io/badge/genre-biological%20survival%20%2B%20roguelike%20evolution-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0)
 

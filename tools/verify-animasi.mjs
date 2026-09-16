@@ -112,14 +112,22 @@ const arah = {
   'kiri-bawah': { x: -0.707, y: 0.707 },
 };
 let T = 0; // waktu render (detik) — sama basisnya dengan game.render(…, time)
-const bob = (f) => Math.sin(f.t * 2.1) * 1.1 + f.move * ((1 - Math.cos(f.wp * 2)) / 2) * 3.4; // rumus identik game.js
+// LOCOMOTION V2: nilai bob DIAMBIL dari player (satu sumber kebenaran —
+// entah dari rig Rive atau rumus cadangannya), bukan dihitung ulang di sini.
+const bob = (f) => f.bob;
+const snap = () => ({
+  t: T, flip: p.animFlip, move: p.moveAmt, lean: p.lean, depth: p.depth, wp: p.walkPhase,
+  bob: p.anim.bob, tilt: p.anim.tilt, sx: p.anim.sx, sy: p.anim.sy,
+  facing: p.facing, turnLean: p.turnLean, step: p.stepIndex, jarak: p.__jarak || 0,
+});
 const jalan = (v, detik) => {
   const n = Math.round(detik / DT);
   const rekam = [];
   for (let i = 0; i < n; i++) {
+    const x0 = p.x, y0 = p.y;
     p.update(DT, { x: v.x, y: v.y, magnitude: Math.hypot(v.x, v.y) }, game);
     T += DT;
-    rekam.push({ t: T, flip: p.animFlip, move: p.moveAmt, lean: p.lean, depth: p.depth, wp: p.walkPhase });
+    const f = snap(); f.jarak = Math.hypot(p.x - x0, p.y - y0); rekam.push(f);
   }
   return rekam;
 };
@@ -127,9 +135,10 @@ const diam = (detik) => {
   const n = Math.round(detik / DT);
   const rekam = [];
   for (let i = 0; i < n; i++) {
+    const x0 = p.x, y0 = p.y;
     p.update(DT, { x: 0, y: 0, magnitude: 0 }, game);
     T += DT;
-    rekam.push({ t: T, flip: p.animFlip, move: p.moveAmt, lean: p.lean, depth: p.depth, wp: p.walkPhase });
+    const f = snap(); f.jarak = Math.hypot(p.x - x0, p.y - y0); rekam.push(f);
   }
   return rekam;
 };
@@ -187,8 +196,55 @@ const rDiag = jalan(arah['kanan-atas'], 0.8);
 const fd = rDiag[rDiag.length - 1];
 cek('diagonal: condong + depth sekaligus', fd.lean > 0.02 && fd.depth < -0.02, `lean=${fd.lean.toFixed(3)} depth=${fd.depth.toFixed(3)}`);
 
-// 6. tidak ada NaN & render tetap jalan
-const adaNaN = [fd.flip, fd.move, fd.lean, fd.depth].some((v) => !Number.isFinite(v));
+// 6. PUTARAN HALUS: badan memutar perlahan, tidak pernah loncat arah
+diam(0.5);
+// kanan → kiri (putar +180°) → kanan lagi (putar −180°) supaya kedua arah
+// belokan tercatat: miring harus berlawanan tanda di dua belokan itu.
+const putar = jalan(arah.kanan, 0.6).concat(jalan(arah.kiri, 0.9), jalan(arah.kanan, 0.9));
+const bungkus = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+let loncatArah = 0;
+for (let i = 1; i < putar.length; i++) loncatArah = Math.max(loncatArah, Math.abs(bungkus(putar[i].facing - putar[i - 1].facing)));
+const batasPutar = ((game.run && 13) || 13) * DT * 1.25; // turn.rate × dt (+ toleransi)
+cek('badan berputar halus (tidak loncat arah)', loncatArah <= batasPutar, `loncatan maks=${loncatArah.toFixed(4)} rad/frame, batas=${batasPutar.toFixed(4)}`);
+const stepsPutar = putar.filter((f, i) => i > 0 && Math.abs(bungkus(f.facing - putar[i - 1].facing)) > 1e-4).length;
+cek('putaran 180° makan banyak frame (≥10)', stepsPutar >= 10, 'frame berputar=' + stepsPutar);
+
+// 7. CONDONG KE ARAH BELOKAN (inersia)
+const miringKiri = Math.min(...putar.map((f) => f.turnLean));
+const miringKanan = Math.max(...putar.map((f) => f.turnLean));
+cek('miring ke arah belokan kiri & kanan', miringKiri < -0.01 && miringKanan > 0.01, `turnLean kiri=${miringKiri.toFixed(4)} kanan=${miringKanan.toFixed(4)}`);
+cek('miring belok tidak berlebihan (≤5°=0.087 rad)', Math.max(Math.abs(miringKiri), Math.abs(miringKanan)) <= 0.088, `maks=${Math.max(Math.abs(miringKiri), Math.abs(miringKanan)).toFixed(4)} rad`);
+
+// 8. FOOT-PLANTING: jumlah langkah = jarak tempuh / panjang langkah
+diam(0.6);
+const langkah = jalan(arah.kanan, 1.6);
+const jarakTotal = langkah.reduce((a, f) => a + f.jarak, 0);
+const jumlahLangkah = langkah[langkah.length - 1].step - langkah[0].step;
+const stride = p.stridePx || 48;
+cek('langkah = jarak / stride (kaki tidak selip)', Math.abs(jumlahLangkah - jarakTotal / stride) <= 1.5, `${jumlahLangkah} langkah vs ${(jarakTotal / stride).toFixed(2)} perkiraan (stride=${stride.toFixed(1)}px, jarak=${jarakTotal.toFixed(0)}px)`);
+cek('stride masuk akal (30–75 px)', stride >= 30 && stride <= 75, 'stride=' + stride.toFixed(1) + 'px');
+// jeda antar langkah harus rata (bukan kadang dekat kadang jauh)
+const jeda = [];
+let terakhir = 0;
+for (let i = 1; i < langkah.length; i++) {
+  if (langkah[i].step !== langkah[i - 1].step) { jeda.push(langkah[i].jarak); terakhir = 0; }
+  else terakhir += langkah[i].jarak;
+}
+const rata = jeda.reduce((a, b) => a + b, 0) / Math.max(1, jeda.length);
+const simpangan = Math.max(...jeda.map((j) => Math.abs(j - rata)));
+cek('panjang langkah seragam (simpangan ≤25%)', jeda.length >= 2 && simpangan / rata <= 0.25, `rata=${rata.toFixed(1)}px simpangan maks=${simpangan.toFixed(1)}px (${(100 * simpangan / rata).toFixed(0)}%)`);
+
+// 9. POSE ANIMASI: bob/tilt/squash tersedia & wajar
+const bobs = langkah.map((f) => f.bob);
+const rentangBob = Math.max(...bobs) - Math.min(...bobs);
+cek('bob bergerak saat jalan (>1.5 px)', rentangBob > 1.5, 'rentang bob=' + rentangBob.toFixed(2) + 'px');
+const loncatBob2 = Math.max(...bobs.slice(1).map((v, i) => Math.abs(v - bobs[i])));
+cek('bob tidak melompat antar frame (≤1 px)', loncatBob2 <= 1, 'loncatan=' + loncatBob2.toFixed(3) + 'px');
+const squ = langkah.map((f) => f.sx / Math.max(0.001, f.sy));
+cek('squash-stretch wajar (0.9–1.1)', Math.min(...squ) > 0.9 && Math.max(...squ) < 1.1, `rasio sx/sy ${Math.min(...squ).toFixed(3)}–${Math.max(...squ).toFixed(3)}`);
+
+// 10. tidak ada NaN & render tetap jalan
+const adaNaN = [fd.flip, fd.move, fd.lean, fd.depth, fd.bob, fd.tilt, fd.sx, fd.sy, fd.facing, fd.turnLean].some((v) => !Number.isFinite(v));
 cek('tidak ada NaN pada state animasi', !adaNaN, JSON.stringify(fd));
 try { game.update(DT); game.render(DT, 3000); } catch (e) { errors.push('render: ' + e.stack); }
 cek('render tidak error', true);

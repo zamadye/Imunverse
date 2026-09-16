@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "doc": "Locomotion hero V2: sinkronisasi langkah (foot-planting), rotasi halus, bob & lean. Semua angka gerak ADA DI SINI, bukan di js/ (kontrak ROADMAP.md §5).",
+  "stride": {
+    "radiusFactor": 3.2,
+    "minPx": 34,
+    "maxPx": 72,
+    "nominalCycleSec": 0.667,
+    "note": "1 siklus jalan = 2 langkah = 2 × stride. stride = radius × radiusFactor (radius 15 → 48 px). nominalSpeed = 2 × stride / nominalCycleSec ≈ 144 px/s — laju animasi rig dikunci ke jarak tempuh, jadi kaki tidak pernah 'selip'."
+  },
+  "turn": {
+    "rate": 13,
+    "leanMax": 0.087,
+    "leanRate": 9,
+    "note": "rate = rad/dtk batas putar badan (180° ≈ 0,24 dtk). leanMax = 5° miring ke arah belokan (berat/inersia), dikejar dengan leanRate."
+  },
+  "bob": {
+    "idleAmp": 1.1,
+    "idleHz": 2.1,
+    "stepAmp": 3.4,
+    "note": "Naik-turun badan saat diam (mengambang) dan saat melangkah (head bob). Nilai cadangan — dipakai bila rig Rive belum siap."
+  },
+  "tilt": {
+    "moveLean": 0.13,
+    "swayAmp": 0.05,
+    "depthX": 0.05,
+    "depthY": 0.03,
+    "note": "moveLean = condong searah jalan; swayAmp = ayunan halus per langkah; depthX/Y = melebar saat mendekat kamera, merapat saat menjauh."
+  },
+  "step": {
+    "dustColor": "rgba(224,244,236,0.85)",
+    "dustCount": 1,
+    "dustSpeed": 30,
+    "dustLife": 2.2,
+    "dustSideOffset": 0.45,
+    "note": "Debu menyentuh tanah TE PAT pada frame kaki menapak (bukan timer tetap) — ini yang menghilangkan kesan 'foto digeser'."
+  },
+  "rive": {
+    "enabled": true,
+    "rig": "assets/rive/hero-locomotion.riv",
+    "artboard": "hero",
+    "animIdle": "idle",
+    "animWalk": "walk",
+    "unitPx": 0.65,
+    "bobUnitPx": 1.25,
+    "minRate": 0.15,
+    "maxRate": 2.8,
+    "note": "Rig .riv dibuat oleh tools/gen-hero-rig.mjs. Nilai posisi rig (unit) dikali unitPx/bobUnitPx menjadi piksel; rotasi (rad) & skala dipakai langsung. legLenUnits/legSpanUnits HARUS sama dengan RIG.amp di tools/gen-hero-rig.mjs — jalankan `npm run rive` bila mengubahnya.",
+    "legLenUnits": 70.9,
+    "legSpanUnits": 36.9
+  }
+}

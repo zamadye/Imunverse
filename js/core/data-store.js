@@ -40,6 +40,7 @@ const store = {
   zones: null,       // data/zones.json (rute biologis kontinu + landmark)
   transitions: null, // data/transitions.json (aturan campur zona saat bertempur)
   economy: null,     // data/economy.json (Antibody, biaya mutasi, Reserve, ads — tunable)
+  locomotion: null,  // data/locomotion.json (langkah, putaran halus, bob/lean, rig Rive)
 };
 
 import { BUILD } from './version.js';
@@ -84,6 +85,7 @@ export async function loadAllData() {
     zones: 'data/zones.json',
     transitions: 'data/transitions.json',
     economy: 'data/economy.json',
+    locomotion: 'data/locomotion.json',
   };
 
   const entries = await Promise.all(
@@ -242,7 +244,14 @@ export function getMastery() {
   return getData().mastery;
 }
 
-// ===== R2 Rebuild: layer naratif (data/narrative.json) =====
+// ===== Locomotion: langkah & putaran hero (data/locomotion.json) =====
+
+/** Config gerak: stride (foot-planting), putaran halus, bob/lean, rig Rive. */
+export function getLocomotion() {
+  return getData().locomotion;
+}
+
+// ===== R2 Rebuild: layer naratif (data/narrative.json) ======
 
 /** RIA/Dr. Amara, glossary awam, barks boss & akhir run. */
 export function getNarrative() {

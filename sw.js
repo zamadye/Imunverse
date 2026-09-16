@@ -4,7 +4,7 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v10';
+const CACHE_VER = 'phagos-v11';
 const PRECACHE = [
   './',
   './index.html',
@@ -14,6 +14,8 @@ const PRECACHE = [
   './styles/dashboard-map.css',
   './styles/portrait.css',
   './js/main.js',
+  // Rig lokomosi Rive (4,7 KB) — runtime wasm-nya di-cache saat dipakai
+  './assets/rive/hero-locomotion.riv',
   // Latar foto dashboard & loading (UI-REBUILD P8)
   './assets/ui/bg-dashboard.jpg',
   './assets/ui/bg-loading.jpg',

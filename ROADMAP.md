@@ -171,7 +171,7 @@ Penjaga regresi di `tools/verify-screens.mjs`: layar lama **tidak boleh** muncul
 DOM, tidak boleh ada tombol yang menujunya, dashboard tetap 4 menu, dan MAIN harus
 langsung masuk run (tanpa layar persiapan).
 
-### P1 — Core combat **[BERJALAN — BUILD 52i]**
+### P1 — Core combat **[BERJALAN — BUILD 52k]**
 - 11 hero punya **identity**: strength / weakness / combat identity / scaling identity
 - 8 archetype serangan (projectile, homing, melee, area/burst, beam, chain, zone, summon)
 - telegraph wajib: anticipation → telegraph → execution → impact → recovery
@@ -197,6 +197,24 @@ Ancaman musuh (§15) — lanjutan:
 | REGENERATIVE diwujudkan | `protozoa.regen = { delaySec: 2.5, pctPerSec: 0.06 }`; `Enemy.update` memulihkan HP setelah jeda tanpa damage dan **damage memotong regenerasi** (jawaban pemain: tekan terus / akhiri burst) |
 | RANGED terbukti bertelegraph | Mode peludah (`armShooter` + `tryEnemyShoot`) diuji: pose telegraph menyala **sebelum** ludahan, proyektil musuh (`run.ebullets`) meluncur ke pemain |
 | Dijaga | `verify:combat` 25 pemeriksaan: identitas hero, telegraph, chain, archetype musuh, regen, telegraph peludah |
+
+Lokomosi hero (prasyarat P2 — gerakan harus mulus sebelum mutasi menimpa bentuknya):
+
+| Langkah | Hasil |
+|---|---|
+| Animasi jalan pakai **Rive** | `npm i @rive-app/canvas` (runtime resmi) + rig `.riv` yang **dibuat dari kode** oleh `tools/gen-hero-rig.mjs` (`npm run rive` → `assets/rive/hero-locomotion.riv`, 4,7 KB). Runtime di-vendor ke `js/vendor/rive/` (MIT) supaya offline/PWA, dimuat **malas** di luar jalur kritis. Rig = node transform kosong (root→body→head/armF/armB/legF/legB) — yang digambar tetap **FOTO karakter**, rig hanya **sumber gerakan** |
+| Foot-planting (kaki tidak selip) | Fase langkah dikunci ke **jarak**, bukan waktu: `walkPhase += (jarak / stride) × π`. Laju putar animasi Rive `rate = kecepatan / nominalSpeed` (nominal = 2 × stride / 0,667 s ≈ 144 px/s). Lintasan kaki dibalik dari telapak yang diinginkan (stance = mundur lurus, swing = terangkat) **bukan** sinus — sinus membuat telapak menyapu tanah ~110% stride; sekarang selip terukur **0,2 px (0,4% stride)** |
+| Putaran halus 360° | `facing` **dikejar** dengan batas `turn.rate` 13 rad/dtk lewat jalan terpendek (dulu diset seketika saat tombol ditekan) |
+| Bobot & inersia | Head-bob 2× per siklus (turun saat menapak), twist badan ±2°, squash-stretch, **miring 5° ke arah belokan** (`turn.leanMax`), debu menyentuh tanah TE PAT pada frame telapak mendarat (dulu timer tetap 0,24 s) |
+| Semua angka di data | `data/locomotion.json` baru (stride, turn, bob, tilt, step, rive) + `getLocomotion()` di data-store — nol angka gerak di `js/` |
+| Gagal = aman | Runtime/wasm gagal dimuat → status `fallback`, hero memakai rumus cadangan yang sama mulusnya (terbukti di penguji jsdom) |
+| Penguji baru | `tools/verify-rive.mjs` (`npm run verify:rive`, 18 pemeriksaan) ikut di `npm run verify`; `tools/verify-animasi.mjs` diperluas jadi 23 pemeriksaan (putaran halus, miring belok, langkah vs jarak, panjang langkah seragam, bob tidak melompat) |
+
+Catatan format `.riv` (ditemukan dari percobaan, bukan asumsi — tertulis di
+`tools/gen-hero-rig.mjs`): `parentId` = 0 untuk anak artboard, selainnya **jarak
+mundur ke induk**; `KeyedObject.objectId` = indeks **lokal terhadap artboard**;
+dan kurva satu animasi harus ditulis **menempel** setelah objek animasinya
+(kalau tidak, runtime menempelkan kurva ke animasi yang salah).
 
 Sisa P1: archetype hero `beam / summon / zone / area` masih memakai pola lama
 (status `planned` di `attacks.json`) dan archetype **support** (buff aura) belum

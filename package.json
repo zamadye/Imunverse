@@ -14,7 +14,16 @@
     "verify:photos": "node tools/verify-mutation-photos.mjs",
     "verify:screens": "node tools/verify-screens.mjs",
     "verify:animasi": "node tools/verify-animasi.mjs",
-    "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:combat",
-    "verify:combat": "node tools/verify-combat.mjs"
+    "verify:rive": "node tools/verify-rive.mjs",
+    "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:rive && npm run verify:combat",
+    "verify:combat": "node tools/verify-combat.mjs",
+    "rive": "node tools/gen-hero-rig.mjs"
+  },
+  "dependencies": {
+    "@rive-app/canvas": "^2.42.2"
+  },
+  "devDependencies": {
+    "@rive-app/canvas-advanced": "^2.42.2",
+    "jsdom": "^26.0.0"
   }
 }
