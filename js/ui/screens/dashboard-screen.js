@@ -159,46 +159,6 @@ function fmtTime(sec) {
   return `${m}m ${String(s).padStart(2, '0')}s`;
 }
 
-/**
- * Overlay progress gameplay di atas background image dashboard.
- * Menggantikan dark gradient overlay — menampilkan data nyata dari STATE.
- */
-function renderBgProgress(meta) {
-  const scr = document.getElementById('screen-dashboard');
-  if (!scr) return;
-  let overlay = scr.querySelector('.dash-bg-progress');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'dash-bg-progress';
-    scr.insertBefore(overlay, scr.firstChild);
-  }
-  const stats = meta.stats || {};
-  const rank = playerRank(meta);
-  const rankLabel = rank ? rank.name : '—';
-
-  const items = [
-    { val: stats.bestWave || 0, lbl: 'Gel. Terbaik' },
-    { val: stats.totalKills.toLocaleString('id-ID'), lbl: 'Total Kill' },
-    { val: rankLabel, lbl: 'Pangkat' },
-    { val: fmtTime(stats.bestSurvivalTime || 0), lbl: 'Waktu Terbaik' },
-    { val: stats.totalRuns || 0, lbl: 'Total Run' },
-    { val: stats.wins || 0, lbl: 'Menang' },
-  ];
-
-  overlay.innerHTML = '';
-  for (const item of items) {
-    const cell = document.createElement('div');
-    cell.className = 'bp-stat';
-    const b = document.createElement('b');
-    b.textContent = item.val;
-    const s = document.createElement('span');
-    s.textContent = item.lbl;
-    cell.appendChild(b);
-    cell.appendChild(s);
-    overlay.appendChild(cell);
-  }
-}
-
 /** Overlay tahap diferensiasi di panggung dashboard; stage 0 tetap polos/tanpa ikon. */
 function renderStageEvoOverlay(meta) {
   let box = document.getElementById('stage-evo');
@@ -577,7 +537,6 @@ export function show() {
   const scr = document.getElementById('screen-dashboard');
   if (scr) scr.classList.toggle('minimal-home', (meta.stats.totalRuns || 0) < 3);
 
-  renderBgProgress(meta); // overlay progress gameplay di atas background image
   startStageCine(); // Sprint 5.26: panggung tetap (§11.1)
   renderBpBar(meta); // Sprint 5.26: bar Mitosis (§11.1)
   renderKapsul(meta); // Sprint 5.26: kapsul kondisional (§11.1)

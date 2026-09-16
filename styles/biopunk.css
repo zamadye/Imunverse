@@ -6,32 +6,32 @@
    ============================================================ */
 
 :root {
-  --void: #04111a;
-  --cyan: #00e5c4;
-  --red: #ff3d5a;
-  --violet: #a78bfa;
-  --gold: #ffd166;
-  --acid: #a8e63d;
+  --void: #0a2029;
+  --cyan: #12e6c8;
+  --red: #ff4d67;
+  --violet: #b39bff;
+  --gold: #ffd46b;
+  --acid: #b6ee52;
 
-  --cream: #04111a;
-  --cream-2: #071824;
-  --card: #0c1e2a;
-  --ink: #e8f4f0;
-  --ink-soft: #8fb8b0;
-  --teal: #00e5c4;
-  --teal-deep: #00b8a0;
-  --teal-dark: #7fe3d0;
-  --teal-light: #0a2a32;
-  --mint: #0d241c;
-  --mint-2: #102820;
-  --sage: #a8e63d;
-  --green: #7ed957;
-  --coral: #ff3d5a;
-  --coral-deep: #d12645;
-  --coral-light: #ff6b81;
-  --gold-deep: #e0a72e;
-  --heart: #ff3d5a;
-  --cream-deep: #0a1820;
+  --cream: #0a2029;
+  --cream-2: #103040;
+  --card: #14333f;
+  --ink: #eafff9;
+  --ink-soft: #a8d0c8;
+  --teal: #12e6c8;
+  --teal-deep: #06c2aa;
+  --teal-dark: #8fe9d6;
+  --teal-light: #17495a;
+  --mint: #123a2e;
+  --mint-2: #164636;
+  --sage: #b6ee52;
+  --green: #86e263;
+  --coral: #ff4d67;
+  --coral-deep: #e0344f;
+  --coral-light: #ff7f92;
+  --gold-deep: #e6ac36;
+  --heart: #ff4d67;
+  --cream-deep: #0e2834;
 
   --shadow-card: 0 0 22px rgba(0, 229, 196, 0.12), 0 10px 28px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 0 40px rgba(0, 229, 196, 0.22), 0 18px 44px rgba(0, 0, 0, 0.5);
@@ -470,49 +470,32 @@ body.in-run .toast {
 /* Override hero-stage gradient — transparan agar background art terlihat */
 #screen-dashboard .hero-stage,
 #screen-dashboard .hero-fixed {
-  background: rgba(4, 17, 26, 0.22) !important;
-  border: 1px solid rgba(0, 229, 196, 0.12);
-  box-shadow: inset 0 0 40px rgba(0, 229, 196, 0.05);
+  background: rgba(10, 32, 41, 0.28) !important;
+  border: 1px solid rgba(18, 230, 200, 0.18);
+  box-shadow: inset 0 0 40px rgba(18, 230, 200, 0.06);
 }
 
-/* Progress gameplay overlay — menggantikan dark gradient overlay */
-.dash-bg-progress {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  z-index: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  pointer-events: none;
-  padding: calc(env(safe-area-inset-top, 0px) + 56px) 14px 10px;
-  background: linear-gradient(180deg, rgba(4,17,26,0.72) 0%, rgba(4,17,26,0.0) 100%);
+/* Kartu dashboard = kaca transparan agar foto vibrant tembus (bukan blok gelap berat) */
+#screen-dashboard .card,
+#screen-dashboard .strain-banner,
+#screen-dashboard .bp-bar,
+#screen-dashboard .stat-cell,
+#screen-dashboard .daily-card,
+#screen-dashboard .campaign-card,
+#screen-dashboard .mode-card,
+#screen-dashboard .arena-card,
+#screen-dashboard .evo-card,
+#screen-dashboard .body-card,
+#screen-dashboard .missions-card,
+#screen-dashboard .kapsul-card {
+  background: rgba(16, 44, 56, 0.68) !important;
+  border: 1px solid rgba(18, 230, 200, 0.16) !important;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
 }
-.dash-bg-progress .bp-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  padding: 6px 4px;
-}
-.dash-bg-progress .bp-stat b {
-  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
-  font-size: 20px;
-  font-weight: 700;
-  color: #00e5c4;
-  line-height: 1;
-  text-shadow: 0 0 14px rgba(0, 229, 196, 0.7);
-  letter-spacing: 0.02em;
-}
-.dash-bg-progress .bp-stat span {
-  font-size: 9px;
-  font-weight: 600;
-  color: rgba(190, 230, 220, 0.75);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.dash-bg-progress .bp-divider {
-  width: 1px;
-  background: rgba(0, 229, 196, 0.15);
-  align-self: stretch;
-  margin: 8px 0;
+/* Strain banner sedikit beda nuansa (aksen ungu strain) */
+#screen-dashboard .strain-banner {
+  background: rgba(30, 26, 54, 0.62) !important;
+  border-color: rgba(179, 155, 255, 0.28) !important;
 }
