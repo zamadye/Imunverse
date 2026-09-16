@@ -11,9 +11,9 @@ satu resep per hero per pose. Dipakai bersama `tools/build-mutation-sprites.py`.
    `assets/sprites/<nama>.png` (RGBA 256 px, latar dibuang, isi di-crop & dipad).
 3. `npm run check` → baris "foto mutasi: N/44 tersedia" harus naik.
 
-> **Progres: 31/44** (macrophage, dendritic, neutrophil, eosinophil, basophil,
-> mastcell, tcd8 lengkap 4/4; tcd4 tinggal mut2_attack; treg, bcell, nkcell
-> belum mulai).
+> **Progres: 41/44** (macrophage, dendritic, neutrophil, eosinophil, basophil,
+> mastcell, tcd8, tcd4, treg, bcell lengkap 4/4; nkcell tinggal mut1_attack,
+> mut2_idle, mut2_attack).
 
 ## Penjepit frame — WAJIB biar animasi tidak melompat
 `build-mutation-sprites.py` mengunci tiap foto mutasi ke frame sprite dasar
@@ -150,10 +150,10 @@ hero_{id}_mut2_idle.png     hero_{id}_mut2_attack.png
 | 5 | basophil | ✅ | ✅ | ✅ | ✅ |
 | 6 | mastcell | ✅ | ✅ | ✅ | ✅ |
 | 7 | tcd8 | ✅ | ✅ | ✅ | ✅ |
-| 8 | tcd4 | ✅ | ✅ | ✅ | ⬜ |
-| 9 | treg | ⬜ | ⬜ | ⬜ | ⬜ |
-| 10 | bcell | ⬜ | ⬜ | ⬜ | ⬜ |
-| 11 | nkcell | ⬜ | ⬜ | ⬜ | ⬜ |
+| 8 | tcd4 | ✅ | ✅ | ✅ | ✅ |
+| 9 | treg | ✅ | ✅ | ✅ | ✅ |
+| 10 | bcell | ✅ | ✅ | ✅ | ✅ |
+| 11 | nkcell | ✅ | ⬜ | ⬜ | ⬜ |
 
 ## Catatan renderer
 

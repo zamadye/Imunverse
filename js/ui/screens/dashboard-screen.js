@@ -154,6 +154,7 @@ function scrollToIndex(i, instant = false) {
     vp.scrollLeft = left;
   }
   updateMapChrome(STATE.meta, idx);
+  commitChapter(idx); // bab yang terlihat = bab yang dimainkan tombol MAIN
 }
 
 function updateMapChrome(meta, idx = chapterIndex) {
@@ -166,6 +167,44 @@ function updateMapChrome(meta, idx = chapterIndex) {
   const next = document.getElementById('map-next');
   if (prev) prev.disabled = idx <= 0;
   if (next) next.disabled = idx >= list.length - 1;
+  // Label di bawah tombol MAIN mengikuti bab yang sedang terlihat — kalau tidak,
+  // pemain menggeser ke Bab 3 tapi label & run tetap Bab 1.
+  const sub = document.getElementById('play-sub');
+  const ch = list[idx];
+  if (sub && ch) {
+    const locked = chapterStatus(ch, meta) === 'locked';
+    sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
+  }
+}
+
+/**
+ * Simpan bab yang sedang terlihat sebagai bab terpilih (bila terbuka), supaya
+ * tombol MAIN memulai run di bab yang tampil di peta — bukan bab lama.
+ */
+function commitChapter(idx) {
+  const list = chapters();
+  const meta = STATE.meta;
+  const ch = list[idx];
+  if (!ch || !meta || meta.selectedChapter === ch.id) return;
+  if (chapterStatus(ch, meta) === 'locked') return;
+  meta.selectedChapter = ch.id;
+  try { markSeen(ch.id); } catch { /* abaikan */ }
+  writeSave(meta);
+}
+
+/** Validasi sebelum MAIN: bab terkunci → peringatan, jangan mulai run. */
+export function canPlaySelected() {
+  const list = chapters();
+  const meta = STATE.meta;
+  const ch = list[chapterIndex] || list.find((c) => c.id === meta.selectedChapter) || list[0];
+  if (!ch) return false;
+  if (chapterStatus(ch, meta) === 'locked') {
+    audio.warn();
+    emit('toast', { message: 'Bab ini terkunci — bersihkan bab sebelumnya dulu!', kind: 'warn' });
+    return false;
+  }
+  commitChapter(chapterIndex);
+  return true;
 }
 
 function selectChapter(chId) {

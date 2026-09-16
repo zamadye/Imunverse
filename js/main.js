@@ -777,6 +777,9 @@ async function boot() {
     } catch { /* tidak didukung */ }
   }
   document.getElementById('btn-play').addEventListener('click', () => {
+    // Peta tubuh: MAIN memakai bab yang sedang terlihat. Bab terkunci → peringatan,
+    // jangan diam-diam memulai run di bab lain.
+    if (dashboardScreen.canPlaySelected && !dashboardScreen.canPlaySelected()) return;
     enterImmersiveFullscreen();
     // Fast path: Play langsung memulai run dengan hero terpilih.
     // Bila hero terpilih ternyata terkunci (save lama), buka roster.
