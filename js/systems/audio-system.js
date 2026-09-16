@@ -13,7 +13,7 @@
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
 
-const MASTER_VOL = 0.5;
+const MASTER_VOL = 0.85; // build 54h: user minta audio lebih keras
 const MIN_GAP = { shoot: 0.035, hit: 0.05, collect: 0.06, kill: 0.05, ui: 0.03 };
 
 class AudioSystem {

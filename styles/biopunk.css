@@ -499,3 +499,352 @@ body.in-run .toast {
   background: rgba(30, 26, 54, 0.62) !important;
   border-color: rgba(179, 155, 255, 0.28) !important;
 }
+
+/* ================================================================
+   DASHBOARD v2 — Slim (build 54h)
+   Struktur: hero-stage (40%) · chapter slideshow (55%) · PLAY · dock(4)
+   ================================================================ */
+
+/* Hero-stage tetap seperti sebelumnya (foto latar screen-dashboard) */
+#screen-dashboard .dash-body {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 74px) 12px 200px;
+  height: 100%;
+  overflow: hidden;
+}
+#screen-dashboard .hero-stage,
+#screen-dashboard .hero-fixed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 34vh;
+  min-height: 200px;
+  border-radius: 22px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+/* ============ CHAPTER MAP: slideshow horizontal swipe ============ */
+.chapter-map {
+  flex: 1 1 auto;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.cm-viewport {
+  flex: 1 1 auto;
+  min-height: 260px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.cm-viewport::-webkit-scrollbar { display: none; }
+.cm-track {
+  display: flex;
+  gap: 0;
+  height: 100%;
+  min-height: 260px;
+}
+.cm-card {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  height: 100%;
+  min-height: 260px;
+  border-radius: 20px;
+  background-size: cover;
+  background-position: center;
+  background-color: #071824;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transform: scale(0.94);
+  transition: transform 320ms cubic-bezier(0.2, 0.85, 0.2, 1), box-shadow 320ms;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(18, 230, 200, 0.18);
+  margin: 0 6px;
+}
+.cm-card.active {
+  transform: scale(1);
+  box-shadow: 0 12px 42px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(18, 230, 200, 0.35), 0 0 40px rgba(18, 230, 200, 0.18);
+}
+.cm-card.cleared { opacity: 0.85; }
+.cm-card.locked { filter: grayscale(0.55) brightness(0.5); cursor: not-allowed; }
+.cm-card .cm-veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(4,17,26,0.55) 0%, transparent 30%, transparent 55%, rgba(4,17,26,0.85) 100%);
+  pointer-events: none;
+}
+.cm-card .cm-top {
+  position: absolute;
+  top: 14px; left: 14px; right: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 2;
+}
+.cm-card .cm-num {
+  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+  font-size: 13px; font-weight: 800; letter-spacing: 0.16em;
+  padding: 4px 12px;
+  background: rgba(18, 230, 200, 0.9);
+  color: #04111a;
+  border-radius: 4px;
+}
+.cm-card .cm-badge {
+  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(18, 230, 200, 0.22);
+  color: #7ff0dc;
+  border: 1px solid rgba(18, 230, 200, 0.4);
+}
+.cm-card .cm-badge.locked {
+  background: rgba(255, 77, 103, 0.22);
+  color: #ff8095;
+  border-color: rgba(255, 77, 103, 0.4);
+}
+.cm-card .cm-bottom {
+  position: absolute;
+  bottom: 16px; left: 18px; right: 18px;
+  z-index: 2;
+}
+.cm-card .cm-organ {
+  display: block;
+  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+  font-size: 26px; font-weight: 800; letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #eafff9;
+  line-height: 1.05;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+.cm-card .cm-title {
+  display: block; margin-top: 2px;
+  font-family: var(--font, 'Inter', sans-serif);
+  font-size: 13px; font-weight: 700;
+  color: #b6d0cc;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+.cm-card .cm-obj {
+  margin: 6px 0 0;
+  font-size: 11px; line-height: 1.4;
+  color: rgba(234, 255, 249, 0.72);
+  max-width: 28ch;
+}
+
+/* Dots below carousel */
+.cm-dots {
+  display: flex; justify-content: center; gap: 8px;
+  padding: 4px 0 0;
+  flex: 0 0 auto;
+}
+.cm-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(18, 230, 200, 0.25);
+  border: 0; padding: 0; cursor: pointer;
+  transition: background 200ms, transform 200ms, width 200ms;
+}
+.cm-dot.active {
+  background: #12e6c8;
+  width: 22px; border-radius: 4px;
+  box-shadow: 0 0 8px rgba(18, 230, 200, 0.6);
+}
+
+/* ============ DOCK 4: hapus tombol MAIN (sudah di tombol besar) ============ */
+#screen-dashboard .dock.dock-4 {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: rgba(6, 16, 24, 0.92) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 8px 14px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.4);
+}
+#screen-dashboard .dock.dock-4 .dock-btn {
+  padding: 6px 4px;
+  min-height: 60px;
+}
+
+/* ============ BOTTOM SHEET: quest modal ============ */
+.sheet {
+  position: fixed; inset: 0;
+  z-index: 200;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.sheet:not([hidden]) { pointer-events: auto; }
+.sheet-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(4, 17, 26, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 260ms;
+}
+.sheet.open .sheet-backdrop { opacity: 1; }
+.sheet-body {
+  position: relative;
+  background: linear-gradient(180deg, #14333f 0%, #0c2030 100%);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border-top: 1px solid rgba(18, 230, 200, 0.28);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6);
+  max-height: 82vh;
+  min-height: 55vh;
+  transform: translateY(100%);
+  transition: transform 260ms cubic-bezier(0.2, 0.85, 0.2, 1);
+  padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet.open .sheet-body { transform: translateY(0); }
+.sheet-close {
+  position: absolute; top: 14px; right: 18px;
+  background: transparent; border: 0;
+  color: #b6d0cc; font-size: 28px; line-height: 1;
+  cursor: pointer; padding: 4px 10px;
+}
+.sheet-close:hover { color: #eafff9; }
+.sheet-head {
+  display: flex; align-items: baseline; gap: 12px;
+  margin: 4px 40px 14px 0;
+}
+.sheet-head h3 {
+  font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+  font-size: 26px; font-weight: 800; letter-spacing: 0.03em;
+  color: #eafff9; margin: 0;
+  text-transform: uppercase;
+}
+.sheet-reset {
+  font-family: var(--font-data, monospace);
+  font-size: 11px; color: #b6d0cc;
+}
+.sheet-reset.urgent { color: #ffb552; }
+.sheet-tabs {
+  display: flex; gap: 4px;
+  padding: 4px;
+  background: rgba(4, 17, 26, 0.55);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.sheet-tab {
+  flex: 1;
+  background: transparent; border: 0;
+  padding: 8px 12px;
+  color: #7d9aa0;
+  font: 700 12px var(--font, 'Inter', sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 200ms, color 200ms;
+}
+.sheet-tab.active {
+  background: rgba(18, 230, 200, 0.18);
+  color: #12e6c8;
+}
+.qtab-panel { display: none; }
+.qtab-panel.active { display: block; }
+
+.sheet-item {
+  background: rgba(4, 17, 26, 0.55);
+  border: 1px solid rgba(18, 230, 200, 0.15);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sheet-item.done { border-color: rgba(255, 209, 102, 0.4); }
+.sheet-item .si-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.sheet-item .si-name {
+  font-size: 14px; color: #eafff9; font-weight: 700;
+}
+.sheet-item .si-desc {
+  font-size: 12px; color: #b6d0cc; line-height: 1.4;
+}
+.sheet-item .si-reward {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 700; color: #ffd46b;
+}
+.sheet-item .si-reward .inline-coin { width: 14px; height: 14px; }
+.sheet-item .si-kind {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+  padding: 2px 6px; border-radius: 3px;
+  background: rgba(18, 230, 200, 0.22); color: #12e6c8;
+}
+.sheet-item .si-kind.weekly { background: rgba(179, 155, 255, 0.22); color: #b39bff; }
+.sheet-item .si-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(30, 69, 96, 0.6);
+  overflow: hidden;
+}
+.sheet-item .si-track i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, #12e6c8, #06c2aa);
+  border-radius: inherit;
+  box-shadow: 0 0 8px rgba(18, 230, 200, 0.5);
+}
+.sheet-item.quest.ready .si-track i { background: linear-gradient(90deg, #ffd46b, #e6ac36); }
+.sheet-item .si-mark {
+  color: #12e6c8; font-weight: 800; font-size: 20px;
+}
+.sheet-empty {
+  text-align: center; color: #7d9aa0;
+  padding: 40px 20px; font-size: 14px;
+}
+.sheet-hint {
+  text-align: center; color: #7d9aa0;
+  font-size: 12px; margin: 12px 0 0;
+}
+
+.bp-strip {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 10px; align-items: center;
+  padding: 12px 14px; margin-bottom: 14px;
+  background: rgba(4, 17, 26, 0.6);
+  border: 1px solid rgba(18, 230, 200, 0.2);
+  border-radius: 10px;
+}
+.bp-strip .bp-tag {
+  font: 800 10px var(--font-display); letter-spacing: 0.14em; color: #12e6c8;
+}
+.bp-strip .bp-lv {
+  font: 900 18px var(--font-display); color: #eafff9;
+}
+.bp-strip .bp-track {
+  height: 8px; border-radius: 4px; background: rgba(30, 69, 96, 0.6); overflow: hidden;
+}
+.bp-strip .bp-fill {
+  display: block; height: 100%; background: linear-gradient(90deg, #12e6c8, #b39bff); border-radius: inherit;
+}
+.bp-strip .bp-pct {
+  font: 700 12px var(--font-data); color: #b6d0cc;
+}
+.btn-block { display: block; width: 100%; }
+
+/* Sembunyikan sisa lama yang tidak lagi ada di HTML tapi mungkin masih dipanggil */
+#screen-dashboard .strain-banner,
+#screen-dashboard .bp-bar,
+#screen-dashboard .kapsul-card,
+#screen-dashboard .campaign-card,
+#screen-dashboard .mode-card,
+#screen-dashboard .arena-card,
+#screen-dashboard .stat-strip,
+#screen-dashboard .daily-card,
+#screen-dashboard .evo-card,
+#screen-dashboard .body-card,
+#screen-dashboard .missions-card,
+#screen-dashboard .duo-row,
+#screen-dashboard .play-row,
+#screen-dashboard .secondary-dock,
+#screen-dashboard .pwa-banner,
+#screen-dashboard #strain-slot { display: none !important; }

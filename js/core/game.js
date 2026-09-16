@@ -2571,6 +2571,22 @@ applyChapterTier(enemy, run) {
         if (!blink) {
           const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
           let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          // BODY SWAP MUTATION (build 54h): kalau Mako + ada mutasi aktif,
+          // ganti base sprite ke foto mutasi (mako_<mut>.png). Ini menggantikan
+          // stamp overlay yang lama — pemain melihat bentuk hero BERUBAH, bukan
+          // stiker yang menumpuk. Kalau ada >1 mutasi, pilih yang tier tertinggi.
+          if (player.heroDef.id === 'macrophage' && !player.attackFlash) {
+            const muts = run.activeMutations || [];
+            if (muts.length > 0) {
+              let bestMid = muts[0], bestTier = -1;
+              for (const mid of muts) {
+                const md = mutationDef(mid);
+                if (md && (md.tier || 0) > bestTier) { bestTier = md.tier || 0; bestMid = mid; }
+              }
+              const mutPath = makoMutationPath('macrophage', bestMid, null);
+              if (mutPath) path = mutPath;
+            }
+          }
           const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
           const flip = Math.cos(player.facing) < 0 ? -1 : 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
@@ -2590,18 +2606,20 @@ applyChapterTier(enemy, run) {
           }
           drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
           drawHeroRunForm(ctx, pBody.x, pBody.y, bodySize, time, player.heroDef.color, run.level);
-          // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
-          // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
-          // mahkota/kilau yang orientasinya bermakna).
-          try {
-            const muts = run.activeMutations || [];
-            for (let mi = 0; mi < muts.length; mi++) {
-              const mdef = mutationDef(muts[mi]);
-              if (!mdef || !mdef.sprite) continue;
-              const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
-              drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
-            }
-          } catch { /* abaikan */ }
+          // (build 54h) Overlay stamp mutasi lama DIHAPUS — sekarang base sprite
+          // yang di-swap ke mako_<mut>.png (lihat body swap di atas). Untuk hero
+          // non-Mako yang masih pakai sprite generik, tetap fallback ke stamp:
+          if (player.heroDef.id !== 'macrophage') {
+            try {
+              const muts = run.activeMutations || [];
+              for (let mi = 0; mi < muts.length; mi++) {
+                const mdef = mutationDef(muts[mi]);
+                if (!mdef || !mdef.sprite) continue;
+                const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
+                drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
+              }
+            } catch { /* abaikan */ }
+          }
           // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
           const crownAcc = STATE.meta.cosmetics?.crown
             ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
