@@ -150,9 +150,24 @@ string baru ke `lang.json`, angka baru di `data/` (bukan `js/`).
 ### Sprint 7 — Polish & benchmark
 
 - [ ] 37. Gamefeel per aksi (kontak/Pulse/engulf/level/mutasi-musuh — §2.2 + fantasi predator)
-- [ ] 38. Audio — hanya bila resource ada (identitas suara sudah dikunci di identity doc)
+- [x] 38. **Audio** — file MP3 CC0 (4 trek + 29 SFX) menggantikan synth prosedural; volume master 0,9; fallback synth tetap ada
 - [ ] 39. Jalankan benchmark §0 satu per satu
 - [ ] 40. Fix semua yang belum ✓ — **definisi production-ready**
+
+### Sprint 8 — UI-REBUILD P8 (permintaan owner, di luar urutan bible)
+
+- [x] 41. **Dashboard bersih**: semua kartu & overlay animasi DICABUT. Yang tersisa: latar foto, Peta Tubuh, tombol MAIN besar, 4 menu footer
+- [x] 42. **Peta Tubuh slideshow** — 6 bab (BAB 1/6 … 6/6), foto per bab, geser kiri/kanan (scroll-snap + panah + titik), bab terkunci digelap
+- [x] 43. **Tombol MAIN dobel dihapus** — CTA tunggal di tengah; dock jadi 4 (Hero · Tas · Misi · Lab Genom)
+- [x] 44. **Misi & Quest → modal** dari tombol Misi di footer (tab Harian/Mingguan/Prestasi + KLAIM + hitung mundur reset + badge)
+- [x] 45. **Fitur sekunder** (Kampanye · Siklus Mitosis · Bio-Pedia · Profil) dipindah ke menu "…" topbar
+- [x] 46. **Audio**: `data/audio.json` (peta file + rantai volume), `tools/build-audio.sh`, `assets/audio/CREDITS.md`
+- [~] 47. **Foto mutasi per hero** — overlay `mut_*.png` DICABUT; 44 foto (2 tingkat × 2 pose × 11 hero) via `tools/mutation-art/PROMPTS.md` + `tools/build-mutation-sprites.py`. Progres: **11/44**
+- [~] 48. **Latar foto dashboard/loading** — jalur siap (`assets/ui/bg-dashboard.jpg`, `bg-loading.jpg`); menunggu berkas owner (saat ini placeholder generated)
+
+> Catatan P8: alat pembuat gambar dibatasi **10 gambar per giliran**, jadi item 47
+> dikerjakan bertahap. Renderer aman separuh jadi: hero tanpa foto otomatis
+> memakai sprite dasar + aura tier (`hasSprite()` di `sprite-loader.js`).
 
 ---
 
