@@ -38,6 +38,12 @@ const store = {
   enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
   welcomeBox: null,  // data/welcome-box.json (ADDENDUM §1: Kapsul Membran)
   audio: null,       // data/audio.json (peta MP3 + volume; CC0)
+  // ===== V2 (ROADMAP.md §2) — kerangka data baru, diisi bertahap P1–P5 =====
+  attacks: null,     // data/attacks.json (8 archetype serangan + telegraph)
+  zones: null,       // data/zones.json (rute biologis kontinu + landmark)
+  transitions: null, // data/transitions.json (aturan campur zona saat bertempur)
+  economy: null,     // data/economy.json (Antibody, biaya mutasi, Reserve, ads — tunable)
+  v2Freeze: null,    // data/v2-freeze.json (P0: layar/HUD lama yang dibekukan)
 };
 
 import { BUILD } from './version.js';
@@ -82,6 +88,12 @@ export async function loadAllData() {
     enemyMutations: 'data/enemy-mutations.json',
     welcomeBox: 'data/welcome-box.json',
     audio: 'data/audio.json', // Audio: peta file MP3 + rantai volume (CC0)
+    // V2
+    attacks: 'data/attacks.json',
+    zones: 'data/zones.json',
+    transitions: 'data/transitions.json',
+    economy: 'data/economy.json',
+    v2Freeze: 'data/v2-freeze.json',
   };
 
   const entries = await Promise.all(
@@ -288,6 +300,33 @@ export function getWelcomeBox() {
 /** Peta file audio MP3 + rantai volume (data/audio.json). */
 export function getAudio() {
   return getData().audio;
+}
+
+// ===== V2 (ROADMAP.md) — getter data baru =====
+
+/** Bahasa serangan V2: 8 archetype + telegraph (data/attacks.json). */
+export function getAttacks() {
+  return getData().attacks;
+}
+
+/** Rute biologis kontinu + landmark (data/zones.json). */
+export function getZones() {
+  return getData().zones;
+}
+
+/** Aturan transisi zona saat bertempur (data/transitions.json). */
+export function getTransitions() {
+  return getData().transitions;
+}
+
+/** Parameter ekonomi V2 yang bisa dituning (data/economy.json). */
+export function getEconomy() {
+  return getData().economy;
+}
+
+/** Daftar layar/HUD lama yang dibekukan selama transisi V2 (data/v2-freeze.json). */
+export function getV2Freeze() {
+  return getData().v2Freeze;
 }
 
 // ===== Fase 18: kurva progresi early/mid/late (data/progression.json) =====

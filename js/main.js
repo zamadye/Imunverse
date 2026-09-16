@@ -12,6 +12,7 @@
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
+import { applyFreeze } from './systems/v2-freeze.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
 import { initPwa } from './systems/pwa.js'; // Sprint 6.35: PWA
 import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
@@ -428,6 +429,10 @@ async function boot() {
   // 1) Data JSON
   const data = await loadAllData();
   loadingScreen.setProgress(12, 'Data patogen dimuat…');
+
+  // 1a) P0 V2: bekukan layar/HUD sistem lama (data/v2-freeze.json) sebelum
+  //     screen dirender — tombol & section lama tidak pernah muncul.
+  applyFreeze();
 
   // 1b) Dwibahasa: muat kamus + pasang observer DOM (bahasa diterapkan setelah save dimuat)
   await loadLang();

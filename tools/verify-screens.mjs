@@ -192,14 +192,35 @@ const a2 = aktif();
 const menuSah = a2.length === 1 && ['dashboard', 'capsule'].includes(a2[0]);
 cek('kembali ke menu (dashboard/kapsul)', menuSah, 'aktif=' + a2);
 
-// 5. tiap layar menu: hanya satu yang aktif
+// 5. tiap layar menu: hanya satu yang aktif.
+//    P0 V2: layar yang dibekukan (data/v2-freeze.json) justru TIDAK BOLEH aktif.
+const beku = (() => {
+  try {
+    return (JSON.parse(fs.readFileSync(path.join(ROOT, 'data/v2-freeze.json'), 'utf8')).frozenScreens) || [];
+  } catch { return []; }
+})();
 for (const id of ['roster', 'campaign', 'upgrade', 'bag', 'codex', 'bp', 'prep', 'shop', 'profile']) {
   API.screenManager.show(id);
   await sleep(150);
   const a = aktif();
+  if (beku.includes(id)) {
+    const aman = !a.includes(id);
+    if (!aman) { errors.push(`layar beku ${id} masih aktif`); hasil['layar ' + id] = 'GAGAL — layar lama masih terbuka'; }
+    else hasil['layar ' + id] = 'OK (dibekukan V2)';
+    continue;
+  }
   if (a.length !== 1 || a[0] !== id) { errors.push(`layar ${id}: aktif=${a}`); hasil['layar ' + id] = 'GAGAL — aktif=' + a; }
   else hasil['layar ' + id] = 'OK';
 }
+
+// 5b. P0 V2: tidak ada tombol navigasi terlihat yang menuju layar beku,
+//     dan dock dashboard tetap 4 menu.
+const navBeku = [...d.querySelectorAll('[data-nav]')].filter((b) => beku.includes(b.dataset.nav));
+const navBekuTerlihat = navBeku.filter((b) => !b.classList.contains('hidden') && !b.hasAttribute('data-v2-frozen'));
+cek('tombol ke layar beku disembunyikan', navBekuTerlihat.length === 0,
+  `${navBeku.length} tombol beku, ${navBekuTerlihat.length} masih terlihat`);
+const dock = [...d.querySelectorAll('.dock-4 .dock-btn')].filter((b) => !b.classList.contains('hidden'));
+cek('dock dashboard = 4 menu', dock.length === 4, 'terlihat=' + dock.length);
 
 console.error = realErr;
 console.log(JSON.stringify(hasil, null, 2));

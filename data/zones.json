@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 continuous biological world (PHAGOS_V2_REBUILD.txt §22-§26, §47). Rute biologis berkesinambungan — BUKAN daftar stage. P4 mengerjakan lung → bloodstream → heart lebih dulu; sisanya menyusul.",
+  "route": [
+    { "id": "lung", "order": 1, "mechanic": "oxygenMucus", "landmark": "Alveolar cluster", "phase": "P4", "enemies": ["virus", "bacteria"] },
+    { "id": "bronchiole", "order": 2, "mechanic": "narrowPath", "landmark": "Bronchial branch", "phase": "P4", "enemies": ["bacteria", "spore"] },
+    { "id": "alveoli", "order": 3, "mechanic": "gasExchange", "landmark": "Alveolar sac field", "phase": "P4", "enemies": ["spore", "virus"] },
+    { "id": "capillary", "order": 4, "mechanic": "narrowMovement", "landmark": "Capillary mesh", "phase": "P4", "enemies": ["bacteria"] },
+    { "id": "bloodstream", "order": 5, "mechanic": "bloodCurrent", "landmark": "Massive blood-cell flow", "phase": "P4", "enemies": ["bloodborne", "infectedCell"] },
+    { "id": "heart", "order": 6, "mechanic": "heartbeatPulse", "landmark": "Heart wall / valve", "phase": "P4", "enemies": ["elitePatrol"] },
+    { "id": "artery", "order": 7, "mechanic": "pressureWave", "landmark": "Arterial pressure gate", "phase": "P5", "enemies": ["bloodborne"] },
+    { "id": "tissue", "order": 8, "mechanic": "obstaclesNarrowPaths", "landmark": "Dense cellular structure", "phase": "P5", "enemies": ["infectedCell", "parasite"] },
+    { "id": "lymphatic", "order": 9, "mechanic": "immuneSignal", "landmark": "Immune signal node", "phase": "P5", "riskReward": true, "enemies": ["prion"] },
+    { "id": "lymphNode", "order": 10, "mechanic": "immuneSignal", "landmark": "Lymph node fortress", "phase": "P5", "enemies": ["elitePatrol"] },
+    { "id": "infectedTissue", "order": 11, "mechanic": "corruptionField", "landmark": "Corrupted tissue bed", "phase": "P5", "enemies": ["parasite", "toxin"] },
+    { "id": "tumor", "order": 12, "mechanic": "regenerationGrowthNodes", "landmark": "Massive tumor growth", "phase": "P5", "boss": true, "enemies": ["cancerCell", "toxin"] }
+  ],
+  "hudProgress": {
+    "style": "minimal",
+    "show": ["currentZone", "nextZone", "landmark"],
+    "rule": "Sangat kecil; tidak boleh mengambil fokus gameplay (§26)"
+  },
+  "waveRule": "Wave = penanda intensitas spawn di dalam zona, BUKAN arena baru (§27)"
+}

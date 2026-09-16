@@ -139,12 +139,25 @@ Semuanya masih bisa dipulihkan dari riwayat git bila ternyata diperlukan.
 Menggabungkan prioritas blueprint gameplay (Fase 1–8) dengan prioritas economy
 (P0–P9). **Jangan kerjakan semuanya sekaligus.**
 
-### P0 — Audit & pondasi V2
+### P0 — Audit & pondasi V2 **[SELESAI — BUILD 52g]**
 - inventarisasi dependensi sistem lama (upgrade/squad/shop/battlepass/unlock/economy lama)
 - bekukan fitur lama (UI disembunyikan, jalan kode tetap aman) sebelum dihapus
-- rapikan `data/` sesuai arsitektur §2 (file baru boleh kosong tapi terdaftar)
+- rapikan `data/` sesuai arsitektur §2
 - **Exit:** `npm run check` hijau, game masih bisa dimainkan end-to-end, tidak ada
   referensi ke layar yang sudah disembunyikan.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Pembekuan terdata | `data/v2-freeze.json` berisi 10 layar lama (`upgrade`, `shop`, `bp`, `capsule`, `rank`, `arena`, `bosschest`, `comeback`, `campaign`, `bag`) + 3 chip HUD (`rank-chip`, `imu-chip`, `hud-imu-chip`) beserta alasannya — bukan hardcode di kode |
+| Penahan navigasi | `js/systems/v2-freeze.js` + penjaga di `screen-manager.show()`: layar beku tidak pernah aktif walau masih ada jalan kode lama yang memanggilnya |
+| Dashboard tetap 4 menu | dock lama **Tas → Bio-Pedia (codex)** dan **Lab Genom → Profil (profile)**; tombol “…” disembunyikan; Kampanye & Siklus Mitosis dicabut dari menu |
+| Kerangka data V2 | `data/attacks.json` (8 archetype + telegraph), `data/zones.json` (rute 12 zona + landmark + mekanik), `data/transitions.json` (transisi 20–60 dtk, event masuk jantung), `data/economy.json` (Antibody, kurva biaya mutasi, 3 fase, Reserve, ads, telemetri, non-goals) — semua terdaftar di `js/core/data-store.js` dengan getter `getAttacks/getZones/getTransitions/getEconomy/getV2Freeze` |
+| Pemeriksa baru | `tools/verify-screens.mjs` kini menegaskan: layar beku **tidak** boleh aktif, tidak ada tombol nav terlihat yang menuju layar beku, dan dock dashboard = 4 menu |
+
+Semua angka di `economy.json` / `zones.json` / `attacks.json` adalah **draf awal** yang
+akan divalidasi saat P3–P5 (dokumen: “bukan angka final”).
 
 ### P1 — Core combat
 - 11 hero punya **identity**: strength / weakness / combat identity / scaling identity

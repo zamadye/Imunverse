@@ -11,10 +11,10 @@
   <link rel="apple-touch-icon" href="assets/icons/pwa-192.png" />
   <meta name="description" content="PHAGOS — Telan. Bermutasi. Bertahan. Roguelike survival membran sel imun di phagos.space!" />
   <title>PHAGOS — Telan. Bermutasi. Bertahan.</title>
-  <link rel="stylesheet" href="styles/main.css?v=52f" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=52f" />
-  <link rel="stylesheet" href="styles/portrait.css?v=52f" />
-  <link rel="stylesheet" href="styles/dashboard-map.css?v=52f" />
+  <link rel="stylesheet" href="styles/main.css?v=52g" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=52g" />
+  <link rel="stylesheet" href="styles/portrait.css?v=52g" />
+  <link rel="stylesheet" href="styles/dashboard-map.css?v=52g" />
 </head>
 <body>
   <div id="app">
@@ -93,12 +93,12 @@
           <div class="dash-points" title="Biokredit dari gameplay"><img class="coin" src="assets/icons/cur-antibodi.svg" alt="Biokredit" /><span id="dash-currency">0</span></div>
           <div class="currency-chip imu-chip" title="Genom premium"><img class="coin" src="assets/icons/cur-imun.svg" alt="Genom" /><span id="dash-imun">0</span></div>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
-          <button id="btn-dash-more" class="topbar-more" aria-label="Semua fitur" aria-haspopup="true" aria-expanded="false">
+          <button id="btn-dash-more" class="topbar-more hidden" aria-label="Semua fitur" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
           </button>
           <nav id="dash-more-menu" class="more-menu hidden" aria-label="Semua fitur">
-            <button data-nav="campaign"><img src="assets/icons/menu-campaign.svg" alt="" /><span>Kampanye</span></button>
-            <button data-nav="bp"><img src="assets/icons/menu-pass.svg" alt="" /><span>Siklus Mitosis</span></button>
+            <!-- P0 V2: Kampanye (stage-select) & Siklus Mitosis (battle pass) dibekukan;
+                 Bio-Pedia & Profil pindah ke dock 4 menu. Tombol "…" disembunyikan bila kosong. -->
             <button data-nav="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
             <button data-nav="profile"><img src="assets/icons/ui-heart.svg" alt="" /><span>Profil</span></button>
           </nav>
@@ -132,17 +132,17 @@
             <span class="dock-ico"><img src="assets/icons/menu-heroes.svg" alt="" /><span class="dock-badge hidden" id="badge-hero"></span></span>
             <span>Hero</span>
           </button>
-          <button class="dock-btn" data-nav="bag" aria-label="Tas">
-            <span class="dock-ico"><img src="assets/icons/sec-item.svg" alt="" /><span class="dock-badge hidden" id="badge-bag"></span></span>
-            <span>Tas</span>
+          <button class="dock-btn" data-nav="codex" aria-label="Bio-Pedia">
+            <span class="dock-ico"><img src="assets/icons/menu-codex.svg" alt="" /><span class="dock-badge hidden" id="badge-codex"></span></span>
+            <span>Bio-Pedia</span>
           </button>
           <button class="dock-btn dock-misi" id="dock-missions" aria-label="Misi &amp; Quest" aria-haspopup="dialog">
             <span class="dock-ico"><img src="assets/icons/menu-quest.svg" alt="" /><span class="dock-badge hidden" id="badge-missions"></span></span>
             <span>Misi</span>
           </button>
-          <button class="dock-btn" data-nav="upgrade" data-tab="pasukan" aria-label="Lab Genom">
-            <span class="dock-ico"><img src="assets/icons/menu-squad.svg" alt="" /><span class="dock-badge hidden" id="badge-lab"></span></span>
-            <span>Lab Genom</span>
+          <button class="dock-btn" data-nav="profile" aria-label="Profil">
+            <span class="dock-ico"><img src="assets/icons/ui-heart.svg" alt="" /><span class="dock-badge hidden" id="badge-profile"></span></span>
+            <span>Profil</span>
           </button>
         </nav>
       </section>
@@ -706,6 +706,6 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=52f"></script>
+  <script type="module" src="js/main.js?v=52g"></script>
 </body>
 </html>

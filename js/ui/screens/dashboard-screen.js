@@ -41,6 +41,7 @@ import { currentChapterId, chapterStatus } from './campaign-screen.js';
 import { emit } from '../../core/ui-bridge.js';
 import { isCapsulePending, isCapsuleSnoozed } from '../../systems/welcome-box-system.js';
 import { currentStrainId } from '../../systems/weekly-strain-system.js';
+import { hudFrozen } from '../../systems/v2-freeze.js';
 import { traitDisplayName } from '../../systems/enemy-mutation-system.js';
 
 let chapterIndex = 0; // indeks slide aktif (bukan selalu = bab terpilih)
@@ -274,7 +275,10 @@ function renderTopbar(meta) {
   }
 
   const rankChip = document.getElementById('rank-chip');
-  if (rankChip) {
+  // P0 V2: chip pangkat dibekukan (data/v2-freeze.json) — jangan dihidupkan lagi.
+  if (rankChip && rankChip.hasAttribute('data-v2-frozen')) {
+    rankChip.classList.add('hidden');
+  } else if (rankChip && !hudFrozen('rank-chip')) {
     const rk = playerRank();
     rankChip.classList.remove('hidden');
     const em = document.getElementById('rank-emblem');

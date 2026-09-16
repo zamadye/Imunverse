@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 Economy & IAP tunables (PHAGOS_IAP_V2.txt §3-§31). SEMUA ANGKA TUNABLE dan harus divalidasi lewat playtest (Test A-E). Belum dikonsumsi runtime sampai P3/P5.",
+  "currency": {
+    "primary": "antibody",
+    "display": { "id": "Antibodi", "icon": "assets/icons/cur-antibodi.svg" },
+    "earnedByGameplay": true,
+    "premium": false,
+    "legacyDisabled": ["imunCoin", "energy", "lives", "multipleGameplayCurrencies"]
+  },
+  "antibody": {
+    "sources": {
+      "enemyKill": 1,
+      "eliteKill": 12,
+      "bossKill": 60,
+      "specialEvent": 25,
+      "runRewardPerZone": 20
+    },
+    "heroModifier": { "_doc": "pengali penghasilan per hero — diisi saat P3 (IAP §11)", "_default": 1 },
+    "pickupFeedback": {
+      "required": true,
+      "chain": ["musuh mati", "partikel antibodi", "+XX Antibodi", "animasi dompet"],
+      "rule": "Jangan hanya mengubah angka di HUD (IAP §5)"
+    }
+  },
+  "mutation": {
+    "primarySink": true,
+    "baseCost": 100,
+    "growth": { "type": "geometric", "firstStep": 50, "stepGrowth": 1.35, "maxStep": 400 },
+    "minCost": 100,
+    "maxCost": 4000,
+    "maxMutationsPerRun": 8,
+    "skipAllowed": true,
+    "rule": "Cost ↑ harus sebanding dengan power ↑ (IAP §9)"
+  },
+  "phases": {
+    "abundance": { "mutations": [1, 2], "target": "income > mutation pressure" },
+    "tension": { "mutations": [3, 5], "target": "income ≈ mutation cost" },
+    "scarcity": { "mutations": [6, 8], "target": "income < mutation pressure; scarcity ≠ grinding" }
+  },
+  "insufficientRule": {
+    "blockGameplay": false,
+    "options": ["continue", "watchAd", "useReserve"],
+    "rule": "Antibody habis TIDAK boleh menghentikan permainan (IAP §10)"
+  },
+  "reserve": {
+    "enabled": false,
+    "separateFromAntibody": true,
+    "assistancePctOfMutationCost": 0.5,
+    "maxUsesPerRun": 2,
+    "capacity": 20000,
+    "note": "P5 — lapisan monetisasi prototipe (IAP §14-§15)"
+  },
+  "rewardedAds": {
+    "enabled": true,
+    "antibodyReward": 100,
+    "cooldownSec": 60,
+    "dailyLimit": 10,
+    "revive": true,
+    "runRewardMultiplier": 2
+  },
+  "iap": {
+    "enabled": false,
+    "provider": "mock",
+    "entryPoint": "contextual",
+    "entryRule": "Hanya muncul saat friksi ekonomi; tidak boleh memenuhi dashboard (IAP §17)",
+    "packs": [
+      { "id": "reserve_s", "grant": 500 },
+      { "id": "reserve_m", "grant": 1500 },
+      { "id": "reserve_l", "grant": 4000 }
+    ],
+    "realPayment": false,
+    "note": "Payment nyata paling akhir (P9). Ganti MockPurchaseProvider → Google Play Billing tanpa menyentuh sistem mutasi."
+  },
+  "telemetry": {
+    "enabled": true,
+    "events": [
+      "run_started", "enemy_killed", "antibody_earned", "mutation_offered",
+      "mutation_purchased", "mutation_failed_insufficient_antibody", "reserve_used",
+      "rewarded_ad_offered", "rewarded_ad_completed", "iap_mock_granted",
+      "run_completed", "run_failed", "hero_selected", "hero_unlocked"
+    ]
+  },
+  "nonGoals": ["battlePass", "largeShop", "skinMarketplace", "subscription", "gacha", "equipmentSystem", "multiPremiumCurrency", "complexMissions", "guild", "pvp", "nft"]
+}
