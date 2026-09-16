@@ -11,6 +11,19 @@ satu resep per hero per pose. Dipakai bersama `tools/build-mutation-sprites.py`.
    `assets/sprites/<nama>.png` (RGBA 256 px, latar dibuang, isi di-crop & dipad).
 3. `npm run check` → baris "foto mutasi: N/44 tersedia" harus naik.
 
+> **Progres: 21/44** (macrophage, dendritic, neutrophil, eosinophil, basophil
+> lengkap 4/4; mastcell baru mut1_idle).
+
+## Penjepit frame — WAJIB biar animasi tidak melompat
+`build-mutation-sprites.py` mengunci tiap foto mutasi ke frame sprite dasar
+hero-nya (rata-rata `hero_<id>_idle` + `hero_<id>_attack`): **tinggi isi**,
+**garis dasar bawah**, dan **pusat-x** disamakan (Δ maksimal ≈0.01 → <1 px di
+layar). Karena itu:
+- ganti base ↔ mut1 ↔ mut2 dan idle ↔ attack tidak berubah ukuran,
+- balik kiri/kanan dan bob naik-turun tetap mulus.
+Kalau menambah hero baru, jalankan ulang skripnya untuk SEMUA foto hero itu
+bukan cuma yang baru, supaya acuannya ikut terhitung.
+
 > Batas alat: **maksimal 10 gambar per giliran**, jadi pengerjaan 44 foto
 > dilakukan bertahap (≈4–5 giliran). Urutan prioritas ada di bagian bawah.
 
@@ -131,10 +144,10 @@ hero_{id}_mut2_idle.png     hero_{id}_mut2_attack.png
 |---|---|---|---|---|---|
 | 1 | macrophage | ✅ | ✅ | ✅ | ✅ |
 | 2 | dendritic | ✅ | ✅ | ✅ | ✅ |
-| 3 | neutrophil | ✅ | ✅ | ✅ | ⬜ |
-| 4 | eosinophil | ⬜ | ⬜ | ⬜ | ⬜ |
-| 5 | basophil | ⬜ | ⬜ | ⬜ | ⬜ |
-| 6 | mastcell | ⬜ | ⬜ | ⬜ | ⬜ |
+| 3 | neutrophil | ✅ | ✅ | ✅ | ✅ |
+| 4 | eosinophil | ✅ | ✅ | ✅ | ✅ |
+| 5 | basophil | ✅ | ✅ | ✅ | ✅ |
+| 6 | mastcell | ✅ | ⬜ | ⬜ | ⬜ |
 | 7 | tcd8 | ⬜ | ⬜ | ⬜ | ⬜ |
 | 8 | tcd4 | ⬜ | ⬜ | ⬜ | ⬜ |
 | 9 | treg | ⬜ | ⬜ | ⬜ | ⬜ |
