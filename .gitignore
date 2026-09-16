@@ -20,3 +20,6 @@ tools/.audiosrc/
 
 # bundle sementara untuk verifikasi runtime (npm run verify:photos)
 .tmp-bundle.js
+
+# dependensi dev (jsdom dipakai pemeriksa foto, npm i --no-save)
+node_modules/
