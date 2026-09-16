@@ -16,11 +16,58 @@ import { writeSave } from '../save/save-manager.js';
 const MASTER_VOL = 0.85; // build 54h: user minta audio lebih keras
 const MIN_GAP = { shoot: 0.035, hit: 0.05, collect: 0.06, kill: 0.05, ui: 0.03 };
 
+// build 54i: sample MP3 override. Kalau file ada di assets/audio/<name>.mp3,
+// akan dipakai; kalau tidak, fallback ke synth Web Audio (kode existing).
+// Nama slot cocok dengan tools/audio_urls.json.
+const SAMPLE_SLOTS = ['shoot', 'hit', 'ui', 'coin', 'wave', 'chest', 'levelup', 'evolve', 'bossSpawn', 'bossDie'];
+const SAMPLE_VOL = { shoot: 0.35, hit: 0.5, ui: 0.6, coin: 0.55, wave: 0.7, chest: 0.7, levelup: 0.8, evolve: 0.85, bossSpawn: 0.9, bossDie: 0.9 };
+
 class AudioSystem {
   constructor() {
     this.ctx = null;
     this.master = null;
     this.lastAt = new Map(); // key → timestamp performance.now()
+    this.samples = new Map(); // name → { audio, ok, checked }
+    this._probeSamples();
+  }
+
+  /**
+   * Cek keberadaan MP3 di assets/audio/<name>.mp3 secara lazy (HEAD tiap slot).
+   * Kalau ada, load HTMLAudioElement; kalau tidak (404), mark ok=false.
+   * Import BUILD dinamis untuk cache-busting.
+   */
+  _probeSamples() {
+    import('../core/version.js').then(({ BUILD }) => {
+      for (const name of SAMPLE_SLOTS) {
+        const url = `assets/audio/${name}.mp3?v=${BUILD}`;
+        const a = new Audio();
+        a.preload = 'auto';
+        a.volume = SAMPLE_VOL[name] || 0.7;
+        a.addEventListener('canplaythrough', () => {
+          const s = this.samples.get(name);
+          if (s) { s.ok = true; s.checked = true; }
+        }, { once: true });
+        a.addEventListener('error', () => {
+          const s = this.samples.get(name);
+          if (s) { s.ok = false; s.checked = true; }
+        }, { once: true });
+        this.samples.set(name, { audio: a, ok: false, checked: false });
+        a.src = url;
+      }
+    }).catch(() => { /* abaikan — fallback synth */ });
+  }
+
+  /** Play sample MP3 kalau tersedia. Return true kalau sample dimainkan. */
+  _playSample(name) {
+    const s = this.samples.get(name);
+    if (!s || !s.ok || this.muted) return false;
+    try {
+      // Clone agar bisa overlap (shoot ditekan cepat)
+      const clone = s.audio.cloneNode(true);
+      clone.volume = SAMPLE_VOL[name] || 0.7;
+      clone.play().catch(() => {});
+      return true;
+    } catch { return false; }
   }
 
   /** Buat/resume context (dipanggil dari gesture user pertama). */
@@ -115,23 +162,27 @@ class AudioSystem {
 
   shoot() {
     if (!this._gate('shoot')) return;
+    if (this._playSample('shoot')) return;
     const f = 620 + Math.random() * 140;
     this._tone(f, 0.07, { type: 'triangle', vol: 0.06, slideTo: f * 0.55 });
   }
 
   hit() {
     if (!this._gate('hit')) return;
+    if (this._playSample('hit')) return;
     this._noise(0.05, { vol: 0.08, filter: 1600, filterTo: 700 });
   }
 
   kill() {
     if (!this._gate('kill')) return;
+    if (this._playSample('hit')) return;
     this._noise(0.09, { vol: 0.12, filter: 900, filterTo: 250 });
     this._tone(300, 0.08, { type: 'square', vol: 0.05, slideTo: 140 });
   }
 
   collect() {
     if (!this._gate('collect')) return;
+    if (this._playSample('coin')) return;
     this._tone(880, 0.07, { type: 'sine', vol: 0.12 });
     this._tone(1318, 0.1, { type: 'sine', vol: 0.1, delay: 0.055 });
   }
@@ -144,6 +195,7 @@ class AudioSystem {
 
   levelup() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('levelup')) return;
     [523, 659, 784].forEach((f, i) => this._tone(f, 0.12, { type: 'triangle', vol: 0.14, delay: i * 0.07 }));
   }
 
@@ -156,12 +208,14 @@ class AudioSystem {
 
   bossSpawn() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('bossSpawn')) return;
     this._tone(110, 0.6, { type: 'sawtooth', vol: 0.2, slideTo: 50 });
     this._noise(0.5, { vol: 0.14, filter: 220, filterTo: 90 });
   }
 
   bossDie() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('bossDie')) return;
     this._noise(0.45, { vol: 0.22, filter: 800, filterTo: 90 });
     this._tone(220, 0.4, { type: 'square', vol: 0.12, slideTo: 55 });
   }
@@ -190,22 +244,26 @@ class AudioSystem {
 
   chest() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('chest')) return;
     [784, 1046, 1318].forEach((f, i) => this._tone(f, 0.14, { type: 'triangle', vol: 0.13, delay: i * 0.08 }));
   }
 
   evolve() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('evolve')) return;
     [392, 494, 587, 784, 1046].forEach((f, i) => this._tone(f, 0.16, { type: 'triangle', vol: 0.13, delay: i * 0.08 }));
   }
 
   wave() {
     if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
+    if (this._playSample('wave')) return;
     this._tone(330, 0.1, { type: 'triangle', vol: 0.1 });
     this._tone(440, 0.14, { type: 'triangle', vol: 0.1, delay: 0.09 });
   }
 
   ui() {
     if (!this._gate('ui')) return;
+    if (this._playSample('ui')) return;
     this._tone(420, 0.05, { type: 'triangle', vol: 0.07 });
   }
 }

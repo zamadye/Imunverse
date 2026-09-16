@@ -2,4 +2,4 @@
  * version.js — Versi build aset. Naikkan setiap rilis agar browser pemain
  * memuat ulang file (cache-busting), apa pun server statisnya.
  */
-export const BUILD = '54h'; // PHAGOS Sprint 1
+export const BUILD = '54i'; // PHAGOS Sprint 1

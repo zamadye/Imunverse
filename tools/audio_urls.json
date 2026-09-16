@@ -1,0 +1,35 @@
+{
+  "_doc": [
+    "Isi setiap URL dengan link MP3/OGG/WAV non-copyright (CC0 / Public Domain).",
+    "Sumber rekomendasi (semua CC0 atau ada license CC0 filter):",
+    "  https://freesound.org  → filter 'Creative Commons 0'",
+    "  https://opengameart.org  → filter CC0",
+    "  https://pixabay.com/sound-effects  → semua royalty-free untuk komersial",
+    "  https://kenney.nl/assets/category:audio  → semua CC0",
+    "",
+    "Rekomendasi durasi:",
+    "  shoot/hit/coin  : 0.1 - 0.3 detik  (SFX pendek, tembak/kena)",
+    "  ui/pickup       : 0.15 - 0.4 detik (klik menu, ambil item)",
+    "  wave/chest      : 0.4 - 1.0 detik  (transisi wave, buka peti)",
+    "  levelup/evolve  : 0.6 - 1.5 detik  (momen upgrade, kaya)",
+    "  bossSpawn       : 1.5 - 3.0 detik  (ancaman, low sting)",
+    "  bossDie         : 1.0 - 2.5 detik  (kemenangan, blast)",
+    "",
+    "Format: MP3 44.1kHz mono/stereo lebih aman untuk mobile PWA (Safari iOS).",
+    "Setelah isi URL, jalankan di terminal LOCAL:",
+    "  python3 tools/fetch_audio.py",
+    "  git add assets/audio/ && git commit -m 'audio: add CC0 SFX pack' && git push"
+  ],
+  "sfx": {
+    "shoot":     { "url": "", "desc": "tembak proyektil hero (0.1-0.2s laser/blip)" },
+    "hit":       { "url": "", "desc": "kena musuh (0.1-0.2s impact/thud pendek)" },
+    "ui":        { "url": "", "desc": "klik tombol menu (0.15s click ringan)" },
+    "coin":      { "url": "", "desc": "pickup coin/orb (0.15-0.3s chime)" },
+    "wave":      { "url": "", "desc": "wave baru dimulai (0.4-0.8s whoosh/gong)" },
+    "chest":     { "url": "", "desc": "buka peti (0.6-1.0s magical open)" },
+    "levelup":   { "url": "", "desc": "level up (0.8-1.5s ascending arpeggio)" },
+    "evolve":    { "url": "", "desc": "evolusi/diferensiasi (1.0-2.0s power-up transform)" },
+    "bossSpawn": { "url": "", "desc": "boss muncul (1.5-3.0s ancaman low brass/sting)" },
+    "bossDie":   { "url": "", "desc": "boss mati (1.0-2.5s kemenangan burst/blast)" }
+  }
+}
