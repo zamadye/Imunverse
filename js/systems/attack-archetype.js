@@ -29,7 +29,7 @@
  * bukan mengganti seni karakter.
  */
 
-import { getData } from '../core/data-store.js';
+import { getData, getMutations } from '../core/data-store.js';
 
 const PH = { anticipation: 0.12, telegraph: 0.25, execution: 0.08, impact: 0.06, recovery: 0.18 };
 const URUT = ['anticipation', 'telegraph', 'execution', 'impact', 'recovery'];
@@ -53,8 +53,88 @@ export function archetypeCfg(id) {
 }
 
 /** Archetype hero (dari identity.attackArchetype — lihat P1). */
-export function archetypeForHero(heroDef) {
-  return (heroDef && heroDef.identity && heroDef.identity.attackArchetype) || null;
+export function archetypeForHero(heroDef, run) {
+  const base = (heroDef && heroDef.identity && heroDef.identity.attackArchetype) || null;
+  if (!base || !run) return base;
+  // P2: mutasi boleh MENGUBAH BENTUK serangan (data/mutations.json →
+  // attack.archetypeFrom), mis. Reaksi Berantai mengubah proyektil jadi chain.
+  const mods = mutationAttackMods(run);
+  const swap = mods.archetypeFrom && mods.archetypeFrom[base];
+  return swap || base;
+}
+
+/**
+ * P2 — Teks perubahan tempur untuk kartu mutasi (modal level-up).
+ * Diturunkan dari blok `attack` mutasi + archetype hero yang sedang dipakai,
+ * jadi yang tertulis di kartu = yang benar-benar terjadi di arena.
+ */
+const KEY_LABEL = {
+  radius: 'radius', radiusMult: 'radius', dmgMult: 'damage', count: 'jumlah',
+  spreadDeg: 'sebaran', speed: 'kecepatan', pierce: 'tembus', turnRate: 'putaran',
+  arcDeg: 'busur', length: 'panjang', width: 'lebar', maxHops: 'lompatan',
+  hopRadius: 'jarak lompat', decay: 'peluruhan', lifeSec: 'durasi', dpsMult: 'DPS',
+  slow: 'perlambat', maxEntities: 'entitas', fireIntervalSec: 'interval tembak',
+  castRange: 'jarak jangkau',
+};
+const PENGALI = new Set(['radiusMult', 'dmgMult', 'dpsMult', 'slow', 'decay', 'turnRate']);
+
+function labelArchetype(id) {
+  const cfg = archetypeCfg(id);
+  return (cfg && cfg.label) || id || '?';
+}
+
+export function describeAttackChange(def, heroDef) {
+  const a = def && def.attack;
+  if (!a) return '';
+  const base = archetypeForHero(heroDef, null);
+  if (!base) return '';
+  const parts = [];
+  const swap = a.archetypeFrom && a.archetypeFrom[base];
+  if (swap) parts.push(`Bentuk serangan: ${labelArchetype(base)} → ${labelArchetype(swap)}`);
+  const pl = (a.payload && a.payload[base]) || null;
+  if (pl) {
+    for (const k of Object.keys(pl)) {
+      const v = pl[k];
+      if (typeof v !== 'number' && typeof v !== 'string') continue;
+      const lbl = KEY_LABEL[k] || k;
+      parts.push(PENGALI.has(k) ? `${lbl} ×${v}` : `${lbl} ${v}`);
+    }
+  }
+  if (typeof a.dmgMult === 'number' && Math.abs(a.dmgMult - 1) > 1e-6) parts.push(`damage ×${a.dmgMult}`);
+  return parts.join(' · ');
+}
+
+/**
+ * P2 — Mutasi bukan cuma angka: ia boleh mengubah BENTUK & angka serangan.
+ * Dibaca dari data/mutations.json → tiap mutasi boleh punya blok `attack`:
+ *   { dmgMult: 0.85,                     // pengali damage global payload
+ *     archetypeFrom: { melee: 'area' },  // ganti bentuk (hanya bila cocok)
+ *     payload: { area: { radiusMult: 1.35 } } } // timpa angka per archetype
+ * Urutan: defaults archetype → patternParams hero → mutasi (mutasi terakhir,
+ * jadi mutasi selalu menang — itu yang membuatnya terasa sebagai Evolusi).
+ */
+export function mutationAttackMods(run) {
+  const out = { dmgMult: 1, archetypeFrom: null, payload: null, ids: [] };
+  const ids = (run && run.activeMutations) || null;
+  if (!Array.isArray(ids) || ids.length === 0) return out;
+  const defs = (getMutations() && getMutations().mutations) || [];
+  for (const id of ids) {
+    const def = defs.find((m) => m && m.id === id);
+    const a = def && def.attack;
+    if (!a) continue;
+    out.ids.push(id);
+    if (typeof a.dmgMult === 'number' && isFinite(a.dmgMult)) out.dmgMult *= a.dmgMult;
+    if (a.archetypeFrom && typeof a.archetypeFrom === 'object') {
+      out.archetypeFrom = Object.assign(out.archetypeFrom || {}, a.archetypeFrom);
+    }
+    if (a.payload && typeof a.payload === 'object') {
+      out.payload = out.payload || {};
+      for (const k of Object.keys(a.payload)) {
+        out.payload[k] = Object.assign(out.payload[k] || {}, a.payload[k]);
+      }
+    }
+  }
+  return out;
 }
 
 function durasi(atk) {
@@ -75,10 +155,11 @@ function durasi(atk) {
 export function beginAttack(game, opts = {}) {
   const run = game && game.run;
   if (!run || !run.player || !run.player.alive) return null;
-  const id = archetypeForHero(run.heroDef);
+  const id = archetypeForHero(run.heroDef, run);
   if (!id) return null;
   const cfg = archetypeCfg(id);
   if (!cfg) return null;
+  const mods = mutationAttackMods(run);
   const player = run.player;
   const target = cariTarget(game, player, opts);
   const atk = {
@@ -88,7 +169,7 @@ export function beginAttack(game, opts = {}) {
     t: 0,
     durs: durasi({ cfg }),
     stats: opts.stats || null,
-    dmgMult: opts.dmgMult ?? 1,
+    dmgMult: (opts.dmgMult ?? 1) * mods.dmgMult,
     color: (run.heroDef && (run.heroDef.roleColor || run.heroDef.color)) || '#8df7d2',
     // Arah & sasaran dikunci SAAT MULAI supaya telegraph jujur: apa yang
     // tergambar saat menelegraph = apa yang benar-benar terjadi saat eksekusi.
@@ -181,8 +262,15 @@ function kena(game, atk, enemy, dmg, opts = {}) {
 function payloadUntuk(run, atk) {
   const dasar = (atk.cfg && atk.cfg.payload) || {};
   const pp = (run.heroDef && run.heroDef.patternParams) || {};
+  const mut = (run && mutationAttackMods(run).payload) || null;
+  const mutA = (mut && atk && mut[atk.id]) || null;
   const out = {};
-  for (const k of Object.keys(dasar)) out[k] = (pp[k] != null ? pp[k] : dasar[k]);
+  for (const k of Object.keys(dasar)) {
+    if (mutA && mutA[k] != null) out[k] = mutA[k];
+    else out[k] = (pp[k] != null ? pp[k] : dasar[k]);
+  }
+  // Kunci yang hanya ada di mutasi (bukan di defaults) tetap ikut terpakai.
+  if (mutA) for (const k of Object.keys(mutA)) if (out[k] == null) out[k] = mutA[k];
   return out;
 }
 

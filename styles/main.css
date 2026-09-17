@@ -1921,6 +1921,16 @@ img.lock-badge {
   50% { transform: translateY(-3px) rotate(3deg); }
 }
 .choice-card.mutation-card.locked .choice-mut-sprite { filter: grayscale(.8); opacity: .7; animation: none; }
+/* P2: kartu mutasi memperlihatkan BENTUK SEKARANG → BENTUK BARU */
+.mut-forms { display: flex; align-items: center; gap: 4px; flex: none; }
+.mut-forms .choice-mut-sprite { width: 44px; height: 44px; }
+.mut-forms .mut-before { opacity: .55; filter: grayscale(.35); animation: none; }
+.mut-arrow { font-size: 13px; color: var(--teal, #2f9c8f); opacity: .9; }
+.mut-attack {
+  margin-top: 3px; font-size: 11px; font-weight: 700; letter-spacing: .2px;
+  color: #0e6e62; background: rgba(141, 247, 210, .28);
+  border-left: 3px solid #2f9c8f; border-radius: 4px; padding: 3px 6px;
+}
 @keyframes capsule-quake {
   0%, 100% { transform: translate(0, 0); }
   20% { transform: translate(-6px, 3px) rotate(-1deg); }

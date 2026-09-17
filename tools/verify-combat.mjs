@@ -34,7 +34,7 @@ globalThis.fetch = async (u) => {
     return { ok: true, status: 200, async json() { return JSON.parse(t); }, async text() { return t; } };
   } catch { return { ok: false, status: 404, async json() { throw new Error('404 ' + f); }, async text() { return ''; } }; }
 };
-const { loadAllData } = await import('../js/core/data-store.js');
+const { loadAllData, getMutations: getMutationsData } = await import('../js/core/data-store.js');
 await loadAllData();
 
 const heroes = baca('data/heroes.json').heroes;
@@ -188,7 +188,7 @@ cek('satu archetype dibedakan per hero (area Makrofag ≠ area Neutrofil)',
   `makro r${ppMakro.radiusMult}/d${ppMakro.dmgMult} vs netro r${ppNetro.radiusMult}/d${ppNetro.dmgMult}`);
 
 // ---------- 9. EKSEKUSI ARCHETYPE DI RUNTIME (§17 + §19) ----------
-const { beginAttack, updateAttack, updateSummons, archetypeForHero } = await import('../js/systems/attack-archetype.js');
+const { beginAttack, updateAttack, updateSummons, archetypeForHero, mutationAttackMods, describeAttackChange } = await import('../js/systems/attack-archetype.js');
 const { dealMembraneDamage } = await import('../js/systems/membrane-system.js');
 
 /** Siapkan run uji memakai objek game NYATA (tanpa menjalankan game.update). */
@@ -369,6 +369,86 @@ pendukung2.frozen = 5;
 for (let i = 0; i < Math.ceil((defKanker.aura.pulseSec + teleCfg + 0.5) * 60); i++) pendukung2.update(1 / 60, pemainJauh2, 0, gameAura2);
 cek('membekukan pendukung menggagalkan aura', terbantu2.auraBuffT === 0, `buffT=${terbantu2.auraBuffT}`);
 
+
+// ---------- 11. P2 — MUTASI MENGUBAH CARA BERTEMPUR (bukan hanya angka) ----------
+/** Jalankan archetype dengan mutasi aktif (run.activeMutations = sumber nyata). */
+function jalankanMutasi(heroId, posisiMusuh, mutasi = [], detik = 1.2) {
+  const { run, musuh } = siapkan(heroId, posisiMusuh);
+  run.activeMutations = mutasi.slice();
+  const hp0 = musuh.map((e) => e.hp);
+  const atk = beginAttack(game, { stats: STATS });
+  const langkah = Math.round(detik * 60);
+  for (let i = 0; i < langkah; i++) updateAttack(game, 1 / 60);
+  return { run, musuh, hp0, hp1: musuh.map((e) => e.hp), atk, id: atk && atk.id };
+}
+
+// (a) mutasi MENIMPA angka payload: Nova memperlebar cincin Makrofag (1,45 → 1,6)
+const dasar200 = jalankanMutasi('macrophage', [[200, 0]], []);
+const nova200 = jalankanMutasi('macrophage', [[200, 0]], ['nova']);
+cek('mutasi menimpa angka payload (radius area Makrofag melebar)',
+  dasar200.hp1[0] === dasar200.hp0[0] && nova200.hp1[0] < nova200.hp0[0],
+  `tanpa mutasi -${Math.round(dasar200.hp0[0] - dasar200.hp1[0])} | nova -${Math.round(nova200.hp0[0] - nova200.hp1[0])}`);
+
+// (b) mutasi MENGUBAH BENTUK serangan: Reaksi Berantai mengubah proyektil → chain
+const panah = jalankanMutasi('eosinophil', [[60, 0], [140, 0]], []);
+const berantai = jalankanMutasi('eosinophil', [[60, 0], [140, 0]], ['rantai']);
+cek('mutasi mengubah BENTUK serangan (proyektil → chain)',
+  panah.id === 'projectile' && berantai.id === 'chain', `${panah.id} → ${berantai.id}`);
+
+// (c) perubahan bentuk terasa di arena: melee (depan saja) → area (sekeliling)
+const nkBiasa = jalankanMutasi('nkcell', [[60, 0], [-80, 0]], []);
+const nkNova = jalankanMutasi('nkcell', [[60, 0], [-80, 0]], ['nova']);
+const belakangBiasa = Math.round(nkBiasa.hp0[1] - nkBiasa.hp1[1]);
+const belakangNova = Math.round(nkNova.hp0[1] - nkNova.hp1[1]);
+cek('perubahan bentuk terasa (melee depan saja → area sekeliling)',
+  nkBiasa.id === 'melee' && nkNova.id === 'area' && belakangBiasa === 0 && belakangNova > 0,
+  `${nkBiasa.id}→${nkNova.id}, belakang ${belakangBiasa} vs ${belakangNova}`);
+
+// (d) pengali damage global mutasi (Auto-Pulse menembak lebih lemah per tembakan)
+const dasarDmg = jalankanMutasi('macrophage', [[60, 0]], []);
+const autoDmg = jalankanMutasi('macrophage', [[60, 0]], ['medan_pulsa']);
+const dmgDasar = Math.round(dasarDmg.hp0[0] - dasarDmg.hp1[0]);
+const dmgAuto = Math.round(autoDmg.hp0[0] - autoDmg.hp1[0]);
+cek('mutasi mengubah damage serangan (auto-pulse lebih lemah per tembakan)',
+  dmgAuto > 0 && dmgAuto < dmgDasar, `dasar -${dmgDasar} vs auto-pulse -${dmgAuto}`);
+
+// (e) regresi: mutasi TANPA blok attack tidak mengubah serangan sedikit pun
+const regenDmg = jalankanMutasi('macrophage', [[60, 0]], ['regenerasi']);
+const regenJauh = jalankanMutasi('macrophage', [[200, 0]], ['regenerasi']);
+cek('mutasi tanpa blok attack tidak mengubah serangan',
+  Math.round(regenDmg.hp0[0] - regenDmg.hp1[0]) === dmgDasar && regenJauh.hp1[0] === regenJauh.hp0[0],
+  `-${Math.round(regenDmg.hp0[0] - regenDmg.hp1[0])} vs dasar -${dmgDasar}`);
+
+// (f) kontrak data: semua blok attack mutasi berbentuk benar & archetype-nya ada
+const daftarMutasi = getMutationsData().mutations || [];
+const idArchetype = new Set((attacks.archetypes || []).map((a) => a.id));
+const berAttack = daftarMutasi.filter((m) => m.attack);
+const salahBentuk = berAttack.filter((m) => {
+  const a = m.attack;
+  const fd = a.archetypeFrom && Object.values(a.archetypeFrom).some((v) => !idArchetype.has(v));
+  const fp = a.payload && Object.keys(a.payload).some((k) => !idArchetype.has(k));
+  const fm = typeof a.dmgMult === 'number' && !(a.dmgMult > 0);
+  return fd || fp || fm;
+});
+cek('semua blok attack mutasi valid (archetype & angka benar)',
+  berAttack.length >= 12 && salahBentuk.length === 0,
+  `${berAttack.length} mutasi ber-blok attack, ${salahBentuk.length} salah: ${salahBentuk.map((m) => m.id).join(',')}`);
+
+// (g) mods terbaca dari run (sumber tunggal: run.activeMutations)
+const { run: runMods } = siapkan('macrophage', []);
+runMods.activeMutations = ['nova', 'medan_pulsa'];
+const mods = mutationAttackMods(runMods);
+cek('mods mutasi terbaca dari run.activeMutations',
+  mods.ids.length === 2 && Math.abs(mods.dmgMult - 0.85) < 1e-6 && !!mods.archetypeFrom.melee && !!mods.payload.area,
+  `ids=${mods.ids.join('+')} dmgMult=${mods.dmgMult}`);
+
+// (h) teks kartu mutasi diturunkan dari blok attack (bukan dikarang di UI)
+const heroMakro = heroes.find((h) => h.id === 'macrophage');
+const teksNova = describeAttackChange(daftarMutasi.find((m) => m.id === 'nova'), heroMakro);
+const teksRegen = describeAttackChange(daftarMutasi.find((m) => m.id === 'regenerasi'), heroMakro);
+cek('teks kartu mutasi turun dari blok attack (bukan dikarang)',
+  teksNova.includes('radius ×1.6') && teksNova.includes('damage ×2') && teksRegen === '',
+  `nova="${teksNova}" | regenerasi="${teksRegen}"`);
 
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);

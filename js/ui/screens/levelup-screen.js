@@ -11,6 +11,7 @@ import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
 import { iconEl } from '../menu-icons.js';
 import { tierLabel, mutationDef as mutationDefById } from '../../systems/mutation-system.js';
+import { describeAttackChange } from '../../systems/attack-archetype.js';
 import { hasSprite } from '../../render/sprite-loader.js'; // UI-REBUILD P8: foto bentuk mutasi
 
 const MUTATION_ICONS = {
@@ -65,6 +66,10 @@ export function show({ level, choices }) {
 function mutationCard(def, bio, heroDef) {
   const locked = !!def.lockedByBio || (def.bioCost || 0) > bio;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
+  const _mutsKini = (game.run && game.run.activeMutations) || [];
+  // P2: apa yang BERUH pada cara bertempur, dibaca langsung dari blok
+  // `attack` mutasi (data/mutations.json) — bukan karangan teks.
+  const _ubah = describeAttackChange(def, heroDef);
   // PHAGOS: ikon kartu = aset sprite mutasi (emoji hanya cadangan).
   // UI-REBUILD P8: kalau hero punya FOTO bentuk mutasi, itu yang dipakai —
   // pemain melihat wujud barunya, bukan ikon generik.
@@ -72,8 +77,20 @@ function mutationCard(def, bio, heroDef) {
   // dasar, tier 2/3 → foto mutasi lanjut (kalau sudah tersedia).
   const _cardStage = (def.tier || 1) >= 2 ? 2 : 1;
   const _form = heroDef ? (heroDef[`spriteMut${_cardStage}Idle`] || heroDef.spriteMut1Idle) : null;
-  const iconNode = (heroDef && _form && hasSprite(_form))
-    ? el('img', { class: 'choice-mut-sprite mut-form', src: _form, alt: '', draggable: 'false' })
+  const _punyaFoto = !!(heroDef && _form && hasSprite(_form));
+  // P2: kartu mutasi memperlihatkan BENTUK SEKARANG → BENTUK BARU (foto
+  // karakter sendiri, bukan ikon/overlay) supaya mutasi terbaca sebagai
+  // evolusi wujud, bukan sekadar daftar angka.
+  const _stageKini = (_mutsKini.length === 0) ? 0 : ((_mutsKini.reduce((mx, id) => Math.max(mx, (mutationDefById(id)?.tier) || 1), 0)) >= 2 ? 2 : 1);
+  const _formKini = heroDef ? (heroDef[`spriteMut${_stageKini}Idle`] || heroDef.spritePortrait || heroDef.spriteIdle) : null;
+  const _fotoKini = (heroDef && _stageKini === 0) ? (heroDef.spritePortrait || heroDef.spriteIdle)
+    : (heroDef && _formKini && hasSprite(_formKini) ? _formKini : (heroDef.spritePortrait || heroDef.spriteIdle));
+  const iconNode = _punyaFoto
+    ? el('div', { class: 'mut-forms' }, [
+        el('img', { class: 'choice-mut-sprite mut-form mut-before', src: _fotoKini, alt: 'Bentuk sekarang', draggable: 'false' }),
+        el('span', { class: 'mut-arrow', text: '➜' }),
+        el('img', { class: 'choice-mut-sprite mut-form mut-after', src: _form, alt: 'Bentuk baru', draggable: 'false' }),
+      ])
     : def.sprite
       ? el('img', { class: 'choice-mut-sprite', src: def.sprite, alt: '', draggable: 'false' })
       : el('div', { class: 'choice-icon mutation-icon', text: icon });
@@ -97,6 +114,7 @@ function mutationCard(def, bio, heroDef) {
           : el('span', { class: 'syn-badge bio-free', text: 'GRATIS' }),
       ]),
       el('p', { text: def.desc }),
+      _ubah ? el('p', { class: 'mut-attack', text: `⚔ ${_ubah}` }) : null,
       def.lore ? el('p', { class: 'mut-lore', text: def.lore }) : null,
       locked ? el('span', { class: 'choice-stack', text: 'Bio-Point kurang — engulf lebih banyak!' }) : null,
     ]),

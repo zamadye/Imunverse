@@ -47,6 +47,17 @@
         "knockbackOnContact": true,
         "knockbackForce": 180
       },
+      "attack": {
+        "payload": {
+          "melee": {
+            "radius": 100,
+            "arcDeg": 150
+          },
+          "area": {
+            "dmgMult": 1.15
+          }
+        }
+      },
       "visualChange": "spikes",
       "conflicts": [
         "lengket"
@@ -64,6 +75,17 @@
         "radiusMult": 1.3,
         "contactSlowPct": 0.5,
         "pullToCenter": 60
+      },
+      "attack": {
+        "payload": {
+          "zone": {
+            "slow": 0.45,
+            "radius": 165
+          },
+          "melee": {
+            "dmgMult": 1.1
+          }
+        }
       },
       "visualChange": "sticky",
       "conflicts": [
@@ -83,6 +105,18 @@
         "trailDpsMult": 0.4,
         "trailDurationSec": 1.5
       },
+      "attack": {
+        "payload": {
+          "zone": {
+            "dpsMult": 1.15,
+            "lifeSec": 4.6,
+            "color": "#7bd389"
+          },
+          "chain": {
+            "decay": 0.25
+          }
+        }
+      },
       "visualChange": "trail",
       "conflicts": [],
       "lore": "Kelenjar racun bocor ke lantai arena.",
@@ -97,6 +131,16 @@
       "effects": {
         "pulseRadiusMult": 1.5,
         "pulseCooldownMult": 1.4
+      },
+      "attack": {
+        "payload": {
+          "area": {
+            "radiusMult": 1.35
+          },
+          "beam": {
+            "length": 440
+          }
+        }
       },
       "visualChange": "wobble",
       "conflicts": [],
@@ -113,6 +157,17 @@
         "engulfThreshold": 0.25,
         "engulfHealMult": 1.5
       },
+      "attack": {
+        "payload": {
+          "melee": {
+            "radius": 112,
+            "dmgMult": 1.75
+          },
+          "summon": {
+            "maxEntities": 4
+          }
+        }
+      },
       "visualChange": "dark_aura",
       "conflicts": [],
       "lore": "Mulut-mulut mikro terbuka di seluruh permukaan.",
@@ -127,6 +182,18 @@
       "effects": {
         "radiusMult": 1.8,
         "contactDmgMult": 0.5
+      },
+      "attack": {
+        "payload": {
+          "beam": {
+            "width": 16,
+            "dmgMult": 2.4
+          },
+          "projectile": {
+            "count": 6,
+            "spreadDeg": 10
+          }
+        }
       },
       "visualChange": "thin_wide",
       "conflicts": [
@@ -144,6 +211,18 @@
       "effects": {
         "pulsePull": true,
         "pulseCenterDmgMult": 2.0
+      },
+      "attack": {
+        "payload": {
+          "area": {
+            "radiusMult": 0.85,
+            "dmgMult": 2.3
+          },
+          "zone": {
+            "radius": 105,
+            "dpsMult": 1.2
+          }
+        }
       },
       "visualChange": "implosion",
       "conflicts": [
@@ -166,6 +245,16 @@
         "outerDmgMult": 0.4,
         "outerSlowPct": 0.3
       },
+      "attack": {
+        "payload": {
+          "projectile": {
+            "count": 8
+          },
+          "area": {
+            "dmgMult": 1.15
+          }
+        }
+      },
       "visualChange": "double_ring",
       "conflicts": [
         "tipis"
@@ -184,6 +273,17 @@
         "engulfExplodeMult": 2.0,
         "engulfExplodeRadius": 90
       },
+      "attack": {
+        "payload": {
+          "homing": {
+            "count": 7,
+            "pierce": 2
+          },
+          "chain": {
+            "maxHops": 3
+          }
+        }
+      },
       "visualChange": "swell_burst",
       "conflicts": [
         "simbiosis"
@@ -201,6 +301,14 @@
         "autoPulse": true,
         "autoPulseIntervalSec": 4.0,
         "autoPulseDmgMult": 0.6
+      },
+      "attack": {
+        "dmgMult": 0.85,
+        "payload": {
+          "summon": {
+            "fireIntervalSec": 0.6
+          }
+        }
       },
       "visualChange": "rhythmic",
       "conflicts": [],
@@ -248,6 +356,18 @@
         "secondWaveDelaySec": 0.3,
         "secondWavePull": true
       },
+      "attack": {
+        "archetypeFrom": {
+          "melee": "area",
+          "zone": "area"
+        },
+        "payload": {
+          "area": {
+            "radiusMult": 1.6,
+            "dmgMult": 2.0
+          }
+        }
+      },
       "visualChange": "double_shockwave",
       "conflicts": [
         "ledakan_dalam"
@@ -266,6 +386,17 @@
         "maxSatellites": 3,
         "satelliteDurationSec": 8.0,
         "satelliteDpsMult": 0.8
+      },
+      "attack": {
+        "archetypeFrom": {
+          "zone": "summon"
+        },
+        "payload": {
+          "summon": {
+            "maxEntities": 4,
+            "lifeSec": 15
+          }
+        }
       },
       "visualChange": "orbiters",
       "conflicts": [
@@ -288,6 +419,18 @@
         "metaEngulfThreshold": 0.3,
         "metaDmgMult": 6.0
       },
+      "attack": {
+        "archetypeFrom": {
+          "projectile": "beam",
+          "homing": "beam"
+        },
+        "payload": {
+          "beam": {
+            "width": 34,
+            "dmgMult": 2.2
+          }
+        }
+      },
       "visualChange": "giant_form",
       "conflicts": [],
       "lore": "Transformasi total — bentuk akhir fagosit.",
@@ -305,6 +448,19 @@
         "chainRadiusMult": 0.5,
         "chainDmgMult": 0.3,
         "chainMax": 5
+      },
+      "attack": {
+        "archetypeFrom": {
+          "projectile": "chain",
+          "homing": "chain"
+        },
+        "payload": {
+          "chain": {
+            "maxHops": 3,
+            "decay": 0.25,
+            "hopRadius": 150
+          }
+        }
       },
       "visualChange": "chain_ripples",
       "conflicts": [],
@@ -336,6 +492,14 @@
         "membraneHpPct": 0.5,
         "membraneDownSec": 5.0
       },
+      "attack": {
+        "payload": {
+          "zone": {
+            "lifeSec": 5.0,
+            "radius": 150
+          }
+        }
+      },
       "visualChange": "breathing_organism",
       "conflicts": [
         "cermin"
@@ -343,5 +507,6 @@
       "lore": "Medan menjadi organisme terpisah yang bernapas.",
       "sprite": "assets/sprites/mut_medan_hidup.png"
     }
-  ]
+  ],
+  "docAttack": "P2 — Mutasi mengubah CARA BERTEMPUR, bukan hanya angka. Tiap mutasi boleh punya blok `attack`: {dmgMult} pengali damage seluruh payload; {archetypeFrom:{asal:'bentuk baru'}} mengganti BENTUK serangan hero bila archetype-nya cocok (mis. Reaksi Berantai: proyektil→chain); {payload:{archetype:{...}}} menimpa angka payload archetype itu. Urutan: defaults attacks.json → patternParams hero → mutasi. Dibaca runtime oleh js/systems/attack-archetype.js (mutationAttackMods)."
 }

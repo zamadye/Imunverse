@@ -243,13 +243,27 @@ ancaman punya jawaban yang bisa dipelajari pemain.
 Dijaga: `verify:combat` naik 25 → **57 pemeriksaan** (data payload, diferensiasi per hero,
 eksekusi runtime tiap archetype memakai `game.startRun` sungguhan, dan aura support).
 
-### P2 — Mutation sebagai jantung progresi
+### P2 — Mutation sebagai jantung progresi **[BERJALAN — BUILD 53b]**
 - mutasi mengubah **perilaku tempur** (attack behavior/range/projectile/area/mobility/
   defense/control/survivability/target priority/interaksi lingkungan)
 - pohon evolusi per hero: BASE → MUT1 → MUT2 → APEX
 - **mutation cinematic** (§9): jeda → energi → bentuk lama pecah → bentuk baru → lanjut
 - modal mutasi: bentuk SEBELUM→SESUDAH, biaya, **SKIP valid**
 - **Exit:** mutasi terasa sebagai evolusi, bukan popup stat.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Mutasi mengubah CARA BERTEMPUR | `data/mutations.json` — 15 dari 18 mutasi kini punya blok `attack`: `payload.{archetype}` menimpa angka serangan (radius/jumlah/peluruhan/durasi/entitas…), `archetypeFrom` **mengganti bentuk** serangan (Reaksi Berantai: proyektil→chain; Nova: tebasan→ledakan; Simbiosis: wilayah→panggilan; Metamorfosis: tembakan→berkas), dan `dmgMult` pengali global. Urutan: defaults `attacks.json` → `patternParams` hero → **mutasi** |
+| Dibaca runtime | `attack-archetype.js` bertambah `mutationAttackMods(run)` (sumber tunggal: `run.activeMutations`) — dipakai `archetypeForHero(heroDef, run)`, `payloadUntuk()`, dan `beginAttack()`; jadi mutasi terasa **di arena**, bukan di layar stat |
+| Kartu mutasi jujur | Modal level-up menampilkan **BENTUK SEKARANG → BENTUK BARU** (dua foto karakter, grayscaled untuk yang lama) + satu baris `⚔ ...` yang **diturunkan dari blok attack** lewat `describeAttackChange()` — bukan teks karangan UI |
+| Dijaga | `verify:combat` 57 → **65 pemeriksaan**: mutasi menimpa angka (radius Makrofag 1,45→1,6 terbukti kena musuh di 200 px), mutasi mengubah bentuk (proyektil→chain; tebasan depan-saja → ledakan sekeliling), `dmgMult` global (auto-pulse lebih lemah per tembakan), mutasi tanpa blok attack **tidak mengubah apa pun**, semua blok valid, dan teks kartu turun dari data |
+
+Sisa P2: pohon evolusi BASE → MUT1 → MUT2 → APEX per hero (`data/evolutions.json`
+masih berisi sistem "fragmen diferensiasi" lama yang tidak dikonsumsi runtime),
+**sinematik transformasi** (§9: jeda → energi → bentuk lama pecah → bentuk baru →
+lanjut), dan tombol **SKIP valid** di modal mutasi.
 
 ### P3 — Economy Antibody (V2)
 - Antibody = satu-satunya resource evolusi (sumber: kill, elite, boss, event, ads)
