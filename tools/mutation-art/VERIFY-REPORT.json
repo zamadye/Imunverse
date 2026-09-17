@@ -16,90 +16,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_macrophage_idle.png",
+            "file": "assets/sprites/hero_macrophage_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_macrophage_attack.png",
+            "file": "assets/sprites/hero_macrophage_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_macrophage_idle.png",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_macrophage_attack.png",
+            "file": "assets/sprites/hero_macrophage_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_macrophage_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_macrophage_idle.png",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_macrophage_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_macrophage_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -111,90 +115,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_dendritic_idle.png",
+            "file": "assets/sprites/hero_dendritic_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_dendritic_attack.png",
+            "file": "assets/sprites/hero_dendritic_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_dendritic_idle.png",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_dendritic_attack.png",
+            "file": "assets/sprites/hero_dendritic_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_dendritic_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_dendritic_idle.png",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_dendritic_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_dendritic_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -206,90 +214,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_neutrophil_idle.png",
+            "file": "assets/sprites/hero_neutrophil_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_neutrophil_attack.png",
+            "file": "assets/sprites/hero_neutrophil_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_neutrophil_idle.png",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_neutrophil_attack.png",
+            "file": "assets/sprites/hero_neutrophil_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_neutrophil_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_neutrophil_idle.png",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_neutrophil_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_neutrophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -301,90 +313,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_eosinophil_idle.png",
+            "file": "assets/sprites/hero_eosinophil_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_eosinophil_attack.png",
+            "file": "assets/sprites/hero_eosinophil_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_eosinophil_idle.png",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_eosinophil_attack.png",
+            "file": "assets/sprites/hero_eosinophil_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_eosinophil_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_eosinophil_idle.png",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_eosinophil_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_eosinophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -396,90 +412,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_basophil_idle.png",
+            "file": "assets/sprites/hero_basophil_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_basophil_attack.png",
+            "file": "assets/sprites/hero_basophil_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_basophil_idle.png",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_basophil_attack.png",
+            "file": "assets/sprites/hero_basophil_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_basophil_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_basophil_idle.png",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_basophil_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_basophil_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -491,90 +511,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_mastcell_idle.png",
+            "file": "assets/sprites/hero_mastcell_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_mastcell_attack.png",
+            "file": "assets/sprites/hero_mastcell_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_mastcell_idle.png",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_mastcell_attack.png",
+            "file": "assets/sprites/hero_mastcell_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_mastcell_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_mastcell_idle.png",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_mastcell_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_mastcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -586,90 +610,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_tcd8_idle.png",
+            "file": "assets/sprites/hero_tcd8_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_tcd8_attack.png",
+            "file": "assets/sprites/hero_tcd8_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_tcd8_idle.png",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_tcd8_attack.png",
+            "file": "assets/sprites/hero_tcd8_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_tcd8_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_tcd8_idle.png",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_tcd8_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd8_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -681,90 +709,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_tcd4_idle.png",
+            "file": "assets/sprites/hero_tcd4_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_tcd4_attack.png",
+            "file": "assets/sprites/hero_tcd4_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_tcd4_idle.png",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_tcd4_attack.png",
+            "file": "assets/sprites/hero_tcd4_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_tcd4_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_tcd4_idle.png",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_tcd4_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_tcd4_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -776,90 +808,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_treg_idle.png",
+            "file": "assets/sprites/hero_treg_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_treg_attack.png",
+            "file": "assets/sprites/hero_treg_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_treg_idle.png",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_treg_attack.png",
+            "file": "assets/sprites/hero_treg_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_treg_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_treg_idle.png",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_treg_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_treg_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -871,90 +907,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_bcell_idle.png",
+            "file": "assets/sprites/hero_bcell_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_bcell_attack.png",
+            "file": "assets/sprites/hero_bcell_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_bcell_idle.png",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_bcell_attack.png",
+            "file": "assets/sprites/hero_bcell_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_bcell_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_bcell_idle.png",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_bcell_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_bcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       },
       {
@@ -966,90 +1006,94 @@
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 551.26,
+            "dasar": 553.29,
             "flip": 1,
             "img": "128x128",
             "status": "OK"
           },
           {
             "kasus": "tier 1 idle",
-            "file": "assets/sprites/hero_nkcell_idle.png",
+            "file": "assets/sprites/hero_nkcell_mut1_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 552.27,
+            "dasar": 552.98,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut1_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 1 serang",
-            "file": "assets/sprites/hero_nkcell_attack.png",
+            "file": "assets/sprites/hero_nkcell_mut1_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 554.16,
+            "dasar": 552.35,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut1_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 idle",
-            "file": "assets/sprites/hero_nkcell_idle.png",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.78,
+            "dasar": 552.46,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 serang",
-            "file": "assets/sprites/hero_nkcell_attack.png",
+            "file": "assets/sprites/hero_nkcell_mut2_attack.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 518.63,
-            "dasar": 551.77,
+            "dasar": 553.12,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut2_attack.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           },
           {
             "kasus": "tier 2/3 menghadap kiri",
-            "file": "assets/sprites/hero_nkcell_idle.png",
-            "w": 56.68,
-            "h": 56.68,
-            "cx": 512,
-            "dasar": 551.4,
-            "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut2_idle.png | ukuran gambar 128x128"
-          },
-          {
-            "kasus": "tier 2/3 bob (waktu beda)",
-            "file": "assets/sprites/hero_nkcell_idle.png",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
             "w": 56.81,
             "h": 56.81,
             "cx": 512,
-            "dasar": 553.37,
+            "dasar": 553.24,
+            "flip": -1,
+            "img": "256x256",
+            "status": "OK"
+          },
+          {
+            "kasus": "tier 2/3 bob (waktu beda)",
+            "file": "assets/sprites/hero_nkcell_mut2_idle.png",
+            "w": 56.77,
+            "h": 56.77,
+            "cx": 512,
+            "dasar": 552.61,
             "flip": 1,
-            "img": "128x128",
-            "status": "SALAH: diharapkan assets/sprites/hero_nkcell_mut2_idle.png | ukuran gambar 128x128"
+            "img": "256x256",
+            "status": "OK"
           }
         ],
         "delta": {
-          "lebar": 0.12,
+          "lebar": 0,
           "idlePusatX": 0,
-          "idlePusatY": 2.53,
+          "idlePusatY": 0.83,
           "serangPusatX": 0,
-          "serangPusatY": 2.39,
+          "serangPusatY": 0.76,
           "balikPusatX": 0,
-          "balikPusatY": 2.32,
-          "flipKiri": "flip=1",
-          "bobNaikTurun": 0.41,
+          "balikPusatY": 0.78,
+          "idleGarisBawah": 0,
+          "serangGarisBawah": 0,
+          "balikGarisBawah": 0,
+          "bobGarisBawah": 0,
+          "flipKiri": "OK",
+          "bobNaikTurun": 0.17,
           "bobGeserSamping": 0,
-          "bobUkuran": 0
+          "bobUkuran": 0.04
         }
       }
     ]
@@ -1059,7 +1103,7 @@
     "berkasGagal": 0,
     "heroDiuji": 11,
     "kasusDiuji": 77,
-    "totalError": 176
+    "totalError": 0
   },
   "levelup": [
     {

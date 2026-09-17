@@ -35,12 +35,13 @@ import { iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurc
 import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
 // P7: tanda tangan serangan per hero (identitas tempur)
 import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
+import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
 import { Enemy } from './entities/enemy.js';
 import { InputHandler } from './input/input-handler.js';
-import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
+import { loadAllSprites, spriteToDataURL, hasSprite, spriteStats } from './render/sprite-loader.js';
 import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
 import { getHero, getAudio } from './core/data-store.js';
@@ -841,6 +842,10 @@ async function boot() {
   window.__IMUNVERSE.audio = audio;
   // P6: kelas Enemy — dipakai penguji untuk menyiapkan musuh elite/boss.
   window.__IMUNVERSE.Enemy = Enemy;
+  // P7: permukaan debug RIG MERAYAP GODOT (dipakai penguji & autotest).
+  window.__IMUNVERSE.crawl = { crawlPose, crawlLobe, crawlStatus };
+  // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)
+  window.__IMUNVERSE.sprites = { has: hasSprite, stats: spriteStats };
   // P7: permukaan debug SERANGAN (dipakai penguji & autotest).
   window.__IMUNVERSE.attacks = {
     beginAttack, updateAttack, attackActive, attackProgress, signatureFor,

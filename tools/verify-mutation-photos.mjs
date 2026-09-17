@@ -273,6 +273,25 @@ const tier3 = tierIds(2).concat(tierIds(3));
 const runtimeRows = [];
 if (API?.game) {
   const { game } = API;
+  // P7: TUNGGU sampai semua foto mutasi benar-benar terdekode. Sebelumnya tes
+  // menunggu 1,5 detik tetap — itu kadang selesai SEBELUM ~250 sprite selesai
+  // dibaca, sehingga hero yang diukur PERTAMA tampak memakai foto dasar (dan
+  // tertangkap sebagai "foto tidak berubah" palsu).
+  const butuh = [];
+  for (const h of heroes) {
+    for (const k of ['spriteIdle', 'spriteAttack', 'spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack']) {
+      if (h[k]) butuh.push(h[k]);
+    }
+  }
+  let siap = false;
+  for (let i = 0; i < 150 && !siap; i++) {
+    siap = butuh.every((p) => API.sprites?.has(p));
+    if (!siap) await sleep(100);
+  }
+  if (!siap) {
+    const st = API.sprites?.stats?.() || {};
+    errors.push(`foto belum siap: ${butuh.filter((p) => !API.sprites.has(p)).length}/${butuh.length} belum termuat (cache=${st.loaded}, placeholder=${st.placeholder})`);
+  }
   for (const h of heroes) {
     const row = { hero: h.id, langkah: [] };
     try {
@@ -284,9 +303,15 @@ if (API?.game) {
       const fixed = () => { player.squash = 0; player.iframes = 0; player.attackFlash = 0; player.facing = 0; player.moving = false; };
       // render SAJA (tanpa update) supaya posisi pemain & kamera identik antar
       // kasus → perbedaan yang terukur murni karena ganti foto mutasi.
-      const renderCase = async (label, mutIds, { attack = false, facing = 0, time = 5000 } = {}) => {
+      const renderCase = async (label, mutIds, { attack = false, facing = 0, time = 5000, flip = null } = {}) => {
         fixed();
         game.run.activeMutations = mutIds;
+        // Tahap evolusi (BASE → MUT1 → MUT2 → APEX) disimpan di run.evoStage
+        // dan hanya diperbarui saat pemain MEMILIH mutasi (game.chooseLevelUp).
+        // Tes ini menyetel activeMutations langsung, jadi tahapnya harus
+        // dihitung ulang — bila tidak, renderer akan tetap memakai foto BASE
+        // dan tes melaporkan "foto tidak berubah" palsu.
+        game.run.evoStage = null;
         player.attackFlash = attack ? 0.12 : 0; // detik (bukan piksel)
         player.swing = 0;
         player.facing = facing;
@@ -297,11 +322,17 @@ if (API?.game) {
           player.update(1 / 60, { x: 0, y: 0, magnitude: 0 }, game);
           player.attackFlash = attack ? 0.12 : 0; // update mengurangi timer
         }
+        // Facing dibalik lewat animFlip yang DIHALUSKAN, dan update TANPA input
+        // akan mengembalikan facing ke 0 — jadi untuk kasus "menghadap kiri"
+        // kita kunci keadaan balikannya SETELAH tick (itulah keadaan mapan saat
+        // pemain benar-benar berjalan ke kiri).
+        if (flip != null) { player.facing = flip < 0 ? Math.PI : 0; player.animFlip = flip; }
         draws.length = 0;
         game.render(16, time);
         await sleep(10);
         const mine = draws.filter((d) => d.src.includes(`hero_${h.id}_`) || d.src.includes(`hero_${h.id}.`));
         const last = mine[mine.length - 1] || null;
+
         row.langkah.push({ kasus: label, file: last?.src || '(tidak digambar)', w: last ? +last.w.toFixed(2) : null, h: last ? +last.h.toFixed(2) : null, cx: last ? +last.cx.toFixed(2) : null, dasar: last ? +(last.cy + last.h / 2).toFixed(2) : null, flip: last?.flip, img: last ? `${last.wImg}x${last.hImg}` : null });
         return last;
       };
@@ -311,7 +342,7 @@ if (API?.game) {
       const c = await renderCase('tier 1 serang', tier1.slice(0, 1), { attack: true });
       const d = await renderCase('tier 2/3 idle', tier3.slice(0, 3));
       const e = await renderCase('tier 2/3 serang', tier3.slice(0, 3), { attack: true });
-      const f = await renderCase('tier 2/3 menghadap kiri', tier3.slice(0, 3), { facing: Math.PI });
+      const f = await renderCase('tier 2/3 menghadap kiri', tier3.slice(0, 3), { facing: Math.PI, flip: -1 });
       const g2 = await renderCase('tier 2/3 bob (waktu beda)', tier3.slice(0, 3), { time: 6400 });
 
       const expect = {
@@ -346,6 +377,17 @@ if (API?.game) {
       const dCySerang = spread(serang, 'cy');
       const dFlipCx = f && d ? Math.abs(f.cx - d.cx) : null;
       const dFlipCy = f && d ? Math.abs(f.cy - d.cy) : null;
+      // P7: badan kini BERPOROS DI GARIS BAWAH (anti mengambang). Konsekuensinya
+      // pusat-y WAJAR bergerak saat badan memipih/memanjang — yang harus tetap
+      // kaku (supaya ganti foto tidak melompat) adalah GARIS BAWAH-nya.
+      const spreadKunci = (arr, kunci) => {
+        const v = arr.map((x) => x[kunci]).filter((v) => typeof v === 'number');
+        return v.length > 1 ? Math.max(...v) - Math.min(...v) : 0;
+      };
+      const dDasarIdle = spreadKunci(idle, 'dasar');
+      const dDasarSerang = spreadKunci(serang, 'dasar');
+      const dFlipDasar = f && d ? Math.abs((f.dasar == null ? 0 : f.dasar) - (d.dasar == null ? 0 : d.dasar)) : null;
+      const bobDasar = g2 && d ? Math.abs((g2.dasar == null ? 0 : g2.dasar) - (d.dasar == null ? 0 : d.dasar)) : null;
       row.delta = {
         lebar: dW == null ? null : +dW.toFixed(2),
         idlePusatX: +dCx.toFixed(2),
@@ -354,6 +396,10 @@ if (API?.game) {
         serangPusatY: +dCySerang.toFixed(2),
         balikPusatX: dFlipCx == null ? null : +dFlipCx.toFixed(2),
         balikPusatY: dFlipCy == null ? null : +dFlipCy.toFixed(2),
+        idleGarisBawah: +dDasarIdle.toFixed(2),
+        serangGarisBawah: +dDasarSerang.toFixed(2),
+        balikGarisBawah: dFlipDasar == null ? null : +dFlipDasar.toFixed(2),
+        bobGarisBawah: bobDasar == null ? null : +bobDasar.toFixed(2),
         flipKiri: f?.flip === -1 ? 'OK' : `flip=${f?.flip}`,
         bobNaikTurun: g2 && d ? +Math.abs(g2.cy - d.cy).toFixed(2) : null,
         bobGeserSamping: g2 && d ? +Math.abs(g2.cx - d.cx).toFixed(2) : null,
@@ -365,11 +411,19 @@ if (API?.game) {
       };
       cek('lebar antar mutasi', dW, 0.5);
       cek('pusat-x idle antar mutasi', dCx, 0.5);
-      cek('pusat-y idle antar mutasi', dCy, 0.5);
+      // P7: pusat-y boleh bergerak ≤3 px — itu deformasi berporos bawah
+      // (badan memipih/memanjang), BUKAN foto bergeser.
+      cek('pusat-y idle antar mutasi (deformasi wajar)', dCy, 3.0);
       cek('pusat-x pose serang', dCxSerang, 0.5);
-      cek('pusat-y pose serang', dCySerang, 0.5);
+      cek('pusat-y pose serang (deformasi wajar)', dCySerang, 3.0);
       cek('pusat-x saat dibalik', dFlipCx, 0.5);
-      cek('pusat-y saat dibalik', dFlipCy, 0.5);
+      cek('pusat-y saat dibalik (deformasi wajar)', dFlipCy, 3.0);
+      // Garis bawah = telapak sel. Inilah yang harus KAKU: kalau ini bergeser,
+      // berarti foto melompat (penjepit frame gagal) atau badan mengambang.
+      cek('garis bawah idle antar mutasi', dDasarIdle, 0.5);
+      cek('garis bawah pose serang', dDasarSerang, 0.5);
+      cek('garis bawah saat dibalik', dFlipDasar, 0.5);
+      cek('garis bawah diam saat bob (ANTI MENGAMBANG)', bobDasar, 0.6);
       cek('geser samping saat bob', row.delta.bobGeserSamping, 0.5);
       cek('ukuran berubah saat bob', row.delta.bobUkuran, 0.5);
       if (f?.flip !== -1) errors.push(`${h.id}: menghadap kiri tidak membalik sprite`);

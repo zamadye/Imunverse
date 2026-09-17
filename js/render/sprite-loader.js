@@ -210,6 +210,13 @@ export function hasSprite(path) {
   return !!entry && !entry.isPlaceholder;
 }
 
+/** Statistik muat sprite — dipakai penguji untuk menunggu foto siap. */
+export function spriteStats() {
+  let placeholder = 0;
+  for (const e of cache.values()) if (e.isPlaceholder) placeholder++;
+  return { loaded: cache.size, placeholder };
+}
+
 /** Fase 14: cache tint skin — {src|color} → canvas. */
 const tintCache = new Map();
 

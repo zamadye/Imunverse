@@ -11,6 +11,8 @@ import { PERSP } from '../render/camera.js';
 import { audio } from '../systems/audio-system.js';
 import { getCombat, getLocomotion } from '../core/data-store.js';
 import { ensureRig, updateRig } from '../render/rive-rig.js';
+// P7: rig merayap hasil PANGGANGAN GODOT — sumber gerak utama (anti mengambang)
+import { crawlPose, crawlLobe } from '../systems/crawl-rig.js';
 
 let nextPlayerId = 1;
 
@@ -50,7 +52,9 @@ export class Player {
     this.stridePx = 48;     // panjang satu langkah (dihitung dari data)
     this.nominalSpeed = 144;// kecepatan saat animasi jalan berputar 1×
     this.rigActive = false; // true bila gerakan datang dari rig Rive
-    this.anim = { bob: 0, tilt: 0, sx: 1, sy: 1, legSwing: 0, armSwing: 0, headTilt: 0 };
+    this.anim = { bob: 0, tilt: 0, sx: 1, sy: 1, legSwing: 0, armSwing: 0, headTilt: 0, shear: 0, contact: 1 };
+    this.rigSource = 'analytic'; // 'crawl' (Godot) | 'rive' | 'analytic'
+    this.time = 0;               // dipakai napas saat diam
     // ---- ANIMASI HALUS (UI-REBUILD P8) ----
     // Dulu sprite hanya dibalik kiri↔kanan secara instan (flip = ±1), jadi
     // gerakan terasa kaku dan tidak pernah bereaksi ke arah atas/bawah.
@@ -163,13 +167,34 @@ export class Player {
     // ---- Rig Rive (sumber gerakan) + cadangan analitik ----
     if (!this._rigAsked) { this._rigAsked = true; ensureRig(); }
     const _vlen = Math.hypot(this.vx, this.vy);
-    const pose = updateRig(dt, { moveAmt: this.moveAmt, speed: _vlen, nominalSpeed: this.nominalSpeed, cfg: loco });
-    this.rigActive = !!pose;
+    // P7: rig merayap GODOT jadi SUMBER GERAK UTAMA. Urutan: crawl → Rive →
+    // rumus analitik (cadangan terakhir). crawl menang karena satu-satunya
+    // yang berporos di GARIS BAWAH (tidak mengambang).
+    const _heroId = (this.heroDef && this.heroDef.id) || null;
+    const _crawl = crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
+    const pose = _crawl ? null : updateRig(dt, { moveAmt: this.moveAmt, speed: _vlen, nominalSpeed: this.nominalSpeed, cfg: loco });
+    this.rigActive = !!(_crawl || pose);
+    this.rigSource = _crawl ? 'crawl' : (pose ? 'rive' : 'analytic');
     {
       const bobCfg = loco.bob || {};
       const tiltCfg = loco.tilt || {};
       const stepCurve = (1 - Math.cos(this.walkPhase * 2)) / 2; // 2 puncak/siklus
-      if (pose) {
+      if (_crawl) {
+        // P7: RIG MERAYAP GODOT. Perhatikan `bob` = 0 — badan TIDAK pernah
+        // diangkat naik-turun (itulah sumber kesan "mengambang"). Seluruh
+        // gerak hidup terjadi sebagai squash-stretch berporos bawah +
+        // jangkauan (shear), sehingga tepi bawah sel tetap menempel alas.
+        this.time += dt;
+        this.anim.bob = _crawl.bob;
+        this.anim.tilt = _crawl.rot + this.turnLean;
+        this.anim.sx = _crawl.sx * (1 + this.depth * (tiltCfg.depthX || 0.05));
+        this.anim.sy = _crawl.sy * (1 - this.depth * (tiltCfg.depthY || 0.03));
+        this.anim.shear = _crawl.shear;
+        this.anim.contact = _crawl.contact;
+        this.anim.legSwing = (crawlLobe(_heroId, this.walkPhase, 0) - 1) * 1.2;
+        this.anim.armSwing = -(crawlLobe(_heroId, this.walkPhase, 2) - 1) * 1.2;
+        this.anim.headTilt = _crawl.rot * 0.4;
+      } else if (pose) {
         // Rig Rive yang mengatur bob/condong/squash; depth kamera tetap
         // ditambahkan supaya mendekat terasa membesar & menjauh mengecil.
         this.anim.bob = pose.bob;

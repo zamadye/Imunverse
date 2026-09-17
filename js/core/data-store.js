@@ -41,6 +41,8 @@ const store = {
   transitions: null, // data/transitions.json (aturan campur zona saat bertempur)
   economy: null,     // data/economy.json (Antibody, biaya mutasi, Reserve, ads — tunable)
   locomotion: null,  // data/locomotion.json (langkah, putaran halus, bob/lean, rig Rive)
+  crawl: null,       // data/crawl.json (sumber angka rig merayap — dipanggang Godot)
+  crawlCycles: null, // data/crawl-cycles.json (HASIL PANGGANGAN Godot: 24 frame/hero)
 };
 
 import { BUILD } from './version.js';
@@ -86,6 +88,8 @@ export async function loadAllData() {
     transitions: 'data/transitions.json',
     economy: 'data/economy.json',
     locomotion: 'data/locomotion.json',
+    crawl: 'data/crawl.json',
+    crawlCycles: 'data/crawl-cycles.json',
   };
 
   const entries = await Promise.all(

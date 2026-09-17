@@ -391,12 +391,58 @@ Progres dari umpan balik pemain (main sendiri, 17 Sep 2026):
 
 | Keluhan pemain | Penanganan | Status |
 |---|---|---|
-| Karakter tidak jalan ke semua arah & "mengambang" | **Godot 4.7.2 headless terpasang & terdokumentasi** (`docs/GODOT-SETUP.md`, `tools/godot/`) sebagai alat authoring animasi. Tahap berikutnya: rig tulang per hero dipanggang dari Godot → JSON → renderer kanvas (bukan lagi foto dibalik-balik) | Alat ✔ · rig **berikutnya** |
+| Karakter tidak jalan ke semua arah & "mengambang" | **Rig MERAYAP dipanggang Godot** — lihat bagian "Rig merayap" di bawah. Bukan lagi foto dibalik-balik: badan berporos di garis bawah, memipih/memanjang, menjangkau, dan lobusnya bergelombang | ✔ |
 | Nav footer salah posisi (di tengah) | `#screen-dashboard` kini `justify-content: flex-start` + dua `margin-top:auto` (peta & dock): kelompok PETA TUBUH + MAIN benar-benar di tengah, dock 4 menu **menempel di bawah** dengan latar bar & aman notch; `.dock-4` jadi 4 kolom penuh (dulu 5 → tombol mengecil & nggantung) | ✔ |
 | Kartu nav terlalu banyak, tidak rapi, bertumpuk | Sistem kartu baru `.nav-cards` / `.nav-card`: grid `auto-fit minmax(140px,1fr)`, maks 4 per baris, tinggi seragam 62px, jarak 10px, judul + subjudul terpotong rapi — tidak ada lagi kartu saling menimpa | ✔ (dipakai bertahap per layar) |
 | Modal mutasi kelebaran & teks berlebihan | Subjudul dipadatkan (Lv 3 · ◉ 12/150 · MENEGANG), **satu baris keterangan** (perubahan tempur; lore jadi tooltip), badge harga menampilkan **kekurangan** saat terkunci (◉ 150 · kurang 40), modal lebih sempit (430px), foto bentuk lebih kecil, lore tidak lagi memakan ruang | ✔ |
 | Jenis serangan semua hero terasa sama | `data/attacks.json → heroSignatures`: 11 hero punya tanda tangan sendiri (warna, ukuran, jumlah, laju, label, SFX). Tiga hero se-archetype `area` kini benar-benar beda: Mako = satu gelombang besar lambat, Neutron = banyak jebakan kecil cepat, Mastia = ledakan beruntun. Diterapkan **runtime** lewat `applySignature()` di `attack-archetype.js` | ✔ |
 | penjaga regresi baru | `tools/verify-attacks.mjs` (11 pemeriksaan): tanda tangan unik, warna unik, hero se-archetype tetap beda, runtime benar-benar memakainya, alur ANTICIPATION→TELEGRAPH→EXECUTION, mutasi mengubah angka serangan, telegraph ≥ 0,18 dtk | ✔ |
+
+### Rig merayap (P7) — jawaban untuk "karakter masih mengambang"
+
+**Akar masalah (ketemu dari kode, bukan dugaan):**
+1. `billboard()` menskala sprite dari **titik tengah**, jadi setiap squash (sy<1)
+   mengangkat tepi bawah badan dari alas → tampak melayang.
+2. `anim.bob` menggeser **seluruh** badan naik-turun — sel darah tidak pernah
+   melompat, jadi ini sumber utama kesan "mengambang".
+
+**Kunci perbaikan:** sel yang merayap tidak pernah meninggalkan alas. Maka
+kanal vertikal **dikunci 0** dan semua "hidup" dipindah ke deformasi yang
+berporos di **garis bawah** sprite:
+- squash-stretch dengan volume terjaga (`sx × sy ≈ 1` → tidak karet);
+- **skew** = massa menjangkau ke arah jalan (pantulan cermin menanganan arah);
+- gerak tegak: ke atas memanjang, ke bawah memipih (poros tetap di bawah);
+- gelombang **lobus** berjalan mengelilingi badan (pseudopodia menjangkau
+  bergiliran), plus `contact` (daya lekat) yang menggerakkan cincin telapak.
+
+**Alur (semua angka di `data/`, kontrak §5):**
+```
+data/crawl.json  →  tools/godot/bake-crawl.mjs  →  data/crawl-cycles.json  →  js/systems/crawl-rig.js
+ (11 hero)          (Godot 4.7.2 headless)          (11 × 24 frame)            (dipakai player.update)
+```
+- Rig Godot: `Rig/Body` (posisi, skala, rotasi, **skew**) + `Body/Lobe0..n`
+  + `Rig/Anchor` (daya lekat), dianimasikan `AnimationPlayer`, lalu dicuplik 24
+  frame dengan `seek(u, true)`. Dua jebakan build web yang sudah terpecahkan
+  tercatat di kepala `tools/godot/rig/bake_crawl.gd`: node tidak bisa dibuat di
+  `_initialize()` (harus di `_process`), dan `AnimationPlayer.add_animation()`
+  tidak menyimpan apa pun — harus lewat `AnimationLibrary`.
+- Tiap hero punya gaya sendiri: Mako merayap lebar & lambat, Neutron many small
+  cepat, Nyx menerjang, Treg mengalir tenang, dan seterusnya.
+
+**Bukti (`tools/verify-crawl.mjs`, 19 pemeriksaan):** tepi bawah sprite
+bergerak **0,0000 px** (cara lama poros tengah: ±2 px → itulah "mengambang");
+rentang squash ≥5 % per hero; putaran 360° tanpa loncatan; 8 arah semuanya
+hidup; sambungan akhir↔awal siklus mulus; 11/11 hero memakai rig ini saat
+runtime.
+
+**Penjaga lama yang ikut dibenahi** (`tools/verify-mutation-photos.mjs`,
+sebelumnya 176 error, sekarang 0): tes menunggu sprite dengan `sleep(1,5 dtk)`
+tetap (sekarang menunggu sampai foto benar-benar terdekode), lupa menghitung
+ulang `run.evoStage` setelah menyetel mutasi (jadi foto dasar yang tergambar),
+dan kasus "menghadap kiri" tidak pernah benar-benar membalik sprite karena
+`facing` kembali ke 0 tanpa input. Invariant vertikalnya pun dipindah dari
+pusat-y (kini wajar bergerak karena deformasi berporos bawah) ke **garis
+bawah** — sesuai dengan yang dijepit `build-mutation-sprites.py`.
 
 Catatan penting untuk sesi berikutnya: **Godot sudah bisa dipakai** —
 `node tools/godot/install.mjs` lalu

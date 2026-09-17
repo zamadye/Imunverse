@@ -118,6 +118,7 @@ const bob = (f) => f.bob;
 const snap = () => ({
   t: T, flip: p.animFlip, move: p.moveAmt, lean: p.lean, depth: p.depth, wp: p.walkPhase,
   bob: p.anim.bob, tilt: p.anim.tilt, sx: p.anim.sx, sy: p.anim.sy,
+  shear: p.anim.shear || 0, contact: p.anim.contact == null ? 1 : p.anim.contact, rig: p.rigSource,
   facing: p.facing, turnLean: p.turnLean, step: p.stepIndex, jarak: p.__jarak || 0,
 });
 const jalan = (v, detik) => {
@@ -168,8 +169,14 @@ const rKontinyu = diam(0.5).concat(jalan(arah.kanan, 0.8), diam(0.8));
 const rentetan = rKontinyu.map(bob);
 const loncatBob = Math.max(...rentetan.slice(1).map((v, i) => Math.abs(v - rentetan[i])));
 cek('bob tidak melompat (≤1 px/frame)', loncatBob <= 1.0, 'loncatan bob=' + loncatBob.toFixed(3) + 'px');
+// P7: keluhan pemain "karakter mengambang" — badan TIDAK boleh diangkat
+// naik-turun. Yang membuatnya hidup adalah squash-stretch BERPOROS BAWAH,
+// jadi bob harus ≈0 sementara sy harus benar-benar berubah.
 const bobMaks = Math.max(...rentetan.map(Math.abs));
-cek('bob bergerak saat jalan (>2 px)', bobMaks > 2, 'bob maks=' + bobMaks.toFixed(2));
+cek('badan tidak diangkat naik-turun / ANTI-MENGAMBANG (|bob| ≤ 0,5 px)', bobMaks <= 0.5, 'bob maks=' + bobMaks.toFixed(2) + 'px');
+const rentangSy0 = Math.max(...rKontinyu.map((f) => f.sy)) - Math.min(...rKontinyu.map((f) => f.sy));
+cek('badan berubah bentuk saat jalan (rentang sy > 4%)', rentangSy0 > 0.04, 'rentang sy=' + rentangSy0.toFixed(3));
+cek('gerak datang dari rig merayap Godot', rKontinyu.some((f) => f.rig === 'crawl'), 'rig=' + (rKontinyu[rKontinyu.length - 1].rig || '?'));
 cek('moveAmt turun ke ~0 saat diam', rStop[rStop.length - 1].move < 0.02, 'moveAmt=' + rStop[rStop.length - 1].move.toFixed(4));
 
 // 3. arah vertikal: depth harus beda tanda atas vs bawah
@@ -237,11 +244,15 @@ cek('panjang langkah seragam (simpangan ≤25%)', jeda.length >= 2 && simpangan 
 // 9. POSE ANIMASI: bob/tilt/squash tersedia & wajar
 const bobs = langkah.map((f) => f.bob);
 const rentangBob = Math.max(...bobs) - Math.min(...bobs);
-cek('bob bergerak saat jalan (>1.5 px)', rentangBob > 1.5, 'rentang bob=' + rentangBob.toFixed(2) + 'px');
+cek('badan tidak melayang: rentang bob ≈ 0 (≤0,5 px)', rentangBob <= 0.5, 'rentang bob=' + rentangBob.toFixed(2) + 'px');
 const loncatBob2 = Math.max(...bobs.slice(1).map((v, i) => Math.abs(v - bobs[i])));
 cek('bob tidak melompat antar frame (≤1 px)', loncatBob2 <= 1, 'loncatan=' + loncatBob2.toFixed(3) + 'px');
-const squ = langkah.map((f) => f.sx / Math.max(0.001, f.sy));
-cek('squash-stretch wajar (0.9–1.1)', Math.min(...squ) > 0.9 && Math.max(...squ) < 1.1, `rasio sx/sy ${Math.min(...squ).toFixed(3)}–${Math.max(...squ).toFixed(3)}`);
+const rentangSq = Math.max(...langkah.map((f) => f.sy)) - Math.min(...langkah.map((f) => f.sy));
+cek('squash-stretch hidup saat jalan (rentang sy > 4%)', rentangSq > 0.04, 'rentang sy=' + rentangSq.toFixed(3));
+const vol = langkah.map((f) => f.sx * f.sy);
+cek('volume terjaga (sx×sy ≈ 1 — tidak karet)', Math.min(...vol) > 0.93 && Math.max(...vol) < 1.07, `sx×sy ${Math.min(...vol).toFixed(3)}–${Math.max(...vol).toFixed(3)}`);
+const rentangShear = Math.max(...langkah.map((f) => Math.abs(f.shear)));
+cek('jangkauan massa (shear) hidup saat jalan', rentangShear > 0.02, 'shear maks=' + rentangShear.toFixed(3));
 
 // 10. tidak ada NaN & render tetap jalan
 const adaNaN = [fd.flip, fd.move, fd.lean, fd.depth, fd.bob, fd.tilt, fd.sx, fd.sy, fd.facing, fd.turnLean].some((v) => !Number.isFinite(v));

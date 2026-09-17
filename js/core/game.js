@@ -2358,12 +2358,16 @@ applyChapterTier(enemy, run) {
     try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
 
     /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
-    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1 } = {}) => {
+    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1, shear = 0 } = {}) => {
       const q = P.project(x, y);
       ctx.save();
       ctx.translate(q.x, q.y - lift * q.s);
       if (tilt) ctx.rotate(tilt);
       ctx.scale(q.s * flip * sx, q.s * sy);
+      // P7: jangkauan massa (skew) BERPOROS DI GARIS BAWAH — bagian bawah
+      // tidak bergeser, bagian atas condong ke arah jalan. Kalau diputar dari
+      // tengah, sel akan terlihat meluncur, bukan merayap.
+      if (shear) ctx.transform(1, 0, -shear, 1, shear * anchorHalf, 0);
       ctx.translate(-x, -y);
       return q;
     };
@@ -2468,7 +2472,11 @@ applyChapterTier(enemy, run) {
       ctx.lineWidth = 3;
       ctx.globalAlpha = 0.8;
       ctx.beginPath();
-      ctx.ellipse(player.x, player.y, player.radius * 1.25, player.radius * 1.25, 0, 0, Math.PI * 2);
+      // P7: cincin tim = telapak sel; mengikuti daya lekat hasil panggangan
+      // Godot (mengembang saat menempel, sedikit mengecil saat ditarik).
+      const _lekat = typeof player.anim.contact === 'number' ? player.anim.contact : 1;
+      const _ringR = player.radius * 1.25 * (0.94 + 0.06 * _lekat);
+      ctx.ellipse(player.x, player.y, _ringR, _ringR, 0, 0, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1;
       ctx.restore();
@@ -2489,6 +2497,7 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
+    const anchorHalf = player.radius * 1.3335; // = (radius * 2.667) / 2 — garis bawah sprite hero
     // LOCOMOTION V2: bob / condong / squash dihitung di player.update() —
     // SATU sumber kebenaran, entah dari rig Rive (data/…/hero-locomotion.riv)
     // atau rumus cadangannya. game.js hanya MEMAKAI nilai itu supaya tidak
@@ -2761,10 +2770,16 @@ applyChapterTier(enemy, run) {
           // miring ke arah belokan (inersia). Dikalikan arah mirror karena
           // sprite yang dibalik membalik arah rotasi.
           const tilt = (pAnim.tilt || 0) * _sgn * _flipAbs + pSwingTilt * _sgn;
-          const sx = pAnim.sx || 1;   // squash-stretch dari rig (atau cadangan)
-          const sy = pAnim.sy || 1;
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt, sx, sy });
-          const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
+          const _pulse = player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1;
+          const sx = (pAnim.sx || 1) * _pulse;   // squash-stretch dari rig (atau cadangan)
+          const sy = (pAnim.sy || 1) * _pulse;
+          const shear = pAnim.shear || 0;
+          // P7: ANTI-MENGAMBANG — squash/stretch diputar pada GARIS BAWAH, bukan
+          // titik tengah: `lift` dikurangi setengah tinggi × (sy - 1), sehingga
+          // tepi bawah sprite TIDAK PERNAH bergeser saat badan memipih/memanjang.
+          const _lift = player.radius * 0.62 + pBob + anchorHalf * (sy - 1);
+          billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
+          const bodySize = player.radius * 2.667;
           // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
           // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
           drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});

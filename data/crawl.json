@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "doc": "Locomotion merayap (CRAWL) per hero — sumber angka gerak untuk RIG GODOT. Kunci desain: permukaan bawah sel TIDAK PERNAH meninggalkan alas (contact=1), jadi semua 'hidup' terjadi sebagai squash-stretch berporos BAWAH + jangkauan (skew) + pergeseran massa — BUKAN badan digeser naik-turun (mengambang). Dipanggang oleh tools/godot/bake-crawl.mjs -> data/crawl-cycles.json.",
+  "cycle": {
+    "frames": 24,
+    "note": "1 siklus = 2 langkah = 2 × stride (jalan fase dikunci jarak, lihat data/locomotion.json)"
+  },
+  "heroes": {
+    "macrophage": {
+      "lobes": 5,
+      "squash": 0.1,
+      "reach": 0.14,
+      "sway": 0.05,
+      "massShift": 3.0,
+      "rate": 0.85,
+      "style": "rayap lobus lebar"
+    },
+    "neutrophil": {
+      "lobes": 7,
+      "squash": 0.07,
+      "reach": 0.1,
+      "sway": 0.06,
+      "massShift": 2.4,
+      "rate": 1.35,
+      "style": "jebakan kecil cepat"
+    },
+    "dendritic": {
+      "lobes": 4,
+      "squash": 0.06,
+      "reach": 0.22,
+      "sway": 0.04,
+      "massShift": 2.0,
+      "rate": 0.75,
+      "style": "dendrit menjangkau"
+    },
+    "eosinophil": {
+      "lobes": 5,
+      "squash": 0.08,
+      "reach": 0.18,
+      "sway": 0.07,
+      "massShift": 3.4,
+      "rate": 1.5,
+      "style": "melesat lurus"
+    },
+    "basophil": {
+      "lobes": 6,
+      "squash": 0.16,
+      "reach": 0.08,
+      "sway": 0.03,
+      "massShift": 2.0,
+      "rate": 0.7,
+      "style": "menggelinding berat"
+    },
+    "mastcell": {
+      "lobes": 6,
+      "squash": 0.13,
+      "reach": 0.12,
+      "sway": 0.05,
+      "massShift": 2.8,
+      "rate": 0.95,
+      "style": "berdenyut"
+    },
+    "tcd8": {
+      "lobes": 3,
+      "squash": 0.09,
+      "reach": 0.2,
+      "sway": 0.08,
+      "massShift": 3.6,
+      "rate": 1.6,
+      "style": "menyerang cepat"
+    },
+    "tcd4": {
+      "lobes": 5,
+      "squash": 0.05,
+      "reach": 0.09,
+      "sway": 0.03,
+      "massShift": 1.8,
+      "rate": 0.8,
+      "style": "meluncur halus"
+    },
+    "treg": {
+      "lobes": 4,
+      "squash": 0.04,
+      "reach": 0.06,
+      "sway": 0.02,
+      "massShift": 1.4,
+      "rate": 0.65,
+      "style": "mengalir tenang"
+    },
+    "bcell": {
+      "lobes": 6,
+      "squash": 0.14,
+      "reach": 0.1,
+      "sway": 0.05,
+      "massShift": 2.6,
+      "rate": 1.0,
+      "style": "menggelinding"
+    },
+    "nkcell": {
+      "lobes": 4,
+      "squash": 0.11,
+      "reach": 0.24,
+      "sway": 0.09,
+      "massShift": 3.8,
+      "rate": 1.45,
+      "style": "menerjang"
+    }
+  }
+}

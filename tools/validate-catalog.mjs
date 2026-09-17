@@ -83,6 +83,16 @@ ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMov
   'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
   && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
+// ---------- P7b: siklus merayap hasil panggang Godot ----------
+const rayap = load('data/crawl-cycles.json');
+const nHero = load('data/heroes.json').heroes.length;
+const framesRayap = Object.values(rayap.heroes || {});
+ok('siklus-merayap-godot', Object.keys(rayap.heroes || {}).length === nHero
+  && framesRayap.every((h) => h.frames && h.frames.length >= 16)
+  // kanal vertikal dikunci = tidak ada badan diangkat (anti mengambang)
+  && framesRayap.every((h) => h.frames.every((f) => f.y === 0))
+  && framesRayap.every((h) => h.frames.every((f) => Math.abs(f.sx * f.sy - 1) <= 0.03)));
+
 // ---------- P7: tanda tangan serangan per hero ----------
 const ser = load('data/attacks.json');
 const ttd = ser.heroSignatures || {};
