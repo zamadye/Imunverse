@@ -178,6 +178,11 @@ export function show(summary) {
       el('span', { class: 'go-eco-goal', text: kurang > 0
         ? ` → mutasi berikutnya ${harga} (kurang ${kurang})`
         : ` → cukup untuk mutasi berikutnya (${harga})!` }),
+      // P5 (IAP §14): cadangan tetap terpisah & tidak prominence — satu baris
+      // kecil, hanya informasi saldo dukungan eksternal.
+      (summary.reserve > 0
+        ? el('span', { class: 'go-eco-reserve', text: ` · ${tr('Cadangan')} ${summary.reserve}` })
+        : null),
     ]));
   }
 

@@ -29,6 +29,10 @@ import {
   initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
   enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
 } from './systems/world-journey.js'; // P4: dunia kontinu
+// P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §21) + iklan reward
+import { reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve, maxAssistFor, reserveUsesLeft, reserveEnabled } from './systems/reserve-system.js';
+import { iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun } from './systems/purchase-provider.js';
+import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
@@ -453,6 +457,7 @@ async function boot() {
     STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, 2]));
     STATE.meta.evoStage = 4;
     STATE.meta.evoParts = { fragmen_diferensiasi: 999 };
+    STATE.meta.reserve = 5000; // P5: Test C — cadangan besar (in-memory saja, tidak tersimpan)
     STATE.meta.allies = 6;
     STATE.meta.allyLevel = 99;
     for (const def of (data.upgrades.globalUpgrades || [])) {
@@ -826,6 +831,16 @@ async function boot() {
   window.__IMUNVERSE.economy = {
     antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost,
     economyPhase, earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+  };
+  // P5: permukaan debug CADANGAN (dipakai penguji & autotest).
+  window.__IMUNVERSE.reserve = {
+    reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve,
+    maxAssistFor, reserveUsesLeft, reserveEnabled,
+  };
+  // P5: permukaan debug provider pembelian MOCK (IAP §21) + status iklan.
+  window.__IMUNVERSE.purchases = {
+    iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun,
+    adStatus, triggerRewardedAdAntibody,
   };
   // P2 §9: permukaan debug sinematik mutasi (dipakai penguji & autotest).
   window.__IMUNVERSE.mutationCinematic = {

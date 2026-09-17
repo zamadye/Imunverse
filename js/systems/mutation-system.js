@@ -98,6 +98,22 @@ export function rollMutationChoices(run) {
  * Terapkan pilihan mutasi ke run.
  * @returns {{ok:boolean, reason?:string, mutation?:object}}
  */
+/**
+ * P5: segarkan status kunci tawaran yang SEDANG tampil setelah dompet
+ * berubah (iklan +antibodi / cadangan membantu), tanpa mengganti BENTUK yang
+ * sudah ditawarkan — pemain tidak kehilangan mutasi yang sedang diincar.
+ * @returns {object[]} kartu yang sama dengan status terbaru
+ */
+export function refreshChoiceLocks(run) {
+  if (!run || !Array.isArray(run.currentChoices) || run.currentChoices.length === 0) return run ? run.currentChoices : null;
+  const harga = mutationPriceFor(run);
+  const mampu = canAffordMutation(run, ((run && run.activeMutations) || []).length + 1);
+  run.currentChoices = run.currentChoices.map((c) => (c && c.isMutation
+    ? { ...c, cost: harga, lockedByAntibody: !mampu }
+    : c));
+  return run.currentChoices;
+}
+
 export function applyMutation(run, mutationId, opts = {}) {
   const all = (getMutations() && getMutations().mutations) || [];
   const def = all.find((m) => m.id === mutationId);

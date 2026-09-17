@@ -1066,7 +1066,30 @@
     "MELIMPAH": "ABUNDANT",
     "MENEGANG": "TENSE",
     "LANGKA": "SCARCE",
-    "Antibodi dibawa pulang": "Antibody carried home"
+    "Antibodi dibawa pulang": "Antibody carried home",
+    "Cadangan": "Reserve",
+    "Lanjut bertempur": "Keep fighting",
+    "gratis · mutasi ditawarkan lagi nanti": "free · mutation offered again later",
+    "Tonton iklan": "Watch ad",
+    "Pakai cadangan": "Use reserve",
+    "iklan nonaktif": "ads disabled",
+    "kuota hari ini habis": "today's quota used up",
+    "belum tersedia": "unavailable",
+    "sudah dipakai di run ini": "already used this run",
+    "Iklan belum tersedia — lanjut bertempur!": "Ad unavailable — keep fighting!",
+    "Cadangan belum bisa dipakai.": "Reserve cannot be used yet.",
+    "Cadangan gagal diisi (prototipe).": "Reserve top-up failed (prototype).",
+    "Tunggu sebentar sebelum iklan berikutnya — lanjut bertempur dulu!": "Wait a moment before the next ad — keep fighting first!",
+    "Kuota iklan hari ini habis — lanjut bertempur!": "Today's ad quota is used up — keep fighting!",
+    "Mode tanpa iklan aktif.": "Ad-free mode is on.",
+    "Iklan reward sedang nonaktif.": "Rewarded ads are disabled.",
+    "Cadangan kosong — kumpulkan antibodi sambil bertempur!": "Reserve is empty — gather antibody while fighting!",
+    "Cadangan sudah dipakai maksimal di run ini.": "Reserve already used up for this run.",
+    "Antibodi sudah cukup, cadangan tidak diperlukan.": "Antibody is sufficient, reserve not needed.",
+    "Cadangan sedang nonaktif.": "Reserve is disabled.",
+    "Atau isi cadangan (prototipe, bukan pembelian nyata):": "Or top up reserve (prototype, not a real purchase):",
+    "Dev grant — tidak ada pembayaran nyata (IAP §21)": "Dev grant — no real payment (IAP §21)",
+    "Lanjut bertempur — mutasi ditawarkan lagi di level berikutnya.": "Keep fighting — mutations are offered again next level."
   },
   "rules": [
     {
@@ -1460,6 +1483,38 @@
     {
       "pattern": "^Butuh (\\d+) biokredit untuk upgrade skill$",
       "replace": "Need $1 Biokredit to upgrade skill"
+    },
+    {
+      "pattern": "^\\+(\\d+) Antibodi dari iklan!$",
+      "replace": "+$1 Antibody from the ad!"
+    },
+    {
+      "pattern": "^Cadangan membantu \\+(\\d+) Antibodi$",
+      "replace": "Reserve assisted +$1 Antibody"
+    },
+    {
+      "pattern": "^Cadangan \\+(\\d+) \\(prototipe, bukan pembelian nyata\\)$",
+      "replace": "Reserve +$1 (prototype, not a real purchase)"
+    },
+    {
+      "pattern": "^\\+(\\d+) Antibodi · gratis$",
+      "replace": "+$1 Antibody · free"
+    },
+    {
+      "pattern": "^tunggu (\\d+)d$",
+      "replace": "wait $1s"
+    },
+    {
+      "pattern": "^cadangan (\\d+) ◉$",
+      "replace": "reserve $1 ◉"
+    },
+    {
+      "pattern": "^bantu \\+(\\d+) ◉ · maks (\\d+) ◉ \\((\\d+)x lagi\\)$",
+      "replace": "help +$1 ◉ · max $2 ◉ ($3x left)"
+    },
+    {
+      "pattern": "^Antibodi kurang (\\d+) ◉ — pilih jalanmu$",
+      "replace": "Need $1 more ◉ Antibody — choose your path"
     }
   ]
 }

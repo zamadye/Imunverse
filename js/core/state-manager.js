@@ -59,6 +59,8 @@ export function createDefaultMeta() {
     evoStage: 0,
     evoParts: { fragmen_diferensiasi: 0 },
     adDaily: { date: null, count: 0 },
+    adLastAt: 0,      // P5: stempel iklan reward terakhir (jeda antar-iklan)
+    reserve: 0,       // P5: CADANGAN — resource eksternal, terpisah dari Antibodi (IAP §14)
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,

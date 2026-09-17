@@ -328,12 +328,33 @@ Yang sudah dikerjakan:
 Sisa P4 ke depan: mekanik zona P5 (arteri, jaringan, limfe, tumor) masih berstatus
 data saja — parameternya sudah ada, eksekusinya menyusul setelah P5/P6.
 
-### P5 — Reserve, Rewarded Ad, IAP mock
+### P5 — Reserve, Rewarded Ad, IAP mock **[SELESAI — BUILD 54c]**
 - Reserve terpisah dari Antibody; bantuan maksimal = X% biaya mutasi (tunable)
 - hierarki: **CONTINUE / WATCH AD / USE RESERVE**
 - IAP entry point **kontekstual** (saat friksi ekonomi), tidak di dashboard
 - `MockPurchaseProvider` — **tidak ada payment nyata** sebelum P9
 - **Exit:** Test B/C/D lolos; transformasi tetap *hero moment*, bukan *sales moment*.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Reserve = sistem terpisah (§14) | `js/systems/reserve-system.js` (baru). Saldo di `meta.reserve` (permanen), antibodi di `run.antibody` (hasil bermain) — dua angka yang TIDAK pernah tercampur. Kapasitas dibatasi data |
+| Bantuan MAKSIMAL X% harga (§15) | `maxAssistFor(cost)` = `floor(cost × assistancePctOfMutationCost)` (kini 50%) **dan** `maxUsesPerRun` 2×. Jadi cadangan 20.000 pun tidak bisa membeli mutasi sendirian: pemain tetap harus bertempur/menonton iklan, cadangan hanya menutup sisanya |
+| Cadangan tidak pernah otomatis | Tidak ada satu pun pemanggilan `useReserve()` di jalur gameplay — selalu lewat tombol pilihan pemain |
+| Iklan reward antibodi (§19) | `adStatus(meta)` + `triggerRewardedAdAntibody()` di `monetization.js`: +100 antibodi, jeda 60 dtk, kuota 10/hari — SEMUA dari `data/economy.json`. Kuota & jeda tersimpan di meta (`adDaily`, `adLastAt`) |
+| Hierarki CONTINUE / IKLAN / CADANGAN (§18, §20) | Panel friksi di modal mutasi, hanya muncul saat kartu benar-benar terkunci: `LANJUT BERMAIN` (gratis, antibodi utuh, mutasi ditawarkan lagi) → `TONTON IKLAN +100 ◉` → `PAKAI CADANGAN (+N ◉, maks 50%)` → baris IAP paling kecil |
+| IAP mock tanpa payment nyata (§21) | `js/systems/purchase-provider.js`: `MockPurchaseProvider` (latensi simulasi, nol jaringan, `realPayment:false`). Isi cadangan = DEV GRANT 500/1500/4000, tidak ada uang, tidak ada entitlement |
+| Titik integrasi P9 (§34) | `setPurchaseProvider()` menukar provider billing sungguhan TANPA menyentuh ekonomi/mutasi/UI — diuji dengan provider palsu di penguji |
+| Kontekstual, bukan dashboard (§17, §27) | Tawaran IAP hanya muncul saat friksi + cadangan tidak cukup, dibatasi `maxOffersPerRun` 2×/run. Dashboard terbukti bersih dari elemen jualan (dicek penguji) |
+| Telemetri (§28) | `reserve_used` · `rewarded_ad_offered` · `rewarded_ad_completed` · `iap_mock_granted` tercatat di log ekonomi yang sama |
+| HUD tetap bersih (§26) | Cadangan TIDAK dipajang di HUD — hanya satu baris kecil di ringkasan akhir run |
+| Perbaikan nyata di jalan | `mutationCard(def, bio, …)` memanggil variabel `bio` yang sudah dihapus di P3 → modal mutasi melempar `ReferenceError` dan hanya merender 1 kartu. Diperbaiki; penguji kini mengunci bahwa semua kartu ter-render |
+| Penguji baru | `tools/verify-p5.mjs` (`npm run verify:p5`, **28 pemeriksaan**, ikut di `npm run verify`): TEST A (nol cadangan) · TEST B (cadangan kecil berguna) · TEST C (cadangan besar TIDAK menggantikan gameplay) · TEST D (iklan +antibodi & segarkan kartu) · batas X% & N×/run · kapasitas · jeda & kuota harian · IAP mock tanpa payment · tukar provider P9 · telemetri · CONTINUE tidak memblokir (§10) · hierarki UI benar-benar tampil & terurut · dashboard bersih · kartu mutasi ter-render penuh |
+| Dijaga | `validate` bertambah `reserve-terbatas`, `iklan-reward-tertunable`, `iap-mock-tanpa-payment` |
+
+Mode dev (`?dev=1`) memberi cadangan 5.000 **di memori saja** supaya TEST C bisa
+dicoba manual tanpa menyentuh save pemain.
 
 ### P6 — Game feel
 - animation + VFX + SFX + enemy reaction + camera response (hierarki normal→boss)

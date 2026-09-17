@@ -32,13 +32,27 @@ import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.j
 import { tagOnHit, cascadeOnDeath } from '../systems/tag-cascade.js'; // R6: Modul D
 import { chemoUpdate } from '../systems/chemotaxis.js'; // R7: Modul E
 import { SkillSystem, SKILL_TRIGGER_LABEL } from '../systems/skill-system.js';
+
+// P5: pesan saat bantuan ekonomi tidak tersedia — jelas, tidak menghard-sell.
+const AD_REASON = {
+  jeda: 'Tunggu sebentar sebelum iklan berikutnya — lanjut bertempur dulu!',
+  'kuota-habis': 'Kuota iklan hari ini habis — lanjut bertempur!',
+  'tanpa-iklan': 'Mode tanpa iklan aktif.',
+  nonaktif: 'Iklan reward sedang nonaktif.',
+};
+const RESERVE_REASON = {
+  kosong: 'Cadangan kosong — kumpulkan antibodi sambil bertempur!',
+  'habis-run': 'Cadangan sudah dipakai maksimal di run ini.',
+  cukup: 'Antibodi sudah cukup, cadangan tidak diperlukan.',
+  nonaktif: 'Cadangan sedang nonaktif.',
+};
 // PHAGOS eksperimen: membran + mutasi hero + mutasi musuh
 import {
   initMembrane, updateMembrane, tryPulse, tryEngulf, getMembraneStats,
   membraneContains, membraneOnKill, membraneAbsorbDamage, membraneOnPlayerHit,
   pulseView,
 } from '../systems/membrane-system.js';
-import { rollMutationChoices, applyMutation, isMutationId, mutationDef } from '../systems/mutation-system.js';
+import { rollMutationChoices, applyMutation, isMutationId, mutationDef, mutationPriceFor, refreshChoiceLocks } from '../systems/mutation-system.js';
 import { applyStartConsumables, updateItemBuffs, absorbMukus, isMukusActive, onPlayerDamaged } from '../systems/item-buffs.js'; // ADDENDUM §2
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
@@ -68,11 +82,15 @@ import { checkAutoUnlocks } from '../systems/unlock-system.js';
 import { EffectsSystem } from '../systems/effects-system.js';
 import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
+  adStatus, triggerRewardedAdAntibody,
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
 import { evoStageFor, evoStatMult, evoProgress, evoSprite } from '../systems/evolution-system.js';
 import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economyPhase, runAntibody, recordEconomyEvent } from '../systems/antibody-economy.js';
+// P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §14-§21, §34)
+import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
+import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
 import { initJourney, updateJourney, journeyHud, drawLandmark } from '../systems/world-journey.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
@@ -229,6 +247,8 @@ export const game = {
       currentChoices: null,
       reviveUsed: false,
       reviveOffered: false,
+      reserveUses: 0,   // P5: berapa kali cadangan dipakai pada run ini (§15)
+      iapOffers: 0,     // P5: berapa kali tawaran IAP muncul pada run ini (§27)
       doubleCurrencyUsed: false,
       earned: 0, // total antibodi yang dibawa pulang (diisi di finishRun)
       boss: null,
@@ -1073,6 +1093,111 @@ export const game = {
     this.recomputePlayerStats();
     if (result.healAmount > 0) run.player.heal(result.healAmount);
     this._afterLevelUpChoice();
+  },
+
+  // ---------------------------------------------------------------- P5 -----
+  // HIERARKI BANTUAN EKONOMI (IAP §20):
+  //     CONTINUE (gratis)  ·  WATCH AD (gratis + jeda)  ·  USE RESERVE (IAP)
+  // Urutan ini sengaja: yang gratis selalu duluan, dan TIDAK ADA satu pun
+  // yang boleh memblokir permainan (§10) maupun mengambil alih momen
+  // transformasi (§27).
+
+  /**
+   * Jalur GRATIS: tutup tawaran mutasi dan lanjut bertempur. Antibodi tidak
+   * berkurang, level-up berikutnya menawarkan mutasi lagi — kekurangan
+   * antibodi tidak pernah menghentikan run (§10).
+   */
+  deferLevelUp() {
+    const run = this.run;
+    if (!run) return false;
+    run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
+    run.currentChoices = null;
+    setLevelUpOpen(false);
+    setPaused(false);
+    emit('toast', { message: tr('Lanjut bertempur — mutasi ditawarkan lagi di level berikutnya.'), kind: 'info' });
+    emit('resume');
+    return true;
+  },
+
+  /**
+   * Satu paket berisi semua yang dibutuhkan UI saat terjadi FRIKSI EKONOMI
+   * (kartu mutasi terkunci): kebutuhan, status iklan, bantuan cadangan, dan
+   * tawaran IAP kontekstual. Semua angka dari data/economy.json.
+   */
+  frictionAssist() {
+    const run = this.run;
+    const meta = STATE.meta;
+    const cost = mutationPriceFor(run);
+    const antibody = runAntibody(run);
+    const shortfall = Math.max(0, cost - antibody);
+    const rv = reserveAssistFor(run, meta, cost);
+    const offersLeft = Math.max(0, maxIapOffersPerRun() - ((run && run.iapOffers) || 0));
+    return {
+      cost, antibody, shortfall,
+      ad: adStatus(meta),
+      reserve: rv,
+      // IAP hanya muncul KONTEKSTUAL: saat friksi nyata, cadangan tidak cukup
+      // menutupnya, dan kuota tayang per run belum habis (IAP §17, §27).
+      iap: {
+        enabled: iapEnabled() && shortfall > 0 && rv.amount < shortfall && offersLeft > 0,
+        packs: iapPacks(),
+        offersLeft,
+      },
+    };
+  },
+
+  /** Tonton iklan reward → +antibodi (jalur gratis akselerasi, IAP §19). */
+  watchAntibodyAd(done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!run || !meta) { if (done) done({ ok: false, reason: 'no-run' }); return false; }
+    return triggerRewardedAdAntibody(meta, () => {
+      const st = adStatus(meta);
+      const n = earnAntibody(run, st.reward, { source: 'rewarded_ad' });
+      refreshChoiceLocks(run);
+      writeSave(meta);
+      if (n > 0) emit('toast', { message: tr(`+${n} Antibodi dari iklan!`), kind: 'gold' });
+      if (done) done({ ok: n > 0, granted: n });
+    }, (reason) => {
+      emit('toast', { message: AD_REASON[reason] || tr('Iklan belum tersedia — lanjut bertempur!'), kind: 'warn' });
+      if (done) done({ ok: false, reason: reason || 'gagal' });
+    });
+  },
+
+  /** Pakai cadangan → menutup MAKSIMAL X% harga mutasi (IAP §15). */
+  useReserveAssist(done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!run || !meta) { if (done) done({ granted: 0, reason: 'no-run' }); return 0; }
+    const cost = mutationPriceFor(run);
+    const masuk = useReserve(run, meta, cost);
+    if (masuk > 0) {
+      refreshChoiceLocks(run);
+      writeSave(meta);
+      emit('toast', { message: tr(`Cadangan membantu +${masuk} Antibodi`), kind: 'gold' });
+    } else {
+      const why = reserveAssistFor(run, meta, cost);
+      emit('toast', { message: RESERVE_REASON[why.reason] || tr('Cadangan belum bisa dipakai.'), kind: 'warn' });
+    }
+    if (done) done({ granted: masuk, cost });
+    return masuk;
+  },
+
+  /** Isi cadangan lewat provider MOCK — TIDAK ADA payment nyata (IAP §21). */
+  async buyReservePack(packId, done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!meta) { if (done) done({ ok: false, reason: 'meta-kosong' }); return null; }
+    if (run) run.iapOffers = ((run.iapOffers) || 0) + 1;
+    const res = await buyPack(meta, packId);
+    if (res.ok) {
+      writeSave(meta);
+      emit('toast', { message: tr(`Cadangan +${res.granted} (prototipe, bukan pembelian nyata)`), kind: 'gold' });
+    } else {
+      emit('toast', { message: tr('Cadangan gagal diisi (prototipe).'), kind: 'warn' });
+    }
+    if (done) done(res);
+    return res;
   },
 
   /** Sisa alur setelah satu pilihan level-up diproses (modal / lanjut run). */
@@ -2161,6 +2286,7 @@ applyChapterTier(enemy, run) {
       engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
       antibody: runAntibody(run),
       antibodySpent: run.antibodySpent || 0,
+      reserve: reserveBalance(STATE.meta), // P5: saldo cadangan (eksternal)
       pulses: (run.membrane && run.membrane.stats && run.membrane.stats.pulseCount) || 0,
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,

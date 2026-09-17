@@ -15,11 +15,12 @@
     "verify:screens": "node tools/verify-screens.mjs",
     "verify:animasi": "node tools/verify-animasi.mjs",
     "verify:rive": "node tools/verify-rive.mjs",
-    "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:rive && npm run verify:combat && npm run verify:economy && npm run verify:world",
+    "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:rive && npm run verify:combat && npm run verify:economy && npm run verify:world && npm run verify:p5",
     "verify:combat": "node tools/verify-combat.mjs",
     "rive": "node tools/gen-hero-rig.mjs",
     "verify:economy": "node tools/verify-economy.mjs",
-    "verify:world": "node tools/verify-world.mjs"
+    "verify:world": "node tools/verify-world.mjs",
+    "verify:p5": "node tools/verify-p5.mjs"
   },
   "dependencies": {
     "@rive-app/canvas": "^2.42.2"

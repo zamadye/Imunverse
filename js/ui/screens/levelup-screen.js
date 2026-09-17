@@ -14,6 +14,7 @@ import { tierLabel, mutationDef as mutationDefById, mutationPriceFor } from '../
 import { describeAttackChange } from '../../systems/attack-archetype.js';
 import { economyPhase } from '../../systems/antibody-economy.js';
 import { hasSprite } from '../../render/sprite-loader.js'; // UI-REBUILD P8: foto bentuk mutasi
+import { t as tr } from '../../systems/i18n.js';
 
 const MUTATION_ICONS = {
   spikes: '🦔', sticky: '🍯', trail: '☠️', wobble: '🌊',
@@ -62,14 +63,120 @@ export function show({ level, choices }) {
 
   for (const def of choices) {
     if (def.isMutation) {
-      wrap.appendChild(mutationCard(def, bio, heroDef));
+      wrap.appendChild(mutationCard(def, heroDef));
     } else {
       wrap.appendChild(upgradeCard(def, heroDef, syn));
     }
   }
+
+  // P5 (IAP §18-§20): FRIKSI EKONOMI — bila ada kartu mutasi terkunci,
+  // tampilkan hierarki bantuan. Panel ini KECIL dan KONTEKSTUAL: hanya muncul
+  // saat pemain benar-benar kekurangan antibodi, tidak pernah mengambil alih
+  // momen transformasi (§27), dan tidak pernah memblokir (§10).
+  const butuhBantuan = choices.some((c) => c.lockedByAntibody);
+  const lama = wrap.parentElement && wrap.parentElement.querySelector('.lu-friction');
+  if (lama) lama.remove();
+  if (butuhBantuan && game.frictionAssist) {
+    wrap.insertAdjacentElement('afterend', frictionPanel(level, choices));
+  }
 }
 
-function mutationCard(def, bio, heroDef) {
+/**
+ * Panel hierarki bantuan: CONTINUE (gratis) → WATCH AD (gratis, berjeda) →
+ * USE RESERVE (cadangan/IAP). IAP hanya muncul bila cadangan pun tidak cukup
+ * (§17, §20) dan kuota tayang per run belum habis (§27).
+ */
+function frictionPanel(level, choices) {
+  const a = game.frictionAssist();
+  const kurang = a.shortfall;
+
+  // --- baris 1: CONTINUE (jalur gratis, selalu ada) ---
+  const continueBtn = el('button', {
+    class: 'fric-btn fric-continue',
+    onclick: () => game.deferLevelUp(),
+  }, [
+    el('span', { class: 'fric-ico', text: '▶' }),
+    el('span', { class: 'fric-label', text: tr('Lanjut bertempur') }),
+    el('span', { class: 'fric-sub', text: tr('gratis · mutasi ditawarkan lagi nanti') }),
+  ]);
+
+  // --- baris 2: WATCH AD (gratis, +antibodi, ada jeda & kuota) ---
+  const ad = a.ad || {};
+  const adSub = !ad.enabled ? tr('iklan nonaktif')
+    : ad.canWatch ? tr(`+${ad.reward} Antibodi · gratis`)
+      : ad.reason === 'jeda' ? tr(`tunggu ${ad.cooldownLeftSec}d`)
+        : ad.reason === 'kuota-habis' ? tr('kuota hari ini habis')
+          : tr('belum tersedia');
+  const adBtn = el('button', {
+    class: 'fric-btn fric-ad' + (ad.canWatch ? '' : ' off'),
+    disabled: ad.canWatch ? null : 'disabled',
+    onclick: () => {
+      if (!ad.canWatch) return;
+      game.watchAntibodyAd(() => {
+        if (game.run && game.run.currentChoices && STATE.levelUpOpen) {
+          show({ level: game.run.level, choices: game.run.currentChoices });
+        }
+      });
+    },
+  }, [
+    el('span', { class: 'fric-ico', text: '🎬' }),
+    el('span', { class: 'fric-label', text: tr('Tonton iklan') }),
+    el('span', { class: 'fric-sub', text: adSub }),
+  ]);
+
+  // --- baris 3: USE RESERVE (bantuan maksimal X% harga, N kali per run) ---
+  const rv = a.reserve || {};
+  const rvSub = rv.amount > 0
+    ? tr(`bantu +${rv.amount} ◉ · maks ${rv.cap} ◉ (${rv.usesLeft}x lagi)`)
+    : rv.reason === 'habis-run' ? tr('sudah dipakai di run ini')
+      : rv.reason === 'kosong' ? tr(`cadangan ${rv.saldo} ◉`)
+        : tr(`cadangan ${rv.saldo} ◉`);
+  const rvBtn = el('button', {
+    class: 'fric-btn fric-reserve' + (rv.amount > 0 ? '' : ' off'),
+    disabled: rv.amount > 0 ? null : 'disabled',
+    onclick: () => {
+      if (!(rv.amount > 0)) return;
+      game.useReserveAssist(() => {
+        if (game.run && game.run.currentChoices && STATE.levelUpOpen) {
+          show({ level: game.run.level, choices: game.run.currentChoices });
+        }
+      });
+    },
+  }, [
+    el('span', { class: 'fric-ico', text: '💠' }),
+    el('span', { class: 'fric-label', text: tr('Pakai cadangan') }),
+    el('span', { class: 'fric-sub', text: rvSub }),
+  ]);
+
+  const kids = [
+    el('p', { class: 'fric-head', text: tr(`Antibodi kurang ${kurang} ◉ — pilih jalanmu`) }),
+    el('div', { class: 'fric-row' }, [continueBtn, adBtn, rvBtn]),
+  ];
+
+  // --- baris 4: IAP kontekstual (prototipe mock, paling akhir & paling kecil) ---
+  if (a.iap && a.iap.enabled && a.iap.packs.length > 0) {
+    kids.push(el('div', { class: 'fric-iap' }, [
+      el('span', { class: 'fric-iap-note', text: tr('Atau isi cadangan (prototipe, bukan pembelian nyata):') }),
+      ...a.iap.packs.map((pk) => el('button', {
+        class: 'fric-pack',
+        title: tr('Dev grant — tidak ada pembayaran nyata (IAP §21)'),
+        onclick: async (ev) => {
+          const btn = ev && ev.currentTarget;
+          if (btn) btn.disabled = true;
+          await game.buyReservePack(pk.id, () => {
+            if (game.run && game.run.currentChoices && STATE.levelUpOpen) {
+              show({ level: game.run.level, choices: game.run.currentChoices });
+            }
+          });
+        },
+      }, [el('span', { text: `+${pk.grant}` }), el('small', { text: pk.label || pk.id })])),
+    ]));
+  }
+
+  return el('div', { class: 'lu-friction' }, kids);
+}
+
+function mutationCard(def, heroDef) {
   const locked = !!def.lockedByAntibody;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
   const _mutsKini = (game.run && game.run.activeMutations) || [];

@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 2,
-  "doc": "V2 Economy & IAP tunables (PHAGOS_IAP_V2.txt §3–§31). SEMUA ANGKA TUNABLE. P3: antibodi = SATU-SATUNYA resource evolusi — didapat dari kill/elite/boss/event/telan, dipakai HANYA untuk mutasi. Diimplementasikan runtime oleh js/systems/antibody-economy.js; kekurangan antibodi TIDAK menghentikan permainan.",
+  "schemaVersion": 3,
+  "doc": "V2 Economy & IAP tunables (PHAGOS_IAP_V2.txt §3–§31). SEMUA ANGKA TUNABLE. P3: antibodi = SATU-SATUNYA resource evolusi — didapat dari kill/elite/boss/event/telan, dipakai HANYA untuk mutasi. Diimplementasikan runtime oleh js/systems/antibody-economy.js; kekurangan antibodi TIDAK menghentikan permainan. P5: Reserve + rewarded ad + IAP mock aktif sebagai PROTOTIPE (tanpa payment nyata).",
   "currency": {
     "primary": "antibody",
     "display": {
@@ -171,12 +171,14 @@
     "rule": "Antibody habis TIDAK boleh menghentikan permainan (IAP §10)"
   },
   "reserve": {
-    "enabled": false,
+    "enabled": true,
     "separateFromAntibody": true,
     "assistancePctOfMutationCost": 0.5,
     "maxUsesPerRun": 2,
     "capacity": 20000,
-    "note": "P5 — lapisan monetisasi prototipe (IAP §14-§15)"
+    "startBalance": 0,
+    "rule": "Reserve membantu MAKSIMAL X% biaya mutasi dan hanya N kali per run — IAP mempercepat, TIDAK menggantikan gameplay (IAP §15).",
+    "note": "P5 — lapisan monetisasi prototipe (IAP §14-§15). Test A=0, Test B=500, Test C=20000."
   },
   "rewardedAds": {
     "enabled": true,
@@ -184,29 +186,38 @@
     "cooldownSec": 60,
     "dailyLimit": 10,
     "revive": true,
-    "runRewardMultiplier": 2
+    "runRewardMultiplier": 2,
+    "simulatedSec": 0.9,
+    "rule": "Jalur GRATIS untuk akselerasi: +antibodi, revive, 2x hadiah run (IAP §19)."
   },
   "iap": {
-    "enabled": false,
+    "enabled": true,
     "provider": "mock",
     "entryPoint": "contextual",
-    "entryRule": "Hanya muncul saat friksi ekonomi; tidak boleh memenuhi dashboard (IAP §17)",
+    "entryRule": "Hanya muncul saat friksi ekonomi (kartu mutasi terkunci) dan cadangan tidak cukup — tidak boleh memenuhi dashboard, tidak mengganggu combat, tidak mengambil alih momen transformasi (IAP §17, §27).",
+    "maxOffersPerRun": 2,
     "packs": [
       {
         "id": "reserve_s",
-        "grant": 500
+        "grant": 500,
+        "label": "Cadangan Kecil"
       },
       {
         "id": "reserve_m",
-        "grant": 1500
+        "grant": 1500,
+        "label": "Cadangan Sedang"
       },
       {
         "id": "reserve_l",
-        "grant": 4000
+        "grant": 4000,
+        "label": "Cadangan Besar"
       }
     ],
     "realPayment": false,
-    "note": "Payment nyata paling akhir (P9). Ganti MockPurchaseProvider → Google Play Billing tanpa menyentuh sistem mutasi."
+    "mock": {
+      "latencyMs": 600,
+      "note": "TIDAK ada payment nyata sebelum P9 (IAP §21). Ganti MockPurchaseProvider → Google Play Billing lewat setPurchaseProvider() tanpa menyentuh sistem mutasi."
+    }
   },
   "telemetry": {
     "enabled": true,

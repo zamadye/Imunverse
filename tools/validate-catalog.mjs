@@ -83,6 +83,21 @@ ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMov
   'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
   && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
+// ---------- P5: reserve · rewarded ads · IAP mock ----------
+const eko = load('data/economy.json');
+const rv = eko.reserve || {};
+ok('reserve-terbatas', rv.enabled === true && rv.separateFromAntibody === true
+  && rv.assistancePctOfMutationCost > 0 && rv.assistancePctOfMutationCost < 1
+  && rv.maxUsesPerRun >= 1 && rv.capacity > 0);
+ok('iklan-reward-tertunable', (eko.rewardedAds || {}).enabled === true
+  && (eko.rewardedAds || {}).antibodyReward > 0 && (eko.rewardedAds || {}).dailyLimit > 0
+  && (eko.rewardedAds || {}).cooldownSec >= 0);
+ok('iap-mock-tanpa-payment', (eko.iap || {}).provider === 'mock'
+  && (eko.iap || {}).realPayment === false
+  && Array.isArray((eko.iap || {}).packs) && (eko.iap || {}).packs.length > 0
+  && (eko.iap || {}).packs.every((pk) => pk.id && pk.grant > 0)
+  && (eko.iap || {}).maxOffersPerRun > 0);
+
 // ---------- mastery.json ----------
 const my = load('data/mastery.json');
 ok('mastery', my.xpFormula?.perKill === 1.4 && my.xpFormula?.perWave === 8
