@@ -228,6 +228,7 @@ export function updateHUD(data) {
   // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
   try { updatePulseButton(data.pulse); } catch { /* abaikan */ }
   try { updateAntibodyChip(data.antibody, data.activeMutations, data.evoStage, data.nextMutationCost); } catch { /* abaikan */ }
+  try { updateJourneyBar(data.journey); } catch { /* abaikan */ }
   try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
@@ -323,6 +324,33 @@ function updatePulseButton(pulse) {
 }
 
 /** PHAGOS: chip Bio-Point + ikon mutasi aktif (run-only). */
+/**
+ * P4 §26 — HUD progres perjalanan MINIMAL: "Paru ──●── Kapiler".
+ * Sangat kecil; tidak boleh mengambil fokus gameplay.
+ */
+function updateJourneyBar(journey) {
+  if (!journey || !journey.zone) return;
+  let bar = document.getElementById('hud-journey');
+  if (!bar) {
+    const top = document.querySelector('.hud-top .hud-center');
+    if (!top) return;
+    bar = document.createElement('div');
+    bar.id = 'hud-journey';
+    bar.className = 'hud-journey';
+    top.appendChild(bar);
+  }
+  const pct = Math.round((journey.progress || 0) * 100);
+  const html = `<span class="jz">${journey.zone}</span>`
+    + `<span class="jtrack"><span class="jdot" style="left:${pct}%"></span></span>`
+    + `<span class="jnext">${journey.next || ''}</span>`;
+  if (bar.dataset.html !== html) {
+    bar.innerHTML = html;
+    bar.dataset.html = html;
+  }
+  bar.title = journey.landmark ? `Landmark: ${journey.landmark}` : '';
+  bar.classList.toggle('transitioning', !!journey.transitioning);
+}
+
 function updateAntibodyChip(bio, mutations, evoStage, nextCost) {
   let chip = document.getElementById('hud-bio-chip');
   if (!chip) {

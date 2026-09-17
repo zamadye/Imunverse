@@ -73,6 +73,7 @@ import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
 import { evoStageFor, evoStatMult, evoProgress, evoSprite } from '../systems/evolution-system.js';
 import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economyPhase, runAntibody, recordEconomyEvent } from '../systems/antibody-economy.js';
+import { initJourney, updateJourney, journeyHud, drawLandmark } from '../systems/world-journey.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
@@ -280,6 +281,12 @@ export const game = {
       const ab = (getMembrane() && getMembrane().arena) || {};
       this.run.arenaBounds = { x: ab.cx || 0, y: ab.cy || 0, r: ab.radius || 750 };
     } catch { this.run.arenaBounds = { x: 0, y: 0, r: 750 }; }
+    // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
+    // mengikuti ZONA, bukan pilihan stage (§21).
+    try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
+    // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
+    // mengikuti zona, bukan pilihan stage (§21).
+    try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
@@ -665,6 +672,9 @@ export const game = {
 
     // 2. Wave & spawn
     const events = run.spawnSys.update(dt, this);
+    // P4: perjalanan dunia (zona & transisi) — SETELAH spawn supaya kenaikan
+    // wave terbaca di frame yang sama (§27: wave = pacing, bukan arena).
+    try { updateJourney(this, dt); } catch (err) { if (isDevMode()) console.warn('[phagos] updateJourney:', err); }
     if (events.waveBreak) {
       emit('waveBreak', { wave: run.spawnSys.wave });
     }
@@ -2218,6 +2228,9 @@ applyChapterTier(enemy, run) {
     const P = cam.makeProjector(w, h);
     cam.setPlayerScreen(P.project(player.x, player.y));
     drawArena3D(ctx, P, time);
+    // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
+    // melewati gugus alveoli itu"), bukan nomor stage.
+    try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
 
     /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
     const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1 } = {}) => {
@@ -2829,6 +2842,8 @@ applyChapterTier(enemy, run) {
         gate: run.spawnSys.isGateBlocked(),
         gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,
+        // P4 §26: progres perjalanan minimal (zona sekarang → berikutnya)
+        journey: journeyHud(run),
         boss: run.boss && run.boss.alive ? { name: run.boss.def.name, pct: run.boss.hp / run.boss.maxHP } : null,
       });
       const mmCtx = getMinimapContext();

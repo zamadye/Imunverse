@@ -71,6 +71,18 @@ ok('jalur-khas-per-hero', heroes.every((h) => {
 ok('sinematik-mutasi-terdata', Array.isArray(evo.cinematic?.phases)
   && evo.cinematic.phases.map((p) => p.id).join('>') === 'pause>charge>break>reveal>resume');
 
+// ---------- zones.json (P4: dunia kontinu) ----------
+const zon = load('data/zones.json');
+const rute = zon.route || [];
+ok('rute-kontinu', rute.length === 12 && rute[0].id === 'lung'
+  && rute.every((z, i) => z.order === i + 1 && z.arenaId && z.landmark && z.mechanic)
+  && ['bloodstream', 'heart', 'tumor'].every((id) => rute.some((z) => z.id === id)));
+ok('transisi-zona', rute.every((z) => typeof z.transitionSec === 'number'
+  && z.transitionSec >= 20 && z.transitionSec <= 60 && z.wavesPerZone >= 1));
+ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMovement',
+  'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
+  && rute.every((z) => z.params && Object.keys(z.params).length > 0));
+
 // ---------- mastery.json ----------
 const my = load('data/mastery.json');
 ok('mastery', my.xpFormula?.perKill === 1.4 && my.xpFormula?.perWave === 8

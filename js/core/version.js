@@ -2,4 +2,4 @@
  * version.js — Versi build aset. Naikkan setiap rilis agar browser pemain
  * memuat ulang file (cache-busting), apa pun server statisnya.
  */
-export const BUILD = '54a'; // P3 SELESAI: ekonomi Antibodi (sumber, kurva biaya mutasi, 3 fase, anti-blokir)
+export const BUILD = '54b'; // P4 SELESAI: dunia kontinu — 12 zona, transisi 20-60 dtk tanpa loading, mekanik lingkungan, landmark

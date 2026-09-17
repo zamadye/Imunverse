@@ -25,6 +25,10 @@ import {
   antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost, economyPhase,
   earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
 } from './systems/antibody-economy.js'; // P3: ekonomi antibodi
+import {
+  initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
+  enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+} from './systems/world-journey.js'; // P4: dunia kontinu
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
@@ -813,6 +817,11 @@ async function boot() {
     return true;
   };
   window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  // P4: permukaan debug perjalanan dunia (dipakai penguji & autotest).
+  window.__IMUNVERSE.world = {
+    initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
+    enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+  };
   // P3: permukaan debug ekonomi antibodi (dipakai penguji & autotest).
   window.__IMUNVERSE.economy = {
     antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost,

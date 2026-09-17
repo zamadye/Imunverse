@@ -302,13 +302,31 @@ Yang sudah dikerjakan:
 Sisa ekonomi yang sengaja menyusul: **Reserve, rewarded ad 2×, dan IAP mock** (P5) —
 semuanya sudah punya wadah tunablenya di `economy.json`, tinggal dihidupkan.
 
-### P4 — Dunia kontinu (Lung → Bloodstream → Heart)
+### P4 — Dunia kontinu (Lung → Bloodstream → Heart) **[SELESAI — BUILD 54b]**
 - rute biologis berkesinambungan; **tanpa stage loading sebagai pengalaman**
 - transition zone 20–60 dtk: lingkungan & musuh lama + baru bercampur
 - mekanik lingkungan: Lung (oksigen/mukus), Capillary (sempit), Bloodstream (arus),
   Heart (denyut), Tissue (halangan), Lymphatic (sinyal imun), Tumor (regen/korupsi)
 - HUD progres zona minimal + **landmark system**
 - **Exit:** pemain berkata “saya sudah keluar dari paru”, bukan “wave 7”.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Rute 12 zona berkesinambungan | `data/zones.json` (schemaVersion 2): lung → bronchiole → alveoli → capillary → bloodstream → heart → artery → tissue → lymphatic → lymphNode → infectedTissue → tumor. Tiap zona punya `arenaId`, `mechanic`, `params`, `landmark`, `wavesPerZone`, `transitionSec`. **Tidak ada lagi stage select** |
+| Modul baru | `js/systems/world-journey.js`: state `run.journey` (zona, fase, blend, landmark, arus, timer mekanik) + `updateJourney()` dipanggil tiap frame **setelah** spawn-system |
+| Transisi terjadi SAAT COMBAT (§23–§24) | Setelah wave zona habis → fase `transition` 20–60 dtk (per zona). Selama itu: musuh zona lama **dan** baru bercampur (`enemyPoolFor` memberi bobot mengikuti blend — dipakai `SpawnSystem.pickEnemyId`), warna & fitur tanah ikut bercampur (`blendedPalette`: fitur lama memudar 1−t, fitur baru menguat t). Tidak ada loading, pemain & musuh tetap hidup |
+| Lingkungan MENGUBAH GAMEPLAY (§25) | Paru = kantung oksigen menyembuhkan + lendir memperlambat · Bronkiolus/Kapiler = **batas arena menyempit** · Alveoli = gas exchange memulihkan · Aliran darah = **arus mendorong** pemain & musuh (arah berganti berkala) · Jantung = **denyut** mendorong musuh + getar kamera + gelang tekanan |
+| Event masuk JANTUNG (§28) | Dua denyut BESAR saat transisi (getar 1.1 + dorong musuh + gelang merah) — tanpa satu pun teks "level/stage bernomor" |
+| Landmark (§47) | Saat zona baru di-commit: landmark world-anchored digambar prosedural (gugus alveoli / katup jantung / aliran sel darah) + label nama landmark, memudar setelah 6 dtk |
+| Wave = pacing (§27) | Wave hanya menandai intensitas spawn; progresi dunia = urutan zona. HUD menampilkan "zona sekarang ──●── zona berikutnya" yang sangat kecil (§26) |
+| Palet baru tanpa aset baru | Dua palet prosedural (kapiler & aliran darah) ditulis dari data — warna & fitur tanah saja, **foto tetap dibekukan** |
+| Penguji baru | `tools/verify-world.mjs` (`npm run verify:world`, **13 pemeriksaan**, ikut di `npm run verify`): rute & landmark, rentang transisi, pergantian zona **tanpa loading** (pemain & musuh tetap hidup), campuran musuh lama+baru, landmark tercatat, keempat mekanik lingkungan diukur nyata (perpindahan arus, radius menyempit, geser musuh + shake, HP pulih), wave sebagai pacing, event jantung, campuran warna/fitur, HUD |
+| Dijaga | `validate` bertambah `rute-kontinu`, `transisi-zona`, `mekanik-lingkungan` |
+
+Sisa P4 ke depan: mekanik zona P5 (arteri, jaringan, limfe, tumor) masih berstatus
+data saja — parameternya sudah ada, eksekusinya menyusul setelah P5/P6.
 
 ### P5 — Reserve, Rewarded Ad, IAP mock
 - Reserve terpisah dari Antibody; bantuan maksimal = X% biaya mutasi (tunable)

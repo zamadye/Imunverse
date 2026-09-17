@@ -1927,6 +1927,25 @@ img.lock-badge {
 .mut-forms .mut-before { opacity: .55; filter: grayscale(.35); animation: none; }
 .mut-arrow { font-size: 13px; color: var(--teal, #2f9c8f); opacity: .9; }
 /* P2 §9: tombol LEWATI sinematik mutasi (VALID — tanpa hukuman) */
+/* P4 §26: bar progres perjalanan MINIMAL — tidak boleh mengambil fokus */
+.hud-journey {
+  display: flex; align-items: center; gap: 6px; margin-top: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  color: #eafff8; opacity: .82;
+}
+.hud-journey .jz { color: #8df7d2; }
+.hud-journey .jnext { opacity: .65; }
+.hud-journey .jtrack {
+  position: relative; width: 74px; height: 3px; border-radius: 999px;
+  background: rgba(234, 255, 248, .22); overflow: visible;
+}
+.hud-journey .jdot {
+  position: absolute; top: -2.5px; width: 8px; height: 8px; margin-left: -4px;
+  border-radius: 50%; background: #8df7d2; box-shadow: 0 0 6px rgba(141, 247, 210, .8);
+  transition: left .4s ease;
+}
+.hud-journey.transitioning .jdot { background: #f5c64f; box-shadow: 0 0 8px rgba(245, 198, 79, .9); }
+
 /* P3: dompet ANTIBODI di HUD — tujuan mutasi berikutnya + animasi saat cukup */
 .bio-next { opacity: .7; margin-left: 2px; }
 .hud-bio-chip.siap-mutasi { animation: wallet-pop .5s ease-in-out infinite alternate; }
