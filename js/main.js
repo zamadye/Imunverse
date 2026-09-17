@@ -21,6 +21,10 @@ import { game } from './core/game.js';
 import {
   cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
 } from './systems/mutation-cinematic.js'; // P2 §9: sinematik mutasi
+import {
+  antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost, economyPhase,
+  earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+} from './systems/antibody-economy.js'; // P3: ekonomi antibodi
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
@@ -809,6 +813,11 @@ async function boot() {
     return true;
   };
   window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  // P3: permukaan debug ekonomi antibodi (dipakai penguji & autotest).
+  window.__IMUNVERSE.economy = {
+    antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost,
+    economyPhase, earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+  };
   // P2 §9: permukaan debug sinematik mutasi (dipakai penguji & autotest).
   window.__IMUNVERSE.mutationCinematic = {
     cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,

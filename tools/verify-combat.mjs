@@ -542,7 +542,7 @@ const { STATE, setLevelUpOpen } = await import('../js/core/state-manager.js');
 resetCinematic();
 game.startRun('macrophage');
 const runEvo = game.run;
-runEvo.bioPoints = 999;
+runEvo.antibody = 9999; // P3: mutasi dibayar dengan ANTIBODI (bukan Bio-Point)
 const kartu = rollMutationChoices(runEvo).find((c) => c.isMutation && !c.lockedByBio);
 runEvo.currentChoices = [kartu];
 setLevelUpOpen(true);

@@ -277,12 +277,30 @@ sendiri), cara bertempurnya berubah, ada adegan transformasi, dan kemajuannya te
 di HUD. Sisa yang menyentuh mutasi tinggal soal **mata uang** (P3: biaya mutasi
 memakai Antibody, bukan Bio-Point).
 
-### P3 — Economy Antibody (V2)
+### P3 — Economy Antibody (V2) **[SELESAI — BUILD 54a]**
 - Antibody = satu-satunya resource evolusi (sumber: kill, elite, boss, event, ads)
 - kurva biaya mutasi **tunable** (`economy.json`): base cost × growth function
 - 3 fase ekonomi: **Abundance → Tension → Scarcity** (scarcity ≠ grinding)
 - kekurangan Antibody **tidak boleh memblokir** permainan (lanjut bertempur)
 - **Exit:** Test A (tanpa Reserve) masih menyenangkan; §32 kriteria 1–5 terpenuhi.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Satu mata uang, satu fungsi | `data/economy.json` (schemaVersion 2): sumber = kill 2 · elite 25 · boss 120 · event 50 · telan 2 · bonus zona 40. **Bio-Point dihapus** — mutasi sekarang dibayar dengan ANTIBODI, dan antibodi dipakai **hanya** untuk mutasi (hero tetap dibuka lewat progres bermain, IAP §33) |
+| Kurva biaya mutasi (§7) | `mutationCost(indeks)`: 100 → 150 → 218 → 309 → 432 → 598 → 822 → 1125, langkah geometris dibatasi `maxStep` 400 dan diapit `minCost/maxCost`. Harga mengikuti **indeks mutasi**, jadi semua kartu dalam satu tawaran sama mahalnya — pemain memilih BENTUK, bukan yang termurah |
+| Profil penghasilan per hero (§11) | 11 hero punya `heroEarning` {normal, elite, boss, event} yang diturunkan dari identitas tempurnya: Mako unggul di gerombolan (boss rendah), Nyx unggul di elite (kill biasa terendah), Dendri unggul di event biologis (elite rendah), T-Bolt unggul di elite/boss (kill biasa rendah)… |
+| Tidak ada hero farming meta (§12) | Penghasilan per run pada campuran kill referensi: **1.830 – 2.058** (rata-rata 1.947) → semua hero dalam **±6%**, jauh di dalam batas kompetitif ±10%. Setiap hero punya keunggulan **dan** trade-off |
+| Tiga fase ekonomi (§8) | 1–2 mutasi = Abundance, 3–5 = Tension, 6–8 = Scarcity. **Test A** (nol Reserve/IAP/iklan): satu run ≈ **6 mutasi** dan berakhir di fase Scarcity; total 8 mutasi (3.754) ≈ **1,9 run** — jadi Scarcity terasa tanpa jadi grinding |
+| Tidak pernah memblokir (§10) | `insufficientRule.blockGameplay = false`. Antibodi kurang → kartu mutasi terkunci dengan pesan "terus bertempur", selalu ada jaring pengaman, `mutation_failed_insufficient_antibody` tercatat, pemain tetap hidup & lanjut |
+| Umpan balik berantai (§5) | Tiap kill: partikel antibodi → label melayang `+N ANTIBODI` → dompet HUD berdenyut saat cukup untuk mutasi berikutnya (bukan sekadar angka berubah) |
+| HUD & tujuan (§24–§26) | Chip HUD: dompet + `/harga mutasi berikutnya` + lencana tahap evolusi. Modal mutasi: dompet, harga, dan fase ekonomi. Game over: "◉ X Antibodi dibawa pulang → mutasi berikutnya Y (kurang Z)" sebagai tujuan run berikutnya |
+| Telemetri (§28) | `recordEconomyEvent` + 14 event wajib (antibody_earned, mutation_purchased, mutation_failed_insufficient_antibody, …) tersedia lewat `economyLog()` |
+| Penguji baru | `tools/verify-economy.mjs` (`npm run verify:economy`, **16 pemeriksaan**, ikut di `npm run verify`): tunable, kurva, profil per hero, rentang kompetitif, tiga fase, anti-blokir, Test A, anti-grinding, dan **runtime nyata** — kill menambah antibodi + label + partikel, membeli mutasi memotong sesuai kurva |
+
+Sisa ekonomi yang sengaja menyusul: **Reserve, rewarded ad 2×, dan IAP mock** (P5) —
+semuanya sudah punya wadah tunablenya di `economy.json`, tinggal dihidupkan.
 
 ### P4 — Dunia kontinu (Lung → Bloodstream → Heart)
 - rute biologis berkesinambungan; **tanpa stage loading sebagai pengalaman**

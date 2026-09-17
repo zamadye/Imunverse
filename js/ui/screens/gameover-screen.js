@@ -21,6 +21,7 @@ import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
 import { signatureMutations } from '../../systems/evolution-system.js';
+import { mutationCost } from '../../systems/antibody-economy.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 
@@ -164,6 +165,21 @@ export function show(summary) {
   grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts' }, [
     el('span', { text: `⬡ Evolusi run ini: ${evoLabel} (${summary.mutations || 0} mutasi)` }),
   ]));
+
+  // P3 (IAP §24–§25): EKONOMI AKHIR RUN — berapa antibodi dibawa pulang dan
+  // apa tujuan run berikutnya. Tidak butuh mission system tambahan: tujuannya
+  // adalah mutasi berikutnya → APEX → area lebih dalam.
+  {
+    const dibawa = Math.round(summary.antibody || 0);
+    const harga = mutationCost((summary.mutations || 0) + 1);
+    const kurang = Math.max(0, harga - dibawa);
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-eco' }, [
+      el('span', { text: `◉ ${dibawa} Antibodi dibawa pulang` }),
+      el('span', { class: 'go-eco-goal', text: kurang > 0
+        ? ` → mutasi berikutnya ${harga} (kurang ${kurang})`
+        : ` → cukup untuk mutasi berikutnya (${harga})!` }),
+    ]));
+  }
 
   countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
 

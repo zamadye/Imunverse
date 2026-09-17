@@ -1058,7 +1058,15 @@
     "Bentuk serangan:": "Attack shape:",
     "Perubahan tempur": "Combat change",
     "LEWATI ▸": "SKIP ▸",
-    "Tekan LEWATI untuk langsung bertempur": "Press SKIP to jump back into the fight"
+    "Tekan LEWATI untuk langsung bertempur": "Press SKIP to jump back into the fight",
+    "ANTIBODI": "ANTIBODY",
+    "Antibodi: material evolusi — dari kill, elite, boss, event & telan": "Antibody: evolution material — from kills, elites, bosses, events & engulf",
+    "Antibodi kurang — terus bertempur, kapan saja bisa bermutasi lagi!": "Not enough Antibody — keep fighting, you can mutate any time!",
+    "mutasi berikutnya": "next mutation",
+    "MELIMPAH": "ABUNDANT",
+    "MENEGANG": "TENSE",
+    "LANGKA": "SCARCE",
+    "Antibodi dibawa pulang": "Antibody carried home"
   },
   "rules": [
     {

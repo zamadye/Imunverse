@@ -72,6 +72,7 @@ import {
 import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
 import { evoStageFor, evoStatMult, evoProgress, evoSprite } from '../systems/evolution-system.js';
+import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economyPhase, runAntibody, recordEconomyEvent } from '../systems/antibody-economy.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
@@ -266,7 +267,7 @@ export const game = {
       // PHAGOS: membran + mutasi + bio-point + adaptasi musuh (run-only)
       activeMutations: [],
       mutationHistory: [],
-      bioPoints: 0,
+      antibody: 0, // P3: ANTIBODI = satu-satunya resource evolusi (IAP §3)
       engulfStats: {},
       enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
       membrane: null,
@@ -1577,9 +1578,9 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
-    // V2 P2: peti boss tidak lagi memberi fragmen evolusi — ia memberi
-    // Bio-Point (mata uang mutasi se-run) supaya mutasi tier 2/3 terjangkau.
-    const bonusBio = 20;
+    // V2 P3: peti boss = suntikan ANTIBODI (resource evolusi) — bukan fragmen
+    // evolusi lama, bukan Bio-Point. Membuat mutasi akhir run terjangkau.
+    const bonusBio = Math.round(antibodyForKill('boss', run.heroDef && run.heroDef.id) * 0.5);
     run.bossChest = { currency: bonusCurrency, bio: bonusBio, doubled: false };
     setPaused(true);
     audio.chest();
@@ -1613,10 +1614,11 @@ applyChapterTier(enemy, run) {
     const currency = chest.currency * (doubled ? 2 : 1);
     const bio = (chest.bio || 0) * (doubled ? 2 : 1);
     meta.currency += currency;
-    run.bioPoints = (run.bioPoints || 0) + bio;
+    // P3: peti boss menambah ANTIBODI (resource evolusi), bukan Bio-Point.
+    earnAntibody(run, bio, { source: 'boss_chest', particles: 14 });
     writeSave(meta);
     run.bossChest = null;
-    emit('toast', { message: `Peti boss: +${currency} Biokredit${bio > 0 ? ` · +${bio} BIO` : ''}${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    emit('toast', { message: `Peti boss: +${currency} Biokredit${bio > 0 ? ` · +${bio} Antibodi` : ''}${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
     setPaused(false);
     emit('resume');
   },
@@ -1797,6 +1799,20 @@ applyChapterTier(enemy, run) {
     const killBk = this.bkForKillCause(enemy, source);
     run.currencyEarned += killBk;
     run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP · +${killBk} BK`, '#cde86b');
+
+    // ---- P3 (IAP §5): ANTIBODI per kill + umpan balik berantai ----
+    // Rantai wajib: musuh mati → partikel → label "+N ANTIBODI" → dompet HUD.
+    // Bukan sekadar mengubah angka.
+    {
+      const kind = enemy.isBoss ? 'boss' : (enemy.def.elite ? 'elite' : 'normal');
+      const jumlah = antibodyForKill(kind, run.heroDef && run.heroDef.id, run.antibodyMult || 1);
+      earnAntibody(run, jumlah, {
+        x: enemy.x, y: enemy.y - (enemy.radius || 12) - 6, source: kind,
+        color: kind === 'boss' ? '#f5c64f' : '#8df7d2',
+        particles: kind === 'boss' ? 18 : (kind === 'elite' ? 10 : 5),
+      });
+      recordEconomyEvent('enemy_killed', { kind, source: source || 'kill' });
+    }
 
     // Sprint 3.17: earn BK LANGSUNG per kill (lihat atas) — drop koin per tier
     // DICABUT (double-count). HARD: nutrisi bonus saja.
@@ -2133,7 +2149,8 @@ applyChapterTier(enemy, run) {
       bossKills: run.bossKills,
       heroId: run.heroDef ? run.heroDef.id : null,
       engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
-      bio: run.bioPoints || 0,
+      antibody: runAntibody(run),
+      antibodySpent: run.antibodySpent || 0,
       pulses: (run.membrane && run.membrane.stats && run.membrane.stats.pulseCount) || 0,
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,
@@ -2794,7 +2811,9 @@ applyChapterTier(enemy, run) {
         wave: run.spawnSys.wave,
         abilities: run.skills.getView(run.level),
         pulse,
-        bioPoints: run.bioPoints || 0,
+        antibody: runAntibody(run),
+        nextMutationCost: mutationCost((run.activeMutations || []).length + 1),
+        ecoPhase: economyPhase((run.activeMutations || []).length),
         activeMutations: run.activeMutations || [],
         // P2: tahap pohon evolusi (BASE → MUT1 → MUT2 → APEX) tampil di HUD
         evoStage: run.evoStage ? { id: run.evoStage.id, name: run.evoStage.name, tierColor: run.evoStage.tierColor } : null,

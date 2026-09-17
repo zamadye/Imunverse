@@ -1,32 +1,137 @@
 {
-  "schemaVersion": 1,
-  "doc": "V2 Economy & IAP tunables (PHAGOS_IAP_V2.txt §3-§31). SEMUA ANGKA TUNABLE dan harus divalidasi lewat playtest (Test A-E). Belum dikonsumsi runtime sampai P3/P5.",
+  "schemaVersion": 2,
+  "doc": "V2 Economy & IAP tunables (PHAGOS_IAP_V2.txt §3–§31). SEMUA ANGKA TUNABLE. P3: antibodi = SATU-SATUNYA resource evolusi — didapat dari kill/elite/boss/event/telan, dipakai HANYA untuk mutasi. Diimplementasikan runtime oleh js/systems/antibody-economy.js; kekurangan antibodi TIDAK menghentikan permainan.",
   "currency": {
     "primary": "antibody",
-    "display": { "id": "Antibodi", "icon": "assets/icons/cur-antibodi.svg" },
+    "display": {
+      "id": "Antibodi",
+      "icon": "assets/icons/cur-antibodi.svg"
+    },
     "earnedByGameplay": true,
     "premium": false,
-    "legacyDisabled": ["imunCoin", "energy", "lives", "multipleGameplayCurrencies"]
+    "legacyDisabled": [
+      "imunCoin",
+      "energy",
+      "lives",
+      "multipleGameplayCurrencies"
+    ]
   },
   "antibody": {
     "sources": {
-      "enemyKill": 1,
-      "eliteKill": 12,
-      "bossKill": 60,
-      "specialEvent": 25,
-      "runRewardPerZone": 20
+      "enemyKill": 2,
+      "eliteKill": 25,
+      "bossKill": 120,
+      "specialEvent": 50,
+      "engulf": 2,
+      "runRewardPerZone": 40
     },
-    "heroModifier": { "_doc": "pengali penghasilan per hero — diisi saat P3 (IAP §11)", "_default": 1 },
-    "pickupFeedback": {
+    "heroEarning": {
+      "macrophage": {
+        "normal": 1.2,
+        "elite": 1.0,
+        "boss": 0.9,
+        "event": 1.0,
+        "note": "pembersih gerombolan: unggul di kill biasa, lemah di boss"
+      },
+      "neutrophil": {
+        "normal": 1.15,
+        "elite": 1.1,
+        "boss": 0.9,
+        "event": 1.0,
+        "note": "ledakan area cepat: kill biasa & elite tinggi, boss rendah"
+      },
+      "dendritic": {
+        "normal": 1.1,
+        "elite": 0.95,
+        "boss": 0.95,
+        "event": 1.2,
+        "note": "rantai/support: unggul di event biologis & kill biasa, elite di bawah rata-rata"
+      },
+      "eosinophil": {
+        "normal": 0.9,
+        "elite": 1.25,
+        "boss": 0.95,
+        "event": 1.0,
+        "note": "pemburu bernilai tinggi: elite kuat, kill biasa rendah"
+      },
+      "basophil": {
+        "normal": 1.05,
+        "elite": 1.0,
+        "boss": 0.95,
+        "event": 1.2,
+        "note": "kontrol wilayah: event & kill biasa stabil, boss rendah"
+      },
+      "mastcell": {
+        "normal": 1.0,
+        "elite": 0.95,
+        "boss": 1.0,
+        "event": 1.2,
+        "note": "pulse murni: unggul di event biologis, elite di bawah rata-rata"
+      },
+      "tcd8": {
+        "normal": 0.85,
+        "elite": 1.15,
+        "boss": 1.05,
+        "event": 0.9,
+        "note": "berkas presisi: elite & boss tinggi, kill biasa rendah"
+      },
+      "tcd4": {
+        "normal": 1.0,
+        "elite": 0.95,
+        "boss": 1.0,
+        "event": 1.3,
+        "note": "komandan: event biologis tertinggi, elite rendah"
+      },
+      "treg": {
+        "normal": 1.1,
+        "elite": 0.95,
+        "boss": 0.9,
+        "event": 1.1,
+        "note": "bertahan lama: kill biasa & event bagus, target besar rendah"
+      },
+      "bcell": {
+        "normal": 0.95,
+        "elite": 1.1,
+        "boss": 1.05,
+        "event": 1.0,
+        "note": "pengejar: elite & boss baik, kill biasa sedikit rendah"
+      },
+      "nkcell": {
+        "normal": 0.8,
+        "elite": 1.25,
+        "boss": 1.0,
+        "event": 0.9,
+        "note": "pembunuh bernilai tinggi: elite tertinggi, kill biasa terendah"
+      }
+    },
+    "killMixReference": {
+      "_doc": "bobot campuran kill untuk menghitung 'peluang progresi' tiap hero; dipakai penguji agar tidak ada hero farming meta (IAP §12)",
+      "normal": 0.85,
+      "elite": 0.1,
+      "boss": 0.04,
+      "event": 0.01
+    },
+    "competitiveBandPct": 10,
+    "earnFeedback": {
       "required": true,
-      "chain": ["musuh mati", "partikel antibodi", "+XX Antibodi", "animasi dompet"],
+      "chain": [
+        "musuh mati",
+        "partikel antibodi",
+        "+N Antibodi",
+        "animasi dompet"
+      ],
       "rule": "Jangan hanya mengubah angka di HUD (IAP §5)"
     }
   },
   "mutation": {
     "primarySink": true,
     "baseCost": 100,
-    "growth": { "type": "geometric", "firstStep": 50, "stepGrowth": 1.35, "maxStep": 400 },
+    "growth": {
+      "type": "geometric",
+      "firstStep": 50,
+      "stepGrowth": 1.35,
+      "maxStep": 400
+    },
     "minCost": 100,
     "maxCost": 4000,
     "maxMutationsPerRun": 8,
@@ -34,13 +139,35 @@
     "rule": "Cost ↑ harus sebanding dengan power ↑ (IAP §9)"
   },
   "phases": {
-    "abundance": { "mutations": [1, 2], "target": "income > mutation pressure" },
-    "tension": { "mutations": [3, 5], "target": "income ≈ mutation cost" },
-    "scarcity": { "mutations": [6, 8], "target": "income < mutation pressure; scarcity ≠ grinding" }
+    "abundance": {
+      "mutations": [
+        1,
+        2
+      ],
+      "target": "income > mutation pressure"
+    },
+    "tension": {
+      "mutations": [
+        3,
+        5
+      ],
+      "target": "income ≈ mutation cost"
+    },
+    "scarcity": {
+      "mutations": [
+        6,
+        8
+      ],
+      "target": "income < mutation pressure; scarcity ≠ grinding"
+    }
   },
   "insufficientRule": {
     "blockGameplay": false,
-    "options": ["continue", "watchAd", "useReserve"],
+    "options": [
+      "continue",
+      "watchAd",
+      "useReserve"
+    ],
     "rule": "Antibody habis TIDAK boleh menghentikan permainan (IAP §10)"
   },
   "reserve": {
@@ -65,9 +192,18 @@
     "entryPoint": "contextual",
     "entryRule": "Hanya muncul saat friksi ekonomi; tidak boleh memenuhi dashboard (IAP §17)",
     "packs": [
-      { "id": "reserve_s", "grant": 500 },
-      { "id": "reserve_m", "grant": 1500 },
-      { "id": "reserve_l", "grant": 4000 }
+      {
+        "id": "reserve_s",
+        "grant": 500
+      },
+      {
+        "id": "reserve_m",
+        "grant": 1500
+      },
+      {
+        "id": "reserve_l",
+        "grant": 4000
+      }
     ],
     "realPayment": false,
     "note": "Payment nyata paling akhir (P9). Ganti MockPurchaseProvider → Google Play Billing tanpa menyentuh sistem mutasi."
@@ -75,11 +211,39 @@
   "telemetry": {
     "enabled": true,
     "events": [
-      "run_started", "enemy_killed", "antibody_earned", "mutation_offered",
-      "mutation_purchased", "mutation_failed_insufficient_antibody", "reserve_used",
-      "rewarded_ad_offered", "rewarded_ad_completed", "iap_mock_granted",
-      "run_completed", "run_failed", "hero_selected", "hero_unlocked"
+      "run_started",
+      "enemy_killed",
+      "antibody_earned",
+      "mutation_offered",
+      "mutation_purchased",
+      "mutation_failed_insufficient_antibody",
+      "reserve_used",
+      "rewarded_ad_offered",
+      "rewarded_ad_completed",
+      "iap_mock_granted",
+      "run_completed",
+      "run_failed",
+      "hero_selected",
+      "hero_unlocked"
     ]
   },
-  "nonGoals": ["battlePass", "largeShop", "skinMarketplace", "subscription", "gacha", "equipmentSystem", "multiPremiumCurrency", "complexMissions", "guild", "pvp", "nft"]
+  "nonGoals": [
+    "battlePass",
+    "largeShop",
+    "skinMarketplace",
+    "subscription",
+    "gacha",
+    "equipmentSystem",
+    "multiPremiumCurrency",
+    "complexMissions",
+    "guild",
+    "pvp",
+    "nft"
+  ],
+  "runModel": {
+    "_doc": "model simulasi untuk penguji ekonomi (bukan gameplay): jumlah kill per wave & panjang run",
+    "killsPerWaveBase": 13,
+    "killsPerWaveGrowth": 1.2,
+    "wavesPerRun": 10
+  }
 }

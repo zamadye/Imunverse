@@ -10,8 +10,9 @@ import { game } from '../../core/game.js';
 import { synergyFor } from '../../systems/retention-system.js';
 import { el } from '../screen-manager.js';
 import { iconEl } from '../menu-icons.js';
-import { tierLabel, mutationDef as mutationDefById } from '../../systems/mutation-system.js';
+import { tierLabel, mutationDef as mutationDefById, mutationPriceFor } from '../../systems/mutation-system.js';
 import { describeAttackChange } from '../../systems/attack-archetype.js';
+import { economyPhase } from '../../systems/antibody-economy.js';
 import { hasSprite } from '../../render/sprite-loader.js'; // UI-REBUILD P8: foto bentuk mutasi
 
 const MUTATION_ICONS = {
@@ -37,9 +38,14 @@ export function show({ level, choices }) {
     heroImg.src = (mut && hasSprite(mut)) ? mut : (heroDef.spritePortrait || heroDef.spriteIdle);
   }
   const luName = heroDef.name;
-  const bio = game.run ? (game.run.bioPoints || 0) : 0;
+  // P3: modal mutasi menampilkan dompet ANTIBODI + harga mutasi berikutnya
+  // (IAP §6) supaya pemain tahu apa yang sedang dituju — tanpa hard selling.
+  const dompet = game.run ? (game.run.antibody || 0) : 0;
+  const harga = mutationPriceFor(game.run);
+  const phase = economyPhase((game.run && game.run.activeMutations || []).length);
+  const labelFase = { abundance: 'MELIMPAH', tension: 'MENEGANG', scarcity: 'LANGKA' }[phase] || '';
   document.getElementById('levelup-sub').textContent =
-    `Level ${level} — ${luName} BERMUTASI! Pilih bentuk baru: (◉ ${bio} BIO)`;
+    `Level ${level} — ${luName} BERMUTASI! (◉ ${dompet} Antibodi · mutasi berikutnya ${harga}${labelFase ? ` · ${labelFase}` : ''})`;
   // retrigger animasi masuk tiap kali scene tampil
   const scene = document.querySelector('#screen-levelup .lu-scene');
   if (scene) {
@@ -64,7 +70,7 @@ export function show({ level, choices }) {
 }
 
 function mutationCard(def, bio, heroDef) {
-  const locked = !!def.lockedByBio || (def.bioCost || 0) > bio;
+  const locked = !!def.lockedByAntibody;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
   const _mutsKini = (game.run && game.run.activeMutations) || [];
   // P2: apa yang BERUH pada cara bertempur, dibaca langsung dari blok
@@ -109,14 +115,14 @@ function mutationCard(def, bio, heroDef) {
       el('b', {}, [
         el('span', { text: def.name }),
         el('span', { class: 'syn-badge mut-tier', text: tierLabel(def.tier || 1) }),
-        (def.bioCost || 0) > 0
-          ? el('span', { class: 'syn-badge bio-cost' + (locked ? ' locked' : ''), text: `◉ ${def.bioCost} BIO` })
+        (def.cost || 0) > 0
+          ? el('span', { class: 'syn-badge bio-cost' + (locked ? ' locked' : ''), text: `◉ ${def.cost} ANTIBODI` })
           : el('span', { class: 'syn-badge bio-free', text: 'GRATIS' }),
       ]),
       el('p', { text: def.desc }),
       _ubah ? el('p', { class: 'mut-attack', text: `⚔ ${_ubah}` }) : null,
       def.lore ? el('p', { class: 'mut-lore', text: def.lore }) : null,
-      locked ? el('span', { class: 'choice-stack', text: 'Bio-Point kurang — engulf lebih banyak!' }) : null,
+      locked ? el('span', { class: 'choice-stack', text: 'Antibodi kurang — terus bertempur, kapan saja bisa bermutasi lagi!' }) : null,
     ]),
   ]);
   return card;

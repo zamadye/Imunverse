@@ -1059,118 +1059,74 @@
     "berkasGagal": 0,
     "heroDiuji": 11,
     "kasusDiuji": 77,
-    "totalError": 176
+    "totalError": 187
   },
   "levelup": [
     {
       "hero": "macrophage",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_macrophage_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_macrophage_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_macrophage_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_macrophage_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "dendritic",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_dendritic_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_dendritic_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_dendritic_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_dendritic_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "neutrophil",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_neutrophil_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_neutrophil_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_neutrophil_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_neutrophil_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "eosinophil",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_eosinophil_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_eosinophil_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_eosinophil_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_eosinophil_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "basophil",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_basophil_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_basophil_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_basophil_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_basophil_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "mastcell",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_mastcell_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_mastcell_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_mastcell_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_mastcell_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "tcd8",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_tcd8_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_tcd8_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_tcd8_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_tcd8_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "tcd4",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_tcd4_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_tcd4_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_tcd4_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_tcd4_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "treg",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_treg_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_treg_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_treg_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_treg_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "bcell",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_bcell_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_bcell_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_bcell_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_bcell_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     },
     {
       "hero": "nkcell",
       "potret": null,
       "kartu": {},
-      "potretTier1": "assets/sprites/hero_nkcell_mut1_idle.png",
-      "kartuTier1": "assets/sprites/hero_nkcell_mut1_idle.png",
-      "potretTier2": "assets/sprites/hero_nkcell_mut2_idle.png",
-      "kartuTier2": "assets/sprites/hero_nkcell_mut2_idle.png",
-      "status": "OK"
+      "status": "GAGAL: bio is not defined"
     }
   ]
 }

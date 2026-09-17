@@ -227,7 +227,7 @@ export function updateHUD(data) {
   updateBuffChips();
   // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
   try { updatePulseButton(data.pulse); } catch { /* abaikan */ }
-  try { updateBioChip(data.bioPoints, data.activeMutations, data.evoStage); } catch { /* abaikan */ }
+  try { updateAntibodyChip(data.antibody, data.activeMutations, data.evoStage, data.nextMutationCost); } catch { /* abaikan */ }
   try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
@@ -323,7 +323,7 @@ function updatePulseButton(pulse) {
 }
 
 /** PHAGOS: chip Bio-Point + ikon mutasi aktif (run-only). */
-function updateBioChip(bio, mutations, evoStage) {
+function updateAntibodyChip(bio, mutations, evoStage, nextCost) {
   let chip = document.getElementById('hud-bio-chip');
   if (!chip) {
     const top = document.querySelector('.hud-top .hud-center');
@@ -331,7 +331,7 @@ function updateBioChip(bio, mutations, evoStage) {
     chip = document.createElement('div');
     chip.id = 'hud-bio-chip';
     chip.className = 'hud-bio-chip';
-    chip.title = 'Bio-Point: material mutasi dari engulf';
+    chip.title = 'Antibodi: material evolusi — dari kill, elite, boss, event & telan';
     top.appendChild(chip);
   }
   const n = bio || 0;
@@ -341,7 +341,12 @@ function updateBioChip(bio, mutations, evoStage) {
   const evo = evoStage && evoStage.id && evoStage.id !== 'base'
     ? `<span class="bio-evo" style="background:${evoStage.tierColor || '#8df7d2'}">${evoStage.name || evoStage.id}</span>`
     : '';
-  const html = `<span class="bio-dot">◉</span><b>${n}</b><small>BIO</small>` +
+  // P3 (IAP §26): HUD hanya menampilkan yang penting — dompet antibodi dan
+  // harga mutasi berikutnya (tujuan), bukan dashboard finansial.
+  const tujuan = (typeof nextCost === 'number' && nextCost > 0)
+    ? `<small class="bio-next" title="Harga mutasi berikutnya">/${nextCost}</small>`
+    : '';
+  const html = `<span class="bio-dot">◉</span><b>${n}</b><small>ANTIBODI</small>${tujuan}` +
     (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '') + evo;
   if (chip.dataset.html !== html) {
     chip.innerHTML = html;
@@ -349,6 +354,13 @@ function updateBioChip(bio, mutations, evoStage) {
   }
   chip.classList.toggle('rich', n >= 5);
   chip.classList.toggle('richer', n >= 15);
+  // IAP §5: dompet BERGERAK saat antibodi masuk (bukan sekadar angka berubah).
+  const siap = typeof nextCost === 'number' && nextCost > 0 && n >= nextCost;
+  if (siap && !chip.classList.contains('siap-mutasi')) {
+    chip.classList.add('siap-mutasi');
+  } else if (!siap) {
+    chip.classList.remove('siap-mutasi');
+  }
 }
 
 /** PHAGOS: bar HP membran hidup (mutasi medan_hidup). */

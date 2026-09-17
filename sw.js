@@ -4,7 +4,7 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v14';
+const CACHE_VER = 'phagos-v15';
 const PRECACHE = [
   './',
   './index.html',

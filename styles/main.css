@@ -1927,6 +1927,15 @@ img.lock-badge {
 .mut-forms .mut-before { opacity: .55; filter: grayscale(.35); animation: none; }
 .mut-arrow { font-size: 13px; color: var(--teal, #2f9c8f); opacity: .9; }
 /* P2 §9: tombol LEWATI sinematik mutasi (VALID — tanpa hukuman) */
+/* P3: dompet ANTIBODI di HUD — tujuan mutasi berikutnya + animasi saat cukup */
+.bio-next { opacity: .7; margin-left: 2px; }
+.hud-bio-chip.siap-mutasi { animation: wallet-pop .5s ease-in-out infinite alternate; }
+@keyframes wallet-pop {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-2px) scale(1.06); }
+}
+.hud-bio-chip.siap-mutasi .bio-dot { color: #f5c64f; }
+
 /* P2: lencana tahap evolusi di chip BIO HUD */
 .bio-evo {
   margin-left: 4px; padding: 2px 6px; border-radius: 999px;

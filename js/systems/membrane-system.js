@@ -17,6 +17,7 @@ import {
   passiveCritBonus, modifyOutgoingDamage, passiveOnHit,
 } from './passive-system.js';
 import { antigenDamageMult, antigenIgnoreArmor } from './antigen-memory.js';
+import { antibodyForEngulf, earnAntibody } from './antibody-economy.js'; // P3: telan → antibodi
 import { tagOnHit } from './tag-cascade.js';
 import { audio } from './audio-system.js';
 import { buzz } from './haptics.js';
@@ -793,10 +794,12 @@ function grantEngulfBio(game, enemy) {
   const opsonin = (enemy.opsoninUntil || 0) > (run.time || 0);
   run.bioEngulfCounter = (run.bioEngulfCounter || 0) + 1;
   if (!opsonin && run.bioEngulfCounter % every !== 0) return 0;
-  let bio = cfg.bioPointPerEngulf || 1;
+  // P3: Bio-Point DIGANTI Antibodi — telan ikut memberi resource evolusi,
+  // nilainya dibaca dari data/economy.json (bukan angka keras di kode).
+  let bio = antibodyForEngulf((run.heroDef && run.heroDef.id) || null, run.antibodyMult || 1);
   if (mem.engulfSpecial === 'heal_bonus') bio = Math.ceil(bio * 1.3);
   if (run.itemBuffs && run.itemBuffs.katalis) bio *= 2; // ADDENDUM S2: Katalis Mitosis (2x final)
-  run.bioPoints = (run.bioPoints || 0) + bio;
+  earnAntibody(run, bio, { source: 'engulf' });
   return bio;
 }
 
@@ -891,7 +894,7 @@ function recruitSatellite(game, enemy, fx, st) {
   const fam = engulfFamilyOf(enemy);
   run.engulfStats = run.engulfStats || {};
   run.engulfStats[fam] = (run.engulfStats[fam] || 0) + 1;
-  run.bioPoints = (run.bioPoints || 0) + 1;
+  earnAntibody(run, antibodyForEngulf((run.heroDef && run.heroDef.id) || null), { source: 'engulf' });
   mem.satellites.push({
     angle: Math.random() * Math.PI * 2,
     dist: st.radius * 0.75,
