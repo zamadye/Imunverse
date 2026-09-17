@@ -102,7 +102,21 @@ export class Enemy {
     this.regenCfg = def.regen || null;
     this.sinceHit = 0;
 
-    this.eliteAffix = null;   // 'brute'|'swift'|'regen'|'volatile' (via makeElite)
+    // ---- V2 §15 SUPPORT: aura penguat untuk musuh di sekitarnya ----
+    // Sumber: enemies[].aura (bawaan, mis. Sel Kanker) atau affix elite 'aura'
+    // (data/waves.json). Aura SELALU bertelegraph (auraWindup) sebelum aktif.
+    this.auraCfg = def.aura || null;
+    this.auraT = 0;          // hitungan mundur ke pulsa aura berikutnya
+    this.auraWindup = 0;     // >0 = sedang menelegraph (belum menguatkan)
+    this.auraPulseFx = 0;    // kilasan singkat setelah aura menyala
+    // status "dikuatkan" (diterima dari aura musuh lain)
+    this.auraBuffT = 0;
+    this.auraDmgMult = 1;
+    this.auraSpeedMult = 1;
+    this.auraDr = 0;         // damage reduction 0..1
+    this.auraColor = null;
+
+    this.eliteAffix = null;   // 'brute'|'swift'|'regen'|'volatile'|'aura' (via makeElite)
     this.affixCfg = null;     // params affix dari waves.json
     this.windupOverride = 0;  // swift: windup lebih singkat
     this.enraged = false;     // boss: fase mengamuk (sekali per boss)
@@ -124,7 +138,44 @@ export class Enemy {
     else if (affix === 'swift') {
       this.speed *= this.affixCfg.speedMult;
       this.windupOverride = this.affixCfg.windup;
+    } else if (affix === 'aura') {
+      // SUPPORT: tidak menambah diri sendiri — ia menguatkan musuh SEKITAR.
+      this.auraCfg = this.affixCfg;
+      this.auraColor = this.affixCfg.color || '#8e7cc3';
+      this.auraT = (this.affixCfg.pulseSec || 3.2) * 0.5; // pulsa pertama lebih cepat
     }
+  }
+
+  /**
+   * V2 §15 SUPPORT: satu pulsa aura — kuatkan semua musuh lain di radius.
+   * Dipanggil SETELAH masa telegraph (auraWindup) habis, jadi pemain punya
+   * kesempatan membaca & menggagalkannya (bekukan / bunuh / menjauh).
+   */
+  emitSupportAura(game) {
+    const cfg = this.auraCfg || {};
+    const run = game && game.run;
+    if (!run) return 0;
+    const radius = cfg.radius || 150;
+    const durasi = cfg.durationSec || 3.5;
+    const warna = cfg.color || this.auraColor || '#8e7cc3';
+    let kena = 0;
+    for (const o of run.enemies) {
+      if (!o.alive || o === this) continue;
+      if (Math.hypot(o.x - this.x, o.y - this.y) > radius) continue;
+      o.auraBuffT = durasi;
+      o.auraDmgMult = cfg.dmgMult || 1.25;
+      o.auraSpeedMult = cfg.speedMult || 1.15;
+      o.auraDr = cfg.dr || 0.2;
+      o.auraColor = warna;
+      kena += 1;
+    }
+    this.auraPulseFx = 0.45; // kilasan visual (dibaca game.js saat menggambar)
+    this.auraLastCount = kena;
+    if (run.effects) {
+      run.effects.spawnBlast(this.x, this.y, radius * 0.55, warna);
+      if (kena > 0) run.effects.spawnLabel(this.x, this.y - this.radius - 14, `AURA +${kena}`, warna);
+    }
+    return kena;
   }
 
   /**
@@ -182,6 +233,20 @@ export class Enemy {
       }
     }
 
+    // V2 §15 SUPPORT (bagian 1): buff dari aura musuh lain ikut berakhir.
+    // Bagian ini jalan meski musuh beku supaya buff tidak "bocor" selamanya.
+    if (this.auraPulseFx > 0) this.auraPulseFx -= dt;
+    if (this.auraBuffT > 0) {
+      this.auraBuffT -= dt;
+      if (this.auraBuffT <= 0) {
+        this.auraBuffT = 0;
+        this.auraDmgMult = 1;
+        this.auraSpeedMult = 1;
+        this.auraDr = 0;
+        this.auraColor = null;
+      }
+    }
+
     // V2 Phase 5: affix REGEN — elite pulih 2%/dtk (jawaban pemain: fokus burst)
     if (this.eliteAffix === 'regen' && this.hp < this.maxHP) {
       this.hp = Math.min(this.maxHP, this.hp + this.maxHP * this.affixCfg.pctPerSec * dt);
@@ -206,6 +271,24 @@ export class Enemy {
       this.slowT -= dt;
       dt = dt * this.slowMult;
       if (this.slowT <= 0) this.slowMult = 1;
+    }
+    // V2 §15 SUPPORT: aura membuat musuh bergerak lebih cepat
+    if (this.auraBuffT > 0 && this.auraSpeedMult > 1) dt = dt * this.auraSpeedMult;
+
+    // ---- V2 §15 SUPPORT (bagian 2): pancarkan aura penguat ----
+    // Diletakkan SETELAH cek beku: membekukan pendukung mematikan auranya —
+    // itu jawaban pemain yang paling jelas (selain membunuhnya lebih dulu).
+    if (this.auraCfg && game) {
+      if (this.auraWindup > 0) {
+        this.auraWindup -= dt;
+        if (this.auraWindup <= 0) this.emitSupportAura(game);
+      } else {
+        this.auraT -= dt;
+        if (this.auraT <= 0) {
+          this.auraT = this.auraCfg.pulseSec || 3.2;
+          this.auraWindup = this.auraCfg.telegraphSec || 0.5; // peringatan dulu
+        }
+      }
     }
 
     const dx = playerPos.x - this.x;
@@ -422,6 +505,8 @@ export class Enemy {
       return false;
     }
     this.lastHitAbsorbed = false;
+    // V2 §15 SUPPORT: musuh yang dikuatkan aura menahan sebagian damage
+    if (this.auraBuffT > 0 && this.auraDr > 0) amount = amount * (1 - this.auraDr);
     this.hp -= amount;
     this.hitFlash = 0.12;
     if (this.hp <= 0) {

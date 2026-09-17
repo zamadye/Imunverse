@@ -69,10 +69,10 @@
     {
       "id": "support",
       "label": "Pendukung",
-      "threat": "Menguatkan musuh lain di sekitarnya (buff aura).",
-      "counter": "Prioritaskan bunuh pendukung sebelum yang dibuff.",
-      "realizedBy": "belum ada — menunggu P1 lanjutan",
-      "status": "planned"
+      "threat": "Menguatkan patogen di sekitarnya: damage & gerak naik, dan mereka menahan sebagian serangan.",
+      "counter": "Bekukan atau bunuh pendukungnya lebih dulu (aura SELALU bertelegraph ~0,5 dtk sebelum aktif), atau pancing keluar dari radius aura.",
+      "realizedBy": "Enemy.auraCfg → emitSupportAura() (enemies[].aura untuk Sel Kanker; affix elite \"aura\" di waves.json) + game.js auraDmgMult/auraDr",
+      "status": "implemented"
     }
   ]
 }

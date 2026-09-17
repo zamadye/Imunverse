@@ -20,6 +20,7 @@ import { antigenDamageMult, antigenIgnoreArmor } from './antigen-memory.js';
 import { tagOnHit } from './tag-cascade.js';
 import { audio } from './audio-system.js';
 import { buzz } from './haptics.js';
+import { beginAttack } from './attack-archetype.js';
 
 // ---------------------------------------------------------------------
 // INIT & STATS
@@ -1038,8 +1039,10 @@ export function tryPulse(game, opts = {}) {
     buzz('elite');
   } catch { /* headless */ }
 
-  // Per-hero pulse behavior
+  // Per-hero pulse behavior — SISA UTILITAS saja (dash, buff, imun, teleport).
+  // Bentuk SERANGAN (archetype) dijalankan terpisah & selalu bertelegraph.
   applyPulseSpecial(game, opts);
+  beginAttack(game, { stats: st, dmgMult });
 
   // PHAGOS D5: skill pasif pemicu 'pulse' (manual maupun otomatis)
   try { game.fireSkillTrigger('pulse'); } catch { /* abaikan */ }
@@ -1139,26 +1142,10 @@ function applyPulseSpecial(game, opts) {
       mem.sweepT = 0.4;
       break;
     }
-    case 'eosinophil': { // Granul ke 5 target terdekat — instan (D3: tanpa proyektil)
-      const targets = nearestEnemies(run, player.x, player.y, 420, 5);
-      for (const t of targets) {
-        const dmg5 = Math.max(4, st.contactDps * 1.2);
-        const ang5 = Math.atan2(t.y - player.y, t.x - player.x);
-        run.effects.spawnSwipe(player.x, player.y, ang5, 52, 1.0, '#ff6b81');
-        run.effects.spawnBurst(t.x, t.y, '#ff6b81', 5, 170, 3);
-        const died5 = t.takeDamage(dmg5);
-        game.spawnHitFeedback(t, dmg5, died5);
-        if (died5) game.onEnemyKilled(t, 'pulse');
-      }
-      break;
-    }
-    case 'basophil': { // Awan histamin 3 dtk
-      mem.clouds.push({
-        x: player.x, y: player.y, r: st.radius * 1.4, t: 0, life: 3,
-        dps: st.contactDps * 0.8, tick: 0,
-      });
-      break;
-    }
+    // Eosinophil (projectile), Basophil & Treg (zone), Sel B (homing),
+    // Makrofag/Neutrofil/Mastia (area), TCD8 (beam) TIDAK lagi melukai
+    // seketika: bentuk serangannya dijalankan oleh attack-archetype.js dengan
+    // telegraph wajib. Yang tersisa di sini hanya efek UTILITAS per hero.
     case 'tcd4': { // Buff squad 20% 3 dtk
       mem.heliaBuffT = 3;
       run.effects.spawnLabel(player.x, player.y - 50, 'SQUAD +20%!', '#f1c40f');
@@ -1177,19 +1164,6 @@ function applyPulseSpecial(game, opts) {
       }
       if (player.iframes < 0.5) player.iframes = 0.5;
       run.effects.spawnLabel(player.x, player.y - 50, 'IMUN 3 DTK!', '#2ecc71');
-      break;
-    }
-    case 'bcell': { // 8 antibodi segala arah — instan ke ≤8 target (D3: tanpa proyektil)
-      const targets8 = nearestEnemies(run, player.x, player.y, st.pulseRadius + 60, 8);
-      for (const t of targets8) {
-        const dmg8 = Math.max(4, st.contactDps * 1.5);
-        const ang8 = Math.atan2(t.y - player.y, t.x - player.x);
-        run.effects.spawnSwipe(player.x, player.y, ang8, 60, 0.9, '#bb8fce');
-        run.effects.spawnBurst(t.x, t.y, '#bb8fce', 5, 160, 3);
-        const died8 = t.takeDamage(dmg8);
-        game.spawnHitFeedback(t, dmg8, died8);
-        if (died8) game.onEnemyKilled(t, 'pulse');
-      }
       break;
     }
     case 'nkcell': { // Hilang 0.5 dtk lalu teleport ke belakang musuh terdekat
@@ -1250,7 +1224,8 @@ function dealCloudDamage(game, c) {
   run.collision.grid.queryCircle(c.x, c.y, c.r + 40, (e) => {
     if (!e.alive) return;
     if (Math.hypot(e.x - c.x, e.y - c.y) > c.r + e.radius * 0.5) return;
-    e.applySlow(0.7, 0.4);
+    // Awan zona (archetype zone / Baso / Treg): lambat & warna ikut data
+    e.applySlow(c.slow != null ? c.slow : 0.7, 0.4);
     dealMembraneDamage(game, e, c.dps * 0.25, { sourceKind: 'cloud', noCrit: true });
   });
 }

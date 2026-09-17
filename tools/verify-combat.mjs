@@ -172,6 +172,204 @@ for (let i = 0; i < 600; i++) {
 cek('peludah menembak ke pemain', tembakan > 0, `tembakan=${tembakan}`);
 cek('peludah memberi telegraph sebelum tembakan', telegraphDulu, `telegraph=${pernahTelegraph}, tembakan=${tembakan}`);
 
+// ---------- 8. PAYLOAD ARCHETYPE: data & penimpaan per hero (§17) ----------
+const tanpaPayload = attacks.archetypes.filter((a) => !a.payload || Object.keys(a.payload).length === 0);
+cek('8 archetype punya payload terdata', tanpaPayload.length === 0, tanpaPayload.map((a) => a.id).join(','));
+const belumJalan = attacks.archetypes.filter((a) => a.status !== 'implemented');
+cek('8 archetype SERANGAH berstatus implemented', belumJalan.length === 0, belumJalan.map((a) => a.id).join(','));
+const tanpaTele = attacks.archetypes.filter((a) => !(a.telegraphSec > 0));
+cek('tiap archetype punya telegraph > 0 dtk', tanpaTele.length === 0, tanpaTele.map((a) => a.id).join(','));
+// SATU archetype harus terasa BEDA antar hero: area Makrofag (cincin besar,
+// moderat) vs area Neutrofil (sempit tapi tajam) — angka ada di heroes.json.
+const ppMakro = heroes.find((h) => h.id === 'macrophage').patternParams || {};
+const ppNetro = heroes.find((h) => h.id === 'neutrophil').patternParams || {};
+cek('satu archetype dibedakan per hero (area Makrofag ≠ area Neutrofil)',
+  (ppMakro.radiusMult || 0) > (ppNetro.radiusMult || 0) && (ppNetro.dmgMult || 0) > (ppMakro.dmgMult || 0),
+  `makro r${ppMakro.radiusMult}/d${ppMakro.dmgMult} vs netro r${ppNetro.radiusMult}/d${ppNetro.dmgMult}`);
+
+// ---------- 9. EKSEKUSI ARCHETYPE DI RUNTIME (§17 + §19) ----------
+const { beginAttack, updateAttack, updateSummons, archetypeForHero } = await import('../js/systems/attack-archetype.js');
+const { dealMembraneDamage } = await import('../js/systems/membrane-system.js');
+
+/** Siapkan run uji memakai objek game NYATA (tanpa menjalankan game.update). */
+function siapkan(heroId, posisiMusuh) {
+  game.startRun(heroId);
+  const run = game.run;
+  run.enemies.length = 0;
+  run.projectiles.length = 0;
+  run.summons = [];
+  run.membrane.clouds.length = 0;
+  run.player.x = 0; run.player.y = 0; run.player.facing = 0; run.player.alive = true;
+  const buah = [];
+  for (const [x, y] of posisiMusuh) {
+    const e = new Enemy(defBakteri, x, y, { hpScale: 6, speedScale: 1 });
+    e.maxHP = 5000; e.hp = 5000;
+    run.enemies.push(e);
+    buah.push(e);
+  }
+  run.collision.rebuildEnemyGrid(run.enemies);
+  return { run, musuh: buah };
+}
+const STATS = { contactDps: 30, pulseRadius: 130 };
+/** Jalankan archetype sampai selesai; kembalikan potongan state penting. */
+function jalankan(heroId, posisiMusuh, detik = 1.2) {
+  const { run, musuh } = siapkan(heroId, posisiMusuh);
+  const hp0 = musuh.map((e) => e.hp);
+  const atk = beginAttack(game, { stats: STATS });
+  const fase = [atk && atk.phase];
+  const langkah = Math.round(detik * 60);
+  let frameEksekusi = -1;
+  for (let i = 0; i < langkah; i++) {
+    const sebelum = run.attack && run.attack.phase;
+    updateAttack(game, 1 / 60);
+    const sesudah = run.attack && run.attack.phase;
+    if (sesudah !== sebelum) fase.push(sesudah);
+    if (sesudah === 'execution' && frameEksekusi < 0) frameEksekusi = i;
+  }
+  return {
+    run, musuh, hp0, hp1: musuh.map((e) => e.hp), fase, frameEksekusi,
+    atk, proyektil: run.projectiles.slice(), awan: run.membrane.clouds.slice(), summon: run.summons.slice(),
+  };
+}
+
+// 9a. RANTAI FASE wajib: anticipation → telegraph → execution → impact → recovery
+const rArea = jalankan('macrophage', [[60, 0]]);
+cek('PULSE menjalankan archetype hero (area Makrofag)', rArea.atk && rArea.atk.id === 'area', String(rArea.atk && rArea.atk.id));
+const urutan = rArea.fase.filter((f) => f && f !== 'done');
+cek('rantai fase: anticipation→telegraph→execution→impact→recovery',
+  urutan.join('>') === 'anticipation>telegraph>execution>impact>recovery', urutan.join('>'));
+
+// 9b. TELEGRAPH: bentuk sudah terbaca & BELUM ada damage sebelum execution
+const cfgArea = attacks.archetypes.find((a) => a.id === 'area');
+const frameTele = Math.round((0.12 + Math.max(0.25, cfgArea.telegraphSec)) * 60);
+const { run: runT, musuh: musuhT } = siapkan('macrophage', [[60, 0]]);
+beginAttack(game, { stats: STATS });
+for (let i = 0; i < frameTele - 3; i++) updateAttack(game, 1 / 60);
+const hpSaatTelegraph = musuhT[0].hp;
+const faseSaatTelegraph = runT.attack.phase;
+for (let i = 0; i < 12; i++) updateAttack(game, 1 / 60);
+const hpSetelahEksekusi = musuhT[0].hp;
+cek('bentuk serangan sudah tergambar saat telegraph (belum melukai)',
+  faseSaatTelegraph === 'telegraph' && hpSaatTelegraph === 5000,
+  `fase=${faseSaatTelegraph}, hp=${hpSaatTelegraph}`);
+cek('damage archetype jatuh SETELAH telegraph', hpSetelahEksekusi < hpSaatTelegraph, `${hpSaatTelegraph} → ${Math.round(hpSetelahEksekusi)}`);
+cek('archetype area melukai musuh di dalam cincin', rArea.hp1[0] < rArea.hp0[0], `${Math.round(rArea.hp0[0])} → ${Math.round(rArea.hp1[0])}`);
+const rAreaLuar = jalankan('macrophage', [[900, 900]]);
+cek('archetype area TIDAK melukai musuh di luar cincin', rAreaLuar.hp1[0] === rAreaLuar.hp0[0], `hp=${Math.round(rAreaLuar.hp1[0])}`);
+
+// 9c. BEAM (TCD8): lurus ke depan, tidak ke belakang
+// musuh depan DIBUAT lebih dekat supaya jelas yang jadi sasaran (arah dikunci
+// pada musuh terdekat saat telegraph), lalu musuh belakang ditempatkan tetap
+// dalam jangkauan jarak tapi di belakang hero — bentuknya harus meleset.
+const rBeam = jalankan('tcd8', [[120, 0], [-150, 0]]);
+cek('beam melukai musuh di depan', rBeam.hp1[0] < rBeam.hp0[0], `${Math.round(rBeam.hp0[0])} → ${Math.round(rBeam.hp1[0])}`);
+cek('beam TIDAK melukai musuh di belakang', rBeam.hp1[1] === rBeam.hp0[1], `hp belakang=${Math.round(rBeam.hp1[1])}`);
+
+// 9d. MELEE (Sel NK): busur di depan saja
+const rMelee = jalankan('nkcell', [[60, 0], [-80, 0]]);
+cek('melee mengenai busur di depan', rMelee.hp1[0] < rMelee.hp0[0], `${Math.round(rMelee.hp0[0])} → ${Math.round(rMelee.hp1[0])}`);
+cek('melee TIDAK mengenai yang di belakang', rMelee.hp1[1] === rMelee.hp0[1], `hp belakang=${Math.round(rMelee.hp1[1])}`);
+
+// 9e. CHAIN (Dendritik): melompat & meluruh
+const rChain = jalankan('dendritic', [[70, 0], [150, 0], [230, 0]]);
+const turun = [0, 1, 2].map((i) => rChain.hp0[i] - rChain.hp1[i]);
+cek('chain mengenai ≥2 musuh berurutan', turun.filter((d) => d > 0).length >= 2, turun.map((d) => Math.round(d)).join(','));
+cek('damage chain meluruh antar lompatan', turun[0] > 0 && (turun[2] === 0 || turun[2] < turun[0]), turun.map((d) => Math.round(d)).join(' → '));
+
+// 9f. PROJECTILE (Eos) & HOMING (Sel B): benar-benar meluncurkan proyektil
+const rProj = jalankan('eosinophil', [[300, 0]]);
+cek('projectile meluncurkan proyektil', rProj.proyektil.length >= 3, `proyektil=${rProj.proyektil.length}`);
+const rHom = jalankan('bcell', [[300, 40]]);
+cek('homing meluncurkan proyektil pengejar', rHom.proyektil.length >= 3 && rHom.proyektil.every((p) => (p.turnRate || 0) > 0), `proyektil=${rHom.proyektil.length}`);
+
+// 9g. ZONE (Basofil): medan tinggal di lantai & melukai yang berada di dalam
+const rZone = jalankan('basophil', [[200, 0]]);
+cek('zone meninggalkan medan di lantai', rZone.awan.length === 1 && rZone.awan[0].life > 0, `awan=${rZone.awan.length}`);
+const awan = rZone.awan[0];
+if (awan) {
+  const { run: runZ, musuh: musuhZ } = siapkan('basophil', [[Math.round(awan.x), Math.round(awan.y)]]);
+  runZ.membrane.clouds.push({ ...awan, t: 0 });
+  runZ.collision.rebuildEnemyGrid(runZ.enemies);
+  const hpAwalZ = musuhZ[0].hp;
+  dealMembraneDamage(game, musuhZ[0], awan.dps * 0.25, { sourceKind: 'cloud', noCrit: true });
+  cek('medan zone melukai musuh di dalamnya', musuhZ[0].hp < hpAwalZ, `${Math.round(hpAwalZ)} → ${Math.round(musuhZ[0].hp)}`);
+}
+
+// 9h. SUMMON (TCD4): entitas muncul & punya umur
+const rSum = jalankan('tcd4', [[300, 0]], 0.9);
+cek('summon memanggil entitas', rSum.summon.length >= 1, `entitas=${rSum.summon.length}`);
+if (rSum.summon.length) {
+  const s0 = rSum.summon[0];
+  for (let i = 0; i < Math.round((s0.life + 0.5) * 60); i++) updateSummons(game, 1 / 60);
+  cek('entitas summon habis masa hidupnya', rSum.run.summons.length === 0, `sisa=${rSum.run.summons.length}`);
+}
+
+// 9i. SETIAP hero menjalankan archetype-nya sendiri (tidak ada yang kosong)
+const kosong = heroes.filter((h) => {
+  const id = archetypeForHero(h);
+  return !id || !attacks.archetypes.find((a) => a.id === id);
+});
+cek('11 hero terpetakan ke archetype yang ada', kosong.length === 0, kosong.map((h) => h.id).join(','));
+
+// 9j. SMOKE TEST jalur nyata: PULSE tombol → archetype → menggambar, tanpa error
+try {
+  game.startRun('tcd8');
+  game.triggerPulse();
+  for (let i = 0; i < 90; i++) { updateAttack(game, 1 / 60); updateSummons(game, 1 / 60); }
+  game.render(1 / 60, 1000);
+  cek('PULSE + archetype + render tanpa error', true);
+} catch (err) {
+  cek('PULSE + archetype + render tanpa error', false, String(err && err.message || err));
+}
+
+// ---------- 10. SUPPORT: aura penguat musuh (§15) ----------
+const defKanker = daftar.find((e) => e.id === 'sel_kanker');
+cek('Sel Kanker membawa aura support', !!defKanker.aura && defKanker.archetypeSecondary === 'support',
+  `aura=${!!defKanker.aura}, sekunder=${defKanker.archetypeSecondary}`);
+const waves = baca('data/waves.json');
+cek('affix elite "aura" terdaftar', (waves.elite.affixes || []).includes('aura') && !!waves.elite.affixParams.aura,
+  (waves.elite.affixes || []).join(','));
+cek('semua 9 archetype ancaman berstatus implemented',
+  enemyArche.archetypes.filter((a) => a.status === 'implemented').length === 9,
+  enemyArche.archetypes.map((a) => `${a.id}:${a.status}`).join(' '));
+
+const pendukung = new Enemy(defKanker, 0, 0, { hpScale: 1, speedScale: 1 });
+const terbantu = new Enemy(defBakteri, 60, 0, { hpScale: 4, speedScale: 1 });
+const runAura = { enemies: [pendukung, terbantu], player: { x: 9999, y: 9999, radius: 15 }, effects: null, time: 0, collision: null };
+const gameAura = { run: runAura, damagePlayer() {}, provokeEnemy() {} };
+const pemainJauh2 = { x: 9999, y: 9999, radius: 15 };
+// (a) selama telegraph: BELUM ada buff
+const teleCfg = defKanker.aura.telegraphSec;
+for (let i = 0; i < Math.ceil(teleCfg * 60) - 4; i++) pendukung.update(1 / 60, pemainJauh2, 0, gameAura);
+cek('aura support menelegraph dulu (belum menguatkan)', terbantu.auraBuffT === 0 && terbantu.auraDmgMult === 1,
+  `buffT=${terbantu.auraBuffT}, dmgMult=${terbantu.auraDmgMult}`);
+// (b) setelah telegraph: buff menyala ke musuh di radius
+for (let i = 0; i < 12; i++) pendukung.update(1 / 60, pemainJauh2, 0, gameAura);
+cek('aura menguatkan musuh di sekitarnya', terbantu.auraBuffT > 0 && terbantu.auraDmgMult > 1 && terbantu.auraDr > 0,
+  `buffT=${terbantu.auraBuffT.toFixed(2)}, dmg×${terbantu.auraDmgMult}, dr=${terbantu.auraDr}`);
+// (c) buff membuat musuh menahan lebih banyak damage
+const polos = new Enemy(defBakteri, 0, 0, { hpScale: 4, speedScale: 1 });
+const pukulan = 40;
+polos.takeDamage(pukulan);
+const hilangPolos = polos.maxHP - polos.hp;
+const berbuff = new Enemy(defBakteri, 0, 0, { hpScale: 4, speedScale: 1 });
+berbuff.auraBuffT = 3; berbuff.auraDr = terbantu.auraDr; berbuff.auraDmgMult = terbantu.auraDmgMult;
+berbuff.takeDamage(pukulan);
+const hilangBuff = berbuff.maxHP - berbuff.hp;
+cek('musuh ber-aura menahan lebih banyak damage', hilangBuff < hilangPolos, `polos -${hilangPolos} vs aura -${Math.round(hilangBuff)}`);
+// (d) buff berakhir sesuai durasi
+const durasi = defKanker.aura.durationSec;
+for (let i = 0; i < Math.ceil((durasi + 0.2) * 60); i++) terbantu.update(1 / 60, pemainJauh2, 0, gameAura);
+cek('buff aura berakhir sesuai durasi', terbantu.auraBuffT === 0 && terbantu.auraDmgMult === 1, `buffT=${terbantu.auraBuffT}`);
+// (e) dukungan bisa digagalkan: bekukan pendukungnya
+const pendukung2 = new Enemy(defKanker, 0, 0, { hpScale: 1, speedScale: 1 });
+const terbantu2 = new Enemy(defBakteri, 50, 0, { hpScale: 4, speedScale: 1 });
+const gameAura2 = { run: { enemies: [pendukung2, terbantu2], player: { x: 9999, y: 9999, radius: 15 }, effects: null, time: 0 }, damagePlayer() {}, provokeEnemy() {} };
+pendukung2.frozen = 5;
+for (let i = 0; i < Math.ceil((defKanker.aura.pulseSec + teleCfg + 0.5) * 60); i++) pendukung2.update(1 / 60, pemainJauh2, 0, gameAura2);
+cek('membekukan pendukung menggagalkan aura', terbantu2.auraBuffT === 0, `buffT=${terbantu2.auraBuffT}`);
+
+
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);
 for (const e of errors.slice(0, 15)) console.log('- ' + e);

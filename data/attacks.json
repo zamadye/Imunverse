@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "doc": "V2 attack language (PHAGOS_V2_REBUILD.txt §17-§20). Delapan archetype serangan + aturan telegraph. Angka = tunable; belum dikonsumsi runtime sampai P1/P6.",
+  "doc": "V2 attack language (PHAGOS_V2_REBUILD.txt §17-§20). Delapan archetype serangan + aturan telegraph. Angka = tunable dan DIKONSUMSI runtime: payload tiap archetype dieksekusi pada PULSE (js/systems/attack-archetype.js) dengan rantai anticipation→telegraph→execution→impact→recovery. Nilai payload bisa ditimpa per hero lewat heroes[].patternParams (kunci yang sama).",
   "telegraph": {
     "stages": [
       "anticipation",
@@ -33,7 +33,15 @@
       "shape": "straight",
       "readable": "● ─────→ musuh",
       "telegraphSec": 0.2,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "count": 4,
+        "spreadDeg": 16,
+        "dmgMult": 1.2,
+        "speed": 440,
+        "pierce": 1
+      },
+      "label": "TEMBAKAN"
     },
     {
       "id": "homing",
@@ -41,7 +49,16 @@
       "readable": "● ↘↗ musuh",
       "telegraphSec": 0.25,
       "turnRate": 3.2,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "count": 5,
+        "spreadDeg": 40,
+        "dmgMult": 1.3,
+        "speed": 360,
+        "turnRate": 5.5,
+        "pierce": 1
+      },
+      "label": "PENGEJAR"
     },
     {
       "id": "melee",
@@ -49,21 +66,38 @@
       "readable": "◎ musuh",
       "telegraphSec": 0.18,
       "arcDeg": 110,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "radius": 88,
+        "arcDeg": 110,
+        "dmgMult": 2.0
+      },
+      "label": "TEBASAN"
     },
     {
       "id": "area",
       "shape": "ringAroundSelf",
       "readable": "○ HERO ○",
       "telegraphSec": 0.35,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "radiusMult": 1.15,
+        "dmgMult": 1.6
+      },
+      "label": "LEDakan"
     },
     {
       "id": "beam",
       "shape": "line",
       "readable": "HERO ═══════ musuh",
       "telegraphSec": 0.45,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "length": 360,
+        "width": 26,
+        "dmgMult": 2.0
+      },
+      "label": "BERKAS"
     },
     {
       "id": "chain",
@@ -75,14 +109,31 @@
       "hopRadius": 120,
       "implementation": "ranged_chain",
       "status": "implemented",
-      "heroSample": "dendritic"
+      "heroSample": "dendritic",
+      "payload": {
+        "maxHops": 2,
+        "hopRadius": 120,
+        "decay": 0.4,
+        "dmgMult": 1.5
+      },
+      "label": "RANTAI"
     },
     {
       "id": "zone",
       "shape": "groundArea",
       "readable": "┌ DANGER ┐",
       "telegraphSec": 0.6,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "radius": 130,
+        "castRange": 140,
+        "lifeSec": 3.2,
+        "dpsMult": 0.8,
+        "slow": 0.7,
+        "color": "#b678e0",
+        "ring": "#8e44ad"
+      },
+      "label": "WILAYAH"
     },
     {
       "id": "summon",
@@ -90,7 +141,15 @@
       "readable": "✦ entitas biologis",
       "telegraphSec": 0.5,
       "maxEntities": 3,
-      "status": "planned"
+      "status": "implemented",
+      "payload": {
+        "maxEntities": 3,
+        "lifeSec": 12,
+        "fireIntervalSec": 0.9,
+        "dpsMult": 0.9,
+        "sprite": "assets/sprites/hero_bcell_idle.png"
+      },
+      "label": "PANGGILAN"
     }
   ],
   "telegraphPhases": {

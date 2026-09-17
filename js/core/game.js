@@ -90,6 +90,7 @@ import { drawNestHint,
 import { drawSprite, hasSprite } from '../render/sprite-loader.js';
 import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
+import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
 
 export const game = {
   canvas: null,
@@ -186,6 +187,8 @@ export const game = {
       player,
       enemies: [],
       projectiles: [],
+      summons: [],       // V2 archetype SUMMON: entitas biologis sementara
+      attack: null,      // V2 §17: eksekusi archetype serangan (bertelegraph)
       ebullets: [],
       pickups: [],
       hazards: [], // Fase 9: genangan toksin (area damage statis)
@@ -763,6 +766,9 @@ export const game = {
     // PHAGOS Tahap 5 — MEDAN MEMBRAN vs musuh (kontak tick + engulf).
     // Proyektil di atas hanya untuk antibodi Bella/Eos + skill (sub-sistem).
     try { updateMembrane(this, dt); } catch (err) { console.warn('[phagos] updateMembrane:', err); }
+    // V2 §17–§19: archetype serangan hero berjalan di PULSE, dengan telegraph
+    try { updateAttack(this, dt); } catch (err) { console.warn('[phagos] updateAttack:', err); }
+    try { updateSummons(this, dt); } catch (err) { console.warn('[phagos] updateSummons:', err); }
     try { updateItemBuffs(this); } catch { /* abaikan */ } // ADDENDUM §2: kedaluwarsa buff
 
     // 7. Separation antar musuh (anti menumpuk)
@@ -1250,7 +1256,8 @@ export const game = {
     enemy.vx += dirX * lunge;
     enemy.vy += dirY * lunge;
     if (isMukusActive(this.run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
-    this.damagePlayer(enemy.damage);
+    // V2 §15 SUPPORT: musuh yang sedang dikuatkan aura melukai lebih keras
+    this.damagePlayer(enemy.damage * (enemy.auraDmgMult || 1));
   },
 
   /** Ledakan AOE boss: cek player dalam radius + shake. */
@@ -2322,6 +2329,8 @@ applyChapterTier(enemy, run) {
 
     // ===== PHAGOS: LAPISAN MEDAN MEMBRAN (di atas background, di bawah hero) =====
     try { this.renderMembraneLayer(ctx, run, time, ground, billboard); } catch (err) { console.warn('[phagos] renderMembrane:', err); }
+    // V2 §19: bentuk TELEGRAPH serangan digambar di lantai SEBELUM eksekusi
+    try { drawAttack(ctx, run, ground); } catch (err) { console.warn('[phagos] drawAttack:', err); }
     try { this.renderArenaWall(ctx, run, time, ground); } catch (err) { console.warn('[phagos] renderArenaWall:', err); }
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
@@ -2384,6 +2393,54 @@ applyChapterTier(enemy, run) {
           ctx.lineWidth = 3.5;
           ctx.beginPath();
           ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.35, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+        // V2 §15 SUPPORT: aura pendukung — telegraph tumbuh dulu, baru menyala.
+        // Kalau pemain melihat cincin ini, ia masih punya waktu untuk membekukan
+        // atau membunuh pendukungnya sebelum buff menyala.
+        if (e.auraCfg) {
+          const cfgA = e.auraCfg;
+          const warnaA = cfgA.color || '#b39ddb';
+          ground(e.x, e.y + e.radius * 0.9);
+          if (e.auraWindup > 0) {
+            const tA = 1 - Math.max(0, e.auraWindup) / (cfgA.telegraphSec || 0.5);
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.35 + 0.45 * tA;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([7, 6]);
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * (0.3 + 0.7 * tA), 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          } else if (e.auraPulseFx > 0) {
+            const kA = Math.max(0, e.auraPulseFx) / 0.45;
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.85 * kA;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * (1.05 - 0.25 * kA), 0, Math.PI * 2);
+            ctx.stroke();
+          } else {
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.22;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * 0.35, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+        // V2 §15 SUPPORT: musuh yang SEDANG dikuatkan aura (cincin terang)
+        if (e.auraBuffT > 0) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = e.auraColor || '#b39ddb';
+          ctx.globalAlpha = 0.45 + 0.25 * Math.abs(Math.sin(time * 6));
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.45, 0, Math.PI * 2);
           ctx.stroke();
           ctx.globalAlpha = 1;
           ctx.restore();
@@ -2474,6 +2531,19 @@ applyChapterTier(enemy, run) {
       draws.push({ y: a.y, fn: () => {
         billboard(a.x, a.y, { lift: a.radius * 0.55 });
         a.render(ctx);
+        ctx.restore();
+      } });
+    }
+    // V2 archetype SUMMON: entitas biologis sementara (punya umur)
+    for (const sm of run.summons || []) {
+      draws.push({ y: sm.y, fn: () => {
+        const fade = Math.min(1, (sm.life - sm.t) / 1.5); // memudar sebelum habis
+        billboard(sm.x, sm.y, { lift: sm.radius * 0.55 });
+        ctx.globalAlpha = 0.35 + 0.4 * fade;
+        drawPulseGlow(ctx, sm.x, sm.y, sm.radius * 1.6, sm.color, time, sm.angle, 0.7);
+        ctx.globalAlpha = fade;
+        drawSprite(ctx, sm.sprite, sm.x, sm.y, sm.radius * 2.4, 0, { alpha: fade });
+        ctx.globalAlpha = 1;
         ctx.restore();
       } });
     }

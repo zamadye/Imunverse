@@ -171,7 +171,7 @@ Penjaga regresi di `tools/verify-screens.mjs`: layar lama **tidak boleh** muncul
 DOM, tidak boleh ada tombol yang menujunya, dashboard tetap 4 menu, dan MAIN harus
 langsung masuk run (tanpa layar persiapan).
 
-### P1 — Core combat **[BERJALAN — BUILD 52k]**
+### P1 — Core combat **[SELESAI — BUILD 53a]**
 - 11 hero punya **identity**: strength / weakness / combat identity / scaling identity
 - 8 archetype serangan (projectile, homing, melee, area/burst, beam, chain, zone, summon)
 - telegraph wajib: anticipation → telegraph → execution → impact → recovery
@@ -216,9 +216,32 @@ mundur ke induk**; `KeyedObject.objectId` = indeks **lokal terhadap artboard**;
 dan kurva satu animasi harus ditulis **menempel** setelah objek animasinya
 (kalau tidak, runtime menempelkan kurva ke animasi yang salah).
 
-Sisa P1: archetype hero `beam / summon / zone / area` masih memakai pola lama
-(status `planned` di `attacks.json`) dan archetype **support** (buff aura) belum
-diwujudkan — keduanya masuk P1 lanjutan sebelum P2 (mutasi).
+Delapan archetype diwujudkan (§19) — satu modul, satu rantai waktu:
+
+| Langkah | Hasil |
+|---|---|
+| Modul baru | `js/systems/attack-archetype.js`: 8 archetype **dijalankan** di PULSE lewat rantai wajib `anticipation → telegraph → execution → impact → recovery` (durasi tiap fase dari `attacks.json → telegraphPhases`). Diekspor: `archetypeCfg`, `archetypeForHero`, `beginAttack`, `updateAttack`, `updateSummons`, `attackActive`, `attackProgress`, `drawAttack` |
+| Payload tiap archetype | `data/attacks.json` bertambah blok `payload` + `label` per archetype: projectile `{count 4, spread 16°, dmgMult 1,2}`, homing `{count 5, spread 40°, turnRate 5,5}`, melee `{radius 88, arc 110°, dmgMult 2,0}`, area `{radiusMult 1,15, dmgMult 1,6}`, beam `{length 360, width 26, dmgMult 2,0}`, chain `{hops 2, radius 120, decay 0,4}`, zone `{radius 130, life 3,2 s, slow 0,7}`, summon `{maks 3 entitas, life 12 s, interval 0,9 s}`. Semua status `planned` → `implemented` |
+| Satu archetype, rasa beda | `heroes[].patternParams` kini boleh **menimpa payload** — Makrofag area `radiusMult 1,45 / dmgMult 1,25` (cincin lebar, sedang) vs Neutrofil `0,95 / 2,0` (cincin sempit, tajam). Kontraknya terdokumentasi di `heroes.json → docPayload` |
+| Jalur hidup dipasang | `membrane-system.applyPulseSpecial` **kehilangan** tiga kasus damage instan (eosinofil, basofil, sel-B) — yang tersisa murni utilitas (dash, sweep, buff, imun, teleport). `beginAttack(game, {stats, dmgMult})` dipanggil setelahnya, jadi **setiap serangan berarti selalu bertelegraph**. `dealCloudDamage` kini menghormat `slow` + `color` dari data |
+| Telegraf jujur | Target & sudut **dikunci saat `beginAttack`**: telegraph menggambar bentuk nyata di lantai (cincin / garis beam / zona / busur melee / anak panah) dan memutih saat execution→impact. Tidak ada lagi damage kejutan |
+| Game loop | `game.run` bertambah `attack` + `summons`; loop memanggil `updateAttack` + `updateSummons` setelah `updateMembrane`, dan render memanggil `drawAttack` setelah lapisan membran. Summon digambar sebagai sprite billboard + `drawPulseGlow`, memudar menjelang akhir hidup |
+
+Archetype ancaman ke-9 — **SUPPORT** (selesai):
+
+| Langkah | Hasil |
+|---|---|
+| Aura buff | `Enemy` bertambah `auraCfg/auraT/auraWindup/auraBuffT/auraDmgMult/auraSpeedMult/auraDr/auraColor/auraPulseFx` + `emitSupportAura(game)`: menguatkan musuh lain dalam radius (damage ×1,25, speed ×1,15, DR 20%) |
+| Selalu bertelegraph | Aura menyala **setelah** `telegraphSec` (0,6 s) dan hanya selama `durationSec`; **membekukan pendukung menggagalkan aura** (emisi aura ditempatkan setelah early-return beku) |
+| Data | `sel_kanker.archetypeSecondary = 'support'` + blok `aura` (radius 190, dmgMult 1,3, DR 25%, warna `#d7263d`, label IMUNOSUPRESIF); affix elite baru `'aura'` di `waves.json → affixParams.aura`; `enemy-archetypes.json → support` jadi `implemented` dengan `counter`: *bekukan atau bunuh pendukungnya lebih dulu* |
+| Lantai bercerita | Render menambah cincin putus-putus yang membesar saat telegraph, kilas saat aura menyala, dan cincin terang di musuh yang sedang di-buff |
+
+**Exit P1 terpenuhi:** identitas hero terbaca dari **bentuk serangannya** (cincin lebar vs
+sempit, garis lurus, lompatan berantai, medan lambat, anak buah), bukan dari angka; dan tiap
+ancaman punya jawaban yang bisa dipelajari pemain.
+
+Dijaga: `verify:combat` naik 25 → **57 pemeriksaan** (data payload, diferensiasi per hero,
+eksekusi runtime tiap archetype memakai `game.startRun` sungguhan, dan aura support).
 
 ### P2 — Mutation sebagai jantung progresi
 - mutasi mengubah **perilaku tempur** (attack behavior/range/projectile/area/mobility/

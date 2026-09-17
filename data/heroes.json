@@ -28,7 +28,9 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "spreadAngle": 0.18
+        "spreadAngle": 0.18,
+        "radiusMult": 1.45,
+        "dmgMult": 1.25
       },
       "skills": [
         "taunt",
@@ -122,7 +124,10 @@
         "spreadAngle": 0.35,
         "turnRate": 5.5,
         "hops": 2,
-        "hopRadius": 120
+        "hopRadius": 120,
+        "maxHops": 2,
+        "decay": 0.4,
+        "dmgMult": 1.5
       },
       "skills": [
         "mark_target",
@@ -222,7 +227,9 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radiusMult": 0.95,
+        "dmgMult": 2.0
       },
       "skills": [
         "grenade",
@@ -319,7 +326,10 @@
       "patternParams": {
         "spreadAngle": 0.4,
         "turnRate": 6.5,
-        "antiParasitMult": 1.5
+        "antiParasitMult": 1.5,
+        "count": 5,
+        "dmgMult": 1.15,
+        "spreadDeg": 18
       },
       "skills": [
         "poison_dart",
@@ -418,7 +428,11 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radius": 145,
+        "lifeSec": 3.4,
+        "dpsMult": 0.8,
+        "slow": 0.68
       },
       "skills": [
         "histamine",
@@ -516,7 +530,9 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 1.9
+        "arc": 1.9,
+        "radiusMult": 1.2,
+        "dmgMult": 1.35
       },
       "skills": [
         "barrier",
@@ -612,7 +628,10 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "length": 420,
+        "width": 22,
+        "dmgMult": 2.2
       },
       "skills": [
         "precision_shot",
@@ -710,7 +729,10 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "maxEntities": 3,
+        "lifeSec": 12,
+        "dpsMult": 0.9
       },
       "skills": [
         "rally",
@@ -804,7 +826,11 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radius": 120,
+        "lifeSec": 3.0,
+        "dpsMult": 0.35,
+        "slow": 0.45
       },
       "skills": [
         "pacify",
@@ -901,7 +927,8 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 6.5,
+        "count": 5
       },
       "skills": [
         "antibody_burst",
@@ -994,7 +1021,10 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 2.0
+        "arc": 2.0,
+        "radius": 92,
+        "arcDeg": 120,
+        "dmgMult": 2.0
       },
       "skills": [
         "backstab",
@@ -1089,5 +1119,6 @@
     }
   },
   "doc": "· UI-REBUILD P8: spriteMut1* = foto bentuk MUTASI DASAR (tier 1), spriteMut2* = foto bentuk MUTASI LANJUT (tier 2-3). Bila foto belum tersedia, renderer memakai sprite dasar.",
-  "docHeroIdentity": "V2 P1 (§12-§14): tiap hero punya kekuatan, kelemahan, identitas tempur dan identitas scaling yang BERBEDA — tidak ada hero terbaik absolut."
+  "docHeroIdentity": "V2 P1 (§12-§14): tiap hero punya kekuatan, kelemahan, identitas tempur dan identitas scaling yang BERBEDA — tidak ada hero terbaik absolut.",
+  "docPayload": "patternParams bisa menimpa angka payload archetype serangan (kunci yang sama dengan data/attacks.json → archetypes[].payload) supaya satu archetype terasa beda per hero: area Makrofag = cincin besar, area Neutrofil = ledakan sempit & tajam."
 }
