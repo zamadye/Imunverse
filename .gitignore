@@ -26,3 +26,6 @@ node_modules/
 
 # berkas diagnostik sementara (bukan aset game)
 .tmp-*
+
+# mesin Godot (dipasang ulang dengan: node tools/godot/install.mjs)
+tools/godot/engine/

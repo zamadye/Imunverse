@@ -21,13 +21,15 @@
     "verify:economy": "node tools/verify-economy.mjs",
     "verify:world": "node tools/verify-world.mjs",
     "verify:p5": "node tools/verify-p5.mjs",
-    "verify:gamefeel": "node tools/verify-gamefeel.mjs"
+    "verify:gamefeel": "node tools/verify-gamefeel.mjs",
+    "godot:install": "node tools/godot/install.mjs",
+    "godot:version": "node tools/godot/run.mjs --version-only"
   },
   "dependencies": {
     "@rive-app/canvas": "^2.42.2"
   },
   "devDependencies": {
     "@rive-app/canvas-advanced": "^2.42.2",
-    "jsdom": "^26.0.0"
+    "jsdom": "^26.1.0"
   }
 }
