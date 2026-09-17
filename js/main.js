@@ -939,17 +939,10 @@ async function boot() {
     screenManager.show('dashboard');
     runAutotest();
   } else {
-    // DESAIN UI (P7): layar loading HANYA boleh berisi UI loading. Setelah 100%
-    // barulah modal MULAI muncul di atasnya; game berpindah layar hanya saat
-    // pemain mengetuk MULAI — tujuan = layar persiapan/pilih hero (roster).
-    const mulaiModal = document.getElementById('mulai-modal');
-    const tombolMulai = document.getElementById('btn-mulai');
-    mulaiModal?.classList.remove('hidden');
-    tombolMulai?.addEventListener('click', () => {
-      mulaiModal?.classList.add('hidden');
-      try { audio.ui(); } catch { /* audio belum terbuka */ }
-      screenManager.show('roster');
-    }, { once: true });
+    // Redesain UI: TIDAK ADA modal "MULAI" perantara — begitu progress 100%,
+    // langsung masuk Dashboard (jeda singkat hanya supaya progress bar
+    // sempat terlihat penuh sebelum transisi screen-in).
+    setTimeout(() => screenManager.show('dashboard'), 450);
   }
   // ADDENDUM §3: parameter akuisisi (?challenge= ?ref= ?play=)
   try { handleAcquisitionParams(); } catch { /* abaikan */ }

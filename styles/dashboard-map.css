@@ -88,15 +88,12 @@
   background-repeat: no-repeat;
 }
 
-/* Kartu loading: kaca gelap teal — SAMA dengan permukaan dashboard supaya
-   transisi loading → dashboard tidak berubah palet. */
-#screen-loading .load-box {
-  padding: clamp(18px, 3vh, 30px) clamp(20px, 5vw, 40px);
-  border-radius: 24px;
-  background: var(--dash-glass);
-  border: 1px solid var(--dash-edge);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+/* Loading: TIDAK LAGI kartu kaca mengambang (UI-audit) — brand + animasi
+   loading duduk langsung di atas latar foto penuh, palet sama dengan
+   dashboard supaya transisi loading → dashboard tidak berubah warna. */
+#screen-loading .load-bottom {
+  padding-left: clamp(20px, 5vw, 40px);
+  padding-right: clamp(20px, 5vw, 40px);
 }
 
 #screen-loading .load-title { color: var(--dash-ink); }
@@ -201,12 +198,17 @@
 }
 
 #screen-dashboard .map-viewport {
-  /* OVERLAY 1:1 — kotak sempurna. Lebar = tinggi yang tersedia, jadi slide
-     tidak pernah gepeng/terpotong dan info bab selalu menempel di posisi
-     yang sama (object-fit: cover merapikan foto 16:9 ke dalam kotak). */
+  /* UI-audit: ukuran dulu ditentukan DUA tempat berbeda (width:42vh di sini
+     + height:clamp(...) di main.css) — aspect-ratio jadi diabaikan browser
+     karena width & height sudah eksplisit dari dua sumber, hasilnya kartu
+     kadang terlalu pendek untuk judul+organ+objektif (teks meluber keluar
+     kartu). Sekarang HANYA file ini yang mengatur ukuran: rasio 16:10
+     (kartu "peta" landscape, lebih lega untuk 3 baris teks) dengan tinggi
+     dijepit clamp() supaya tetap wajar di layar sangat pendek/tinggi. */
   flex: 0 0 auto;
-  width: min(100%, 42vh);
-  aspect-ratio: 1 / 1;
+  width: min(100%, 640px);
+  aspect-ratio: 16 / 10;
+  max-height: clamp(160px, 30vh, 260px);
   margin: 0 auto;
   overflow-x: auto;
   overflow-y: hidden;
@@ -215,6 +217,9 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   border-radius: 18px;
+}
+@media (max-height: 700px) {
+  #screen-dashboard .map-viewport { max-height: clamp(130px, 24vh, 200px); }
 }
 
 .map-viewport::-webkit-scrollbar { display: none; }
@@ -278,6 +283,11 @@
   gap: 4px;
   text-align: left;
   pointer-events: none;
+  /* UI-audit: kartu peta punya tinggi terbatas (lihat .map-viewport) — kunci
+     info ke area bawah yang pasti tertutup gradasi (.chap-slide::after) dan
+     JANGAN pernah biarkan tumpukan teks lebih tinggi dari itu. */
+  max-height: 74%;
+  overflow: hidden;
 }
 
 #screen-dashboard .chap-no {
@@ -311,9 +321,15 @@
   font-size: clamp(10px, 1.5vh, 13px);
   font-weight: 600;
   color: rgba(226, 245, 240, 0.82);
-  max-width: min(46ch, 60%);
+  max-width: min(46ch, 88%);
   line-height: 1.35;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  /* Kalimat objektif bab panjangnya bervariasi per data/campaign.json — batasi
+     ke 2 baris & potong rapi, bukan meluber ke luar kartu. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 #screen-dashboard .chap-status {

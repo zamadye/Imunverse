@@ -202,9 +202,14 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 .currency-chip.small { padding: 4px 13px 4px 6px; font-size: 13.5px; }
 .currency-chip.small .coin { width: 26px; height: 26px; font-size: 12px; }
 
-/* ---------------- LOADING ---------------- */
-#screen-loading { justify-content: center; }
-.load-box { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+/* ---------------- LOADING ----------------
+   Latar penuh + brand di sepertiga atas + animasi loading MENEMPEL DI BAWAH
+   layar (bukan kartu mengambang di tengah). .load-box mengisi seluruh
+   #screen-loading; .load-bottom didorong ke dasar lewat margin-top:auto. */
+.load-box {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+}
 .load-emblem {
   width: min(52vw, 240px); aspect-ratio: 1; object-fit: contain;
   filter: drop-shadow(0 16px 26px rgba(31, 74, 66, 0.22));
@@ -213,15 +218,32 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
 .load-title { font-size: 30px; font-weight: 900; color: var(--teal-dark); letter-spacing: 2px; }
 .load-title span { color: var(--coral); }
+/* Blok bawah: progress bar + label, terkunci ke dasar layar (aman notch). */
+.load-bottom {
+  margin-top: auto;
+  width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding-bottom: calc(30px + env(safe-area-inset-bottom));
+}
 .progress-track {
-  width: min(64vw, 300px); height: 16px; border-radius: var(--pill); margin-top: 10px;
+  position: relative;
+  width: min(64vw, 300px); height: 16px; border-radius: var(--pill);
   background: #efe3c8; overflow: hidden; box-shadow: inset 0 2px 3px rgba(31, 74, 66, 0.12);
 }
 .progress-fill {
   height: 100%; width: 0%; border-radius: var(--pill);
   background: linear-gradient(180deg, #37ab9c, var(--teal-deep));
   transition: width 0.15s ease;
+  position: relative; overflow: hidden;
 }
+/* Animasi loading: kilau bergerak di atas fill — terasa "hidup" walau progres lambat. */
+.progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.65) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: loading-shine 1.4s linear infinite;
+}
+@keyframes loading-shine { from { background-position: 140% 0; } to { background-position: -60% 0; } }
 .loading-label { color: var(--ink-soft); font-size: 13px; font-weight: 700; }
 
 /* Kartu generik */
@@ -724,10 +746,8 @@ img.lock-badge {
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   flex: 0 0 auto;
 }
-/* layar pendek: peta mengecil, tombol MAIN & dock tetap utuh */
-@media (max-height: 700px) {
-  #screen-dashboard .body-map .map-viewport { height: clamp(120px, 26vh, 190px); }
-}
+/* layar pendek: peta mengecil, tombol MAIN & dock tetap utuh — ukuran
+   sepenuhnya diatur dashboard-map.css (satu sumber, lihat catatan di sana). */
 #screen-dashboard::before, #screen-roster::before, #screen-shop::before,
 #screen-upgrade::before, #screen-gameover::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
@@ -1952,7 +1972,10 @@ img.lock-badge {
   box-shadow: 0 3px 8px rgba(31, 74, 66, .25); z-index: 2;
 }
 .hero-card.locked .role-badge { filter: grayscale(.8); opacity: .7; }
-#screen-roster .screen-footer { margin-top: -66px; } /* footer menumpang di padding-bottom grid (dashboard-focus.css) */
+/* UI-audit: margin-top negatif di sini menarik footer MULAI naik lebih dalam
+   dari padding-bottom yang disediakan grid (dashboard-focus.css) — hasilnya
+   tombol MULAI menutupi baris kartu hero terakhir. Footer sticky sudah
+   berdiri sendiri di ruang padding-bottom grid, jadi TIDAK butuh margin ini. */
 /* Gembok SVG krem di lingkaran krem: padding piksel tetap (persen = relatif lebar avatar → gambar hilang) */
 #screen-roster .lock-badge { padding: 4px; box-sizing: border-box; background: var(--card); border-color: #e4d9bf; }
 #screen-roster .hero-card.locked .lock-badge { background: var(--card); }
@@ -2018,6 +2041,19 @@ img.lock-badge {
 #screen-hud .pulse-btn.pulse-meta {
   background: linear-gradient(170deg, #b366d9, #7b2fa0) !important;
 }
+/* UI-audit: chip ini sebelumnya TANPA gaya dasar sendiri (cuma teks polos
+   berdampingan dengan chip lain di .hud-center) — hasilnya menempel/bertabrakan
+   dengan chip tetangga ("10ANTIBODI/100" tanpa jarak, seperti satu blok teks).
+   Sekarang jadi pill sendiri konsisten dgn .hud-kills/.timer-chip; `gap` di
+   flex memberi jarak antar span (dot/angka/label/harga tujuan/badge evolusi)
+   tanpa perlu ubah markup di hud-screen.js. */
+.hud-bio-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(13, 17, 23, 0.55); border: 1px solid rgba(141, 247, 210, 0.35);
+  border-radius: 999px; padding: 4px 10px; font-weight: 900; font-size: 11px;
+  color: #eafff8; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+.hud-bio-chip:empty { display: none; }
 .hud-bio-chip .bio-dot { color: #8df7d2; font-size: 13px; }
 .hud-bio-chip .bio-muts { margin-left: 6px; font-size: 11px; color: #ffd93d; }
 .hud-bio-chip.rich { border-color: #ffd93d; box-shadow: 0 0 8px rgba(255, 217, 61, .5); }
@@ -2250,60 +2286,12 @@ img.lock-badge {
   box-shadow: inset 0 2px 10px rgba(255, 226, 200, 0.35), inset 0 -12px 20px rgba(90, 20, 8, 0.3);
 }
 
-/* ---------- 2. Overlay peta: nama peta → Chapter N → virus jalan (loop) ---------- */
-#screen-dashboard .map-viewport { position: relative; height: clamp(112px, 23vh, 176px); }
-#screen-dashboard .map-overlay {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 14px 12px 8px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  pointer-events: none;
-  z-index: 3;
-  background: linear-gradient(to top, rgba(3, 20, 24, 0.88) 0%, rgba(3, 20, 24, 0.5) 46%, rgba(3, 20, 24, 0) 100%);
-}
-.mo-text { min-width: 0; }
-.mo-name {
-  font-size: clamp(15px, 4.1vw, 21px);
-  font-weight: 900;
-  letter-spacing: 0.01em;
-  color: #f2ffff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mo-chapter {
-  margin-top: 2px;
-  font-size: clamp(9.5px, 2.5vw, 12px);
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #7ff0d6;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
-}
-.mo-walker { position: relative; width: clamp(56px, 17vw, 94px); height: 42px; overflow: hidden; flex: 0 0 auto; }
-.mo-walker-track { position: absolute; inset: 0; animation: vw-jalan 9s linear infinite; }
-.virus-walk { width: 100%; height: 100%; overflow: visible; }
-@keyframes vw-jalan { 0% { transform: translateX(-108%); } 100% { transform: translateX(108%); } }
-.vw-body { transform-box: fill-box; transform-origin: 50% 100%; animation: vw-ayun 0.62s ease-in-out infinite; }
-@keyframes vw-ayun {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50%      { transform: translateY(-3px) rotate(2deg); }
-}
-.vw-leg { transform-box: fill-box; transform-origin: 50% 0%; animation: vw-langkah 0.62s ease-in-out infinite; }
-.vw-leg.vl2, .vw-leg.vl3 { animation-direction: reverse; }
-@keyframes vw-langkah {
-  0%, 100% { transform: rotate(-17deg); }
-  50%      { transform: rotate(17deg); }
-}
-.vw-capsid { fill: #2ec9b0; stroke: #0b4f4d; stroke-width: 2.4; }
-.vw-core { fill: #c8fff2; opacity: 0.92; }
-.vw-eye { fill: #07282b; }
-.vw-knob { fill: #ff8a6a; }
-.vw-spikes { stroke: #ff8a6a; }
+/* ---------- 2. Peta Tubuh ----------
+   Overlay duplikat "nama peta → Chapter N → virus jalan" DIHAPUS (UI-audit):
+   info itu sudah ditampilkan oleh setiap kartu bab sendiri (.chap-info di
+   dashboard-map.css) — dua lapis teks di tempat yang sama menyebabkan kartu
+   terlihat "bertumpuk"/ganda. Ukuran & rasio kotak peta kini diatur tunggal
+   di dashboard-map.css (§2) supaya tidak ada dua sumber ukuran yang bentrok. */
 
 /* ---------- 3. Tombol PLAY dibangun ulang: lebih besar, proporsional, bentuk cairan ---------- */
 #screen-dashboard .dash-play.netes {
@@ -2337,10 +2325,16 @@ img.lock-badge {
 #screen-dashboard .dash-play-copy b { font-size: clamp(17px, 3.2vh, 26px); }
 #screen-dashboard .dash-play-copy small { font-size: clamp(9px, 2.3vw, 11px); max-width: 130px; }
 
-/* ---------- 4. Loading: watermark + maskot, HANYA UI loading ---------- */
+/* ---------- 4. Loading: watermark + maskot di sepertiga atas, HANYA UI loading ----------
+   Tidak ada lagi modal "MULAI" (UI-audit): loading selesai → main.js langsung
+   berpindah ke Dashboard. Brand didorong sedikit dari atas; sisa ruang kosong
+   dipakai .load-bottom (main.css §LOADING) untuk animasi loading di dasar layar. */
 #screen-loading .load-stage { display: none !important; }   /* dekorasi = "UI lain" */
-#screen-loading .load-box { position: relative; z-index: 2; gap: clamp(10px, 2vh, 18px); }
-#screen-loading .load-brand { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+#screen-loading .load-box { position: relative; z-index: 2; }
+#screen-loading .load-brand {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  margin-top: clamp(48px, 16vh, 140px);
+}
 #screen-loading .load-mascot {
   width: clamp(84px, 27vw, 138px);
   height: auto;
@@ -2352,26 +2346,6 @@ img.lock-badge {
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.65);
 }
 #screen-loading .progress-track { width: min(300px, 74vw); }
-.mulai-modal {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at 50% 62%, rgba(4, 26, 30, 0.32), rgba(2, 13, 16, 0.88));
-  animation: mulai-masuk 0.35s ease-out;
-}
-.mulai-modal.hidden { display: none; }
-@keyframes mulai-masuk { from { opacity: 0; } to { opacity: 1; } }
-.mulai-box { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.mulai-sub {
-  font-size: clamp(10px, 2.6vw, 12.5px);
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #9fe9dd;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-}
 
 /* ---------- 5. Modal Shop ---------- */
 .shop-sub { font-size: 12px; font-weight: 700; opacity: 0.86; margin: 2px 0 10px; }
@@ -2393,5 +2367,5 @@ img.lock-badge {
 
 /* ---------- 6. Hormati pengurangan gerak ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .mo-walker-track, .vw-body, .vw-leg, #screen-dashboard .dash-play.netes, .mulai-modal { animation: none; }
+  #screen-dashboard .dash-play.netes { animation: none; }
 }

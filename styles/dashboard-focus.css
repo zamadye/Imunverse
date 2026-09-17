@@ -1584,9 +1584,16 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-kills img { width: 15px; height: 15px; }
 #screen-hud .hud-center .wave-pill,
 #screen-hud .hud-center .timer-chip { box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-/* Equity-stage chip (Polos → Equity 1..4) sebagai satu pill berdampingan */
+/* Equity-stage chip (Polos → Equity 1..4) sebagai satu pill berdampingan.
+   UI-audit: chip ini asalnya absolute + left:50%/transform:translateX(-50%)
+   (main.css) untuk dipusatkan sendiri. `position` sudah di-static-kan di sini
+   tapi `transform` lama TIDAK PERNAH DIRESET — transform tetap berlaku pada
+   elemen static (cuma layout-nya yang tidak terpengaruh), jadi chip ini
+   tergambar geser ~setengah lebarnya sendiri ke kiri, menindih chip HP di
+   sebelahnya. Reset transform/left/top supaya jadi flex item normal. */
 #screen-hud .hud-center .hud-equity-stage {
-  position: static !important; background: rgba(255,253,244,.9); color: var(--teal-dark);
+  position: static !important; left: auto !important; top: auto !important; transform: none !important;
+  background: rgba(255,253,244,.9); color: var(--teal-dark);
   border-radius: 999px; padding: 3px 10px; font-weight: 900; font-size: 11px;
   box-shadow: 0 2px 6px rgba(0,0,0,.1); white-space: nowrap;
 }
@@ -1751,8 +1758,14 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-center .avatar-wrap { width: 34px !important; height: 34px !important; flex-basis: 34px !important; }
 #screen-hud .hud-center .hud-portrait { width: 34px !important; height: 34px !important; }
 #screen-hud .hud-center .level-badge { font-size: 8px !important; padding: 1px 5px !important; bottom: -4px !important; right: -7px !important; }
-#screen-hud .hud-center .status-bars { width: 110px !important; }
-#screen-hud .hud-center .hud-equity-stage { top: -11px; }
+/* UI-audit: 110px lebih sempit dari isinya (hati + bar HP + teks "120/120"),
+   jadi teks HP meluber dan tertindih chip "POLOS" di sebelahnya. Biarkan
+   lebar mengikuti isi + kunci track HP ke ukuran ringkas yang benar-benar
+   muat di bar atas — gap flex `.hud-center` yang menjaga jarak ke chip lain. */
+#screen-hud .hud-center .status-bars { width: auto !important; }
+#screen-hud .hud-center .hud-hp-track { width: 52px !important; }
+/* (top:-11px lama dihapus — tidak berefek pada elemen position:static, dan
+   memberi kesan salah bahwa posisi vertikal chip diatur di sini.) */
 #screen-hud .hud-center .hud-currency-run { pointer-events: auto; }
 #screen-hud .hud-center .hud-boss-wrap { flex-basis: 100%; }
 /* Bar bawah: misi + buff item, tengah-bawah, semi-opaque. */
@@ -1852,7 +1865,11 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 /* ============ Sprint 5.29 — Font self-host (offline PWA, tanpa CDN) ============
    TODO-ASET: jatuhkan file woff2 ke assets/fonts/ (Binari tidak bisa diunduh
    di sandbox ini — firewall). Sampai file ada, stack sistem rounded dipakai.
-   Rekomendasi: Nunito-ExtraBold (heading) + Nunito-Black atau "Baloo 2" (angka). */
+   Rekomendasi: Nunito-ExtraBold (heading) + Nunito-Black atau "Baloo 2" (angka).
+   UI-audit: @font-face DINONAKTIFKAN SEMENTARA — filenya belum ada di
+   assets/fonts/, jadi tiap load memicu 2 request 404 percuma. Aktifkan lagi
+   begitu imunverse-head.woff2 & imunverse-num.woff2 benar-benar di-commit. */
+/*
 @font-face{
   font-family:'Imunverse Head';font-weight:800 900;font-style:normal;font-display:swap;
   src:url('../assets/fonts/imunverse-head.woff2') format('woff2');
@@ -1861,9 +1878,10 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   font-family:'Imunverse Num';font-weight:700 900;font-style:normal;font-display:swap;
   src:url('../assets/fonts/imunverse-num.woff2') format('woff2');
 }
+*/
 :root{
-  --font-head:'Imunverse Head','Nunito','Quicksand','Varela Round',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
-  --font-num:'Imunverse Num','Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-head:'Nunito','Quicksand','Varela Round',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-num:'Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
 }
 /* Heading + angka memakai font self-host */
 h1,h2,h3,.gameover-title,.card-title,.dock-label,.btn,.quest-heading,.go-hook-title,

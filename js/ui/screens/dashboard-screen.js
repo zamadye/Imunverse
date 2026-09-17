@@ -171,24 +171,6 @@ function updateMapChrome(meta, idx = chapterIndex) {
     const locked = chapterStatus(ch, meta) === 'locked';
     sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
   }
-  // Overlay peta (di bawah kartu): nama peta → Chapter N.
-  const nm = document.getElementById('map-name');
-  const cp = document.getElementById('map-chapter');
-  if (ch) {
-    if (nm) nm.textContent = namaPeta(ch) || ch.organ || '—';
-    if (cp) cp.textContent = `Chapter ${idx + 1}`;
-  }
-}
-
-/** Nama peta = nama arena bab ini (data/arenas.json), jatuh ke organ bab. */
-function namaPeta(ch) {
-  try {
-    const semua = (getData().arenas && getData().arenas.arenas) || [];
-    const arena = semua.find((a) => a && a.id === ch.arenaId);
-    if (arena && arena.name) return arena.name;
-    if (arena && arena.organ && arena.organ.name) return arena.organ.name;
-  } catch { /* data belum siap */ }
-  return '';
 }
 
 /**

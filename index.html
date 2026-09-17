@@ -35,11 +35,13 @@
     <!-- Layer semua screen UI (HTML/CSS overlay di atas canvas) -->
     <div id="ui">
 
-      <!-- ============ LOADING ============ -->
+      <!-- ============ LOADING ============
+           Latar penuh (bg-loading.jpg) + brand di tengah-atas + progress bar
+           & label MENEMPEL DI BAWAH layar. Tidak ada modal "MULAI" — begitu
+           progress 100%, main.js langsung berpindah ke Dashboard. -->
       <section id="screen-loading" class="screen active" data-screen="loading">
         <div class="load-box">
-          <!-- Dekorasi lama DISIMPAN tapi disembunyikan CSS: scene loading hanya
-               boleh berisi UI loading + watermark (permintaan desain UI). -->
+          <!-- Dekorasi lama DISIMPAN tapi disembunyikan CSS (dekor "UI lain"). -->
           <div class="load-stage" aria-hidden="true">
             <img class="deco germ g1" src="assets/sprites/deco_germ_teal.png" alt="" />
             <img class="deco germ g2" src="assets/sprites/deco_germ_coral.png" alt="" />
@@ -52,14 +54,10 @@
             <img class="load-mascot" src="assets/sprites/mascot_phagos.png?v=54i" alt="Maskot PHAGOS" />
             <div class="load-title">PHA<span>GOS</span></div>
           </div>
-          <div class="progress-track"><div id="loading-bar" class="progress-fill"></div></div>
-          <p id="loading-label" class="loading-label">Menyiapkan organisme…</p>
-        </div>
-        <!-- Modal MULAI — MUNCUL SETELAH loading 100% (tidak tampil saat loading) -->
-        <div id="mulai-modal" class="mulai-modal hidden" role="dialog" aria-modal="true" aria-label="Siap dimainkan">
-          <div class="mulai-box">
-            <div class="mulai-sub">Sistem imun siap</div>
-            <button id="btn-mulai" class="btn btn-primary btn-xl"><img class="btn-ico" src="assets/icons/ui-play.svg" alt="" />MULAI</button>
+          <!-- Animasi loading: SELALU menempel di bawah layar. -->
+          <div class="load-bottom">
+            <div class="progress-track"><div id="loading-bar" class="progress-fill"></div></div>
+            <p id="loading-label" class="loading-label">Menyiapkan organisme…</p>
           </div>
         </div>
       </section>
@@ -145,41 +143,9 @@
             </div>
           </div>
           <div class="map-viewport" id="map-viewport">
-            <div class="map-track" id="chapter-track"><!-- diisi dashboard-screen.js --></div>
-            <!-- Overlay: nama peta → Chapter N → virus berjalan (loop terus) -->
-            <div class="map-overlay">
-              <div class="mo-text">
-                <div class="mo-name" id="map-name">—</div>
-                <div class="mo-chapter" id="map-chapter">Chapter 1</div>
-              </div>
-              <div class="mo-walker" aria-hidden="true">
-                <div class="mo-walker-track">
-                  <svg class="virus-walk" viewBox="0 0 100 70" role="img" aria-label="Virus berjalan">
-                    <g class="vw-legs" stroke="#8ef0d8" stroke-width="4" stroke-linecap="round" fill="none">
-                      <path class="vw-leg vl1" d="M40 52 L38 66" />
-                      <path class="vw-leg vl2" d="M47 54 L45 67" />
-                      <path class="vw-leg vl3" d="M54 54 L56 67" />
-                      <path class="vw-leg vl4" d="M61 52 L63 66" />
-                    </g>
-                    <g class="vw-body">
-                      <g class="vw-spikes" stroke="#ff8a6a" stroke-width="3.4" stroke-linecap="round">
-                        <path d="M50 4 L50 13" /><path d="M74 16 L67 22" /><path d="M83 36 L75 36" />
-                        <path d="M74 56 L67 50" /><path d="M50 68 L50 59" /><path d="M26 56 L33 50" />
-                        <path d="M17 36 L25 36" /><path d="M26 16 L33 22" />
-                      </g>
-                      <circle class="vw-knob" cx="50" cy="3" r="3" /><circle class="vw-knob" cx="76" cy="14" r="3" />
-                      <circle class="vw-knob" cx="86" cy="36" r="3" /><circle class="vw-knob" cx="76" cy="58" r="3" />
-                      <circle class="vw-knob" cx="50" cy="69" r="3" /><circle class="vw-knob" cx="24" cy="58" r="3" />
-                      <circle class="vw-knob" cx="14" cy="36" r="3" /><circle class="vw-knob" cx="24" cy="14" r="3" />
-                      <path class="vw-capsid" d="M50 12 L70 22 L70 50 L50 60 L30 50 L30 22 Z" />
-                      <circle class="vw-core" cx="50" cy="36" r="8" />
-                      <circle class="vw-eye" cx="46" cy="33" r="2.1" /><circle class="vw-eye" cx="54" cy="33" r="2.1" />
-                      <path class="vw-mouth" d="M45 42 Q50 46 55 42" fill="none" stroke="#0b2a2e" stroke-width="2.2" stroke-linecap="round" />
-                    </g>
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <div class="map-track" id="chapter-track"><!-- diisi dashboard-screen.js: setiap slide sudah
+               membawa nomor/judul/organ/objektif bab sendiri (.chap-info) — JANGAN duplikasi info itu
+               di overlay terpisah lagi, itu penyebab teks bertumpuk di kartu peta. --></div>
           </div>
           <div class="map-dots" id="map-dots"><!-- diisi dashboard-screen.js --></div>
         </section>
