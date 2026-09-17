@@ -33,6 +33,8 @@ import {
 import { reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve, maxAssistFor, reserveUsesLeft, reserveEnabled } from './systems/reserve-system.js';
 import { iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun } from './systems/purchase-provider.js';
 import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
+// P7: tanda tangan serangan per hero (identitas tempur)
+import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
@@ -839,6 +841,11 @@ async function boot() {
   window.__IMUNVERSE.audio = audio;
   // P6: kelas Enemy — dipakai penguji untuk menyiapkan musuh elite/boss.
   window.__IMUNVERSE.Enemy = Enemy;
+  // P7: permukaan debug SERANGAN (dipakai penguji & autotest).
+  window.__IMUNVERSE.attacks = {
+    beginAttack, updateAttack, attackActive, attackProgress, signatureFor,
+    archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods,
+  };
   // P6: permukaan debug GAME FEEL (dipakai penguji & autotest).
   window.__IMUNVERSE.gameFeel = {
     TIER_ORDER, gfTier, tierForEvent, crowdScale, updateGameFeel, numberAllowed,

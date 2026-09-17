@@ -52,6 +52,38 @@ export function archetypeCfg(id) {
   return list.find((a) => a.id === id) || null;
 }
 
+/**
+ * P7: TANDA TANGAN serangan per hero (data/attacks.json → heroSignatures).
+ * Dua hero bisa berbagi archetype (mis. area), tetapi warna, ukuran, jumlah,
+ * dan lajunya berbeda — jadi serangan TIDAK terasa sama semua.
+ */
+export function signatureFor(heroDef) {
+  const sigs = (getData().attacks && getData().attacks.heroSignatures) || {};
+  const id = heroDef && heroDef.id;
+  return (id && sigs[id]) || sigs._default || null;
+}
+
+/** Terapkan tanda tangan hero ke konfigurasi archetype (salinan, bukan mutasi). */
+function applySignature(cfg, sig) {
+  if (!cfg) return cfg;
+  if (!sig) return cfg;
+  const out = { ...cfg, payload: { ...(cfg.payload || {}) } };
+  const p = out.payload;
+  if (sig.tint) out.tint = sig.tint;
+  if (sig.label) out.signatureLabel = sig.label;
+  const kalikan = (kunci, f) => { if (typeof p[kunci] === 'number' && f) p[kunci] = p[kunci] * f; };
+  kalikan('radius', sig.sizeMult); kalikan('radiusMult', sig.sizeMult);
+  kalikan('length', sig.sizeMult); kalikan('width', sig.sizeMult); kalikan('hopRadius', sig.sizeMult);
+  kalikan('speed', sig.speedMult);
+  kalikan('spreadDeg', sig.spreadMult);
+  kalikan('dmgMult', sig.dmgMult); kalikan('dpsMult', sig.dmgMult);
+  if (sig.countMult) {
+    if (typeof p.count === 'number') p.count = Math.max(1, Math.round(p.count * sig.countMult));
+    if (typeof p.maxEntities === 'number') p.maxEntities = Math.max(1, Math.round(p.maxEntities * sig.countMult));
+  }
+  return out;
+}
+
 /** Archetype hero (dari identity.attackArchetype — lihat P1). */
 export function archetypeForHero(heroDef, run) {
   const base = (heroDef && heroDef.identity && heroDef.identity.attackArchetype) || null;
@@ -157,7 +189,10 @@ export function beginAttack(game, opts = {}) {
   if (!run || !run.player || !run.player.alive) return null;
   const id = archetypeForHero(run.heroDef, run);
   if (!id) return null;
-  const cfg = archetypeCfg(id);
+  // P7: konfigurasi DITANDATANGANI hero — archetype boleh sama, rasanya tidak.
+  const heroDef = run.heroDef || (run.player && run.player.heroDef) || null;
+  const sig = signatureFor(heroDef);
+  const cfg = applySignature(archetypeCfg(id), sig);
   if (!cfg) return null;
   const mods = mutationAttackMods(run);
   const player = run.player;
@@ -170,7 +205,8 @@ export function beginAttack(game, opts = {}) {
     durs: durasi({ cfg }),
     stats: opts.stats || null,
     dmgMult: (opts.dmgMult ?? 1) * mods.dmgMult,
-    color: (run.heroDef && (run.heroDef.roleColor || run.heroDef.color)) || '#8df7d2',
+    color: (sig && sig.tint) || (run.heroDef && (run.heroDef.roleColor || run.heroDef.color)) || '#8df7d2',
+    sig,
     // Arah & sasaran dikunci SAAT MULAI supaya telegraph jujur: apa yang
     // tergambar saat menelegraph = apa yang benar-benar terjadi saat eksekusi.
     angle: target ? Math.atan2(target.y - player.y, target.x - player.x) : (player.facing || 0),
@@ -181,7 +217,7 @@ export function beginAttack(game, opts = {}) {
   };
   run.attack = atk;
   if (run.effects) {
-    run.effects.spawnLabel(player.x, player.y - 56, (cfg.label || id).toUpperCase(), atk.color);
+    run.effects.spawnLabel(player.x, player.y - 56, ((cfg.signatureLabel || cfg.label) || id).toUpperCase(), atk.color);
   }
   return atk;
 }

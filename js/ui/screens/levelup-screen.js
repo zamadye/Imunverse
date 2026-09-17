@@ -45,8 +45,9 @@ export function show({ level, choices }) {
   const harga = mutationPriceFor(game.run);
   const phase = economyPhase((game.run && game.run.activeMutations || []).length);
   const labelFase = { abundance: 'MELIMPAH', tension: 'MENEGANG', scarcity: 'LANGKA' }[phase] || '';
+  // P7 (keluhan user): subjudul DIPADATKAN — satu baris, inti saja.
   document.getElementById('levelup-sub').textContent =
-    `Level ${level} — ${luName} BERMUTASI! (◉ ${dompet} Antibodi · mutasi berikutnya ${harga}${labelFase ? ` · ${labelFase}` : ''})`;
+    `Lv ${level} · ◉ ${dompet}/${harga}${labelFase ? ` · ${labelFase}` : ''}`;
   // retrigger animasi masuk tiap kali scene tampil
   const scene = document.querySelector('#screen-levelup .lu-scene');
   if (scene) {
@@ -178,6 +179,7 @@ function frictionPanel(level, choices) {
 
 function mutationCard(def, heroDef) {
   const locked = !!def.lockedByAntibody;
+  const dompetKini = (game.run && game.run.antibody) || 0;
   const icon = MUTATION_ICONS[def.visualChange] || '🧬';
   const _mutsKini = (game.run && game.run.activeMutations) || [];
   // P2: apa yang BERUH pada cara bertempur, dibaca langsung dari blok
@@ -222,14 +224,16 @@ function mutationCard(def, heroDef) {
       el('b', {}, [
         el('span', { text: def.name }),
         el('span', { class: 'syn-badge mut-tier', text: tierLabel(def.tier || 1) }),
+        // P7: harga SELALU terbaca — kalau terkunci, tampilkan KEKURANGANNYA.
         (def.cost || 0) > 0
-          ? el('span', { class: 'syn-badge bio-cost' + (locked ? ' locked' : ''), text: `◉ ${def.cost} ANTIBODI` })
+          ? el('span', { class: 'syn-badge bio-cost' + (locked ? ' locked' : ''), text: locked
+            ? `◉ ${def.cost} · kurang ${Math.max(0, def.cost - dompetKini)}`
+            : `◉ ${def.cost}` })
           : el('span', { class: 'syn-badge bio-free', text: 'GRATIS' }),
       ]),
-      el('p', { text: def.desc }),
-      _ubah ? el('p', { class: 'mut-attack', text: `⚔ ${_ubah}` }) : null,
-      def.lore ? el('p', { class: 'mut-lore', text: def.lore }) : null,
-      locked ? el('span', { class: 'choice-stack', text: 'Antibodi kurang — terus bertempur, kapan saja bisa bermutasi lagi!' }) : null,
+      // P7: SATU baris saja — yang BERUBAH pada cara bertempur lebih penting
+      // dari deskripsi; lore jadi tooltip (tidak memakan ruang kartu).
+      el('p', { class: 'mut-line', text: _ubah ? _ubah : def.desc, title: def.lore || def.desc || '' }),
     ]),
   ]);
   return card;

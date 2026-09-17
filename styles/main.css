@@ -257,6 +257,54 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 }
 .dock-btn .dock-ico img { width: 32px; height: 32px; object-fit: contain; }
 .dock-btn span { font-size: 13px; font-weight: 900; color: var(--ink); }
+/* Dock 4 menu = 4 kolom penuh (bukan 5 seperti dock lama) supaya sejajar rapi */
+.dock.dock-4 { grid-template-columns: repeat(4, 1fr); }
+/* Nav footer ala game mobile: bar dengan latar, menempel di bawah, aman notch */
+#screen-dashboard > .dock,
+.screen > .dock {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 253, 244, 0), rgba(255, 253, 244, 0.92) 38%);
+  border-top: 1px solid rgba(46, 125, 106, 0.12);
+  padding-top: 12px;
+  gap: 8px;
+}
+.dock-btn { padding-top: 2px; }
+.dock-btn .dock-ico { position: relative; }
+.dock-btn.active .dock-ico { box-shadow: 0 0 0 2px var(--teal), var(--shadow-card); }
+
+/* ---------- SISTEM KARTU NAV (rapi & tidak bertumpuk) ----------
+   Satu aturan untuk semua kumpulan kartu: grid responsif, maksimal 4 kartu
+   per baris, tinggi seragam, jarak 10px — tidak ada lagi kartu yang saling
+   menimpa saat jumlahnya berubah. */
+.nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  align-content: start;
+}
+.nav-card {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 62px; padding: 10px 12px;
+  border: none; border-radius: var(--r-lg, 18px);
+  background: var(--card, #fffdf6);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font); text-align: left; cursor: pointer;
+}
+.nav-card:active { transform: scale(0.98); }
+.nav-card .nc-ico {
+  width: 40px; height: 40px; flex: 0 0 auto; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(63, 217, 194, 0.16);
+}
+.nav-card .nc-ico img { width: 22px; height: 22px; object-fit: contain; }
+.nav-card .nc-copy { min-width: 0; }
+.nav-card .nc-title { display: block; font-size: 12.5px; font-weight: 900; color: var(--teal-dark); }
+.nav-card .nc-sub {
+  display: block; font-size: 10px; font-weight: 700; color: var(--ink-soft);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 /* ---------------- Header sub-screen ---------------- */
 .screen-header {
@@ -495,6 +543,23 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 @keyframes choice-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
 .choice-card:active { transform: scale(0.96); }
 
+/* ---------- P7: KARTU MUTASI LEBIH RINGKAS & TIDAK TERLALU LEBAR ----------
+   Keluhan user: kartu kelebaran & teks berlebihan sampai membingungkan.
+   Kini: modal lebih sempit, satu baris keterangan, foto bentuk lebih kecil. */
+#screen-levelup .lu-scene { width: min(92vw, 430px); }
+#screen-levelup .choice-card { padding: 10px 12px; gap: 10px; text-align: left; }
+#screen-levelup .choice-info b { font-size: 13.5px; gap: 5px; }
+#screen-levelup .choice-info p { font-size: 11px; margin-top: 2px; }
+.mut-line {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; font-size: 10.5px; font-weight: 700; color: var(--ink-soft);
+}
+.mut-forms { gap: 4px; }
+.mut-forms .mut-form { width: 52px; height: 52px; object-fit: contain; }
+.mut-arrow { font-size: 12px; opacity: 0.7; }
+.syn-badge.bio-cost { font-size: 9.5px; padding: 2px 7px; }
+.syn-badge.bio-cost.locked { background: rgba(255, 107, 107, 0.18); color: #b3261e; }
+
 /* ---------- P5: panel friksi ekonomi (IAP §18–§20, §27) ----------
    Kecil, kontekstual, tidak pernah mengambil alih momen transformasi:
    urutan CONTINUE (gratis) → WATCH AD (gratis) → USE RESERVE, dengan IAP
@@ -639,6 +704,30 @@ img.lock-badge {
       Screen dijadikan stacking context (z-index:0) supaya ::before
       ber-z-index -1 muncul DI ATAS bg cream tapi DI BAWAH konten. -- */
 #screen-dashboard, #screen-roster, #screen-shop, #screen-upgrade, #screen-gameover { z-index: 0; }
+
+/* ---------- TATA LETAK DASHBOARD (diminta user) ----------
+   Urutan vertikal yang pasti: TOPBAR (atas) → PETA TUBUH + TOMBOL MAIN
+   (kelompok di tengah) → DOCK 4 MENU (menempel di bawah).
+   Dua `margin-top:auto` membagi ruang kosong sehingga kelompok tengah
+   benar-benar di tengah dan nav footer SELALU di bawah, di semua tinggi
+   layar (tidak pernah lagi "di tengah"). */
+#screen-dashboard {
+  justify-content: flex-start;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+#screen-dashboard .body-map { margin-top: auto; }
+#screen-dashboard .dash-play { margin-top: 0; }
+#screen-dashboard > .dock {
+  margin-top: auto;
+  margin-bottom: 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  flex: 0 0 auto;
+}
+/* layar pendek: peta mengecil, tombol MAIN & dock tetap utuh */
+@media (max-height: 700px) {
+  #screen-dashboard .body-map .map-viewport { height: clamp(120px, 26vh, 190px); }
+}
 #screen-dashboard::before, #screen-roster::before, #screen-shop::before,
 #screen-upgrade::before, #screen-gameover::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;

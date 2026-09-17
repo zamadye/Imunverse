@@ -380,12 +380,30 @@ Catatan: sebelumnya seluruh rantai game feel (dari V2 Phase 1) **tidak punya pen
 P6 menutupnya, jadi perubahan dampak ke depan tidak bisa lagi menyalahi hierarki §20
 tanpa ketahuan.
 
-### P7 — UI/UX V2
+### P7 — UI/UX V2 **[BERJALAN — BUILD 54e]**
 - dashboard minimal: PHAGOS · HERO · CURRENT FORM · **PLAY** · Continue Journey
   (sekunder: Heroes, Progress, Settings)
 - hero selection: FORM / STRENGTH / WEAKNESS / START JOURNEY
 - HUD: atas = progres zona, tengah = gameplay, bawah = HP · Antibody · progres mutasi
 - **Exit:** checklist UI/UX §50 terpenuhi (tanpa upgrade/squad/battle/shop/BP).
+
+Progres dari umpan balik pemain (main sendiri, 17 Sep 2026):
+
+| Keluhan pemain | Penanganan | Status |
+|---|---|---|
+| Karakter tidak jalan ke semua arah & "mengambang" | **Godot 4.7.2 headless terpasang & terdokumentasi** (`docs/GODOT-SETUP.md`, `tools/godot/`) sebagai alat authoring animasi. Tahap berikutnya: rig tulang per hero dipanggang dari Godot → JSON → renderer kanvas (bukan lagi foto dibalik-balik) | Alat ✔ · rig **berikutnya** |
+| Nav footer salah posisi (di tengah) | `#screen-dashboard` kini `justify-content: flex-start` + dua `margin-top:auto` (peta & dock): kelompok PETA TUBUH + MAIN benar-benar di tengah, dock 4 menu **menempel di bawah** dengan latar bar & aman notch; `.dock-4` jadi 4 kolom penuh (dulu 5 → tombol mengecil & nggantung) | ✔ |
+| Kartu nav terlalu banyak, tidak rapi, bertumpuk | Sistem kartu baru `.nav-cards` / `.nav-card`: grid `auto-fit minmax(140px,1fr)`, maks 4 per baris, tinggi seragam 62px, jarak 10px, judul + subjudul terpotong rapi — tidak ada lagi kartu saling menimpa | ✔ (dipakai bertahap per layar) |
+| Modal mutasi kelebaran & teks berlebihan | Subjudul dipadatkan (Lv 3 · ◉ 12/150 · MENEGANG), **satu baris keterangan** (perubahan tempur; lore jadi tooltip), badge harga menampilkan **kekurangan** saat terkunci (◉ 150 · kurang 40), modal lebih sempit (430px), foto bentuk lebih kecil, lore tidak lagi memakan ruang | ✔ |
+| Jenis serangan semua hero terasa sama | `data/attacks.json → heroSignatures`: 11 hero punya tanda tangan sendiri (warna, ukuran, jumlah, laju, label, SFX). Tiga hero se-archetype `area` kini benar-benar beda: Mako = satu gelombang besar lambat, Neutron = banyak jebakan kecil cepat, Mastia = ledakan beruntun. Diterapkan **runtime** lewat `applySignature()` di `attack-archetype.js` | ✔ |
+| penjaga regresi baru | `tools/verify-attacks.mjs` (11 pemeriksaan): tanda tangan unik, warna unik, hero se-archetype tetap beda, runtime benar-benar memakainya, alur ANTICIPATION→TELEGRAPH→EXECUTION, mutasi mengubah angka serangan, telegraph ≥ 0,18 dtk | ✔ |
+
+Catatan penting untuk sesi berikutnya: **Godot sudah bisa dipakai** —
+`node tools/godot/install.mjs` lalu
+`node tools/godot/run.mjs <proyek> --headless --path <proyek> --script res://x.gd`.
+Build ini `template_release` (tanpa editor, tanpa WebGL di sandbox), jadi Godot
+dipakai untuk **menulis & memanggang** animasi (Skeleton2D + AnimationPlayer →
+JSON), sedangkan yang menggambar tetap kanvas 2D game.
 
 ### P8 — Balance & telemetri
 - 11 hero × 13 famili patogen; pastikan tidak ada *farming meta hero* (Test E)

@@ -83,6 +83,13 @@ ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMov
   'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
   && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
+// ---------- P7: tanda tangan serangan per hero ----------
+const ser = load('data/attacks.json');
+const ttd = ser.heroSignatures || {};
+const daftarHero = load('data/heroes.json').heroes;
+ok('tanda-tangan-serangan', daftarHero.every((h) => ttd[h.id])
+  && new Set(daftarHero.map((h) => `${ttd[h.id].tint}|${ttd[h.id].sizeMult || 1}|${ttd[h.id].countMult || 1}|${ttd[h.id].speedMult || 1}`)).size === daftarHero.length);
+
 // ---------- P6: game feel (tangga dampak + keramaian) ----------
 const gf = load('data/gamefeel.json');
 const tangga = (gf.tiers || {});
