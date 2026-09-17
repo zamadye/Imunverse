@@ -18,6 +18,9 @@ import { initPwa } from './systems/pwa.js'; // Sprint 6.35: PWA
 import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
+import {
+  cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
+} from './systems/mutation-cinematic.js'; // P2 §9: sinematik mutasi
 import { Pickup } from './entities/pickup.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
@@ -677,9 +680,15 @@ async function boot() {
   // Satu-satunya aksi tempur keyboard: 4 / T / K = PULSE langsung.
   // (SPASI ditangani InputHandler — antrean edge-trigger — jangan di sini.)
   window.addEventListener('keydown', (ev) => {
-    if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const target = ev.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+    // P2 §9: LEWATI sinematik mutasi dengan Spasi/Enter — VALID, tidak ada hukuman.
+    if (cineActive() && (ev.key === ' ' || ev.key === 'Enter' || ev.key === 'Escape')) {
+      ev.preventDefault();
+      skipCinematic('keyboard');
+      return;
+    }
+    if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const key = ev.key;
     if (key === '4' || key.toLowerCase() === 't' || key.toLowerCase() === 'k') {
       ev.preventDefault();
@@ -753,6 +762,12 @@ async function boot() {
   // 5) Game loop (rAF + delta-time) — update hanya saat gameplay aktif
   const loop = new GameLoop(
     (dt) => {
+      // P2 §9: saat sinematik mutasi berjalan, dunia DIBEKUKAN — hanya adegan
+      // yang maju. Lewati lewat tombol/spasi (lihat handler di bawah).
+      if (cineActive()) {
+        updateMutationCinematic(dt);
+        return;
+      }
       if (STATE.screen === 'gameplay' && !STATE.paused && !STATE.levelUpOpen) {
         game.update(dt);
       }
@@ -794,6 +809,10 @@ async function boot() {
     return true;
   };
   window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  // P2 §9: permukaan debug sinematik mutasi (dipakai penguji & autotest).
+  window.__IMUNVERSE.mutationCinematic = {
+    cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
+  };
 
   loop.start();
   setPaused(false);

@@ -450,6 +450,112 @@ cek('teks kartu mutasi turun dari blok attack (bukan dikarang)',
   teksNova.includes('radius ×1.6') && teksNova.includes('damage ×2') && teksRegen === '',
   `nova="${teksNova}" | regenerasi="${teksRegen}"`);
 
+// ---------- 12. P2 — POHON EVOLUSI + SINEMATIK MUTASI (§9) ----------
+const {
+  evoStageFor, evoSprite, evoProgress, signatureMutations, evoCounts, evoStatMult,
+} = await import('../js/systems/evolution-system.js');
+// Sinematik dipakai game.js di DALAM bundle — ambil instance yang SAMA lewat
+// window.__IMUNVERSE.mutationCinematic supaya uji jalur nyata tidak bohong.
+const CINE = (API && API.mutationCinematic) || await import('../js/systems/mutation-cinematic.js');
+const { startMutationCinematic, updateMutationCinematic, cineActive, cinePhase, cineDuration, skipCinematic, resetCinematic } = CINE;
+const evoData = baca('data/evolutions.json');
+
+// (a) pohon: BASE → MUT1 → MUT2 → APEX, ambang jumlah mutasi naik
+const idTahap = evoData.stages.map((s) => s.id);
+const ambangNaik = evoData.stages.every((s, i) => i === 0 || (s.minMutations || 0) > (evoData.stages[i - 1].minMutations || 0));
+cek('pohon evolusi BASE → MUT1 → MUT2 → APEX terurut',
+  idTahap.join('>') === 'base>mut1>mut2>apex' && ambangNaik,
+  `${idTahap.join('>')} | ambang ${evoData.stages.map((s) => s.minMutations).join(',')}`);
+
+// (b) tiap hero punya jalur KHAS (≥2 mutasi yang menyentuh archetype-nya)
+const sigKecil = heroes.filter((h) => (evoData.heroes[h.id]?.signature || []).length < 2);
+const sigNyata = heroes.every((h) => (evoData.heroes[h.id]?.signature || []).every((id) => {
+  const atk = (daftarMutasi.find((m) => m.id === id) || {}).attack || {};
+  const arch = h.identity.attackArchetype;
+  return !!(atk.payload && atk.payload[arch]) || !!(atk.archetypeFrom && atk.archetypeFrom[arch]);
+}));
+cek('tiap hero punya ≥2 mutasi khas archetype-nya',
+  sigKecil.length === 0 && sigNyata, `${sigKecil.length} hero kurang, nyata=${sigNyata}`);
+
+// (c) tahap run mengikuti jumlah mutasi (sumber tunggal: run.activeMutations)
+const heroMak = heroes.find((h) => h.id === 'macrophage');
+const sigMak = signatureMutations(heroMak);
+const runPalsu = (ids) => ({ activeMutations: ids, heroDef: heroMak });
+const nonSig = daftarMutasi.map((m) => m.id).filter((id) => !sigMak.includes(id));
+cek('tahap naik mengikuti jumlah mutasi',
+  evoStageFor(runPalsu([]), heroMak).id === 'base'
+  && evoStageFor(runPalsu(['berduri']), heroMak).id === 'mut1'
+  && evoStageFor(runPalsu(['berduri', 'elastis', 'nova']), heroMak).id === 'mut2'
+  && evoStageFor(runPalsu(nonSig.slice(0, 5)), heroMak).id === 'mut2',
+  `0=${evoStageFor(runPalsu([]), heroMak).id} 1=${evoStageFor(runPalsu(['berduri']), heroMak).id} 5non-sig=${evoStageFor(runPalsu(nonSig.slice(0, 5)), heroMak).id}`);
+
+// (d) APEX butuh mutasi khas, bukan sekadar banyak mutasi
+const apexRun = runPalsu([sigMak[0], sigMak[1], ...nonSig.slice(0, 3)]);
+cek('APEX butuh mutasi khas hero (bukan sekadar ≥5 mutasi)',
+  evoStageFor(apexRun, heroMak).id === 'apex' && evoCounts(apexRun, heroMak).signature >= 2,
+  `${evoStageFor(apexRun, heroMak).id} khas=${evoCounts(apexRun, heroMak).signature}`);
+
+// (e) foto karakter mengikuti tahap (bukan overlay)
+const sprBase = evoSprite(runPalsu([]), heroMak);
+const sprMut1 = evoSprite(runPalsu(['berduri']), heroMak);
+const sprApex = evoSprite(apexRun, heroMak);
+cek('foto karakter mengikuti tahap evolusi',
+  sprBase === heroMak.spriteIdle && sprMut1 === heroMak.spriteMut1Idle && sprApex === heroMak.spriteMut2Idle,
+  `${sprBase} → ${sprMut1} → ${sprApex}`);
+cek('foto tahap benar-benar ada di assets',
+  fs.existsSync(path.join(ROOT, sprMut1)) && fs.existsSync(path.join(ROOT, sprApex)),
+  `${sprMut1} & ${sprApex}`);
+
+// (f) pengali stat tahap & kemajuan ke tahap berikutnya
+const mApex = evoStatMult(apexRun, heroMak);
+const prog = evoProgress(runPalsu(['berduri']), heroMak);
+cek('pengali stat & kemajuan tahap terbaca',
+  mApex.damage > 1 && mApex.maxHP > 1 && prog.id === 'mut1' && prog.needMutations > 0,
+  `apex dmg×${mApex.damage} hp×${mApex.maxHP} | mut1 butuh ${prog.needMutations} lagi`);
+
+// (g) sinematik: urutan fase pause → charge → break → reveal → resume
+resetCinematic();
+let selesai = 0;
+startMutationCinematic({ from: sprBase, to: sprMut1, name: 'Uji', stageName: 'MUT1', onDone: () => { selesai += 1; } });
+const faseCine = [cinePhase()];
+for (let i = 0; i < Math.ceil((cineDuration() + 0.1) * 60); i++) {
+  updateMutationCinematic(1 / 60);
+  const f = cinePhase();
+  if (f && f !== faseCine[faseCine.length - 1]) faseCine.push(f);
+}
+cek('sinematik mutasi: jeda → energi → pecah → bentuk baru → lanjut',
+  faseCine.slice(0, 5).join('>') === 'pause>charge>break>reveal>resume' && !cineActive() && selesai === 1,
+  `${faseCine.join('>')} | onDone ${selesai}x`);
+
+// (h) LEWATI itu VALID: tetap selesai, mutasi tidak hilang, onDone sekali
+resetCinematic();
+let selesai2 = 0;
+startMutationCinematic({ from: sprBase, to: sprMut1, name: 'Uji', onDone: () => { selesai2 += 1; } });
+for (let i = 0; i < 20; i++) updateMutationCinematic(1 / 60); // lewati ambang 0,2 dtk
+const dilewati = skipCinematic();
+cek('LEWATI sinematik valid (adegan selesai, onDone sekali)',
+  dilewati && !cineActive() && selesai2 === 1, `skip=${dilewati} onDone=${selesai2}`);
+
+// (i) jalur nyata: memilih mutasi di game menjalankan adegan + tahap naik
+const { rollMutationChoices } = await import('../js/systems/mutation-system.js');
+const { STATE, setLevelUpOpen } = await import('../js/core/state-manager.js');
+resetCinematic();
+game.startRun('macrophage');
+const runEvo = game.run;
+runEvo.bioPoints = 999;
+const kartu = rollMutationChoices(runEvo).find((c) => c.isMutation && !c.lockedByBio);
+runEvo.currentChoices = [kartu];
+setLevelUpOpen(true);
+game.chooseLevelUp(kartu.id);
+const jalan = cineActive();
+const tahapSetelah = runEvo.evoStage && runEvo.evoStage.id;
+for (let i = 0; i < Math.ceil((cineDuration() + 0.2) * 60); i++) updateMutationCinematic(1 / 60);
+cek('memilih mutasi menjalankan adegan & menaikkan tahap (jalur nyata)',
+  jalan && runEvo.activeMutations.includes(kartu.id) && tahapSetelah === 'mut1'
+  && !cineActive() && STATE.paused === false,
+  `adegan=${jalan} mutasi=${runEvo.activeMutations.join(',')} tahap=${tahapSetelah} paused=${STATE.paused}`);
+resetCinematic();
+
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);
 for (const e of errors.slice(0, 15)) console.log('- ' + e);

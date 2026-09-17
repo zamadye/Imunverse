@@ -243,7 +243,7 @@ ancaman punya jawaban yang bisa dipelajari pemain.
 Dijaga: `verify:combat` naik 25 → **57 pemeriksaan** (data payload, diferensiasi per hero,
 eksekusi runtime tiap archetype memakai `game.startRun` sungguhan, dan aura support).
 
-### P2 — Mutation sebagai jantung progresi **[BERJALAN — BUILD 53b]**
+### P2 — Mutation sebagai jantung progresi **[SELESAI — BUILD 53c]**
 - mutasi mengubah **perilaku tempur** (attack behavior/range/projectile/area/mobility/
   defense/control/survivability/target priority/interaksi lingkungan)
 - pohon evolusi per hero: BASE → MUT1 → MUT2 → APEX
@@ -260,10 +260,22 @@ Yang sudah dikerjakan:
 | Kartu mutasi jujur | Modal level-up menampilkan **BENTUK SEKARANG → BENTUK BARU** (dua foto karakter, grayscaled untuk yang lama) + satu baris `⚔ ...` yang **diturunkan dari blok attack** lewat `describeAttackChange()` — bukan teks karangan UI |
 | Dijaga | `verify:combat` 57 → **65 pemeriksaan**: mutasi menimpa angka (radius Makrofag 1,45→1,6 terbukti kena musuh di 200 px), mutasi mengubah bentuk (proyektil→chain; tebasan depan-saja → ledakan sekeliling), `dmgMult` global (auto-pulse lebih lemah per tembakan), mutasi tanpa blok attack **tidak mengubah apa pun**, semua blok valid, dan teks kartu turun dari data |
 
-Sisa P2: pohon evolusi BASE → MUT1 → MUT2 → APEX per hero (`data/evolutions.json`
-masih berisi sistem "fragmen diferensiasi" lama yang tidak dikonsumsi runtime),
-**sinematik transformasi** (§9: jeda → energi → bentuk lama pecah → bentuk baru →
-lanjut), dan tombol **SKIP valid** di modal mutasi.
+Lanjutan P2 — pohon evolusi & sinematik (SELESAI):
+
+| Langkah | Hasil |
+|---|---|
+| Pohon BASE → MUT1 → MUT2 → APEX | `data/evolutions.json` ditulis ulang (schemaVersion 3): tahap dihitung dari **mutasi aktif se-run** (0/1/3/5) dan APEX butuh ≥5 mutasi **DAN ≥2 mutasi khas hero**. Mutasi khas = mutasi yang blok `attack`-nya menyentuh archetype hero (payload atau archetypeFrom) — jadi tiap hero punya jalur berbeda karena cara bertempurnya berbeda |
+| Sistem lama dihapus | `evolution-system.js` ditulis ulang: fragmen/parts drop, `meta.evoParts`, dan `rollPartDrop` **dihapus**; peti boss kini memberi **Bio-Point** (bukan fragmen); `drawHeroEquity` (overlay anatomi) dicabut dari render — bentuk evolusi murni **FOTO karakter** |
+| Runtime | `evoStageFor/evoSprite/evoProgress/evoStatMult/signatureMutations` — satu sumber: `run.evoStage`, disegarkan setiap mutasi dipilih. Pengali stat tahap ikut `recomputePlayerStats` |
+| **Sinematik mutasi §9** | `js/systems/mutation-cinematic.js`: pause → charge → break → reveal → resume (durasi per fase dari `evolutions.json → cinematic`). Foto lama mengerut & dikelilingi energi → **pecah jadi 14 pecahan partikel** + kilas putih → foto baru muncul dengan cincin kejut + nama mutasi & tahap. Dunia **dibekukan** selama adegan (loop utama hanya memajukan adegan) |
+| **SKIP valid** | Tombol LEWATI (DOM) + Spasi/Enter/Esc aktif setelah 0,2 s. Mutasi **sudah diterapkan sebelum** adegan mulai, jadi melewati tidak mengurangi apa pun — murni mempercepat |
+| Terlihat di HUD & hasil run | Chip BIO menampilkan lencana tahap (warna ikut data); layar game over menampilkan "Evolusi run ini: MUT2 (3 mutasi)" dan target "APEX <hero>" di kotak *Kurang Sedikit Lagi* |
+| Dijaga | `verify:combat` 65 → **74** pemeriksaan (pohon terurut, jalur khas per hero, tahap naik & APEX butuh mutasi khas, foto mengikuti tahap + berkas ada, sinematik urut fase & onDone sekali, LEWATI valid, dan **jalur nyata**: memilih mutasi lewat `game.chooseLevelUp` menjalankan adegan & menaikkan tahap) · `validate` mengganti pemeriksaan "diferensiasi" lama dengan `pohon-evolusi` + `jalur-khas-per-hero` + `sinematik-mutasi-terdata` |
+
+**Exit P2 terpenuhi:** mutasi terasa sebagai **evolusi** — bentuk karakter berubah (foto
+sendiri), cara bertempurnya berubah, ada adegan transformasi, dan kemajuannya terbaca
+di HUD. Sisa yang menyentuh mutasi tinggal soal **mata uang** (P3: biaya mutasi
+memakai Antibody, bukan Bio-Point).
 
 ### P3 — Economy Antibody (V2)
 - Antibody = satu-satunya resource evolusi (sumber: kill, elite, boss, event, ads)

@@ -227,7 +227,7 @@ export function updateHUD(data) {
   updateBuffChips();
   // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
   try { updatePulseButton(data.pulse); } catch { /* abaikan */ }
-  try { updateBioChip(data.bioPoints, data.activeMutations); } catch { /* abaikan */ }
+  try { updateBioChip(data.bioPoints, data.activeMutations, data.evoStage); } catch { /* abaikan */ }
   try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
@@ -323,7 +323,7 @@ function updatePulseButton(pulse) {
 }
 
 /** PHAGOS: chip Bio-Point + ikon mutasi aktif (run-only). */
-function updateBioChip(bio, mutations) {
+function updateBioChip(bio, mutations, evoStage) {
   let chip = document.getElementById('hud-bio-chip');
   if (!chip) {
     const top = document.querySelector('.hud-top .hud-center');
@@ -336,8 +336,13 @@ function updateBioChip(bio, mutations) {
   }
   const n = bio || 0;
   const muts = mutations || [];
+  // P2: tahap evolusi ikut tampil — pemain selalu tahu di mana ia berada di
+  // pohon BASE → MUT1 → MUT2 → APEX (warna mengikuti data/evolutions.json).
+  const evo = evoStage && evoStage.id && evoStage.id !== 'base'
+    ? `<span class="bio-evo" style="background:${evoStage.tierColor || '#8df7d2'}">${evoStage.name || evoStage.id}</span>`
+    : '';
   const html = `<span class="bio-dot">◉</span><b>${n}</b><small>BIO</small>` +
-    (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '');
+    (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '') + evo;
   if (chip.dataset.html !== html) {
     chip.innerHTML = html;
     chip.dataset.html = html;

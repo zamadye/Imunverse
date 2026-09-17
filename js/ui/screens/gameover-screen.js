@@ -6,7 +6,7 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getHero } from '../../core/data-store.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
@@ -20,7 +20,7 @@ import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA 
 import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
-import { getNextEvoStageDef } from '../../systems/evolution-system.js';
+import { signatureMutations } from '../../systems/evolution-system.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 
@@ -158,14 +158,12 @@ export function show(summary) {
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-body', text: `Tubuh: ${bits.join(' · ')}` }));
   }
 
-  // Bagian evolusi terkumpul run ini (feed meta-progression)
-  if (summary.parts > 0) {
-    const partsLine = el('div', { class: 'go-parts' }, [
-      el('img', { src: 'assets/sprites/part_equity_memory_core.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
-      el('span', { text: ` ${summary.parts} fragmen diferensiasi dibawa pulang — cek Dashboard!` }),
-    ]);
-    grid.insertAdjacentElement('afterend', partsLine);
-  }
+  // P2: evolusi run ini (BASE → MUT1 → MUT2 → APEX) — progresi run = mutasi,
+  // bukan lagi fragmen meta yang dikumpulkan.
+  const evoLabel = { base: 'BASE', mut1: 'MUT1', mut2: 'MUT2', apex: 'APEX' }[summary.evoStage] || 'BASE';
+  grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts' }, [
+    el('span', { text: `⬡ Evolusi run ini: ${evoLabel} (${summary.mutations || 0} mutasi)` }),
+  ]));
 
   countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
 
@@ -284,14 +282,21 @@ function renderHookBox(summary) {
     cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value,
       eta: etaFor(STAT_PACE[u.stat] || null, u.value - v) });
   }
-  // 2) Diferensiasi tahap berikutnya
+  // 2) P2: target evolusi run berikutnya — APEX butuh 5 mutasi (≥2 di antaranya
+  // mutasi khas hero). Angka dibaca dari data/evolutions.json, bukan dikarang.
   try {
-    const next = getNextEvoStageDef(meta);
-    if (next) {
-      const [[partId, need]] = Object.entries(next.cost);
-      const cur = (meta.evoParts || {})[partId] || 0;
-      cands.push({ label: `Diferensiasi ${next.stage}`, cur, need, unit: 'frag', pct: Math.min(1, cur / need),
-        eta: etaFor('frags', need - cur) });
+    const evoData = getData().evolutions || {};
+    const apex = (evoData.stages || []).find((s) => s.id === 'apex');
+    const heroDef = getHero(meta.selectedHero) || null;
+    const khas = heroDef ? signatureMutations(heroDef).length : 0;
+    if (apex && (summary.evoStage || 'base') !== 'apex') {
+      const need = apex.minMutations || 5;
+      const cur = Math.min(need, summary.mutations || 0);
+      cands.push({
+        label: `APEX ${heroDef ? heroDef.name : 'hero'}`, cur, need,
+        unit: `mutasi (${khas} khas tersedia)`, pct: Math.min(1, cur / need),
+        eta: etaFor('mutations', need - cur),
+      });
     }
   } catch { /* abaikan */ }
   cands.sort((a, b) => b.pct - a.pct);

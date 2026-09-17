@@ -51,10 +51,25 @@ ok('hero-tanpa-harga-premium', heroes.every((h) => !h.unlock?.imuCost && !h.shop
 ok('hero-membrane', heroes.every((h) => h.membrane && typeof h.membrane === 'object'));
 
 // ---------- evolutions.json ----------
+// V2 P2: format lama (fragmen diferensiasi) DIGANTI pohon evolusi per hero.
+// Validasi baru: 4 tahap BASE→MUT1→MUT2→APEX, ambang naik, dan 11 hero
+// punya ≥2 mutasi khas sesuai archetype-nya.
 const evo = load('data/evolutions.json');
-ok('diferensiasi', evo.parts.length === 1 && evo.parts[0].id === 'fragmen_diferensiasi'
-  && evo.dropChanceNormal === 0.004 && evo.dropChanceElite === 0.04 && evo.bossGuaranteedParts === 1
-  && evo.stages.map((s) => Object.values(s.cost || {}).reduce((a, b) => a + b, 0)).join(',') === '0,50,50,50,17');
+const muts = load('data/mutations.json').mutations || [];
+ok('pohon-evolusi', evo.schemaVersion === 3
+  && evo.stages.map((s) => s.id).join('>') === 'base>mut1>mut2>apex'
+  && evo.stages.every((s, i) => i === 0 || s.minMutations > evo.stages[i - 1].minMutations)
+  && Object.keys(evo.heroes || {}).length === 11);
+ok('jalur-khas-per-hero', heroes.every((h) => {
+  const arch = h.identity?.attackArchetype;
+  const sig = (evo.heroes[h.id] || {}).signature || [];
+  return sig.length >= 2 && sig.every((id) => {
+    const atk = (muts.find((m) => m.id === id) || {}).attack || {};
+    return !!(atk.payload && atk.payload[arch]) || !!(atk.archetypeFrom && atk.archetypeFrom[arch]);
+  });
+}));
+ok('sinematik-mutasi-terdata', Array.isArray(evo.cinematic?.phases)
+  && evo.cinematic.phases.map((p) => p.id).join('>') === 'pause>charge>break>reveal>resume');
 
 // ---------- mastery.json ----------
 const my = load('data/mastery.json');

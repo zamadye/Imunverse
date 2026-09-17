@@ -1926,6 +1926,25 @@ img.lock-badge {
 .mut-forms .choice-mut-sprite { width: 44px; height: 44px; }
 .mut-forms .mut-before { opacity: .55; filter: grayscale(.35); animation: none; }
 .mut-arrow { font-size: 13px; color: var(--teal, #2f9c8f); opacity: .9; }
+/* P2 §9: tombol LEWATI sinematik mutasi (VALID — tanpa hukuman) */
+/* P2: lencana tahap evolusi di chip BIO HUD */
+.bio-evo {
+  margin-left: 4px; padding: 2px 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; color: #08231f; letter-spacing: .4px;
+}
+
+.muta-cine-skip {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(12px, 7vh); z-index: 60;
+  padding: 10px 20px; border: none; border-radius: 999px;
+  background: rgba(10, 40, 46, .82); color: #eafff8;
+  font-family: var(--font); font-size: 13px; font-weight: 800; letter-spacing: .6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35); cursor: pointer;
+  animation: muta-skip-in .25s ease both;
+}
+.muta-cine-skip:active { transform: translateX(-50%) scale(.96); }
+@keyframes muta-skip-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
 .mut-attack {
   margin-top: 3px; font-size: 11px; font-weight: 700; letter-spacing: .2px;
   color: #0e6e62; background: rgba(141, 247, 210, .28);

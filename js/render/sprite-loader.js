@@ -45,7 +45,9 @@ export function collectSpritePaths(data) {
   for (const n of data.nutrients.nutrients) {
     record(n.sprite, n.color, n.name);
   }
-  if (data.evolutions) {
+  // V2 P2: `parts` (fragmen diferensiasi) DIHAPUS dari data/evolutions.json —
+  // progresi run sekarang lewat mutasi, jadi tidak ada sprite fragmen lagi.
+  if (data.evolutions && Array.isArray(data.evolutions.parts)) {
     for (const p of data.evolutions.parts) {
       record(p.sprite, '#b07ae0', p.name);
     }

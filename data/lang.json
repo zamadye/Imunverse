@@ -1056,7 +1056,9 @@
     "Bentuk sekarang": "Current form",
     "Bentuk baru": "New form",
     "Bentuk serangan:": "Attack shape:",
-    "Perubahan tempur": "Combat change"
+    "Perubahan tempur": "Combat change",
+    "LEWATI ▸": "SKIP ▸",
+    "Tekan LEWATI untuk langsung bertempur": "Press SKIP to jump back into the fight"
   },
   "rules": [
     {

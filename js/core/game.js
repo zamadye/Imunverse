@@ -71,7 +71,8 @@ import {
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
-import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
+import { evoStageFor, evoStatMult, evoProgress, evoSprite } from '../systems/evolution-system.js';
+import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
 } from '../systems/body-system.js';
@@ -88,7 +89,7 @@ import { drawNestHint,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite, hasSprite } from '../render/sprite-loader.js';
-import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
 
@@ -120,6 +121,7 @@ export const game = {
   // MULAI RUN
   // =====================================================================
   startRun(heroId) {
+    resetCinematic(); // P2: run baru tidak boleh mewarisi adegan mutasi lama
     const meta = STATE.meta;
     const heroDef = getHero(heroId) || getHero(meta.selectedHero);
     if (!heroDef) throw new Error('Hero tidak ditemukan: ' + heroId);
@@ -174,11 +176,10 @@ export const game = {
     const focusId = meta.focusRun || 'seimbang';
     const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === focusId) || null;
 
-    // Kemampuan aktif sesuai tahap evolusi hero (tombol kanan: pedang + 3 kekuatan)
-    const evoStage = getEvoStageDef(meta);
-    const unlockedAbilityIds = getData().evolutions.stages
-      .filter((st) => st.stage <= evoStage.stage && st.ability)
-      .map((st) => st.ability);
+    // P2: tahap evolusi dihitung dari MUTASI AKTIF se-run (bukan fragmen meta).
+    // Awal run selalu BASE; naik saat pemain memilih mutasi (refreshEvoStage).
+    const evoStage = evoStageFor(null, heroDef);
+    const unlockedAbilityIds = []; // V2: kekuatan datang dari mutasi, bukan drop fragmen
 
     this.run = {
       heroDef,
@@ -250,7 +251,7 @@ export const game = {
       skills: new SkillSystem(heroDef, { cdMult: (squadMultipliers(meta).jurusCd || 1) * passiveSkillCdMult(heroDef) }),
       // lapisan pertahanan Fase 12: shield → protect → evade
       shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
-      parts: { fragmen_diferensiasi: 0 },
+      parts: {}, // V2: fragmen evolusi DIHAPUS — progresi run = mutasi
       partsCollectedTotal: 0,
       bossChest: null,
       imuAccrued: 0, // Fase 17: IMU terkumpul live di HUD (akhir run = rumus penuh)
@@ -329,13 +330,16 @@ export const game = {
    * Kalikan stat dasar dengan multiplier META: tahap evolusi hero (damage/HP)
    * + bonus arena terpilih (speed/magnet). Dipanggil di startRun.
    */
-  applyMetaMultipliers(stats) {
+  applyMetaMultipliers(stats, heroDef) {
     const meta = STATE.meta;
-    const evo = getEvoStageDef(meta);
+    const run = this.run;
+    const hd = heroDef || (run && run.heroDef) || null;
+    // P2: pengali tahap evolusi (BASE → MUT1 → MUT2 → APEX) dari mutasi run ini.
+    const m = evoStatMult(run, hd);
     const arena = this.getRunArena();
-    stats.damage *= evo.damageMult;
-    stats.maxHP = Math.round(stats.maxHP * evo.maxHPMult);
-    stats.speed *= arena.bonus.speedMult || 1;
+    stats.damage *= m.damage;
+    stats.maxHP = Math.round(stats.maxHP * m.maxHP);
+    stats.speed *= (arena.bonus.speedMult || 1) * m.speed;
     stats.magnetRadius *= arena.bonus.magnetMult || 1;
     return stats;
   },
@@ -866,15 +870,6 @@ export const game = {
     run.effects.spawnCollect(p.x, p.y, p.def.color);
 
     switch (p.pickupType) {
-      case 'part': {
-        // Bagian evolusi: untuk upgrade bentuk hero (tangan → kaki → pedang → elemen)
-        const partId = p.partId || p.def.id;
-        run.parts[partId] = (run.parts[partId] || 0) + 1;
-        run.partsCollectedTotal += 1;
-        run.effects.spawnLabel(p.x, p.y, `${p.def.name} +1`, '#ffe082');
-        run.effects.spawnKillFx('ring', p.x, p.y, run.evoStage.tierColor, Math.random() * 10);
-        break;
-      }
       case 'xp':
         this.addXP(p.value);
         // XP TERASA: label melayang tiap orb (ramah anak)
@@ -1034,24 +1029,45 @@ export const game = {
     if (!run || !run.currentChoices) return;
     // PHAGOS: kartu mutasi vs kartu upgrade lama (safety net)
     if (isMutationId(upgradeId)) {
+      // P2 §9: bentuk SEBELUM diingat dulu untuk adegan transformasi.
+      const sebelum = evoSprite(run, run.heroDef) || run.heroDef.spriteIdle;
       const res = applyMutation(run, upgradeId);
       if (!res.ok) {
         emit('toast', { message: res.reason || 'Mutasi gagal', kind: 'warn' });
         return; // jangan tutup modal — pemain pilih kartu lain
       }
+      // Tahap evolusi naik (BASE → MUT1 → MUT2 → APEX) dari mutasi aktif.
+      run.evoStage = evoStageFor(run, run.heroDef);
+      this.recomputePlayerStats();
+      const sesudah = evoSprite(run, run.heroDef) || sebelum;
       showAnnounce(res.mutation.name.toUpperCase() + '!', true);
       run.effects.spawnBurst(run.player.x, run.player.y, '#8df7d2', 30, 260, 5);
       run.camera.addShake(0.4);
       audio.mutation();
       buzz('levelup');
       emit('toast', { message: `MUTASI: ${res.mutation.name}!`, kind: 'gold' });
-      this.recomputePlayerStats();
-    } else {
-      const result = applyLevelUp(run, upgradeId);
-      this.recomputePlayerStats();
-      if (result.healAmount > 0) run.player.heal(result.healAmount);
+      // Dunia beku → putar adegan, lalu lanjutkan sisa antrean level-up.
+      // Mutasi SUDAH diterapkan di sini, jadi LEWATI tidak menghilangkan apa pun.
+      startMutationCinematic({
+        from: sebelum,
+        to: sesudah,
+        name: res.mutation.name,
+        stageName: run.evoStage.name || '',
+        tierColor: run.evoStage.tierColor || '#8df7d2',
+        onDone: () => this._afterLevelUpChoice(),
+      });
+      return;
     }
+    const result = applyLevelUp(run, upgradeId);
+    this.recomputePlayerStats();
+    if (result.healAmount > 0) run.player.heal(result.healAmount);
+    this._afterLevelUpChoice();
+  },
 
+  /** Sisa alur setelah satu pilihan level-up diproses (modal / lanjut run). */
+  _afterLevelUpChoice() {
+    const run = this.run;
+    if (!run) return;
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
     if (run.levelUpQueue > 0) {
       // masih ada level berlebih → tampilkan pilihan berikutnya
@@ -1143,8 +1159,9 @@ export const game = {
     const heroDef = run?.heroDef || run?.player?.heroDef || null;
     const designs = getData().characterDesigns;
     const heroDesign = heroDef ? designs?.heroes?.[heroDef.id] : null;
-    const stageRaw = run?.evoStage?.stage ?? STATE.meta?.evoStage ?? 0;
-    const stage = Math.max(0, Math.min(4, stageRaw || 0));
+    // P2: tahap visual = indeks pohon evolusi V2 (0 BASE … 3 APEX).
+    const stageRaw = run?.evoStage?.index ?? 0;
+    const stage = Math.max(0, Math.min(3, stageRaw || 0));
     const eq = stage > 0 ? (heroDesign?.equity || []).find((e) => e.stage === stage) : null;
     const dirX = Number.isFinite(opts.dirX) ? opts.dirX : ((enemy && run?.player) ? enemy.x - run.player.x : 1);
     const dirY = Number.isFinite(opts.dirY) ? opts.dirY : ((enemy && run?.player) ? enemy.y - run.player.y : 0);
@@ -1560,14 +1577,15 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
-    const bonusPart = rollPartDrop('boss', 1) || 'fragmen_diferensiasi';
-    run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
+    // V2 P2: peti boss tidak lagi memberi fragmen evolusi — ia memberi
+    // Bio-Point (mata uang mutasi se-run) supaya mutasi tier 2/3 terjangkau.
+    const bonusBio = 20;
+    run.bossChest = { currency: bonusCurrency, bio: bonusBio, doubled: false };
     setPaused(true);
     audio.chest();
     emit('bosschest', {
       currency: bonusCurrency,
-      partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
-      partSprite: getData().evolutions.parts.find((p) => p.id === bonusPart)?.sprite || '',
+      bio: bonusBio,
       adAvailable: canWatchAd(STATE.meta),
     });
   },
@@ -1593,11 +1611,12 @@ applyChapterTier(enemy, run) {
     const chest = run.bossChest;
     if (!chest) return;
     const currency = chest.currency * (doubled ? 2 : 1);
+    const bio = (chest.bio || 0) * (doubled ? 2 : 1);
     meta.currency += currency;
-    meta.evoParts[chest.partId] = (meta.evoParts[chest.partId] || 0) + (doubled ? 2 : 1);
+    run.bioPoints = (run.bioPoints || 0) + bio;
     writeSave(meta);
     run.bossChest = null;
-    emit('toast', { message: `Peti boss: +${currency} Biokredit${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    emit('toast', { message: `Peti boss: +${currency} Biokredit${bio > 0 ? ` · +${bio} BIO` : ''}${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
     setPaused(false);
     emit('resume');
   },
@@ -1864,27 +1883,9 @@ applyChapterTier(enemy, run) {
     // D9 (roadmap): korban TELAN = trade-off — heal+Bio, TANPA drop fisik.
     // (XP + BK cause tetap jalan; boss chest/opsonin tidak diganggu.)
     const devoured = source === 'engulf' && !enemy.isBoss;
-    // ---- Drop BAGIAN EVOLUSI (item upgrade hero, bukan sekadar poin) ----
-    const partMult = run.arena.bonus.partMult || 1;
-    const dropPart = (partId, ox = 0, oy = 0) => {
-      if (!partId) return;
-      const partDef = getData().evolutions.parts.find((p) => p.id === partId);
-      if (!partDef) return;
-      const pickup = new Pickup({ ...partDef, pickupType: 'part', color: partDef.sprite, radius: 13, lifetime: 25 }, enemy.x + ox, enemy.y + oy);
-      pickup.partId = partDef.id;
-      run.pickups.push(pickup);
-    };
-    if (devoured) {
-      // D9: ditelan utuh — fragmen ikut tercerna, tidak ada drop
-    } else if (enemy.isBoss) {
-      for (let i = 0; i < getData().evolutions.bossGuaranteedParts; i++) {
-        dropPart(rollPartDrop('boss', partMult), (Math.random() - 0.5) * 70, (Math.random() - 0.5) * 70);
-      }
-    } else if (enemy.def.elite) {
-      dropPart(rollPartDrop('elite', partMult));
-    } else {
-      dropPart(rollPartDrop('normal', partMult));
-    }
+    // V2 P2: drop fragmen evolusi DIHAPUS. Progresi run = mutasi (dipilih saat
+    // level-up), jadi tidak ada lagi item fragmen yang perlu dipungut.
+    void devoured;
 
     // PHAGOS Sprint 1 (bible §5): XP di-grant LANGSUNG saat kill (lihat atas) —
     // orb XP kill dicabut (sebelumnya double-grant: langsung + orb).
@@ -2057,10 +2058,6 @@ applyChapterTier(enemy, run) {
     meta.stats.totalRuns += 1;
     meta.stats.totalNutrients += run.nutrientsCollected;
     meta.stats.totalXP += Math.floor(run.xpGained);
-    // Bagian evolusi yang dikumpulkan selama run → inventory meta
-    for (const [partId, n] of Object.entries(run.parts)) {
-      if (n > 0) meta.evoParts[partId] = (meta.evoParts[partId] || 0) + n;
-    }
     addCurrency(meta, earned);
 
     // V2: Battle Pass & Pangkat DIHAPUS. Hasil run hanya mengalir ke Antibodi
@@ -2141,6 +2138,8 @@ applyChapterTier(enemy, run) {
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,
       parts: run.partsCollectedTotal,
+      mutations: (run.activeMutations || []).length, // P2: progresi run = mutasi
+      evoStage: (run.evoStage && run.evoStage.id) || 'base',
       level: run.level,
       currencyEarned: earned,
       newMissions: completedMissions.length,
@@ -2557,18 +2556,20 @@ applyChapterTier(enemy, run) {
           // overlay mut_*.png yang ditumpuk). Kalau fotonya belum tersedia untuk
           // hero ini, pakai sprite dasar seperti sediakala.
           const _muts = run.activeMutations || [];
-          // UI-REBUILD P8: mutasi BERTINGKAT — tier 2/3 memakai foto bentuk
-          // LANJUT (mut2), sisanya bentuk DASAR (mut1). Bila foto tingkat itu
-          // belum ada, turun ke tingkat di bawahnya; terakhir ke sprite dasar.
-          const _topTier = _muts.reduce((mx, id) => Math.max(mx, (mutationDef(id)?.tier) || 1), 0);
-          const _wantStage = _topTier >= 2 ? 2 : 1;
+          // P2: BENTUK karakter mengikuti POHON EVOLUSI (BASE → MUT1 → MUT2 →
+          // APEX) — sumber tunggalnya data/evolutions.json, bukan lagi tier
+          // mutasi mentah. Bila foto tingkat itu belum ada, turun ke tingkat
+          // bawahnya; terakhir ke sprite dasar.
+          const _evo = run.evoStage || evoStageFor(run, player.heroDef);
+          const _evoId = _evo.id || 'base';
+          const _wantStage = _evo.spriteKey === 'spriteMut2Idle' ? 2 : (_evo.spriteKey === 'spriteMut1Idle' ? 1 : 0);
           const _attacking = player.attackFlash > 0;
           const _mutPair = (stage) => [
             _attacking ? player.heroDef[`spriteMut${stage}Attack`] : player.heroDef[`spriteMut${stage}Idle`],
             _attacking ? player.heroDef[`spriteMut${stage}Idle`] : null, // cadangan satu pose bila pose ini belum ada
           ];
           let path = _attacking ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          if (_muts.length > 0) {
+          if (_wantStage > 0) {
             const stages = _wantStage === 2 ? [2, 1] : [1];
             for (const st of stages) {
               const [main, fallback] = _mutPair(st);
@@ -2596,10 +2597,14 @@ applyChapterTier(enemy, run) {
           const sy = pAnim.sy || 1;
           billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt, sx, sy });
           const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
-          const evoStage = run.evoStage?.stage || 0;
-          // (skin kosmetik berbayar dihapus di V2 — identitas dari mutasi)
+          // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
+          // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
           drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
-          drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
+          // APEX: aura emas prosedural (bukan tempelan gambar) — penanda
+          // puncak pohon evolusi hero.
+          if (_evoId === 'apex') {
+            drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.9, '#f5c64f', time, 0, 0.5);
+          }
           // UI-REBUILD P8: overlay mut_*.png DICABUT — mutasi kini mengganti
           // FOTO karakter (lihat pemilihan `path` di atas). Yang tersisa cuma
           // aura kanvas tipis yang ikut jumlah mutasi (bukan tempelan gambar):
@@ -2791,6 +2796,8 @@ applyChapterTier(enemy, run) {
         pulse,
         bioPoints: run.bioPoints || 0,
         activeMutations: run.activeMutations || [],
+        // P2: tahap pohon evolusi (BASE → MUT1 → MUT2 → APEX) tampil di HUD
+        evoStage: run.evoStage ? { id: run.evoStage.id, name: run.evoStage.name, tierColor: run.evoStage.tierColor } : null,
         membraneLiving: run.membrane && run.membrane.livingMaxHp > 0
           ? { hp: run.membrane.livingHp, max: run.membrane.livingMaxHp, down: run.membrane.livingDownT > 0 }
           : null,
@@ -2810,6 +2817,9 @@ applyChapterTier(enemy, run) {
         drawMinimap(mmCtx, mmCtx.canvas, run, player, 760);
       }
     }
+
+    // P2 §9: sinematik mutasi digambar paling atas (dunia sedang dibekukan).
+    if (cineActive()) drawMutationCinematic(ctx, w, h, time);
   },
 
   /**
