@@ -83,6 +83,19 @@ ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMov
   'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
   && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
+// ---------- P6: game feel (tangga dampak + keramaian) ----------
+const gf = load('data/gamefeel.json');
+const tangga = (gf.tiers || {});
+const urut = ['normal', 'heavy', 'elite', 'ultimate', 'bossEvent'];
+ok('tangga-dampak-naik', urut.every((k) => tangga[k])
+  && ['shake', 'killSec', 'flashSec', 'squash'].every((f) => urut.every((k, i) => i === 0 || (tangga[k][f] ?? 0) > (tangga[urut[i - 1]][f] ?? 0)))
+  && tangga.normal.hitSec === 0 && tangga.bossEvent.staggerSec === 0);
+ok('keramaian-terkendali', (gf.crowd || {}).numbersMax > 0 && (gf.crowd || {}).numbersPerSec > 0
+  && (gf.crowd || {}).labelsMax > 0 && (gf.crowd || {}).busyEnemyCount > (gf.crowd || {}).calmEnemyCount
+  && (gf.crowd || {}).particleScale < 1 && (gf.crowd || {}).shakeScale < 1
+  && Object.keys((gf.crowd || {}).sfxThrottleMs || {}).length >= 3);
+ok('kamera-di-cap', (gf.camera || {}).traumaCap > 0 && (gf.camera || {}).traumaCap <= 1);
+
 // ---------- P5: reserve · rewarded ads · IAP mock ----------
 const eko = load('data/economy.json');
 const rv = eko.reserve || {};

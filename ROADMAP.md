@@ -356,10 +356,29 @@ Yang sudah dikerjakan:
 Mode dev (`?dev=1`) memberi cadangan 5.000 **di memori saja** supaya TEST C bisa
 dicoba manual tanpa menyentuh save pemain.
 
-### P6 — Game feel
+### P6 — Game feel **[SELESAI — BUILD 54d]**
 - animation + VFX + SFX + enemy reaction + camera response (hierarki normal→boss)
 - keterbacaan serangan tanpa angka (§18)
 - **Exit:** layar tidak kacau saat ramai; hit reaction terbaca.
+
+Yang sudah dikerjakan:
+
+| Langkah | Hasil |
+|---|---|
+| Satu sutradara dampak (§20) | `js/systems/game-feel.js` (baru). Semua dampak lewat SATU tangga: `normal → heavy → elite → ultimate → bossEvent`. Lima kanal §20 — ANIMATION (squash) + VFX + SFX + ENEMY REACTION + CAMERA — menyala bersamaan dari satu tempat, bukan tersebar di banyak titik |
+| Tangga dampak tunable | `data/gamefeel.json` (schemaVersion 2) → `tiers`: getar 0.035 → 0.09 → 0.18 → 0.35 → 0.65; hit-stop kill 0.03 → 0.09; durasi flash 0.12 → 0.26 dtk; squash 0.12 → 0.32 |
+| Reaksi musuh nyata (§20) | flash kini BERBEDA per tingkat (dulu 0.12 rata untuk semua hit); **squash** (pop seketika, lebar/tinggi sprite diskalakan tanpa menyentuh aset foto — `drawSprite` menerima `scaleX/scaleY`); **stagger** (musuh terhuyung) untuk crit ke atas; boss **imun** stagger & knockback — reaksinya lewat flash lebih lama + getar besar |
+| Kamera di-cap (§20) | `camera.traumaCap` dari data (0.85) + `setTraumaCap()`: rentetan 50 dampak besar tidak pernah melewati batas; getar kecil ber-throttle (keroyokan tidak menggetarkan layar terus), getar besar selalu lewat |
+| Keramaian terkendali | Satu budget untuk semua teks melayang: angka damage (maks 18, isi ulang 22/dtk) + label "+N ANTIBODI"/XP (maks 10, 14/dtk). Partikel mengecil 50 % dan getar 60 % saat musuh ≥ 26. **40 kill sekaligus kini menampilkan ≤ 28 teks, bukan 40+** |
+| Suara tidak membanjiri | SFX ber-throttle per jenis: hit 55 ms · kill/engulf 70 ms · crit 90 ms · playerHit 120 ms — 60 hit tidak lagi menjadi 60 bunyi |
+| Death pop bertingkat | normal 1.30× · elite 1.45× · boss 1.70× — kematian terasa bertingkat, bukan seragam |
+| Keterbacaan & telegraph (§18–§19) | Dijaga dari data: 8 arketipe serangan punya BENTUK berbeda (projectile/homing/melee/area/beam/chain/zone/summon) dan `telegraphSec` 0,18–0,60 dtk; serangan kontak musuh ber-windup sebelum mendarat |
+| Penguji baru | `tools/verify-gamefeel.mjs` (`npm run verify:gamefeel`, **24 pemeriksaan**, ikut di `npm run verify`): tangga naik di getar/hit-stop/flash/squash; hit biasa = normal (tanpa stagger & tanpa jeda); crit = heavy (stagger); elite; boss terlama & tanpa stagger; satu hit menyalakan 5 kanal (termasuk jalur nyata `spawnHitFeedback`); cap & throttle kamera; budget angka/label; skala keramaian; throttle SFX; 40 kill sekaligus tetap terkendali; bentuk & telegraph arketipe; squash sampai ke renderer; death pop bertingkat |
+| Dijaga | `validate` bertambah `tangga-dampak-naik`, `keramaian-terkendali`, `kamera-di-cap` |
+
+Catatan: sebelumnya seluruh rantai game feel (dari V2 Phase 1) **tidak punya penguji** —
+P6 menutupnya, jadi perubahan dampak ke depan tidak bisa lagi menyalahi hierarki §20
+tanpa ketahuan.
 
 ### P7 — UI/UX V2
 - dashboard minimal: PHAGOS · HERO · CURRENT FORM · **PLAY** · Continue Journey

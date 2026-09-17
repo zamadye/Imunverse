@@ -51,6 +51,12 @@ export class Enemy {
     // Visual
     this.rotation = Math.random() * Math.PI * 2;
     this.hitFlash = 0;
+    // P6 (§20 ENEMY REACTION): squash = pop seketika saat terhantam; durasi
+    // flash mengikuti TINGKAT dampak (bukan lagi 0.12 untuk semua hit).
+    this.flashDur = 0.12;
+    this.squashT = 0;
+    this.squashDur = 0;
+    this.squashAmt = 0;
     // R4 Modul B: window telan (phagocytosis) — diisi phagoUpdateEnemy
     this.phagoEligible = false;
     this.phagoWindowT = 0;
@@ -223,6 +229,8 @@ export class Enemy {
   update(dt, playerPos, time, game) {
     if (!this.alive) return;
     if (this.hitFlash > 0) this.hitFlash -= dt;
+    // P6: squash meluruh — bentuk kembali normal setelah pop (dibaca renderer)
+    if (this.squashT > 0) this.squashT = Math.max(0, this.squashT - dt);
 
     // V2 §15 REGENERATIVE: musuh memulihkan diri bibiarkan tanpa damage.
     // Jawaban pemain: tekan terus atau akhiri dengan burst.
@@ -500,7 +508,7 @@ export class Enemy {
     // ARMOR (Gram Positif/Negatif/Prion): lapisan luar menyerap satu tepukan
     if (this.armorLayers > 0) {
       this.armorLayers -= 1;
-      this.hitFlash = 0.12;
+      this.hitFlash = 0.12; this.flashDur = Math.max(this.flashDur || 0, 0.12); this.flashDur = Math.max(this.flashDur || 0, 0.12);
       this.lastHitAbsorbed = true;
       return false;
     }
@@ -508,7 +516,7 @@ export class Enemy {
     // V2 §15 SUPPORT: musuh yang dikuatkan aura menahan sebagian damage
     if (this.auraBuffT > 0 && this.auraDr > 0) amount = amount * (1 - this.auraDr);
     this.hp -= amount;
-    this.hitFlash = 0.12;
+    this.hitFlash = 0.12; this.flashDur = Math.max(this.flashDur || 0, 0.12);
     if (this.hp <= 0) {
       this.hp = 0;
       this.alive = false;
@@ -526,7 +534,7 @@ export class Enemy {
     this.sinceHit = 0; // V2 §15: damage memotong regenerasi
     this.lastHitAbsorbed = false;
     this.hp -= amount;
-    this.hitFlash = 0.12;
+    this.hitFlash = 0.12; this.flashDur = Math.max(this.flashDur || 0, 0.12);
     if (this.hp <= 0) {
       this.hp = 0;
       this.alive = false;

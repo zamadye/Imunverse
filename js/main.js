@@ -33,7 +33,10 @@ import {
 import { reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve, maxAssistFor, reserveUsesLeft, reserveEnabled } from './systems/reserve-system.js';
 import { iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun } from './systems/purchase-provider.js';
 import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
+// P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
+import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
+import { Enemy } from './entities/enemy.js';
 import { InputHandler } from './input/input-handler.js';
 import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
 import { loadSave, writeSave } from './save/save-manager.js';
@@ -831,6 +834,16 @@ async function boot() {
   window.__IMUNVERSE.economy = {
     antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost,
     economyPhase, earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+  };
+  // P6: audio bundel — dipakai penguji untuk mengintai throttle SFX.
+  window.__IMUNVERSE.audio = audio;
+  // P6: kelas Enemy — dipakai penguji untuk menyiapkan musuh elite/boss.
+  window.__IMUNVERSE.Enemy = Enemy;
+  // P6: permukaan debug GAME FEEL (dipakai penguji & autotest).
+  window.__IMUNVERSE.gameFeel = {
+    TIER_ORDER, gfTier, tierForEvent, crowdScale, updateGameFeel, numberAllowed,
+    playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction,
+    particleBudget, deathPopFor,
   };
   // P5: permukaan debug CADANGAN (dipakai penguji & autotest).
   window.__IMUNVERSE.reserve = {

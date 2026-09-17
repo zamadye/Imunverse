@@ -176,6 +176,11 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   ctx.save();
   ctx.translate(x, y);
   if (rotation) ctx.rotate(rotation);
+  // P6: squash/stretch — lebar & tinggi bisa diskalakan terpisah (pop saat
+  // terhantam) tanpa mengubah aset foto sedikit pun.
+  if (opts.scaleX !== undefined || opts.scaleY !== undefined) {
+    ctx.scale(opts.scaleX ?? 1, opts.scaleY ?? 1);
+  }
   if (opts.alpha !== undefined) ctx.globalAlpha = opts.alpha;
   // sprite dibuat dengan margin — gambar sesuai rasio aslinya
   ctx.drawImage(img, -w / 2, -h / 2, w, h);

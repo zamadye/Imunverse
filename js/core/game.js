@@ -79,7 +79,10 @@ import {
   passiveOnKill, passiveOnPlayerHit, passiveTick, passiveSkillCdMult,
 } from '../systems/passive-system.js'; // V2 Phase 3: identitas hero
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
-import { EffectsSystem } from '../systems/effects-system.js';
+import { EffectsSystem, bindEffectsBudget } from '../systems/effects-system.js';
+// P6: teks melayang ikut budget keramaian (diikat sekali ke run aktif)
+// (arrow dieksekusi nanti, jadi aman merujuk `game` yang didefinisikan di bawah)
+bindEffectsBudget(() => labelAllowed(game.run));
 import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
   adStatus, triggerRewardedAdAntibody,
@@ -92,6 +95,8 @@ import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economy
 import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
 import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
 import { initJourney, updateJourney, journeyHud, drawLandmark } from '../systems/world-journey.js';
+// P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
+import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
@@ -304,9 +309,8 @@ export const game = {
     // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
     // mengikuti ZONA, bukan pilihan stage (§21).
     try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
-    // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
-    // mengikuti zona, bukan pilihan stage (§21).
-    try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
+    // P6: batas getar kamera dari data — rentetan dampak boss tetap nyaman.
+    try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
     // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
@@ -529,6 +533,7 @@ export const game = {
       return;
     }
     run.time += dt;
+    updateGameFeel(run, dt); // P6: isi ulang budget angka damage (keramaian)
 
     // V2 Phase 1: LOW-HP heartbeat — HP < threshold → detak jantung berkala
     {
@@ -794,7 +799,7 @@ export const game = {
       });
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
-      else audio.hit();
+      else playSfx(run, 'hit'); // P6: throttle — keroyokan tidak membanjiri telinga
       return died;
     });
 
@@ -1326,7 +1331,10 @@ export const game = {
     tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
     const absorbed = !!enemy.lastHitAbsorbed;
     const hitVisual = this.characterHitVisual(enemy, opts);
-    if (crit && enemy.hitFlash !== undefined) enemy.hitFlash = Math.max(enemy.hitFlash, 0.18);
+    // P6 (§20): REAKSI MUSUH + getar + SFX + hit-stop lewat SATU tangga
+    // dampak (normal → heavy → elite → ultimate → bossEvent). Urutan & harga
+    // dampak tidak lagi tersebar di banyak tempat.
+    const dampak = applyHitImpact(this, enemy, { crit, died, absorbed, source: opts.sourceKind });
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
     run.effects.spawnImpact(enemy.x, enemy.y - enemy.radius * 0.18, absorbed ? '#cfd8e3' : (crit ? gf.crit.color : (enemy.def.color || '#ffffff')), {
       big: died || crit || enemy.isBoss,
@@ -1335,16 +1343,7 @@ export const game = {
       ...hitVisual,
     });
 
-    // Micro shake khusus hit yang BELUM kill. Kill/elite/boss tetap ditangani
-    // di onEnemyKilled agar intensitasnya tidak dobel.
-    if (!died && !absorbed && run.camera && gf.shake) {
-      const now = run.time || 0;
-      const throttle = gf.shake.hitThrottleSec ?? 0.055;
-      if (now - (run.lastHitShakeAt ?? -999) >= throttle) {
-        run.lastHitShakeAt = now;
-        run.camera.addShake(crit ? (gf.shake.critHit ?? 0.09) : (gf.shake.hit ?? 0.035));
-      }
-    }
+    // P6: getar SUDAH ditangani applyHitImpact (ber-tangga + ber-throttle).
 
     // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
     const dn = gf.damageNumber;
@@ -1353,11 +1352,13 @@ export const game = {
     if (crit) {
       size *= gf.crit.sizeMult;
       color = gf.crit.color;
-      this.hitStopRun(gf.hitStop.crit); // jeda mikro "berat" khusus crit
-      audio.crit(); // bunyi khusus crit (lebih tajam dari hit biasa)
       buzz('crit');
     }
-    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
+    // P6: angka damage punya BUDGET (layar padat → angka tidak menumpuk) dan
+    // SFX crit ber-throttle (lewat sutradara di atas).
+    if (numberAllowed(run)) {
+      run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
+    }
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
@@ -1440,7 +1441,7 @@ export const game = {
       if (amount < before) {
         run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
         run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
-        audio.hit();
+        playSfx(run, 'hit');
       }
       if (amount <= 0) return;
     }
@@ -1472,9 +1473,10 @@ export const game = {
     emit('playerHit', { damage: amount });
     // Fase 17 (trigger 5B): percikan merah 5–8 partikel di sekitar player
     run.effects.spawnBurst(player.x, player.y, '#ff6b6b', getRetention().particles.playerHit, 120, 3);
-    // Screen shake saat kena damage besar (sesuai spek)
-    run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
-    audio.playerHit();
+    // P6 (§20): getar saat pemain terluka juga lewat tangga — pukulan besar
+    // (≥15) setara elite, sisanya setara heavy; tetap di-cap trauma kamera.
+    addImpactShake(this, amount >= 15 ? (gfTier('elite').shake || 0.18) : (gfTier('heavy').shake || 0.09), { throttle: false });
+    playSfx(run, 'playerHit');
     buzz('playerHit'); // V2 Phase 1: getaran pola [30,40,30] di HP
     player.squash = 0.28; // JUICE squash saat terkena hit
     passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
@@ -1959,26 +1961,20 @@ applyChapterTier(enemy, run) {
       }
     }
 
-    // ---- JUICE: hit-stop + SFX kill ----
-    // PHAGOS: korban yang DITELAN beda bunyi dari kill kontak/Pulse (basah).
-    if (source === 'engulf') audio.engulf(); else audio.kill();
-    // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
+    // ---- JUICE (P6): hit-stop + getar + SFX kill lewat SATU tangga (§20) ----
     const gf = getGameFeel();
-    if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
-    else if (enemy.def.elite) { this.hitStopRun(gf.hitStop.elite); buzz('elite'); }
+    const mati = applyDeathImpact(this, enemy, {
+      source,
+      // kill kontak membran: freeze paling kecil & tidak menumpuk (RONDE-7)
+      cooldownSec: 0.24,
+    });
+    if (enemy.isBoss) buzz('boss');
+    else if (enemy.def.elite) buzz('elite');
     else {
       // RONDE-7: kill biasa tidak menumpuk freeze — cadence PULSE tetap
       // responsif penuh di tengah keroyokan.
-      // PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi).
-      const isMembraneKill = source == null || typeof source === 'string'; // PHAGOS Sprint 1: cause string = kill membran
-      if (run.hitStopCool <= 0) {
-        this.hitStopRun(isMembraneKill ? (gf.hitStop.membraneKill ?? 0.015) : gf.hitStop.kill);
-        run.hitStopCool = 0.24;
-      }
       buzz('kill');
     }
-    // V2 Phase 1: micro shake per kill (biasa/elite; boss sudah shake 0.65 di bawah)
-    if (!enemy.isBoss) run.camera.addShake(enemy.def.elite ? gf.shake.elite : gf.shake.kill);
     // V2 Phase 5: elite VOLATILE — bangkai meledak setelah fuse ber-telegraph
     // (konsisten filosofi Phase 2: bisa dihindari dengan menjauh)
     if (enemy.eliteAffix === 'volatile') {
@@ -1986,13 +1982,16 @@ applyChapterTier(enemy, run) {
       run.pendingBlasts.push({ x: enemy.x, y: enemy.y, t: vc.fuse, radius: vc.radius, damage: vc.damage, color: vc.color });
       run.effects.spawnBlast(enemy.x, enemy.y, vc.radius, vc.color);
     }
-    // V2 Phase 1: DEATH POP — sprite membesar & memudar, kill tidak "lenyap"
+    // P6: DEATH POP bertingkat (normal/elite/boss) — sprite membesar & memudar
+    const pop = deathPopFor(enemy.isBoss, enemy.def.elite);
     run.effects.spawnKillPop(
       enemy.x, enemy.y, enemy.def.spriteIdle, enemy.radius,
-      run.player.x < enemy.x, gf.killPop.dur, gf.killPop.scaleTo,
+      run.player.x < enemy.x, pop.dur, pop.scaleTo,
     );
     const pfx = getRetention().particles;
-    run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
+    // P6: partikel mengecil saat layar ramai (§20: VFX tidak membuat kacau)
+    const partikel = particleBudget(run, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath);
+    run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, partikel, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
     const killKind = run.evoStage.killFx || 'ring';
@@ -2643,10 +2642,23 @@ applyChapterTier(enemy, run) {
         billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
         const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+        // P6 (§20): SQUASH — pop seketika saat terhantam, lalu kembali.
+        // k = 0 di awal → puncak di tengah → 0 lagi (tanpa menyentuh aset foto).
+        let sqX = 1;
+        let sqY = 1;
+        if (e.squashT > 0 && e.squashDur > 0) {
+          const p = 1 - e.squashT / e.squashDur;
+          const k = Math.sin(Math.PI * p) * (e.squashAmt || 0);
+          sqX = 1 + k;
+          sqY = Math.max(0.5, 1 - k * 0.85);
+        }
         drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
           // V2 Phase 5: boss enrage = tint merah konstan (drama fase akhir)
-          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : (e.enraged ? 0.3 : 0),
+          // P6: durasi flash mengikuti TINGKAT dampak (bukan 0.12 rata).
+          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / (e.flashDur || 0.12)) : (e.enraged ? 0.3 : 0),
           flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
+          scaleX: sqX,
+          scaleY: sqY,
         });
         drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
         ctx.globalAlpha = 1;

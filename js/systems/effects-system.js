@@ -10,6 +10,14 @@ const MAX_PARTICLES = 400;
 const MAX_EFFECTS = 110;
 const MAX_NUMBERS = 40;
 
+/**
+ * P6: budget teks melayang. Diikat dari core/game.js ke `labelAllowed(run)`
+ * supaya 40 kill sekaligus tidak membanjiri layar dengan 40 label (§20).
+ * Kosong = tanpa pembatas (modul tetap berdiri sendiri untuk penguji).
+ */
+let LABEL_BUDGET = null;
+export function bindEffectsBudget(fn) { LABEL_BUDGET = typeof fn === 'function' ? fn : null; }
+
 export class EffectsSystem {
   constructor() {
     this.particles = []; // {x,y,vx,vy,life,maxLife,size,color}
@@ -186,6 +194,7 @@ export class EffectsSystem {
 
   /** Label bebas mengambang (mis. "Silia +1" saat drop bagian evolusi diambil). */
   spawnLabel(x, y, text, color = '#ffe082') {
+    if (LABEL_BUDGET && !LABEL_BUDGET()) return;
     if (this.numbers.length >= MAX_NUMBERS) this.numbers.shift();
     this.numbers.push({
       x: x + (Math.random() - 0.5) * 10,

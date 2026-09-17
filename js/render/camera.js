@@ -170,7 +170,17 @@ export class Camera {
    * boss muncul / boss blast.
    */
   addShake(amount) {
-    this.shakeTrauma = Math.min(1, this.shakeTrauma + amount);
+    // P6: trauma di-cap (data/gamefeel.json → camera.traumaCap) supaya
+    // rentetan dampak besar tidak membuat layar bergetar di luar batas nyaman.
+    const cap = typeof this.traumaCap === 'number' ? this.traumaCap : 1;
+    this.shakeTrauma = Math.max(0, Math.min(cap, this.shakeTrauma + amount));
+  }
+
+  /** Batas atas trauma kamera (dipanggil game.js dari data saat run dibuat). */
+  setTraumaCap(cap) {
+    this.traumaCap = Math.max(0.1, Math.min(1, Number(cap) || 1));
+    this.shakeTrauma = Math.min(this.shakeTrauma, this.traumaCap);
+    return this.traumaCap;
   }
 
   update(dt) {
