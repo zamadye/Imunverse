@@ -83,6 +83,21 @@ ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMov
   'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
   && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
+// ---------- P7c: rig makhluk hasil panggang Godot (prototipe) ----------
+const makhluk = load('data/creature-rigs.json');
+const daftarMakhluk = Object.values(makhluk.creatures || {});
+const keadaanWajib = ['idle', 'walk', 'turn', 'attack', 'skill', 'hit', 'death', 'mutate'];
+ok('rig-makhluk-godot', daftarMakhluk.length >= 1
+  && daftarMakhluk.every((c) => keadaanWajib.every((s) => c.states && c.states[s] && c.states[s].frames && c.states[s].frames.length >= 16))
+  // foot planting: ujung kaki yang menapak harus bergerak MUNDUR (badan maju)
+  && daftarMakhluk.every((c) => {
+    const f = c.states.walk.frames;
+    return f.every((fr, i) => fr.limbs.every((la, k) => {
+      const lb = f[(i + 1) % f.length].limbs[k];
+      return !(la.plant && lb.plant) || (lb.x <= la.x + 1e-6 && Math.abs(lb.y - la.y) <= 1e-6);
+    }));
+  }));
+
 // ---------- P7b: siklus merayap hasil panggang Godot ----------
 const rayap = load('data/crawl-cycles.json');
 const nHero = load('data/heroes.json').heroes.length;

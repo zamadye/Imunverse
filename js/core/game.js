@@ -114,6 +114,8 @@ import { drawNestHint,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
 import { drawSprite, hasSprite } from '../render/sprite-loader.js';
+// P7-PROTOTIPE: tiga cara menggambar hero yang bisa dibandingkan
+import { drawHeroBody, drawHeroLimbs } from '../render/hero-mode.js';
 import { drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
@@ -527,6 +529,7 @@ export const game = {
     if (run.hitStopCool > 0) run.hitStopCool -= dt;
     // PHAGOS: flash merah arena (peringatan mutasi musuh) meluruh real-time
     if (run._mutationFlashT > 0) run._mutationFlashT -= dt;
+    if (run.__mutasiFxT > 0) run.__mutasiFxT -= dt; // P7-PROTOTIPE: timer keadaan 'mutate'
     // JUICE hit-stop: freeze singkat saat kill besar (render tetap jalan)
     if (run.hitStop > 0) {
       run.hitStop -= dt;
@@ -1074,6 +1077,7 @@ export const game = {
       }
       // Tahap evolusi naik (BASE → MUT1 → MUT2 → APEX) dari mutasi aktif.
       run.evoStage = evoStageFor(run, run.heroDef);
+      run.__mutasiFxT = 1.6; // P7-PROTOTIPE: penanda keadaan 'mutate' untuk rig makhluk
       this.recomputePlayerStats();
       const sesudah = evoSprite(run, run.heroDef) || sebelum;
       showAnnounce(res.mutation.name.toUpperCase() + '!', true);
@@ -2778,11 +2782,33 @@ applyChapterTier(enemy, run) {
           // titik tengah: `lift` dikurangi setengah tinggi × (sy - 1), sehingga
           // tepi bawah sprite TIDAK PERNAH bergeser saat badan memipih/memanjang.
           const _lift = player.radius * 0.62 + pBob + anchorHalf * (sy - 1);
-          billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
           const bodySize = player.radius * 2.667;
-          // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
-          // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
-          drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+          // P7-PROTOTIPE: 'foto' = cara lama; 'hibrida' = foto + anggota
+          // prosedural; 'makhluk' = makhluk vektor penuh (rig Godot).
+          // MEKANIK TIDAK BERUBAH — hanya fungsi gambarnya.
+          const _pj = P.project(pBody.x, pBody.y - player.radius * 0.41);
+          const _cara = drawHeroBody(ctx, {
+            player, run, x: 0, y: 0, size: bodySize,
+            time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1,
+            proyeksi: _pj,
+          });
+          if (_cara === 'creature') {
+            // foto TIDAK digambar — makhluk vektor menggantikan seluruhnya
+          } else {
+            billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
+            // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
+            // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
+            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+            ctx.restore();
+            // mode hibrida: anggota gerak digambar SETELAH foto supaya
+            // pseudopodia tampak di sekeliling badan, bukan tertutup foto.
+            if (_cara === 'hybrid') {
+              drawHeroLimbs(ctx, {
+                player, run, x: 0, y: 0, size: bodySize,
+                time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1, proyeksi: _pj,
+              });
+            }
+          }
           // APEX: aura emas prosedural (bukan tempelan gambar) — penanda
           // puncak pohon evolusi hero.
           if (_evoId === 'apex') {

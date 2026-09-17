@@ -43,6 +43,8 @@ const store = {
   locomotion: null,  // data/locomotion.json (langkah, putaran halus, bob/lean, rig Rive)
   crawl: null,       // data/crawl.json (sumber angka rig merayap — dipanggang Godot)
   crawlCycles: null, // data/crawl-cycles.json (HASIL PANGGANGAN Godot: 24 frame/hero)
+  characterRigs: null, // data/character-rigs.json (spesimen anatomi makhluk — sumber panggang)
+  creatureRigs: null,  // data/creature-rigs.json (HASIL PANGGANGAN rig makhluk per keadaan)
 };
 
 import { BUILD } from './version.js';
@@ -90,6 +92,8 @@ export async function loadAllData() {
     locomotion: 'data/locomotion.json',
     crawl: 'data/crawl.json',
     crawlCycles: 'data/crawl-cycles.json',
+    characterRigs: 'data/character-rigs.json',
+    creatureRigs: 'data/creature-rigs.json',
   };
 
   const entries = await Promise.all(

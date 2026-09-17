@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "doc": "SPESIMEN ANATOMI + parameter tiap KEADAAN untuk RIG MAKHLUK (pendekatan ②). Satu berkas ini = satu karakter. Dipanggang Godot → data/creature-<id>.json. Bentuk dasar: SEL BERANGGOTA — badan ameba + 6 pseudopodia yang menapak & melangkah. PROTOTIPE: baru macrophage (Mako). Hero lain menyusul setelah konsep dikunci.",
+  "bake": {
+    "frames": 24,
+    "catatan": "24 frame per keadaan; keadaan sekali jalan (serang/skill/hit/mati/mutasi) dipetakan ke progres 0..1."
+  },
+  "creatures": {
+    "macrophage": {
+      "body": {
+        "radius": 0.5,
+        "color": "#4a7c59",
+        "rim": "#8fe6c8",
+        "belly": "#3a6146",
+        "wobble": {
+          "amp": 0.03,
+          "speed": 1.7,
+          "lobes": 7,
+          "secondary": 0.012
+        },
+        "catatan": "radius dalam satuan badan (1.0 = lebar penuh sprite)"
+      },
+      "nucleus": {
+        "r": 0.19,
+        "x": 0.0,
+        "y": -0.05,
+        "color": "#2c5540",
+        "bob": 0.018,
+        "rim": "#7fe3d0"
+      },
+      "organelles": {
+        "count": 5,
+        "r": 0.045,
+        "orbit": 0.25,
+        "color": "#b6f26f",
+        "drift": 0.6
+      },
+      "front": {
+        "arc": 0.62,
+        "thickness": 0.13,
+        "color": "#7fe3d0",
+        "catatan": "lamellipodium — tepi depan yang menjangkau; penanda arah hadap"
+      },
+      "uropod": {
+        "len": 0.3,
+        "thick": 0.1,
+        "color": "#3a6146",
+        "catatan": "ekor belakang — penanda arah membelakangi kamera"
+      },
+      "limbs": {
+        "count": 6,
+        "mount": [
+          -2.55,
+          -1.85,
+          -1.12,
+          1.12,
+          1.85,
+          2.55
+        ],
+        "phase": [
+          0.0,
+          0.5,
+          0.17,
+          0.67,
+          0.33,
+          0.83
+        ],
+        "side": [
+          -1,
+          -1,
+          -1,
+          1,
+          1,
+          1
+        ],
+        "len": 0.6,
+        "thick": 0.145,
+        "taper": 0.32,
+        "duty": 0.62,
+        "lift": 0.17,
+        "color": "#5c9873",
+        "tip": "#8fe6c8",
+        "catatan": "mount = sudut pangkal (rad, 0 = depan). duty = porsi siklus menapak; lift = tinggi ayun."
+      },
+      "states": {
+        "idle": {
+          "loop": true,
+          "dur": 2.6,
+          "breath": 0.028,
+          "squash": 0.02,
+          "wobble": 1.0,
+          "limbStride": 0.05,
+          "limbLift": 0.03,
+          "duty": 0.9,
+          "lean": 0.0,
+          "front": 0.35,
+          "coreY": 0.0,
+          "coreX": 0.0,
+          "rot": 0.0,
+          "splay": 1.0,
+          "note": "napas: mengembang-kempis pelan, anggota bergelombang kecil"
+        },
+        "walk": {
+          "loop": true,
+          "dur": 1.0,
+          "breath": 0.014,
+          "squash": 0.055,
+          "wobble": 1.1,
+          "limbStride": 1.0,
+          "limbLift": 0.17,
+          "duty": 0.62,
+          "lean": 0.1,
+          "front": 0.75,
+          "coreY": 0.0,
+          "coreX": 0.02,
+          "rot": 0.0,
+          "splay": 1.0,
+          "note": "jalan: anggota menapak bergiliran (tripod), badan memipih-memanjang"
+        },
+        "turn": {
+          "loop": true,
+          "dur": 0.8,
+          "breath": 0.014,
+          "squash": 0.03,
+          "wobble": 1.0,
+          "limbStride": 0.55,
+          "limbLift": 0.1,
+          "duty": 0.7,
+          "lean": 0.06,
+          "front": 0.5,
+          "coreY": 0.0,
+          "coreX": 0.0,
+          "rot": 0.22,
+          "splay": 1.06,
+          "note": "belok: badan memutar lebih dulu, anggota menyusul (follow-through)"
+        },
+        "attack": {
+          "loop": false,
+          "dur": 0.42,
+          "breath": 0.0,
+          "squash": 0.1,
+          "wobble": 1.6,
+          "limbStride": 0.1,
+          "limbLift": 0.06,
+          "duty": 0.9,
+          "lean": 0.26,
+          "front": 1.35,
+          "coreY": -0.02,
+          "coreX": 0.1,
+          "rot": 0.0,
+          "splay": 0.86,
+          "note": "serang: menjangkau ke depan lalu menarik (recoil)"
+        },
+        "skill": {
+          "loop": false,
+          "dur": 0.9,
+          "breath": 0.0,
+          "squash": 0.16,
+          "wobble": 2.0,
+          "limbStride": 0.06,
+          "limbLift": 0.05,
+          "duty": 0.9,
+          "lean": 0.05,
+          "front": 0.9,
+          "coreY": 0.0,
+          "coreX": 0.0,
+          "rot": 0.0,
+          "splay": 1.3,
+          "note": "skill/Pulse: menggembung (charge) → meletus (release)"
+        },
+        "hit": {
+          "loop": false,
+          "dur": 0.36,
+          "breath": 0.0,
+          "squash": 0.2,
+          "wobble": 2.4,
+          "limbStride": 0.05,
+          "limbLift": 0.1,
+          "duty": 0.9,
+          "lean": -0.2,
+          "front": 0.2,
+          "coreY": 0.0,
+          "coreX": -0.06,
+          "rot": 0.0,
+          "splay": 1.12,
+          "note": "kena hit: terdorong mundur, memipih keras, anggota terkulai"
+        },
+        "death": {
+          "loop": false,
+          "dur": 1.4,
+          "breath": 0.0,
+          "squash": 0.1,
+          "wobble": 0.5,
+          "limbStride": 0.0,
+          "limbLift": 0.0,
+          "duty": 0.9,
+          "lean": 0.0,
+          "front": 0.0,
+          "coreY": 0.1,
+          "coreX": 0.0,
+          "rot": 0.5,
+          "splay": 0.55,
+          "note": "mati: anggota terkulai, badan kempis ke alas"
+        },
+        "mutate": {
+          "loop": false,
+          "dur": 1.6,
+          "breath": 0.03,
+          "squash": 0.14,
+          "wobble": 2.6,
+          "limbStride": 0.12,
+          "limbLift": 0.12,
+          "duty": 0.9,
+          "lean": 0.0,
+          "front": 0.8,
+          "coreY": 0.0,
+          "coreX": 0.0,
+          "rot": 0.0,
+          "splay": 1.22,
+          "note": "mutasi A→B: bentuk menggembung, anggota memanjang, lalu mapan"
+        }
+      }
+    }
+  }
+}

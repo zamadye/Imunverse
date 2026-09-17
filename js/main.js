@@ -36,6 +36,10 @@ import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
 // P7: tanda tangan serangan per hero (identitas tempur)
 import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
 import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
+// P7-PROTOTIPE: lab & pemilih cara gambar hero
+import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode } from './render/hero-mode.js';
+import { bukaLab, tutupLab, gantiLab, initLab, labTerbuka } from './ui/prototype-lab.js';
+import { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy } from './render/creature-rig.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
@@ -658,6 +662,18 @@ async function boot() {
   const unlockAudio = () => audio.unlock();
   window.addEventListener('pointerdown', unlockAudio, { once: true });
   window.addEventListener('keydown', unlockAudio, { once: true });
+  // P7-PROTOTIPE: P = lab prototipe makhluk, M = ganti cara gambar hero di arena
+  window.addEventListener('keydown', (ev) => {
+    const t = ev.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    const k = (ev.key || '').toLowerCase();
+    if (k === 'p') { ev.preventDefault(); gantiLab(); }
+    else if (k === 'm') {
+      ev.preventDefault();
+      const m = cycleHeroMode();
+      try { showToast({ message: 'Mode hero: ' + m.toUpperCase() + ' (M untuk ganti)', kind: 'info' }); } catch { /* abaikan */ }
+    }
+  });
 
   // Toggle suara (dashboard + modal pause) — ikon & label sinkron
   const soundIcon = () => document.getElementById('img-sound-icon');
@@ -828,6 +844,7 @@ async function boot() {
     return true;
   };
   window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  try { initHeroMode(); } catch { /* abaikan */ }
   // P4: permukaan debug perjalanan dunia (dipakai penguji & autotest).
   window.__IMUNVERSE.world = {
     initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
@@ -844,6 +861,8 @@ async function boot() {
   window.__IMUNVERSE.Enemy = Enemy;
   // P7: permukaan debug RIG MERAYAP GODOT (dipakai penguji & autotest).
   window.__IMUNVERSE.crawl = { crawlPose, crawlLobe, crawlStatus };
+  window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, bukaLab, tutupLab, labTerbuka };
+  window.__IMUNVERSE.creature = { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy };
   // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)
   window.__IMUNVERSE.sprites = { has: hasSprite, stats: spriteStats };
   // P7: permukaan debug SERANGAN (dipakai penguji & autotest).
@@ -868,6 +887,7 @@ async function boot() {
     adStatus, triggerRewardedAdAntibody,
   };
   // P2 §9: permukaan debug sinematik mutasi (dipakai penguji & autotest).
+  try { initLab(); } catch { /* abaikan */ }
   window.__IMUNVERSE.mutationCinematic = {
     cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
   };

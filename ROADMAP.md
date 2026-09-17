@@ -398,6 +398,59 @@ Progres dari umpan balik pemain (main sendiri, 17 Sep 2026):
 | Jenis serangan semua hero terasa sama | `data/attacks.json → heroSignatures`: 11 hero punya tanda tangan sendiri (warna, ukuran, jumlah, laju, label, SFX). Tiga hero se-archetype `area` kini benar-benar beda: Mako = satu gelombang besar lambat, Neutron = banyak jebakan kecil cepat, Mastia = ledakan beruntun. Diterapkan **runtime** lewat `applySignature()` di `attack-archetype.js` | ✔ |
 | penjaga regresi baru | `tools/verify-attacks.mjs` (11 pemeriksaan): tanda tangan unik, warna unik, hero se-archetype tetap beda, runtime benar-benar memakainya, alur ANTICIPATION→TELEGRAPH→EXECUTION, mutasi mengubah angka serangan, telegraph ≥ 0,18 dtk | ✔ |
 
+### PROTOTIPE MAKHLUK (P7) — “karakter harus terasa HIDUP”  **[arsitektur BELUM dikunci]**
+
+Keluhan lanjutan setelah mengambang teratasi: *arahnya masih 2 arah* — jalan ke
+kiri/kanan = atas/bawah, bentuknya tidak berubah. Akar masalahnya: **foto
+datar tidak punya sendi dan tidak punya sisi depan/belakang**, jadi berapa pun
+frame yang dibuat, arahnya tetap harus ditebak dari transformasi.
+
+**Yang diminta:** evaluasi beberapa pendekatan, lalu **1 master prototype
+(MAKO)** yang bisa dibandingkan secara nyata — bukan teori.
+
+- **Dokumen evaluasi:** `docs/CHARACTER-PROTOTYPE-EVAL.md` — 5 pendekatan
+  (① frame-sprite, ② rigged 2D vektor, ③ deformasi prosedural, ④ hibrida,
+  ⑤ cut-out) dinilai pada 12 kriteria (visual, animasi, responsif, 360°, aset,
+  data, kompleksitas, skala 11 hero, skala mutasi, skala skin, kompatibilitas,
+  biaya). Skor: ② 54 · ④ 48 · ③ 39 · ⑤ 35 · ① 26.
+- **Rekomendasi: ②** (Godot memanggang rig → JSON → digambar vektor), dengan
+  ④ sebagai jembatan dan ③ sebagai cadangan perangkat lemah. Alasan utama:
+  nol foto baru, arah 360° diblend (bukan 4 tampang), mutasi = mengubah
+  anatomi di `data/` bukan set aset baru, dan bisa dibuktikan dengan angka.
+- **Yang diprototipe (3 mode berdampingan):** `foto` (③, baseline) ·
+  `hibrida` (④) · `makhluk` (②). Semua memakai mekanik yang **sama persis** —
+  hanya fungsi gambarnya yang berbeda.
+- **Cara membandingkan:** tombol **P** di dalam game → **Lab Prototipe**
+  (atau `?lab=mako`); tombol **M** mengganti mode **saat bermain**;
+  `?heroMode=makhluk` membuka game langsung memakai mode tertentu.
+- **Isi lab:** idle/napas · jalan · belok · serang · skill (Pulse) · kena hit ·
+  mati · **mutasi A→B** · 8 arah + putar 360° otomatis · pengatur laju ·
+  siklus semua keadaan.
+
+**Alur panggang (②):**
+```
+data/character-rigs.json  →  tools/godot/bake-creature.mjs  →  data/creature-rigs.json  →  js/render/creature-rig.js
+  (anatomi MAKO, 8 keadaan)     (Godot 4.7.2 headless)          (8 × 24 frame)              (digambar di kanvas)
+```
+Rig Godot: `Core` (napas/squash/condong) · `Nuk` (massa dalam, ikut
+**terlambat**) · `Front` (lamellipodium = penanda depan) · `Uro` (ekor =
+penanda membelakangi) · `Wob` (riak membran) · `L0..L5` (ujung pseudopodia).
+
+**Bukti (`tools/verify-prototype.mjs`, 17 pemeriksaan):**
+- **FOOT PLANTING 78/78 transisi benar**, 0 perubahan tinggi saat menapak
+  (ujung kaki bergerak mundur di ruang makhluk = diam di dunia — bukan menyapu);
+- 2–5 kaki menapak setiap saat (gaya tripod, tidak pernah meluncur);
+- **71 bentuk unik dari 72 arah** (sapu 360° tiap 5°) — benar-benar arah
+  berkesinambungan, bukan 4 tampang;
+- **tanpa “pop”**: lompatan bentuk antar 5° maks 0,387 vs median 0,154 (< 3×);
+- samping ≠ depan (jarak 0,684 vs median 0,154) — arah benar-benar berpengaruh;
+- **mekanik tidak tersentuh**: posisi & HP identik untuk ketiga mode;
+- 8 keadaan × 8 arah digambar tanpa NaN dan tanpa error.
+
+**Belum dikerjakan (sengaja, sesuai brief):** baru MAKO; 10 hero lain, 13
+patogen, dan boss menyusul setelah konsep dikunci. Arsitektur sengaja belum
+dikunci sampai bos memilih.
+
 ### Rig merayap (P7) — jawaban untuk "karakter masih mengambang"
 
 **Akar masalah (ketemu dari kode, bukan dugaan):**
