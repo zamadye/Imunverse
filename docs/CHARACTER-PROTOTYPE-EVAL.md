@@ -159,6 +159,22 @@ menjadi penilai mutu visualnya sendiri.
 
 ---
 
+## Yang GAGAL pada percobaan pertama — dan pelajarannya
+
+Laporan awal saya mengatakan “selesai”, padahal yang terlihat di layar **tidak
+berubah sama sekali**. Tiga kesalahan nyata (sudah diperbaiki):
+
+| Kesalahan | Kenyataan | Perbaikan |
+|---|---|---|
+| Mode bawaan masih `foto` | Prototipe benar-benar jalan, tetapi yang tampil tetap cara lama → pemain melihat nol perubahan | **Mode bawaan sekarang `makhluk`**; `foto` hanya lewat `?heroMode=foto` atau tombol ganti |
+| Satu-satunya pintu masuk = tombol **P**/**M** | Di layar sentuh (preview HP) tombol keyboard tidak ada | Dua tombol di **layar Jeda**: *Lab Prototipe Hero* & *Mode hero: …* |
+| Penguji hanya membuktikan “fungsi dipanggil” | `drawCreature()` diuji langsung → hijau, padahal `game.render()` bisa saja tidak memakainya | Penguji baru memakai **`game.render()` sungguhan** dan **membandingkan jumlah geometri** antar mode: path 284 (foto) vs 367 (makhluk), dan `drawImage` foto hero hilang |
+
+Pelajaran yang dikunci sebagai aturan pengujian: **buktikan apa yang tampil di
+layar, bukan apa yang dipanggil di kode.** Karena itu `tools/verify-prototype.mjs`
+sekarang berisi uji diferensial render dan uji posisi/ukuran makhluk
+(menapak di garis alas yang sama dengan foto lama, 0,42 × S ± 0,06 × S).
+
 ## Prototype yang bisa dibandingkan
 
 Tiga mode berjalan BERDAMPINGAN di **Lab Prototype** (buka dengan tombol **P**
@@ -166,12 +182,18 @@ di dalam game, atau `?lab=mako`):
 
 | Mode | Isi |
 |---|---|
-| `foto` | ③ deformasi prosedural pada foto (keadaan sekarang) |
+| `makhluk` | ② makhluk vektor penuh — rig Godot, depan/samping/belakang diblend. **INI MODE BAWAAN** |
 | `hibrida` | ④ foto sebagai inti badan + anggota gerak prosedural |
-| `makhluk` | ② makhluk vektor penuh — rig Godot, depan/samping/belakang diblend |
+| `foto` | ③ deformasi prosedural pada foto (cara lama — pembanding) |
 
-Tombol **M** mengganti mode **saat bermain sungguhan**, jadi bisa dirasakan
-langsung di arena (mekanik permainan tidak berubah sedikit pun).
+Cara mengganti (tanpa keyboard juga bisa):
+- **Layar Jeda** → tombol *Mode hero: …* (berganti tiap ketuk) dan
+  *Lab Prototipe Hero* (membuka 3 kanvas berdampingan).
+- **Tombol M** mengganti mode saat bermain, **tombol P** membuka lab.
+- `?heroMode=foto|hibrida|makhluk` membuka game langsung dengan mode itu.
+
+Mekanik permainan tidak berubah sedikit pun — yang berganti hanya fungsi
+gambar (terbukti: posisi & HP identik untuk ketiga mode).
 
 State yang wajib terlihat — semuanya tersedia di lab:
 idle/napas · jalan (akselerasi + deselerasi) · belok · serang · skill (Pulse) ·

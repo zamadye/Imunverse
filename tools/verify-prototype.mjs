@@ -28,6 +28,20 @@ const cek = (nama, ok, info = '') => {
 };
 if (!API || !game) { console.log('bundle/harness belum siap'); process.exit(1); }
 
+// ---------- 0. MODE BAWAAN HARUS TERLIHAT (keluhan: "tidak ada perubahan") ----------
+// Ini uji yang dulu TIDAK ADA: prototipe boleh saja benar, tetapi kalau mode
+// bawaannya masih 'foto', pemain tidak melihat apa pun berubah.
+const modeBawaan = API.hero.heroMode();
+cek('mode BAWAAN = makhluk (perubahan langsung terlihat saat game dibuka)',
+  modeBawaan === 'makhluk', 'mode=' + modeBawaan);
+const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const kodeMain = fs.readFileSync(path.join(ROOT, 'js/main.js'), 'utf8');
+for (const id of ['btn-proto-lab', 'btn-proto-mode']) {
+  cek(`kendali layar ${id} ada di index.html & dipasang di main.js`,
+    html.includes(`id="${id}"`) && kodeMain.includes(`'${id}'`),
+    `html=${html.includes(`id="${id}"`)} main=${kodeMain.includes(`'${id}'`)}`);
+}
+
 const CRE = API.creature;
 const HERO = API.hero;
 cek('permukaan prototipe terpasang', !!(CRE && HERO), JSON.stringify(Object.keys(API)));
@@ -163,6 +177,77 @@ cek('tidak ada "pop": lompatan terbesar ≤ 3× lompatan tengah',
 const sisiDepan = jarak(sapu[0], sapu[Math.floor(LANGKAH / 4)]);   // samping vs menghadap
 cek('arah BENAR-BENAR berpengaruh (samping ≠ depan)',
   sisiDepan > Math.max(0.3, median * 3), `jarak samping→depan=${sisiDepan.toFixed(3)} vs median=${median.toFixed(3)}`);
+
+// ---------- 4b. BENAR-BENAR TAMPIL DI ARENA (bukan hanya fungsi dipanggil) ----------
+// Uji ini memakai game.render() sungguhan dengan ctx perekam, lalu MEMBANDINGKAN
+// jumlah geometri antar mode. Kalau prototipe tidak pernah tampil, angkanya sama.
+function ctxHitung() {
+  const rec = { drawImage: 0, path: 0, nan: 0 };
+  const cekN = (...v) => { if (v.some((n) => typeof n === 'number' && !Number.isFinite(n))) rec.nan++; };
+  const grad = { addColorStop() {} };
+  const base = {
+    canvas: { width: 400, height: 300 },
+    createLinearGradient: (...a) => { cekN(...a); return grad; },
+    createRadialGradient: (...a) => { cekN(...a); return grad; },
+    createPattern: () => null, measureText: () => ({ width: 0 }),
+    getImageData: () => ({ data: new Uint8ClampedArray(4), width: 1, height: 1 }),
+    createImageData: (w, h) => ({ data: new Uint8ClampedArray(4), width: w, height: h }),
+    putImageData() {},
+    save() {}, restore() {}, translate(...a) { cekN(...a); }, rotate(...a) { cekN(...a); },
+    scale(...a) { cekN(...a); }, transform(...a) { cekN(...a); }, setTransform(...a) { cekN(...a); },
+    resetTransform() {}, beginPath() {}, closePath() {},
+    moveTo(...a) { cekN(...a); rec.path++; }, lineTo(...a) { cekN(...a); rec.path++; },
+    quadraticCurveTo(...a) { cekN(...a); rec.path++; }, bezierCurveTo(...a) { cekN(...a); rec.path++; },
+    arc(...a) { cekN(...a); rec.path++; }, ellipse(...a) { cekN(...a); rec.path++; },
+    rect(...a) { cekN(...a); rec.path++; }, roundRect(...a) { cekN(...a); }, arcTo(...a) { cekN(...a); },
+    fill() {}, stroke() {}, clip() {}, fillRect(...a) { cekN(...a); }, clearRect(...a) { cekN(...a); },
+    strokeRect(...a) { cekN(...a); }, fillText() {}, strokeText() {},
+    drawImage(...a) { cekN(a[1], a[2], a[3], a[4]); rec.drawImage++; },
+  };
+  return { ctx: new Proxy(base, {
+    get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$|^letterSpacing$|^wordSpacing$/.test(p)) return ''; return (t[p] = () => undefined); },
+    set(t, p, v) { t[p] = v; return true; },
+  }), rec };
+}
+const hitungArena = async (mode) => {
+  API.hero.setHeroMode(mode);
+  game.startRun('macrophage');
+  await sleep(50);
+  const pl = game.run.player;
+  for (let i = 0; i < 40; i++) pl.update(1 / 60, { x: 1, y: 0, magnitude: 1 }, game);
+  const { ctx, rec } = ctxHitung();
+  game.ctx = ctx; game.viewW = 400; game.viewH = 300; game.dpr = 1;
+  game.render(16, 2000);
+  return rec;
+};
+const rFoto = await hitungArena('foto');
+const rBawaan = await hitungArena(modeBawaan);
+cek('arena: mode bawaan menggambar GEOMETRI MAKHLUK (bukan foto lama)',
+  rBawaan.path > rFoto.path + 40,
+  `path foto=${rFoto.path} vs bawaan=${rBawaan.path} (selisih ${rBawaan.path - rFoto.path})`);
+cek('arena: foto hero TIDAK lagi digambar di mode makhluk',
+  rBawaan.drawImage < rFoto.drawImage,
+  `drawImage foto=${rFoto.drawImage} vs bawaan=${rBawaan.drawImage}`);
+cek('arena: render tanpa NaN di mode bawaan', rBawaan.nan === 0, `${rBawaan.nan} angka tidak terhingga`);
+
+// ---------- 4c. POSISI & UKURAN DI LAYAR (harus sejajar dengan alas lama) ----------
+// Foto lama: bawahnya di y + 0,5×S (S = ukuran sprite). Makhluk harus
+// menapak di garis yang SAMA supaya tidak melayang atau tenggelam.
+const S = 100;
+const { ctx: cUkur, rec: rUkur } = ctxRekam();
+CRE.drawCreature(cUkur, { id: ID, state: 'idle', u: 0.2, x: 0, y: 0, size: S, facing: 0, time: 0.5 });
+const xs = rUkur.tanda.filter((_, i) => i % 2 === 0);
+const ys = rUkur.tanda.filter((_, i) => i % 2 === 1);
+const bbox = {
+  kiri: Math.min(...xs), kanan: Math.max(...xs),
+  atas: Math.min(...ys), bawah: Math.max(...ys),
+};
+cek('makhluk menapak di garis alas yang sama dengan foto lama (0,42×S ± 0,06×S)',
+  Math.abs(bbox.bawah - 0.42 * S) <= 0.06 * S, `bawah=${bbox.bawah.toFixed(1)} (harap ≈${(0.42 * S).toFixed(1)})`);
+cek('ukuran makhluk wajar (lebar 0,8–1,8 × S, tinggi 0,6–1,4 × S)',
+  (bbox.kanan - bbox.kiri) >= 0.8 * S && (bbox.kanan - bbox.kiri) <= 1.8 * S
+  && (bbox.bawah - bbox.atas) >= 0.6 * S && (bbox.bawah - bbox.atas) <= 1.4 * S,
+  `lebar=${(bbox.kanan - bbox.kiri).toFixed(1)} tinggi=${(bbox.bawah - bbox.atas).toFixed(1)} (S=${S})`);
 
 // ---------- 5. MODE TIDAK MENYENTUH MEKANIK ----------
 const modeAsal = HERO.heroMode();

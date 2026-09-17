@@ -37,7 +37,7 @@ import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
 import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
 import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
 // P7-PROTOTIPE: lab & pemilih cara gambar hero
-import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode } from './render/hero-mode.js';
+import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode, heroModeLabel } from './render/hero-mode.js';
 import { bukaLab, tutupLab, gantiLab, initLab, labTerbuka } from './ui/prototype-lab.js';
 import { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy } from './render/creature-rig.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
@@ -861,6 +861,27 @@ async function boot() {
   window.__IMUNVERSE.Enemy = Enemy;
   // P7: permukaan debug RIG MERAYAP GODOT (dipakai penguji & autotest).
   window.__IMUNVERSE.crawl = { crawlPose, crawlLobe, crawlStatus };
+  // P7-PROTOTIPE: kendali di LAYAR (bisa disentuh) — tidak cuma tombol keyboard
+  {
+    const bLab = document.getElementById('btn-proto-lab');
+    const bMode = document.getElementById('btn-proto-mode');
+    const segar = () => { if (bMode) bMode.textContent = 'Mode hero: ' + heroModeLabel(); };
+    if (bLab) bLab.addEventListener('click', () => { audio.ui(); bukaLab('macrophage'); });
+    if (bMode) bMode.addEventListener('click', () => {
+      audio.ui();
+      const m = cycleHeroMode();
+      segar();
+      try { showToast({ message: 'Mode hero: ' + heroModeLabel(m) + ' — rasakan di arena', kind: 'info' }); } catch { /* abaikan */ }
+    });
+    segar();
+    // segarkan label setiap layar jeda dibuka
+    try {
+      const layarJeda = document.getElementById('screen-pause');
+      if (layarJeda && typeof MutationObserver !== 'undefined') {
+        new MutationObserver(segar).observe(layarJeda, { attributes: true, attributeFilter: ['class'] });
+      }
+    } catch { /* abaikan */ }
+  }
   window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, bukaLab, tutupLab, labTerbuka };
   window.__IMUNVERSE.creature = { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy };
   // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)

@@ -277,6 +277,9 @@ if (API?.game) {
   // menunggu 1,5 detik tetap — itu kadang selesai SEBELUM ~250 sprite selesai
   // dibaca, sehingga hero yang diukur PERTAMA tampak memakai foto dasar (dan
   // tertangkap sebagai "foto tidak berubah" palsu).
+  // Penguji ini khusus mengukur FOTO mutasi — paksa mode gambar 'foto'
+  // (mode bawaan game sekarang 'makhluk', yang tidak menggambar foto sama sekali).
+  try { API.hero?.setHeroMode?.('foto'); } catch { /* abaikan */ }
   const butuh = [];
   for (const h of heroes) {
     for (const k of ['spriteIdle', 'spriteAttack', 'spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack']) {

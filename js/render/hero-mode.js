@@ -12,7 +12,9 @@
 import { drawCreature, creatureAvailable, creatureStateInfo } from './creature-rig.js';
 
 const MODES = ['foto', 'hibrida', 'makhluk'];
-let _mode = 'foto';
+// DEFAULT = 'makhluk': prototipe harus TERLIHAT begitu game dibuka.
+// (Sebelumnya default 'foto' → pemain tidak melihat apa pun berubah.)
+let _mode = 'makhluk';
 let _lastT = 0;
 
 /** Mode aktif. */
@@ -31,6 +33,11 @@ export function initHeroMode(search) {
     if (s && MODES.includes(s)) _mode = s;
   } catch { /* abaikan */ }
   return _mode;
+}
+
+/** Nama mode yang enak dibaca (untuk tombol & toast). */
+export function heroModeLabel(m) {
+  return ({ foto: 'FOTO (lama)', hibrida: 'HIBRIDA', makhluk: 'MAKHLUK' })[m || _mode] || String(m || _mode);
 }
 
 /**
