@@ -197,7 +197,11 @@ cek('kembali ke menu (dashboard)', menuSah, 'aktif=' + a2);
 // V2 P0: layar lama sudah DIHAPUS (bukan dibekukan) — lengkap dengan
 // section, modul layar, sistem dan datanya. Daftar ini menjaga agar tidak
 // ada satu pun yang tumbuh kembali.
-const LAYAR_LAMA_DAFTAR = ['upgrade', 'shop', 'bp', 'bag', 'bosschest', 'rank', 'capsule', 'comeback', 'campaign', 'arena', 'prep'];
+// 'shop' DIHIDUPKAN KEMBALI sebagai MODAL (bukan layar menu lama) pada
+// UI-REBUILD P7 tahap 4, atas permintaan desain: kartu atas dashboard ke-3
+// = Shop. Karena itu 'shop' dikeluarkan dari daftar layar terlarang — yang
+// tetap dilarang adalah layar menu lama yang dibekukan (upgrade, bp, bag, …).
+const LAYAR_LAMA_DAFTAR = ['upgrade', 'bp', 'bag', 'bosschest', 'rank', 'capsule', 'comeback', 'campaign', 'arena', 'prep'];
 const beku = LAYAR_LAMA_DAFTAR;
 for (const id of ['roster', 'codex', 'profile']) {
   API.screenManager.show(id);

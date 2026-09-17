@@ -218,11 +218,18 @@ cek('tawaran bantuan hanya muncul saat friksi ekonomi (§17, §27)',
   panelFriksi && /\(\s*a\.iap && a\.iap\.enabled/.test(kodeLevelUp),
   'panel friksi/hierarki belum ditemukan di levelup-screen');
 // Komentar kode tidak dihitung — yang dilarang adalah UI JUALAN yang nyata.
+// CATATAN P7 tahap 4: dashboard kini punya SATU pintu masuk Shop (kartu atas
+// ke-3) atas permintaan desain. Yang dilarang §17 adalah ETALASE jualan:
+// daftar harga, tombol Beli, atau tawaran IAP yang memenuhi dashboard.
+// Jadi aturannya: maksimal 1 pintu masuk, dan TIDAK ADA harga/paket di dashboard.
 const dashBersihKomentar = kodeDashboard.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 const dashHtml = (html.match(/<section[^>]*id="screen-dashboard"[\s\S]*?<\/section>/) || [''])[0];
-const dashboardBersih = !/iap|reserve|buyReservePack|shop|toko|cadangan/i.test(dashBersihKomentar)
-  && !/iap|shop|toko|beli|buy/i.test(dashHtml);
-cek('IAP TIDAK memenuhi dashboard (§17)', dashboardBersih, 'dashboard memuat elemen jualan');
+const etalaseJualan = /shop-pack|Beli|Rp\.?\s?\d|harga|price|iap|buy/i.test(dashHtml);
+const pintuShop = (dashHtml.match(/card-shop|data-nav="shop"/g) || []).length;
+const kodeBersih = !/iap|reserve|buyReservePack|shop|toko|cadangan/i.test(dashBersihKomentar);
+cek('IAP TIDAK memenuhi dashboard (§17): maksimal 1 pintu masuk & tanpa etalase harga',
+  kodeBersih && !etalaseJualan && pintuShop <= 1,
+  `kode=${kodeBersih} etalase=${etalaseJualan} pintu=${pintuShop}`);
 const kuotaTayang = typeof P.maxIapOffersPerRun() === 'number' && eco.iap.maxOffersPerRun > 0;
 cek('kuota tayang IAP per run dibatasi data (§27)', kuotaTayang, `maksOffersPerRun=${eco.iap.maxOffersPerRun}`);
 

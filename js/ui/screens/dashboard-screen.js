@@ -171,6 +171,24 @@ function updateMapChrome(meta, idx = chapterIndex) {
     const locked = chapterStatus(ch, meta) === 'locked';
     sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
   }
+  // Overlay peta (di bawah kartu): nama peta → Chapter N.
+  const nm = document.getElementById('map-name');
+  const cp = document.getElementById('map-chapter');
+  if (ch) {
+    if (nm) nm.textContent = namaPeta(ch) || ch.organ || '—';
+    if (cp) cp.textContent = `Chapter ${idx + 1}`;
+  }
+}
+
+/** Nama peta = nama arena bab ini (data/arenas.json), jatuh ke organ bab. */
+function namaPeta(ch) {
+  try {
+    const semua = (getData().arenas && getData().arenas.arenas) || [];
+    const arena = semua.find((a) => a && a.id === ch.arenaId);
+    if (arena && arena.name) return arena.name;
+    if (arena && arena.organ && arena.organ.name) return arena.organ.name;
+  } catch { /* data belum siap */ }
+  return '';
 }
 
 /**
@@ -254,7 +272,12 @@ function updateMissionBadge() {
 // ---------------------------------------------------------------------
 
 function renderTopbar(meta) {
-  document.getElementById('dash-currency').textContent = (meta.currency || 0).toLocaleString('id-ID');
+  const cur = document.getElementById('dash-currency');
+  if (cur) cur.textContent = (meta.currency || 0).toLocaleString('id-ID');
+  // Kartu atas #1: level pasukan (angka nyata dari save — game belum punya
+  // level akun ber-XP, jadi yang ditampilkan level pasukan yang bisa di-upgrade).
+  const lv = document.getElementById('card-level-val');
+  if (lv) lv.textContent = 'Lv ' + (meta.allyLevel || 0);
 
   const session = getSession();
   const chip = document.getElementById('account-chip');

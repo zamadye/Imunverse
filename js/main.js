@@ -74,6 +74,7 @@ import { signUp, hasAccount } from './systems/account-system.js';
 import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
+import * as shopScreen from './ui/screens/shop-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import * as missionsScreen from './ui/screens/missions-screen.js'; // UI-REBUILD P8: modal Misi & Quest
 import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
@@ -498,6 +499,7 @@ async function boot() {
   screenManager.registerScreen('title', titleScreen);
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   screenManager.registerScreen('missions', missionsScreen); // UI-REBUILD P8: modal Misi & Quest (footer)
+  screenManager.registerScreen('shop', shopScreen); // UI-REBUILD P7: modal Shop (kartu atas dashboard)
   titleScreen.wire(); // F21: layar judul gameplay-first
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
@@ -556,6 +558,19 @@ async function boot() {
     // presenter naratif (RIA) jangan menimpa tombol baca— sembunyikan sementara
     const pr = document.getElementById('presenter-layer');
     if (pr) pr.style.visibility = 'hidden';
+  }
+
+  // ---------- KARTU ATAS DASHBOARD (bentuk sel meleleh) ----------
+  // 3 kartu: Profil/Level → layar profil · Nilai Antibody → panduan cara
+  // mendapatkan antibodi · Shop → modal shop (paket cadangan + iklan reward).
+  {
+    const pasang = (id, aksi) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => { try { audio.ui(); } catch { /* abaikan */ } aksi(); });
+    };
+    pasang('card-level', () => screenManager.show('profile'));
+    pasang('card-anti', () => openCurGuide('anti'));
+    pasang('card-shop', () => screenManager.show('shop'));
   }
 
   const antiChip = document.getElementById('hud-anti-chip');
@@ -923,16 +938,18 @@ async function boot() {
     if (!hasAccount()) signUp({ username: 'Tester', password: '1234', faction: 'imun' });
     screenManager.show('dashboard');
     runAutotest();
-  } else if (!hasAccount()) {
-    // F21 GAMEPLAY-FIRST: user baru disambut layar judul → cerita → LANGSUNG
-    // gameplay (bukan dashboard/daftar akun dulu). Akun diminta setelah run pertama.
-    screenManager.show('title');
   } else {
-    // Pemain lama: sinematik pembuka (sekali) → dashboard → coach
-    playOnce('intro', () => {
-      screenManager.show('dashboard');
-      coach.startIfFirstTime();
-    });
+    // DESAIN UI (P7): layar loading HANYA boleh berisi UI loading. Setelah 100%
+    // barulah modal MULAI muncul di atasnya; game berpindah layar hanya saat
+    // pemain mengetuk MULAI — tujuan = layar persiapan/pilih hero (roster).
+    const mulaiModal = document.getElementById('mulai-modal');
+    const tombolMulai = document.getElementById('btn-mulai');
+    mulaiModal?.classList.remove('hidden');
+    tombolMulai?.addEventListener('click', () => {
+      mulaiModal?.classList.add('hidden');
+      try { audio.ui(); } catch { /* audio belum terbuka */ }
+      screenManager.show('roster');
+    }, { once: true });
   }
   // ADDENDUM §3: parameter akuisisi (?challenge= ?ref= ?play=)
   try { handleAcquisitionParams(); } catch { /* abaikan */ }
