@@ -66,9 +66,8 @@ import * as reviveScreen from './ui/screens/revive-screen.js';
 import * as openboxScreen from './ui/screens/openbox-screen.js'; // V2 onboarding: reveal hero bonus
 import * as signupScreen from './ui/screens/signup-screen.js'; // V2 onboarding: simpan progres (ringkas)
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
-import { onRunStart as tutorialOnRunStart, isTutorialActive } from './systems/tutorial-system.js';
+import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
-import { cinematic, playOnce } from './ui/cinematic.js';
 import * as codexScreen from './ui/screens/codex-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
@@ -79,10 +78,7 @@ import * as profileScreen from './ui/screens/profile-screen.js';
 import * as shopScreen from './ui/screens/shop-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
 import * as missionsScreen from './ui/screens/missions-screen.js'; // UI-REBUILD P8: modal Misi & Quest
-import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
-import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
-import { vo } from './systems/vo-system.js'; // R3: lapisan VO
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -111,11 +107,9 @@ function showToast({ message, kind = '' }) {
   el.className = 'toast ' + kind;
   el.textContent = message;
   box.appendChild(el);
-  // R2: bark RIA = beat naratif — tampil lebih lama & tidak tergusur toast lain
-  setTimeout(() => el.remove(), kind === 'ria' ? 5200 : 3200);
+  setTimeout(() => el.remove(), 3200);
   while (box.children.length > 4) {
-    const victim = [...box.children].find((c) => !c.classList.contains('ria')) || box.firstChild;
-    victim.remove();
+    box.firstChild.remove();
   }
 }
 
@@ -126,11 +120,7 @@ function wireUiBridge() {
   on('toast', (payload) => {
     // Fase 12c: jangan menumpuk — maksimal 2 toast, yang tertua dihapus
     const live = [...document.querySelectorAll('#toasts .toast')];
-    if (live.length >= 2) {
-      // R2: jangan gusur bark RIA — korbankan toast non-naratif tertua
-      const victim = live.find((c) => !c.classList.contains('ria')) || live[0];
-      victim.remove();
-    }
+    if (live.length >= 2) live[0].remove();
     showToast(payload);
   });
 
@@ -285,109 +275,31 @@ function wireUiBridge() {
   on('waveBreak', ({ wave }) => {
     hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
     // E2 poin 6: WAVE PENTING (kelipatan boss, mis. 5/10/15) → cinematic
-    // kemenangan 3 babak: diserang → melawan & menang → ancaman lebih besar
-    // muncul. Gameplay dipause, selesai → resume → RIA menyambut.
+    // kemenangan 3 babak: diserang → melawan & menang → ancaman lebih besar muncul.
     const bossEvery = (getData().waves && getData().waves.bossWaveEvery) || 5;
     if (wave > 0 && wave % bossEvery === 0) {
       // playWaveCinematic DULU (set flag aktif) baru pause — supaya handler
       // on('pause') tahu ini cinematic, bukan modal jeda.
-      playWaveCinematic(wave, () => {
-        game.resume();
-        setTimeout(() => showPresenter('ria',
-          `Luar biasa! Wave ${wave} kita menangkan... tapi kurasakan getaran patogen yang JAUH lebih besar mendekat. Bersiaplah — aku di sini bersamamu!`,
-          { duration: 5.5 }), 350);
-      });
+      playWaveCinematic(wave, () => game.resume());
       game.pause();
       return;
     }
-    // E1 poin 9: RIA muncul TIAP selesai wave — karakter hidup (pose bicara
-    // + gestur), teks di samping, auto-hilang cepat agar ritme tak terganggu.
-    const riaBarks = [
-      `Wave ${wave} bersih! Patogen mundur — tarik napas, sebentar lagi datang lebih banyak.`,
-      `Kerja bagus! Wave ${wave} selesai. Kuperbarui peta ancaman... siap-siap ya!`,
-      `Area aman! Itu tadi wave ${wave}. Pungut nutrisi selagi sempat!`,
-      `Wave ${wave} tumbang! Sinyal inflamasi menurun... tapi jangan lengah.`,
-    ];
-    showPresenter('ria', riaBarks[wave % riaBarks.length], { duration: 4 });
   });
 
-  // R3 (Narrative-Cinematic): REVEAL BOSS BAB 5 (naskah final 6.3) —
-  // cutscene 2-panel 1× sejak pernah; selain itu = bark VO 3-5 dtk (7.3).
-  on('bossBark', ({ chapterId }) => {
-    const meta = STATE.meta;
-    const cs = getData().cutscenes;
-    if (chapterId === 'bab_kanker' && !meta.bossRevealSeen) {
-      meta.bossRevealSeen = true;
-      writeSave(meta);
-      // reveal twist: pause → cutscene → resume (pola cinematic wave;
-      // cutsceneActive() di-set sinkron oleh playCutscene sebelum pause)
-      playCutscene('boss_reveal_bab_kanker', () => game.resume());
-      game.pause();
-      return;
-    }
-    const voPath = cs && cs.bossVo ? (cs.bossVo[chapterId] || cs.bossVo.default) : null;
-    if (voPath) vo.play(voPath);
-  });
-
-  // R3 Task 4: FIRST-TIME EXPERIENCE RIA (sekali sejak pernah, non-blocking,
-  // bisa di-tap untuk skip — presenter + VO, nada bersemangat/jenaka).
-  // RONDE-3 visual fix: presenter TIDAK boleh menumpuk di atas modal Level-Up /
-  // pause — bark ditunda sampai momen resume (antrian 1 baris).
-  let pendingBark = null;
   // V2 onboarding: true di antara 'levelup' pertama dan 'resume' berikutnya —
   // lihat on('levelup')/on('resume') di bawah.
   let pendingOnboardingBox = false;
-  function flushBark() {
-    const b = pendingBark;
-    pendingBark = null;
-    if (b) setTimeout(() => {
-      // Level-up beruntun: jangan menimpa modal yang baru terbuka — antri ulang
-      if (STATE.levelUpOpen || (game.run && game.run.paused)) { pendingBark = b; return; }
-      showPresenter(b.who, b.text, b.opts);
-    }, 420);
-  }
-  function nftFirst(key, event) {
-    const meta = STATE.meta;
-    if (meta.nft && meta.nft[key]) return;
-    // RONDE-4 (check-3): riwayat — saat tutorial onboarding berjalan, bark
-    // RIA (NFT) dilewati. RONDE-7: tutorial dimatikan → cabang ini moot,
-    // disimpan demi keamanan bila sistem onboarding dihidupkan lagi.
-    if (isTutorialActive()) {
-      meta.nft = meta.nft || {};
-      meta.nft[key] = true;
-      writeSave(meta);
-      return;
-    }
-    const nft = getData().cutscenes && getData().cutscenes.nft;
-    const line = nft && nft[key];
-    if (!line) return;
-    meta.nft = meta.nft || {};
-    meta.nft[key] = true;
-    writeSave(meta);
-    if (STATE.levelUpOpen || (game.run && game.run.paused)) {
-      pendingBark = { who: 'ria', text: line.text, opts: { vo: line.vo } };
-    } else {
-      showPresenter('ria', line.text, { vo: line.vo });
-    }
-    if (event) event.preventDefault?.();
-  }
-  on('nftMove', () => nftFirst('move'));
   on('levelup', (payload) => {
-    nftFirst('levelup');
     // V2 onboarding: level-up PERTAMA pemain (siapa pun, jalur mana pun)
     // dilanjutkan dengan modal "openbox" (reveal hero bonus) setelah pilihan
     // mutasi selesai — lihat on('resume') di bawah.
     if (!STATE.meta.onboardingBoxSeen) pendingOnboardingBox = true;
     screenManager.show('levelup', payload);
   });
-  on('revive', () => {
-    nftFirst('revive');
-    screenManager.show('revive');
-  });
+  on('revive', () => screenManager.show('revive'));
   // skill pertama = cast kemampuan pertama (banner nama kemampuan)
   let bannerTimer = null;
   on('abilityBanner', ({ name, color }) => {
-    nftFirst('skill');
     const b = document.getElementById('ability-banner');
     if (!b) return;
     b.textContent = name;
@@ -400,21 +312,7 @@ function wireUiBridge() {
     bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
   });
 
-  // E1 poin 9: AMARA muncul saat pemain MENDAPAT HERO BARU — menjelaskan
-  // spesifikasi (role + skill) dengan bahasa awam, karakter penuh bergestur.
-  on('heroUnlocked', ({ heroId }) => {
-    const h = getData().heroes.heroes.find((x) => x.id === heroId);
-    if (!h) return;
-    const skillNames = (h.skills || []).map((sid) => {
-      const sd = getData().skills.skills.find((x) => x.id === sid);
-      return sd ? sd.name : sid;
-    }).join(', ');
-    setTimeout(() => showPresenter('amara',
-      `Selamat! ${h.name} — ${h.title} — bergabung dengan pasukanmu. Perannya ${h.role}. Jurus andalannya: ${skillNames}. Coba dia di run berikutnya!`,
-      { duration: 9 }), 900);
-  });
-
-  on('pause', () => { if (!waveCineActive() && !cutsceneActive()) screenManager.show('pause'); }); // E2 poin 6 + R3: cinematic ≠ modal pause
+  on('pause', () => { if (!waveCineActive()) screenManager.show('pause'); }); // E2 poin 6: cinematic ≠ modal pause
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
     // V2 onboarding: level-up pertama → jangan langsung ke HUD, sisipkan
@@ -429,7 +327,6 @@ function wireUiBridge() {
       return;
     }
     if (STATE.screen === 'gameplay') screenManager.show('hud');
-    flushBark(); // bark NFT yang ditunda saat modal terbuka → tampil bersih di HUD
   });
   on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
 }
@@ -472,10 +369,6 @@ async function boot() {
     loadingScreen.setProgress(pct, `Memuat sprite… (${done}/${total})${isFallback ? ' [fallback dev]' : ''}`);
   });
   loadingScreen.setProgress(98, 'Mengaktifkan sistem imun…');
-
-  // R3 (Narrative-Cinematic): prewarm cutscene (modul three.js + VO pembuka)
-  // di background — jank init WebGL keluar dari jalur kritis cutscene.
-  prewarmCutscenes();
 
   // 3) Save / meta
   const raw = loadSave();
@@ -549,8 +442,6 @@ async function boot() {
 
   let guideAutoPaused = false;
   function closeCurGuide() {
-    const pr = document.getElementById('presenter-layer');
-    if (pr) pr.style.visibility = '';
     // kembali ke dunia yang aktif; resume hanya bila kami yang mem-pause sebelumnya
     if (guideAutoPaused && game.run && !game.run.ended && game.run.paused) {
       game.resume();
@@ -577,9 +468,6 @@ async function boot() {
       guideAutoPaused = true;
     }
     screenManager.show('curguide');
-    // presenter naratif (RIA) jangan menimpa tombol baca— sembunyikan sementara
-    const pr = document.getElementById('presenter-layer');
-    if (pr) pr.style.visibility = 'hidden';
   }
 
   // ---------- KARTU ATAS DASHBOARD (bentuk sel meleleh) ----------

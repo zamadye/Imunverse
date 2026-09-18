@@ -27,7 +27,6 @@ const store = {
   gamefeel: null,    // data/gamefeel.json (V2 Phase 1: rantai feedback game feel)
   combat: null,      // data/combat.json (V2 Phase 2: movement/targeting/contact attack)
   mastery: null,     // data/mastery.json (V2 Phase 6: hero mastery dari bermain)
-  narrative: null,   // data/narrative.json (R2: RIA/Dr. Amara, glossary, barks)
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
   characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
   membrane: null,    // data/membrane.json (PHAGOS: properti medan membran)
@@ -64,8 +63,6 @@ export async function loadAllData() {
     arenas: 'data/arenas.json',
     mutators: 'data/mutators.json',
     campaign: 'data/campaign.json',
-    cinematics: 'data/cinematics.json',
-    cutscenes: 'data/cutscenes.json', // R3 (Narrative-Cinematic): cutscene produksi + VO
     coach: 'data/coach.json',
     factions: 'data/factions.json',
     bodySystems: 'data/body-systems.json',
@@ -76,7 +73,6 @@ export async function loadAllData() {
     gamefeel: 'data/gamefeel.json',
     combat: 'data/combat.json',
     mastery: 'data/mastery.json',
-    narrative: 'data/narrative.json',
     modules: 'data/modules.json',
     characterDesigns: 'data/character-designs.json',
     membrane: 'data/membrane.json',
@@ -257,13 +253,6 @@ export function getMastery() {
 /** Config gerak: stride (foot-planting), putaran halus, bob/lean, rig Rive. */
 export function getLocomotion() {
   return getData().locomotion;
-}
-
-// ===== R2 Rebuild: layer naratif (data/narrative.json) ======
-
-/** RIA/Dr. Amara, glossary awam, barks boss & akhir run. */
-export function getNarrative() {
-  return getData().narrative;
 }
 
 // ===== R3+ Rebuild: modul combat differentiation (data/modules.json) =====

@@ -10,13 +10,10 @@ import { getData, getHero } from '../../core/data-store.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
-import { playOnce } from '../cinematic.js';
-import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): epilog 6.4
 import { music } from '../../systems/music-system.js'; // R3: hentikan musik setelah epilog
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
-import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
 import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
@@ -48,16 +45,6 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
-  // R2: 1 baris bark kontekstual RIA — non-blocking (story doc §7.3)
-  const oldBark = document.getElementById('go-ria-bark');
-  if (oldBark) oldBark.remove();
-  const barkText = runEndBark(!!summary.victory, (STATE.meta.stats && STATE.meta.stats.totalRuns) || 0);
-  if (barkText) {
-    const bark = el('div', { id: 'go-ria-bark', class: 'go-ria-bark', style: 'margin:2px auto 4px;font-size:12px;font-weight:800;color:#2f9c8f;max-width:460px;font-style:italic' }, [
-      el('span', { text: barkText }),
-    ]);
-    document.getElementById('gameover-title').insertAdjacentElement('afterend', bark);
-  }
   // R1 (Rebuild): guest-first — ajakan akun DI LAYAR HASIL, setelah reward
   // masuk ("sayang kalau hilang"), bukan gate di depan. Non-blocking.
   const oldSavePrompt = document.getElementById('go-save-prompt');
@@ -405,27 +392,21 @@ export function wireButtons() {
 
 function doRetry() {
 const meta = STATE.meta;
-    // Menang kampanye → lanjut bab berikutnya (sinematik clear dulu bila baru)
+    // Menang kampanye → lanjut bab berikutnya
     const wonCampaign = STATE.lastGameoverSummary && STATE.lastGameoverSummary.victory
       && STATE.lastGameoverSummary.modeId === 'kampanye';
     if (wonCampaign) {
-      const wonChapter = STATE.lastGameoverSummary.chapterId;
-      // R3 (Narrative-Cinematic): kemenangan BAB FINAL → EPILOG (naskah final
-      // 6.4 — 3D dgn fallback 2D, 60 dtk, skip-able) menggantikan clear_ lama
-      const cs = getData().cutscenes;
-      if (wonChapter === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
-        playCutscene('epilog', () => { music.stop(); screenManager.show('campaign'); });
-        return;
-      }
       const chapters = getData().campaign.chapters;
       const next = chapters.find((c) => !(meta.campaignCleared || {})[c.id]);
       if (next) {
         meta.selectedChapter = next.id;
         writeSave(meta);
-        playOnce('clear_' + wonChapter, () => screenManager.show('dashboard'));
+        screenManager.show('dashboard');
         return;
       }
-      playOnce('clear_' + wonChapter, () => screenManager.show('campaign'));
+      // Tak ada bab tersisa → seluruh kampanye tamat
+      music.stop();
+      screenManager.show('campaign');
       return;
     }
     game.startRun(meta.selectedHero); // 'runstart' → HUD tampil otomatis
@@ -433,16 +414,7 @@ const meta = STATE.meta;
 
 function doHome() {
 const summary = STATE.lastGameoverSummary;
-    if (summary && summary.victory && summary.modeId === 'kampanye') {
-      // R3: bab final → EPILOG (6.4) sebelum pulang
-      const cs = getData().cutscenes;
-      if (summary.chapterId === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
-        playCutscene('epilog', () => { music.stop(); window.__IMUNVERSE_goDashboard(); });
-        return;
-      }
-      playOnce('clear_' + summary.chapterId, () => window.__IMUNVERSE_goDashboard());
-      return;
-    }
+    if (summary && summary.victory && summary.chapterId === 'bab_final') music.stop();
     window.__IMUNVERSE_goDashboard();
 }
 

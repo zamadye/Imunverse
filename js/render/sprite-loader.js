@@ -96,11 +96,6 @@ const EXTRA_PRELOAD = [
   'assets/sprites/ov_pseudopodia.png',
   'assets/sprites/ov_pedang.png',
   'assets/sprites/ov_inti.png',
-  // E1 poin 8: karakter naratif hidup — pose idle/talk (Dr. Amara & RIA)
-  'assets/sprites/amara_pose_idle.png',
-  'assets/sprites/amara_pose_talk.png',
-  'assets/sprites/ria_pose_idle.png',
-  'assets/sprites/ria_pose_talk.png',
 ];
 
 /**

@@ -14,7 +14,6 @@
  */
 
 import { STATE, setPaused, setLevelUpOpen, setScreen } from './state-manager.js';
-import { hidePresenter } from '../ui/presenter.js';
 import {
   getData, getHero, getEnemyDef, getNutrientDef, getWaveConfig,
   xpToNextLevel, getMembrane,
@@ -25,7 +24,6 @@ import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
 import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
-import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
 import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4: Modul B
 import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.js'; // R5: Modul C
@@ -228,7 +226,6 @@ export const game = {
       chemoEmitT: 0,
       chemoSpeedMult: 1, // pengali speed saat menyentuh jejak matang
       chemoStat: null,
-      nftMoveFired: false, // R3 Task 4: penanda "gerakan pertama" per run
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -350,7 +347,6 @@ export const game = {
     setScreen('gameplay');
     setPaused(false);
     setLevelUpOpen(false);
-    resetNarrativeRun(); // R2: bark boss boleh tampil lagi di run baru
     initAntigenRun(this.run); // R3 Modul A: memori antigen reset tiap run
     try { applyStartConsumables(this); } catch (err) { console.warn('[item] start:', err); }
     emit('runstart', { heroDef });
@@ -629,8 +625,6 @@ export const game = {
       run.objective.bossSpawned = true;
       const boss = run.chapter.boss;
       if (boss) {
-        const barkText = bossBark(run.chapter.id); // R2: RIA berkomentar — non-blocking, 1×/run
-        if (barkText) emit('bossBark', { chapterId: run.chapter.id, text: barkText }); // R3: lapisan VO
         this.spawnChapterBoss(run.chapter);
       } else {
         // Bab tanpa boss → langsung bersih saat kuota tercapai
@@ -688,15 +682,6 @@ export const game = {
 
     // PHAGOS: jepit player di dalam cawan petri (dash/knockback tak bisa kabur)
     try { this.arenaClamp(player, player.radius || 15); } catch { /* abaikan */ }
-
-    // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi
-    // ONLY (tidak menyentuh logic combat/wave). Emit 1× per run; main.js
-    // mengecek penanda meta.nft.move (sekali sejak pernah) lalu memutar
-    // VO + presenter RIA (non-blocking).
-    if (!run.nftMoveFired && (move.x !== 0 || move.y !== 0)) {
-      run.nftMoveFired = true;
-      emit('nftMove', {});
-    }
 
     // 2. Wave & spawn
     const events = run.spawnSys.update(dt, this);
@@ -1055,7 +1040,6 @@ export const game = {
     showAnnounce('BERMUTASI!', false);
     this.hitStopRun(getRetention().levelUpStopSec);
     setLevelUpOpen(true);
-    hidePresenter(); // RONDE-4: narrator jangan menumpuk modal pilih-evolusi
     setPaused(true);
     audio.levelup();
     buzz('levelup'); // V2 Phase 1: selebrasi terasa di tangan
@@ -2112,9 +2096,6 @@ applyChapterTier(enemy, run) {
   // =====================================================================
   pause() {
     if (STATE.screen !== 'gameplay' || STATE.paused || STATE.levelUpOpen) return;
-    // RONDE-7: bark naratif (presenter-layer z 340) jangan menempel di atas
-    // menu pause — dulu menelan tombol LANJUT (#btn-resume) sampai terasa mati.
-    try { hidePresenter(); } catch { /* presenter belum siap di fase tes */ }
     setPaused(true);
     emit('pause', {});
   },
@@ -2266,7 +2247,6 @@ applyChapterTier(enemy, run) {
     for (const h of newlyUnlocked) {
       emit('toast', { message: `Hero baru terbuka: ${h.name}!`, kind: 'gold' });
       queueHeroNotice(h.id); // Fase 17: overlay "HERO BARU!" di dashboard
-      emit('heroUnlocked', { heroId: h.id }); // E1 poin 9: Amara menjelaskan
     }
 
     writeSave(meta); // AUTO-SAVE akhir run

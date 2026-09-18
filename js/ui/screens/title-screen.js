@@ -1,14 +1,12 @@
 /**
  * title-screen.js — F21: LAYAR JUDUL (gameplay-first, ala game indie).
- * User baru MULAI → sinematik cerita → LANGSUNG gameplay (bukan dashboard).
- * Sudah punya akun → MASUK (alur lama). Semua klik riil.
+ * User baru MULAI → LANGSUNG gameplay (bukan dashboard). Sudah punya akun →
+ * MASUK (alur lama). Semua klik riil.
  */
 
 import { screenManager } from '../screen-manager.js';
 import { STATE } from '../../core/state-manager.js';
-import { getData, getHero } from '../../core/data-store.js';
-import { playOnce } from '../cinematic.js';
-import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): pembuka 6.1
+import { getData } from '../../core/data-store.js';
 import { game } from '../../core/game.js';
 import { audio } from '../../systems/audio-system.js';
 import { writeSave } from '../../save/save-manager.js';
@@ -21,7 +19,7 @@ export function show() {
 
 export function hide() {}
 
-/** Mulai run onboarding: sinematik cerita → langsung gameplay bab pertama. */
+/** Mulai run onboarding: langsung gameplay bab pertama, tanpa cutscene. */
 export function startOnboardingRun() {
   const meta = STATE.meta;
   // Hero default (Mako — spek: hero pertama) + bab kampanye pertama
@@ -34,16 +32,7 @@ export function startOnboardingRun() {
     meta.selectedMode = 'kampanye';
   }
   writeSave(meta);
-  // R3 (Narrative-Cinematic): CUTSCENE PEMBUKA (naskah final 6.1 — 3D dgn
-  // fallback 2D otomatis, dapat di-skip) → LANGSUNG gameplay (tanpa loading
-  // screen — story doc 7.2#5). V2 onboarding lama (teks) tetap jadi cadangan
-  // bila data/cutscenes.json tak tersedia.
-  const cs = getData().cutscenes;
-  if (cs && cs.scenes && cs.scenes.pembuka) {
-    playCutscene('pembuka', () => game.startRun(starter.id));
-  } else {
-    playOnce('onboarding', () => game.startRun(starter.id));
-  }
+  game.startRun(starter.id);
 }
 
 export function wire() {

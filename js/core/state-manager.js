@@ -58,11 +58,6 @@ export function createDefaultMeta() {
     onboardingBoxSeen: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     guestUid: null, // ADDENDUM §1.5/§3.2: UID tamu utk link referral/share (akun boleh belum ada)
-    cinematicsSeen: {},
-    // R3 (Narrative-Cinematic): penanda momen "first-time experience" (Task 4)
-    // — masing-masing diputar SEKALI SEJAK PERNAH (VO + presenter, non-blocking)
-    nft: { move: false, levelup: false, skill: false, revive: false },
-    bossRevealSeen: false, // reveal boss bab kanker (cutscene 6.3) — sekali
     leaderboard: [],
     evoStage: 0,
     evoParts: { fragmen_diferensiasi: 0 },
@@ -134,23 +129,11 @@ export function mergeMetaDefaults(meta) {
     for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = (v === true ? 0 : v);
     meta.campaignCleared = mc;
   }
-  // R3: merge penanda naratif baru (save lama aman)
-  meta.nft = { ...base.nft, ...(meta.nft && typeof meta.nft === 'object' ? meta.nft : {}) };
-  if (typeof meta.bossRevealSeen !== 'boolean') meta.bossRevealSeen = false;
   // Save yang SUDAH ADA (lewat jalur ini, bukan createDefaultMeta) berarti
   // pemainnya sudah pernah main sebelum onboarding gameplay-first ini ada —
   // jangan paksa mereka lewat onboarding lagi di boot berikutnya.
   if (typeof meta.onboardingDone !== 'boolean') meta.onboardingDone = true;
   if (typeof meta.onboardingBoxSeen !== 'boolean') meta.onboardingBoxSeen = true;
-  if (meta.cinematicsSeen && typeof meta.cinematicsSeen === 'object') {
-    const ms = {};
-    for (const [k, v] of Object.entries(meta.cinematicsSeen)) {
-      let nk = k;
-      for (const [o, nu] of Object.entries(CH_MAP)) nk = nk.replace(o, nu);
-      ms[nk] = v;
-    }
-    meta.cinematicsSeen = ms;
-  }
   if (Array.isArray(meta.unlockedHeroes)) meta.unlockedHeroes = [...new Set(meta.unlockedHeroes.map(mapId))];
   if (meta.selectedHero) meta.selectedHero = mapId(meta.selectedHero);
   if (meta.heroLevels && typeof meta.heroLevels === 'object') {

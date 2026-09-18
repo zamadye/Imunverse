@@ -42,7 +42,7 @@
       },
       "bossName": null,
       "reward": 60,
-      "story": "Inang tergores sesuatu — luka kecil, kata Dr. Amara. Tapi dari dalam sini, itu gerbang raksasa yang terbuka. Bakteri sudah menyusup duluan. Kamu yang paling dekat: gerak!",
+      "story": "Inang tergores sesuatu — luka kecil, kata dokter. Tapi dari dalam sini, itu gerbang raksasa yang terbuka. Bakteri sudah menyusup duluan. Kamu yang paling dekat: gerak!",
       "objective": "Bersihkan 120 patogen dari jaringan luka, tumbangkan Gumpalan Luka",
       "art": "assets/chapters/ch1_luka.jpg",
       "mapTag": "Saluran Limfe"
@@ -78,7 +78,7 @@
         "dmgMult": 2.5
       },
       "reward": 120,
-      "story": "Ada yang tidak beres dengan makanan Inang semalam. Bakteri pencernaan masuk lebih cepat dan acak dari biasanya — Dr. Amara mulai waspada. Kita hajar di Lambung sebelum menyebar.",
+      "story": "Ada yang tidak beres dengan makanan Inang semalam. Bakteri pencernaan masuk lebih cepat dan acak dari biasanya — tim medis mulai waspada. Kita hajar di Lambung sebelum menyebar.",
       "objective": "Basmi bakteri pencernaan, kalahkan Ratu Racun",
       "art": "assets/chapters/ch3_racun.jpg",
       "mapTag": "Lambung"
@@ -103,7 +103,7 @@
         }
       },
       "reward": 150,
-      "story": "Kali ini aneh: sebagian pasukan kita sendiri bereaksi berlebihan — menyerang hal yang seharusnya tidak berbahaya. RIA menyebutnya 'musuh dalam selimut'. Tenangkan medan sebelum tubuh melukai dirinya sendiri.",
+      "story": "Kali ini aneh: sebagian pasukan kita sendiri bereaksi berlebihan — menyerang hal yang seharusnya tidak berbahaya. Ini yang disebut 'musuh dalam selimut'. Tenangkan medan sebelum tubuh melukai dirinya sendiri.",
       "objective": "Redakan reaksi berlebih, taklukkan Alergen Purba",
       "art": "assets/chapters/ch4_alergi.jpg",
       "mapTag": "Paru"
@@ -128,7 +128,7 @@
         }
       },
       "reward": 200,
-      "story": "Ini... beda. Sel ini bukan penyusup dari luar — dia bagian dari kita yang salah tumbuh, menyamar sebagai sel sehat. Di dunia atas, Dr. Amara menahan suaranya di depan keluarga kecil itu. Keluarga kecil? Jadi Inang kita...",
+      "story": "Ini... beda. Sel ini bukan penyusup dari luar — dia bagian dari kita yang salah tumbuh, menyamar sebagai sel sehat. Di dunia atas, sang dokter menahan suaranya di depan keluarga kecil itu. Keluarga kecil? Jadi Inang kita...",
       "objective": "Buru sel yang menyamar, hancurkan Bayang Dalam",
       "art": "assets/chapters/ch5_kanker.jpg",
       "mapTag": "Saluran Limfe"

@@ -987,30 +987,6 @@ img.lock-badge {
   50% { box-shadow: var(--shadow-card), 0 0 0 10px rgba(47,156,143,0); }
 }
 
-/* ---------- SINEMATIK ---------- */
-#cinematic-layer {
-  position: fixed; inset: 0; z-index: 90; background: #000;
-  display: flex; align-items: flex-end; justify-content: center;
-}
-#cinematic-layer.hidden { display: none; }
-#cinematic-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.cine-text {
-  position: relative; z-index: 2; margin-bottom: 7%;
-  max-width: 82%; text-align: center; color: #274; 
-  font-size: 15px; font-weight: 800; line-height: 1.5;
-  background: rgba(255,252,245,0.92); border: 3px solid #2f9c8f;
-  border-radius: 14px; padding: 10px 16px;
-  opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-}
-.cine-text.visible { opacity: 1; transform: translateY(0); }
-.cine-skip {
-  position: absolute; top: 14px; right: 14px; z-index: 3;
-  background: rgba(255,252,245,0.9); border: 2px solid #d8cfc0;
-  border-radius: 12px; padding: 6px 14px; font-size: 12px; font-weight: 900;
-  color: #6b6156; cursor: pointer;
-}
-
 /* ---------- MISSION HUD (kampanye) ---------- */
 .hud-mission {
   position: absolute; top: 96px; left: 50%; transform: translateX(-50%);
@@ -1855,14 +1831,6 @@ img.lock-badge {
 }
 @keyframes evoPulse { from { box-shadow: 0 0 10px rgba(195,155,211,0.4); } to { box-shadow: 0 0 22px rgba(195,155,211,0.8); } }
 
-/* ===== R2 (Rebuild): bark RIA — toast dua-lapis naratif ===== */
-.toast.ria {
-  border-left-color: #2f9c8f;
-  background: linear-gradient(135deg, rgba(47,156,143,0.12), rgba(53,208,186,0.06)), var(--card, #fffef8);
-  font-style: italic;
-}
-.toast.ria::before { content: '⚡ '; font-style: normal; }
-
 /* ===== R3 Modul A: chip memori antigen (kiri-bawah, di atas HP) ===== */
 .hud-antigen {
   position: absolute;
@@ -1927,51 +1895,6 @@ img.lock-badge {
 #screen-dashboard.minimal-home .dash-scroll{ overflow:hidden; }
 #screen-dashboard.minimal-home .banner-carousel{ height: calc(100% - 8px); }
 
-/* ============================================================
-   E1 poin 8 — PRESENTER: karakter naratif hidup (RIA & Amara)
-   Karakter BESAR berdiri di kiri, teks DI SAMPING (bukan bawah),
-   pose idle/talk bergantian = mulut & tangan bergerak.
-   ============================================================ */
-#presenter-layer{position:fixed;inset:0;z-index:340;pointer-events:none;opacity:0;transition:opacity .28s ease}
-#presenter-layer.on{opacity:1}
-/* RONDE-7: bark JANGAN mengambil pointer seluruh layar — dulu layer .on
-   pointer-events:auto inset:0 (z 340) menelan tap tombol SERANG/skill
-   (terasa "SERANG lemot/mati"). Hanya panggung bark yang bisa disentuh;
-   area lain tembus ke HUD/canvas. */
-#presenter-layer.on .presenter-panel{pointer-events:auto}
-/* RONDE-7: GAMBAR presenter (karakter RIA di kiri-bawah) TIDAK BOLEH
-   menelan sentuhan gameplay — dulu area drag di zona panel Misi mati total
-   saat bark tampil (terasa sebagai "joystick gagal / SERANG lemot").
-   Dismiss tetap mudah: ketuk PANEL bark (hint "ketuk untuk lanjut"). */
-#presenter-layer .presenter-img{pointer-events:none}
-#presenter-layer.soft .presenter-panel, #presenter-layer.soft .presenter-img{pointer-events:none} /* onboarding soft: drag tembus */
-#presenter-layer .presenter-stage{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;gap:0;padding:0 14px;filter:drop-shadow(0 10px 26px rgba(10,40,36,.35))}
-#presenter-layer .presenter-img{
-  height:min(62vh,300px);width:auto;margin-bottom:-4px;flex:0 0 auto;
-  transform-origin:50% 100%;
-  animation:presenterBob 2.6s ease-in-out infinite;
-}
-@keyframes presenterBob{0%,100%{transform:translateY(0) rotate(-.6deg)}50%{transform:translateY(-6px) rotate(.6deg)}}
-#presenter-layer .presenter-panel{
-  position:relative;flex:1;max-width:520px;margin:0 0 30px -6px;
-  background:linear-gradient(165deg,#fffdf6,#f2fbf7);
-  border:3px solid var(--pr-accent,#35d0ba);border-radius:20px;
-  padding:12px 16px 20px;
-}
-#presenter-layer .presenter-panel::before{ /* ekor balon ke arah karakter */
-  content:"";position:absolute;left:-13px;bottom:38px;width:0;height:0;
-  border-top:11px solid transparent;border-bottom:11px solid transparent;
-  border-right:13px solid var(--pr-accent,#35d0ba);
-}
-#presenter-layer .presenter-head{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
-#presenter-layer .presenter-head b{font-size:15px;font-weight:900;color:var(--pr-accent,#35d0ba);letter-spacing:.04em}
-#presenter-layer .presenter-head small{font-size:10px;font-weight:800;color:#6b8a82;text-transform:uppercase;letter-spacing:.06em}
-#presenter-layer #presenter-text{margin:0;font-size:13.5px;line-height:1.5;font-weight:700;color:#173f39}
-#presenter-layer .presenter-hint{position:absolute;right:12px;bottom:6px;font-size:9px;font-weight:800;color:#9ab5ad;text-transform:uppercase;letter-spacing:.06em}
-@media (max-width:700px){
-  #presenter-layer .presenter-img{height:min(54vh,220px)}
-  #presenter-layer #presenter-text{font-size:12px}
-}
 #wave-cine-layer.out{opacity:0}
 #wave-cine-layer .wave-cine-title{
   position:absolute;left:0;right:0;top:11%;text-align:center;

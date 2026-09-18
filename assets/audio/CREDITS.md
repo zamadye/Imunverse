@@ -64,10 +64,6 @@ Semua berasal dari **Kenney** — [kenney.nl](https://kenney.nl) — lisensi **C
 
 Olahan: loudness −13 LUFS, true peak −1 dB, MP3 64 kbps mono 44,1 kHz.
 
-## Narasi (`assets/audio/narration/`)
-
-VO RIA & Dr. Amara — aset internal proyek (bukan pihak ketiga).
-
 ---
 
 ### Kenapa “lebih keras”

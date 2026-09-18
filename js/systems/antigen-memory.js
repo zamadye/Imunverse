@@ -5,7 +5,7 @@
  * berulang → memori antigen tipe itu naik tier → bonus stacking:
  *   T1 +15% dmg · T2 +30% dmg + 10% ignore-armor · T3 +50% dmg + splash kill.
  * Threshold: killsRequired(tier) = round(baseKills × tier^tierExp)
- * (15 / 37 / 63). Lore: RIA — sistem yang menyimpan ingatan musuh (story doc).
+ * (15 / 37 / 63).
  *
  * Semua efek di belakang flag moduleEnabled('antigenMemory'). Telemetry:
  * tier-up dicatat sebagai module_trigger (metrics.js) untuk evaluasi §7.
@@ -66,7 +66,7 @@ export function onAntigenKill(run, enemy, game) {
   if (cur < (cfg.maxTier || 3) && run.antigen.kills[id] >= killsRequired(cur + 1, cfg)) {
     run.antigen.tiers[id] = cur + 1;
     const name = enemy.def.name || id;
-    emit('toast', { message: `MEMORI ANTIGEN: ${name} Tier ${cur + 1}! Damage ke ${name} +${Math.round(cfg.tierDamage[cur] * 100)}%`, kind: 'ria' });
+    emit('toast', { message: `MEMORI ANTIGEN: ${name} Tier ${cur + 1}! Damage ke ${name} +${Math.round(cfg.tierDamage[cur] * 100)}%`, kind: 'gold' });
     if (run.effects) run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 30, `MEMORI T${cur + 1}!`, '#c39bd3');
     recordModuleTrigger('antigenMemory', { wave: run.spawnSys ? run.spawnSys.wave : 0, tier: cur + 1, type: id });
   }
