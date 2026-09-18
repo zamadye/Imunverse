@@ -1,14 +1,13 @@
 /**
- * upgrade-system.js — Dua jalur upgrade:
- *  1. Upgrade in-run (level-up): LIMA stat boost biologis (bible §4.1 safety
- *     net) dari pool data/upgrades.json — jaring pengaman level 2-4 +
- *     fallback saat pool mutasi habis. Pool shooter lama & evolusi senjata
- *     DICABUT (bible §14).
- *  2. Upgrade Squad (permanen): dibeli dengan Biokredit, tersimpan di save.
+ * upgrade-system.js — Upgrade in-run (level-up): LIMA stat boost biologis
+ * (bible §4.1 safety net) dari pool data/upgrades.json — jaring pengaman
+ * level 2-4 + fallback saat pool mutasi habis. Pool shooter lama & evolusi
+ * senjata DICABUT (bible §14). Upgrade Squad permanen (dibeli currency)
+ * DICABUT bersama sistem hero-upgrade/pasukan — satu-satunya jalur
+ * kekuatan sekarang mutasi in-run berbayar Antibodi.
  */
 
 import { getData } from '../core/data-store.js';
-import { writeSave } from '../save/save-manager.js';
 
 // ---------------------------------------------------------------
 // Level-up (in-run)
@@ -87,61 +86,13 @@ export function effectiveStacks(run, upgradeId, synergyIds) {
 }
 
 // ---------------------------------------------------------------
-// Upgrade Squad (permanen, dibeli dengan currency)
+// Multiplier stat (dulu "Upgrade Squad" dibeli permanen dengan currency —
+// DICABUT bersama sistem hero-upgrade/pasukan lainnya; alur kekuatan
+// sekarang tunggal lewat mutasi in-run berbayar Antibodi). Fungsi ini
+// dipertahankan sebagai stub netral (semua 1x) supaya computeStats di
+// game.js & hero-detail-screen.js tidak perlu di-cabangkan ulang.
 // ---------------------------------------------------------------
 
-export function getSquadUpgradeDef(id) {
-  return getData().upgrades.squadUpgrades.find((u) => u.id === id) || null;
-}
-
-/** Harga level berikutnya: round(baseCost * costGrowth^level). */
-export function squadUpgradeCost(def, currentLevel) {
-  return Math.round(def.baseCost * Math.pow(def.costGrowth, currentLevel));
-}
-
-/**
- * Coba beli upgrade squad permanen.
- * @returns {{ok:boolean, reason?:string}}
- */
-export function purchaseSquadUpgrade(meta, id) {
-  const def = getSquadUpgradeDef(id);
-  if (!def) return { ok: false, reason: 'Upgrade tidak ditemukan' };
-  const level = meta.squadUpgrades[id] || 0;
-  if (level >= def.maxLevel) return { ok: false, reason: 'Sudah maksimum' };
-  const cost = squadUpgradeCost(def, level);
-  if (meta.currency < cost) return { ok: false, reason: 'Biokredit tidak cukup' };
-  meta.currency -= cost;
-  meta.squadUpgrades[id] = level + 1;
-  writeSave(meta); // auto-save setelah pembelian
-  return { ok: true };
-}
-
-/**
- * Total multiplier dari semua upgrade squad (dipakai computeStats di game.js).
- * @returns {{damage:number, maxHP:number, speed:number, attackSpeed:number, attackRange:number, xpGain:number}}
- */
-export function squadMultipliers(meta) {
-  const out = { damage: 1, maxHP: 1, speed: 1, attackSpeed: 1, attackRange: 1, xpGain: 1, weapon: 1, jurusCd: 1, jurusRadius: 1, armor: 1 };
-  for (const def of getData().upgrades.squadUpgrades) {
-    const level = meta.squadUpgrades[def.id] || 0;
-    if (level <= 0) continue;
-    const bonus = 1 + def.perLevel * level;
-    switch (def.id) {
-      case 'sq_damage': out.damage = bonus; break;
-      case 'sq_vitality': out.maxHP = bonus; break;
-      case 'sq_weapon': out.weapon = bonus; break;        // SENJATA
-      case 'sq_jurus':                                    // JURUS
-        out.jurusCd = Math.max(0.5, 1 - def.perLevel * level);
-        out.jurusRadius = 1 + def.perLevel * 1.35 * level;
-        break;
-      case 'sq_armor':                                    // PERTAHANAN
-        out.armor = Math.max(0.55, 1 - def.perLevel * level);
-        break;
-      case 'sq_swift': out.speed = bonus; break;
-      case 'sq_attack': out.attackSpeed = bonus; break;
-      case 'sq_range': out.attackRange = bonus; break;
-      case 'sq_nutrition': out.xpGain = bonus; break;
-    }
-  }
-  return out;
+export function squadMultipliers() {
+  return { damage: 1, maxHP: 1, speed: 1, attackSpeed: 1, attackRange: 1, xpGain: 1, weapon: 1, jurusCd: 1, jurusRadius: 1, armor: 1 };
 }

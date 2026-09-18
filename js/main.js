@@ -382,8 +382,6 @@ async function boot() {
     STATE.meta.evoStage = 4;
     STATE.meta.evoParts = { fragmen_diferensiasi: 999 };
     STATE.meta.reserve = 5000; // P5: Test C — cadangan besar (in-memory saja, tidak tersimpan)
-    STATE.meta.allies = 6;
-    STATE.meta.allyLevel = 99;
     for (const def of (data.upgrades.globalUpgrades || [])) {
       STATE.meta.globalUpgrades[def.id] = def.maxLevel;
     }

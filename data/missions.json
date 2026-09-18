@@ -44,16 +44,12 @@
       "reward": 100, "bpXp": 250
     },
     {
-      "id": "weekly_squad_sync",
-      "name": "Sinkronisasi Pasukan",
+      "id": "weekly_run_streak",
+      "name": "Konsistensi Bertarung",
       "desc": "Main 4 run dalam seminggu",
       "stat": "totalRuns",
       "target": 4,
-      "reward": 60, "bpXp": 250,
-      "item": {
-        "id": "sinapsis",
-        "n": 1
-      }
+      "reward": 60, "bpXp": 250
     }
   ],
   "missions": [

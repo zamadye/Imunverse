@@ -51,7 +51,6 @@ import {
   pulseView,
 } from '../systems/membrane-system.js';
 import { rollMutationChoices, applyMutation, isMutationId, mutationDef, mutationPriceFor, refreshChoiceLocks } from '../systems/mutation-system.js';
-import { applyStartConsumables, updateItemBuffs, absorbMukus, isMukusActive, onPlayerDamaged } from '../systems/item-buffs.js'; // ADDENDUM §2
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
   maybeApplyTrait as enemyMutMaybeApply, updateEnemyMutations,
@@ -101,7 +100,6 @@ import {
 } from '../systems/body-system.js';
 import * as tutorial from '../systems/tutorial-system.js';
 import { audio } from '../systems/audio-system.js';
-import { Ally } from '../entities/ally.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
@@ -154,10 +152,7 @@ export const game = {
     meta.selectedHero = heroId;
     writeSave(meta); // simpan pilihan hero
 
-    // ADDENDUM §2: consumable dipakai otomatis di AKHIR startRun
-    // (applyStartConsumables — butuh player & membran yang sudah jadi).
     this.runFlags = {};
-    meta.consumables = meta.consumables || {};
 
     const startX = 0;
     const startY = 0;
@@ -208,7 +203,6 @@ export const game = {
 
     this.run = {
       heroDef,
-      heroLvl: (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0,
       globalHomeo: globalHomeoLevels(STATE.meta), // D11: cdr/radius/engulf
       player,
       enemies: [],
@@ -263,6 +257,10 @@ export const game = {
       chapter: chapterDef,
       mutator: mutatorDef,
       mutatorDate,
+      // Sistem pasukan/ally DICABUT (workflow minimal — hanya hero + mutasi).
+      // Array kosong permanen: banyak jalur render/update lain (shadow,
+      // membran mini, arena clamp) sudah meng-iterasi run.allies — dibiarkan
+      // kosong supaya jalur itu jadi no-op alami tanpa disentuh satu per satu.
       allies: [],
       chapterTier: chapterDef ? this.getChapterTier(meta) : null,
       objective: chapterDef
@@ -312,23 +310,6 @@ export const game = {
     try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
-    // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
-    // Tidak ada pasukan di awal game; 1 sel bergabung tiap hero mencapai level
-    // unlock skill (3/5/10) + Lv 15 (slot ke-4). Jumlah total tetap mengikuti
-    // meta.allies + allyLevel (Fase 20); yang berubah hanya WAKTU bergabung.
-    this.run.allies = [];
-    {
-      const membersPerLv = getData().upgrades.allyUpgrade.membersPerLevels || 3;
-      const allyByLevel = 1 + Math.floor((meta.allyLevel || 0) / membersPerLv);
-      const total = Math.max(0, Math.min(6, Math.max(meta.allies || 0, allyByLevel)));
-      const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
-      this.run.squadPlan = {
-        total,
-        joined: 0,
-        speedBonus: allySpeedBonus,
-        unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL], // [3, 5, 10, 15]
-      };
-    }
 
     // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
     for (let gi = 0; gi < 2; gi++) {
@@ -348,7 +329,6 @@ export const game = {
     setPaused(false);
     setLevelUpOpen(false);
     initAntigenRun(this.run); // R3 Modul A: memori antigen reset tiap run
-    try { applyStartConsumables(this); } catch (err) { console.warn('[item] start:', err); }
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
   },
@@ -440,9 +420,6 @@ export const game = {
     // Tier lebih tinggi = basis lebih kuat (data/heroes.json → tiers.statMult).
     const tierCfg = (getData().heroes.tiers || {})[heroDef.tier];
     const tierMult = tierCfg ? tierCfg.statMult : 1;
-    // LEVEL HERO (upgrade antibodi per hero): damage & HP tumbuh
-    const heroCfg = getData().upgrades.heroUpgrade;
-    const heroLvl = (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0;
     const up = runUpgrades;
 
     // BUFF TEMPUR: nutrisi (zinc, zat besi, probiotik, serat) — nyata di statistik
@@ -457,7 +434,7 @@ export const game = {
     const syn = synergyFor(heroDef);
     const eff = (id) => effectiveStacks({ upgrades: up, heroDef }, id, syn);
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * buffDamage;
     const cooldown = base.attackCooldown / squad.attackSpeed * buffCooldown;
     // PHAGOS: Treg memperlambat SEMUA termasuk dirinya sendiri (-10%)
     const tregSlow = heroDef.id === 'treg' ? 0.9 : 1;
@@ -465,7 +442,7 @@ export const game = {
     const speed = base.speed * squad.speed * (1 + eff('speed_boost') * 0.10) * (tb ? tb.speed.mult : 1) * tregSlow;
     const attackRange = base.attackRange * squad.attackRange;
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange;
-    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) * (1 + eff('hp_boost') * 0.15) + (perm.maxHP || 0));
+    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + eff('hp_boost') * 0.15) + (perm.maxHP || 0));
     const projectileCount = base.projectileCount;
     const lifeSteal = 0; // pool life-steal dicabut (bible §14); konsumen dipertahankan utk mutasi Sprint 2
 
@@ -504,10 +481,6 @@ export const game = {
     this.applyMetaMultipliers(stats);
     this.applyBodyModifiers(stats, run.bodyMods || getBodyRunModifiers(STATE.meta));
     run.player.stats = stats;
-    // PHAGOS Sprint 1: sitokin ×1.4 adalah pengali SEMENTARA di atas stats — recompute
-    // mengganti objek stats (pengali hilang) sementara flag sitokinApplied masih owed.
-    // Terapkan ulang agar restore /1.4 saat expiry tidak membelah base (slow permanen 71%).
-    if (run.itemBuffs && run.itemBuffs.sitokinApplied) stats.speed *= 1.4;
     run.player.maxHP = stats.maxHP;
     // pertahankan HP absolut; penambahan maxHP dari upgrade menaikkan selisih
     run.player.hp = Math.min(run.player.hp + Math.max(0, stats.maxHP - oldMax), stats.maxHP);
@@ -797,7 +770,6 @@ export const game = {
     // V2 §17–§19: archetype serangan hero berjalan di PULSE, dengan telegraph
     try { updateAttack(this, dt); } catch (err) { console.warn('[phagos] updateAttack:', err); }
     try { updateSummons(this, dt); } catch (err) { console.warn('[phagos] updateSummons:', err); }
-    try { updateItemBuffs(this); } catch { /* abaikan */ } // ADDENDUM §2: kedaluwarsa buff
 
     // 7. Separation antar musuh (anti menumpuk)
     run.collision.separateEnemies(run.enemies);
@@ -985,30 +957,8 @@ export const game = {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
-      this.tryJoinSquad(run.level);
       this.announceSkillProgress(run.level);
     }
-  },
-
-  /**
-   * Pasukan imun bergabung di level unlock skill [3, 5, 10] (+15) — satu sel
-   * per ambang, sampai total skuad meta tercapai. Tidak ada pasukan di awal
-   * run (permintaan user): mereka "dipanggil" saat hero semakin kuat.
-   */
-  tryJoinSquad(level) {
-    const run = this.run;
-    const plan = run && run.squadPlan;
-    if (!plan || plan.joined >= plan.total) return false;
-    const slotIdx = plan.unlockLevels.indexOf(level);
-    if (slotIdx < 0 || slotIdx !== plan.joined) return false;
-    const ally = new Ally(plan.joined, run.player, plan.speedBonus);
-    plan.joined += 1;
-    run.allies.push(ally);
-    // Selebrasi kecil yang jelas: burst hijau-imun + label + toast
-    run.effects.spawnBurst(run.player.x, run.player.y, '#6cf2c3', 14, 220, 4);
-    run.effects.spawnLabel(run.player.x, run.player.y - 44, tr('PASUKAN DATANG!'), '#8df7d2');
-    emit('toast', { message: `Pasukan imun: sel #${plan.joined} bergabung bertarung!`, kind: 'gold' });
-    return true;
   },
 
   /** Fase 18: cairkan XP yang ditahan saat gerbang tertutup (dipanggil saat boss tumbang). */
@@ -1397,7 +1347,6 @@ export const game = {
     const lunge = getCombat().contactAttack.lunge;
     enemy.vx += dirX * lunge;
     enemy.vy += dirY * lunge;
-    if (isMukusActive(this.run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
     // V2 §15 SUPPORT: musuh yang sedang dikuatkan aura melukai lebih keras
     this.damagePlayer(enemy.damage * (enemy.auraDmgMult || 1));
   },
@@ -1413,7 +1362,6 @@ export const game = {
     const dy = player.y - enemy.y;
     const rr = cfg.radius + player.radius;
     if (dx * dx + dy * dy < rr * rr) {
-      if (isMukusActive(run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
       this.damagePlayer(cfg.damage);
     }
   },
@@ -1422,17 +1370,6 @@ export const game = {
   damagePlayer(amount) {
     const run = this.run;
     const player = run.player;
-    // ADDENDUM §2 — LAPISAN MUKUS (item): serap dari pool 25% max HP
-    if (isMukusActive(run)) {
-      const before = amount;
-      amount = absorbMukus(run, amount);
-      if (amount < before) {
-        run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
-        run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
-        playSfx(run, 'hit');
-      }
-      if (amount <= 0) return;
-    }
     // PHAGOS: membran hidup / immunity / armor Mastia / adaptif spora
     try {
       amount = membraneAbsorbDamage(run, amount);
@@ -1469,7 +1406,6 @@ export const game = {
     player.squash = 0.28; // JUICE squash saat terkena hit
     passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
     try { membraneOnPlayerHit(this, amount); } catch { /* abaikan */ } // PHAGOS: reflektor cermin
-    try { onPlayerDamaged(this, amount); } catch { /* abaikan */ } // ADDENDUM §2: serum/cadangan/thorns
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -1990,13 +1926,6 @@ applyChapterTier(enemy, run) {
 
     if (enemy.isBoss) {
       run.bossKills += 1;
-      // ADDENDUM §2.2 — boss bisa menjatuhkan Marker Opsonin (25%)
-      if (Math.random() < 0.25 && STATE.meta) {
-        STATE.meta.consumables = STATE.meta.consumables || {};
-        STATE.meta.consumables.opsonin = (STATE.meta.consumables.opsonin || 0) + 1;
-        try { writeSave(STATE.meta); } catch { /* abaikan */ }
-        emit('toast', { message: 'Boss menjatuhkan Marker Opsonin!', kind: 'gold' });
-      }
       run.boss = null;
       run.camera.addShake(0.65);
       audio.bossDie();
@@ -2167,10 +2096,9 @@ applyChapterTier(enemy, run) {
     if (!run.victory) audio.gameover(); // fanfare kalah (menang sudah bunyi di winRun)
 
     const meta = STATE.meta;
-    const doubleMult = (run.itemBuffs && run.itemBuffs.katalis) ? 1.5 : 1; // ADDENDUM §2: Katalis Mitosis
     // Sprint 3.17 (bible §6.2): earn BK sudah LIVE per kill/wave — rumus bonus
     // akhir run (wave×8 + kills×0.5 + boss×50) DICABUT. Sisa: chapter/endless bonus.
-    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0)) * doubleMult);
+    const earned = Math.round(run.currencyEarned + (run.bonusCurrency || 0));
     run.earned = earned;
     const victory = !!run.victory;
 
@@ -2181,8 +2109,6 @@ applyChapterTier(enemy, run) {
       meta.campaignCleared = meta.campaignCleared || {};
       const tierIdx = run.chapterTier ? run.chapterTier.tier : 0;
       meta.campaignCleared[run.chapter.id] = Math.max(meta.campaignCleared[run.chapter.id] || 0, tierIdx);
-      const clearedCount = Object.keys(meta.campaignCleared).length;
-      meta.allies = Math.min(6, Math.max(meta.allies || 1, 1 + clearedCount));
     }
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
@@ -3142,20 +3068,6 @@ applyChapterTier(enemy, run) {
       const invisible = mem.shape === 'invisible';
       if (invisible) alpha *= 0.25; // Nyx: nyaris tak terlihat (tetap ada petunjuk samar)
       this.drawMembraneShape(ctx, ground, player, mem, visR, fieldColor, alpha, time, { pulsing, peak, has, fx, st });
-      // ADDENDUM §2 — Membran Cadangan: cincin kedua 0,5× saat aktif
-      if (this.run && this.run.itemBuffs && (this.run.time || 0) < (this.run.itemBuffs.cadanganUntil || 0)) {
-        ground(player.x, player.y);
-        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(time * 6);
-        ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 6]);
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, visR * 0.5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
-        ctx.restore();
-      }
       // Dual ring: ring luar kedua
       if (fx.dualRing) {
         const outerR = st.radius * fx.outerRadiusMult * idleOsc;

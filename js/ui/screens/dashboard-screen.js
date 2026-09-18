@@ -30,6 +30,7 @@ import { audio } from '../../systems/audio-system.js';
 import { music } from '../../systems/music-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { markSeen } from '../../systems/codex-system.js';
+import { masteryInfo } from '../../systems/mastery-system.js';
 import { drainHeroNotices } from '../../systems/retention-system.js';
 import { applyGateVisual } from '../../systems/feature-gate.js';
 import { getSession } from '../../systems/account-system.js';
@@ -256,10 +257,11 @@ function updateMissionBadge() {
 function renderTopbar(meta) {
   const cur = document.getElementById('dash-currency');
   if (cur) cur.textContent = (meta.currency || 0).toLocaleString('id-ID');
-  // Kartu atas #1: level pasukan (angka nyata dari save — game belum punya
-  // level akun ber-XP, jadi yang ditampilkan level pasukan yang bisa di-upgrade).
+  // Kartu atas #1: mastery hero yang sedang dipakai — satu-satunya "level"
+  // yang tersisa sekarang bahwa sistem hero-upgrade/pasukan berbayar dicabut;
+  // murni didapat dari bermain (kills/runs/wins), bukan dibeli.
   const lv = document.getElementById('card-level-val');
-  if (lv) lv.textContent = 'Lv ' + (meta.allyLevel || 0);
+  if (lv) lv.textContent = 'Lv ' + masteryInfo(meta, meta.selectedHero).level;
 
   const session = getSession();
   const chip = document.getElementById('account-chip');

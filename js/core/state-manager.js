@@ -44,9 +44,6 @@ export function createDefaultMeta() {
     selectedMode: 'kampanye',
     selectedChapter: 'bab_luka',
     campaignCleared: {},
-    allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
-    heroLevels: {},  // { heroId: level } — level per hero (upgrade antibodi)
-    allyLevel: 0,    // level pasukan (damage & gesit)
     coachDone: false,
     // V2 gameplay-first onboarding (blueprint §48-49, roadmap ROADMAP.md §"P7"):
     // save BARU (belum pernah main) → false → loading langsung ke gameplay
@@ -69,18 +66,6 @@ export function createDefaultMeta() {
     soundMuted: false,
     musicOn: true, // F23: musik latar prosedural (Profil → Pengaturan)
     bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
-    squadUpgrades: {
-      sq_damage: 0,
-      sq_vitality: 0,
-      sq_swift: 0,
-      sq_attack: 0,
-      sq_range: 0,
-      sq_nutrition: 0,
-    },
-    consumables: {
-      serum_regenerasi: 0, enzim_litik: 0, sitokin_burst: 0, lapisan_mukus: 0, katalis_mitosis: 0,
-      opsonin: 0, atp_surge: 0, membran_cadangan: 0, toksin_balik: 0, sinapsis: 0,
-    },
     missionsClaimed: [],
     questState: { periodKey: null, accepted: {}, claimed: {}, baseline: {} },
     globalUpgrades: {},   // Fase 17: upgrade permanen global (Imun Coin, semua hero)
@@ -136,11 +121,6 @@ export function mergeMetaDefaults(meta) {
   if (typeof meta.onboardingBoxSeen !== 'boolean') meta.onboardingBoxSeen = true;
   if (Array.isArray(meta.unlockedHeroes)) meta.unlockedHeroes = [...new Set(meta.unlockedHeroes.map(mapId))];
   if (meta.selectedHero) meta.selectedHero = mapId(meta.selectedHero);
-  if (meta.heroLevels && typeof meta.heroLevels === 'object') {
-    const mapped = {};
-    for (const [k, v] of Object.entries(meta.heroLevels)) mapped[mapId(k)] = v;
-    meta.heroLevels = mapped;
-  }
   if (meta.codexSeen && typeof meta.codexSeen === 'object') {
     const mapped = {};
     for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapCh(mapId(k))] = v;

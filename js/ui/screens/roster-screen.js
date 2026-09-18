@@ -13,7 +13,7 @@ import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
-import { heroLevelBadge } from '../../systems/economy-system.js';
+import { masteryInfo } from '../../systems/mastery-system.js';
 import { screenManager as sm } from '../screen-manager.js';
 import { roleIconSrc, roleTint } from '../menu-icons.js';
 
@@ -123,7 +123,7 @@ export function show() {
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'hero-pattern' }, [
         el('span', { text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }),
-        el('span', { class: 'hero-lvl-chip', text: heroLevelBadge(meta, heroDef.id) }),
+        el('span', { class: 'hero-lvl-chip', text: `Lv ${masteryInfo(meta, heroDef.id).level}` }),
       ]));
       const equity = rosterEquityMini(heroDef, meta);
       if (equity) children.push(equity);
