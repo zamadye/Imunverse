@@ -585,6 +585,14 @@
 #screen-dashboard .more-menu button:hover,
 #screen-dashboard .more-menu button:active { background: rgba(53, 208, 186, 0.16); }
 #screen-dashboard .more-menu img { width: 18px; height: 18px; }
+/* R1 progressive disclosure: item terkunci disembunyikan, bukan digembok
+   (dock lama sudah dicabut — nav yang sama kini hidup di sini). */
+#screen-dashboard .more-menu button.gated { display: none; }
+#screen-dashboard .more-menu .menu-item-badge {
+  margin-left: auto; min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; background: #ff4f3d; color: #fff;
+  font-size: 9.5px; font-weight: 900; line-height: 16px; text-align: center;
+}
 
 /* ---------------------------------------------------------------
    6. MODAL MISI & QUEST

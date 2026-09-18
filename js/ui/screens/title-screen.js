@@ -22,7 +22,7 @@ export function show() {
 export function hide() {}
 
 /** Mulai run onboarding: sinematik cerita → langsung gameplay bab pertama. */
-function startOnboardingRun() {
+export function startOnboardingRun() {
   const meta = STATE.meta;
   // Hero default (Mako — spek: hero pertama) + bab kampanye pertama
   const heroes = getData().heroes.heroes;

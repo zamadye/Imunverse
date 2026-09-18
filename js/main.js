@@ -63,6 +63,8 @@ import * as hudScreen from './ui/screens/hud-screen.js';
 import * as levelupScreen from './ui/screens/levelup-screen.js';
 import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
+import * as openboxScreen from './ui/screens/openbox-screen.js'; // V2 onboarding: reveal hero bonus
+import * as signupScreen from './ui/screens/signup-screen.js'; // V2 onboarding: simpan progres (ringkas)
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
 import { onRunStart as tutorialOnRunStart, isTutorialActive } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
@@ -332,6 +334,9 @@ function wireUiBridge() {
   // RONDE-3 visual fix: presenter TIDAK boleh menumpuk di atas modal Level-Up /
   // pause — bark ditunda sampai momen resume (antrian 1 baris).
   let pendingBark = null;
+  // V2 onboarding: true di antara 'levelup' pertama dan 'resume' berikutnya —
+  // lihat on('levelup')/on('resume') di bawah.
+  let pendingOnboardingBox = false;
   function flushBark() {
     const b = pendingBark;
     pendingBark = null;
@@ -369,6 +374,10 @@ function wireUiBridge() {
   on('nftMove', () => nftFirst('move'));
   on('levelup', (payload) => {
     nftFirst('levelup');
+    // V2 onboarding: level-up PERTAMA pemain (siapa pun, jalur mana pun)
+    // dilanjutkan dengan modal "openbox" (reveal hero bonus) setelah pilihan
+    // mutasi selesai — lihat on('resume') di bawah.
+    if (!STATE.meta.onboardingBoxSeen) pendingOnboardingBox = true;
     screenManager.show('levelup', payload);
   });
   on('revive', () => {
@@ -408,6 +417,17 @@ function wireUiBridge() {
   on('pause', () => { if (!waveCineActive() && !cutsceneActive()) screenManager.show('pause'); }); // E2 poin 6 + R3: cinematic ≠ modal pause
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
+    // V2 onboarding: level-up pertama → jangan langsung ke HUD, sisipkan
+    // modal openbox (hero bonus) dulu. game.js sudah setPaused(false) sebelum
+    // emit ini — kunci lagi supaya run tidak berjalan di belakang modal.
+    if (pendingOnboardingBox) {
+      pendingOnboardingBox = false;
+      STATE.meta.onboardingBoxSeen = true;
+      writeSave(STATE.meta);
+      setPaused(true);
+      screenManager.show('openbox');
+      return;
+    }
     if (STATE.screen === 'gameplay') screenManager.show('hud');
     flushBark(); // bark NFT yang ditunda saat modal terbuka → tampil bersih di HUD
   });
@@ -491,6 +511,8 @@ async function boot() {
   screenManager.registerScreen('levelup', levelupScreen);
   screenManager.registerScreen('pause', pauseScreen);
   screenManager.registerScreen('revive', reviveScreen);
+  screenManager.registerScreen('openbox', openboxScreen); // V2 onboarding: reveal hero bonus
+  screenManager.registerScreen('signup', signupScreen); // V2 onboarding: simpan progres (ringkas)
   screenManager.registerScreen('gameover', gameoverScreen);
   screenManager.registerScreen('codex', codexScreen);
   screenManager.registerScreen('auth', authScreen);
@@ -939,10 +961,20 @@ async function boot() {
     screenManager.show('dashboard');
     runAutotest();
   } else {
-    // Redesain UI: TIDAK ADA modal "MULAI" perantara — begitu progress 100%,
-    // langsung masuk Dashboard (jeda singkat hanya supaya progress bar
-    // sempat terlihat penuh sebelum transisi screen-in).
-    setTimeout(() => screenManager.show('dashboard'), 450);
+    // V2 gameplay-first (blueprint §48-49): TIDAK ADA modal "MULAI" perantara
+    // — begitu progress 100%, pemain BARU (belum pernah main) langsung masuk
+    // GAMEPLAY dengan Mako (jeda singkat hanya supaya progress bar sempat
+    // terlihat penuh); pemain KEMBALI (sudah pernah main / punya save) masuk
+    // Dashboard seperti biasa — "Continue Journey", bukan onboarding lagi.
+    setTimeout(() => {
+      if (STATE.meta.onboardingDone) {
+        screenManager.show('dashboard');
+      } else {
+        STATE.meta.onboardingDone = true;
+        writeSave(STATE.meta);
+        titleScreen.startOnboardingRun();
+      }
+    }, 450);
   }
   // ADDENDUM §3: parameter akuisisi (?challenge= ?ref= ?play=)
   try { handleAcquisitionParams(); } catch { /* abaikan */ }

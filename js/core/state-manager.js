@@ -48,6 +48,14 @@ export function createDefaultMeta() {
     heroLevels: {},  // { heroId: level } — level per hero (upgrade antibodi)
     allyLevel: 0,    // level pasukan (damage & gesit)
     coachDone: false,
+    // V2 gameplay-first onboarding (blueprint §48-49, roadmap ROADMAP.md §"P7"):
+    // save BARU (belum pernah main) → false → loading langsung ke gameplay
+    // dengan Mako, bukan dashboard. Sekali run pertama dimulai, jadi true
+    // selamanya (lihat main.js boot + mergeMetaDefaults di bawah untuk save lama).
+    onboardingDone: false,
+    // Modal "openbox" (reveal hero bonus T-Bolt) tampil sekali di level-up
+    // pertama pemain baru — lihat main.js on('levelup'/'resume').
+    onboardingBoxSeen: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     guestUid: null, // ADDENDUM §1.5/§3.2: UID tamu utk link referral/share (akun boleh belum ada)
     cinematicsSeen: {},
@@ -129,6 +137,11 @@ export function mergeMetaDefaults(meta) {
   // R3: merge penanda naratif baru (save lama aman)
   meta.nft = { ...base.nft, ...(meta.nft && typeof meta.nft === 'object' ? meta.nft : {}) };
   if (typeof meta.bossRevealSeen !== 'boolean') meta.bossRevealSeen = false;
+  // Save yang SUDAH ADA (lewat jalur ini, bukan createDefaultMeta) berarti
+  // pemainnya sudah pernah main sebelum onboarding gameplay-first ini ada —
+  // jangan paksa mereka lewat onboarding lagi di boot berikutnya.
+  if (typeof meta.onboardingDone !== 'boolean') meta.onboardingDone = true;
+  if (typeof meta.onboardingBoxSeen !== 'boolean') meta.onboardingBoxSeen = true;
   if (meta.cinematicsSeen && typeof meta.cinematicsSeen === 'object') {
     const ms = {};
     for (const [k, v] of Object.entries(meta.cinematicsSeen)) {

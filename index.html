@@ -101,14 +101,17 @@
             </span>
           </button>
           <button id="btn-lang-dash" class="lang-pill" title="Language / Bahasa">EN</button>
-          <button id="btn-dash-more" class="topbar-more hidden" aria-label="Semua fitur" aria-haspopup="true" aria-expanded="false">
+          <button id="btn-dash-more" class="topbar-more" aria-label="Semua fitur" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
           </button>
+          <!-- UI-audit: dock 4 menu di bawah DICABUT (ROADMAP §35 "New Dashboard" —
+               dashboard minimal: hero/PLAY di tengah, nav sekunder Heroes/Progress/
+               Settings). Keempatnya sekarang tinggal di sini, satu tempat. -->
           <nav id="dash-more-menu" class="more-menu hidden" aria-label="Semua fitur">
-            <!-- P0 V2: Kampanye (stage-select) & Siklus Mitosis (battle pass) dibekukan;
-                 Bio-Pedia & Profil pindah ke dock 4 menu. Tombol "…" disembunyikan bila kosong. -->
-            <button data-nav="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span></button>
-            <button data-nav="profile"><img src="assets/icons/ui-heart.svg" alt="" /><span>Profil</span></button>
+            <button data-nav="roster"><img src="assets/icons/menu-heroes.svg" alt="" /><span>Hero</span><span class="menu-item-badge hidden" id="badge-hero"></span></button>
+            <button data-nav="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span><span class="menu-item-badge hidden" id="badge-codex"></span></button>
+            <button id="dock-missions" aria-haspopup="dialog"><img src="assets/icons/menu-quest.svg" alt="" /><span>Misi</span><span class="menu-item-badge hidden" id="badge-missions"></span></button>
+            <button data-nav="profile"><img src="assets/icons/ui-heart.svg" alt="" /><span>Profil</span><span class="menu-item-badge hidden" id="badge-profile"></span></button>
           </nav>
         </header>
 
@@ -149,31 +152,14 @@
           <div class="map-dots" id="map-dots"><!-- diisi dashboard-screen.js --></div>
         </section>
 
-        <!-- Satu-satunya CTA: MAIN (tombol dobel di navbar sudah dicabut) -->
-        <button class="dash-play netes" id="btn-play" aria-label="Main sekarang">
+        <!-- Satu-satunya CTA: PLAY — ikon saja, bentuk lingkaran jelas (UI-audit:
+             bentuk "sel meleleh" lama tidak terbaca sebagai tombol; label MAIN
+             dicabut, fungsinya sudah jelas dari ikon + posisi + denyut). -->
+        <button class="dash-play" id="btn-play" aria-label="Main sekarang">
           <span class="dash-play-ring" aria-hidden="true"></span>
-          <img src="assets/icons/ui-play.svg" alt="" />
-          <span class="dash-play-copy"><b>MAIN</b><small id="play-sub">Mulai run sekarang</small></span>
+          <span class="dash-play-ring dash-play-ring2" aria-hidden="true"></span>
+          <img class="dash-play-icon" src="assets/icons/ui-play.svg" alt="" />
         </button>
-
-        <nav class="dock dock-4" aria-label="Menu utama">
-          <button class="dock-btn" data-nav="roster" aria-label="Hero">
-            <span class="dock-ico"><img src="assets/icons/menu-heroes.svg" alt="" /><span class="dock-badge hidden" id="badge-hero"></span></span>
-            <span>Hero</span>
-          </button>
-          <button class="dock-btn" data-nav="codex" aria-label="Bio-Pedia">
-            <span class="dock-ico"><img src="assets/icons/menu-codex.svg" alt="" /><span class="dock-badge hidden" id="badge-codex"></span></span>
-            <span>Bio-Pedia</span>
-          </button>
-          <button class="dock-btn dock-misi" id="dock-missions" aria-label="Misi &amp; Quest" aria-haspopup="dialog">
-            <span class="dock-ico"><img src="assets/icons/menu-quest.svg" alt="" /><span class="dock-badge hidden" id="badge-missions"></span></span>
-            <span>Misi</span>
-          </button>
-          <button class="dock-btn" data-nav="profile" aria-label="Profil">
-            <span class="dock-ico"><img src="assets/icons/ui-heart.svg" alt="" /><span class="dock-badge hidden" id="badge-profile"></span></span>
-            <span>Profil</span>
-          </button>
-        </nav>
       </section>
 
       <!-- ============ SHOP (modal dari kartu atas dashboard) ============ -->
@@ -431,6 +417,40 @@
           <h2 class="levelup-title">BERMUTASI!</h2>
           <p id="levelup-sub" class="levelup-sub">Pilih bentuk baru!</p>
           <div id="levelup-choices" class="choice-grid"><!-- diisi JS --></div>
+        </div>
+      </section>
+
+      <!-- ============ MODAL: OPENBOX (V2 onboarding — reveal hero bonus) ============ -->
+      <section id="screen-openbox" class="screen modal" data-screen="openbox">
+        <div class="openbox-scene">
+          <div class="openbox-glow" aria-hidden="true"></div>
+          <div id="openbox-crate" class="openbox-crate" aria-hidden="true">
+            <img class="openbox-crate-icon" src="assets/icons/ui-chest.svg" alt="" />
+          </div>
+          <h2 class="openbox-title">SEL BARU BERGABUNG!</h2>
+          <p class="openbox-sub">Sistem imunmu baru saja merekrut satu sel lagi</p>
+          <div class="openbox-hero">
+            <img id="openbox-hero-portrait" class="openbox-hero-portrait" src="" alt="" />
+            <div class="openbox-hero-info">
+              <b id="openbox-hero-name">—</b>
+              <small id="openbox-hero-role">—</small>
+              <p id="openbox-hero-desc"></p>
+            </div>
+          </div>
+          <button id="btn-openbox-claim" class="btn btn-primary btn-xl">Lanjut</button>
+        </div>
+      </section>
+
+      <!-- ============ MODAL: SIMPAN PROGRES (signup ringkas — V2 onboarding) ============ -->
+      <section id="screen-signup" class="screen modal" data-screen="signup">
+        <div class="modal-box signup-box">
+          <h2>Simpan progresmu!</h2>
+          <p class="modal-sub">Buat akun supaya sel &amp; hero yang sudah kamu dapat tersimpan — bisa disambung lagi kapan saja.</p>
+          <input id="signup-username" class="auth-input" maxlength="16" autocomplete="username" placeholder="Nama akun" />
+          <input id="signup-password" class="auth-input" type="password" autocomplete="new-password" placeholder="Sandi" />
+          <div id="signup-error" class="auth-error"></div>
+          <button id="btn-signup-submit" class="btn btn-primary btn-xl">Buat Akun &amp; Lanjut</button>
+          <button id="btn-signup-skip" class="btn btn-ghost">Nanti saja</button>
         </div>
       </section>
 

@@ -278,7 +278,10 @@ function renderTopbar(meta) {
 }
 
 function applyGates() {
-  document.querySelectorAll('.dock-4 .dock-btn[data-nav]').forEach((b) => {
+  // UI-audit: dock 4 menu dicabut — nav yang sama (Hero/Bio-Pedia/Misi/Profil)
+  // sekarang tinggal di menu sekunder "…" (#dash-more-menu). Gate 'dock' di
+  // data/features.json dipertahankan apa adanya, hanya elemen targetnya pindah.
+  document.querySelectorAll('#dash-more-menu button[data-nav]').forEach((b) => {
     applyGateVisual(b, 'dock', b.dataset.nav);
   });
 }
