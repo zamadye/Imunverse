@@ -112,10 +112,15 @@
             <button data-nav="codex"><img src="assets/icons/menu-codex.svg" alt="" /><span>Bio-Pedia</span><span class="menu-item-badge hidden" id="badge-codex"></span></button>
             <button id="dock-missions" aria-haspopup="dialog"><img src="assets/icons/menu-quest.svg" alt="" /><span>Misi</span><span class="menu-item-badge hidden" id="badge-missions"></span></button>
             <button data-nav="profile"><img src="assets/icons/ui-heart.svg" alt="" /><span>Profil</span><span class="menu-item-badge hidden" id="badge-profile"></span></button>
+            <!-- P10 (dashboard benar-benar minimal): Shop/Cadangan dipindah dari kartu
+                 atas ke sini — dashboard utama tinggal PLAY · card Antibody · Profil ·
+                 Peta Tubuh, persis 4 elemen yang diminta owner. -->
+            <button data-nav="shop"><img src="assets/icons/ui-chest.svg" alt="" /><span>Shop</span></button>
           </nav>
         </header>
 
-        <!-- ===== KARTU ATAS: Profil/Level · Nilai Antibody · Shop (bentuk sel meleleh) ===== -->
+        <!-- ===== KARTU ATAS: Profil/Level · Nilai Antibody (bentuk sel meleleh) —
+             P10: hanya 2 kartu sekarang, sesuai daftar minimal owner. ===== -->
         <div class="dash-cards" role="group" aria-label="Ringkasan pemain">
           <button class="dash-card netes" id="card-level" aria-label="Profil dan level">
             <span class="dc-ico"><img src="assets/icons/ui-heart.svg" alt="" /></span>
@@ -126,11 +131,6 @@
             <span class="dc-ico"><img src="assets/icons/cur-antibodi.svg" alt="" /></span>
             <span class="dc-val" id="dash-currency">0</span>
             <span class="dc-label">Antibody</span>
-          </button>
-          <button class="dash-card netes" id="card-shop" aria-label="Buka shop">
-            <span class="dc-ico"><img src="assets/icons/ui-chest.svg" alt="" /></span>
-            <span class="dc-val">Shop</span>
-            <span class="dc-label">Cadangan</span>
           </button>
         </div>
 

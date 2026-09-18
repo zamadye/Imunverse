@@ -469,8 +469,9 @@ async function boot() {
   }
 
   // ---------- KARTU ATAS DASHBOARD (bentuk sel meleleh) ----------
-  // 3 kartu: Profil/Level → layar profil · Nilai Antibody → panduan cara
-  // mendapatkan antibodi · Shop → modal shop (paket cadangan + iklan reward).
+  // P10: tinggal 2 kartu: Profil/Level → layar profil · Nilai Antibody →
+  // panduan cara mendapatkan antibodi. Shop pindah ke menu "..." (data-nav
+  // generik di bawah menangani navigasinya, tak perlu wiring khusus lagi).
   {
     const pasang = (id, aksi) => {
       const el = document.getElementById(id);
@@ -478,7 +479,6 @@ async function boot() {
     };
     pasang('card-level', () => screenManager.show('profile'));
     pasang('card-anti', () => openCurGuide('anti'));
-    pasang('card-shop', () => screenManager.show('shop'));
   }
 
   const antiChip = document.getElementById('hud-anti-chip');
