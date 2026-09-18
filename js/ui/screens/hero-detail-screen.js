@@ -30,6 +30,10 @@ import { t as tr } from '../../systems/i18n.js';
 import { masteryInfo } from '../../systems/mastery-system.js';
 import { SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../../systems/skill-unlock.js';
 import { SKILL_TRIGGER_LABEL } from '../../systems/skill-system.js';
+import { getHeroStatus, purchaseHero } from '../../systems/unlock-system.js';
+import { emit } from '../../core/ui-bridge.js';
+import { audio } from '../../systems/audio-system.js';
+import { writeSave } from '../../save/save-manager.js';
 
 let heroId = null;
 let keyHandler = null;
@@ -162,6 +166,45 @@ function renderEquityPathCard(heroDef, currentStage) {
   ]);
 }
 
+/* ---------- Banner unlock (hero terkunci): syarat gratis ATAU beli Antibodi ---------- */
+function buildUnlockBanner(meta, heroDef, status) {
+  const rows = [
+    el('div', { class: 'hd-unlock-row hd-unlock-free' }, [
+      el('span', { class: 'hd-unlock-ico', text: status.conditionMet ? '✓' : '○' }),
+      el('span', { class: 'hd-unlock-label', text: tr(status.conditionLabel) }),
+    ]),
+  ];
+  if (status.shopCost > 0) {
+    rows.push(el('div', { class: 'hd-unlock-row hd-unlock-buy' }, [
+      el('span', { class: 'hd-unlock-ico', text: '◉' }),
+      el('span', { class: 'hd-unlock-label', text: `${status.shopCost.toLocaleString('id-ID')} Antibodi (kamu punya ${Math.round(meta.currency || 0).toLocaleString('id-ID')})` }),
+      el('button', {
+        class: 'btn btn-gold hd-unlock-btn',
+        id: 'btn-buy-hero',
+        text: status.canBuy ? tr('BELI HERO') : tr('KURANG ANTIBODI'),
+        disabled: status.canBuy ? undefined : 'true',
+        onclick: () => {
+          const res = purchaseHero(meta, heroDef);
+          if (res.ok) {
+            audio.coin();
+            emit('toast', { message: `${heroDef.name} terbuka! -${res.cost} Antibodi`, kind: 'gold' });
+            meta.selectedHero = heroDef.id;
+            writeSave(meta);
+            selectHero(0);
+          } else {
+            audio.warn();
+            emit('toast', { message: res.reason || 'Gagal membeli', kind: 'warn' });
+          }
+        },
+      }),
+    ]));
+  }
+  return el('div', { class: 'hd-unlock-banner' }, [
+    el('b', { class: 'hd-unlock-title', text: tr('BELUM TERBUKA — pilih salah satu jalur') }),
+    ...rows,
+  ]);
+}
+
 /* ================= SELEKSI HERO — bangun ulang halaman ================= */
 function selectHero(dir = 0) {
   const meta = STATE.meta;
@@ -191,6 +234,10 @@ function selectHero(dir = 0) {
   const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((sk) => sk.id === id)).filter(Boolean);
   const tier = (getData().heroes.tiers || {})[heroDef.tier] || {};
   const unlockedSet = new Set(meta.unlockedHeroes || []);
+  // Workflow minimal: dua jalur unlock — gratis (syarat statistik) ATAU beli
+  // instan dengan Antibodi (meta.currency). status.unlocked = false berarti
+  // kartu ini menampilkan BANNER unlock, bukan stat langsung dipakai.
+  const status = getHeroStatus(meta, heroDef);
 
   /* ---------- RAIL KIRI: daftar hero (carousel terintegrasi, gaya RoK) ---------- */
   const railItems = heroes.map((h, i) => {
@@ -288,6 +335,9 @@ function selectHero(dir = 0) {
         ]),
       ]),
     ]),
+    // Workflow minimal: hero terkunci → banner dua jalur (gratis/beli) di
+    // atas stat, stat di bawahnya tetap tampil sebagai PREVIEW kekuatannya.
+    status.unlocked ? null : buildUnlockBanner(meta, heroDef, status),
     // Stat strip (kekuatan hero murni dari mutasi in-run, bukan pembelian)
     el('div', { class: 'hl-chips hd-stats hd-rok-stats' }, [
       el('span', { class: 'hl-chip atk', title: tr('Damage per serangan') }, [el('small', { text: 'DMG' }), el('b', { text: `${Math.round(nowDamage)}` })]),

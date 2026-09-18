@@ -132,23 +132,29 @@ export function show() {
       avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: tr(status.conditionLabel) }));
-      // V2 §3 + IAP §22: hero TIDAK dibuka dengan mata uang premium.
-      // Pembukaan murni dari progress bermain (lihat unlock-system).
+      // Workflow minimal: jalur beli instan dengan Antibodi, DI SAMPING jalur
+      // gratis (kondisi statistik di atas) — tombol beli sungguhan ada di
+      // hero-detail (kartu ini cuma harga sekilas + navigasi ke sana).
+      if (status.shopCost > 0) {
+        children.push(el('div', { class: 'lock-cond lock-buy' + (status.canBuy ? ' afford' : ''), text: `◉ ${status.shopCost.toLocaleString('id-ID')} Antibodi` }));
+      }
     }
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
-      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
-      // Kartu terkunci BUKAN tombol (tetapi tombol BUKA di dalamnya tetap aktif —
-      // jangan pakai aria-disabled di kartu: itu menonaktifkan keturunannya bagi AT)
-      role: status.unlocked ? 'button' : undefined,
-      tabindex: status.unlocked ? '0' : '-1',
-      // SATU handler: pilih hero (tersimpan) lalu buka detail — sebelumnya dua listener
-      // (onclick pilih + listener detail) membuat render ulang grid tepat sebelum navigasi.
+      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : `${heroDef.name} — terkunci, ketuk untuk lihat syarat/beli`,
+      // Kartu terkunci TETAP tombol sekarang: menuju hero-detail untuk lihat
+      // syarat gratis ATAU beli dengan Antibodi (dua jalur, lihat unlock-system).
+      role: 'button',
+      tabindex: '0',
+      // SATU handler: pilih hero (tersimpan, hanya bila SUDAH dimiliki) lalu
+      // buka detail — hero terkunci tetap boleh dilihat detailnya (tombol beli
+      // di sana), sama seperti rail carousel di hero-detail sendiri.
       onclick: () => {
-        if (!status.unlocked) return;
-        meta.selectedHero = heroDef.id;
-        writeSave(meta);
+        if (status.unlocked) {
+          meta.selectedHero = heroDef.id;
+          writeSave(meta);
+        }
         sm.show('herodetail', { heroId: heroDef.id });
       },
     }, children);

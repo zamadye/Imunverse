@@ -140,7 +140,7 @@
         "stat": "totalKills",
         "value": 250
       },
-      "shopCost": 0,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
       "tier": "rare",
       "passive": {
@@ -242,7 +242,7 @@
         "stat": "totalRuns",
         "value": 5
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
       "tier": "uncommon",
       "passive": {
@@ -342,7 +342,7 @@
         "value": 10,
         "label": "Selesaikan 10 run"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_eosinophil.png",
       "tier": "uncommon",
       "passive": {
@@ -445,7 +445,7 @@
         "value": 2,
         "label": "Kalahkan 2 Bos"
       },
-      "shopCost": 0,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_basophil.png",
       "tier": "rare",
       "passive": {
@@ -545,7 +545,7 @@
         "value": 8,
         "label": "Kalahkan 8 Bos"
       },
-      "shopCost": 0,
+      "shopCost": 3800,
       "spritePortrait": "assets/sprites/portrait_mastcell.png",
       "tier": "epic",
       "passive": {
@@ -644,7 +644,7 @@
         "value": 20,
         "label": "Capai Gelombang 20"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_tcd8.png",
       "tier": "uncommon",
       "passive": {
@@ -745,7 +745,7 @@
         "value": 150,
         "label": "Serap 150 patogen (total)"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_tcd4.png",
       "tier": "uncommon",
       "passive": {
@@ -843,7 +843,7 @@
         "value": 400,
         "label": "Serap 400 patogen (total)"
       },
-      "shopCost": 0,
+      "shopCost": 3800,
       "spritePortrait": "assets/sprites/portrait_treg.png",
       "tier": "epic",
       "passive": {
@@ -941,7 +941,7 @@
         "value": 8,
         "label": "Capai Gelombang 8"
       },
-      "shopCost": 0,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_bcell.png",
       "tier": "rare",
       "passive": {
@@ -1037,7 +1037,7 @@
         "stat": "bossKills",
         "value": 3
       },
-      "shopCost": 0,
+      "shopCost": 7000,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",
       "tier": "legend",
       "passive": {

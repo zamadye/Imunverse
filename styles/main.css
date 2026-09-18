@@ -396,8 +396,10 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 .roster-eq-dot.active{transform:scale(1.32);box-shadow:0 0 0 1px #fff,0 0 7px color-mix(in srgb,var(--eq) 65%,transparent)}
 .roster-equity small{font-size:8.5px;line-height:1.15;color:#6c8179;font-weight:800;text-align:center;max-width:112px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* Hero terkunci: siluet redup + badge gembok (ala mockup) */
-.hero-card.locked { cursor: default; }
+/* Hero terkunci: siluet redup + badge gembok (ala mockup). Kartu TETAP
+   tombol (workflow minimal: ketuk untuk lihat syarat gratis ATAU beli
+   dengan Antibodi di hero-detail) — jadi cursor tetap pointer. */
+.hero-card.locked { cursor: pointer; }
 .hero-card.locked .avatar-wrap { border-color: #e4d9bf; }
 .hero-card.locked .hero-sprite { opacity: 0.28; filter: grayscale(1) contrast(0.8); }
 .hero-card.locked .hero-name { color: var(--ink-soft); }
@@ -413,6 +415,28 @@ h1, h2, h3 { letter-spacing: 0.2px; }
   font-size: 10px; color: var(--coral-deep); font-weight: 800; text-align: center;
   line-height: 1.3; max-width: 92%;
 }
+/* Jalur beli instan (Antibodi) — harga sekilas di kartu roster; hijau bila
+   sudah cukup saldo, netral bila belum (tetap bisa diketuk untuk detail). */
+.lock-cond.lock-buy { color: var(--ink-soft); }
+.lock-cond.lock-buy.afford { color: var(--teal-deep); }
+
+/* Banner unlock di hero-detail: dua jalur (gratis vs beli Antibodi) */
+.hd-unlock-banner {
+  display: flex; flex-direction: column; gap: 6px;
+  background: #fff6df; border: 1px solid #f0dfa8; border-radius: 14px;
+  padding: 10px 12px; margin: 4px 0 2px;
+}
+.hd-unlock-title { font-size: 11px; letter-spacing: .03em; color: var(--coral-deep); }
+.hd-unlock-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hd-unlock-ico { font-size: 13px; width: 18px; text-align: center; flex: 0 0 auto; }
+.hd-unlock-free .hd-unlock-ico { color: var(--ink-soft); }
+.hd-unlock-buy .hd-unlock-ico { color: var(--teal-deep); }
+.hd-unlock-label { font-size: 12px; font-weight: 700; color: var(--ink); flex: 1 1 auto; min-width: 0; }
+.hd-unlock-btn {
+  font-size: 11px; padding: 6px 14px; border-radius: var(--pill);
+  flex: 0 0 auto; white-space: nowrap;
+}
+.hd-unlock-btn:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
 /* slider level: track + knob (meniru mockup Attack/Army Size) */
 .upg-slider { position: relative; height: 26px; border-radius: var(--pill); background: #f3e8cf; overflow: visible; }
 .upg-slider .upg-fill {
