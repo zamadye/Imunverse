@@ -96,10 +96,18 @@ body:not(.in-run) #toasts {
   width: min(72vw, 320px);
 }
 /* Roster: grid kartu hero mulai lebih tinggi di layar ini (tidak ada
-   ruang kosong seluas dashboard) — taruh toast tepat di bawah judul/subjudul
-   supaya paling banter menimpa teks instruksi, bukan kartu hero. */
+   ruang kosong seluas dashboard) — taruh toast di BAWAH subjudul (bukan
+   menimpanya — subjudul jelaskan "terkunci lewat progres", harus selalu
+   kebaca) supaya paling banter menimpa baris pertama kartu hero, bukan teks
+   instruksi. Nilai ini = tinggi header + subjudul terukur di layar 390px. */
 body[data-active-screen="roster"]:not(.in-run) #toasts {
-  top: calc(64px + env(safe-area-inset-top));
+  top: calc(104px + env(safe-area-inset-top));
+}
+/* Profil: avatar + nama pemain duduk tinggi di layar ini (tidak ada kartu
+   ringkasan seperti dashboard) — taruh toast di bawah blok avatar/nama,
+   supaya nama pemain tidak ketiban tumpukan toast. */
+body[data-active-screen="profile"]:not(.in-run) #toasts {
+  top: calc(302px + env(safe-area-inset-top));
 }
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 .toast {
