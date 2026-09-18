@@ -1,9 +1,18 @@
 /**
- * dashboard-screen.js — Dashboard UI-REBUILD P8 (permintaan owner).
+ * dashboard-screen.js — Dashboard UI-REBUILD P8 (permintaan owner) + P9
+ * (peta anatomi tersambung, ala minimap MLBB — rombak workflow minimal).
  *
  * Prinsip baru: **dashboard BERSIH**.
- *   latar foto  +  PETA TUBUH (slideshow bab, geser kiri/kanan)  +  MAIN besar
+ *   latar foto  +  PETA TUBUH (peta anatomi SATU JALUR tersambung, bab =
+ *   node di posisi tubuhnya — bukan lagi carousel geser)  +  MAIN besar
  *   +  4 menu footer (Hero · Tas · Misi · Lab Genom).
+ *
+ * P9: node bab 'cleared' TETAP bisa diketuk lagi (jalan balik ke bab
+ * bawah utk farm antibodi di level lebih rendah — permintaan owner),
+ * persis seperti carousel lama, cuma sekarang keliatan sebagai peta
+ * spasial bukan kartu geser. Posisi tiap node dari data/campaign.json
+ * → chapters[].mapPos, digambar di atas siluet tubuh SVG statis
+ * (index.html) yang viewBox-nya (0 0 300 520) sama dengan mapPos.
  *
  * Yang DICABUT (dulu memenuhi layar sebagai kartu/overlay animasi):
  *   panggung hero + canvas cinematic, kartu kampanye, kolom mode (endless/
@@ -40,77 +49,80 @@ import { emit } from '../../core/ui-bridge.js';
 import { currentStrainId } from '../../systems/weekly-strain-system.js';
 import { traitDisplayName } from '../../systems/enemy-mutation-system.js';
 
-let chapterIndex = 0; // indeks slide aktif (bukan selalu = bab terpilih)
+let chapterIndex = 0; // indeks bab TERPILIH (peta sekarang statis — semua node terlihat sekaligus, tak ada lagi "slide yang sedang di-scroll")
 
 function chapters() {
   return getData().campaign.chapters;
 }
 
 // ---------------------------------------------------------------------
-// PETA TUBUH — slideshow bab
+// PETA TUBUH — peta anatomi TERSAMBUNG satu jalur (ala minimap MLBB),
+// menggantikan carousel geser lama. Node = bab, posisi dari
+// data/campaign.json → chapters[].mapPos (viewBox SVG 0 0 300 520, sama
+// dengan siluet tubuh statis di index.html). Jalur digambar sebagai
+// segmen garis antar node berurutan; segmen ke bab terkunci meredup.
+// Status locked/current/cleared TIDAK berubah dari sebelumnya (chapters.js)
+// — bab 'cleared' tetap bisa diketuk lagi: itulah "jalan balik utk farm".
 // ---------------------------------------------------------------------
 
-function buildSlide(ch, i, meta) {
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function statusBadgeText(status) {
+  return status === 'cleared' ? 'BERSIH ✓' : status === 'current' ? 'AKTIF' : 'TERKUNCI';
+}
+
+function buildNode(ch, i, meta) {
   const status = chapterStatus(ch, meta);
-  const list = chapters();
-  const slide = el('article', {
-    class: `chap-slide ${status}${meta.selectedChapter === ch.id ? ' selected' : ''}`,
+  const selected = meta.selectedChapter === ch.id;
+  const pos = ch.mapPos || { x: 150, y: 260 };
+  const node = el('button', {
+    class: `chap-node ${status}${selected ? ' selected' : ''}`,
+    style: `left:${(pos.x / 300) * 100}%; top:${(pos.y / 520) * 100}%;`,
     'data-ch': ch.id,
-    'data-i': String(i),
-    role: 'button',
-    tabindex: status === 'locked' ? '-1' : '0',
-    'aria-label': `Bab ${i + 1}: ${ch.title}`,
-  });
-
-  slide.appendChild(el('img', {
-    class: 'chap-art',
-    src: ch.art || 'assets/ui/bg-dashboard.jpg',
-    alt: '',
-    draggable: 'false',
-    loading: i > 1 ? 'lazy' : 'eager',
-  }));
-
-  const badge = status === 'cleared' ? 'BERSIH ✓'
-    : status === 'current' ? 'AKTIF'
-      : 'TERKUNCI 🔒';
-  slide.appendChild(el('span', { class: `chap-status ${status}`, text: badge }));
-
-  slide.appendChild(el('div', { class: 'chap-info' }, [
-    el('span', { class: 'chap-no', text: `BAB ${i + 1}` }),
-    el('b', { class: 'chap-title', text: ch.title }),
-    el('span', { class: 'chap-organ', text: `${ch.organ} · ${ch.mapTag || ''}` }),
-    el('span', { class: 'chap-obj', text: ch.objective || '' }),
-  ]));
-
-  if (status === 'locked') {
-    const prev = list[i - 1];
-    slide.appendChild(el('div', { class: 'chap-lock' }, [
-      el('span', { text: '🔒 SELESAIKAN DULU' }),
-      el('span', { text: prev ? `BAB ${i}: ${prev.title}` : '' }),
-    ]));
-  }
-
-  if (status !== 'locked') {
-    slide.addEventListener('click', () => selectChapter(ch.id));
-    slide.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectChapter(ch.id); }
-    });
-  } else {
-    slide.addEventListener('click', () => {
+    'aria-label': `Bab ${i + 1}: ${ch.title}${status === 'locked' ? ' (terkunci)' : ''}`,
+    title: ch.title,
+  }, [
+    el('span', { class: 'chap-node-ring', 'aria-hidden': 'true' }),
+    el('span', { class: 'chap-node-no', text: String(i + 1) }),
+    status === 'cleared' ? el('img', { class: 'chap-node-badge', src: 'assets/icons/ui-star.svg', alt: '' }) : null,
+    status === 'locked' ? el('img', { class: 'chap-node-badge', src: 'assets/icons/ui-lock.svg', alt: '' }) : null,
+  ]);
+  node.addEventListener('click', () => {
+    if (status === 'locked') {
       audio.warn();
       emit('toast', { message: 'Bab ini terkunci — bersihkan bab sebelumnya dulu!', kind: 'warn' });
-    });
+      return;
+    }
+    selectChapter(ch.id);
+  });
+  return node;
+}
+
+/** Gambar jalur (segmen garis) antar node berurutan di dalam SVG siluet. */
+function buildPathSegments(list, meta) {
+  const group = document.getElementById('chapter-path-group');
+  if (!group) return;
+  group.textContent = '';
+  for (let i = 0; i < list.length - 1; i++) {
+    const a = list[i].mapPos;
+    const b = list[i + 1].mapPos;
+    if (!a || !b) continue;
+    const reachable = chapterStatus(list[i + 1], meta) !== 'locked';
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', a.x);
+    line.setAttribute('y1', a.y);
+    line.setAttribute('x2', b.x);
+    line.setAttribute('y2', b.y);
+    line.setAttribute('class', `chapter-path-seg${reachable ? ' open' : ' locked'}`);
+    group.appendChild(line);
   }
-  return slide;
 }
 
 function renderMap(meta) {
-  const track = document.getElementById('chapter-track');
-  const dots = document.getElementById('map-dots');
-  if (!track) return;
+  const nodesHost = document.getElementById('chapter-nodes');
+  if (!nodesHost) return;
   const list = chapters();
-  track.textContent = '';
-  dots.textContent = '';
+  nodesHost.textContent = '';
 
   // Bab terpilih wajib valid (save lama / bab terkunci).
   const selId = list.some((c) => c.id === meta.selectedChapter)
@@ -118,92 +130,66 @@ function renderMap(meta) {
     : currentChapterId(meta);
   if (meta.selectedChapter !== selId) { meta.selectedChapter = selId; writeSave(meta); }
   const selIdx = Math.max(0, list.findIndex((c) => c.id === selId));
+  chapterIndex = selIdx;
 
-  list.forEach((ch, i) => {
-    track.appendChild(buildSlide(ch, i, meta));
-    const dot = el('button', {
-      class: `map-dot${chapterStatus(ch, meta) === 'cleared' ? ' cleared' : ''}`,
-      'aria-label': `Bab ${i + 1}`,
-      onclick: () => scrollToIndex(i),
-    });
-    dots.appendChild(dot);
-  });
+  buildPathSegments(list, meta);
+  list.forEach((ch, i) => nodesHost.appendChild(buildNode(ch, i, meta)));
 
-  // Posisi awal = bab yang sedang/terakhir dimainkan.
-  scrollToIndex(selIdx, true);
   updateMapChrome(meta, selIdx);
-
-  const sub = document.getElementById('play-sub');
-  const sel = list[selIdx];
-  if (sub && sel) sub.textContent = `Bab ${selIdx + 1} · ${sel.organ}`;
-}
-
-function scrollToIndex(i, instant = false) {
-  const vp = document.getElementById('map-viewport');
-  const list = chapters();
-  const idx = Math.max(0, Math.min(list.length - 1, i));
-  chapterIndex = idx;
-  if (!vp) return;
-  const left = idx * (vp.clientWidth || 0);
-  try {
-    vp.scrollTo({ left, behavior: instant ? 'auto' : 'smooth' });
-  } catch {
-    vp.scrollLeft = left;
-  }
-  updateMapChrome(STATE.meta, idx);
-  commitChapter(idx); // bab yang terlihat = bab yang dimainkan tombol MAIN
 }
 
 function updateMapChrome(meta, idx = chapterIndex) {
   const list = chapters();
   const pos = document.getElementById('map-pos');
   if (pos) pos.textContent = `BAB ${idx + 1}/${list.length}`;
-  const dots = document.querySelectorAll('#map-dots .map-dot');
-  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
   const prev = document.getElementById('map-prev');
   const next = document.getElementById('map-next');
   if (prev) prev.disabled = idx <= 0;
   if (next) next.disabled = idx >= list.length - 1;
-  // Label di bawah tombol MAIN mengikuti bab yang sedang terlihat — kalau tidak,
-  // pemain menggeser ke Bab 3 tapi label & run tetap Bab 1.
-  const sub = document.getElementById('play-sub');
-  const ch = list[idx];
-  if (sub && ch) {
-    const locked = chapterStatus(ch, meta) === 'locked';
-    sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
-  }
-}
 
-/**
- * Simpan bab yang sedang terlihat sebagai bab terpilih (bila terbuka), supaya
- * tombol MAIN memulai run di bab yang tampil di peta — bukan bab lama.
- */
-function commitChapter(idx) {
-  const list = chapters();
-  const meta = STATE.meta;
   const ch = list[idx];
-  if (!ch || !meta || meta.selectedChapter === ch.id) return;
-  if (chapterStatus(ch, meta) === 'locked') return;
-  meta.selectedChapter = ch.id;
-  try { markSeen(ch.id); } catch { /* abaikan */ }
-  writeSave(meta);
+  if (!ch) return;
+  const status = chapterStatus(ch, meta);
+  const locked = status === 'locked';
+
+  // Label di bawah tombol MAIN mengikuti bab yang terpilih di peta.
+  const sub = document.getElementById('play-sub');
+  if (sub) sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
+
+  // Kartu info bab terpilih (dulu tertulis langsung di kartu carousel besar;
+  // sekarang node kecil di peta, jadi detailnya pindah ke panel ini).
+  const panel = document.getElementById('chap-info-panel');
+  if (!panel) return;
+  panel.className = `chap-info-panel ${status}`;
+  panel.textContent = '';
+  panel.appendChild(el('img', { class: 'cip-art', src: ch.art || 'assets/ui/bg-dashboard.jpg', alt: '', draggable: 'false' }));
+  const prevCh = list[idx - 1];
+  panel.appendChild(el('div', { class: 'cip-body' }, [
+    el('span', { class: `cip-status ${status}`, text: statusBadgeText(status) }),
+    el('b', { class: 'cip-title', text: `BAB ${idx + 1} · ${ch.title}` }),
+    el('span', { class: 'cip-organ', text: `${ch.organ} · ${ch.mapTag || ''}` }),
+    locked
+      ? el('span', { class: 'cip-lock', text: `🔒 Selesaikan dulu: BAB ${idx} — ${prevCh ? prevCh.title : ''}` })
+      : el('span', { class: 'cip-obj', text: ch.objective || '' }),
+  ]));
 }
 
 /** Validasi sebelum MAIN: bab terkunci → peringatan, jangan mulai run. */
 export function canPlaySelected() {
   const list = chapters();
   const meta = STATE.meta;
-  const ch = list[chapterIndex] || list.find((c) => c.id === meta.selectedChapter) || list[0];
+  const ch = list.find((c) => c.id === meta.selectedChapter) || list[0];
   if (!ch) return false;
   if (chapterStatus(ch, meta) === 'locked') {
     audio.warn();
     emit('toast', { message: 'Bab ini terkunci — bersihkan bab sebelumnya dulu!', kind: 'warn' });
     return false;
   }
-  commitChapter(chapterIndex);
   return true;
 }
 
+/** Pilih bab: ketuk node di peta ATAU panah ‹ › — SATU jalur (tak ada lagi
+ * "commit" terpisah, memilih langsung menyimpan meta.selectedChapter). */
 function selectChapter(chId) {
   const meta = STATE.meta;
   const ch = chapters().find((c) => c.id === chId);
@@ -220,10 +206,14 @@ function selectChapter(chId) {
   renderMap(meta);
 }
 
-/** Geser satu slide (panah ‹ ›). */
+/** Pindah bab terpilih satu langkah menurut urutan cerita (panah ‹ ›) —
+ * fallback aksesibilitas untuk keyboard/non-sentuh; peta sendiri dipilih
+ * langsung via tap node di posisi anatominya. */
 function step(dir) {
-  scrollToIndex(chapterIndex + dir);
-  audio.ui();
+  const list = chapters();
+  const idx = Math.max(0, Math.min(list.length - 1, chapterIndex + dir));
+  const ch = list[idx];
+  if (ch) selectChapter(ch.id);
 }
 
 // ---------------------------------------------------------------------
@@ -383,18 +373,6 @@ function bindOnce() {
   bound = true;
   document.getElementById('map-prev')?.addEventListener('click', () => step(-1));
   document.getElementById('map-next')?.addEventListener('click', () => step(1));
-
-  const vp = document.getElementById('map-viewport');
-  if (vp) {
-    let t = 0;
-    vp.addEventListener('scroll', () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        const idx = Math.round(vp.scrollLeft / Math.max(1, vp.clientWidth));
-        if (idx !== chapterIndex) { chapterIndex = idx; updateMapChrome(STATE.meta, idx); }
-      }, 90);
-    }, { passive: true });
-  }
 
   // Menu "…" (fitur sekunder yang dulu jadi kartu).
   const moreBtn = document.getElementById('btn-dash-more');

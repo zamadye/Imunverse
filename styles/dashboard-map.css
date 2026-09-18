@@ -135,7 +135,12 @@
 }
 
 /* ---------------------------------------------------------------
-   2. PETA TUBUH — slideshow bab
+   2. PETA TUBUH — peta anatomi TERSAMBUNG (ala minimap MLBB)
+   P9 (rombak workflow minimal): carousel geser lama DICABUT. Sekarang
+   satu peta statis: siluet tubuh SVG (index.html) + node bab di posisi
+   anatominya (data/campaign.json → mapPos) + jalur garis antar node.
+   Node 'cleared' tetap bisa diketuk (jalan balik utk farm) — sama
+   seperti carousel lama, cuma sekarang spasial bukan kartu geser.
    --------------------------------------------------------------- */
 #screen-dashboard .body-map {
   /* UI-audit: peta tubuh dulu flex:0 0 auto + lebar shrink-to-fit (align-items:
@@ -204,217 +209,246 @@
 }
 
 #screen-dashboard .map-viewport {
-  /* UI-audit ("peta tubuh terlalu kecil, ruang kosong kebanyakan"): kartu peta
-     dulu dijepit rasio 16:10 TERHADAP LEBAR YANG SUDAH MENCIUT (lihat catatan
-     di .body-map di atas) — hasilnya kotak kecil ~253×158px terapung di
-     tengah layar yang lapang. Sekarang lebar penuh (100% dari .body-map yang
-     sudah diregangkan) dan TINGGI mengisi sisa ruang secara elastis
-     (flex:1 1 auto, warisan dari .body-map) — dijepit max-height supaya
-     tetap wajar di tablet/layar sangat tinggi. Tanpa aspect-ratio tetap:
-     rasio kotak sekarang mengikuti ruang yang tersedia per perangkat (foto
-     bab pakai object-fit:cover, jadi rasio berapa pun tetap rapi). */
+  /* Bingkai peta: tinggi mengisi sisa ruang antara kartu ringkasan & tombol
+     PLAY (flex:1 1 auto, warisan dari .body-map), dijepit max-height supaya
+     wajar di tablet/layar sangat tinggi. Canvas peta di dalamnya (persegi
+     panjang portrait, viewBox 300×520) dipusatkan & di-scale mengikuti
+     tinggi yang tersedia — bukan lagi jalur/lorong horizontal digeser. */
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
   max-width: 640px;
   max-height: clamp(300px, 52vh, 480px);
   margin: 0 auto;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 18px;
 }
 @media (max-height: 700px) {
   #screen-dashboard .map-viewport { max-height: clamp(240px, 42vh, 360px); }
 }
 
-.map-viewport::-webkit-scrollbar { display: none; }
-
-#screen-dashboard .map-track {
-  display: flex;
-  height: 100%;
-  gap: 10px;
-}
-
-/* Satu slide = satu bab */
-#screen-dashboard .chap-slide {
+/* Kanvas peta: rasio TETAP sama dengan viewBox SVG siluet (300×520) supaya
+   node yang diposisikan via persen (mapPos.x/300 · mapPos.y/520) selalu
+   presisi menempel di badan siluet, di ukuran layar berapa pun. */
+#screen-dashboard .body-map-canvas {
   position: relative;
-  flex: 0 0 100%;
   height: 100%;
-  scroll-snap-align: center;
+  aspect-ratio: 300 / 520;
   border-radius: 18px;
   overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 8%, rgba(53, 208, 186, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(6, 34, 32, 0.55) 0%, rgba(4, 20, 19, 0.82) 100%);
   border: 1px solid var(--dash-edge);
   box-shadow: var(--dash-shadow);
-  cursor: pointer;
-  isolation: isolate;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-#screen-dashboard .chap-art {
+#screen-dashboard .body-silhouette {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  /* Foto animasi: ken-burns pelan per slide. */
-  animation: chap-kenburns 22s ease-in-out infinite alternate;
-  will-change: transform;
 }
 
-@keyframes chap-kenburns {
-  from { transform: scale(1.02) translate3d(0, 0, 0); }
-  to   { transform: scale(1.12) translate3d(-2%, -1.5%, 0); }
+/* Siluet anatomi — bentuk lembut/rounded senada gaya sel imun game ini,
+   bukan render medis realistis. Napas pelan supaya peta terasa "hidup". */
+#screen-dashboard .bs-head,
+#screen-dashboard .bs-neck,
+#screen-dashboard .bs-torso,
+#screen-dashboard .bs-limb,
+#screen-dashboard .bs-leg,
+#screen-dashboard .bs-hand,
+#screen-dashboard .bs-foot {
+  fill: rgba(127, 227, 208, 0.10);
+  stroke: rgba(127, 227, 208, 0.38);
+  stroke-width: 2.5;
+  animation: body-breathe 7s ease-in-out infinite;
+  transform-origin: 150px 260px;
 }
 
-#screen-dashboard .chap-slide::after {
-  content: '';
+@keyframes body-breathe {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+/* Jalur antar-bab: segmen garis dari node ke node berurutan. Terbuka =
+   menyala teal (boleh dijalani/diketuk balik utk farm); terkunci = redup
+   putus-putus (arah cerita yang belum sampai sana). */
+#screen-dashboard .chapter-path-seg {
+  stroke-width: 4;
+  stroke-linecap: round;
+  fill: none;
+}
+#screen-dashboard .chapter-path-seg.open {
+  stroke: var(--dash-accent-2);
+  opacity: 0.85;
+  filter: drop-shadow(0 0 5px rgba(53, 208, 186, 0.55));
+}
+#screen-dashboard .chapter-path-seg.locked {
+  stroke: rgba(198, 236, 227, 0.22);
+  stroke-dasharray: 3 7;
+}
+
+/* Overlay node — HTML di atas SVG (tombol asli, gampang disentuh & AT-friendly). */
+#screen-dashboard .chapter-nodes {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(3, 20, 19, 0.92) 0%, rgba(3, 20, 19, 0.55) 42%, rgba(3, 20, 19, 0.12) 70%),
-    linear-gradient(0deg, rgba(3, 20, 19, 0.88) 0%, rgba(3, 20, 19, 0.10) 55%);
 }
 
-#screen-dashboard .chap-info {
+#screen-dashboard .chap-node {
   position: absolute;
-  z-index: 2;
-  left: clamp(12px, 2.4vw, 28px);
-  bottom: clamp(10px, 2.2vh, 22px);
-  right: clamp(12px, 2.4vw, 28px);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-  pointer-events: none;
-  /* UI-audit: kartu peta punya tinggi terbatas (lihat .map-viewport) — kunci
-     info ke area bawah yang pasti tertutup gradasi (.chap-slide::after) dan
-     JANGAN pernah biarkan tumpukan teks lebih tinggi dari itu. */
-  max-height: 74%;
-  overflow: hidden;
-}
-
-#screen-dashboard .chap-no {
-  align-self: flex-start;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.2em;
-  color: #08211f;
-  background: linear-gradient(120deg, #7fe3d0, #35d0ba);
+  transform: translate(-50%, -50%);
+  width: 15%;
+  aspect-ratio: 1;
+  min-width: 34px;
+  max-width: 52px;
   border-radius: 999px;
-  padding: 3px 10px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-}
-
-#screen-dashboard .chap-title {
-  font-size: clamp(17px, 3.4vh, 30px);
-  font-weight: 900;
-  line-height: 1.05;
-  color: #f2fffb;
-  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
-}
-
-#screen-dashboard .chap-organ {
-  font-size: clamp(11px, 1.7vh, 14px);
-  font-weight: 700;
-  color: #9fe8d8;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-}
-
-#screen-dashboard .chap-obj {
-  font-size: clamp(10px, 1.5vh, 13px);
-  font-weight: 600;
-  color: rgba(226, 245, 240, 0.82);
-  max-width: min(46ch, 88%);
-  line-height: 1.35;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-  /* Kalimat objektif bab panjangnya bervariasi per data/campaign.json — batasi
-     ke 2 baris & potong rapi, bukan meluber ke luar kartu. */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-#screen-dashboard .chap-status {
-  position: absolute;
-  z-index: 3;
-  top: 10px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--dash-glass);
-  border: 1px solid var(--dash-edge);
+  border: 2px solid var(--dash-edge-2);
+  background: radial-gradient(circle at 34% 28%, rgba(53, 208, 186, 0.5), rgba(6, 30, 28, 0.92));
   color: var(--dash-ink);
-  backdrop-filter: blur(6px);
-}
-
-#screen-dashboard .chap-status.cleared { color: #b9f6c9; border-color: rgba(120, 240, 170, 0.45); }
-#screen-dashboard .chap-status.locked { color: #ffc9b5; border-color: rgba(255, 140, 110, 0.45); }
-
-/* Slide terpilih: menyala + sedikit lebih besar */
-#screen-dashboard .chap-slide.selected {
-  border-color: rgba(255, 209, 102, 0.85);
-  box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.35), 0 18px 50px rgba(0, 0, 0, 0.55);
-}
-
-#screen-dashboard .chap-slide.locked { cursor: not-allowed; }
-#screen-dashboard .chap-slide.locked .chap-art { filter: grayscale(0.65) brightness(0.55); }
-
-#screen-dashboard .chap-lock {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
+  font-size: clamp(11px, 2.2vw, 15px);
+  font-weight: 900;
   display: grid;
   place-items: center;
-  gap: 8px;
-  background: rgba(4, 20, 19, 0.55);
-  color: #ffd9c9;
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  text-align: center;
-}
-
-#screen-dashboard .chap-lock span { display: block; font-size: 11px; font-weight: 700; opacity: 0.85; }
-
-/* Indikator titik */
-#screen-dashboard .map-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px;
-  padding-bottom: 2px;
-}
-
-#screen-dashboard .map-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  border: 0;
-  padding: 0;
-  background: rgba(216, 240, 234, 0.28);
   cursor: pointer;
-  transition: width 0.2s ease, background 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+#screen-dashboard .chap-node:active { transform: translate(-50%, -50%) scale(0.92); }
+
+#screen-dashboard .chap-node-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 209, 102, 0.6);
+  opacity: 0;
+  pointer-events: none;
 }
 
-#screen-dashboard .map-dot.active {
-  width: 22px;
-  background: linear-gradient(90deg, #7fe3d0, #35d0ba);
+#screen-dashboard .chap-node-no { position: relative; z-index: 1; }
+
+#screen-dashboard .chap-node-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 44%;
+  height: 44%;
+  border-radius: 999px;
+  background: var(--dash-bg-mid);
+  border: 2px solid var(--dash-bg-mid);
+  padding: 2px;
 }
 
-#screen-dashboard .map-dot.cleared { background: rgba(150, 240, 190, 0.6); }
+/* Terkunci: redup + gembok, tetap bisa diketuk (menampilkan syarat via toast). */
+#screen-dashboard .chap-node.locked {
+  background: radial-gradient(circle at 34% 28%, rgba(120, 140, 135, 0.28), rgba(6, 20, 19, 0.92));
+  border-color: rgba(198, 236, 227, 0.22);
+  color: rgba(230, 251, 245, 0.45);
+}
+
+/* Bersih (cleared): boleh dijalani ulang — "jalan balik utk farm". */
+#screen-dashboard .chap-node.cleared {
+  border-color: rgba(120, 240, 170, 0.55);
+  background: radial-gradient(circle at 34% 28%, rgba(120, 240, 170, 0.38), rgba(6, 30, 28, 0.92));
+}
+
+/* Aktif (bab sekarang di alur cerita) — cincin berdenyut, ala "kamu di sini". */
+#screen-dashboard .chap-node.current .chap-node-ring {
+  opacity: 1;
+  animation: chap-node-pulse 2s ease-out infinite;
+}
+
+@keyframes chap-node-pulse {
+  0%   { transform: scale(0.85); opacity: 0.9; }
+  70%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* Terpilih (mau dimainkan tombol PLAY) — sorot emas. */
+#screen-dashboard .chap-node.selected {
+  border-color: rgba(255, 209, 102, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.3), 0 10px 22px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------------------------------------------------------------
+   2b. KARTU INFO BAB TERPILIH — detail bab yang dulu tertulis
+   langsung di kartu carousel besar; sekarang node di peta kecil,
+   jadi detailnya pindah ke satu strip ringkas di bawah peta.
+   --------------------------------------------------------------- */
+#screen-dashboard .chap-info-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--dash-glass);
+  border: 1px solid var(--dash-edge);
+  backdrop-filter: blur(6px);
+  min-height: 54px;
+}
+
+#screen-dashboard .cip-art {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+#screen-dashboard .chap-info-panel.locked .cip-art { filter: grayscale(0.6) brightness(0.6); }
+
+#screen-dashboard .cip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+#screen-dashboard .cip-status {
+  align-self: flex-start;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(53, 208, 186, 0.18);
+  color: #9fe8d8;
+}
+#screen-dashboard .cip-status.cleared { background: rgba(120, 240, 170, 0.18); color: #b9f6c9; }
+#screen-dashboard .cip-status.locked { background: rgba(255, 140, 110, 0.18); color: #ffc9b5; }
+
+#screen-dashboard .cip-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #f2fffb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#screen-dashboard .cip-organ {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9fe8d8;
+}
+
+#screen-dashboard .cip-obj,
+#screen-dashboard .cip-lock {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(226, 245, 240, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#screen-dashboard .cip-lock { color: #ffc9b5; }
+
+@media (max-width: 380px) {
+  #screen-dashboard .cip-organ { display: none; }
+}
 
 /* ---------------------------------------------------------------
    3. TOMBOL MAIN — satu-satunya CTA, besar di tengah
@@ -774,14 +808,21 @@
    Penyesuaian layar kecil / portrait
    --------------------------------------------------------------- */
 @media (max-width: 560px) {
-  #screen-dashboard .chap-obj { display: none; }
+  #screen-dashboard .cip-obj { display: none; }
   #screen-dashboard .dash-play { width: clamp(88px, 13vh, 120px); height: clamp(88px, 13vh, 120px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #screen-dashboard .chap-art,
   #screen-dashboard .dash-bg,
-  #screen-dashboard .dash-play-ring { animation: none; }
+  #screen-dashboard .dash-play-ring,
+  #screen-dashboard .bs-head,
+  #screen-dashboard .bs-neck,
+  #screen-dashboard .bs-torso,
+  #screen-dashboard .bs-limb,
+  #screen-dashboard .bs-leg,
+  #screen-dashboard .bs-hand,
+  #screen-dashboard .bs-foot,
+  #screen-dashboard .chap-node.current .chap-node-ring { animation: none; }
 }
 
 /* ---------------------------------------------------------------

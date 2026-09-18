@@ -45,7 +45,8 @@
       "story": "Inang tergores sesuatu — luka kecil, kata dokter. Tapi dari dalam sini, itu gerbang raksasa yang terbuka. Bakteri sudah menyusup duluan. Kamu yang paling dekat: gerak!",
       "objective": "Bersihkan 120 patogen dari jaringan luka, tumbangkan Gumpalan Luka",
       "art": "assets/chapters/ch1_luka.jpg",
-      "mapTag": "Saluran Limfe"
+      "mapTag": "Saluran Limfe",
+      "mapPos": { "x": 122, "y": 462 }
     },
     {
       "id": "bab_demam",
@@ -63,7 +64,8 @@
       "story": "Suhu Inang 38.5 — dokter bilang itu normal, tubuh sedang kerja ekstra. Artinya: sinyal darurat sudah dikirim ke seluruh pasukan. Virus flu terus bermutasi tiap gelombang. Siap-siap.",
       "objective": "Tahan gelombang flu, tumbangkan Raja Flu Mutan",
       "art": "assets/chapters/ch2_demam.jpg",
-      "mapTag": "Paru"
+      "mapTag": "Paru",
+      "mapPos": { "x": 180, "y": 190 }
     },
     {
       "id": "bab_racun",
@@ -81,7 +83,8 @@
       "story": "Ada yang tidak beres dengan makanan Inang semalam. Bakteri pencernaan masuk lebih cepat dan acak dari biasanya — tim medis mulai waspada. Kita hajar di Lambung sebelum menyebar.",
       "objective": "Basmi bakteri pencernaan, kalahkan Ratu Racun",
       "art": "assets/chapters/ch3_racun.jpg",
-      "mapTag": "Lambung"
+      "mapTag": "Lambung",
+      "mapPos": { "x": 150, "y": 260 }
     },
     {
       "id": "bab_alergi",
@@ -106,7 +109,8 @@
       "story": "Kali ini aneh: sebagian pasukan kita sendiri bereaksi berlebihan — menyerang hal yang seharusnya tidak berbahaya. Ini yang disebut 'musuh dalam selimut'. Tenangkan medan sebelum tubuh melukai dirinya sendiri.",
       "objective": "Redakan reaksi berlebih, taklukkan Alergen Purba",
       "art": "assets/chapters/ch4_alergi.jpg",
-      "mapTag": "Paru"
+      "mapTag": "Paru",
+      "mapPos": { "x": 150, "y": 110 }
     },
     {
       "id": "bab_kanker",
@@ -131,7 +135,8 @@
       "story": "Ini... beda. Sel ini bukan penyusup dari luar — dia bagian dari kita yang salah tumbuh, menyamar sebagai sel sehat. Di dunia atas, sang dokter menahan suaranya di depan keluarga kecil itu. Keluarga kecil? Jadi Inang kita...",
       "objective": "Buru sel yang menyamar, hancurkan Bayang Dalam",
       "art": "assets/chapters/ch5_kanker.jpg",
-      "mapTag": "Saluran Limfe"
+      "mapTag": "Saluran Limfe",
+      "mapPos": { "x": 225, "y": 175 }
     },
     {
       "id": "bab_final",
@@ -156,7 +161,8 @@
       "story": "Kondisi kritis. Semua ancaman yang pernah kamu lawan datang bersamaan, dan monitor di dunia atas berbunyi terlalu cepat. Kamu tidak akan pernah bertemu Inang secara langsung — tapi malam ini, hidupnya ada di tanganmu.",
       "objective": "Bertahan dari segalanya. Tumbangkan Mahakrisis.",
       "art": "assets/chapters/ch6_final.jpg",
-      "mapTag": "Sumbu Saraf"
+      "mapTag": "Sumbu Saraf",
+      "mapPos": { "x": 150, "y": 55 }
     }
   ]
 }

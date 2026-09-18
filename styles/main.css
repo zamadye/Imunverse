@@ -2298,11 +2298,10 @@ img.lock-badge {
 }
 
 /* ---------- 2. Peta Tubuh ----------
-   Overlay duplikat "nama peta → Chapter N → virus jalan" DIHAPUS (UI-audit):
-   info itu sudah ditampilkan oleh setiap kartu bab sendiri (.chap-info di
-   dashboard-map.css) — dua lapis teks di tempat yang sama menyebabkan kartu
-   terlihat "bertumpuk"/ganda. Ukuran & rasio kotak peta kini diatur tunggal
-   di dashboard-map.css (§2) supaya tidak ada dua sumber ukuran yang bentrok. */
+   P9: carousel kartu geser DICABUT — sekarang peta anatomi tersambung
+   (siluet SVG + node bab + jalur), detail bab terpilih di satu strip
+   .chap-info-panel di bawah peta. Semua styling ada di dashboard-map.css
+   (§2/§2b) supaya tidak ada dua sumber ukuran yang bentrok. */
 
 /* ---------- 3. Tombol PLAY — ikon saja, lingkaran jelas (UI-audit) ----------
    Bentuk "sel meleleh" (clip-path .netes) lama tidak terbaca sebagai tombol
