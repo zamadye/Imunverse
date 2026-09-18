@@ -238,9 +238,14 @@
   aspect-ratio: 300 / 520;
   border-radius: 18px;
   overflow: hidden;
+  /* UI-audit ("peta kurang sesuai"): foto latar dashboard (kosmik, ramai)
+     dulu terlalu tembus di balik kanvas peta — siluet tubuh yang lembut
+     jadi susah dibaca, kalah ramai sama foto belakangnya. Lapisan gelap
+     dipertegas (0.82→0.95) supaya siluet+node jadi elemen yang paling
+     menonjol di kanvas, foto latar cuma sisa nuansa jauh di belakang. */
   background:
-    radial-gradient(120% 90% at 50% 8%, rgba(53, 208, 186, 0.16), transparent 55%),
-    linear-gradient(180deg, rgba(6, 34, 32, 0.55) 0%, rgba(4, 20, 19, 0.82) 100%);
+    radial-gradient(120% 90% at 50% 8%, rgba(53, 208, 186, 0.20), transparent 55%),
+    linear-gradient(180deg, rgba(6, 34, 32, 0.82) 0%, rgba(4, 20, 19, 0.95) 100%);
   border: 1px solid var(--dash-edge);
   box-shadow: var(--dash-shadow);
 }
@@ -253,7 +258,10 @@
 }
 
 /* Siluet anatomi — bentuk lembut/rounded senada gaya sel imun game ini,
-   bukan render medis realistis. Napas pelan supaya peta terasa "hidup". */
+   bukan render medis realistis. Napas pelan supaya peta terasa "hidup".
+   UI-audit: fill/stroke lama (0.10/0.38) tenggelam di kanvas gelap —
+   dipertegas supaya bentuk tubuh terbaca jelas sebagai badan, bukan
+   garis samar acak. */
 #screen-dashboard .bs-head,
 #screen-dashboard .bs-neck,
 #screen-dashboard .bs-torso,
@@ -261,9 +269,9 @@
 #screen-dashboard .bs-leg,
 #screen-dashboard .bs-hand,
 #screen-dashboard .bs-foot {
-  fill: rgba(127, 227, 208, 0.10);
-  stroke: rgba(127, 227, 208, 0.38);
-  stroke-width: 2.5;
+  fill: rgba(127, 227, 208, 0.16);
+  stroke: rgba(127, 227, 208, 0.6);
+  stroke-width: 3;
   animation: body-breathe 7s ease-in-out infinite;
   transform-origin: 150px 260px;
 }

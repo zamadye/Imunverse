@@ -109,13 +109,17 @@ body[data-active-screen="roster"]:not(.in-run) #toasts {
 body[data-active-screen="profile"]:not(.in-run) #toasts {
   top: calc(302px + env(safe-area-inset-top));
 }
-/* Dashboard: Peta Tubuh sekarang mengisi hampir seluruh layar tepat di
-   bawah kartu ringkasan (lihat .body-map di dashboard-map.css) — 150px
-   generik di atas jatuh persis di judul "PETA TUBUH"/panah bab. Taruh
-   toast di bawah baris itu; paling banter menimpa puncak foto kartu bab,
-   bukan judul/navigasi peta. */
+/* Dashboard (P9 peta anatomi tersambung): peta sekarang mengisi HAMPIR
+   SELURUH layar dan node-nya ada di mana-mana termasuk dekat puncak
+   (bab terakhir = kepala) — anchor top generik/172px lama jatuh PERSIS
+   menimpa node bab (bukan cuma foto dekoratif seperti carousel lama).
+   Node itu interaktif (bisa diketuk), jadi toast dipindah ke BAWAH,
+   menimpa panel info bab (.chap-info-panel, cuma teks non-interaktif)
+   alih-alih menimpa peta. */
 body[data-active-screen="dashboard"]:not(.in-run) #toasts {
-  top: calc(172px + env(safe-area-inset-top));
+  top: auto;
+  bottom: calc(172px + env(safe-area-inset-bottom));
+  flex-direction: column-reverse;
 }
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 .toast {

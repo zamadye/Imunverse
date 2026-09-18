@@ -46,7 +46,7 @@
       "objective": "Bersihkan 120 patogen dari jaringan luka, tumbangkan Gumpalan Luka",
       "art": "assets/chapters/ch1_luka.jpg",
       "mapTag": "Saluran Limfe",
-      "mapPos": { "x": 122, "y": 462 }
+      "mapPos": { "x": 117, "y": 462 }
     },
     {
       "id": "bab_demam",
