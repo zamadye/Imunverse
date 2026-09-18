@@ -70,6 +70,19 @@ export function createDefaultMeta() {
     questState: { periodKey: null, accepted: {}, claimed: {}, baseline: {} },
     globalUpgrades: {},   // Fase 17: upgrade permanen global (Imun Coin, semua hero)
     heroNotices: [],      // Fase 17: antrean notifikasi "HERO BARU" (overlay dashboard)
+    // Workflow minimal (rombak V3): kekuatan pemain (level + mutasi + Antibodi
+    // yang belum dibelanjakan) TIDAK reset saat mati. Kalah → balik dashboard,
+    // tapi tekan PLAY lagi lanjut dari kekuatan yang sama (lihat game.js
+    // startRun/finishRun). Musuh ikut mengeras seiring level ini naik
+    // (playerLevelScaling) — jadi progresi permanen di sini JUGA berarti
+    // dunia jadi permanen lebih keras, bukan cuma pemain lebih kuat.
+    power: {
+      level: 1,
+      xp: 0,
+      activeMutations: [],
+      mutationHistory: [],
+      antibody: 0,
+    },
     stats: {
       wins: 0,
       totalKills: 0,

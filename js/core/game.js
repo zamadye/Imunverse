@@ -180,8 +180,26 @@ export const game = {
       emit('toast', { message: `Mutator hari ini: ${daily.def.name}`, kind: 'gold' });
     }
 
+    // Workflow minimal (rombak V3): level + mutasi + Antibodi yang belum
+    // dibelanjakan TIDAK reset antar-run — dipulihkan dari meta.power di sini,
+    // ditulis balik ke meta.power di finishRun. `run` tetap satu-satunya
+    // state LIVE selama gameplay (puluhan titik baca run.level/run.activeMutations
+    // di seluruh sistem tidak perlu diubah); hanya titik seed & tulis-balik ini
+    // yang tahu soal persistensi.
+    const power = meta.power || {};
+    const persistedLevel = Number.isFinite(power.level) && power.level >= 1 ? Math.floor(power.level) : 1;
+    const persistedXp = Number.isFinite(power.xp) && power.xp >= 0 ? power.xp : 0;
+    const persistedMutations = Array.isArray(power.activeMutations) ? power.activeMutations.slice() : [];
+    const persistedMutationHistory = Array.isArray(power.mutationHistory) ? power.mutationHistory.slice() : [];
+    const persistedAntibody = Number.isFinite(power.antibody) && power.antibody >= 0 ? power.antibody : 0;
+    // Shim hanya berisi field yang dibaca evoStateFor/evoStatMult (activeMutations
+    // + heroDef) — dipakai SEBELUM this.run ada, supaya multiplier stat evolusi
+    // (maxHP/damage/speed) sudah benar sejak player pertama dibuat, bukan baru
+    // menyusul di frame berikutnya.
+    const persistedRunShim = { activeMutations: persistedMutations, heroDef };
+
     const stats = this.computePlayerStats(heroDef, upgrades);
-    this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
+    this.applyMetaMultipliers(stats, heroDef, persistedRunShim); // evolusi hero (mutasi permanen) + bonus arena
     this.applyBodyModifiers(stats, bodyMods); // kondisi tubuh (meta-layer)
     markSeen(heroDef.id); // Bio-Pedia: hero yang dimainkan
     markSeen('imun'); // Bio-Pedia: sistem imun (pasukan pemain)
@@ -196,9 +214,10 @@ export const game = {
     const focusId = meta.focusRun || 'seimbang';
     const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === focusId) || null;
 
-    // P2: tahap evolusi dihitung dari MUTASI AKTIF se-run (bukan fragmen meta).
-    // Awal run selalu BASE; naik saat pemain memilih mutasi (refreshEvoStage).
-    const evoStage = evoStageFor(null, heroDef);
+    // P2: tahap evolusi dihitung dari MUTASI AKTIF (kini permanen lintas run,
+    // lihat persistedMutations di atas) — naik lagi saat pemain memilih mutasi
+    // baru (chooseLevelUp → evoStageFor(run,...)).
+    const evoStage = evoStageFor(persistedRunShim, heroDef);
     const unlockedAbilityIds = []; // V2: kekuatan datang dari mutasi, bukan drop fragmen
 
     this.run = {
@@ -233,9 +252,9 @@ export const game = {
       wave: 1,
       kills: 0,
       bossKills: 0,
-      xp: 0,
+      xp: persistedXp,
       xpGained: 0,
-      level: 1,
+      level: persistedLevel,
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
@@ -287,10 +306,11 @@ export const game = {
       // punya beat-nya; sisanya menunggu celah 0.24 dtk.
       hitStopCool: 0,
       ended: false,
-      // PHAGOS: membran + mutasi + bio-point + adaptasi musuh (run-only)
-      activeMutations: [],
-      mutationHistory: [],
-      antibody: 0, // P3: ANTIBODI = satu-satunya resource evolusi (IAP §3)
+      // PHAGOS: membran + mutasi + bio-point + adaptasi musuh — PERMANEN lintas
+      // run (dipulihkan dari meta.power di atas, ditulis balik di finishRun).
+      activeMutations: persistedMutations,
+      mutationHistory: persistedMutationHistory,
+      antibody: persistedAntibody, // P3: ANTIBODI = satu-satunya resource evolusi (IAP §3) — permanen
       engulfStats: {},
       enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
       membrane: null,
@@ -340,9 +360,12 @@ export const game = {
    * Kalikan stat dasar dengan multiplier META: tahap evolusi hero (damage/HP)
    * + bonus arena terpilih (speed/magnet). Dipanggil di startRun.
    */
-  applyMetaMultipliers(stats, heroDef) {
+  applyMetaMultipliers(stats, heroDef, runOverride) {
     const meta = STATE.meta;
-    const run = this.run;
+    // startRun memanggil ini SEBELUM this.run ada (run baru belum dibuat) —
+    // runOverride adalah shim berisi mutasi permanen yang akan diwarisi run
+    // baru, supaya evoStatMult benar sejak awal alih-alih baru menyusul.
+    const run = runOverride || this.run;
     const hd = heroDef || (run && run.heroDef) || null;
     // P2: pengali tahap evolusi (BASE → MUT1 → MUT2 → APEX) dari mutasi run ini.
     const m = evoStatMult(run, hd);
@@ -2123,6 +2146,17 @@ applyChapterTier(enemy, run) {
 
     // V2: Battle Pass & Pangkat DIHAPUS. Hasil run hanya mengalir ke Antibodi
     // (satu-satunya resource) — sudah dilakukan oleh addCurrency() di atas.
+
+    // Workflow minimal (rombak V3): tulis balik kekuatan permanen — level,
+    // mutasi aktif, riwayat mutasi, dan Antibodi yang belum dibelanjakan —
+    // ke meta.power, supaya PLAY berikutnya (dari dashboard ATAU tombol "Main
+    // Lagi" di layar ini) melanjutkan dari kekuatan yang sama, bukan dari nol.
+    meta.power = meta.power || {};
+    meta.power.level = run.level;
+    meta.power.xp = run.xp;
+    meta.power.activeMutations = [...(run.activeMutations || [])];
+    meta.power.mutationHistory = [...(run.mutationHistory || [])];
+    meta.power.antibody = runAntibody(run);
 
     recordAntigenMeta(meta, run); // R3: encounter record memori antigen (collection)
     // V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain

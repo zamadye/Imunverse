@@ -85,7 +85,7 @@ export function show(summary) {
   document.getElementById('gameover-sub').textContent =
     summary.wave >= 10
       ? 'Luar biasa! Sistem imun mengingat jasamu.'
-      : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+      : 'Mutasi & Antibodimu tersimpan — main lagi lanjut dari sini, bukan dari nol.';
 
   // Sprint 5.28 (§11.3): headline ringkas run.
   let head = document.getElementById('go-headline');
@@ -146,22 +146,23 @@ export function show(summary) {
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-body', text: `Tubuh: ${bits.join(' · ')}` }));
   }
 
-  // P2: evolusi run ini (BASE → MUT1 → MUT2 → APEX) — progresi run = mutasi,
-  // bukan lagi fragmen meta yang dikumpulkan.
+  // Workflow minimal (rombak V3): evolusi & mutasi kini PERMANEN lintas run
+  // (tidak lagi reset ke BASE tiap kali) — grid ini menampilkan total yang
+  // sudah terkumpul, bukan cuma hasil run barusan.
   const evoLabel = { base: 'BASE', mut1: 'MUT1', mut2: 'MUT2', apex: 'APEX' }[summary.evoStage] || 'BASE';
   grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts' }, [
-    el('span', { text: `⬡ Evolusi run ini: ${evoLabel} (${summary.mutations || 0} mutasi)` }),
+    el('span', { text: `⬡ Evolusi sekarang: ${evoLabel} (${summary.mutations || 0} mutasi total — permanen)` }),
   ]));
 
-  // P3 (IAP §24–§25): EKONOMI AKHIR RUN — berapa antibodi dibawa pulang dan
-  // apa tujuan run berikutnya. Tidak butuh mission system tambahan: tujuannya
+  // P3 (IAP §24–§25): EKONOMI — berapa Antibodi tersimpan (permanen) dan apa
+  // tujuan mutasi berikutnya. Tidak butuh mission system tambahan: tujuannya
   // adalah mutasi berikutnya → APEX → area lebih dalam.
   {
     const dibawa = Math.round(summary.antibody || 0);
     const harga = mutationCost((summary.mutations || 0) + 1);
     const kurang = Math.max(0, harga - dibawa);
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-eco' }, [
-      el('span', { text: `◉ ${dibawa} Antibodi dibawa pulang` }),
+      el('span', { text: `◉ ${dibawa} Antibodi tersimpan` }),
       el('span', { class: 'go-eco-goal', text: kurang > 0
         ? ` → mutasi berikutnya ${harga} (kurang ${kurang})`
         : ` → cukup untuk mutasi berikutnya (${harga})!` }),
