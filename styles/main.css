@@ -87,10 +87,19 @@ html, body {
   z-index: 60; display: flex; flex-direction: column-reverse; gap: 8px; align-items: center;
   pointer-events: none; width: min(86vw, 400px);
 }
-/* Di luar pertempuran: toast kecil di ATAS layar (bukan menutup konten tengah) */
+/* Di luar pertempuran: toast kecil di ATAS layar (bukan menutup konten tengah).
+   UI-audit: sebelumnya `bottom: 122px` (bukan beneran "di atas layar") —
+   itu jatuh persis di atas tombol MAIN dan menutupinya. Sekarang benar-benar
+   ditaruh di atas, di bawah kartu ringkasan (Profil/Antibody/Shop). */
 body:not(.in-run) #toasts {
-  top: auto; bottom: 122px; flex-direction: column; /* di atas dock — tidak menutupi topbar */
+  top: calc(150px + env(safe-area-inset-top)); bottom: auto; flex-direction: column;
   width: min(72vw, 320px);
+}
+/* Roster: grid kartu hero mulai lebih tinggi di layar ini (tidak ada
+   ruang kosong seluas dashboard) — taruh toast tepat di bawah judul/subjudul
+   supaya paling banter menimpa teks instruksi, bukan kartu hero. */
+body[data-active-screen="roster"]:not(.in-run) #toasts {
+  top: calc(64px + env(safe-area-inset-top));
 }
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 .toast {
@@ -216,8 +225,6 @@ h1, h2, h3 { letter-spacing: 0.2px; }
   animation: bob 3.2s ease-in-out infinite;
 }
 @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
-.load-title { font-size: 30px; font-weight: 900; color: var(--teal-dark); letter-spacing: 2px; }
-.load-title span { color: var(--coral); }
 /* Blok bawah: progress bar + label, terkunci ke dasar layar (aman notch). */
 .load-bottom {
   margin-top: auto;
@@ -2325,25 +2332,22 @@ img.lock-badge {
 #screen-dashboard .dash-play-copy b { font-size: clamp(17px, 3.2vh, 26px); }
 #screen-dashboard .dash-play-copy small { font-size: clamp(9px, 2.3vw, 11px); max-width: 130px; }
 
-/* ---------- 4. Loading: watermark + maskot di sepertiga atas, HANYA UI loading ----------
+/* ---------- 4. Loading: logo PHAGOS (satu aset, latar transparan) di sepertiga atas ----------
    Tidak ada lagi modal "MULAI" (UI-audit): loading selesai → main.js langsung
    berpindah ke Dashboard. Brand didorong sedikit dari atas; sisa ruang kosong
    dipakai .load-bottom (main.css §LOADING) untuk animasi loading di dasar layar. */
 #screen-loading .load-stage { display: none !important; }   /* dekorasi = "UI lain" */
 #screen-loading .load-box { position: relative; z-index: 2; }
 #screen-loading .load-brand {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  display: flex; flex-direction: column; align-items: center;
   margin-top: clamp(48px, 16vh, 140px);
 }
-#screen-loading .load-mascot {
-  width: clamp(84px, 27vw, 138px);
+/* Logo gabungan maskot + wordmark, latar sudah dibersihkan jadi transparan —
+   tidak ada lagi kotak/blok gelap menempel di belakangnya. */
+#screen-loading .load-logo {
+  width: clamp(200px, 62vw, 420px);
   height: auto;
-  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.6));
-}
-#screen-loading .load-title {
-  font-size: clamp(32px, 10vw, 52px);
-  letter-spacing: 0.2em;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.65);
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.45));
 }
 #screen-loading .progress-track { width: min(300px, 74vw); }
 

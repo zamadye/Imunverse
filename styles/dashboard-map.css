@@ -78,13 +78,14 @@
 }
 
 #screen-loading {
-  /* Latar foto loading — warna kartu di bawah mengikuti palet foto ini. */
+  /* UI-audit: dulu ada linear-gradient hitam-transparan di atas foto ini
+     (rgba(4,22,21,.72→.90)) yang menggelapkan seluruh layar loading dan
+     menempel sebagai "kotak hitam" di belakang logo. Dihapus — foto latar
+     tampil bersih apa adanya, tanpa overlay penutup. */
   background-color: var(--dash-bg-deep);
-  background-image:
-    linear-gradient(180deg, rgba(4, 22, 21, 0.72), rgba(4, 22, 21, 0.90)),
-    url('../assets/ui/bg-loading.jpg');
-  background-size: cover, cover;
-  background-position: center, center;
+  background-image: url('../assets/ui/bg-loading.jpg');
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
 }
 
@@ -96,9 +97,7 @@
   padding-right: clamp(20px, 5vw, 40px);
 }
 
-#screen-loading .load-title { color: var(--dash-ink); }
-#screen-loading .load-title span { color: var(--dash-accent); }
-#screen-loading .loading-label { color: var(--dash-ink-soft); }
+#screen-loading .loading-label { color: var(--dash-ink-soft); text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55); }
 
 #screen-loading .progress-track {
   background: rgba(3, 27, 29, 0.85);
