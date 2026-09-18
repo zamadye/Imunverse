@@ -109,6 +109,14 @@ body[data-active-screen="roster"]:not(.in-run) #toasts {
 body[data-active-screen="profile"]:not(.in-run) #toasts {
   top: calc(302px + env(safe-area-inset-top));
 }
+/* Dashboard: Peta Tubuh sekarang mengisi hampir seluruh layar tepat di
+   bawah kartu ringkasan (lihat .body-map di dashboard-map.css) — 150px
+   generik di atas jatuh persis di judul "PETA TUBUH"/panah bab. Taruh
+   toast di bawah baris itu; paling banter menimpa puncak foto kartu bab,
+   bukan judul/navigasi peta. */
+body[data-active-screen="dashboard"]:not(.in-run) #toasts {
+  top: calc(172px + env(safe-area-inset-top));
+}
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 .toast {
   background: var(--card); color: var(--ink);
@@ -743,18 +751,17 @@ img.lock-badge {
 #screen-dashboard, #screen-roster, #screen-shop, #screen-upgrade, #screen-gameover { z-index: 0; }
 
 /* ---------- TATA LETAK DASHBOARD (diminta user) ----------
-   Urutan vertikal: TOPBAR (atas) → PETA TUBUH + TOMBOL PLAY (kelompok
-   tengah). UI-audit: dock 4 menu di bawah DICABUT (nav-nya pindah ke menu
-   "…" di topbar) — dulu dock jadi jangkar bawah lewat margin-top:auto-nya
-   sendiri; sekarang giliran .dash-play yang pakai margin-bottom:auto supaya
-   kelompok peta+play tetap di tengah ruang kosong, bukan menempel ke bawah. */
+   Urutan vertikal: TOPBAR → kartu ringkasan → PETA TUBUH (besar, mengisi
+   sisa ruang — lihat .body-map/.map-viewport di dashboard-map.css) → PLAY
+   (margin atasnya sendiri sudah diatur di sana, §3). UI-audit: dulu peta+play
+   "mengambang" di tengah lewat sepasang margin-auto, menyisakan setengah
+   layar kosong di atasnya. Sekarang peta sendiri yang mengisi ruang kosong
+   itu (flex-grow), PLAY menempel tepat di bawahnya. */
 #screen-dashboard {
   justify-content: flex-start;
   overflow: hidden;
   padding-bottom: calc(18px + env(safe-area-inset-bottom));
 }
-#screen-dashboard .body-map { margin-top: auto; }
-#screen-dashboard .dash-play { margin-top: 0; margin-bottom: auto; }
 /* layar pendek: peta mengecil, tombol MAIN & dock tetap utuh — ukuran
    sepenuhnya diatur dashboard-map.css (satu sumber, lihat catatan di sana). */
 #screen-dashboard::before, #screen-roster::before, #screen-shop::before,

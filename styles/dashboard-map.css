@@ -138,8 +138,15 @@
    2. PETA TUBUH — slideshow bab
    --------------------------------------------------------------- */
 #screen-dashboard .body-map {
-  /* Peta tubuh TIDAK diregangkan: tingginya mengikuti kotak 1:1 di bawah. */
-  flex: 0 0 auto;
+  /* UI-audit: peta tubuh dulu flex:0 0 auto + lebar shrink-to-fit (align-items:
+     center di .screen dasar membuatnya menciut mengikuti tinggi kotak alih-alih
+     mengisi lebar layar) — hasilnya kotak peta kecil dan sisa layar jadi ruang
+     kosong besar. Sekarang: lebar diregangkan penuh (align-self:stretch) dan
+     tinggi mengisi SEMUA sisa ruang antara kartu ringkasan & tombol PLAY
+     (flex:1 1 auto, dijepit oleh max-height .map-viewport di bawah). */
+  flex: 1 1 auto;
+  min-height: 0;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -197,17 +204,20 @@
 }
 
 #screen-dashboard .map-viewport {
-  /* UI-audit: ukuran dulu ditentukan DUA tempat berbeda (width:42vh di sini
-     + height:clamp(...) di main.css) — aspect-ratio jadi diabaikan browser
-     karena width & height sudah eksplisit dari dua sumber, hasilnya kartu
-     kadang terlalu pendek untuk judul+organ+objektif (teks meluber keluar
-     kartu). Sekarang HANYA file ini yang mengatur ukuran: rasio 16:10
-     (kartu "peta" landscape, lebih lega untuk 3 baris teks) dengan tinggi
-     dijepit clamp() supaya tetap wajar di layar sangat pendek/tinggi. */
-  flex: 0 0 auto;
-  width: min(100%, 640px);
-  aspect-ratio: 16 / 10;
-  max-height: clamp(160px, 30vh, 260px);
+  /* UI-audit ("peta tubuh terlalu kecil, ruang kosong kebanyakan"): kartu peta
+     dulu dijepit rasio 16:10 TERHADAP LEBAR YANG SUDAH MENCIUT (lihat catatan
+     di .body-map di atas) — hasilnya kotak kecil ~253×158px terapung di
+     tengah layar yang lapang. Sekarang lebar penuh (100% dari .body-map yang
+     sudah diregangkan) dan TINGGI mengisi sisa ruang secara elastis
+     (flex:1 1 auto, warisan dari .body-map) — dijepit max-height supaya
+     tetap wajar di tablet/layar sangat tinggi. Tanpa aspect-ratio tetap:
+     rasio kotak sekarang mengikuti ruang yang tersedia per perangkat (foto
+     bab pakai object-fit:cover, jadi rasio berapa pun tetap rapi). */
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 640px;
+  max-height: clamp(300px, 52vh, 480px);
   margin: 0 auto;
   overflow-x: auto;
   overflow-y: hidden;
@@ -218,7 +228,7 @@
   border-radius: 18px;
 }
 @media (max-height: 700px) {
-  #screen-dashboard .map-viewport { max-height: clamp(130px, 24vh, 200px); }
+  #screen-dashboard .map-viewport { max-height: clamp(240px, 42vh, 360px); }
 }
 
 .map-viewport::-webkit-scrollbar { display: none; }
