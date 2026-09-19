@@ -403,15 +403,3 @@ export function releaseTBoltRive() {
   state.status = 'idle';
   state.promise = null;
 }
-ore */ }
-  state.machineInstance = null;
-  state.artboard = null;
-  state.file = null;
-  state.machine = null;
-  state.inputs = new Map();
-  state.renderer = null;
-  state.renderCanvas = null;
-  state.renderContext = null;
-  state.status = 'idle';
-  state.promise = null;
-}
