@@ -186,6 +186,29 @@ good Phase 2 candidates using this exact same style bible, but keeping this
 pass scoped to the 77 in-run sprites is what actually fixes what the owner
 flagged.)
 
+### On the "M1–M4 mutation system" from the owner's reference doc
+
+The owner separately shared a longer reference doc proposing a "4 fixed
+mutations per hero, unlocked at hero level 5/10/15/20, mutations 3–4
+purchasable with a premium currency" system. **That gameplay/economy model
+does not match this codebase** — verified directly against the code, not
+assumed: the live mutation system (`js/systems/mutation-system.js`) draws
+from one shared pool gated by the player's in-run level tier, not
+per-hero fixed slots; there is no persistent "hero level 5/10/15/20"
+concept anywhere in the code; and the premium currency it names
+(`imunCoin`) is explicitly listed under `"legacyDisabled"` in
+`data/economy.json` — already a made decision to keep this game
+single-currency (Antibodi). None of that system is being adopted.
+
+**What WAS pulled from that doc, by owner's direction:** the flavor
+*names* and *costume/prop ideas* for each hero's power-up stages, folded
+into the `_mut1_*`/`_mut2_*` prompts below purely as visual identity
+labels — cosmetic naming only, with no gameplay/unlock/monetization
+meaning attached. Two of that doc's four named stages per hero are used
+(mapped onto this game's actual 2-stage mut1/mut2 art pipeline); the
+other two names are noted per hero as flavor text Claude can reuse later
+if a dedicated APEX art pass ever gets added.
+
 ---
 
 ## 4. Per-hero briefs and prompts
@@ -208,12 +231,18 @@ survives.
 **Look bible:** A big-bellied, greedy, amoeba-warrior brawler — this is
 literally the hero closest to the owner's reference render (stocky green
 monster, big gut, thick limbs), so lean into that directly. Base form:
-plain-ish rounded green cell body, no gear yet. Mut1 adds big
-membrane "pseudopodia" arms he uses to grab and pull enemies in (from the
-game's own evolution data: "Pseudopodia Grip"). Mut2 adds a glowing
-yellow-green translucent digestion sac visible in his gut/torso where
-swallowed enemies dissolve ("Phagosome Vault") plus glowing enzyme
-granules around his body ("Lysosome Mantle").
+plain-ish rounded green cell body wearing a simple cracked-leather apron
+(the "eater" motif), no other gear yet. Mut1 — stage name **"Mako
+Gigante"** — grows visibly bigger/more muscular plus big membrane
+"pseudopodia" arms he uses to grab and pull enemies in (game's own
+evolution data: "Pseudopodia Grip"). Mut2 — stage name **"Mako Fagosit"**
+— mouth grows wider with sharper teeth and a long tongue, combined with a
+glowing yellow-green translucent digestion sac visible in his gut/torso
+where swallowed enemies dissolve ("Phagosome Vault") plus glowing enzyme
+granules around his body ("Lysosome Mantle"). (Flavor names for a possible
+future APEX pass: "Mako Berserker" — red-tinted, glowing eyes, steam
+venting from the mouth; "Mako Titan" — giant size, thick crystalline
+membrane armor.)
 
 - **hero_macrophage_idle.png** — `[master style bible]` Mako, a big-bellied
   stocky green amoeba-warrior tank, macrophage immune cell, standing
@@ -231,26 +260,30 @@ granules around his body ("Lysosome Mantle").
   digestive interior, dynamic forward-leaning stance, motion lines,
   transparent background.
 - **hero_macrophage_mut1_idle.png** — `[master style bible]` Mako
-  evolved one stage: same big green amoeba-warrior identity, now with two
+  evolved one stage — **"Mako Gigante"**: same big green amoeba-warrior
+  identity, visibly bigger and more muscular than base form, now with two
   extra-large thick membrane pseudopod-arms extending from his shoulders
   ending in soft grasping pad-claws (used to grip prey), slightly more
   muscular/confident stance, subtle bright green glowing veins across his
   body, same face/colors as base, transparent background.
-- **hero_macrophage_mut1_attack.png** — `[master style bible]` same Mako
-  as mut1_idle, attack pose: the extra pseudopod-arms whipping forward to
-  grab/constrict a target, aggressive open-mouth expression, glowing green
-  vein highlights intensified, transparent background.
+- **hero_macrophage_mut1_attack.png** — `[master style bible]` same
+  "Mako Gigante" as mut1_idle, attack pose: the extra pseudopod-arms
+  whipping forward to grab/constrict a target, aggressive open-mouth
+  expression, glowing green vein highlights intensified, transparent
+  background.
 - **hero_macrophage_mut2_idle.png** — `[master style bible]` Mako fully
-  evolved: same identity, now with a visible translucent glowing
+  evolved — **"Mako Fagosit"**: same identity, mouth now noticeably wider
+  with sharper teeth and a long tongue, a visible translucent glowing
   yellow-green digestion sac/window in his torso showing partially
   dissolved matter inside (Phagosome Vault), small glowing enzyme granule
   nodules scattered across his shoulders/back (Lysosome Mantle), spikier
   more aggressive membrane texture, confident powerful stance, deep green
   + glowing yellow-green accent palette, transparent background.
-- **hero_macrophage_mut2_attack.png** — `[master style bible]` same fully
-  evolved Mako as mut2_idle, ferocious attack lunge, digestion-sac glow
-  flaring brighter, enzyme granules trailing small glowing particle
-  streaks, wide devouring mouth, transparent background.
+- **hero_macrophage_mut2_attack.png** — `[master style bible]` same
+  "Mako Fagosit" as mut2_idle, ferocious attack lunge, wide devouring
+  mouth with long tongue extended, digestion-sac glow flaring brighter,
+  enzyme granules trailing small glowing particle streaks, transparent
+  background.
 - **portrait_macrophage.png** — `[master style bible]` Mako head-and-
   shoulders bust portrait, 3/4 view, big warm mischievous grin, small dark
   eyes with personality, green membrane-textured skin, base-form (no
@@ -267,9 +300,15 @@ between nearby enemies.
 
 **Look bible:** A scholarly, alert, antenna-covered scout/tactician —
 should read as the "brains" of the squad. Base form has short stubby
-branch-nubs. Mut1 grows large radiating antenna-branches used to sense and
-tag enemies ("Dendrite Probe"). Mut2 adds glowing clip/flag details at the
-antenna tips used to mark targets ("Antigen Clip" / "MHC Flag").
+branch-nubs and small round glasses. Mut1 — stage name **"Dendri Sage"**
+— adds a long scholar's robe and a large book carried under one arm,
+plus large radiating antenna-branches used to sense and tag enemies
+("Dendrite Probe"). Mut2 — stage name **"Dendri Oracle"** — grows a
+glowing third eye on the forehead (all-seeing), antenna tips now show
+glowing clip/flag details used to mark targets ("Antigen Clip" / "MHC
+Flag"). (Flavor names for a possible future APEX pass: "Dendri
+Archivist" — ancient glowing scroll, gold aura; "Dendri Prime" —
+demigod-like ascended form, huge gold aura.)
 
 - **hero_dendritic_idle.png** — `[master style bible]` Dendri, a lean
   orange spiked scout-creature, dendritic immune cell, alert upright
@@ -283,23 +322,28 @@ antenna tips used to mark targets ("Antigen Clip" / "MHC Flag").
   chain-lightning bolt that visibly arcs toward an off-frame second
   target, alert focused expression, transparent background.
 - **hero_dendritic_mut1_idle.png** — `[master style bible]` Dendri evolved
-  one stage: same identity, now with long radiating spike-antenna
-  branches extending outward from head and shoulders like a sensor array
-  (Dendrite Probe), tips glowing soft teal, more confident tactician
-  stance, same face/colors as base, transparent background.
-- **hero_dendritic_mut1_attack.png** — `[master style bible]` same Dendri
-  as mut1_idle, casting pose with antenna-branches fanned forward, one
-  branch tip firing a glowing chain-bolt with a small clip/marker icon
-  effect at the tip, transparent background.
+  one stage — **"Dendri Sage"**: same identity, now wearing a long
+  scholar's robe with a large closed book tucked under one arm, small
+  round glasses, long radiating spike-antenna branches extending outward
+  from head and shoulders like a sensor array (Dendrite Probe), tips
+  glowing soft teal, more confident tactician stance, same face/colors as
+  base, transparent background.
+- **hero_dendritic_mut1_attack.png** — `[master style bible]` same
+  "Dendri Sage" as mut1_idle, casting pose with antenna-branches fanned
+  forward, one branch tip firing a glowing chain-bolt with a small
+  clip/marker icon effect at the tip, robe flowing with the motion,
+  transparent background.
 - **hero_dendritic_mut2_idle.png** — `[master style bible]` Dendri fully
-  evolved: same identity, antenna branches now tipped with glowing
-  golden clip-like pincers (Antigen Clip) and one branch flying a small
-  glowing blue signal-flag (MHC Flag), more ornate/commanding posture,
-  orange + gold + blue accent palette, transparent background.
+  evolved — **"Dendri Oracle"**: same identity, a glowing third eye now
+  visible on the forehead, antenna branches tipped with glowing golden
+  clip-like pincers (Antigen Clip) and one branch flying a small glowing
+  blue signal-flag (MHC Flag), more ornate/commanding posture, orange +
+  gold + blue accent palette, transparent background.
 - **hero_dendritic_mut2_attack.png** — `[master style bible]` same fully
-  evolved Dendri, dynamic cast pose, multiple antenna-branches firing
-  chained glowing bolts in sequence toward several off-frame points,
-  triumphant sharp expression, transparent background.
+  evolved "Dendri Oracle", dynamic cast pose, third eye glowing bright,
+  multiple antenna-branches firing chained glowing bolts in sequence
+  toward several off-frame points, triumphant sharp expression,
+  transparent background.
 - **portrait_dendritic.png** — `[master style bible]` Dendri head-and-
   shoulders bust, 3/4 view, sharp intelligent eyes, knowing smile, short
   branch-nubs around head, orange skin, transparent background, no baked
@@ -316,10 +360,15 @@ explosions up close, thrives when surrounded.
 
 **Look bible:** Fast, twitchy, aggressive first-responder — should look
 like the squad's speed-demon brawler, always mid-motion. Base form: dark
-navy-blue segmented body. Mut1 grows sticky net-filaments used to trap
-swarms ("NET Filament"). Mut2 adds bright oxidative-burst energy crackling
-around fists/segmented triple-core glow ("Oxidase Burst" / "Segmented
-Core").
+navy-blue segmented body. Mut1 — stage name **"Neutron Blitz"** — adds a
+sleek black tactical-style chest wrap and a glowing red visor-band across
+the eyes, plus sticky net-filaments used to trap swarms ("NET Filament").
+Mut2 — stage name **"Neutron Overdrive"** — crackling blue-white
+oxidative-burst energy around both fists and three small glowing
+segmented core-orbs along the spine ("Oxidase Burst" / "Segmented
+Core"). (Flavor names for a possible future APEX pass: "Neutron
+Demolition" — bulkier build, mini rocket-launcher prop; "Neutron
+Phantom" — semi-transparent body, trailing blue light-afterimages.)
 
 - **hero_neutrophil_idle.png** — `[master style bible]` Neutron, a lean
   fast dark-navy-blue segmented cell-warrior, neutrophil immune cell,
@@ -334,24 +383,25 @@ Core").
   motion blur/speed lines trailing behind the body, fierce grin,
   transparent background.
 - **hero_neutrophil_mut1_idle.png** — `[master style bible]` Neutron
-  evolved one stage: same identity, thin glowing white net-filament
-  strands trailing from the forearms/back like ready-to-cast webbing (NET
-  Filament), more aggressive coiled stance, same face/colors as base,
-  transparent background.
+  evolved one stage — **"Neutron Blitz"**: same identity, now wearing a
+  sleek black tactical chest-wrap with a glowing red visor-band across the
+  eyes, thin glowing white net-filament strands trailing from the
+  forearms/back like ready-to-cast webbing (NET Filament), more
+  aggressive coiled stance, transparent background.
 - **hero_neutrophil_mut1_attack.png** — `[master style bible]` same
-  Neutron as mut1_idle, attack pose flinging the glowing net-filaments
-  forward to entangle a swarm, dynamic action lines, transparent
-  background.
+  "Neutron Blitz" as mut1_idle, attack pose flinging the glowing
+  net-filaments forward to entangle a swarm, visor glowing bright,
+  dynamic action lines, transparent background.
 - **hero_neutrophil_mut2_idle.png** — `[master style bible]` Neutron fully
-  evolved: same identity, three small glowing white-blue orb-cores
-  visible embedded along the spine/back (Segmented Core), crackling
-  blue-white oxidative energy sparking around both fists (Oxidase
-  Burst), sharper more predatory stance, navy + icy-white accent palette,
-  transparent background.
+  evolved — **"Neutron Overdrive"**: same identity, three small glowing
+  white-blue orb-cores visible embedded along the spine/back (Segmented
+  Core), crackling blue-white oxidative energy sparking around both fists
+  (Oxidase Burst), sharper more predatory stance, navy + icy-white accent
+  palette, transparent background.
 - **hero_neutrophil_mut2_attack.png** — `[master style bible]` same fully
-  evolved Neutron, explosive full-body burst attack, crackling
-  blue-white energy erupting from both fists in a wide shockwave,
-  triumphant fierce expression, transparent background.
+  evolved "Neutron Overdrive", explosive full-body burst attack,
+  crackling blue-white energy erupting from both fists in a wide
+  shockwave, triumphant fierce expression, transparent background.
 - **portrait_neutrophil.png** — `[master style bible]` Neutron
   head-and-shoulders bust, 3/4 view, sharp focused eyes, energetic
   smirk, segmented lobed head shape, dark navy-blue skin, transparent
@@ -368,10 +418,16 @@ homing shots that prioritize the highest-value target.
 
 **Look bible:** A sleek, precise huntress archetype — should read as the
 squad's sniper/marksman. Base form: pink-orange body with small internal
-granules visible. Mut1 grows a large hooked lance-arm for spearing
-parasites ("Parasite Hook"). Mut2 adds a glowing tethered whip-cord
-(IgE Tether) and a large protein lance weapon (Major Basic Protein
-Lance).
+granules visible. Mut1 — stage name **"Eos Huntress"** — grows long
+wavy pink hair and a huntress-style wrap outfit, plus a large hooked
+lance-arm for spearing parasites ("Parasite Hook"). Mut2 — stage name
+**"Eos Venom"** — the lance now drips with a glowing toxic sheen and a
+poison-aura mist trails behind her, combined with a glowing tethered
+whip-cord (IgE Tether) and a longer crystalline lance (Major Basic
+Protein Lance) — keep the toxic glow in her own pink/salmon/gold accent
+range rather than green, to stay on the hero's established palette.
+(Flavor names for a possible future APEX pass: "Eos Storm" — branching
+whip-like tail, pink lightning; "Eos Apocalypse" — glowing wings.)
 
 - **hero_eosinophil_idle.png** — `[master style bible]` Eos, a sleek
   agile pink-orange huntress-creature, eosinophil immune cell, poised
@@ -385,21 +441,25 @@ Lance).
   homing projectile (small trailing spark comet), sharp intent
   expression, dynamic lean-forward stance, transparent background.
 - **hero_eosinophil_mut1_idle.png** — `[master style bible]` Eos evolved
-  one stage: same identity, one arm now ending in a large curved organic
-  hook/lance (Parasite Hook) held ready like a spear, more predatory
-  poised stance, same face/colors as base, transparent background.
-- **hero_eosinophil_mut1_attack.png** — `[master style bible]` same Eos
-  as mut1_idle, lunging thrust attack with the hook-lance forward,
-  glowing orange energy trailing off the hook tip, transparent
-  background.
+  one stage — **"Eos Huntress"**: same identity, long wavy pink hair now
+  flowing loose, wearing a lightweight huntress wrap-outfit, one arm
+  ending in a large curved organic hook/lance (Parasite Hook) held ready
+  like a spear, more predatory poised stance, transparent background.
+- **hero_eosinophil_mut1_attack.png** — `[master style bible]` same
+  "Eos Huntress" as mut1_idle, lunging thrust attack with the hook-lance
+  forward, hair trailing with the motion, glowing orange energy trailing
+  off the hook tip, transparent background.
 - **hero_eosinophil_mut2_idle.png** — `[master style bible]` Eos fully
-  evolved: same identity, hook-lance now a longer glowing crystalline
-  "Major Basic Protein Lance," a thin glowing tether-cord (IgE Tether)
-  coiled at her hip ready to lash out, sleeker more lethal silhouette,
-  pink + orange + pale-yellow accent palette, transparent background.
+  evolved — **"Eos Venom"**: same identity, hook-lance now a longer
+  glowing crystalline "Major Basic Protein Lance" with a faint toxic
+  sheen dripping off it (pink/salmon-toned glow, not green), a thin
+  glowing tether-cord (IgE Tether) coiled at her hip ready to lash out, a
+  soft poison-mist aura trailing behind her, sleeker more lethal
+  silhouette, pink + orange + pale-yellow accent palette, transparent
+  background.
 - **hero_eosinophil_mut2_attack.png** — `[master style bible]` same fully
-  evolved Eos, powerful lance-thrust attack pose, the tether-cord
-  lashing out toward an off-frame target simultaneously, glowing
+  evolved "Eos Venom", powerful lance-thrust attack pose, the tether-cord
+  lashing out toward an off-frame target simultaneously, toxic mist
   particle trail, fierce triumphant expression, transparent background.
 - **portrait_eosinophil.png** — `[master style bible]` Eos head-and-
   shoulders bust, 3/4 view, narrow focused predator eyes, confident
@@ -416,11 +476,17 @@ Weakness: lowest damage, long cooldown. Combat identity: a crowd-control
 zone that cripples enemy movement.
 
 **Look bible:** A calm, deliberate, cloud/gas-themed controller — should
-read as the squad's battlefield-control mage. Base form: purple body with
-small internal vesicles. Mut1 grows a large histamine vesicle-sac on the
-back used to emit slowing gas clouds ("Histamine Vesicle"). Mut2 adds a
-glowing receptor-halo ring and fan-shaped inflammatory signal wings
-("IgE Receptor Halo" / "Leukotriene Fan").
+read as the squad's battlefield-control mage, with a "mad chemist" streak.
+Base form: purple body with small internal vesicles. Mut1 — stage name
+**"Baso Alchemist"** — adds a white lab coat and protective goggles
+pushed up on the forehead, plus a large histamine vesicle-sac on the back
+used to emit slowing gas clouds ("Histamine Vesicle"). Mut2 — stage name
+**"Baso Toxic"** — the lab coat now has small chemical tubes strapped to
+it visibly leaking purple vapor, combined with a glowing receptor-halo
+ring and fan-shaped inflammatory signal wings ("IgE Receptor Halo" /
+"Leukotriene Fan"). (Flavor names for a possible future APEX pass: "Baso
+Plague" — dark purple aura, glowing eyes; "Baso Miasma" — half-gaseous
+form, huge purple aura.)
 
 - **hero_basophil_idle.png** — `[master style bible]` Baso, a calm
   composed purple cell-mystic, basophil immune cell, standing in a
@@ -434,24 +500,26 @@ glowing receptor-halo ring and fan-shaped inflammatory signal wings
   outstretched hand, calm focused expression, cloth/membrane
   wrap-details billowing with the cast motion, transparent background.
 - **hero_basophil_mut1_idle.png** — `[master style bible]` Baso evolved
-  one stage: same identity, a large glowing purple vesicle-sac now
-  visible on the back/shoulder (Histamine Vesicle) gently pulsing with
-  contained gas, more grounded confident stance, same face/colors as
-  base, transparent background.
-- **hero_basophil_mut1_attack.png** — `[master style bible]` same Baso as
-  mut1_idle, attack pose releasing a larger denser gas cloud directly
-  from the back vesicle-sac, hands guiding the cloud outward, transparent
-  background.
+  one stage — **"Baso Alchemist"**: same identity, now wearing a white
+  lab coat with protective goggles pushed up on the forehead, a large
+  glowing purple vesicle-sac visible on the back/shoulder (Histamine
+  Vesicle) gently pulsing with contained gas, more grounded confident
+  stance, transparent background.
+- **hero_basophil_mut1_attack.png** — `[master style bible]` same
+  "Baso Alchemist" as mut1_idle, attack pose releasing a larger denser
+  gas cloud directly from the back vesicle-sac, lab coat billowing,
+  hands guiding the cloud outward, transparent background.
 - **hero_basophil_mut2_idle.png** — `[master style bible]` Baso fully
-  evolved: same identity, a thin glowing golden receptor-halo ring
-  floating just behind the head/shoulders (IgE Receptor Halo), fan-shaped
-  translucent membrane wing-vanes at the back (Leukotriene Fan), more
-  regal composed posture, violet + gold accent palette, transparent
-  background.
+  evolved — **"Baso Toxic"**: same identity, lab coat now has small
+  chemical tubes strapped across it visibly leaking wisps of purple
+  vapor, a thin glowing golden receptor-halo ring floating just behind
+  the head/shoulders (IgE Receptor Halo), fan-shaped translucent membrane
+  wing-vanes at the back (Leukotriene Fan), more regal composed posture,
+  violet + gold accent palette, transparent background.
 - **hero_basophil_mut2_attack.png** — `[master style bible]` same fully
-  evolved Baso, both the wing-vanes and receptor-halo flaring as a wide
-  slowing-gas dome erupts outward, serene but powerful expression,
-  transparent background.
+  evolved "Baso Toxic", both the wing-vanes and receptor-halo flaring as
+  a wide slowing-gas dome erupts outward, chemical tubes venting extra
+  vapor, serene but powerful expression, transparent background.
 - **portrait_basophil.png** — `[master style bible]` Baso head-and-
   shoulders bust, 3/4 view, half-lidded serene eyes, knowing smile,
   deep violet skin with subtle vesicle bumps, transparent background, no
@@ -468,11 +536,17 @@ area brawler who punishes anyone who gets close.
 
 **Look bible:** A hulking, immovable gate-guardian brute — the heaviest,
 most armored-feeling hero in the roster (closest in spirit to the "big
-tank up front" role from the reference poster). Base form: broad red-orange
-body. Mut1 grows a large granule-sac backpack ready to burst ("Granule
-Sac"). Mut2 adds a cracked-open detonation valve on the chest and a thick
-membrane barricade shield-plating ("Degranulation Valve" / "Membrane
-Barricade").
+tank up front" role from the reference poster). Base form: broad
+red-orange body. Mut1 — stage name **"Mastia Guardian"** — adds a thick
+plated helmet and a large round shield held in front, plus a large
+granule-sac backpack ready to burst ("Granule Sac"). Mut2 — stage name
+**"Mastia Spike"** — skin now grows small hardened spikes across the
+shoulders/back (reflect-damage motif) and the shield itself gains spike
+studs, combined with a cracked-open glowing detonation valve on the chest
+and thick membrane barricade plating ("Degranulation Valve" / "Membrane
+Barricade"). (Flavor names for a possible future APEX pass: "Mastia
+Fortress" — mini-wall/barrier motif; "Mastia Colossus" — giant size,
+crystalline armor.)
 
 - **hero_mastcell_idle.png** — `[master style bible]` Mastia, a hulking
   broad-shouldered red-orange bruiser-creature, mast cell immune cell,
@@ -486,24 +560,26 @@ Barricade").
   granule-bumps visibly rupturing with small orange-red spark bursts
   along the swing path, fierce grimace, transparent background.
 - **hero_mastcell_mut1_idle.png** — `[master style bible]` Mastia evolved
-  one stage: same identity, a large lumpy granule-sac now visible
-  strapped/grown across the back like a bulging pack (Granule Sac),
-  even more armored bulk, same face/colors as base, transparent
-  background.
-- **hero_mastcell_mut1_attack.png** — `[master style bible]` same Mastia
-  as mut1_idle, attack swipe with the back granule-sac visibly pulsing
-  and venting small orange sparks with the impact, transparent
-  background.
+  one stage — **"Mastia Guardian"**: same identity, now wearing a thick
+  plated helmet and holding a large round shield in front, a large lumpy
+  granule-sac visible strapped/grown across the back like a bulging pack
+  (Granule Sac), even more armored bulk, transparent background.
+- **hero_mastcell_mut1_attack.png** — `[master style bible]` same
+  "Mastia Guardian" as mut1_idle, attack swipe with the shield braced,
+  back granule-sac visibly pulsing and venting small orange sparks with
+  the impact, transparent background.
 - **hero_mastcell_mut2_idle.png** — `[master style bible]` Mastia fully
-  evolved: same identity, a glowing cracked valve-plate visible on the
-  chest (Degranulation Valve) with faint orange light leaking from the
-  cracks, thick overlapping membrane-plate armor across shoulders/
-  forearms (Membrane Barricade), even more imposing planted stance, red +
-  orange + dark-plate accent palette, transparent background.
+  evolved — **"Mastia Spike"**: same identity, small hardened spikes now
+  growing across the shoulders/back and studding the shield's rim, a
+  glowing cracked valve-plate visible on the chest (Degranulation Valve)
+  with faint orange light leaking from the cracks, thick overlapping
+  membrane-plate armor across shoulders/forearms (Membrane Barricade),
+  even more imposing planted stance, red + orange + dark-plate accent
+  palette, transparent background.
 - **hero_mastcell_mut2_attack.png** — `[master style bible]` same fully
-  evolved Mastia, devastating attack pose with the chest valve bursting
-  open in a shockwave of orange-red energy as the swipe connects, armor
-  plates flaring outward, transparent background.
+  evolved "Mastia Spike", devastating attack pose with the chest valve
+  bursting open in a shockwave of orange-red energy as the spiked swipe
+  connects, armor plates flaring outward, transparent background.
 - **portrait_mastcell.png** — `[master style bible]` Mastia head-and-
   shoulders bust, 3/4 view, heavy-lidded stern eyes, grim frown, broad
   red-orange face with granule bumps, transparent background, no baked
@@ -521,10 +597,16 @@ own "killer T cell" executioner.
 
 **Look bible:** A sharp, precise, icy-blue executioner archetype — closest
 in spirit to the blue "ice knight with a rifle" from the reference poster.
-Base form: cyan-blue sleek body. Mut1 grows a large sensor-scanner crest
-on the forehead used to lock onto targets ("TCR Scanner"). Mut2 wields twin
-glowing perforin energy-blades and a molten orange core visible in the
-chest ("Perforin Blade" / "Granzyme Core").
+Base form: cyan-blue sleek body. Mut1 — stage name **"T-Bolt Sniper"** —
+grows a longer armored arm and a glowing cyan visor across the eyes, plus
+a sensor-scanner crest on the forehead used to lock onto targets ("TCR
+Scanner"). Mut2 — stage name **"T-Bolt Piercer"** (this name lines up
+neatly with his actual pierce-damage ability) — wields twin glowing
+perforin energy-blades and a molten orange core visible in the chest
+("Perforin Blade" / "Granzyme Core"). (Flavor names for a possible future
+APEX pass: "T-Bolt Executioner" — dark cloak, oversized armored arm,
+fitting his real execute-low-HP passive; "T-Bolt Annihilator" — huge blue
+aura, glowing eyes.)
 
 - **hero_tcd8_idle.png** — `[master style bible]` T-Bolt, a sleek sharp
   cyan-blue executioner-creature, killer T cell immune cell, precise
@@ -537,23 +619,26 @@ chest ("Perforin Blade" / "Granzyme Core").
   visibly continues past the first point of impact (pierce effect),
   cold intense expression, transparent background.
 - **hero_tcd8_mut1_idle.png** — `[master style bible]` T-Bolt evolved
-  one stage: same identity, a glowing scanner-crest ridge now visible
-  across the forehead sweeping with a faint light-scan effect (TCR
-  Scanner), sharper more angular posture, same face/colors as base,
+  one stage — **"T-Bolt Sniper"**: same identity, a glowing cyan
+  visor-band now across the eyes, one arm longer/more armored, a
+  scanner-crest ridge visible across the forehead sweeping with a faint
+  light-scan effect (TCR Scanner), sharper more angular posture,
   transparent background.
-- **hero_tcd8_mut1_attack.png** — `[master style bible]` same T-Bolt as
-  mut1_idle, firing pose with the forehead scanner-crest glowing bright
-  as it locks onto the target before the shot, transparent background.
+- **hero_tcd8_mut1_attack.png** — `[master style bible]` same
+  "T-Bolt Sniper" as mut1_idle, firing pose with the visor and forehead
+  scanner-crest glowing bright as it locks onto the target before the
+  shot, transparent background.
 - **hero_tcd8_mut2_idle.png** — `[master style bible]` T-Bolt fully
-  evolved: same identity, now wielding twin glowing cyan-white energy
-  blades extending from the forearms (Perforin Blade), a molten
-  orange-red glowing core visible through a chest window (Granzyme
-  Core), lethal composed stance, cyan + white + orange accent palette,
-  transparent background.
+  evolved — **"T-Bolt Piercer"**: same identity, now wielding twin
+  glowing cyan-white energy blades extending from the forearms (Perforin
+  Blade), a molten orange-red glowing core visible through a chest
+  window (Granzyme Core), lethal composed stance, cyan + white + orange
+  accent palette, transparent background.
 - **hero_tcd8_mut2_attack.png** — `[master style bible]` same fully
-  evolved T-Bolt, explosive dual-blade slashing attack pose, chest core
-  flaring bright orange, energy blade trails, ice-cold triumphant
-  expression, transparent background.
+  evolved "T-Bolt Piercer", explosive dual-blade slashing attack pose
+  with a visible piercing thrust motion, chest core flaring bright
+  orange, energy blade trails, ice-cold triumphant expression,
+  transparent background.
 - **portrait_tcd8.png** — `[master style bible]` T-Bolt head-and-
   shoulders bust, 3/4 view, narrow cold focused eyes, thin confident
   smirk, sleek cyan-blue skin, transparent background, no baked circle/
@@ -571,10 +656,14 @@ squad's gold-armored commander.
 
 **Look bible:** Regal, commanding, golden — closest in spirit to the
 gold-armored priestess/commander with a staff from the reference poster.
-Base form: warm gold-yellow body. Mut1 grows a compass-like reader crest
-used to scan allies/antigens ("TCR Compass"). Mut2 wields a large glowing
-cytokine command-staff and a commanding halo ("Cytokine Staff" / "Helper
-Relay Halo").
+Base form: warm gold-yellow body. Mut1 — stage name **"Helia Commander"**
+— adds a small gold crown and a compass-like reader crest on the chest
+used to scan allies/antigens ("TCR Compass"). Mut2 — stage name **"Helia
+Warlord"** — gains ornate gold armor plating and wields a large glowing
+cytokine command-staff, with a commanding halo above her head ("Cytokine
+Staff" / "Helper Relay Halo"). (Flavor names for a possible future APEX
+pass: "Helia Tactician" — holographic war-map motif; "Helia Empress" —
+full goddess-like regalia, huge gold aura.)
 
 - **hero_tcd4_idle.png** — `[master style bible]` Helia, a regal
   commanding golden-yellow cell-commander, helper T cell immune cell,
@@ -587,22 +676,24 @@ Relay Halo").
   support energy outward toward an off-frame ally, focused commanding
   expression, transparent background.
 - **hero_tcd4_mut1_idle.png** — `[master style bible]` Helia evolved one
-  stage: same identity, a compass-like glowing crest now visible on the
-  forehead/chest (TCR Compass) slowly rotating as if reading the
-  battlefield, more authoritative posture, same face/colors as base,
+  stage — **"Helia Commander"**: same identity, now wearing a small gold
+  crown, a compass-like glowing crest visible on the chest (TCR Compass)
+  slowly rotating as if reading the battlefield, more authoritative
+  posture, transparent background.
+- **hero_tcd4_mut1_attack.png** — `[master style bible]` same
+  "Helia Commander" as mut1_idle, commanding pose with the chest
+  compass-crest glowing bright while directing a support beam,
   transparent background.
-- **hero_tcd4_mut1_attack.png** — `[master style bible]` same Helia as
-  mut1_idle, commanding pose with the compass-crest glowing bright while
-  directing a support beam, transparent background.
 - **hero_tcd4_mut2_idle.png** — `[master style bible]` Helia fully
-  evolved: same identity, now holding a large glowing golden
-  cytokine command-staff (Cytokine Staff), a thin glowing halo ring
-  floating above the head (Helper Relay Halo), regal powerful stance,
-  gold + pale-blue accent palette, transparent background.
+  evolved — **"Helia Warlord"**: same identity, now wearing ornate gold
+  armor plating and holding a large glowing golden cytokine command-staff
+  (Cytokine Staff), a thin glowing halo ring floating above the head
+  (Helper Relay Halo), regal powerful stance, gold + pale-blue accent
+  palette, transparent background.
 - **hero_tcd4_mut2_attack.png** — `[master style bible]` same fully
-  evolved Helia, staff raised high channeling a wide golden command-aura
-  outward, halo glowing bright, commanding triumphant expression,
-  transparent background.
+  evolved "Helia Warlord", staff raised high channeling a wide golden
+  command-aura outward, armor gleaming, halo glowing bright, commanding
+  triumphant expression, transparent background.
 - **portrait_tcd4.png** — `[master style bible]` Helia head-and-
   shoulders bust, 3/4 view, calm confident eyes, dignified expression,
   warm gold-yellow skin, transparent background, no baked circle/frame.
@@ -618,9 +709,15 @@ and suppresses enemy aggression, turns fights controlled rather than
 chaotic.
 
 **Look bible:** Serene, mint-green, a peacekeeping guardian-monk
-archetype. Base form: soft mint-green rounded body. Mut1 grows a seal-like
-brake emblem on the chest ("CTLA-4 Seal"). Mut2 adds a calming green aura
-field and a tolerance-mantle cloak ("IL-10 Aura" / "Tolerance Mantle").
+archetype. Base form: soft mint-green rounded body. Mut1 — stage name
+**"Treg Judge"** — adds a simple dark judge's robe and a small pair of
+gold scales held in one hand, plus a seal-like brake emblem glowing on
+the chest ("CTLA-4 Seal"). Mut2 — stage name **"Treg Arbiter"** (kept
+distinct from her own base title "Peacekeeper" to avoid a naming clash)
+— adds a thin silver circlet and a calming green aura field, wrapped in a
+flowing tolerance-mantle cloak with pale wing-like folds ("IL-10 Aura" /
+"Tolerance Mantle"). (Flavor name for a possible future APEX pass: "Treg
+Seraph" — full angelic wings, huge green-white aura.)
 
 - **hero_treg_idle.png** — `[master style bible]` Treg, a serene
   composed mint-green guardian-monk creature, regulatory T cell immune
@@ -633,20 +730,24 @@ field and a tolerance-mantle cloak ("IL-10 Aura" / "Tolerance Mantle").
   green suppressive field toward an off-frame enemy, serene but
   resolute expression, transparent background.
 - **hero_treg_mut1_idle.png** — `[master style bible]` Treg evolved one
-  stage: same identity, a glowing seal-emblem now visible on the chest
-  (CTLA-4 Seal), calmer more grounded monk-like posture, same face/
-  colors as base, transparent background.
-- **hero_treg_mut1_attack.png** — `[master style bible]` same Treg as
-  mut1_idle, restraining cast with the chest seal glowing bright as the
-  suppressive field extends, transparent background.
+  stage — **"Treg Judge"**: same identity, now wearing a simple dark
+  judge's robe over the shoulders and holding a small pair of gold
+  scales in one hand, a glowing seal-emblem visible on the chest (CTLA-4
+  Seal), calmer more grounded posture, transparent background.
+- **hero_treg_mut1_attack.png** — `[master style bible]` same
+  "Treg Judge" as mut1_idle, restraining cast with the scales raised and
+  the chest seal glowing bright as the suppressive field extends,
+  transparent background.
 - **hero_treg_mut2_idle.png** — `[master style bible]` Treg fully
-  evolved: same identity, wrapped in a flowing translucent mint-green
-  "Tolerance Mantle" cloak, a soft continuous calming aura field visible
-  around the whole body (IL-10 Aura), serene powerful presence, mint +
-  soft-gold accent palette, transparent background.
+  evolved — **"Treg Arbiter"**: same identity, now wearing a thin silver
+  circlet, wrapped in a flowing translucent mint-green "Tolerance
+  Mantle" cloak with pale wing-like folds, a soft continuous calming aura
+  field visible around the whole body (IL-10 Aura), serene powerful
+  presence, mint + soft-gold accent palette, transparent background.
 - **hero_treg_mut2_attack.png** — `[master style bible]` same fully
-  evolved Treg, mantle billowing as a wide calming-suppression dome
-  pulses outward, serene resolute expression, transparent background.
+  evolved "Treg Arbiter", mantle billowing as a wide calming-suppression
+  dome pulses outward, circlet glowing, serene resolute expression,
+  transparent background.
 - **portrait_treg.png** — `[master style bible]` Treg head-and-
   shoulders bust, 3/4 view, peaceful closed/half-closed eyes, knowing
   smile, mint-green skin, transparent background, no baked circle/frame.
@@ -663,10 +764,16 @@ projectiles, an artist who never misses her mark.
 **Look bible:** Elegant, artistic, precise — a lavender-purple
 antibody-artisan archetype, closest in spirit to the pink mage-support
 girl from the reference poster but purple-toned per this hero's own
-color. Base form: light lavender-purple rounded body. Mut1 grows a
-Y-shaped antenna receiver ("BCR Antenna"). Mut2 grows large Y-shaped
+color. Base form: light lavender-purple rounded body. Mut1 — stage name
+**"Bella Artist"** — adds a small artist's apron with paint-splash
+patterns and a large paintbrush held like a wand, plus a Y-shaped antenna
+receiver growing from the head ("BCR Antenna"). Mut2 — stage name
+**"Bella Maestro"** — now holds a glowing multi-colored paint palette
+alongside a brush that trails soft light, combined with large Y-shaped
 antibody-wings and a glowing plasma-forge core ("Antibody-Y Wings" /
-"Plasma Forge").
+"Plasma Forge"). (Flavor names for a possible future APEX pass: "Bella
+Virtuoso" — pink aura, sparkling eyes; "Bella Creator" — goddess-of-art
+form, huge pink aura.)
 
 - **hero_bcell_idle.png** — `[master style bible]` Bella, an elegant
   graceful lavender-purple artisan-creature, B cell immune cell, poised
@@ -679,22 +786,25 @@ antibody-wings and a glowing plasma-forge core ("Antibody-Y Wings" /
   Y-shaped antibody projectile that curves toward an off-frame target,
   focused artistic precision in her expression, transparent background.
 - **hero_bcell_mut1_idle.png** — `[master style bible]` Bella evolved one
-  stage: same identity, a glowing Y-shaped antenna now extending from the
-  head (BCR Antenna) gently swaying, more confident artisan posture, same
-  face/colors as base, transparent background.
-- **hero_bcell_mut1_attack.png** — `[master style bible]` same Bella as
-  mut1_idle, casting pose with the head-antenna glowing as she releases a
-  homing shot, transparent background.
-- **hero_bcell_mut2_idle.png** — `[master style bible]` Bella fully
-  evolved: same identity, large glowing translucent Y-shaped
-  antibody-wing structures extending from her back (Antibody-Y Wings), a
-  softly glowing plasma-forge core visible in the chest (Plasma Forge),
-  elegant powerful stance, lavender + gold accent palette, transparent
-  background.
-- **hero_bcell_mut2_attack.png** — `[master style bible]` same fully
-  evolved Bella, wings flaring as multiple glowing homing projectiles
-  release in an elegant fan pattern, confident triumphant smile,
+  stage — **"Bella Artist"**: same identity, now wearing a small
+  paint-splashed artist's apron and holding a large paintbrush like a
+  wand, a glowing Y-shaped antenna extending from the head (BCR Antenna)
+  gently swaying, more confident artisan posture, transparent background.
+- **hero_bcell_mut1_attack.png** — `[master style bible]` same
+  "Bella Artist" as mut1_idle, casting pose flicking the paintbrush
+  forward as the head-antenna glows, releasing a homing shot,
   transparent background.
+- **hero_bcell_mut2_idle.png** — `[master style bible]` Bella fully
+  evolved — **"Bella Maestro"**: same identity, now holding a glowing
+  multi-colored paint palette in one hand and a light-trailing brush in
+  the other, large glowing translucent Y-shaped antibody-wing structures
+  extending from her back (Antibody-Y Wings), a softly glowing
+  plasma-forge core visible in the chest (Plasma Forge), elegant powerful
+  stance, lavender + gold accent palette, transparent background.
+- **hero_bcell_mut2_attack.png** — `[master style bible]` same fully
+  evolved "Bella Maestro", wings flaring as multiple glowing homing
+  projectiles release in an elegant fan pattern from a sweep of her
+  brush, confident triumphant smile, transparent background.
 - **portrait_bcell.png** — `[master style bible]` Bella head-and-
   shoulders bust, 3/4 view, warm expressive eyes, gentle confident
   smile, lavender-purple skin, transparent background, no baked circle/
@@ -713,11 +823,18 @@ hero, closest in spirit to the purple ninja/assassin with twin blades
 from the reference poster.
 
 **Look bible:** Sleek, dark, silent, dangerous — the roster's premium
-legendary assassin. Base form: dark violet-purple sleek body. Mut1 grows a
-glowing scanning eye/sensor used to detect disguised enemies
-("Missing-Self Scanner"). Mut2 grows a ring of glowing perforin
-spike-blades around the forearms and dart-like granzyme projectile
-launchers ("Perforin Spike Ring" / "Granzyme Darts").
+legendary assassin. Base form: dark violet-purple sleek body. Mut1 —
+stage name **"Nyx Shadow"** — adds a tattered dark cloak and her eyes now
+glow a faint red, plus a glowing scanning eye/sensor used to detect
+disguised enemies ("Missing-Self Scanner"). Mut2 — stage name **"Nyx
+Assassin"** (this name and the twin-blade motif line up neatly with her
+actual melee burst-assassin gameplay) — wields twin glowing violet
+energy-daggers and wears a thin mask across the lower face, combined with
+a ring of glowing perforin spike-blades around the forearms and dart-like
+granzyme projectile launchers at the hip ("Perforin Spike Ring" /
+"Granzyme Darts"). (Flavor names for a possible future APEX pass: "Nyx
+Reaper" — large scythe, dark purple aura; "Nyx Death" — black wings,
+death-god presence.)
 
 - **hero_nkcell_idle.png** — `[master style bible]` Nyx, a sleek dark
   violet-purple assassin-creature, natural killer cell immune cell, low
@@ -732,24 +849,28 @@ launchers ("Perforin Spike Ring" / "Granzyme Darts").
   arc, sharp motion trail, fierce focused predator expression,
   transparent background.
 - **hero_nkcell_mut1_idle.png** — `[master style bible]` Nyx evolved one
-  stage: same identity, one eye now replaced/overlaid with a glowing
+  stage — **"Nyx Shadow"**: same identity, now wearing a tattered dark
+  cloak, eyes glowing a faint red, one eye also overlaid with a glowing
   violet scanning sensor (Missing-Self Scanner) that appears to sweep
-  the surroundings, more coiled predatory posture, same face/colors as
-  base, transparent background.
-- **hero_nkcell_mut1_attack.png** — `[master style bible]` same Nyx as
-  mut1_idle, attack pose with the scanning eye glowing bright as she
-  strikes, transparent background.
+  the surroundings, more coiled predatory posture, transparent
+  background.
+- **hero_nkcell_mut1_attack.png** — `[master style bible]` same
+  "Nyx Shadow" as mut1_idle, cloak whipping with the motion, attack pose
+  with the scanning eye glowing bright as she strikes, transparent
+  background.
 - **hero_nkcell_mut2_idle.png** — `[master style bible]` Nyx fully
-  evolved: same identity, a ring of small glowing violet-orange spike
-  blades encircling both forearms (Perforin Spike Ring), a couple of
-  dart-like glowing projectiles holstered at the hip (Granzyme Darts),
-  sleeker even more lethal silhouette, dark purple + violet + orange
-  accent palette, transparent background.
-- **hero_nkcell_mut2_attack.png** — `[master style bible]` same fully
-  evolved Nyx, a devastating full-body spinning slash with the forearm
-  spike-rings blurring through the arc plus a dart already mid-flight
-  toward an off-frame target, cold lethal triumphant expression,
+  evolved — **"Nyx Assassin"**: same identity, now wielding twin glowing
+  violet energy-daggers and wearing a thin mask across the lower face, a
+  ring of small glowing violet-orange spike blades encircling both
+  forearms (Perforin Spike Ring), a couple of dart-like glowing
+  projectiles holstered at the hip (Granzyme Darts), sleeker even more
+  lethal silhouette, dark purple + violet + orange accent palette,
   transparent background.
+- **hero_nkcell_mut2_attack.png** — `[master style bible]` same fully
+  evolved "Nyx Assassin", a devastating full-body spinning dagger-slash
+  with the forearm spike-rings blurring through the arc plus a dart
+  already mid-flight toward an off-frame target, cold lethal triumphant
+  expression, transparent background.
 - **portrait_nkcell.png** — `[master style bible]` Nyx head-and-
   shoulders bust, 3/4 view, sharp narrow predatory eyes, silent
   confident smirk, dark violet-purple skin with faint pale markings,
