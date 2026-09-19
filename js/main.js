@@ -40,6 +40,7 @@ import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
 import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode, heroModeLabel } from './render/hero-mode.js';
 import { bukaLab, tutupLab, gantiLab, initLab, labTerbuka } from './ui/prototype-lab.js';
 import { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy } from './render/creature-rig.js';
+import { createMakoAnimator, quantizeMakoDirection, MAKO_DIRECTIONS, MAKO_STATES } from './render/mako-animation.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
@@ -807,6 +808,14 @@ async function boot() {
   }
   window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, bukaLab, tutupLab, labTerbuka };
   window.__IMUNVERSE.creature = { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy };
+  // Mako frame-pack preparation: deterministic state machine exposed for the
+  // animation lab while source frames are still being generated.
+  window.__IMUNVERSE.makoAnimation = {
+    create: (options = {}) => createMakoAnimator(getData().makoAnimation, options),
+    quantizeDirection: (angle) => quantizeMakoDirection(angle, getData().makoAnimation),
+    directions: MAKO_DIRECTIONS.slice(),
+    states: MAKO_STATES.slice(),
+  };
   // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)
   window.__IMUNVERSE.sprites = { has: hasSprite, stats: spriteStats };
   // P7: permukaan debug SERANGAN (dipakai penguji & autotest).

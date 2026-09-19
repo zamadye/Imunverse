@@ -1,0 +1,1 @@
+# idle frames\n\nSee `../../../../docs/MAKO-ANIMATION-BRIEF.md` and `../animation-manifest.json`.\n

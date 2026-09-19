@@ -1,0 +1,808 @@
+{
+  "schemaVersion": 1,
+  "id": "mako-animation",
+  "heroId": "macrophage",
+  "displayName": "Mako",
+  "reference": "assets/character-art-src/hero_macrophage_idle.png",
+  "frameSpec": {
+    "width": 256,
+    "height": 256,
+    "format": "png",
+    "colorType": "RGBA",
+    "background": "fully-transparent"
+  },
+  "directions": [
+    "e",
+    "se",
+    "s",
+    "sw",
+    "w",
+    "nw",
+    "n",
+    "ne"
+  ],
+  "directionOrderNote": "e=0 radians; clockwise around the gameplay plane: e, se, s, sw, w, nw, n, ne",
+  "states": {
+    "idle": {
+      "framesPerDirection": 4,
+      "fps": 8,
+      "loop": true,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_e_00.png",
+            "assets/character-anim-src/mako/idle/idle_e_01.png",
+            "assets/character-anim-src/mako/idle/idle_e_02.png",
+            "assets/character-anim-src/mako/idle/idle_e_03.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_se_00.png",
+            "assets/character-anim-src/mako/idle/idle_se_01.png",
+            "assets/character-anim-src/mako/idle/idle_se_02.png",
+            "assets/character-anim-src/mako/idle/idle_se_03.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_s_00.png",
+            "assets/character-anim-src/mako/idle/idle_s_01.png",
+            "assets/character-anim-src/mako/idle/idle_s_02.png",
+            "assets/character-anim-src/mako/idle/idle_s_03.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_sw_00.png",
+            "assets/character-anim-src/mako/idle/idle_sw_01.png",
+            "assets/character-anim-src/mako/idle/idle_sw_02.png",
+            "assets/character-anim-src/mako/idle/idle_sw_03.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_w_00.png",
+            "assets/character-anim-src/mako/idle/idle_w_01.png",
+            "assets/character-anim-src/mako/idle/idle_w_02.png",
+            "assets/character-anim-src/mako/idle/idle_w_03.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_nw_00.png",
+            "assets/character-anim-src/mako/idle/idle_nw_01.png",
+            "assets/character-anim-src/mako/idle/idle_nw_02.png",
+            "assets/character-anim-src/mako/idle/idle_nw_03.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_n_00.png",
+            "assets/character-anim-src/mako/idle/idle_n_01.png",
+            "assets/character-anim-src/mako/idle/idle_n_02.png",
+            "assets/character-anim-src/mako/idle/idle_n_03.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/idle/idle_ne_00.png",
+            "assets/character-anim-src/mako/idle/idle_ne_01.png",
+            "assets/character-anim-src/mako/idle/idle_ne_02.png",
+            "assets/character-anim-src/mako/idle/idle_ne_03.png"
+          ]
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 6,
+      "fps": 12,
+      "loop": true,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_e_00.png",
+            "assets/character-anim-src/mako/walk/walk_e_01.png",
+            "assets/character-anim-src/mako/walk/walk_e_02.png",
+            "assets/character-anim-src/mako/walk/walk_e_03.png",
+            "assets/character-anim-src/mako/walk/walk_e_04.png",
+            "assets/character-anim-src/mako/walk/walk_e_05.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_se_00.png",
+            "assets/character-anim-src/mako/walk/walk_se_01.png",
+            "assets/character-anim-src/mako/walk/walk_se_02.png",
+            "assets/character-anim-src/mako/walk/walk_se_03.png",
+            "assets/character-anim-src/mako/walk/walk_se_04.png",
+            "assets/character-anim-src/mako/walk/walk_se_05.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_s_00.png",
+            "assets/character-anim-src/mako/walk/walk_s_01.png",
+            "assets/character-anim-src/mako/walk/walk_s_02.png",
+            "assets/character-anim-src/mako/walk/walk_s_03.png",
+            "assets/character-anim-src/mako/walk/walk_s_04.png",
+            "assets/character-anim-src/mako/walk/walk_s_05.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_sw_00.png",
+            "assets/character-anim-src/mako/walk/walk_sw_01.png",
+            "assets/character-anim-src/mako/walk/walk_sw_02.png",
+            "assets/character-anim-src/mako/walk/walk_sw_03.png",
+            "assets/character-anim-src/mako/walk/walk_sw_04.png",
+            "assets/character-anim-src/mako/walk/walk_sw_05.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_w_00.png",
+            "assets/character-anim-src/mako/walk/walk_w_01.png",
+            "assets/character-anim-src/mako/walk/walk_w_02.png",
+            "assets/character-anim-src/mako/walk/walk_w_03.png",
+            "assets/character-anim-src/mako/walk/walk_w_04.png",
+            "assets/character-anim-src/mako/walk/walk_w_05.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_nw_00.png",
+            "assets/character-anim-src/mako/walk/walk_nw_01.png",
+            "assets/character-anim-src/mako/walk/walk_nw_02.png",
+            "assets/character-anim-src/mako/walk/walk_nw_03.png",
+            "assets/character-anim-src/mako/walk/walk_nw_04.png",
+            "assets/character-anim-src/mako/walk/walk_nw_05.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_n_00.png",
+            "assets/character-anim-src/mako/walk/walk_n_01.png",
+            "assets/character-anim-src/mako/walk/walk_n_02.png",
+            "assets/character-anim-src/mako/walk/walk_n_03.png",
+            "assets/character-anim-src/mako/walk/walk_n_04.png",
+            "assets/character-anim-src/mako/walk/walk_n_05.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/walk/walk_ne_00.png",
+            "assets/character-anim-src/mako/walk/walk_ne_01.png",
+            "assets/character-anim-src/mako/walk/walk_ne_02.png",
+            "assets/character-anim-src/mako/walk/walk_ne_03.png",
+            "assets/character-anim-src/mako/walk/walk_ne_04.png",
+            "assets/character-anim-src/mako/walk/walk_ne_05.png"
+          ]
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 8,
+      "fps": 18,
+      "loop": false,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_e_00.png",
+            "assets/character-anim-src/mako/attack/attack_e_01.png",
+            "assets/character-anim-src/mako/attack/attack_e_02.png",
+            "assets/character-anim-src/mako/attack/attack_e_03.png",
+            "assets/character-anim-src/mako/attack/attack_e_04.png",
+            "assets/character-anim-src/mako/attack/attack_e_05.png",
+            "assets/character-anim-src/mako/attack/attack_e_06.png",
+            "assets/character-anim-src/mako/attack/attack_e_07.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_se_00.png",
+            "assets/character-anim-src/mako/attack/attack_se_01.png",
+            "assets/character-anim-src/mako/attack/attack_se_02.png",
+            "assets/character-anim-src/mako/attack/attack_se_03.png",
+            "assets/character-anim-src/mako/attack/attack_se_04.png",
+            "assets/character-anim-src/mako/attack/attack_se_05.png",
+            "assets/character-anim-src/mako/attack/attack_se_06.png",
+            "assets/character-anim-src/mako/attack/attack_se_07.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_s_00.png",
+            "assets/character-anim-src/mako/attack/attack_s_01.png",
+            "assets/character-anim-src/mako/attack/attack_s_02.png",
+            "assets/character-anim-src/mako/attack/attack_s_03.png",
+            "assets/character-anim-src/mako/attack/attack_s_04.png",
+            "assets/character-anim-src/mako/attack/attack_s_05.png",
+            "assets/character-anim-src/mako/attack/attack_s_06.png",
+            "assets/character-anim-src/mako/attack/attack_s_07.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_sw_00.png",
+            "assets/character-anim-src/mako/attack/attack_sw_01.png",
+            "assets/character-anim-src/mako/attack/attack_sw_02.png",
+            "assets/character-anim-src/mako/attack/attack_sw_03.png",
+            "assets/character-anim-src/mako/attack/attack_sw_04.png",
+            "assets/character-anim-src/mako/attack/attack_sw_05.png",
+            "assets/character-anim-src/mako/attack/attack_sw_06.png",
+            "assets/character-anim-src/mako/attack/attack_sw_07.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_w_00.png",
+            "assets/character-anim-src/mako/attack/attack_w_01.png",
+            "assets/character-anim-src/mako/attack/attack_w_02.png",
+            "assets/character-anim-src/mako/attack/attack_w_03.png",
+            "assets/character-anim-src/mako/attack/attack_w_04.png",
+            "assets/character-anim-src/mako/attack/attack_w_05.png",
+            "assets/character-anim-src/mako/attack/attack_w_06.png",
+            "assets/character-anim-src/mako/attack/attack_w_07.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_nw_00.png",
+            "assets/character-anim-src/mako/attack/attack_nw_01.png",
+            "assets/character-anim-src/mako/attack/attack_nw_02.png",
+            "assets/character-anim-src/mako/attack/attack_nw_03.png",
+            "assets/character-anim-src/mako/attack/attack_nw_04.png",
+            "assets/character-anim-src/mako/attack/attack_nw_05.png",
+            "assets/character-anim-src/mako/attack/attack_nw_06.png",
+            "assets/character-anim-src/mako/attack/attack_nw_07.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_n_00.png",
+            "assets/character-anim-src/mako/attack/attack_n_01.png",
+            "assets/character-anim-src/mako/attack/attack_n_02.png",
+            "assets/character-anim-src/mako/attack/attack_n_03.png",
+            "assets/character-anim-src/mako/attack/attack_n_04.png",
+            "assets/character-anim-src/mako/attack/attack_n_05.png",
+            "assets/character-anim-src/mako/attack/attack_n_06.png",
+            "assets/character-anim-src/mako/attack/attack_n_07.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/attack/attack_ne_00.png",
+            "assets/character-anim-src/mako/attack/attack_ne_01.png",
+            "assets/character-anim-src/mako/attack/attack_ne_02.png",
+            "assets/character-anim-src/mako/attack/attack_ne_03.png",
+            "assets/character-anim-src/mako/attack/attack_ne_04.png",
+            "assets/character-anim-src/mako/attack/attack_ne_05.png",
+            "assets/character-anim-src/mako/attack/attack_ne_06.png",
+            "assets/character-anim-src/mako/attack/attack_ne_07.png"
+          ]
+        }
+      ]
+    },
+    "devour": {
+      "framesPerDirection": 12,
+      "fps": 15,
+      "loop": false,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_e_00.png",
+            "assets/character-anim-src/mako/devour/devour_e_01.png",
+            "assets/character-anim-src/mako/devour/devour_e_02.png",
+            "assets/character-anim-src/mako/devour/devour_e_03.png",
+            "assets/character-anim-src/mako/devour/devour_e_04.png",
+            "assets/character-anim-src/mako/devour/devour_e_05.png",
+            "assets/character-anim-src/mako/devour/devour_e_06.png",
+            "assets/character-anim-src/mako/devour/devour_e_07.png",
+            "assets/character-anim-src/mako/devour/devour_e_08.png",
+            "assets/character-anim-src/mako/devour/devour_e_09.png",
+            "assets/character-anim-src/mako/devour/devour_e_10.png",
+            "assets/character-anim-src/mako/devour/devour_e_11.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_se_00.png",
+            "assets/character-anim-src/mako/devour/devour_se_01.png",
+            "assets/character-anim-src/mako/devour/devour_se_02.png",
+            "assets/character-anim-src/mako/devour/devour_se_03.png",
+            "assets/character-anim-src/mako/devour/devour_se_04.png",
+            "assets/character-anim-src/mako/devour/devour_se_05.png",
+            "assets/character-anim-src/mako/devour/devour_se_06.png",
+            "assets/character-anim-src/mako/devour/devour_se_07.png",
+            "assets/character-anim-src/mako/devour/devour_se_08.png",
+            "assets/character-anim-src/mako/devour/devour_se_09.png",
+            "assets/character-anim-src/mako/devour/devour_se_10.png",
+            "assets/character-anim-src/mako/devour/devour_se_11.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_s_00.png",
+            "assets/character-anim-src/mako/devour/devour_s_01.png",
+            "assets/character-anim-src/mako/devour/devour_s_02.png",
+            "assets/character-anim-src/mako/devour/devour_s_03.png",
+            "assets/character-anim-src/mako/devour/devour_s_04.png",
+            "assets/character-anim-src/mako/devour/devour_s_05.png",
+            "assets/character-anim-src/mako/devour/devour_s_06.png",
+            "assets/character-anim-src/mako/devour/devour_s_07.png",
+            "assets/character-anim-src/mako/devour/devour_s_08.png",
+            "assets/character-anim-src/mako/devour/devour_s_09.png",
+            "assets/character-anim-src/mako/devour/devour_s_10.png",
+            "assets/character-anim-src/mako/devour/devour_s_11.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_sw_00.png",
+            "assets/character-anim-src/mako/devour/devour_sw_01.png",
+            "assets/character-anim-src/mako/devour/devour_sw_02.png",
+            "assets/character-anim-src/mako/devour/devour_sw_03.png",
+            "assets/character-anim-src/mako/devour/devour_sw_04.png",
+            "assets/character-anim-src/mako/devour/devour_sw_05.png",
+            "assets/character-anim-src/mako/devour/devour_sw_06.png",
+            "assets/character-anim-src/mako/devour/devour_sw_07.png",
+            "assets/character-anim-src/mako/devour/devour_sw_08.png",
+            "assets/character-anim-src/mako/devour/devour_sw_09.png",
+            "assets/character-anim-src/mako/devour/devour_sw_10.png",
+            "assets/character-anim-src/mako/devour/devour_sw_11.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_w_00.png",
+            "assets/character-anim-src/mako/devour/devour_w_01.png",
+            "assets/character-anim-src/mako/devour/devour_w_02.png",
+            "assets/character-anim-src/mako/devour/devour_w_03.png",
+            "assets/character-anim-src/mako/devour/devour_w_04.png",
+            "assets/character-anim-src/mako/devour/devour_w_05.png",
+            "assets/character-anim-src/mako/devour/devour_w_06.png",
+            "assets/character-anim-src/mako/devour/devour_w_07.png",
+            "assets/character-anim-src/mako/devour/devour_w_08.png",
+            "assets/character-anim-src/mako/devour/devour_w_09.png",
+            "assets/character-anim-src/mako/devour/devour_w_10.png",
+            "assets/character-anim-src/mako/devour/devour_w_11.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_nw_00.png",
+            "assets/character-anim-src/mako/devour/devour_nw_01.png",
+            "assets/character-anim-src/mako/devour/devour_nw_02.png",
+            "assets/character-anim-src/mako/devour/devour_nw_03.png",
+            "assets/character-anim-src/mako/devour/devour_nw_04.png",
+            "assets/character-anim-src/mako/devour/devour_nw_05.png",
+            "assets/character-anim-src/mako/devour/devour_nw_06.png",
+            "assets/character-anim-src/mako/devour/devour_nw_07.png",
+            "assets/character-anim-src/mako/devour/devour_nw_08.png",
+            "assets/character-anim-src/mako/devour/devour_nw_09.png",
+            "assets/character-anim-src/mako/devour/devour_nw_10.png",
+            "assets/character-anim-src/mako/devour/devour_nw_11.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_n_00.png",
+            "assets/character-anim-src/mako/devour/devour_n_01.png",
+            "assets/character-anim-src/mako/devour/devour_n_02.png",
+            "assets/character-anim-src/mako/devour/devour_n_03.png",
+            "assets/character-anim-src/mako/devour/devour_n_04.png",
+            "assets/character-anim-src/mako/devour/devour_n_05.png",
+            "assets/character-anim-src/mako/devour/devour_n_06.png",
+            "assets/character-anim-src/mako/devour/devour_n_07.png",
+            "assets/character-anim-src/mako/devour/devour_n_08.png",
+            "assets/character-anim-src/mako/devour/devour_n_09.png",
+            "assets/character-anim-src/mako/devour/devour_n_10.png",
+            "assets/character-anim-src/mako/devour/devour_n_11.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/devour/devour_ne_00.png",
+            "assets/character-anim-src/mako/devour/devour_ne_01.png",
+            "assets/character-anim-src/mako/devour/devour_ne_02.png",
+            "assets/character-anim-src/mako/devour/devour_ne_03.png",
+            "assets/character-anim-src/mako/devour/devour_ne_04.png",
+            "assets/character-anim-src/mako/devour/devour_ne_05.png",
+            "assets/character-anim-src/mako/devour/devour_ne_06.png",
+            "assets/character-anim-src/mako/devour/devour_ne_07.png",
+            "assets/character-anim-src/mako/devour/devour_ne_08.png",
+            "assets/character-anim-src/mako/devour/devour_ne_09.png",
+            "assets/character-anim-src/mako/devour/devour_ne_10.png",
+            "assets/character-anim-src/mako/devour/devour_ne_11.png"
+          ]
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "fps": 18,
+      "loop": false,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_e_00.png",
+            "assets/character-anim-src/mako/hit/hit_e_01.png",
+            "assets/character-anim-src/mako/hit/hit_e_02.png",
+            "assets/character-anim-src/mako/hit/hit_e_03.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_se_00.png",
+            "assets/character-anim-src/mako/hit/hit_se_01.png",
+            "assets/character-anim-src/mako/hit/hit_se_02.png",
+            "assets/character-anim-src/mako/hit/hit_se_03.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_s_00.png",
+            "assets/character-anim-src/mako/hit/hit_s_01.png",
+            "assets/character-anim-src/mako/hit/hit_s_02.png",
+            "assets/character-anim-src/mako/hit/hit_s_03.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_sw_00.png",
+            "assets/character-anim-src/mako/hit/hit_sw_01.png",
+            "assets/character-anim-src/mako/hit/hit_sw_02.png",
+            "assets/character-anim-src/mako/hit/hit_sw_03.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_w_00.png",
+            "assets/character-anim-src/mako/hit/hit_w_01.png",
+            "assets/character-anim-src/mako/hit/hit_w_02.png",
+            "assets/character-anim-src/mako/hit/hit_w_03.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_nw_00.png",
+            "assets/character-anim-src/mako/hit/hit_nw_01.png",
+            "assets/character-anim-src/mako/hit/hit_nw_02.png",
+            "assets/character-anim-src/mako/hit/hit_nw_03.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_n_00.png",
+            "assets/character-anim-src/mako/hit/hit_n_01.png",
+            "assets/character-anim-src/mako/hit/hit_n_02.png",
+            "assets/character-anim-src/mako/hit/hit_n_03.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/hit/hit_ne_00.png",
+            "assets/character-anim-src/mako/hit/hit_ne_01.png",
+            "assets/character-anim-src/mako/hit/hit_ne_02.png",
+            "assets/character-anim-src/mako/hit/hit_ne_03.png"
+          ]
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 8,
+      "fps": 15,
+      "loop": false,
+      "directions": [
+        {
+          "direction": "e",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_e_00.png",
+            "assets/character-anim-src/mako/death/death_e_01.png",
+            "assets/character-anim-src/mako/death/death_e_02.png",
+            "assets/character-anim-src/mako/death/death_e_03.png",
+            "assets/character-anim-src/mako/death/death_e_04.png",
+            "assets/character-anim-src/mako/death/death_e_05.png",
+            "assets/character-anim-src/mako/death/death_e_06.png",
+            "assets/character-anim-src/mako/death/death_e_07.png"
+          ]
+        },
+        {
+          "direction": "se",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_se_00.png",
+            "assets/character-anim-src/mako/death/death_se_01.png",
+            "assets/character-anim-src/mako/death/death_se_02.png",
+            "assets/character-anim-src/mako/death/death_se_03.png",
+            "assets/character-anim-src/mako/death/death_se_04.png",
+            "assets/character-anim-src/mako/death/death_se_05.png",
+            "assets/character-anim-src/mako/death/death_se_06.png",
+            "assets/character-anim-src/mako/death/death_se_07.png"
+          ]
+        },
+        {
+          "direction": "s",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_s_00.png",
+            "assets/character-anim-src/mako/death/death_s_01.png",
+            "assets/character-anim-src/mako/death/death_s_02.png",
+            "assets/character-anim-src/mako/death/death_s_03.png",
+            "assets/character-anim-src/mako/death/death_s_04.png",
+            "assets/character-anim-src/mako/death/death_s_05.png",
+            "assets/character-anim-src/mako/death/death_s_06.png",
+            "assets/character-anim-src/mako/death/death_s_07.png"
+          ]
+        },
+        {
+          "direction": "sw",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_sw_00.png",
+            "assets/character-anim-src/mako/death/death_sw_01.png",
+            "assets/character-anim-src/mako/death/death_sw_02.png",
+            "assets/character-anim-src/mako/death/death_sw_03.png",
+            "assets/character-anim-src/mako/death/death_sw_04.png",
+            "assets/character-anim-src/mako/death/death_sw_05.png",
+            "assets/character-anim-src/mako/death/death_sw_06.png",
+            "assets/character-anim-src/mako/death/death_sw_07.png"
+          ]
+        },
+        {
+          "direction": "w",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_w_00.png",
+            "assets/character-anim-src/mako/death/death_w_01.png",
+            "assets/character-anim-src/mako/death/death_w_02.png",
+            "assets/character-anim-src/mako/death/death_w_03.png",
+            "assets/character-anim-src/mako/death/death_w_04.png",
+            "assets/character-anim-src/mako/death/death_w_05.png",
+            "assets/character-anim-src/mako/death/death_w_06.png",
+            "assets/character-anim-src/mako/death/death_w_07.png"
+          ]
+        },
+        {
+          "direction": "nw",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_nw_00.png",
+            "assets/character-anim-src/mako/death/death_nw_01.png",
+            "assets/character-anim-src/mako/death/death_nw_02.png",
+            "assets/character-anim-src/mako/death/death_nw_03.png",
+            "assets/character-anim-src/mako/death/death_nw_04.png",
+            "assets/character-anim-src/mako/death/death_nw_05.png",
+            "assets/character-anim-src/mako/death/death_nw_06.png",
+            "assets/character-anim-src/mako/death/death_nw_07.png"
+          ]
+        },
+        {
+          "direction": "n",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_n_00.png",
+            "assets/character-anim-src/mako/death/death_n_01.png",
+            "assets/character-anim-src/mako/death/death_n_02.png",
+            "assets/character-anim-src/mako/death/death_n_03.png",
+            "assets/character-anim-src/mako/death/death_n_04.png",
+            "assets/character-anim-src/mako/death/death_n_05.png",
+            "assets/character-anim-src/mako/death/death_n_06.png",
+            "assets/character-anim-src/mako/death/death_n_07.png"
+          ]
+        },
+        {
+          "direction": "ne",
+          "frames": [
+            "assets/character-anim-src/mako/death/death_ne_00.png",
+            "assets/character-anim-src/mako/death/death_ne_01.png",
+            "assets/character-anim-src/mako/death/death_ne_02.png",
+            "assets/character-anim-src/mako/death/death_ne_03.png",
+            "assets/character-anim-src/mako/death/death_ne_04.png",
+            "assets/character-anim-src/mako/death/death_ne_05.png",
+            "assets/character-anim-src/mako/death/death_ne_06.png",
+            "assets/character-anim-src/mako/death/death_ne_07.png"
+          ]
+        }
+      ]
+    }
+  },
+  "events": {
+    "attack": [
+      {
+        "id": "telegraph",
+        "at": 0.125,
+        "effect": "mako_attack_telegraph"
+      },
+      {
+        "id": "reach",
+        "at": 0.375,
+        "effect": "mako_pseudopod_trail"
+      },
+      {
+        "id": "impact",
+        "at": 0.5,
+        "effect": "mako_attack_impact"
+      },
+      {
+        "id": "recovery",
+        "at": 0.75,
+        "effect": "mako_attack_recovery"
+      }
+    ],
+    "devour": [
+      {
+        "id": "charge",
+        "at": 0.167,
+        "effect": "mako_devour_charge"
+      },
+      {
+        "id": "grab",
+        "at": 0.333,
+        "effect": "mako_devour_grab"
+      },
+      {
+        "id": "swallow",
+        "at": 0.5,
+        "effect": "mako_devour_swallow"
+      },
+      {
+        "id": "digest",
+        "at": 0.667,
+        "effect": "mako_phagosome_glow"
+      },
+      {
+        "id": "heal",
+        "at": 0.833,
+        "effect": "mako_devour_heal"
+      },
+      {
+        "id": "release",
+        "at": 0.917,
+        "effect": "mako_devour_release"
+      }
+    ]
+  },
+  "interrupts": {
+    "idle": [
+      "walk",
+      "attack",
+      "devour",
+      "hit",
+      "death"
+    ],
+    "walk": [
+      "idle",
+      "attack",
+      "devour",
+      "hit",
+      "death"
+    ],
+    "attack": [
+      "hit",
+      "death"
+    ],
+    "devour": [
+      "hit",
+      "death"
+    ],
+    "hit": [
+      "death",
+      "idle"
+    ],
+    "death": []
+  },
+  "runtime": {
+    "defaultState": "idle",
+    "walkState": "walk",
+    "attackState": "attack",
+    "skillState": "devour",
+    "blendSeconds": 0.06,
+    "holdLastFrameForNonLoop": true
+  },
+  "directionAngles": {
+    "e": 0,
+    "se": 0.7853981633974483,
+    "s": 1.5707963267948966,
+    "sw": 2.356194490192345,
+    "w": 3.141592653589793,
+    "nw": -2.356194490192345,
+    "n": -1.5707963267948966,
+    "ne": -0.7853981633974483
+  },
+  "effects": {
+    "mako_attack_telegraph": {
+      "kind": "charge",
+      "color": "#b6f26f",
+      "radius": 62,
+      "duration": 0.12
+    },
+    "mako_pseudopod_trail": {
+      "kind": "trail",
+      "color": "#72d66b",
+      "count": 5,
+      "duration": 0.18
+    },
+    "mako_attack_impact": {
+      "kind": "impact",
+      "color": "#d8ff88",
+      "burst": 10,
+      "shake": 0.08
+    },
+    "mako_attack_recovery": {
+      "kind": "recovery",
+      "color": "#4a7c59",
+      "duration": 0.1
+    },
+    "mako_devour_charge": {
+      "kind": "charge",
+      "color": "#b6f26f",
+      "radius": 74,
+      "duration": 0.22
+    },
+    "mako_devour_grab": {
+      "kind": "tether",
+      "color": "#72d66b",
+      "count": 2,
+      "duration": 0.2
+    },
+    "mako_devour_swallow": {
+      "kind": "impact",
+      "color": "#d8ff88",
+      "burst": 14,
+      "shake": 0.12
+    },
+    "mako_phagosome_glow": {
+      "kind": "coreGlow",
+      "color": "#b6f26f",
+      "duration": 0.28
+    },
+    "mako_devour_heal": {
+      "kind": "heal",
+      "color": "#9be15d",
+      "burst": 12,
+      "label": "heal"
+    },
+    "mako_devour_release": {
+      "kind": "payoff",
+      "color": "#d8ff88",
+      "radius": 104,
+      "duration": 0.3
+    }
+  }
+}

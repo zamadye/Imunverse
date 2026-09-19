@@ -44,6 +44,7 @@ const store = {
   crawlCycles: null, // data/crawl-cycles.json (HASIL PANGGANGAN Godot: 24 frame/hero)
   characterRigs: null, // data/character-rigs.json (spesimen anatomi makhluk — sumber panggang)
   creatureRigs: null,  // data/creature-rigs.json (HASIL PANGGANGAN rig makhluk per keadaan)
+  makoAnimation: null, // data/mako-animation.json (frame pack + event timing)
 };
 
 import { BUILD } from './version.js';
@@ -90,6 +91,7 @@ export async function loadAllData() {
     crawlCycles: 'data/crawl-cycles.json',
     characterRigs: 'data/character-rigs.json',
     creatureRigs: 'data/creature-rigs.json',
+    makoAnimation: 'data/mako-animation.json',
   };
 
   const entries = await Promise.all(
