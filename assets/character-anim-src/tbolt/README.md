@@ -25,5 +25,21 @@ Isi pack:
 | Equity mutasi | visor + scanner (mut1/Sniper), blade_r/l + core (mut2/Piercer), seal (stage4/Apoptosis) |
 | Skill FX | fx_bolt (Precision Shot), fx_lockon (Lock On), fx_execute (Execute) |
 
-Status: **pack siap — artboard Rive (`rive.yaml` + `scene.rml`) belum dirakit**
-(menunggu perintah eksekusi Rive).
+Status: **artboard `TBolt` sudah dirakit dan dikompilasi** ke
+`tbolt-rive-draft.riv`, dengan `TBoltStateMachine`. Gameplay memuatnya lewat
+`js/render/tbolt-rive.js` (konfigurasi `data/locomotion.json` → `tbolt`).
+
+## Verifikasi
+
+- `npm run verify:tbolt-parts` — validasi 21 PNG dan pasangan cermin.
+- `npm run verify:tbolt-rive` — validasi source/rig lewat Rive CLI.
+- `npm run verify:tbolt-runtime` — uji **loader dan renderer browser asli**.
+  Jalankan `npm start` terlebih dahulu. Membutuhkan Playwright + Chromium;
+  instalasi eksternal dapat dipilih melalui `PW_PATH` dan `CHROMIUM_PATH`
+  (lihat `scripts/e2e-tbolt-rive.mjs`). Screenshot disimpan di `shots/tbolt-rive/`.
+
+Uji CLI saja tidak mendeteksi error JavaScript saat gameplay. Uji browser
+memastikan `.riv` dimuat dengan versi `BUILD`, artwork memiliki pixel nyata
+(bukan penanda `RIVE?/err?`), idle/walk/attack bergerak, dan stage evolusi aktif.
+Renderer Canvas Advanced harus memanggil `resolveAnimationFrame()` sebelum
+canvas Rive disalin ke canvas game, karena loop game memakai rAF browser sendiri.

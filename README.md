@@ -130,6 +130,9 @@ npm run check     # validasi import path, JSON, sprite, dan aturan CSS layar
 npm run validate  # pacing & katalog
 npm start         # jalankan server statis di :8000
 
+# Di terminal lain, dengan Playwright + Chromium (atau PW_PATH/CHROMIUM_PATH):
+npm run verify:tbolt-runtime # loader + artwork Rive asli + animasi T-Bolt
+
 # pemeriksa runtime (butuh bundle + jsdom opsional)
 npx esbuild --bundle js/main.js --outfile=.tmp-bundle.js --format=iife
 PHAGOS_BUNDLE=.tmp-bundle.js npm run verify   # foto mutasi + layar + animasi

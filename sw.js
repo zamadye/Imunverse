@@ -4,7 +4,7 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v26-tbolt-rive';
+const CACHE_VER = 'phagos-v27-tbolt-rive-loader';
 const PRECACHE = [
   './',
   './index.html',

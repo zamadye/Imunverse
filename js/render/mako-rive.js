@@ -260,6 +260,8 @@ function renderArtboard() {
     state.renderer.clear();
     state.artboard.draw(state.renderer);
     state.renderer.flush();
+    // The game owns rAF; complete Rive's queued Canvas drawing before blitting.
+    state.runtime.resolveAnimationFrame();
     return true;
   } catch (error) {
     state.error = String(error && error.message ? error.message : error);

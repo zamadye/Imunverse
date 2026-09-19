@@ -25,6 +25,7 @@
     "shot:tbolt": "node tools/rive/run.mjs assets/character-anim-src/tbolt --screenshot",
     "shot:mako": "node tools/rive/run.mjs assets/character-anim-src/mako --screenshot",
   "verify:tbolt-rive": "node tools/verify-tbolt-rive.mjs",
+  "verify:tbolt-runtime": "node scripts/e2e-tbolt-rive.mjs",
   "rive:cli:install": "node tools/rive/install.mjs",
   "rive:cli:runtime": "node tools/rive/setup-runtime.mjs",
   "rive:cli": "node tools/rive/run.mjs",

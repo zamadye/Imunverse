@@ -14,6 +14,7 @@
  */
 
 import { getLocomotion } from '../core/data-store.js';
+import { BUILD } from '../core/version.js';
 import { quantizeMakoDirection, DEFAULT_DIRECTION_ANGLES } from './mako-animation.js';
 
 const DEFAULT_RIVE = 'assets/character-anim-src/tbolt/tbolt-rive-draft.riv';
@@ -142,7 +143,7 @@ async function loadTBolt() {
     // Cache-bust: nama file .riv sama antar versi, tanpa ini browser bisa
     // menyajikan rig basi (setup lama) sehingga karakter salah render.
     const sep = path.includes('?') ? '&' : '?';
-    const response = await fetch(`${path}${sep}v=${BUILD || '54k'}`);
+    const response = await fetch(`${path}${sep}v=${BUILD}`);
     if (!response.ok) throw new Error(`gagal memuat ${path} (${response.status})`);
     const bytes = new Uint8Array(await response.arrayBuffer());
     const file = await runtime.load(bytes);
@@ -319,6 +320,10 @@ function renderArtboard() {
     state.renderer.clear();
     state.artboard.draw(state.renderer);
     state.renderer.flush();
+    // Canvas Advanced queues drawing until the Rive frame is resolved.
+    // Our loop uses browser rAF, not runtime.requestAnimationFrame(), so
+    // finish those commands BEFORE copying renderCanvas into the game.
+    state.runtime.resolveAnimationFrame();
     return true;
   } catch (error) {
     state.error = String(error && error.message ? error.message : error);
