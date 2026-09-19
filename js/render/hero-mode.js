@@ -12,9 +12,11 @@
 import { drawCreature, creatureAvailable, creatureStateInfo } from './creature-rig.js';
 
 const MODES = ['foto', 'hibrida', 'makhluk'];
-// DEFAULT = 'makhluk': prototipe harus TERLIHAT begitu game dibuka.
-// (Sebelumnya default 'foto' → pemain tidak melihat apa pun berubah.)
-let _mode = 'makhluk';
+// DEFAULT = 'foto': gameplay memakai artwork hero yang benar-benar diintegrasikan
+// ke assets/sprites/. Mode 'makhluk' tetap tersedia sebagai lab rig eksperimental,
+// tetapi tidak boleh menjadi tampilan gameplay utama karena bentuknya adalah
+// placeholder prosedural, bukan art final roster.
+let _mode = 'foto';
 let _lastT = 0;
 
 /** Mode aktif. */
