@@ -20,6 +20,7 @@
   "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:crawl && npm run verify:prototype && npm run verify:visual && npm run verify:rive && npm run verify:combat && npm run verify:economy && npm run verify:world && npm run verify:p5 && npm run verify:gamefeel && npm run verify:attacks",
   "verify:combat": "node tools/verify-combat.mjs",
   "rive": "node tools/gen-hero-rig.mjs",
+  "rive:cli:install": "node tools/rive/install.mjs",
   "verify:economy": "node tools/verify-economy.mjs",
   "verify:world": "node tools/verify-world.mjs",
   "verify:p5": "node tools/verify-p5.mjs",

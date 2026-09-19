@@ -29,6 +29,7 @@ node_modules/
 
 # mesin Godot (dipasang ulang dengan: node tools/godot/install.mjs)
 tools/godot/engine/
+tools/rive/engine/
 
 # P7: salinan sumber panggangan Godot (dibuat ulang oleh bake-crawl / bake-creature)
 tools/godot/rig/crawl-src.json
