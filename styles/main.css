@@ -2327,24 +2327,29 @@ img.lock-badge {
   animation-delay: 1.2s;
 }
 
-/* ---------- 4. Loading: foto latar baru (bg-loading.jpg) sudah membawa
-   wordmark "PHAGOS" sendiri + karakter di tepi + dekorasi virus — logo
-   HTML terpisah (.load-brand) DISEMBUNYIKAN di layar ini supaya tidak
-   dobel. Ruang kosong di tengah foto diisi cincin loading berdenyut
-   (.load-ring-slot); progress bar tetap di dasar layar (.load-bottom). ---------- */
-#screen-loading .load-stage { display: none !important; }   /* dekorasi = "UI lain" */
+/* ---------- 4. Loading: bg-loading = hero roster poster, logo DITAMPILKAN.
+   Cincin loading mengambang di bawah logo dengan glow kontras tinggi agar
+   terlihat jelas di atas ilustrasi padat warna. ---------- */
+#screen-loading .load-stage { display: none !important; }
 #screen-loading .load-box { position: relative; z-index: 2; display: flex; flex-direction: column; }
-#screen-loading .load-brand { display: none; }
+#screen-loading .load-brand {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 6%;
+  left: 0; right: 0;
+  z-index: 3;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.6));
+}
+#screen-loading .load-logo { width: clamp(140px, 44vw, 220px); height: auto; }
 #screen-loading .progress-track { width: min(300px, 74vw); }
 
-/* Cincin loading — diposisikan meniru slot kosong di foto latar baru
-   (kira-kira di tengah layar, sedikit di atas titik tengah). */
 #screen-loading .load-ring-slot {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(150px, 42vw, 220px);
+  width: clamp(100px, 28vw, 150px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -2353,18 +2358,19 @@ img.lock-badge {
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  border: 1.5px solid rgba(159, 232, 216, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 16px rgba(159, 232, 216, 0.3);
 }
-#screen-loading .load-ring-inner { inset: 14%; border-color: rgba(159, 232, 216, 0.55); }
+#screen-loading .load-ring-inner { inset: 18%; border-color: rgba(255, 255, 255, 0.65); }
 #screen-loading .load-ring-outer { animation: load-ring-spin 5s linear infinite; border-style: dashed; }
 #screen-loading .load-ring-inner { animation: load-ring-pulse 2.2s ease-in-out infinite; }
 #screen-loading .load-blob {
   position: relative;
-  width: 46%;
+  width: 50%;
   aspect-ratio: 1.1;
   border-radius: 46% 54% 52% 48% / 52% 48% 54% 46%;
-  background: linear-gradient(160deg, rgba(159, 232, 216, 0.55), rgba(53, 208, 186, 0.28));
-  box-shadow: 0 0 24px rgba(127, 227, 208, 0.35);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25), rgba(159, 232, 216, 0.15));
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.25), 0 0 40px rgba(127, 227, 208, 0.2);
   animation: load-blob-breathe 2.2s ease-in-out infinite;
   display: flex;
   align-items: center;
@@ -2375,7 +2381,8 @@ img.lock-badge {
   width: 14%;
   aspect-ratio: 1;
   border-radius: 999px;
-  background: rgba(6, 34, 32, 0.75);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
 }
 @keyframes load-ring-spin { to { transform: rotate(360deg); } }
 @keyframes load-ring-pulse {

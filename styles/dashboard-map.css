@@ -78,12 +78,10 @@
 }
 
 #screen-loading {
-  /* UI-audit: dulu ada linear-gradient hitam-transparan di atas foto ini
-     (rgba(4,22,21,.72→.90)) yang menggelapkan seluruh layar loading dan
-     menempel sebagai "kotak hitam" di belakang logo. Dihapus — foto latar
-     tampil bersih apa adanya, tanpa overlay penutup. */
   background-color: var(--dash-bg-deep);
-  background-image: url('../assets/ui/bg-loading.jpg');
+  background-image:
+    radial-gradient(ellipse at 50% 30%, rgba(4, 22, 21, 0.15) 0%, rgba(4, 22, 21, 0.65) 100%),
+    url('../assets/ui/bg-loading.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -941,45 +939,19 @@
 #screen-dashboard .float-pill.strain b { color: #ffd166; }
 
 /* ---------------------------------------------------------------
-   7. PETA PENUH (modal dramatis) — dibuka dari veil preview dashboard.
-   Foto latar bg-fullmap.jpg (organ tubuh gaya ilustrasi "Small Cells
-   Big Missions") full-bleed, SEMUA bab kelihatan sekaligus (beda dari
-   preview dashboard yang sengaja dipotong pendek), animasi zoom-in saat
-   dibuka. Node/jalur = data SAMA dari dashboard-screen.js (paintHost).
+   7. PETA PENUH (modal dramatis) — FOTO = PETA.
+   bg-fullmap.jpg SUDAH peta lengkap (jalur berliku Jantung→Otak, node
+   bernomor 1-14 dengan bintang/gembok, boss demon, label organ). Kita
+   TIDAK menggambar jalur/nomor apa pun di atasnya — cuma menyoroti node
+   bernomor yang sudah ada di foto lewat cincin transparan (.chap-hotspot,
+   posisinya persen mapPhotoPos). Foto tampil BERSIH, tanpa blur/dim/veil
+   yang menutupinya — itu adalah esensi peta ini.
    --------------------------------------------------------------- */
 #screen-fullmap.screen.modal {
   padding: 0;
-  background: rgba(2, 10, 10, 0.7);
-  backdrop-filter: blur(3px);
+  background: #0a1c1c;
+  backdrop-filter: none;
   overflow: hidden;
-}
-
-#screen-fullmap .fullmap-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-color: var(--dash-bg-deep);
-  background-image: url('../assets/ui/bg-fullmap.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  /* Foto sumbernya bawa nomor jalur & label organ sendiri (1-13, dilukis
-     di gambar) — kalau dibiarkan tajam, teks/nomor itu bentrok dan
-     membingungkan dengan node interaktif kita sendiri (chap-node, angka
-     bab 1-6) yang digambar di atasnya (dua "peta" seolah tumpang tindih).
-     Diredupkan + sedikit blur supaya teks/nomornya tidak terbaca lagi —
-     yang tersisa cuma suasana warna & bentuk organ (backdrop), sedangkan
-     SATU-SATUNYA peta yang terbaca adalah jalur+node HTML kita. */
-  filter: brightness(0.4) saturate(0.5) blur(2px);
-  transform: scale(1.03); /* tutup tepi buram akibat blur supaya tak ada garis putih di pinggir */
-}
-
-#screen-fullmap .fullmap-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(3, 15, 15, 0.8) 0%, rgba(3, 15, 15, 0.42) 20%, rgba(3, 15, 15, 0.52) 55%, rgba(3, 15, 15, 0.46) 75%, rgba(3, 15, 15, 0.92) 100%);
 }
 
 #screen-fullmap .fullmap-box {
@@ -990,15 +962,15 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
+  gap: 6px;
+  padding: 0 0 calc(6px + env(safe-area-inset-bottom));
   /* Efek "zoom dramatis" saat modal dibuka — bukan sekadar fade generik
      bawaan .screen.active (screen-in), supaya terasa beda dari layar biasa. */
   animation: fullmap-zoom-in 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fullmap-zoom-in {
-  from { opacity: 0; transform: scale(1.12); }
+  from { opacity: 0; transform: scale(1.08); }
   to   { opacity: 1; transform: scale(1); }
 }
 
@@ -1007,6 +979,11 @@
   align-items: center;
   gap: 10px;
   flex: 0 0 auto;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 8px;
+  /* Bar tipis di atas foto, semi-transparan supaya foto tetap kelihatan. */
+  background: linear-gradient(180deg, rgba(3, 15, 15, 0.72) 0%, rgba(3, 15, 15, 0) 100%);
+  position: relative;
+  z-index: 3;
 }
 
 #screen-fullmap .fullmap-title {
@@ -1015,7 +992,7 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   color: var(--dash-ink);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
 #screen-fullmap .fullmap-pos {
@@ -1035,31 +1012,117 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  overflow: hidden;
+  align-items: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: -48px; /* header transparan menumpang di atas foto, bukan mendorong ke bawah */
+  padding: 0;
 }
 
-/* Kanvas peta penuh: SELALU tampil 100% (tak ada pan/zoom seperti preview
-   dashboard) — inilah tempat semua 6 bab kelihatan sekaligus. Tidak ada
-   siluet SVG flat di sini (foto latar sudah menggambarkan organ tubuh) —
-   hanya jalur (chapter-path-group-full) + node HTML di atasnya. */
-#screen-fullmap .fullmap-canvas {
+/* Bingkai foto: pakai rasio ASLI foto (900×1600 ≈ 9:16), bukan siluet SVG
+   lama. Foto itu sendiri content, bukan latar dekorasi — ditampilkan penuh
+   supaya semua node bernomor kelihatan. */
+#screen-fullmap .fullmap-photo {
   position: relative;
-  height: 100%;
-  aspect-ratio: 300 / 520;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 900 / 1600;
 }
 
-#screen-fullmap .fullmap-silhouette {
-  position: absolute;
-  inset: 0;
+#screen-fullmap .fullmap-photo-img {
+  display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Container hotspot: tepat di atas foto, koordinat sama. */
+#screen-fullmap .fullmap-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* .chap-hotspot sendiri yg menangkap klik, bukan container */
+}
+
+/* HOTSPOT interaktif — cincin TRANSPARAN yang duduk PAS di atas node
+   bernomor yang sudah ada di foto. Bukan bulatan penuh (yang akan menutupi
+   nomor/bintang di foto), bukan pula nomor baru (foto sudah punya nomor
+   sendiri). Cuma menandai "yang mana yang bisa kamu ketuk sekarang". */
+#screen-fullmap .chap-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  transition: transform 0.12s ease;
+}
+#screen-fullmap .chap-hotspot:active { transform: translate(-50%, -50%) scale(0.9); }
+
+/* Cincin default (semua status kecuali locked): tipis, teal transparan —
+   cukup untuk "aku bisa diketuk", tidak menutupi apa pun. */
+#screen-fullmap .chap-hotspot-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: 2.5px solid rgba(127, 227, 208, 0.7);
+  box-shadow: 0 0 12px rgba(127, 227, 208, 0.55), inset 0 0 8px rgba(127, 227, 208, 0.35);
+}
+
+/* Bab sekarang (current): cincin terang + denyut — "kamu di sini". */
+#screen-fullmap .chap-hotspot.current .chap-hotspot-ring {
+  border-color: rgba(255, 232, 128, 0.95);
+  box-shadow: 0 0 18px rgba(255, 232, 128, 0.7), inset 0 0 10px rgba(255, 232, 128, 0.35);
+  animation: fullmap-hotspot-pulse 1.9s ease-out infinite;
+}
+
+/* Bab terpilih (mau dimainkan): cincin emas solid. */
+#screen-fullmap .chap-hotspot.selected .chap-hotspot-ring {
+  border-color: rgba(255, 209, 102, 1);
+  border-width: 3.5px;
+  box-shadow: 0 0 22px rgba(255, 209, 102, 0.75), inset 0 0 12px rgba(255, 209, 102, 0.4);
+}
+
+/* Bab terkunci: cincin merah redup — foto sendiri sudah menunjukkan
+   gembok di node itu, jadi kita cuma memberi kesan "tidak bisa ditekan". */
+#screen-fullmap .chap-hotspot.locked .chap-hotspot-ring {
+  border-color: rgba(255, 122, 92, 0.55);
+  border-style: dashed;
+  box-shadow: none;
+}
+
+/* Bab bersih (cleared): cincin hijau lembut — foto sudah menunjukkan
+   bintang emas di node itu, ini cuma menegaskan "boleh diketuk lagi". */
+#screen-fullmap .chap-hotspot.cleared .chap-hotspot-ring {
+  border-color: rgba(120, 240, 170, 0.75);
+  box-shadow: 0 0 14px rgba(120, 240, 170, 0.5);
+}
+
+@keyframes fullmap-hotspot-pulse {
+  0%   { transform: scale(0.94); }
+  60%  { transform: scale(1.1); opacity: 0.55; }
+  100% { transform: scale(1.18); opacity: 0; }
 }
 
 #screen-fullmap .fullmap-info {
   flex: 0 0 auto;
+  margin: 0 12px;
   background: var(--dash-glass-2);
+  border: 1px solid var(--dash-edge);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #screen-fullmap .fullmap-box { animation: none; }
+  #screen-fullmap .fullmap-box,
+  #screen-fullmap .chap-hotspot.current .chap-hotspot-ring { animation: none; }
 }

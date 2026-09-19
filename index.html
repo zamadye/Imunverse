@@ -49,16 +49,11 @@
             <img class="deco dot d1" src="assets/sprites/deco_dots.png" alt="" />
             <img class="load-emblem" src="assets/sprites/ui_shield_emblem.png" alt="" />
           </div>
-          <!-- Logo PHAGOS lama (maskot + wordmark terpisah) — DISEMBUNYIKAN sekarang:
-               foto latar baru (bg-loading.jpg) sudah membawa wordmark "PHAGOS" sendiri,
-               dua logo tumpuk akan terlihat dobel. Elemen tetap ada (dipakai layar lain
-               yang mungkin masih mereferensikan .load-logo) tapi disembunyikan via CSS
-               khusus #screen-loading. -->
+          <!-- Logo PHAGOS — ditampilkan di atas hero roster poster. -->
           <div class="load-brand">
             <img class="load-logo" src="assets/ui/phagos-logo.png?v=55a" alt="PHAGOS" />
           </div>
-          <!-- Cincin loading — posisinya meniru slot kosong di tengah foto latar baru
-               (bentuk sel + dua mata titik berdenyut, ala mockup owner). -->
+          <!-- Cincin loading + mascot blob berdenyut di tengah layar. -->
           <div class="load-ring-slot" aria-hidden="true">
             <span class="load-ring load-ring-outer"></span>
             <span class="load-ring load-ring-inner"></span>
@@ -210,16 +205,16 @@
       </section>
 
       <!-- ============ PETA PENUH (modal dramatis dari preview dashboard) ====
-           UI-audit: overlay peta lama "terlalu HTML, tak ada efek dramatis" —
-           versi ini pakai foto latar bg-fullmap.jpg (organ tubuh bergaya
-           ilustrasi, bukan siluet flat), animasi zoom-in saat dibuka, dan
-           SEMUA bab kelihatan sekaligus (beda dari preview dashboard yang
-           sengaja dipotong pendek). Node/jalur = data yang SAMA dari
-           dashboard-screen.js (paintHost dipanggil ke dua host sekaligus)
-           supaya tak ada logika ganda yang bisa tidak sinkron. ============ -->
+           FOTO = PETA. bg-fullmap.jpg ITU SENDIRI sudah jadi peta lengkap:
+           punya jalur berliku dari Jantung ke Otak lewat organ, punya node
+           bernomor 1-14 dengan bintang/gembok, punya boss demon di node
+           8 dan 14, punya label organ. Kita TIDAK menggambar jalur atau
+           node baru di atasnya — cuma menaruh CINCIN INTERAKTIF transparan
+           di posisi node bernomor yang SUDAH ADA di foto (koordinat foto
+           per-bab: data/campaign.json → chapters[].mapPhotoPos, persen dari
+           dimensi foto). Tap cincin = pilih bab; foto kelihatan utuh dan
+           itulah esensi peta ini. ============ -->
       <section id="screen-fullmap" class="screen modal fullmap-modal" data-screen="fullmap">
-        <div class="fullmap-bg" aria-hidden="true"></div>
-        <div class="fullmap-veil" aria-hidden="true"></div>
         <div class="fullmap-box">
           <header class="fullmap-head">
             <button class="btn-back" data-back="dashboard" aria-label="Tutup peta penuh"><img src="assets/icons/ui-back.svg" alt="" /></button>
@@ -227,11 +222,10 @@
             <span class="fullmap-pos" id="fullmap-pos">BAB 1/6</span>
           </header>
           <div class="fullmap-viewport" id="fullmap-viewport">
-            <div class="body-map-canvas fullmap-canvas" id="body-map-canvas-full">
-              <svg class="body-silhouette fullmap-silhouette" viewBox="0 0 300 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-                <g id="chapter-path-group-full" class="chapter-path-group"></g>
-              </svg>
-              <div class="chapter-nodes" id="chapter-nodes-full"><!-- node per bab, diisi dashboard-screen.js --></div>
+            <div class="fullmap-photo" id="fullmap-photo">
+              <img class="fullmap-photo-img" src="assets/ui/bg-fullmap.jpg" alt="Peta tubuh" draggable="false" />
+              <div class="chapter-nodes fullmap-hotspots" id="chapter-nodes-full"><!-- hotspot per bab, diisi dashboard-screen.js -->
+              </div>
             </div>
           </div>
           <div class="chap-info-panel fullmap-info" id="chap-info-panel-full"><!-- kartu info bab terpilih, diisi dashboard-screen.js --></div>
