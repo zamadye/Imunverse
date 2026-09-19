@@ -167,6 +167,10 @@ async function loadTBolt() {
     applyQueuedInputs();
     state.machineInstance.advanceAndApply(0);
     state.artboard.advance(0);
+    if (typeof console !== 'undefined' && !isJsdomEnvironment()) {
+      console.info('[tbolt-rive] siap: %d byte, artboard=%s, input=[%s]',
+        bytes.length, options.artboard || DEFAULT_ARTBOARD, [...inputs.keys()].join(','));
+    }
     return state.status;
   } catch (error) {
     state.status = 'fallback';
@@ -311,9 +315,46 @@ function renderArtboard() {
  * @param {number} y screen-space ground y
  * @param {number} targetHeight visible character height in pixels
  */
+/**
+ * Penanda visual saat artboard belum/bisa tampil: 'RIVE…' = masih memuat,
+ * 'RIVE?' = gagal (lihat console untuk alasan). Lebih baik daripada hero
+ * hilang tanpa kabar.
+ */
+function drawTBoltMarker(ctx, x, y, targetHeight, broken) {
+  const r = Math.max(8, targetHeight * 0.28);
+  ctx.save();
+  ctx.translate(x, y - targetHeight * 0.5);
+  ctx.strokeStyle = broken ? 'rgba(255,90,90,0.95)' : 'rgba(0,210,255,0.9)';
+  ctx.lineWidth = Math.max(1.5, targetHeight * 0.02);
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#fff';
+  ctx.font = `900 ${Math.max(10, targetHeight * 0.13)}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(broken ? 'RIVE?' : 'RIVE…', 0, 1);
+  ctx.restore();
+  return true;
+}
+
 export function drawTBoltRive(ctx, x, y, targetHeight, options = {}) {
-  if (state.status !== 'ready' || !ctx || !Number.isFinite(targetHeight)) return false;
-  if (!renderArtboard()) return false;
+  if (!ctx || !Number.isFinite(targetHeight)) return false;
+  if (state.status !== 'ready') {
+    if (state.status === 'loading' || state.status === 'fallback') {
+      return drawTBoltMarker(ctx, x, y, targetHeight, state.status === 'fallback');
+    }
+    return false;
+  }
+  if (!renderArtboard()) {
+    if (typeof console !== 'undefined' && !isJsdomEnvironment() && !state.renderWarned) {
+      state.renderWarned = true;
+      console.warn('[tbolt-rive] renderer gagal (WebGL?):', state.error || 'artboard tidak tergambar');
+    }
+    return drawTBoltMarker(ctx, x, y, targetHeight, true);
+  }
   const scale = (targetHeight / ART_HEIGHT) * (options.scale || 1);
   const sx = (options.scaleX == null ? 1 : options.scaleX) * scale;
   const sy = (options.scaleY == null ? 1 : options.scaleY) * scale;
