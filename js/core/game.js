@@ -2811,17 +2811,18 @@ applyChapterTier(enemy, run) {
               { rotation: _dirAngle + tilt, scaleX: sx, scaleY: sy },
             );
           } else if (_isTBoltRive) {
-            // T-Bolt: artboard Rive visible (21 part), arah 8-way + stage evolusi.
+            // T-Bolt: artboard Rive visible (21 part), cermin kiri/kanan + stage evolusi.
+            // HUMANOID satu tampilan: JANGAN rotasi 8-way ala Mako (blob radial
+            // yang cocok diputar) — itu membuat T-Bolt jungkir-balik/miring.
+            // Pakai mirror + condong kecil seperti foto lama.
             const _tground = P.project(pBody.x, pBody.y);
-            const _tdir = quantizeMakoDirection(player.facing, { directionAngles: DEFAULT_DIRECTION_ANGLES });
-            const _tdirAngle = DEFAULT_DIRECTION_ANGLES[_tdir] || 0;
             setTBoltRiveInput('stage', _evoId === 'apex' ? 3 : _wantStage);
             drawTBoltRive(
               ctx,
               _tground.x,
               _tground.y - _lift * _tground.s,
               bodySize * _tground.s,
-              { rotation: _tdirAngle + tilt, scaleX: sx, scaleY: sy },
+              { rotation: tilt, scaleX: flip * sx, scaleY: sy },
             );
           } else {
             _cara = drawHeroBody(ctx, {
