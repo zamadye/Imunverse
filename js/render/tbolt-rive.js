@@ -53,6 +53,7 @@ const state = {
   direction: 's',
   stateName: 'idle',
   lastStage: 0,
+  loadStart: 0,
 };
 
 function cfg() {
@@ -325,6 +326,16 @@ function renderArtboard() {
  */
 function drawTBoltMarker(ctx, x, y, targetHeight, broken) {
   const r = Math.max(8, targetHeight * 0.28);
+  let sub = '';
+  if (broken) {
+    const e = String(state.error || '');
+    sub = /gagal memuat .*\.riv/.test(e) ? 'riv?' : /wasm/i.test(e) ? 'wasm?'
+      : /artboard/.test(e) ? 'art?' : /state machine/.test(e) ? 'sm?'
+      : /WebGL|render|GL/i.test(e) ? 'gl?' : /factory|runtime/i.test(e) ? 'rt?'
+      : /dimatikan/.test(e) ? 'off' : 'err?';
+  } else if (state.loadStart) {
+    sub = `${Math.floor((Date.now() - state.loadStart) / 1000)}s`;
+  }
   ctx.save();
   ctx.translate(x, y - targetHeight * 0.5);
   ctx.strokeStyle = broken ? 'rgba(255,90,90,0.95)' : 'rgba(0,210,255,0.9)';
@@ -338,7 +349,12 @@ function drawTBoltMarker(ctx, x, y, targetHeight, broken) {
   ctx.font = `900 ${Math.max(10, targetHeight * 0.13)}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(broken ? 'RIVE?' : 'RIVE…', 0, 1);
+  ctx.fillText(broken ? 'RIVE?' : 'RIVE…', 0, sub ? -r * 0.18 : 1);
+  if (sub) {
+    ctx.font = `700 ${Math.max(9, targetHeight * 0.09)}px system-ui, sans-serif`;
+    ctx.fillStyle = broken ? '#ffb3b3' : '#b3ecff';
+    ctx.fillText(sub, 0, r * 0.32);
+  }
   ctx.restore();
   return true;
 }
@@ -376,6 +392,18 @@ export function releaseTBoltRive() {
   try { state.machineInstance?.delete?.(); } catch { /* ignore */ }
   try { state.artboard?.delete?.(); } catch { /* ignore */ }
   try { state.file?.delete?.(); } catch { /* ignore */ }
+  state.machineInstance = null;
+  state.artboard = null;
+  state.file = null;
+  state.machine = null;
+  state.inputs = new Map();
+  state.renderer = null;
+  state.renderCanvas = null;
+  state.renderContext = null;
+  state.status = 'idle';
+  state.promise = null;
+}
+ore */ }
   state.machineInstance = null;
   state.artboard = null;
   state.file = null;
