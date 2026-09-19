@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "id": "mako-separable-parts",
+  "character": "Mako",
+  "status": "prepared-concept-layers",
+  "reference": "assets/character-art-src/hero_macrophage_idle.png",
+  "sourceSpec": {
+    "width": 512,
+    "height": 512,
+    "format": "png",
+    "colorType": "RGBA",
+    "background": "fully-transparent",
+    "normalization": "Each layer is centered on a 512 x 512 transparent canvas; artboard placement below is a first-pass assembly guide."
+  },
+  "targetRive": {
+    "artboard": "Mako",
+    "artboardSize": {
+      "width": 1024,
+      "height": 1024
+    },
+    "coordinateSystem": "origin-top-left, x-right, y-down",
+    "rendering": "direct-artboard",
+    "notReadyForRuntime": true,
+    "reviewGate": "Review the assembled artboard and visible pose changes before copying any animation output to assets/sprites/."
+  },
+  "layerOrderBackToFront": [
+    "leg_back",
+    "arm_back",
+    "torso",
+    "digestion_sac",
+    "leg_front",
+    "arm_front",
+    "head",
+    "mouth_open"
+  ],
+  "bones": [
+    {
+      "name": "root",
+      "parent": null,
+      "pivot": [
+        0.5,
+        0.78
+      ],
+      "purpose": "Whole-character placement; gameplay owns world translation."
+    },
+    {
+      "name": "torso",
+      "parent": "root",
+      "pivot": [
+        0.5,
+        0.52
+      ],
+      "purpose": "Primary squash, stretch, breathing, and locomotion sway."
+    },
+    {
+      "name": "head",
+      "parent": "torso",
+      "pivot": [
+        0.5,
+        0.78
+      ],
+      "purpose": "Face aim, hit recoil, attack anticipation."
+    },
+    {
+      "name": "arm_back",
+      "parent": "torso",
+      "pivot": [
+        0.18,
+        0.22
+      ],
+      "purpose": "Rear pseudopod swing and secondary locomotion counterbalance."
+    },
+    {
+      "name": "arm_front",
+      "parent": "torso",
+      "pivot": [
+        0.18,
+        0.2
+      ],
+      "purpose": "Primary reach, attack contact, and Devour grab."
+    },
+    {
+      "name": "leg_back",
+      "parent": "torso",
+      "pivot": [
+        0.5,
+        0.12
+      ],
+      "purpose": "Rear planted limb and walk weight shift."
+    },
+    {
+      "name": "leg_front",
+      "parent": "torso",
+      "pivot": [
+        0.5,
+        0.12
+      ],
+      "purpose": "Front planted limb and walk weight shift."
+    },
+    {
+      "name": "jaw",
+      "parent": "head",
+      "pivot": [
+        0.5,
+        0.22
+      ],
+      "purpose": "Mouth open pose for attack and Devour."
+    },
+    {
+      "name": "digestion_sac",
+      "parent": "torso",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "purpose": "Phagosome Vault glow and Devour digestion pulse."
+    }
+  ],
+  "parts": [
+    {
+      "id": "leg_back",
+      "file": "mako_leg_back.png",
+      "riveNode": "art/leg_back",
+      "bone": "leg_back",
+      "zIndex": 10,
+      "artboardPlacement": {
+        "x": 390,
+        "y": 650,
+        "width": 300,
+        "height": 330,
+        "pivot": [
+          0.5,
+          0.12
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "4x5",
+        "deformationPurpose": "Plant and lift with walk stride; avoid rigid rotation only."
+      }
+    },
+    {
+      "id": "arm_back",
+      "file": "mako_arm_back.png",
+      "riveNode": "art/arm_back",
+      "bone": "arm_back",
+      "zIndex": 20,
+      "artboardPlacement": {
+        "x": 250,
+        "y": 390,
+        "width": 360,
+        "height": 290,
+        "pivot": [
+          0.18,
+          0.22
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "5x4",
+        "deformationPurpose": "Swing and curl through attack anticipation and Devour wrap."
+      },
+      "cleanup": "Chroma-key cleaned from the regenerated magenta-background source; inspect edge fringe in Rive before approval."
+    },
+    {
+      "id": "torso",
+      "file": "mako_torso.png",
+      "riveNode": "art/torso",
+      "bone": "torso",
+      "zIndex": 30,
+      "artboardPlacement": {
+        "x": 282,
+        "y": 365,
+        "width": 460,
+        "height": 480,
+        "pivot": [
+          0.5,
+          0.52
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "6x6",
+        "deformationPurpose": "Breathing, squash/stretch, and readable body recoil."
+      }
+    },
+    {
+      "id": "digestion_sac",
+      "file": "mako_digestion_sac.png",
+      "riveNode": "art/digestion_sac",
+      "bone": "digestion_sac",
+      "zIndex": 35,
+      "artboardPlacement": {
+        "x": 360,
+        "y": 450,
+        "width": 300,
+        "height": 330,
+        "pivot": [
+          0.5,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "5x5",
+        "deformationPurpose": "Scale and glow pulse during Devour; remain behind torso membrane."
+      }
+    },
+    {
+      "id": "leg_front",
+      "file": "mako_leg_front.png",
+      "riveNode": "art/leg_front",
+      "bone": "leg_front",
+      "zIndex": 40,
+      "artboardPlacement": {
+        "x": 480,
+        "y": 645,
+        "width": 300,
+        "height": 330,
+        "pivot": [
+          0.5,
+          0.12
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "4x5",
+        "deformationPurpose": "Opposite planted limb in walk and locomotion anticipation."
+      }
+    },
+    {
+      "id": "arm_front",
+      "file": "mako_arm_front.png",
+      "riveNode": "art/arm_front",
+      "bone": "arm_front",
+      "zIndex": 50,
+      "artboardPlacement": {
+        "x": 430,
+        "y": 350,
+        "width": 390,
+        "height": 330,
+        "pivot": [
+          0.18,
+          0.2
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "5x4",
+        "deformationPurpose": "Primary attack reach, contact, and Devour grab deformation."
+      }
+    },
+    {
+      "id": "head",
+      "file": "mako_head.png",
+      "riveNode": "art/head",
+      "bone": "head",
+      "zIndex": 60,
+      "artboardPlacement": {
+        "x": 315,
+        "y": 170,
+        "width": 395,
+        "height": 300,
+        "pivot": [
+          0.5,
+          0.78
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "6x5",
+        "deformationPurpose": "Head aim and subtle expression squash while preserving Mako identity."
+      }
+    },
+    {
+      "id": "mouth_open",
+      "file": "mako_mouth_open.png",
+      "riveNode": "art/mouth_open",
+      "bone": "jaw",
+      "zIndex": 70,
+      "artboardPlacement": {
+        "x": 405,
+        "y": 295,
+        "width": 220,
+        "height": 205,
+        "pivot": [
+          0.5,
+          0.22
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "suggestedGrid": "4x4",
+        "deformationPurpose": "Visibility/opacity swap or jaw-open deformation for attack and Devour."
+      }
+    }
+  ],
+  "statePlan": {
+    "idle": "torso breathing plus small arm and head settle; loop",
+    "walk": "alternating leg/arm planted phases with torso weight shift; loop",
+    "attack": "anticipation, reach, contact, recovery; one-shot",
+    "devour": "charge, grab, mouth open, digestion sac pulse, heal, release; one-shot",
+    "hit": "whole-rig recoil with head and torso squash; one-shot",
+    "death": "collapse and fade/dissolve; one-shot"
+  },
+  "requiredStateMachineInputs": [
+    {
+      "name": "State",
+      "type": "enum-or-number",
+      "purpose": "Idle, walk, attack, Devour, hit, and death selection."
+    },
+    {
+      "name": "Direction",
+      "type": "number",
+      "purpose": "Eight-direction locomotion blend or discrete direction selector."
+    },
+    {
+      "name": "Attack",
+      "type": "trigger",
+      "purpose": "Start attack one-shot and expose attack event markers."
+    },
+    {
+      "name": "Devour",
+      "type": "trigger",
+      "purpose": "Start Devour one-shot and expose charge/grab/swallow/digest/heal/release markers."
+    },
+    {
+      "name": "Hit",
+      "type": "trigger",
+      "purpose": "Recoil and hit-stop response."
+    },
+    {
+      "name": "Damage",
+      "type": "number",
+      "purpose": "Drive hit intensity and optional flash deformation."
+    },
+    {
+      "name": "Heal",
+      "type": "number",
+      "purpose": "Drive Devour healing pulse and VFX intensity."
+    },
+    {
+      "name": "HitStop",
+      "type": "number",
+      "purpose": "Temporarily pause or slow the animation clock without moving the artboard externally."
+    }
+  ],
+  "authoringNotes": [
+    "Use each PNG as a separate image/mesh object; do not flatten these layers into a single photo.",
+    "Create real Rive bones and weight/deform the meshes; external CSS transforms are not a substitute.",
+    "Keep root world translation in gameplay, but keep pose, squash, stretch, jaw, and limb motion inside the Rive state machine.",
+    "Attach animation markers to attack and Devour timelines so runtime VFX and damage are event-synchronized.",
+    "This manifest is an assembly guide, not evidence that the .riv exists or that animation is complete."
+  ]
+}
