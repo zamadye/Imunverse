@@ -18,14 +18,25 @@ node tools/rive/install.mjs --archive /path/to/rive-linux-x64.tar.gz
 The archive is verified against the official SHA-256 before extraction. The
 installer does not require sudo and runs `rive --version` after unpacking.
 
-After installation, an authoring project can be built headlessly with:
+After installation, prepare the sandbox's user-local graphics libraries:
 
 ```bash
-tools/rive/engine/current/rive myproject --verify
-tools/rive/engine/current/rive myproject --once
-tools/rive/engine/current/rive myproject --screenshot=preview.png --advance=1
+npm run rive:cli:runtime
 ```
 
-`--once` writes a local `.riv`; it does not require a Rive account. The CLI's
-watch window may need system EGL/GLES/X11 libraries, but headless build and
-screenshot modes do not need the watch window.
+Then run the CLI through the workspace wrapper:
+
+```bash
+npm run rive:cli -- --version
+npm run rive:cli -- myproject --verify
+npm run rive:cli -- myproject --once
+npm run rive:cli -- myproject --screenshot=preview.png --advance=1
+```
+
+`--once` writes a local `.riv`; it does not require a Rive account. The official
+CLI links EGL/GLES, Wayland, and xkbcommon even for headless startup. The
+runtime setup uses Chromium's SwiftShader npm payload for EGL/GLES and local
+compatibility shims for the non-window headless path. It is ignored by Git and
+is only needed in this restricted sandbox; a normal Linux machine should use
+its system libraries. Watch-mode preview is not claimed to work with these
+headless shims.

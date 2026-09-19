@@ -21,6 +21,8 @@
   "verify:combat": "node tools/verify-combat.mjs",
   "rive": "node tools/gen-hero-rig.mjs",
   "rive:cli:install": "node tools/rive/install.mjs",
+  "rive:cli:runtime": "node tools/rive/setup-runtime.mjs",
+  "rive:cli": "node tools/rive/run.mjs",
   "verify:economy": "node tools/verify-economy.mjs",
   "verify:world": "node tools/verify-world.mjs",
   "verify:p5": "node tools/verify-p5.mjs",

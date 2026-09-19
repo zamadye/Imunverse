@@ -1,0 +1,428 @@
+<Rive version="1" kind="fragment">
+  <ImageAsset file="parts/mako_leg_back.png" name="leg_back" id="0:100"/>
+  <ImageAsset file="parts/mako_arm_back.png" name="arm_back" id="0:101"/>
+  <ImageAsset file="parts/mako_torso.png" name="torso" id="0:102"/>
+  <ImageAsset file="parts/mako_digestion_sac.png" name="digestion_sac" id="0:103"/>
+  <ImageAsset file="parts/mako_leg_front.png" name="leg_front" id="0:104"/>
+  <ImageAsset file="parts/mako_arm_front.png" name="arm_front" id="0:105"/>
+  <ImageAsset file="parts/mako_head.png" name="head" id="0:106"/>
+  <ImageAsset file="parts/mako_mouth_open.png" name="mouth_open" id="0:107"/>
+  <Artboard name="Mako" id="0:2" width="1024" height="1024" defaultStateMachineId="0:600">
+    <RootBone x="540" y="815" length="120" name="leg_backBone" id="0:40"/>
+    <RootBone x="430" y="535" length="120" name="arm_backBone" id="0:41"/>
+    <RootBone x="512" y="605" length="120" name="torsoBone" id="0:42"/>
+    <RootBone x="510" y="615" length="120" name="digestion_sacBone" id="0:43"/>
+    <RootBone x="630" y="810" length="120" name="leg_frontBone" id="0:44"/>
+    <RootBone x="625" y="515" length="120" name="arm_frontBone" id="0:45"/>
+    <RootBone x="512" y="320" length="120" name="headBone" id="0:46"/>
+    <RootBone x="515" y="397" length="120" name="mouth_openBone" id="0:47"/>
+    <StateMachine name="MakoStateMachine" id="0:600">
+      <StateMachineLayer name="Main" id="0:601">
+        <EntryState id="0:602">
+          <StateTransition stateToId="0:603"/>
+        </EntryState>
+        <AnimationState animationId="0:500" id="0:603"/>
+      </StateMachineLayer>
+    </StateMachine>
+    <LinearAnimation loopValue="loop" duration="90" fps="30" name="idle" id="0:500">
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898438" frame="0"/>
+          <KeyFrameDouble value=".875000" frame="45"/>
+          <KeyFrameDouble value=".898438" frame="90"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="17">
+          <KeyFrameDouble value=".937500" frame="0"/>
+          <KeyFrameDouble value=".960000" frame="45"/>
+          <KeyFrameDouble value=".937500" frame="90"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:206">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value=".025" frame="45"/>
+          <KeyFrameDouble value="0" frame="90"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:207">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value="0" frame="90"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation loopValue="loop" duration="20" fps="30" name="walk" id="0:501">
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="14">
+          <KeyFrameDouble value="605" frame="0"/>
+          <KeyFrameDouble value="595" frame="5"/>
+          <KeyFrameDouble value="605" frame="10"/>
+          <KeyFrameDouble value="595" frame="15"/>
+          <KeyFrameDouble value="605" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898" frame="0"/>
+          <KeyFrameDouble value=".91" frame="5"/>
+          <KeyFrameDouble value=".898" frame="10"/>
+          <KeyFrameDouble value=".91" frame="15"/>
+          <KeyFrameDouble value=".898" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="17">
+          <KeyFrameDouble value=".938" frame="0"/>
+          <KeyFrameDouble value=".925" frame="5"/>
+          <KeyFrameDouble value=".938" frame="10"/>
+          <KeyFrameDouble value=".925" frame="15"/>
+          <KeyFrameDouble value=".938" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:204">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value=".35" frame="0"/>
+          <KeyFrameDouble value="-.35" frame="5"/>
+          <KeyFrameDouble value=".35" frame="10"/>
+          <KeyFrameDouble value=".35" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:200">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="-.35" frame="0"/>
+          <KeyFrameDouble value=".35" frame="5"/>
+          <KeyFrameDouble value="-.35" frame="10"/>
+          <KeyFrameDouble value="-.35" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="-.22" frame="0"/>
+          <KeyFrameDouble value=".22" frame="5"/>
+          <KeyFrameDouble value="-.22" frame="10"/>
+          <KeyFrameDouble value="-.22" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:201">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value=".22" frame="0"/>
+          <KeyFrameDouble value="-.22" frame="5"/>
+          <KeyFrameDouble value=".22" frame="10"/>
+          <KeyFrameDouble value=".22" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:206">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value=".08" frame="0"/>
+          <KeyFrameDouble value="-.08" frame="5"/>
+          <KeyFrameDouble value=".08" frame="10"/>
+          <KeyFrameDouble value=".08" frame="20"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation loopValue="oneShot" duration="8" fps="18" name="attack" id="0:502">
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="14">
+          <KeyFrameDouble value="625" frame="0"/>
+          <KeyFrameDouble value="600" frame="2"/>
+          <KeyFrameDouble value="790" frame="4"/>
+          <KeyFrameDouble value="760" frame="5"/>
+          <KeyFrameDouble value="625" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value=".15" frame="0"/>
+          <KeyFrameDouble value="-.25" frame="2"/>
+          <KeyFrameDouble value="-.8" frame="4"/>
+          <KeyFrameDouble value="-.45" frame="5"/>
+          <KeyFrameDouble value=".08" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898" frame="0"/>
+          <KeyFrameDouble value=".86" frame="2"/>
+          <KeyFrameDouble value=".94" frame="4"/>
+          <KeyFrameDouble value=".898" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:207">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value="1" frame="2"/>
+          <KeyFrameDouble value="1" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:206">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value="-.06" frame="4"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation loopValue="oneShot" duration="12" fps="15" name="devour" id="0:503">
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="14">
+          <KeyFrameDouble value="625" frame="0"/>
+          <KeyFrameDouble value="650" frame="3"/>
+          <KeyFrameDouble value="730" frame="6"/>
+          <KeyFrameDouble value="680" frame="9"/>
+          <KeyFrameDouble value="625" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value=".1" frame="0"/>
+          <KeyFrameDouble value="-.2" frame="3"/>
+          <KeyFrameDouble value="-.45" frame="6"/>
+          <KeyFrameDouble value="-.25" frame="9"/>
+          <KeyFrameDouble value=".1" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:207">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value="1" frame="3"/>
+          <KeyFrameDouble value="1" frame="10"/>
+          <KeyFrameDouble value="0" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:203">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".586" frame="0"/>
+          <KeyFrameDouble value=".68" frame="3"/>
+          <KeyFrameDouble value=".75" frame="6"/>
+          <KeyFrameDouble value=".68" frame="9"/>
+          <KeyFrameDouble value=".586" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:203">
+        <KeyedProperty propertyKey="17">
+          <KeyFrameDouble value=".645" frame="0"/>
+          <KeyFrameDouble value=".7" frame="3"/>
+          <KeyFrameDouble value=".78" frame="6"/>
+          <KeyFrameDouble value=".7" frame="9"/>
+          <KeyFrameDouble value=".645" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898" frame="0"/>
+          <KeyFrameDouble value=".82" frame="6"/>
+          <KeyFrameDouble value=".898" frame="12"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation loopValue="oneShot" duration="4" fps="18" name="hit" id="0:504">
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="14">
+          <KeyFrameDouble value="605" frame="0"/>
+          <KeyFrameDouble value="620" frame="1"/>
+          <KeyFrameDouble value="600" frame="2"/>
+          <KeyFrameDouble value="605" frame="4"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value="-.12" frame="1"/>
+          <KeyFrameDouble value=".08" frame="2"/>
+          <KeyFrameDouble value="0" frame="4"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:206">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value=".12" frame="1"/>
+          <KeyFrameDouble value="-.08" frame="2"/>
+          <KeyFrameDouble value="0" frame="4"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898" frame="0"/>
+          <KeyFrameDouble value=".84" frame="1"/>
+          <KeyFrameDouble value=".92" frame="2"/>
+          <KeyFrameDouble value=".898" frame="4"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="17">
+          <KeyFrameDouble value=".938" frame="0"/>
+          <KeyFrameDouble value="1.0" frame="1"/>
+          <KeyFrameDouble value=".95" frame="2"/>
+          <KeyFrameDouble value=".938" frame="4"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <LinearAnimation loopValue="oneShot" duration="8" fps="15" name="death" id="0:505">
+      <KeyedObject objectId="0:200">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:201">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:203">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:204">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:205">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:206">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:207">
+        <KeyedProperty propertyKey="18">
+          <KeyFrameDouble value="1" frame="0"/>
+          <KeyFrameDouble value=".8" frame="3"/>
+          <KeyFrameDouble value=".35" frame="6"/>
+          <KeyFrameDouble value="0" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="14">
+          <KeyFrameDouble value="605" frame="0"/>
+          <KeyFrameDouble value="625" frame="4"/>
+          <KeyFrameDouble value="680" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="15">
+          <KeyFrameDouble value="0" frame="0"/>
+          <KeyFrameDouble value=".2" frame="4"/>
+          <KeyFrameDouble value="1.2" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="16">
+          <KeyFrameDouble value=".898" frame="0"/>
+          <KeyFrameDouble value="1.2" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+      <KeyedObject objectId="0:202">
+        <KeyedProperty propertyKey="17">
+          <KeyFrameDouble value=".938" frame="0"/>
+          <KeyFrameDouble value=".55" frame="8"/>
+        </KeyedProperty>
+      </KeyedObject>
+    </LinearAnimation>
+    <Image x="540" y="815" scaleX="0.585938" scaleY="0.644531" assetId="0:100" name="leg_back" id="0:200">
+      <Mesh triangleIndexBytes="AAECAAID" name="leg_backMesh" id="0:300">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="leg_backV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="leg_backV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="leg_backV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="leg_backV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="leg_backSkin"><Tendon boneId="0:40" tx="0" ty="0" name="leg_backTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="430" y="535" scaleX="0.703125" scaleY="0.566406" assetId="0:101" name="arm_back" id="0:201">
+      <Mesh triangleIndexBytes="AAECAAID" name="arm_backMesh" id="0:301">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="arm_backV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="arm_backV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="arm_backV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="arm_backV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="arm_backSkin"><Tendon boneId="0:41" tx="0" ty="0" name="arm_backTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="512" y="605" scaleX="0.898438" scaleY="0.937500" assetId="0:102" name="torso" id="0:202">
+      <Mesh triangleIndexBytes="AAECAAID" name="torsoMesh" id="0:302">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="torsoV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="torsoV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="torsoV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="torsoV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="torsoSkin"><Tendon boneId="0:42" tx="0" ty="0" name="torsoTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="510" y="615" scaleX="0.585938" scaleY="0.644531" assetId="0:103" name="digestion_sac" id="0:203">
+      <Mesh triangleIndexBytes="AAECAAID" name="digestion_sacMesh" id="0:303">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="digestion_sacV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="digestion_sacV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="digestion_sacV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="digestion_sacV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="digestion_sacSkin"><Tendon boneId="0:43" tx="0" ty="0" name="digestion_sacTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="630" y="810" scaleX="0.585938" scaleY="0.644531" assetId="0:104" name="leg_front" id="0:204">
+      <Mesh triangleIndexBytes="AAECAAID" name="leg_frontMesh" id="0:304">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="leg_frontV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="leg_frontV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="leg_frontV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="leg_frontV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="leg_frontSkin"><Tendon boneId="0:44" tx="0" ty="0" name="leg_frontTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="625" y="515" scaleX="0.761719" scaleY="0.644531" assetId="0:105" name="arm_front" id="0:205">
+      <Mesh triangleIndexBytes="AAECAAID" name="arm_frontMesh" id="0:305">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="arm_frontV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="arm_frontV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="arm_frontV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="arm_frontV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="arm_frontSkin"><Tendon boneId="0:45" tx="0" ty="0" name="arm_frontTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="512" y="320" scaleX="0.771484" scaleY="0.585938" assetId="0:106" name="head" id="0:206">
+      <Mesh triangleIndexBytes="AAECAAID" name="headMesh" id="0:306">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="headV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="headV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="headV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="headV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="headSkin"><Tendon boneId="0:46" tx="0" ty="0" name="headTendon"/></Skin>
+      </Mesh>
+    </Image>
+    <Image x="515" y="397" scaleX="0.429688" scaleY="0.400391" assetId="0:107" name="mouth_open" id="0:207" opacity="0">
+      <Mesh triangleIndexBytes="AAECAAID" name="mouth_openMesh" id="0:307">
+        <ContourMeshVertex x="-256" y="-256" u="0" v="0" name="mouth_openV0"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="-256" u="1" v="0" name="mouth_openV1"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="256" y="256" u="1" v="1" name="mouth_openV2"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <ContourMeshVertex x="-256" y="256" u="0" v="1" name="mouth_openV3"><Weight values="255" indices="1"/></ContourMeshVertex>
+        <Skin tx="0" ty="0" name="mouth_openSkin"><Tendon boneId="0:47" tx="0" ty="0" name="mouth_openTendon"/></Skin>
+      </Mesh>
+    </Image>
+  </Artboard>
+</Rive>

@@ -119,9 +119,14 @@ try {
 
   log(`installed ${VERSION} at ${installedBinary}`);
   try {
-    execFileSync(installedBinary, ['--version'], { cwd: VERSION_DIR, stdio: 'inherit' });
+    const runtimeLibs = path.join(ROOT, 'tools', 'rive', 'runtime-libs');
+    const env = { ...process.env };
+    if (fs.existsSync(runtimeLibs)) {
+      env.LD_LIBRARY_PATH = [runtimeLibs, env.LD_LIBRARY_PATH].filter(Boolean).join(':');
+    }
+    execFileSync(installedBinary, ['--version'], { cwd: VERSION_DIR, stdio: 'inherit', env });
   } catch {
-    fail('binary was unpacked but --version failed');
+    fail('binary was unpacked but --version failed; run npm run rive:cli:runtime and retry');
   }
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
