@@ -189,7 +189,21 @@ export function ensureTBoltRive() {
   if (state.status === 'ready' || state.status === 'fallback') return state.promise || Promise.resolve(state.status);
   if (!state.promise) {
     state.status = 'loading';
-    state.promise = loadTBolt();
+    state.loadStart = Date.now();
+    // Batas waktu: jangan gantung selamanya — nyatakan gagal dengan jelas.
+    state.promise = (async () => {
+      const timer = new Promise((_, rej) => setTimeout(() => rej(new Error('batas waktu muat 25 dtk terlampaui')), 25000));
+      try {
+        return await Promise.race([loadTBolt(), timer]);
+      } catch (error) {
+        if (state.status === 'loading') {
+          state.status = 'fallback';
+          state.error = String(error && error.message ? error.message : error);
+          if (typeof console !== 'undefined' && !isJsdomEnvironment()) console.warn('[tbolt-rive] direct renderer fallback:', state.error);
+        }
+        return state.status;
+      }
+    })();
   }
   return state.promise;
 }
