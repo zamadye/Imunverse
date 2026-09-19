@@ -12,9 +12,10 @@
 import { drawCreature, creatureAvailable, creatureStateInfo } from './creature-rig.js';
 
 const MODES = ['foto', 'hibrida', 'makhluk'];
-// DEFAULT = 'makhluk': prototipe harus TERLIHAT begitu game dibuka.
-// (Sebelumnya default 'foto' → pemain tidak melihat apa pun berubah.)
-let _mode = 'makhluk';
+// DEFAULT = 'foto': karakter yang tampil di layar HARUS foto hero asli
+// (assets/sprites/*.png) — bukan blob vektor prosedural. 'makhluk' hanya
+// prototipe eksperimen, tidak boleh jadi tampilan bawaan pemain.
+let _mode = 'foto';
 let _lastT = 0;
 
 /** Mode aktif. */

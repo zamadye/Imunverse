@@ -278,7 +278,8 @@ if (API?.game) {
   // dibaca, sehingga hero yang diukur PERTAMA tampak memakai foto dasar (dan
   // tertangkap sebagai "foto tidak berubah" palsu).
   // Penguji ini khusus mengukur FOTO mutasi — paksa mode gambar 'foto'
-  // (mode bawaan game sekarang 'makhluk', yang tidak menggambar foto sama sekali).
+  // (mode bawaan game memang sudah 'foto', tapi dipaksa eksplisit di sini
+  // supaya tes ini tidak ikut rusak bila mode bawaan berubah lagi nanti).
   try { API.hero?.setHeroMode?.('foto'); } catch { /* abaikan */ }
   const butuh = [];
   for (const h of heroes) {

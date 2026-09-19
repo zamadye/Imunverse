@@ -28,12 +28,13 @@ const cek = (nama, ok, info = '') => {
 };
 if (!API || !game) { console.log('bundle/harness belum siap'); process.exit(1); }
 
-// ---------- 0. MODE BAWAAN HARUS TERLIHAT (keluhan: "tidak ada perubahan") ----------
-// Ini uji yang dulu TIDAK ADA: prototipe boleh saja benar, tetapi kalau mode
-// bawaannya masih 'foto', pemain tidak melihat apa pun berubah.
+// ---------- 0. MODE BAWAAN HARUS MENAMPILKAN FOTO HERO ASLI ----------
+// Keluhan pemain: karakter yang tampil cuma blob vektor bulat, bukan foto
+// hero yang sudah digenerate. 'makhluk' (blob prosedural) hanya prototipe
+// eksperimen — mode bawaan WAJIB 'foto' supaya artwork asli yang terlihat.
 const modeBawaan = API.hero.heroMode();
-cek('mode BAWAAN = makhluk (perubahan langsung terlihat saat game dibuka)',
-  modeBawaan === 'makhluk', 'mode=' + modeBawaan);
+cek('mode BAWAAN = foto (foto hero asli yang tampil, bukan blob vektor)',
+  modeBawaan === 'foto', 'mode=' + modeBawaan);
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const kodeMain = fs.readFileSync(path.join(ROOT, 'js/main.js'), 'utf8');
 for (const id of ['btn-proto-lab', 'btn-proto-mode']) {
@@ -221,13 +222,16 @@ const hitungArena = async (mode) => {
   return rec;
 };
 const rFoto = await hitungArena('foto');
+const rMakhluk = await hitungArena('makhluk');
 const rBawaan = await hitungArena(modeBawaan);
-cek('arena: mode bawaan menggambar GEOMETRI MAKHLUK (bukan foto lama)',
-  rBawaan.path > rFoto.path + 40,
-  `path foto=${rFoto.path} vs bawaan=${rBawaan.path} (selisih ${rBawaan.path - rFoto.path})`);
-cek('arena: foto hero TIDAK lagi digambar di mode makhluk',
-  rBawaan.drawImage < rFoto.drawImage,
-  `drawImage foto=${rFoto.drawImage} vs bawaan=${rBawaan.drawImage}`);
+cek('arena: mode bawaan menggambar FOTO HERO ASLI (drawImage > 0)',
+  rBawaan.drawImage > 0, `drawImage bawaan=${rBawaan.drawImage}`);
+cek('arena: mode makhluk (eksperimen) tetap menggambar GEOMETRI berbeda dari foto',
+  rMakhluk.path > rFoto.path + 40,
+  `path foto=${rFoto.path} vs makhluk=${rMakhluk.path} (selisih ${rMakhluk.path - rFoto.path})`);
+cek('arena: foto hero TIDAK digambar saat mode makhluk aktif',
+  rMakhluk.drawImage < rFoto.drawImage,
+  `drawImage foto=${rFoto.drawImage} vs makhluk=${rMakhluk.drawImage}`);
 cek('arena: render tanpa NaN di mode bawaan', rBawaan.nan === 0, `${rBawaan.nan} angka tidak terhingga`);
 
 // ---------- 4c. POSISI & UKURAN DI LAYAR (harus sejajar dengan alas lama) ----------
