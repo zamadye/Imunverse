@@ -9,7 +9,10 @@
 import { PERSP } from '../render/camera.js';
 
 import { audio } from '../systems/audio-system.js';
-import { getCombat } from '../core/data-store.js';
+import { getCombat, getLocomotion } from '../core/data-store.js';
+import { ensureRig, updateRig } from '../render/rive-rig.js';
+// P7: rig merayap hasil PANGGANGAN GODOT — sumber gerak utama (anti mengambang)
+import { crawlPose, crawlLobe } from '../systems/crawl-rig.js';
 
 let nextPlayerId = 1;
 
@@ -37,7 +40,29 @@ export class Player {
     this.swing = 0;           // Fase 12c: animasi tebasan respons tombol
     this.moving = false;
     this.walkPhase = 0; // Fase 12b: animasi jalan (bobbing)
-    this.stepT = 0;     // jeda antar langkah (debu kaki)
+    this.stepT = 0;     // (dipertahankan untuk pemanggil lama; debu kaki kini
+                        //  dipicu oleh momen kaki menapak — lihat stepEvent)
+    this.time = 0;      // waktu hidup hero (napas saat diam)
+    // ---- LOCOMOTION V2 (foot-planting, putaran halus, bob & lean) ----
+    this.facingTarget = 0;  // sudut yang DIKEJAR (bukan langsung diset)
+    this.facingVel = 0;     // laju putar aktual (rad/dtk) → sumber lean belok
+    this.turnLean = 0;      // condong ke arah belokan (inersia), rad
+    this.stepIndex = 0;     // hitungan langkah (naik tiap kaki menapak)
+    this.stepEvent = 0;     // 1 pada frame kaki menapak (untuk debu)
+    this.stridePx = 48;     // panjang satu langkah (dihitung dari data)
+    this.nominalSpeed = 144;// kecepatan saat animasi jalan berputar 1×
+    this.rigActive = false; // true bila gerakan datang dari rig Rive
+    this.anim = { bob: 0, tilt: 0, sx: 1, sy: 1, legSwing: 0, armSwing: 0, headTilt: 0, shear: 0, contact: 1 };
+    this.rigSource = 'analytic'; // 'crawl' (Godot) | 'rive' | 'analytic'
+    this.time = 0;               // dipakai napas saat diam
+    // ---- ANIMASI HALUS (UI-REBUILD P8) ----
+    // Dulu sprite hanya dibalik kiri↔kanan secara instan (flip = ±1), jadi
+    // gerakan terasa kaku dan tidak pernah bereaksi ke arah atas/bawah.
+    // Sekarang semua ditahan oleh smoothing berbasis dt:
+    this.animFlip = 1;  // -1..1, lewat 0 saat berputar → sprite "menipis" = berbalik
+    this.moveAmt = 0;   // 0..1 seberapa kuat sedang berjalan (untuk bob & ayun)
+    this.lean = 0;      // miring ke arah jalan (rad) — kiri/kanan
+    this.depth = 0;     // -1..1 gerakan vertikal (menjauh → -1, mendekat → +1)
     this.vx = 0;        // V2 Phase 2: velocity smoothing (accel/decel)
     this.vy = 0;
     this.alive = true;
@@ -76,20 +101,134 @@ export class Player {
       this.vx = 0;
       this.vy = 0;
     }
+    const _prevX = this.x;
+    const _prevY = this.y;
     this.x += this.vx * dt;
     this.y += this.vy * dt;
-    if (hasInput) {
-      this.facing = Math.atan2(move.y, move.x);
-      this.moving = true;
-      // Fase 12b: animasi jalan — bobbing + debu langkah kecil
-      this.walkPhase += dt * (this.stats.speed / 16);
-      this.stepT -= dt;
-      if (this.stepT <= 0 && game && game.run) {
-        this.stepT = 0.24;
-        game.run.effects.spawnBurst(this.x, this.y + this.radius * 0.75, 'rgba(224,244,236,0.85)', 1, 30, 2.2);
+    const _dist = Math.hypot(this.x - _prevX, this.y - _prevY); // jarak TEMPUH frame ini
+    // ---- Animasi halus: semua arah (kiri/kanan/atas/bawah) ----
+    // Nilai mentah dihitung dari kecepatan (bukan tombol), lalu dihaluskan
+    // dengan peluruhan eksponensial supaya transisi tidak pernah melompat.
+    const loco = getLocomotion() || {};
+    {
+      const spd = Math.max(1, this.stats.speed || 1);
+      const vlen = Math.hypot(this.vx, this.vy);
+      const targetMove = Math.min(1, vlen / spd);
+      const targetFlip = Math.cos(this.facing) < 0 ? -1 : 1;
+      // miring searah jalan (dibatasi) — terasa seperti mencondongkan badan
+      const tiltCfg = loco.tilt || {};
+      const targetLean = Math.max(-1, Math.min(1, this.vx / spd)) * (tiltCfg.moveLean != null ? tiltCfg.moveLean : 0.13);
+      // vertikal: + = mendekat ke kamera (bawah layar), - = menjauh
+      const targetDepth = Math.max(-1, Math.min(1, this.vy / spd));
+      const ease = (cur, target, rate) => cur + (target - cur) * (1 - Math.exp(-rate * dt));
+      this.moveAmt = ease(this.moveAmt, targetMove, 7);
+      this.animFlip = ease(this.animFlip, targetFlip, 11);
+      this.lean = ease(this.lean, targetLean, 8);
+      this.depth = ease(this.depth, targetDepth, 6);
+    }
+
+    if (hasInput) this.facingTarget = Math.atan2(move.y, move.x);
+    // ---- Putaran halus (smooth rotation) ----
+    // Dulu `facing` langsung diset ke sudut input → badan berputar seketika
+    // (patah-patah saat pemain mengetuk arah). Sekarang sudut DIKEJAR dengan
+    // batas laju putar (turn.rate rad/dtk) lewat jalan terpendek di lingkaran
+    // 360°, lalu selisihnya jadi "condong ke arah belokan" (inersia).
+    {
+      const turn = loco.turn || {};
+      const rate = turn.rate || 13;
+      let d = this.facingTarget - this.facing;
+      while (d > Math.PI) d -= Math.PI * 2;   // jalan terpendek: kiri atau kanan
+      while (d < -Math.PI) d += Math.PI * 2;
+      const step = Math.max(-rate * dt, Math.min(rate * dt, d));
+      this.facing += step;
+      if (this.facing > Math.PI) this.facing -= Math.PI * 2;
+      if (this.facing < -Math.PI) this.facing += Math.PI * 2;
+      this.facingVel = dt > 0 ? step / dt : 0;
+      const targetTurnLean = Math.max(-1, Math.min(1, this.facingVel / rate)) * (turn.leanMax || 0.087);
+      const kLean = 1 - Math.exp(-(turn.leanRate || 9) * dt);
+      this.turnLean += (targetTurnLean - this.turnLean) * kLean;
+    }
+
+    // ---- Foot-planting: fase langkah dikunci ke JARAK, bukan ke waktu ----
+    // 1 langkah = π rad fase; jadi kaki menapak TE PAT setiap kali hero
+    // menempuh satu `stride` (data/locomotion.json). Kalau fase digerakkan
+    // waktu saja, kaki "menyapu" lebih cepat/lambat dari badan bergerak —
+    // itulah kesan foto digeser yang dihilangkan di sini.
+    const strideCfg = loco.stride || {};
+    this.stridePx = Math.max(strideCfg.minPx || 34, Math.min(strideCfg.maxPx || 72, this.radius * (strideCfg.radiusFactor || 3.2)));
+    this.nominalSpeed = (2 * this.stridePx) / (strideCfg.nominalCycleSec || 0.667);
+    {
+      const prevStep = this.stepIndex;
+      this.walkPhase += (_dist / this.stridePx) * Math.PI;
+      this.stepIndex = Math.floor(this.walkPhase / Math.PI);
+      this.stepEvent = this.stepIndex !== prevStep ? 1 : 0;
+    }
+
+    // ---- Rig Rive (sumber gerakan) + cadangan analitik ----
+    if (!this._rigAsked) { this._rigAsked = true; ensureRig(); }
+    const _vlen = Math.hypot(this.vx, this.vy);
+    // P7: rig merayap GODOT jadi SUMBER GERAK UTAMA. Urutan: crawl → Rive →
+    // rumus analitik (cadangan terakhir). crawl menang karena satu-satunya
+    // yang berporos di GARIS BAWAH (tidak mengambang).
+    const _heroId = (this.heroDef && this.heroDef.id) || null;
+    const _crawl = crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
+    const pose = _crawl ? null : updateRig(dt, { moveAmt: this.moveAmt, speed: _vlen, nominalSpeed: this.nominalSpeed, cfg: loco });
+    this.rigActive = !!(_crawl || pose);
+    this.rigSource = _crawl ? 'crawl' : (pose ? 'rive' : 'analytic');
+    {
+      const bobCfg = loco.bob || {};
+      const tiltCfg = loco.tilt || {};
+      const stepCurve = (1 - Math.cos(this.walkPhase * 2)) / 2; // 2 puncak/siklus
+      if (_crawl) {
+        // P7: RIG MERAYAP GODOT. Perhatikan `bob` = 0 — badan TIDAK pernah
+        // diangkat naik-turun (itulah sumber kesan "mengambang"). Seluruh
+        // gerak hidup terjadi sebagai squash-stretch berporos bawah +
+        // jangkauan (shear), sehingga tepi bawah sel tetap menempel alas.
+        this.time += dt;
+        this.anim.bob = _crawl.bob;
+        this.anim.tilt = _crawl.rot + this.turnLean;
+        this.anim.sx = _crawl.sx * (1 + this.depth * (tiltCfg.depthX || 0.05));
+        this.anim.sy = _crawl.sy * (1 - this.depth * (tiltCfg.depthY || 0.03));
+        this.anim.shear = _crawl.shear;
+        this.anim.contact = _crawl.contact;
+        this.anim.legSwing = (crawlLobe(_heroId, this.walkPhase, 0) - 1) * 1.2;
+        this.anim.armSwing = -(crawlLobe(_heroId, this.walkPhase, 2) - 1) * 1.2;
+        this.anim.headTilt = _crawl.rot * 0.4;
+      } else if (pose) {
+        // Rig Rive yang mengatur bob/condong/squash; depth kamera tetap
+        // ditambahkan supaya mendekat terasa membesar & menjauh mengecil.
+        this.anim.bob = pose.bob;
+        this.anim.tilt = pose.tilt + this.turnLean;
+        this.anim.sx = pose.sx * (1 + this.depth * (tiltCfg.depthX || 0.05));
+        this.anim.sy = pose.sy * (1 - this.depth * (tiltCfg.depthY || 0.03));
+        this.anim.legSwing = pose.legSwing;
+        this.anim.armSwing = pose.armSwing;
+        this.anim.headTilt = pose.headTilt;
+      } else {
+        // CADANGAN (rig belum siap / gagal dimuat): rumus lama yang sudah
+        // terbukti mulus — sekarang fase langkahnya ikut jarak (lihat atas).
+        this.time += dt;
+        const idleAmp = bobCfg.idleAmp != null ? bobCfg.idleAmp : 1.1;
+        const stepAmp = bobCfg.stepAmp != null ? bobCfg.stepAmp : 3.4;
+        const swayAmp = tiltCfg.swayAmp != null ? tiltCfg.swayAmp : 0.05;
+        this.anim.bob = Math.sin(this.time * (bobCfg.idleHz || 2.1)) * idleAmp + this.moveAmt * stepCurve * stepAmp;
+        this.anim.tilt = this.lean + Math.sin(this.walkPhase * 2) * swayAmp * this.moveAmt + this.turnLean;
+        this.anim.sx = 1 + this.depth * (tiltCfg.depthX || 0.05);
+        this.anim.sy = 1 - this.depth * (tiltCfg.depthY || 0.03);
+        this.anim.legSwing = Math.sin(this.walkPhase) * 0.42;
+        this.anim.armSwing = -Math.sin(this.walkPhase) * 0.32;
+        this.anim.headTilt = -Math.sin(this.walkPhase) * 0.022;
       }
-    } else {
-      this.moving = Math.hypot(this.vx, this.vy) > 4; // masih meluncur pelan
+    }
+
+    // ---- Debu langkah: TE PAT saat kaki menapak, di kaki yang menapak ----
+    this.moving = _vlen > 4;
+    if (this.stepEvent && game && game.run && _vlen > 12) {
+      const st = loco.step || {};
+      const side = (this.stepIndex % 2 === 0 ? 1 : -1) * this.radius * (st.dustSideOffset != null ? st.dustSideOffset : 0.45);
+      const fx = this.x - Math.sin(this.facing) * side;      // kaki kiri/kanan
+      const fy = this.y + Math.cos(this.facing) * side * 0.5; // agak miring (kamera)
+      game.run.effects.spawnBurst(fx, fy + this.radius * 0.75, st.dustColor || 'rgba(224,244,236,0.85)', st.dustCount || 1, st.dustSpeed || 30, st.dustLife || 2.2);
     }
 
     // ---- Timers ----
@@ -224,6 +363,32 @@ export class Player {
           turnRate,
           antiParasitMult: this.heroDef.patternParams.antiParasitMult || 0,
           color: this.heroDef.color,
+        });
+      }
+      game.run.stats.shotsFired += n;
+    } else if (pattern === 'ranged_chain') {
+      // V2 §17 archetype CHAIN: tembakan yang menyambung ke musuh terdekat
+      // di sekitar target pertama (identitas Dendritic: multi-target & kontrol).
+      const chain = game.getAttackArchetype('chain') || {};
+      const n = this.stats.projectileCount;
+      const spread = (this.heroDef.patternParams.spreadAngle || 0.5) * (n - 1);
+      const turnRate = this.heroDef.patternParams.turnRate || 4;
+      for (let i = 0; i < n; i++) {
+        const angle = this.facing - spread / 2 + (n === 1 ? 0 : (spread / (n - 1)) * i);
+        game.spawnProjectile({
+          pattern: 'homing',
+          x: this.x + Math.cos(angle) * this.radius,
+          y: this.y + Math.sin(angle) * this.radius,
+          angle,
+          speed: this.stats.projectileSpeed,
+          damage: this.stats.damage,
+          pierce: 1 + (this.heroDef.patternParams.hops || chain.maxHops || 2),
+          turnRate,
+          antiParasitMult: this.heroDef.patternParams.antiParasitMult || 0,
+          color: this.heroDef.color,
+          chainHops: this.heroDef.patternParams.hops || chain.maxHops || 2,
+          chainRadius: this.heroDef.patternParams.hopRadius || chain.hopRadius || 120,
+          chainDecay: (chain.decay != null ? chain.decay : 0.4),
         });
       }
       game.run.stats.shotsFired += n;

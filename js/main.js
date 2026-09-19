@@ -12,17 +12,43 @@
 import { STATE, setPaused } from './core/state-manager.js';
 import { GameLoop } from './core/game-loop.js';
 import { loadAllData, getData, applyDataLanguage } from './core/data-store.js';
+import { applyRunDefaults } from './systems/chapters.js';
 import { initMetrics } from './systems/metrics.js'; // V2 Phase 0: instrumen KPI
 import { initPwa } from './systems/pwa.js'; // Sprint 6.35: PWA
 import { loadLang, initSweep, sweepAll, t } from './systems/i18n.js';
 import { emit, on } from './core/ui-bridge.js';
 import { game } from './core/game.js';
+import {
+  cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
+} from './systems/mutation-cinematic.js'; // P2 §9: sinematik mutasi
+import {
+  antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost, economyPhase,
+  earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+} from './systems/antibody-economy.js'; // P3: ekonomi antibodi
+import {
+  initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
+  enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+} from './systems/world-journey.js'; // P4: dunia kontinu
+// P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §21) + iklan reward
+import { reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve, maxAssistFor, reserveUsesLeft, reserveEnabled } from './systems/reserve-system.js';
+import { iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun } from './systems/purchase-provider.js';
+import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
+// P7: tanda tangan serangan per hero (identitas tempur)
+import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
+import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
+// P7-PROTOTIPE: lab & pemilih cara gambar hero
+import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode, heroModeLabel } from './render/hero-mode.js';
+import { bukaLab, tutupLab, gantiLab, initLab, labTerbuka } from './ui/prototype-lab.js';
+import { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy } from './render/creature-rig.js';
+// P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
+import { updateGameFeel, numberAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction, crowdScale, particleBudget, deathPopFor, gfTier, tierForEvent, TIER_ORDER } from './systems/game-feel.js';
 import { Pickup } from './entities/pickup.js';
+import { Enemy } from './entities/enemy.js';
 import { InputHandler } from './input/input-handler.js';
-import { loadAllSprites, spriteToDataURL } from './render/sprite-loader.js';
+import { loadAllSprites, spriteToDataURL, hasSprite, spriteStats } from './render/sprite-loader.js';
 import { loadSave, writeSave } from './save/save-manager.js';
 import { createDefaultMeta, mergeMetaDefaults } from './core/state-manager.js';
-import { getHero } from './core/data-store.js';
+import { getHero, getAudio } from './core/data-store.js';
 import { isDevMode } from './core/dev-mode.js';
 import { music } from './systems/music-system.js';
 import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
@@ -33,40 +59,26 @@ import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
 import * as dashboardScreen from './ui/screens/dashboard-screen.js';
 import * as rosterScreen from './ui/screens/roster-screen.js';
-import * as upgradeScreen from './ui/screens/upgrade-screen.js';
-import * as shopScreen from './ui/screens/shop-screen.js';
 import * as hudScreen from './ui/screens/hud-screen.js';
 import * as levelupScreen from './ui/screens/levelup-screen.js';
 import * as pauseScreen from './ui/screens/pause-screen.js';
 import * as reviveScreen from './ui/screens/revive-screen.js';
+import * as openboxScreen from './ui/screens/openbox-screen.js'; // V2 onboarding: reveal hero bonus
+import * as signupScreen from './ui/screens/signup-screen.js'; // V2 onboarding: simpan progres (ringkas)
 import * as gameoverScreen from './ui/screens/gameover-screen.js';
-import * as arenaScreen from './ui/screens/arena-screen.js';
-import * as prepScreen from './ui/screens/prep-screen.js';
-import { onRunStart as tutorialOnRunStart, isTutorialActive } from './systems/tutorial-system.js';
+import { onRunStart as tutorialOnRunStart } from './systems/tutorial-system.js';
 import { audio } from './systems/audio-system.js';
-import { cinematic, playOnce } from './ui/cinematic.js';
-import * as campaignScreen from './ui/screens/campaign-screen.js';
 import * as codexScreen from './ui/screens/codex-screen.js';
-import * as battlepassScreen from './ui/screens/battlepass-screen.js';
 import * as authScreen from './ui/screens/auth-screen.js';
 import * as heroDetailScreen from './ui/screens/hero-detail-screen.js';
 import { signUp, hasAccount } from './systems/account-system.js';
 import { isDockGated } from './systems/feature-gate.js';
 import * as coach from './ui/coach.js';
-import * as bagScreen from './ui/screens/bag-screen.js';
-import * as bosschestScreen from './ui/screens/bosschest-screen.js';
-import * as rankScreen from './ui/screens/rank-screen.js';
 import * as profileScreen from './ui/screens/profile-screen.js';
+import * as shopScreen from './ui/screens/shop-screen.js';
 import * as titleScreen from './ui/screens/title-screen.js';
-import * as capsuleScreen from './ui/screens/capsule-screen.js'; // ADDENDUM §1: Kapsul Membran
-import * as comebackScreen from './ui/screens/comeback-screen.js'; // Sprint 6.31: §10.1 Comeback
-import { getChallenge, showChallengeModal } from './systems/challenge-system.js'; // ADDENDUM §3.3
-import { handleRefParam } from './systems/referral-system.js'; // ADDENDUM P2 §3.4
-import { decodeBuild, showBuildModal } from './systems/build-share-system.js'; // ADDENDUM P2 §6.6
-import { showPresenter } from './ui/presenter.js'; // E1 poin 8+9: karakter naratif hidup
+import * as missionsScreen from './ui/screens/missions-screen.js'; // UI-REBUILD P8: modal Misi & Quest
 import { playWaveCinematic, waveCineActive } from './ui/wave-cinematic.js'; // E2 poin 6: cinematic wave penting
-import { playCutscene, prewarmCutscenes, cutsceneActive } from './ui/cutscene-player.js'; // R3 (Narrative-Cinematic)
-import { vo } from './systems/vo-system.js'; // R3: lapisan VO
 
 const canvas = document.getElementById('game');
 const vignette = document.getElementById('damage-vignette');
@@ -95,11 +107,9 @@ function showToast({ message, kind = '' }) {
   el.className = 'toast ' + kind;
   el.textContent = message;
   box.appendChild(el);
-  // R2: bark RIA = beat naratif — tampil lebih lama & tidak tergusur toast lain
-  setTimeout(() => el.remove(), kind === 'ria' ? 5200 : 3200);
+  setTimeout(() => el.remove(), 3200);
   while (box.children.length > 4) {
-    const victim = [...box.children].find((c) => !c.classList.contains('ria')) || box.firstChild;
-    victim.remove();
+    box.firstChild.remove();
   }
 }
 
@@ -110,11 +120,7 @@ function wireUiBridge() {
   on('toast', (payload) => {
     // Fase 12c: jangan menumpuk — maksimal 2 toast, yang tertua dihapus
     const live = [...document.querySelectorAll('#toasts .toast')];
-    if (live.length >= 2) {
-      // R2: jangan gusur bark RIA — korbankan toast non-naratif tertua
-      const victim = live.find((c) => !c.classList.contains('ria')) || live[0];
-      victim.remove();
-    }
+    if (live.length >= 2) live[0].remove();
     showToast(payload);
   });
 
@@ -171,6 +177,16 @@ function wireUiBridge() {
 
   on('wave', ({ wave, isBoss }) => {
     hudScreen.showAnnounce(isBoss ? 'BOSS!' : `WAVE ${wave}`, isBoss);
+    // AUDIO: duel boss punya trek sendiri; gelombang biasa balik ke trek bab.
+    try {
+      if (isBoss) {
+        music.setTrack('boss');
+      } else {
+        const chId = (STATE.meta.selectedChapter || '').replace('bab_', '');
+        const map = getAudio()?.chapterTracks || {};
+        music.setTrack(map[chId] || 'run');
+      }
+    } catch { /* musik tak boleh memecat gameplay */ }
   });
   // F25: panel quest kiri-tengah — AMBIL → progres → KLAIM (hadiah TIDAK otomatis)
   /**
@@ -259,102 +275,31 @@ function wireUiBridge() {
   on('waveBreak', ({ wave }) => {
     hudScreen.showAnnounce(`ARENA BERSIH · WAVE ${wave}`, false);
     // E2 poin 6: WAVE PENTING (kelipatan boss, mis. 5/10/15) → cinematic
-    // kemenangan 3 babak: diserang → melawan & menang → ancaman lebih besar
-    // muncul. Gameplay dipause, selesai → resume → RIA menyambut.
+    // kemenangan 3 babak: diserang → melawan & menang → ancaman lebih besar muncul.
     const bossEvery = (getData().waves && getData().waves.bossWaveEvery) || 5;
     if (wave > 0 && wave % bossEvery === 0) {
       // playWaveCinematic DULU (set flag aktif) baru pause — supaya handler
       // on('pause') tahu ini cinematic, bukan modal jeda.
-      playWaveCinematic(wave, () => {
-        game.resume();
-        setTimeout(() => showPresenter('ria',
-          `Luar biasa! Wave ${wave} kita menangkan... tapi kurasakan getaran patogen yang JAUH lebih besar mendekat. Bersiaplah — aku di sini bersamamu!`,
-          { duration: 5.5 }), 350);
-      });
+      playWaveCinematic(wave, () => game.resume());
       game.pause();
       return;
     }
-    // E1 poin 9: RIA muncul TIAP selesai wave — karakter hidup (pose bicara
-    // + gestur), teks di samping, auto-hilang cepat agar ritme tak terganggu.
-    const riaBarks = [
-      `Wave ${wave} bersih! Patogen mundur — tarik napas, sebentar lagi datang lebih banyak.`,
-      `Kerja bagus! Wave ${wave} selesai. Kuperbarui peta ancaman... siap-siap ya!`,
-      `Area aman! Itu tadi wave ${wave}. Pungut nutrisi selagi sempat!`,
-      `Wave ${wave} tumbang! Sinyal inflamasi menurun... tapi jangan lengah.`,
-    ];
-    showPresenter('ria', riaBarks[wave % riaBarks.length], { duration: 4 });
   });
 
-  // R3 (Narrative-Cinematic): REVEAL BOSS BAB 5 (naskah final 6.3) —
-  // cutscene 2-panel 1× sejak pernah; selain itu = bark VO 3-5 dtk (7.3).
-  on('bossBark', ({ chapterId }) => {
-    const meta = STATE.meta;
-    const cs = getData().cutscenes;
-    if (chapterId === 'bab_kanker' && !meta.bossRevealSeen) {
-      meta.bossRevealSeen = true;
-      writeSave(meta);
-      // reveal twist: pause → cutscene → resume (pola cinematic wave;
-      // cutsceneActive() di-set sinkron oleh playCutscene sebelum pause)
-      playCutscene('boss_reveal_bab_kanker', () => game.resume());
-      game.pause();
-      return;
-    }
-    const voPath = cs && cs.bossVo ? (cs.bossVo[chapterId] || cs.bossVo.default) : null;
-    if (voPath) vo.play(voPath);
-  });
-
-  // R3 Task 4: FIRST-TIME EXPERIENCE RIA (sekali sejak pernah, non-blocking,
-  // bisa di-tap untuk skip — presenter + VO, nada bersemangat/jenaka).
-  // RONDE-3 visual fix: presenter TIDAK boleh menumpuk di atas modal Level-Up /
-  // pause — bark ditunda sampai momen resume (antrian 1 baris).
-  let pendingBark = null;
-  function flushBark() {
-    const b = pendingBark;
-    pendingBark = null;
-    if (b) setTimeout(() => {
-      // Level-up beruntun: jangan menimpa modal yang baru terbuka — antri ulang
-      if (STATE.levelUpOpen || (game.run && game.run.paused)) { pendingBark = b; return; }
-      showPresenter(b.who, b.text, b.opts);
-    }, 420);
-  }
-  function nftFirst(key, event) {
-    const meta = STATE.meta;
-    if (meta.nft && meta.nft[key]) return;
-    // RONDE-4 (check-3): riwayat — saat tutorial onboarding berjalan, bark
-    // RIA (NFT) dilewati. RONDE-7: tutorial dimatikan → cabang ini moot,
-    // disimpan demi keamanan bila sistem onboarding dihidupkan lagi.
-    if (isTutorialActive()) {
-      meta.nft = meta.nft || {};
-      meta.nft[key] = true;
-      writeSave(meta);
-      return;
-    }
-    const nft = getData().cutscenes && getData().cutscenes.nft;
-    const line = nft && nft[key];
-    if (!line) return;
-    meta.nft = meta.nft || {};
-    meta.nft[key] = true;
-    writeSave(meta);
-    if (STATE.levelUpOpen || (game.run && game.run.paused)) {
-      pendingBark = { who: 'ria', text: line.text, opts: { vo: line.vo } };
-    } else {
-      showPresenter('ria', line.text, { vo: line.vo });
-    }
-    if (event) event.preventDefault?.();
-  }
-  on('nftMove', () => nftFirst('move'));
+  // V2 onboarding: true di antara 'levelup' pertama dan 'resume' berikutnya —
+  // lihat on('levelup')/on('resume') di bawah.
+  let pendingOnboardingBox = false;
   on('levelup', (payload) => {
-    nftFirst('levelup');
+    // V2 onboarding: level-up PERTAMA pemain (siapa pun, jalur mana pun)
+    // dilanjutkan dengan modal "openbox" (reveal hero bonus) setelah pilihan
+    // mutasi selesai — lihat on('resume') di bawah.
+    if (!STATE.meta.onboardingBoxSeen) pendingOnboardingBox = true;
     screenManager.show('levelup', payload);
   });
-  on('revive', () => {
-    nftFirst('revive');
-    screenManager.show('revive');
-  });
+  on('revive', () => screenManager.show('revive'));
   // skill pertama = cast kemampuan pertama (banner nama kemampuan)
   let bannerTimer = null;
   on('abilityBanner', ({ name, color }) => {
-    nftFirst('skill');
     const b = document.getElementById('ability-banner');
     if (!b) return;
     b.textContent = name;
@@ -367,26 +312,21 @@ function wireUiBridge() {
     bannerTimer = setTimeout(() => b.classList.remove('show'), 1100);
   });
 
-  // E1 poin 9: AMARA muncul saat pemain MENDAPAT HERO BARU — menjelaskan
-  // spesifikasi (role + skill) dengan bahasa awam, karakter penuh bergestur.
-  on('heroUnlocked', ({ heroId }) => {
-    const h = getData().heroes.heroes.find((x) => x.id === heroId);
-    if (!h) return;
-    const skillNames = (h.skills || []).map((sid) => {
-      const sd = getData().skills.skills.find((x) => x.id === sid);
-      return sd ? sd.name : sid;
-    }).join(', ');
-    setTimeout(() => showPresenter('amara',
-      `Selamat! ${h.name} — ${h.title} — bergabung dengan pasukanmu. Perannya ${h.role}. Jurus andalannya: ${skillNames}. Coba dia di run berikutnya!`,
-      { duration: 9 }), 900);
-  });
-
-  on('bosschest', (payload) => screenManager.show('bosschest', payload));
-  on('pause', () => { if (!waveCineActive() && !cutsceneActive()) screenManager.show('pause'); }); // E2 poin 6 + R3: cinematic ≠ modal pause
+  on('pause', () => { if (!waveCineActive()) screenManager.show('pause'); }); // E2 poin 6: cinematic ≠ modal pause
   // Modal tertutup (level-up selesai / resume / revive sukses) → kembali ke HUD
   on('resume', () => {
+    // V2 onboarding: level-up pertama → jangan langsung ke HUD, sisipkan
+    // modal openbox (hero bonus) dulu. game.js sudah setPaused(false) sebelum
+    // emit ini — kunci lagi supaya run tidak berjalan di belakang modal.
+    if (pendingOnboardingBox) {
+      pendingOnboardingBox = false;
+      STATE.meta.onboardingBoxSeen = true;
+      writeSave(STATE.meta);
+      setPaused(true);
+      screenManager.show('openbox');
+      return;
+    }
     if (STATE.screen === 'gameplay') screenManager.show('hud');
-    flushBark(); // bark NFT yang ditunda saat modal terbuka → tampil bersih di HUD
   });
   on('gameover', (payload) => { music.stop(); screenManager.show('gameover', payload); });
 }
@@ -418,6 +358,7 @@ async function boot() {
   const data = await loadAllData();
   loadingScreen.setProgress(12, 'Data patogen dimuat…');
 
+
   // 1b) Dwibahasa: muat kamus + pasang observer DOM (bahasa diterapkan setelah save dimuat)
   await loadLang();
   initSweep();
@@ -429,24 +370,18 @@ async function boot() {
   });
   loadingScreen.setProgress(98, 'Mengaktifkan sistem imun…');
 
-  // R3 (Narrative-Cinematic): prewarm cutscene (modul three.js + VO pembuka)
-  // di background — jank init WebGL keluar dari jalur kritis cutscene.
-  prewarmCutscenes();
-
   // 3) Save / meta
   const raw = loadSave();
   STATE.meta = raw ? mergeMetaDefaults(raw) : createDefaultMeta();
   if (isDevMode()) {
     // In-memory only: dev access never overwrites the player's real save.
-    STATE.meta.imun = 999999;
     STATE.meta.currency = 999999;
     STATE.meta.stats = { ...STATE.meta.stats, wins: 99, totalKills: 9999, bossKills: 99, bestWave: 99, totalRuns: 99 };
     STATE.meta.unlockedHeroes = data.heroes.heroes.map((h) => h.id);
     STATE.meta.campaignCleared = Object.fromEntries(data.campaign.chapters.map((c) => [c.id, 2]));
     STATE.meta.evoStage = 4;
     STATE.meta.evoParts = { fragmen_diferensiasi: 999 };
-    STATE.meta.allies = 6;
-    STATE.meta.allyLevel = 99;
+    STATE.meta.reserve = 5000; // P5: Test C — cadangan besar (in-memory saja, tidak tersimpan)
     for (const def of (data.upgrades.globalUpgrades || [])) {
       STATE.meta.globalUpgrades[def.id] = def.maxLevel;
     }
@@ -463,30 +398,22 @@ async function boot() {
   screenManager.registerScreen('loading', loadingScreen);
   screenManager.registerScreen('dashboard', dashboardScreen);
   screenManager.registerScreen('roster', rosterScreen);
-  screenManager.registerScreen('upgrade', upgradeScreen);
-  screenManager.registerScreen('shop', shopScreen);
   screenManager.registerScreen('hud', hudScreen);
   screenManager.registerScreen('levelup', levelupScreen);
   screenManager.registerScreen('pause', pauseScreen);
   screenManager.registerScreen('revive', reviveScreen);
+  screenManager.registerScreen('openbox', openboxScreen); // V2 onboarding: reveal hero bonus
+  screenManager.registerScreen('signup', signupScreen); // V2 onboarding: simpan progres (ringkas)
   screenManager.registerScreen('gameover', gameoverScreen);
-  screenManager.registerScreen('arena', arenaScreen);
-  screenManager.registerScreen('prep', prepScreen);
-  screenManager.registerScreen('campaign', campaignScreen);
   screenManager.registerScreen('codex', codexScreen);
-  screenManager.registerScreen('bp', battlepassScreen);
   screenManager.registerScreen('auth', authScreen);
   screenManager.registerScreen('herodetail', heroDetailScreen);
-  screenManager.registerScreen('bag', bagScreen);
-  screenManager.registerScreen('bosschest', bosschestScreen);
-  screenManager.registerScreen('rank', rankScreen);
   screenManager.registerScreen('profile', profileScreen);
   screenManager.registerScreen('title', titleScreen);
-  screenManager.registerScreen('capsule', capsuleScreen); // ADDENDUM §1: Kapsul Membran
-  screenManager.registerScreen('comeback', comebackScreen); // Sprint 6.31: §10.1 Comeback
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
-  bosschestScreen.wire();
-  rankScreen.wire(); // Fase 19: modal pangkat
+  screenManager.registerScreen('missions', missionsScreen); // UI-REBUILD P8: modal Misi & Quest (footer)
+  screenManager.registerScreen('shop', shopScreen); // UI-REBUILD P7: modal Shop (kartu atas dashboard)
+  screenManager.registerScreen('fullmap', {}); // UI-audit: modal peta penuh dramatis — DOM-nya diisi dashboard-screen.js (paintHost), tak perlu modul show/hide sendiri
   titleScreen.wire(); // F21: layar judul gameplay-first
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih
@@ -510,24 +437,10 @@ async function boot() {
         '<b>Upgrade hero & squad membayar dengan biokredit</b> — kumpulkan lebih banyak per run!',
       ],
     },
-    imu: {
-      title: 'Cara Mendapatkan Genom',
-      icon: 'assets/icons/cur-imun.svg',
-      balance: () => Math.floor(STATE.meta.imun || 0),
-      tasks: [
-        '<b>Main run berulang</b> — tiap kill patogen memberi Genom kecil.',
-        '<b>Selesaikan tiap wave</b> — bonus Genom per wave tuntas.',
-        '<b>Kalahkan boss</b> — hadiah Genom besar tiap boss tumbang.',
-        '<b>Naikkan Mastery hero</b> — reward Genom di akhir run (sistem Mastery).',
-        '<b>Genom dipakai untuk Siklus Mitosis premium</b> — kumpulkan dari run ke run!',
-      ],
-    },
   };
 
   let guideAutoPaused = false;
   function closeCurGuide() {
-    const pr = document.getElementById('presenter-layer');
-    if (pr) pr.style.visibility = '';
     // kembali ke dunia yang aktif; resume hanya bila kami yang mem-pause sebelumnya
     if (guideAutoPaused && game.run && !game.run.ended && game.run.paused) {
       game.resume();
@@ -554,22 +467,26 @@ async function boot() {
       guideAutoPaused = true;
     }
     screenManager.show('curguide');
-    // presenter naratif (RIA) jangan menimpa tombol baca— sembunyikan sementara
-    const pr = document.getElementById('presenter-layer');
-    if (pr) pr.style.visibility = 'hidden';
+  }
+
+  // ---------- KARTU ATAS DASHBOARD (bentuk sel meleleh) ----------
+  // P10: tinggal 2 kartu: Profil/Level → layar profil · Nilai Antibody →
+  // panduan cara mendapatkan antibodi. Shop pindah ke menu "..." (data-nav
+  // generik di bawah menangani navigasinya, tak perlu wiring khusus lagi).
+  {
+    const pasang = (id, aksi) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => { try { audio.ui(); } catch { /* abaikan */ } aksi(); });
+    };
+    pasang('card-level', () => screenManager.show('profile'));
+    pasang('card-anti', () => openCurGuide('anti'));
   }
 
   const antiChip = document.getElementById('hud-anti-chip');
-  const imuChip = document.getElementById('hud-imu-chip');
   if (antiChip) {
     antiChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('anti'); });
     antiChip.addEventListener('click', () => openCurGuide('anti'));
     antiChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('anti'); } });
-  }
-  if (imuChip) {
-    imuChip.querySelector('.cur-plus').addEventListener('click', (ev) => { ev.stopPropagation(); openCurGuide('imu'); });
-    imuChip.addEventListener('click', () => openCurGuide('imu'));
-    imuChip.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCurGuide('imu'); } });
   }
   const cgClose = document.getElementById('btn-curguide-close');
   if (cgClose) cgClose.addEventListener('click', closeCurGuide);
@@ -630,37 +547,23 @@ async function boot() {
   // Wire tombol modal revive & gameover (sekali saat boot)
   reviveScreen.wireButtons();
   gameoverScreen.wireButtons();
-  document.getElementById('btn-arena-close').addEventListener('click', () => backToContext());
   // R1 (Rebuild): PLAY → LANGSUNG masuk run (addendum UX — core loop dulu).
   // Default otomatis: mode kampanye + bab aktif + hero terpilih. Pilihan bab
   // (Peta Tubuh) baru di-expose setelah run ke-3 — trigger-based, bukan waktu.
+  // V2 §34: PLAY = langsung masuk perjalanan (tanpa layar pilih stage/bab).
   // Fase 13: tombol dirender ulang saat dashboard tampil → pakai delegasi
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#btn-play-big')) return;
-    const meta = STATE.meta;
-    const runs = (meta.stats && meta.stats.totalRuns) || 0;
-    if (runs >= 3) {
-      screenManager.show('campaign'); // pemain sudah paham loop → boleh memilih
-      return;
-    }
-    // Default otomatis: bab pertama yang belum tamat, mode kampanye
-    const chapters = (getData().campaign && getData().campaign.chapters) || [];
-    const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
-    if (ch) { meta.selectedChapter = ch.id; meta.selectedMode = 'kampanye'; }
-    const heroDef = getHero(meta.selectedHero);
-    const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
-    game.startRun(unlocked ? heroDef.id : (getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0]).id);
+    startRunFromDashboard();
   });
   // Sidebar (fitur — berbeda dari dock inti): Home/Kampanye/Bio/Rekor/Tubuh
   const sideHome = document.getElementById('side-home');
   if (sideHome) sideHome.addEventListener('click', () => {
-    document.querySelector('.dash-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('map-viewport')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  document.getElementById('side-campaign')?.addEventListener('click', () => screenManager.show('campaign'));
   document.getElementById('side-codex')?.addEventListener('click', () => screenManager.show('codex'));
-  document.getElementById('side-bp')?.addEventListener('click', () => screenManager.show('bp'));
   document.getElementById('side-records')?.addEventListener('click', () => document.getElementById('leaderboard-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  document.getElementById('side-body')?.addEventListener('click', () => document.getElementById('body-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
   // PHAGOS: tombol PULSE (SATU TOMBOL) — tiap TEKAN = satu ledakan membran.
   // Antrean edge-trigger dikonsumsi game.update; onPress memberi respons instan.
@@ -683,6 +586,18 @@ async function boot() {
   const unlockAudio = () => audio.unlock();
   window.addEventListener('pointerdown', unlockAudio, { once: true });
   window.addEventListener('keydown', unlockAudio, { once: true });
+  // P7-PROTOTIPE: P = lab prototipe makhluk, M = ganti cara gambar hero di arena
+  window.addEventListener('keydown', (ev) => {
+    const t = ev.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    const k = (ev.key || '').toLowerCase();
+    if (k === 'p') { ev.preventDefault(); gantiLab(); }
+    else if (k === 'm') {
+      ev.preventDefault();
+      const m = cycleHeroMode();
+      try { showToast({ message: 'Mode hero: ' + m.toUpperCase() + ' (M untuk ganti)', kind: 'info' }); } catch { /* abaikan */ }
+    }
+  });
 
   // Toggle suara (dashboard + modal pause) — ikon & label sinkron
   const soundIcon = () => document.getElementById('img-sound-icon');
@@ -724,9 +639,15 @@ async function boot() {
   // Satu-satunya aksi tempur keyboard: 4 / T / K = PULSE langsung.
   // (SPASI ditangani InputHandler — antrean edge-trigger — jangan di sini.)
   window.addEventListener('keydown', (ev) => {
-    if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const target = ev.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+    // P2 §9: LEWATI sinematik mutasi dengan Spasi/Enter — VALID, tidak ada hukuman.
+    if (cineActive() && (ev.key === ' ' || ev.key === 'Enter' || ev.key === 'Escape')) {
+      ev.preventDefault();
+      skipCinematic('keyboard');
+      return;
+    }
+    if (STATE.screen !== 'gameplay' || STATE.levelUpOpen) return;
     const key = ev.key;
     if (key === '4' || key.toLowerCase() === 't' || key.toLowerCase() === 'k') {
       ev.preventDefault();
@@ -765,6 +686,9 @@ async function boot() {
     } catch { /* tidak didukung */ }
   }
   document.getElementById('btn-play').addEventListener('click', () => {
+    // Peta tubuh: MAIN memakai bab yang sedang terlihat. Bab terkunci → peringatan,
+    // jangan diam-diam memulai run di bab lain.
+    if (dashboardScreen.canPlaySelected && !dashboardScreen.canPlaySelected()) return;
     enterImmersiveFullscreen();
     // Fast path: Play langsung memulai run dengan hero terpilih.
     // Bila hero terpilih ternyata terkunci (save lama), buka roster.
@@ -797,6 +721,12 @@ async function boot() {
   // 5) Game loop (rAF + delta-time) — update hanya saat gameplay aktif
   const loop = new GameLoop(
     (dt) => {
+      // P2 §9: saat sinematik mutasi berjalan, dunia DIBEKUKAN — hanya adegan
+      // yang maju. Lewati lewat tombol/spasi (lihat handler di bawah).
+      if (cineActive()) {
+        updateMutationCinematic(dt);
+        return;
+      }
       if (STATE.screen === 'gameplay' && !STATE.paused && !STATE.levelUpOpen) {
         game.update(dt);
       }
@@ -838,6 +768,74 @@ async function boot() {
     return true;
   };
   window.__IMUNVERSE = { game, STATE, screenManager, input, getData }; // getData: harness e2e
+  try { initHeroMode(); } catch { /* abaikan */ }
+  // P4: permukaan debug perjalanan dunia (dipakai penguji & autotest).
+  window.__IMUNVERSE.world = {
+    initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
+    enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+  };
+  // P3: permukaan debug ekonomi antibodi (dipakai penguji & autotest).
+  window.__IMUNVERSE.economy = {
+    antibodyForKill, antibodyForEngulf, mutationCost, totalMutationCost,
+    economyPhase, earnAntibody, runAntibody, projectedRunIncome, economyLog, recordEconomyEvent,
+  };
+  // P6: audio bundel — dipakai penguji untuk mengintai throttle SFX.
+  window.__IMUNVERSE.audio = audio;
+  // P6: kelas Enemy — dipakai penguji untuk menyiapkan musuh elite/boss.
+  window.__IMUNVERSE.Enemy = Enemy;
+  // P7: permukaan debug RIG MERAYAP GODOT (dipakai penguji & autotest).
+  window.__IMUNVERSE.crawl = { crawlPose, crawlLobe, crawlStatus };
+  // P7-PROTOTIPE: kendali di LAYAR (bisa disentuh) — tidak cuma tombol keyboard
+  {
+    const bLab = document.getElementById('btn-proto-lab');
+    const bMode = document.getElementById('btn-proto-mode');
+    const segar = () => { if (bMode) bMode.textContent = 'Mode hero: ' + heroModeLabel(); };
+    if (bLab) bLab.addEventListener('click', () => { audio.ui(); bukaLab('macrophage'); });
+    if (bMode) bMode.addEventListener('click', () => {
+      audio.ui();
+      const m = cycleHeroMode();
+      segar();
+      try { showToast({ message: 'Mode hero: ' + heroModeLabel(m) + ' — rasakan di arena', kind: 'info' }); } catch { /* abaikan */ }
+    });
+    segar();
+    // segarkan label setiap layar jeda dibuka
+    try {
+      const layarJeda = document.getElementById('screen-pause');
+      if (layarJeda && typeof MutationObserver !== 'undefined') {
+        new MutationObserver(segar).observe(layarJeda, { attributes: true, attributeFilter: ['class'] });
+      }
+    } catch { /* abaikan */ }
+  }
+  window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, bukaLab, tutupLab, labTerbuka };
+  window.__IMUNVERSE.creature = { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy };
+  // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)
+  window.__IMUNVERSE.sprites = { has: hasSprite, stats: spriteStats };
+  // P7: permukaan debug SERANGAN (dipakai penguji & autotest).
+  window.__IMUNVERSE.attacks = {
+    beginAttack, updateAttack, attackActive, attackProgress, signatureFor,
+    archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods,
+  };
+  // P6: permukaan debug GAME FEEL (dipakai penguji & autotest).
+  window.__IMUNVERSE.gameFeel = {
+    TIER_ORDER, gfTier, tierForEvent, crowdScale, updateGameFeel, numberAllowed,
+    playSfx, addImpactShake, applyHitImpact, applyDeathImpact, enemyReaction,
+    particleBudget, deathPopFor,
+  };
+  // P5: permukaan debug CADANGAN (dipakai penguji & autotest).
+  window.__IMUNVERSE.reserve = {
+    reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve,
+    maxAssistFor, reserveUsesLeft, reserveEnabled,
+  };
+  // P5: permukaan debug provider pembelian MOCK (IAP §21) + status iklan.
+  window.__IMUNVERSE.purchases = {
+    iapCfg, iapEnabled, iapPacks, buyReservePack, purchaseProvider, setPurchaseProvider, maxIapOffersPerRun,
+    adStatus, triggerRewardedAdAntibody,
+  };
+  // P2 §9: permukaan debug sinematik mutasi (dipakai penguji & autotest).
+  try { initLab(); } catch { /* abaikan */ }
+  window.__IMUNVERSE.mutationCinematic = {
+    cineActive, updateMutationCinematic, skipCinematic, cinePhase, cineDuration, startMutationCinematic, resetCinematic,
+  };
 
   loop.start();
   setPaused(false);
@@ -849,42 +847,51 @@ async function boot() {
     if (!hasAccount()) signUp({ username: 'Tester', password: '1234', faction: 'imun' });
     screenManager.show('dashboard');
     runAutotest();
-  } else if (!hasAccount()) {
-    // F21 GAMEPLAY-FIRST: user baru disambut layar judul → cerita → LANGSUNG
-    // gameplay (bukan dashboard/daftar akun dulu). Akun diminta setelah run pertama.
-    screenManager.show('title');
   } else {
-    // Pemain lama: sinematik pembuka (sekali) → dashboard → coach
-    playOnce('intro', () => {
-      screenManager.show('dashboard');
-      coach.startIfFirstTime();
-    });
+    // V2 gameplay-first (blueprint §48-49): TIDAK ADA modal "MULAI" perantara
+    // — begitu progress 100%, pemain BARU (belum pernah main) langsung masuk
+    // GAMEPLAY dengan Mako (jeda singkat hanya supaya progress bar sempat
+    // terlihat penuh); pemain KEMBALI (sudah pernah main / punya save) masuk
+    // Dashboard seperti biasa — "Continue Journey", bukan onboarding lagi.
+    setTimeout(() => {
+      if (STATE.meta.onboardingDone) {
+        screenManager.show('dashboard');
+      } else {
+        STATE.meta.onboardingDone = true;
+        writeSave(STATE.meta);
+        titleScreen.startOnboardingRun();
+      }
+    }, 450);
   }
   // ADDENDUM §3: parameter akuisisi (?challenge= ?ref= ?play=)
   try { handleAcquisitionParams(); } catch { /* abaikan */ }
 }
 
+/**
+ * V2 §34: PLAY = langsung masuk perjalanan. Tidak ada layar persiapan/stage
+ * select di antara dashboard dan run; hero dipilih dari dashboard (P7 nanti).
+ */
+function startRunFromDashboard() {
+  const meta = STATE.meta;
+  applyRunDefaults(meta, writeSave);
+  const chapters = (getData().campaign && getData().campaign.chapters) || [];
+  const ch = chapters.find((c) => !meta.campaignCleared?.[c.id]) || chapters[0];
+  if (ch) meta.selectedChapter = ch.id;
+  const heroDef = getHero(meta.selectedHero);
+  const unlocked = heroDef && (heroDef.unlock?.type === 'default' || meta.unlockedHeroes.includes(heroDef.id));
+  const fallback = getData().heroes.heroes.find((h) => h.unlock?.type === 'default') || getData().heroes.heroes[0];
+  game.startRun(unlocked ? heroDef.id : fallback.id);
+}
+
+// V2: ?play=1 → langsung mulai run (tanpa layar persiapan).
+// Referral, challenge & build share dihapus — non-goal Economy V2 (IAP §38).
 // ADDENDUM §3.1/§3.2/§3.3 — link marketing & referral (query, ramah hosting statis).
 function handleAcquisitionParams() {
   const q = new URLSearchParams(location.search);
   const meta = STATE.meta;
-  // Referral: simpan pengundang + catat hadiah dua arah (outbox klaim).
-  const ref = (q.get('ref') || '').slice(0, 32);
-  if (ref && meta) handleRefParam(meta, ref);
-  // Zero friction: ?play=1 → langsung layar persiapan run
-  if (q.get('play') === '1') screenManager.show('prep');
-  // Challenge: tampilkan modal perbandingan di atas layar aktif
-  const ch = (q.get('challenge') || '').slice(0, 64);
-  if (ch) {
-    const summary = getChallenge(ch);
-    if (summary) setTimeout(() => showChallengeModal(summary), 600);
-  }
-  // Build share: tampilkan modal resep build
-  const b = (q.get('build') || '').slice(0, 1024);
-  if (b) {
-    const build = decodeBuild(b);
-    if (build) setTimeout(() => showBuildModal(build), 600);
-  }
+  // V2: ?play=1 → langsung mulai run (tanpa layar persiapan).
+  // Referral, challenge & build share dihapus — non-goal Economy V2 (IAP §38).
+  if (q.get('play') === '1') startRunFromDashboard();
 }
 
 // ---------------------------------------------------------------------

@@ -5,8 +5,7 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { getData, getCharacterDesigns } from '../../core/data-store.js';
-import { getHeroStatus, isPurchasable } from '../../systems/unlock-system.js';
-import { purchaseHeroUnlock } from '../../systems/economy-system.js';
+import { getHeroStatus } from '../../systems/unlock-system.js';
 import { queueHeroNotice } from '../../systems/retention-system.js';
 import { emit } from '../../core/ui-bridge.js';
 import { t as tr } from '../../systems/i18n.js';
@@ -14,7 +13,7 @@ import { createHeroEquityPreview } from '../../render/character-preview.js';
 import { writeSave } from '../../save/save-manager.js';
 import { game } from '../../core/game.js';
 import { el } from '../screen-manager.js';
-import { heroLevelBadge } from '../../systems/economy-system.js';
+import { masteryInfo } from '../../systems/mastery-system.js';
 import { screenManager as sm } from '../screen-manager.js';
 import { roleIconSrc, roleTint } from '../menu-icons.js';
 
@@ -77,8 +76,6 @@ export function show() {
   const meta = STATE.meta;
   const grid = document.getElementById('roster-grid');
   grid.textContent = '';
-  const imuEl = document.getElementById('roster-imun');
-  if (imuEl) imuEl.textContent = (meta.imun || 0).toLocaleString('id-ID');
 
   // Fase 13.1: chip progres koleksi di subtitle (x/11 terbuka)
   const heroesAll = getData().heroes.heroes;
@@ -126,7 +123,7 @@ export function show() {
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'hero-pattern' }, [
         el('span', { text: PATTERN_LABEL[heroDef.attackPattern] || heroDef.attackPattern }),
-        el('span', { class: 'hero-lvl-chip', text: heroLevelBadge(meta, heroDef.id) }),
+        el('span', { class: 'hero-lvl-chip', text: `Lv ${masteryInfo(meta, heroDef.id).level}` }),
       ]));
       const equity = rosterEquityMini(heroDef, meta);
       if (equity) children.push(equity);
@@ -135,40 +132,29 @@ export function show() {
       avatar.appendChild(el('img', { class: 'lock-badge', src: 'assets/icons/ui-lock.svg', alt: 'terkunci' }));
       children.push(el('div', { class: 'hero-name', text: heroDef.name }));
       children.push(el('div', { class: 'lock-cond', text: tr(status.conditionLabel) }));
-      // Fase 17 (trigger 1B): hero jalur Imun Coin bisa DIBUKA langsung di roster
-      if (isPurchasable(meta, heroDef)) {
-        const imuCost = heroDef.unlock.imuCost || 0;
-        children.push(el('button', {
-          class: 'btn btn-gold lock-unlock-btn' + (meta.imun >= imuCost ? '' : ' poor'),
-          text: `BUKA — ${imuCost} Genom`,
-          onclick: (ev) => {
-            ev.stopPropagation(); // jangan buka detail
-            const res = purchaseHeroUnlock(meta, heroDef);
-            if (res.ok) {
-              emit('toast', { message: `${heroDef.name} bergabung dengan pasukan!`, kind: 'gold' });
-              queueHeroNotice(heroDef.id);
-              show();
-            } else {
-              emit('toast', { message: res.reason, kind: 'danger' });
-            }
-          },
-        }));
+      // Workflow minimal: jalur beli instan dengan Antibodi, DI SAMPING jalur
+      // gratis (kondisi statistik di atas) — tombol beli sungguhan ada di
+      // hero-detail (kartu ini cuma harga sekilas + navigasi ke sana).
+      if (status.shopCost > 0) {
+        children.push(el('div', { class: 'lock-cond lock-buy' + (status.canBuy ? ' afford' : ''), text: `◉ ${status.shopCost.toLocaleString('id-ID')} Antibodi` }));
       }
     }
 
     const card = el('div', {
       class: 'hero-card' + (status.unlocked ? '' : ' locked') + (selected ? ' selected' : ''),
-      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : heroDef.name,
-      // Kartu terkunci BUKAN tombol (tetapi tombol BUKA di dalamnya tetap aktif —
-      // jangan pakai aria-disabled di kartu: itu menonaktifkan keturunannya bagi AT)
-      role: status.unlocked ? 'button' : undefined,
-      tabindex: status.unlocked ? '0' : '-1',
-      // SATU handler: pilih hero (tersimpan) lalu buka detail — sebelumnya dua listener
-      // (onclick pilih + listener detail) membuat render ulang grid tepat sebelum navigasi.
+      title: status.unlocked ? `Detail & upgrade ${heroDef.name}` : `${heroDef.name} — terkunci, ketuk untuk lihat syarat/beli`,
+      // Kartu terkunci TETAP tombol sekarang: menuju hero-detail untuk lihat
+      // syarat gratis ATAU beli dengan Antibodi (dua jalur, lihat unlock-system).
+      role: 'button',
+      tabindex: '0',
+      // SATU handler: pilih hero (tersimpan, hanya bila SUDAH dimiliki) lalu
+      // buka detail — hero terkunci tetap boleh dilihat detailnya (tombol beli
+      // di sana), sama seperti rail carousel di hero-detail sendiri.
       onclick: () => {
-        if (!status.unlocked) return;
-        meta.selectedHero = heroDef.id;
-        writeSave(meta);
+        if (status.unlocked) {
+          meta.selectedHero = heroDef.id;
+          writeSave(meta);
+        }
         sm.show('herodetail', { heroId: heroDef.id });
       },
     }, children);

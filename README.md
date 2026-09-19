@@ -1,8 +1,23 @@
 # 🧬 PHAGOS
 
-**HTML5 roguelike survival bertema sel imun** — kamu adalah sel imun terakhir yang bertahan melawan gelombang patogen di dalam aliran darah. Vanilla JavaScript + Canvas 2D API murni, **tanpa framework/library eksternal**.
+**HTML5 biological survival adventure** — kamu masuk ke tubuh manusia sebagai sel imun,
+bertahan melawan ekosistem patogen yang berevolusi, bermutasi jadi bentuk yang makin
+kuat, dan terus menembus lebih dalam sampai sumber infeksi lenyap.
+Vanilla JavaScript + Canvas 2D API murni, **tanpa framework UI eksternal**.
+Satu pengecualian: **Rive** (`@rive-app/canvas`, runtime MIT) dipakai khusus
+menjalankan animasi jalan hero; rig-nya dibuat dari kode lewat
+`npm run rive` (lihat `ROADMAP.md` → P1) dan runtime-nya di-vendor di
+`js/vendor/rive/` supaya tetap offline.
 
-![genre](https://img.shields.io/badge/genre-roguelike%20survival-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0)
+![genre](https://img.shields.io/badge/genre-biological%20survival%20%2B%20roguelike%20evolution-35d0ba) ![tech](https://img.shields.io/badge/tech-vanilla%20JS%20%2B%20Canvas%202D-4cc9f0)
+
+> **Status: menuju V2.** Build yang berjalan sekarang masih memakai model lama
+> (wave → level-up → upgrade acak + squad/shop/battle pass). Model itu **sedang
+> dibongkar**. Peta jalan baru ada di **[`ROADMAP.md`](ROADMAP.md)**, diturunkan dari
+> `PHAGOS_V2_REBUILD.txt` (gameplay) dan `PHAGOS_IAP_V2.txt` (economy & IAP).
+>
+> Ringkasnya V2: **Kill → Antibody → Mutation → Evolution → Go Deeper**, semua terjadi
+> di satu perjalanan yang tidak terputus (Lung → Bloodstream → Heart → Tissue → Tumor).
 
 ---
 
@@ -35,6 +50,12 @@ Lalu buka **http://localhost:8000** — selesai. Tidak ada build step, tidak ada
 - Kumpulkan **nutrisi**: Glukosa/Amino (XP), Vitamin C (heal), Antibodi (mata uang), Sinyal Sitokin (magnet).
 - **Level up** → pilih 1 dari 3 upgrade acak.
 - Antibodi dipakai untuk **Upgrade Squad permanen**, **unlock hero**, dan item di **Toko** — semua tersimpan otomatis di `localStorage`.
+
+> ⚠️ Paragraf di atas menjelaskan **model lama** yang akan diganti V2: tidak ada lagi
+> halaman upgrade, squad, shop gameplay, dan battle pass. Antibody menjadi satu-satunya
+> resource **evolusi (mutasi)**, XP hanya jadi pemicu kesempatan mutasi, dan “wave”
+> berubah jadi penanda intensitas di dalam perjalanan biologis yang kontinu.
+> Lihat [`ROADMAP.md`](ROADMAP.md) §1 dan §4.
 
 ## 🏗️ Struktur Proyek
 
@@ -105,8 +126,13 @@ Imunverse/  <!-- nama repo & branch eksperimen tetap; brand game = PHAGOS -->
 
 ```bash
 npm run sprites   # regenerasi assets/sprites/*.png (butuh Pillow)
-npm run check     # validasi import path, JSON, dan kelengkapan sprite
+npm run check     # validasi import path, JSON, sprite, dan aturan CSS layar
+npm run validate  # pacing & katalog
 npm start         # jalankan server statis di :8000
+
+# pemeriksa runtime (butuh bundle + jsdom opsional)
+npx esbuild --bundle js/main.js --outfile=.tmp-bundle.js --format=iife
+PHAGOS_BUNDLE=.tmp-bundle.js npm run verify   # foto mutasi + layar + animasi
 ```
 
 ## 🧪 Self-test headless

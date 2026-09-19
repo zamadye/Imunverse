@@ -3,14 +3,18 @@
  * progress (statistik meta). Status locked/unlocked ditampilkan di roster
  * (opacity rendah + ikon gembok untuk yang terkunci).
  *
- * Dua jalur unlock:
- *  1. Kondisi statistik terpenuhi (auto-unlock, persist ke save).
- *  2. Pembelian di Toko dengan Antibodi (lihat economy-system.purchaseHeroUnlock).
+ * Workflow minimal (rombak V3): DUA jalur unlock, keduanya aktif sekaligus —
+ * pemain memilih mana yang lebih cocok, bukan satu menggantikan yang lain:
+ *  1. Kondisi statistik terpenuhi lewat main (gratis, auto-unlock, persist).
+ *  2. Beli langsung dengan Antibodi (meta.currency) via purchaseHero() di
+ *     bawah — utk pemain yang sudah cukup farm tapi belum capai syaratnya.
+ * Harga per hero ada di data/heroes.json → heroes[].shopCost (skala tier).
  */
 
 import { getData } from '../core/data-store.js';
 import { writeSave } from '../save/save-manager.js';
 import { isDevMode } from '../core/dev-mode.js';
+import { spendCurrency } from './economy-system.js';
 
 /** Nilai stat meta; 'unlockedHeroes' = jumlah hero yang dimiliki. */
 function metaValue(meta, stat) {
@@ -30,22 +34,26 @@ export function getHeroStatus(meta, heroDef) {
     return { unlocked: true, conditionMet: true, shopCost: heroDef.shopCost || 0 };
   }
 
-  const cost = unlock.imuCost || heroDef.shopCost || 0;
+  // Workflow minimal: jalur premium DIKEMBALIKAN sebagai alternatif — beli
+  // langsung dengan Antibodi (meta.currency) bila pemain belum capai syarat
+  // statistiknya tapi sudah cukup farm. Harga dari data/heroes.json.
+  const cost = Number.isFinite(heroDef.shopCost) ? heroDef.shopCost : 0;
   let conditionMet = false;
   let conditionLabel = '';
   if (unlock.type === 'stat') {
     const value = metaValue(meta, unlock.stat);
     conditionMet = value >= unlock.value;
     conditionLabel = unlock.label || `Capai ${unlock.value} ${unlock.stat}`;
-  } else if (unlock.type === 'imu') {
-    // Buka kapan saja dengan Imun Coin (roster/toko)
-    conditionMet = true;
-    conditionLabel = unlock.label || `Buka dengan ${cost} Genom`;
-  } else if (unlock.type === 'imu_stat') {
-    // Kombinasi: misi terpenuhi + bayar Imun Coin
-    const value = metaValue(meta, unlock.stat);
-    conditionMet = value >= unlock.value;
-    conditionLabel = unlock.label || `Capai target + ${cost} Genom`;
+  } else {
+    // jalur lama 'imu'/'imu_stat' diperlakukan sebagai jalur stat bila
+    // membawa syarat statistik; bila tidak, hero tidak bisa dibuka.
+    if (unlock.stat) {
+      const value = metaValue(meta, unlock.stat);
+      conditionMet = value >= unlock.value;
+      conditionLabel = unlock.label || `Capai ${unlock.value} ${unlock.stat}`;
+    } else {
+      conditionLabel = 'Tidak tersedia di V2';
+    }
   }
 
   return {
@@ -53,8 +61,27 @@ export function getHeroStatus(meta, heroDef) {
     conditionLabel,
     conditionMet,
     shopCost: cost,
+    canBuy: cost > 0 && meta.currency >= cost,
     unlockType: unlock.type,
   };
+}
+
+/**
+ * Beli hero langsung dengan Antibodi (meta.currency) — jalur instan di
+ * samping jalur gratis (kondisi statistik). Tidak mengganggu jalur gratis:
+ * hero yang sudah unlocked lewat statistik tetap gratis, beli hanya untuk
+ * yang belum capai syaratnya.
+ * @returns {{ok:boolean, reason?:string}}
+ */
+export function purchaseHero(meta, heroDef) {
+  if (!heroDef) return { ok: false, reason: 'Hero tidak ditemukan' };
+  if ((meta.unlockedHeroes || []).includes(heroDef.id)) return { ok: false, reason: 'Sudah dimiliki' };
+  const cost = Number.isFinite(heroDef.shopCost) ? heroDef.shopCost : 0;
+  if (cost <= 0) return { ok: false, reason: 'Hero ini tidak dijual' };
+  if (!spendCurrency(meta, cost)) return { ok: false, reason: `Butuh ${cost} Antibodi` };
+  meta.unlockedHeroes.push(heroDef.id);
+  writeSave(meta); // auto-save setelah pembelian
+  return { ok: true, cost };
 }
 
 /**
@@ -66,8 +93,7 @@ export function checkAutoUnlocks(meta) {
   const newly = [];
   for (const heroDef of getData().heroes.heroes) {
     const unlock = heroDef.unlock || { type: 'default' };
-    // Fase 17: hanya jalur MISI (stat) yang auto-terbuka — jalur Imun Coin
-    // (imu / imu_stat) harus dibuka lewat pembelian.
+    // V2: hero terbuka dari progress bermain (stat) — jalur premium dihapus.
     if (unlock.type !== 'stat') continue;
     const status = getHeroStatus(meta, heroDef);
     if (!status.unlocked && status.conditionMet) {
@@ -79,15 +105,3 @@ export function checkAutoUnlocks(meta) {
   return newly;
 }
 
-/**
- * Apakah hero bisa dibuka lewat pembelian Imun Coin (Fase 17):
- * 'imu' = kapan saja; 'imu_stat' = setelah syarat misi terpenuhi.
- */
-export function isPurchasable(meta, heroDef) {
-  const status = getHeroStatus(meta, heroDef);
-  if (status.unlocked) return false;
-  const type = heroDef.unlock && heroDef.unlock.type;
-  if (type === 'imu') return (heroDef.unlock.imuCost || 0) > 0;
-  if (type === 'imu_stat') return status.conditionMet && (heroDef.unlock.imuCost || 0) > 0;
-  return false;
-}

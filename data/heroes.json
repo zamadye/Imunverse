@@ -28,7 +28,9 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "spreadAngle": 0.18
+        "spreadAngle": 0.18,
+        "radiusMult": 1.45,
+        "dmgMult": 1.25
       },
       "skills": [
         "taunt",
@@ -71,6 +73,25 @@
           "spreadAngle": 0.18
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_macrophage_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_macrophage_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_macrophage_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_macrophage_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Survivability",
+          "Swarm control",
+          "Sustain"
+        ],
+        "weakness": [
+          "Mobility",
+          "Ranged threats",
+          "Chasing fast targets"
+        ],
+        "combatIdentity": "Menelan jarak dekat + zona pencernaan; makin lama hidup, makin banyak yang disapu.",
+        "scalingIdentity": "Radius zona & sustain naik; mutasi memperlebar cakupan, bukan menambah damage tunggal."
       }
     },
     {
@@ -84,7 +105,7 @@
       "spriteAttack": "assets/sprites/hero_dendritic_attack.png",
       "color": "#ff8c00",
       "roleColor": "#3498db",
-      "attackPattern": "ranged_homing",
+      "attackPattern": "ranged_chain",
       "baseStats": {
         "maxHP": 80,
         "speed": 150,
@@ -101,7 +122,12 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "hops": 2,
+        "hopRadius": 120,
+        "maxHops": 2,
+        "decay": 0.4,
+        "dmgMult": 1.5
       },
       "skills": [
         "mark_target",
@@ -109,11 +135,12 @@
         "overcharge"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 150,
-        "label": "Buka dengan 150 Genom"
+        "type": "stat",
+        "label": "Kalahkan 250 patogen (total)",
+        "stat": "totalKills",
+        "value": 250
       },
-      "shopCost": 150,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_dendritic.png",
       "tier": "rare",
       "passive": {
@@ -151,6 +178,25 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_dendritic_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_dendritic_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_dendritic_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_dendritic_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "chain",
+        "strength": [
+          "Multi-target",
+          "Control",
+          "Assist/scaling tim"
+        ],
+        "weakness": [
+          "Burst damage",
+          "Fragile (HP 80)",
+          "Butuh musuh berdekatan"
+        ],
+        "combatIdentity": "Serangan berantai: satu tembakan menyambung ke target terdekat di sekitarnya.",
+        "scalingIdentity": "Jumlah lompatan (hops) & radius rantai naik; bukan damage per target."
       }
     },
     {
@@ -181,7 +227,9 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radiusMult": 0.95,
+        "dmgMult": 2.0
       },
       "skills": [
         "grenade",
@@ -189,11 +237,12 @@
         "blitz"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 100,
-        "label": "Buka dengan 100 Genom"
+        "type": "stat",
+        "label": "Selesaikan 5 run",
+        "stat": "totalRuns",
+        "value": 5
       },
-      "shopCost": 100,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_neutrophil.png",
       "tier": "uncommon",
       "passive": {
@@ -226,6 +275,26 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_neutrophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_neutrophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_neutrophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_neutrophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Swarm clearing",
+          "Burst jarak dekat",
+          "Tempo serangan cepat"
+        ],
+        "weakness": [
+          "Jarak (range 90)",
+          "Sustain",
+          "Mobility"
+        ],
+        "combatIdentity": "Ledakan granula jarak dekat; kuat saat musuh mengerumun.",
+        "scalingIdentity": "Radius & kepadatan ledakan; bukan jangkauan.",
+        "flavor": "burst"
       }
     },
     {
@@ -257,7 +326,10 @@
       "patternParams": {
         "spreadAngle": 0.4,
         "turnRate": 6.5,
-        "antiParasitMult": 1.5
+        "antiParasitMult": 1.5,
+        "count": 5,
+        "dmgMult": 1.15,
+        "spreadDeg": 18
       },
       "skills": [
         "poison_dart",
@@ -270,7 +342,7 @@
         "value": 10,
         "label": "Selesaikan 10 run"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_eosinophil.png",
       "tier": "uncommon",
       "passive": {
@@ -307,6 +379,25 @@
           "antiParasitMult": 1.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_eosinophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_eosinophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_eosinophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_eosinophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "projectile",
+        "strength": [
+          "Single-target",
+          "Kecepatan",
+          "Anti-parasit (×1.5)"
+        ],
+        "weakness": [
+          "Sangat rapuh (HP 75)",
+          "Swarm",
+          "Sustain"
+        ],
+        "combatIdentity": "Tembakan cepat berprioritas target bernilai; unggul pada parasit.",
+        "scalingIdentity": "Kecepatan tembak & pengali anti-parasit; tetap rapuh."
       }
     },
     {
@@ -337,7 +428,11 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radius": 145,
+        "lifeSec": 3.4,
+        "dpsMult": 0.8,
+        "slow": 0.68
       },
       "skills": [
         "histamine",
@@ -345,13 +440,12 @@
         "chemical_storm"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 260,
+        "type": "stat",
         "stat": "bossKills",
         "value": 2,
-        "label": "Kalahkan 2 Bos + 260 Genom"
+        "label": "Kalahkan 2 Bos"
       },
-      "shopCost": 130,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_basophil.png",
       "tier": "rare",
       "passive": {
@@ -388,6 +482,25 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_basophil_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_basophil_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_basophil_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_basophil_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "zone",
+        "strength": [
+          "Area denial",
+          "Control",
+          "Durasi"
+        ],
+        "weakness": [
+          "Damage terendah",
+          "Cooldown panjang (0.8s)",
+          "Tidak ada burst"
+        ],
+        "combatIdentity": "Awan histamin: zona yang melumpuhkan gerakan musuh di dalamnya.",
+        "scalingIdentity": "Ukuran & durasi zona; bukan damage."
       }
     },
     {
@@ -417,7 +530,9 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 1.9
+        "arc": 1.9,
+        "radiusMult": 1.2,
+        "dmgMult": 1.35
       },
       "skills": [
         "barrier",
@@ -425,13 +540,12 @@
         "anaphylaxis"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 700,
+        "type": "stat",
         "stat": "bossKills",
         "value": 8,
-        "label": "Kalahkan 8 Bos + 700 Genom"
+        "label": "Kalahkan 8 Bos"
       },
-      "shopCost": 150,
+      "shopCost": 3800,
       "spritePortrait": "assets/sprites/portrait_mastcell.png",
       "tier": "epic",
       "passive": {
@@ -465,6 +579,25 @@
           "arc": 1.9
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_mastcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_mastcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_mastcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_mastcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "area",
+        "strength": [
+          "Tank (HP 130)",
+          "Close-range",
+          "Degranulasi area"
+        ],
+        "weakness": [
+          "Paling lambat (110)",
+          "Ranged threats",
+          "Mengejar target cepat"
+        ],
+        "combatIdentity": "Degranulasi: sapuan area di sekitar tubuhnya sendiri.",
+        "scalingIdentity": "Radius sapuan & damage reduction; mobilitas tetap terburuk."
       }
     },
     {
@@ -495,7 +628,10 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "length": 420,
+        "width": 22,
+        "dmgMult": 2.2
       },
       "skills": [
         "precision_shot",
@@ -508,7 +644,7 @@
         "value": 20,
         "label": "Capai Gelombang 20"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_tcd8.png",
       "tier": "uncommon",
       "passive": {
@@ -544,6 +680,25 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_tcd8_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_tcd8_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_tcd8_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_tcd8_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "beam",
+        "strength": [
+          "Pierce (2)",
+          "Single-target",
+          "Jarak (160)"
+        ],
+        "weakness": [
+          "Rapuh (HP 85)",
+          "Butuh posisi lurus",
+          "Lemah saat dikepung"
+        ],
+        "combatIdentity": "Tembakan menembus lurus; menghukum barisan musuh segaris.",
+        "scalingIdentity": "Jumlah tembusan (pierce) & panjang garis; bukan kecepatan."
       }
     },
     {
@@ -574,7 +729,10 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "maxEntities": 3,
+        "lifeSec": 12,
+        "dpsMult": 0.9
       },
       "skills": [
         "rally",
@@ -587,7 +745,7 @@
         "value": 150,
         "label": "Serap 150 patogen (total)"
       },
-      "shopCost": 0,
+      "shopCost": 1200,
       "spritePortrait": "assets/sprites/portrait_tcd4.png",
       "tier": "uncommon",
       "passive": {
@@ -619,6 +777,25 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_tcd4_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_tcd4_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_tcd4_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_tcd4_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "summon",
+        "strength": [
+          "Dukungan",
+          "Scaling",
+          "Memerintah entitas"
+        ],
+        "weakness": [
+          "Damage rendah",
+          "Bergantung pada entitas",
+          "Butuh ruang"
+        ],
+        "combatIdentity": "Memanggil entitas biologis/dukungan; kekuatan datang dari apa yang dibantunya.",
+        "scalingIdentity": "Jumlah & daya tahan entitas; bukan damage langsung."
       }
     },
     {
@@ -649,7 +826,11 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 5.5,
+        "radius": 120,
+        "lifeSec": 3.0,
+        "dpsMult": 0.35,
+        "slow": 0.45
       },
       "skills": [
         "pacify",
@@ -657,13 +838,12 @@
         "truce"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 700,
+        "type": "stat",
         "stat": "totalEngulfs",
         "value": 400,
-        "label": "Serap 400 patogen + 700 Genom"
+        "label": "Serap 400 patogen (total)"
       },
-      "shopCost": 120,
+      "shopCost": 3800,
       "spritePortrait": "assets/sprites/portrait_treg.png",
       "tier": "epic",
       "passive": {
@@ -697,6 +877,26 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_treg_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_treg_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_treg_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_treg_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "zone",
+        "strength": [
+          "Control",
+          "Menekan kerusakan",
+          "Menahan area"
+        ],
+        "weakness": [
+          "Damage terendah",
+          "Tidak ada burst",
+          "Lambat membersihkan"
+        ],
+        "combatIdentity": "Menekan pergerakan & agresi musuh; mengubah pertempuran jadi terkendali.",
+        "scalingIdentity": "Kuatnya & lamanya efek tekanan; bukan damage.",
+        "flavor": "control"
       }
     },
     {
@@ -727,7 +927,8 @@
       },
       "patternParams": {
         "spreadAngle": 0.35,
-        "turnRate": 5.5
+        "turnRate": 6.5,
+        "count": 5
       },
       "skills": [
         "antibody_burst",
@@ -735,13 +936,12 @@
         "plasma_rain"
       ],
       "unlock": {
-        "type": "imu_stat",
-        "imuCost": 350,
+        "type": "stat",
         "stat": "bestWave",
         "value": 8,
-        "label": "Capai Gel. 8 + 350 Genom"
+        "label": "Capai Gelombang 8"
       },
-      "shopCost": 100,
+      "shopCost": 2200,
       "spritePortrait": "assets/sprites/portrait_bcell.png",
       "tier": "rare",
       "passive": {
@@ -773,6 +973,25 @@
           "turnRate": 5.5
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_bcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_bcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_bcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_bcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "homing",
+        "strength": [
+          "Konsisten",
+          "Auto-aim",
+          "Memori antibodi"
+        ],
+        "weakness": [
+          "Burst rendah",
+          "Rapuh (HP 70)",
+          "Cooldown menengah"
+        ],
+        "combatIdentity": "Proyektil penjejak: stabil dan tidak pernah meleset.",
+        "scalingIdentity": "Jumlah proyektil & kecepatan penjejak; tetap tanpa burst besar."
       }
     },
     {
@@ -802,7 +1021,10 @@
         "pickupRadius": 26
       },
       "patternParams": {
-        "arc": 2.0
+        "arc": 2.0,
+        "radius": 92,
+        "arcDeg": 120,
+        "dmgMult": 2.0
       },
       "skills": [
         "backstab",
@@ -810,11 +1032,12 @@
         "annihilate"
       ],
       "unlock": {
-        "type": "imu",
-        "imuCost": 200,
-        "label": "Buka dengan 200 Genom"
+        "type": "stat",
+        "label": "Kalahkan 3 Bos",
+        "stat": "bossKills",
+        "value": 3
       },
-      "shopCost": 200,
+      "shopCost": 7000,
       "spritePortrait": "assets/sprites/portrait_nkcell.png",
       "tier": "legend",
       "passive": {
@@ -846,6 +1069,25 @@
           "arc": 2.0
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
+      },
+      "spriteMut1Idle": "assets/sprites/hero_nkcell_mut1_idle.png",
+      "spriteMut1Attack": "assets/sprites/hero_nkcell_mut1_attack.png",
+      "spriteMut2Idle": "assets/sprites/hero_nkcell_mut2_idle.png",
+      "spriteMut2Attack": "assets/sprites/hero_nkcell_mut2_attack.png",
+      "identity": {
+        "attackArchetype": "melee",
+        "strength": [
+          "Burst tertinggi (22)",
+          "Mobility (180)",
+          "Sapuan lebar (arc 2.0)"
+        ],
+        "weakness": [
+          "Sangat rapuh (HP 80)",
+          "Kesalahan mahal",
+          "Harus masuk jarak dekat"
+        ],
+        "combatIdentity": "Sapuan mematikan jarak dekat; masuk, menghajar, keluar.",
+        "scalingIdentity": "Kerusakan sapuan & kecepatan; tetap berisiko tinggi."
       }
     }
   ],
@@ -875,5 +1117,8 @@
       "color": "#f2b93e",
       "statMult": 1.35
     }
-  }
+  },
+  "doc": "· UI-REBUILD P8: spriteMut1* = foto bentuk MUTASI DASAR (tier 1), spriteMut2* = foto bentuk MUTASI LANJUT (tier 2-3). Bila foto belum tersedia, renderer memakai sprite dasar.",
+  "docHeroIdentity": "V2 P1 (§12-§14): tiap hero punya kekuatan, kelemahan, identitas tempur dan identitas scaling yang BERBEDA — tidak ada hero terbaik absolut.",
+  "docPayload": "patternParams bisa menimpa angka payload archetype serangan (kunci yang sama dengan data/attacks.json → archetypes[].payload) supaya satu archetype terasa beda per hero: area Makrofag = cincin besar, area Neutrofil = ledakan sempit & tajam."
 }

@@ -12,3 +12,24 @@ __pycache__/
 shots/
 screenshots/
 image-search/
+
+# Sumber foto mutasi mentah (latar magenta) — hanya dipakai tools/build-mutation-sprites.py
+tools/.mutsrc/
+# Sumber audio mentah (tools/build-audio.sh)
+tools/.audiosrc/
+
+# bundle sementara untuk verifikasi runtime (npm run verify:photos)
+.tmp-bundle.js
+
+# dependensi dev (jsdom dipakai pemeriksa foto, npm i --no-save)
+node_modules/
+
+# berkas diagnostik sementara (bukan aset game)
+.tmp-*
+
+# mesin Godot (dipasang ulang dengan: node tools/godot/install.mjs)
+tools/godot/engine/
+
+# P7: salinan sumber panggangan Godot (dibuat ulang oleh bake-crawl / bake-creature)
+tools/godot/rig/crawl-src.json
+tools/godot/rig/creature-src.json

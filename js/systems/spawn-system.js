@@ -13,6 +13,21 @@
 import { getData, getWaveConfig, getSpawnInterval, getEnemyHPScale, getEnemySpeedScale, getProgression } from '../core/data-store.js';
 import { isTutorialActive } from './tutorial-system.js';
 
+/** Pool musuh zona aktif (null bila perjalanan dunia belum jalan). */
+function zonePoolOf(game) {
+  try {
+    const run = game && game.run;
+    if (!run || !run.journey) return null;
+    // Diimpor longgar agar tidak melingkar: world-journey tidak impor spawn-system.
+    // eslint-disable-next-line
+    const mod = WORLD_JOURNEY;
+    return mod ? mod.enemyPoolFor(run) : null;
+  } catch { return null; }
+}
+let WORLD_JOURNEY = null;
+/** Dipanggil world-journey saat modul siap (menghindari impor melingkar). */
+export function bindWorldJourney(mod) { WORLD_JOURNEY = mod || null; }
+
 export class SpawnSystem {
   constructor() {
     this.reset();
@@ -63,7 +78,7 @@ export class SpawnSystem {
       const aliveN = game.run.enemies.reduce((n, e) => n + (e.alive ? 1 : 0), 0);
       if (this.spawnTimer <= 0 && aliveN < 4) {
         this.spawnTimer = 4.0;
-        const enemyId = this.pickEnemyId(this.wave);
+        const enemyId = this.pickEnemyId(this.wave, zonePoolOf(game));
         if (enemyId) {
           game.spawnEnemy(enemyId, false);
           const e = game.run.enemies[game.run.enemies.length - 1];
@@ -108,7 +123,7 @@ export class SpawnSystem {
       if (this.spawnTimer <= 0) {
         this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * gk.trickleSpawnMult / (this.mods.spawnMult || 1);
         if (game.run.enemies.length < cfg.maxAliveEnemies) {
-          const enemyId = this.pickEnemyId(this.wave);
+          const enemyId = this.pickEnemyId(this.wave, zonePoolOf(game));
           if (enemyId) game.spawnEnemy(enemyId, false);
         }
       }
@@ -170,7 +185,7 @@ export class SpawnSystem {
     if (this.spawnTimer <= 0) {
       this.spawnTimer = getSpawnInterval(this.wave) * this.rampMult * cfg.trickleIntervalMult / (this.mods.spawnMult || 1); // V2 Phase 2: dari data
       if (game.run.enemies.length < cfg.maxAliveEnemies) {
-        const enemyId = this.pickEnemyId(this.wave);
+        const enemyId = this.pickEnemyId(this.wave, zonePoolOf(game));
         if (enemyId) game.spawnEnemy(enemyId, false); // tanpa nest/ai → mengejar player
       }
     }
@@ -227,7 +242,7 @@ export class SpawnSystem {
     const hunterShare = eco.hunterShare != null ? eco.hunterShare : 0.6;
     while (batch-- > 0) {
       if (run.enemies.length >= cfg.maxAliveEnemies) break; // CAP global
-      const enemyId = this.pickEnemyId(this.wave);
+      const enemyId = this.pickEnemyId(this.wave, zonePoolOf(game));
       if (!enemyId) break;
       const hunter = Math.random() < hunterShare;
       game.spawnEnemy(enemyId, false, hunter ? {} : { nest: true, ai });
@@ -265,7 +280,7 @@ export class SpawnSystem {
       const angle = baseAngle + (n / nNests) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
       const px = game.run.player.x + Math.cos(angle) * dist;
       const py = game.run.player.y + Math.sin(angle) * dist;
-      const enemyId = this.pickEnemyId(this.wave);
+      const enemyId = this.pickEnemyId(this.wave, zonePoolOf(game));
       if (!enemyId) return;
       for (let m = 0; m < packSize; m++) {
         if (game.run.enemies.length >= cfg.maxAliveEnemies) return;
@@ -293,15 +308,27 @@ export class SpawnSystem {
    * Pilih tipe musuh via weighted random dari musuh yang memenuhi minWave.
    * @returns {string|null} id musuh
    */
-  pickEnemyId(waveNumber) {
+/**
+ * Pilih id musuh untuk wave ini. `zonePool` (Map<id,bobot>) datang dari
+ * perjalanan dunia (data/zones.json): saat TRANSISI, musuh zona lama & baru
+ * BERCAMPUR (§24). Bobot zona dikalikan bobot dasar musuh.
+ */
+  pickEnemyId(waveNumber, zonePool = null) {
     const enemies = getData().enemies.enemies;
-    const pool = enemies.filter((e) => e.weight > 0 && waveNumber >= e.minWave);
-    if (pool.length === 0) return null;
+    let pool = enemies.filter((e) => e.weight > 0 && waveNumber >= e.minWave);
+    if (!pool.length) return null;
+    if (zonePool && zonePool.size) {
+      const filtered = pool.filter((e) => zonePool.has(e.id));
+      // Jika zona belum punya musuh yang cocok (data belum lengkap), jangan
+      // mengosongkan arena — pakai pool dasar seperti sediakala.
+      if (filtered.length) pool = filtered;
+    }
+    const bobot = (e) => (e.weight || 1) * (zonePool && zonePool.has(e.id) ? (zonePool.get(e.id) || 1) : 1);
     let total = 0;
-    for (const e of pool) total += e.weight;
+    for (const e of pool) total += bobot(e);
     let roll = Math.random() * total;
     for (const e of pool) {
-      roll -= e.weight;
+      roll -= bobot(e);
       if (roll <= 0) return e.id;
     }
     return pool[pool.length - 1].id;

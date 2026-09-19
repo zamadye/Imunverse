@@ -44,42 +44,45 @@ export function createDefaultMeta() {
     selectedMode: 'kampanye',
     selectedChapter: 'bab_luka',
     campaignCleared: {},
-    allies: 1, // pasukan imun permanen (tumbuh per bab bersih, maks 6)
-    heroLevels: {},  // { heroId: level } — level per hero (upgrade antibodi)
-    allyLevel: 0,    // level pasukan (damage & gesit)
     coachDone: false,
+    // V2 gameplay-first onboarding (blueprint §48-49, roadmap ROADMAP.md §"P7"):
+    // save BARU (belum pernah main) → false → loading langsung ke gameplay
+    // dengan Mako, bukan dashboard. Sekali run pertama dimulai, jadi true
+    // selamanya (lihat main.js boot + mergeMetaDefaults di bawah untuk save lama).
+    onboardingDone: false,
+    // Modal "openbox" (reveal hero bonus T-Bolt) tampil sekali di level-up
+    // pertama pemain baru — lihat main.js on('levelup'/'resume').
+    onboardingBoxSeen: false,
     account: null, // { uid, username, faction, createdAt } — diisi saat sign-up/login
     guestUid: null, // ADDENDUM §1.5/§3.2: UID tamu utk link referral/share (akun boleh belum ada)
-    cinematicsSeen: {},
-    // R3 (Narrative-Cinematic): penanda momen "first-time experience" (Task 4)
-    // — masing-masing diputar SEKALI SEJAK PERNAH (VO + presenter, non-blocking)
-    nft: { move: false, levelup: false, skill: false, revive: false },
-    bossRevealSeen: false, // reveal boss bab kanker (cutscene 6.3) — sekali
     leaderboard: [],
     evoStage: 0,
     evoParts: { fragmen_diferensiasi: 0 },
     adDaily: { date: null, count: 0 },
+    adLastAt: 0,      // P5: stempel iklan reward terakhir (jeda antar-iklan)
+    reserve: 0,       // P5: CADANGAN — resource eksternal, terpisah dari Antibodi (IAP §14)
     focusRun: 'seimbang',
     tutorialDone: false,
     soundMuted: false,
     musicOn: true, // F23: musik latar prosedural (Profil → Pengaturan)
     bodyState: null, // diisi createDefaultBodyState() saat body-system pertama dipakai
-    squadUpgrades: {
-      sq_damage: 0,
-      sq_vitality: 0,
-      sq_swift: 0,
-      sq_attack: 0,
-      sq_range: 0,
-      sq_nutrition: 0,
-    },
-    consumables: {
-      serum_regenerasi: 0, enzim_litik: 0, sitokin_burst: 0, lapisan_mukus: 0, katalis_mitosis: 0,
-      opsonin: 0, atp_surge: 0, membran_cadangan: 0, toksin_balik: 0, sinapsis: 0,
-    },
     missionsClaimed: [],
     questState: { periodKey: null, accepted: {}, claimed: {}, baseline: {} },
     globalUpgrades: {},   // Fase 17: upgrade permanen global (Imun Coin, semua hero)
     heroNotices: [],      // Fase 17: antrean notifikasi "HERO BARU" (overlay dashboard)
+    // Workflow minimal (rombak V3): kekuatan pemain (level + mutasi + Antibodi
+    // yang belum dibelanjakan) TIDAK reset saat mati. Kalah → balik dashboard,
+    // tapi tekan PLAY lagi lanjut dari kekuatan yang sama (lihat game.js
+    // startRun/finishRun). Musuh ikut mengeras seiring level ini naik
+    // (playerLevelScaling) — jadi progresi permanen di sini JUGA berarti
+    // dunia jadi permanen lebih keras, bukan cuma pemain lebih kuat.
+    power: {
+      level: 1,
+      xp: 0,
+      activeMutations: [],
+      mutationHistory: [],
+      antibody: 0,
+    },
     stats: {
       wins: 0,
       totalKills: 0,
@@ -124,25 +127,13 @@ export function mergeMetaDefaults(meta) {
     for (const [k, v] of Object.entries(meta.campaignCleared)) mc[mapCh(k)] = (v === true ? 0 : v);
     meta.campaignCleared = mc;
   }
-  // R3: merge penanda naratif baru (save lama aman)
-  meta.nft = { ...base.nft, ...(meta.nft && typeof meta.nft === 'object' ? meta.nft : {}) };
-  if (typeof meta.bossRevealSeen !== 'boolean') meta.bossRevealSeen = false;
-  if (meta.cinematicsSeen && typeof meta.cinematicsSeen === 'object') {
-    const ms = {};
-    for (const [k, v] of Object.entries(meta.cinematicsSeen)) {
-      let nk = k;
-      for (const [o, nu] of Object.entries(CH_MAP)) nk = nk.replace(o, nu);
-      ms[nk] = v;
-    }
-    meta.cinematicsSeen = ms;
-  }
+  // Save yang SUDAH ADA (lewat jalur ini, bukan createDefaultMeta) berarti
+  // pemainnya sudah pernah main sebelum onboarding gameplay-first ini ada —
+  // jangan paksa mereka lewat onboarding lagi di boot berikutnya.
+  if (typeof meta.onboardingDone !== 'boolean') meta.onboardingDone = true;
+  if (typeof meta.onboardingBoxSeen !== 'boolean') meta.onboardingBoxSeen = true;
   if (Array.isArray(meta.unlockedHeroes)) meta.unlockedHeroes = [...new Set(meta.unlockedHeroes.map(mapId))];
   if (meta.selectedHero) meta.selectedHero = mapId(meta.selectedHero);
-  if (meta.heroLevels && typeof meta.heroLevels === 'object') {
-    const mapped = {};
-    for (const [k, v] of Object.entries(meta.heroLevels)) mapped[mapId(k)] = v;
-    meta.heroLevels = mapped;
-  }
   if (meta.codexSeen && typeof meta.codexSeen === 'object') {
     const mapped = {};
     for (const [k, v] of Object.entries(meta.codexSeen)) mapped[mapCh(mapId(k))] = v;

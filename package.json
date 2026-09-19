@@ -1,15 +1,41 @@
 {
-  "name": "phagos",
-  "version": "1.0.0",
-  "description": "PHAGOS — HTML5 roguelike survival bertema sel imun. Vanilla JS + Canvas 2D, tanpa framework.",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "python3 -m http.server 8000 --bind 0.0.0.0",
-    "sprites": "python3 tools/gen_sprites.py",
-    "check": "node scripts/check-imports.mjs",
-    "validate": "node tools/validate-catalog.mjs && node tools/validate-retention.mjs",
-    "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
-    "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs"
-  }
+ "name": "phagos",
+ "version": "1.0.0",
+ "description": "PHAGOS — HTML5 roguelike survival bertema sel imun. Vanilla JS + Canvas 2D, tanpa framework.",
+ "private": true,
+ "type": "module",
+ "scripts": {
+  "start": "python3 -m http.server 8000 --bind 0.0.0.0",
+  "sprites": "python3 tools/gen_sprites.py",
+  "check": "node scripts/check-imports.mjs",
+  "validate": "node tools/validate-catalog.mjs",
+  "ecosystem-assets": "python3 tools/gen_ecosystem_assets.py",
+  "check:ecosystem-assets": "node scripts/verify-ecosystem-assets.mjs",
+  "verify:photos": "node tools/verify-mutation-photos.mjs",
+  "verify:screens": "node tools/verify-screens.mjs",
+  "verify:animasi": "node tools/verify-animasi.mjs",
+  "verify:rive": "node tools/verify-rive.mjs",
+  "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:crawl && npm run verify:prototype && npm run verify:visual && npm run verify:rive && npm run verify:combat && npm run verify:economy && npm run verify:world && npm run verify:p5 && npm run verify:gamefeel && npm run verify:attacks",
+  "verify:combat": "node tools/verify-combat.mjs",
+  "rive": "node tools/gen-hero-rig.mjs",
+  "verify:economy": "node tools/verify-economy.mjs",
+  "verify:world": "node tools/verify-world.mjs",
+  "verify:p5": "node tools/verify-p5.mjs",
+  "verify:gamefeel": "node tools/verify-gamefeel.mjs",
+  "godot:install": "node tools/godot/install.mjs",
+  "godot:version": "node tools/godot/run.mjs --version-only",
+  "verify:attacks": "node tools/verify-attacks.mjs",
+  "bake:crawl": "node tools/godot/bake-crawl.mjs",
+  "verify:crawl": "node tools/verify-crawl.mjs",
+  "bake:creature": "node tools/godot/bake-creature.mjs",
+  "verify:prototype": "node tools/verify-prototype.mjs",
+  "verify:visual": "node tools/verify-visual.mjs"
+ },
+ "dependencies": {
+  "@rive-app/canvas": "^2.42.2"
+ },
+ "devDependencies": {
+  "@rive-app/canvas-advanced": "^2.42.2",
+  "jsdom": "^26.1.0"
+ }
 }

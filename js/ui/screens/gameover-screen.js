@@ -6,27 +6,19 @@
 
 import { STATE } from '../../core/state-manager.js';
 import { game } from '../../core/game.js';
-import { getData } from '../../core/data-store.js';
+import { getData, getHero } from '../../core/data-store.js';
 import { triggerRewardedAdDoubleCurrency } from '../../systems/monetization.js';
 import { el, screenManager } from '../screen-manager.js';
 import { writeSave } from '../../save/save-manager.js';
-import { playOnce } from '../cinematic.js';
-import { playCutscene } from '../cutscene-player.js'; // R3 (Narrative-Cinematic): epilog 6.4
 import { music } from '../../systems/music-system.js'; // R3: hentikan musik setelah epilog
 import { audio } from '../../systems/audio-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { hasAccount } from '../../systems/account-system.js'; // R1: prompt simpan progres
-import { runEndBark } from '../../systems/narrative-system.js'; // R2: bark RIA akhir run
-import { isCapsulePending } from '../../systems/welcome-box-system.js'; // ADDENDUM §1: Kapsul Membran
-import { saveCurrentRun, copyText } from '../../systems/challenge-system.js'; // ADDENDUM §3.3
-import { encodeCurrentBuild, makeBuildUrl } from '../../systems/build-share-system.js'; // ADDENDUM P2 §6.6
-import { checkMilestone } from '../../systems/referral-system.js'; // ADDENDUM P2 §3.4
 import { emit } from '../../core/ui-bridge.js';
 import { msUntilDailyReset, formatResetCountdown } from '../../systems/mission-system.js';
 import { paceAverages, etaRuns, STAT_PACE } from '../../systems/metrics.js';
-import { ensureBp, xpNeed } from '../../systems/battlepass-system.js';
-import { playerRank } from '../../systems/rank-system.js';
-import { getNextEvoStageDef } from '../../systems/evolution-system.js';
+import { signatureMutations } from '../../systems/evolution-system.js';
+import { mutationCost } from '../../systems/antibody-economy.js';
 import { getHeroStatus } from '../../systems/unlock-system.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 
@@ -53,21 +45,6 @@ function countUp(node, target) {
 
 export function show(summary) {
   STATE.lastGameoverSummary = { ...summary };
-  // ADDENDUM P2 §3.4 — bonus milestone referral (wave 5 pertama)
-  try {
-    const ms = checkMilestone(game.run, STATE.meta);
-    if (ms > 0) setTimeout(() => emit('toast', { message: `Bonus referral: +${ms} Biokredit! \u{1F389}`, kind: 'gold' }), 800);
-  } catch { /* abaikan */ }
-  // R2: 1 baris bark kontekstual RIA — non-blocking (story doc §7.3)
-  const oldBark = document.getElementById('go-ria-bark');
-  if (oldBark) oldBark.remove();
-  const barkText = runEndBark(!!summary.victory, (STATE.meta.stats && STATE.meta.stats.totalRuns) || 0);
-  if (barkText) {
-    const bark = el('div', { id: 'go-ria-bark', class: 'go-ria-bark', style: 'margin:2px auto 4px;font-size:12px;font-weight:800;color:#2f9c8f;max-width:460px;font-style:italic' }, [
-      el('span', { text: barkText }),
-    ]);
-    document.getElementById('gameover-title').insertAdjacentElement('afterend', bark);
-  }
   // R1 (Rebuild): guest-first — ajakan akun DI LAYAR HASIL, setelah reward
   // masuk ("sayang kalau hilang"), bukan gate di depan. Non-blocking.
   const oldSavePrompt = document.getElementById('go-save-prompt');
@@ -108,7 +85,7 @@ export function show(summary) {
   document.getElementById('gameover-sub').textContent =
     summary.wave >= 10
       ? 'Luar biasa! Sistem imun mengingat jasamu.'
-      : 'Setiap run membuat squad semakin kuat. Coba lagi!';
+      : 'Mutasi & Antibodimu tersimpan — main lagi lanjut dari sini, bukan dari nol.';
 
   // Sprint 5.28 (§11.3): headline ringkas run.
   let head = document.getElementById('go-headline');
@@ -169,13 +146,32 @@ export function show(summary) {
     grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-body', text: `Tubuh: ${bits.join(' · ')}` }));
   }
 
-  // Bagian evolusi terkumpul run ini (feed meta-progression)
-  if (summary.parts > 0) {
-    const partsLine = el('div', { class: 'go-parts' }, [
-      el('img', { src: 'assets/sprites/part_equity_memory_core.png', alt: '', style: 'width:16px;vertical-align:-3px' }),
-      el('span', { text: ` ${summary.parts} fragmen diferensiasi dibawa pulang — cek Dashboard!` }),
-    ]);
-    grid.insertAdjacentElement('afterend', partsLine);
+  // Workflow minimal (rombak V3): evolusi & mutasi kini PERMANEN lintas run
+  // (tidak lagi reset ke BASE tiap kali) — grid ini menampilkan total yang
+  // sudah terkumpul, bukan cuma hasil run barusan.
+  const evoLabel = { base: 'BASE', mut1: 'MUT1', mut2: 'MUT2', apex: 'APEX' }[summary.evoStage] || 'BASE';
+  grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts' }, [
+    el('span', { text: `⬡ Evolusi sekarang: ${evoLabel} (${summary.mutations || 0} mutasi total — permanen)` }),
+  ]));
+
+  // P3 (IAP §24–§25): EKONOMI — berapa Antibodi tersimpan (permanen) dan apa
+  // tujuan mutasi berikutnya. Tidak butuh mission system tambahan: tujuannya
+  // adalah mutasi berikutnya → APEX → area lebih dalam.
+  {
+    const dibawa = Math.round(summary.antibody || 0);
+    const harga = mutationCost((summary.mutations || 0) + 1);
+    const kurang = Math.max(0, harga - dibawa);
+    grid.insertAdjacentElement('afterend', el('div', { class: 'go-parts go-eco' }, [
+      el('span', { text: `◉ ${dibawa} Antibodi tersimpan` }),
+      el('span', { class: 'go-eco-goal', text: kurang > 0
+        ? ` → mutasi berikutnya ${harga} (kurang ${kurang})`
+        : ` → cukup untuk mutasi berikutnya (${harga})!` }),
+      // P5 (IAP §14): cadangan tetap terpisah & tidak prominence — satu baris
+      // kecil, hanya informasi saldo dukungan eksternal.
+      (summary.reserve > 0
+        ? el('span', { class: 'go-eco-reserve', text: ` · ${tr('Cadangan')} ${summary.reserve}` })
+        : null),
+    ]));
   }
 
   countUp(document.getElementById('gameover-currency-num'), summary.currencyEarned);
@@ -295,29 +291,21 @@ function renderHookBox(summary) {
     cands.push({ label: `Buka ${h.name}`, cur: v, need: u.value, unit: STAT_LABEL[u.stat] || u.stat, pct: v / u.value,
       eta: etaFor(STAT_PACE[u.stat] || null, u.value - v) });
   }
-  // 2) pangkat berikutnya
+  // 2) P2: target evolusi run berikutnya — APEX butuh 5 mutasi (≥2 di antaranya
+  // mutasi khas hero). Angka dibaca dari data/evolutions.json, bukan dikarang.
   try {
-    const rk = playerRank();
-    if (rk.next) cands.push({ label: `Pangkat ${rk.next.name}`, cur: rk.gp, need: rk.next.min, unit: 'GP', pct: rk.pct,
-      eta: etaFor('gp', rk.need) });
-  } catch { /* abaikan */ }
-  // 3) Mitosis level berikutnya
-  try {
-    const bp = ensureBp(meta);
-    const need = xpNeed(bp.level);
-    if (bp.level < getData().battlepass.maxLevel) {
-      cands.push({ label: `Mitosis Lv ${bp.level + 1}`, cur: bp.xp, need, unit: 'XP', pct: bp.xp / need,
-        eta: etaFor('bpXp', need - bp.xp) });
-    }
-  } catch { /* abaikan */ }
-  // 4) Diferensiasi tahap berikutnya
-  try {
-    const next = getNextEvoStageDef(meta);
-    if (next) {
-      const [[partId, need]] = Object.entries(next.cost);
-      const cur = (meta.evoParts || {})[partId] || 0;
-      cands.push({ label: `Diferensiasi ${next.stage}`, cur, need, unit: 'frag', pct: Math.min(1, cur / need),
-        eta: etaFor('frags', need - cur) });
+    const evoData = getData().evolutions || {};
+    const apex = (evoData.stages || []).find((s) => s.id === 'apex');
+    const heroDef = getHero(meta.selectedHero) || null;
+    const khas = heroDef ? signatureMutations(heroDef).length : 0;
+    if (apex && (summary.evoStage || 'base') !== 'apex') {
+      const need = apex.minMutations || 5;
+      const cur = Math.min(need, summary.mutations || 0);
+      cands.push({
+        label: `APEX ${heroDef ? heroDef.name : 'hero'}`, cur, need,
+        unit: `mutasi (${khas} khas tersedia)`, pct: Math.min(1, cur / need),
+        eta: etaFor('mutations', need - cur),
+      });
     }
   } catch { /* abaikan */ }
   cands.sort((a, b) => b.pct - a.pct);
@@ -397,71 +385,29 @@ export function wireButtons() {
     });
   });
 
-  document.getElementById('btn-retry').addEventListener('click', () => {
-    if (capsuleFirst(doRetry)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
-    doRetry();
-  });
-
-  document.getElementById('btn-home').addEventListener('click', () => {
-    if (capsuleFirst(doHome)) return; // ADDENDUM §1: kapsul dulu setelah run pertama
-    doHome();
-  });
-  // ADDENDUM §3.3 — Challenge link (onclick agar tak dobel-bind tiap show)
-  // ADDENDUM P2 §6.6 — bagikan build (onclick agar tak dobel-bind)
-  document.getElementById('btn-build').onclick = async () => {
-    const code = encodeCurrentBuild(game);
-    if (!code) {
-      emit('toast', { message: 'Gagal membuat kode build.', kind: 'warn' });
-      return;
-    }
-    const ok = await copyText(makeBuildUrl(code));
-    emit('toast', { message: ok ? 'Link build tersalin! \u{1F9EC}' : 'Salin manual: ' + makeBuildUrl(code), kind: 'gold' });
-  };
-  document.getElementById('btn-challenge').onclick = async () => {
-    const saved = saveCurrentRun(game);
-    if (!saved) {
-      emit('toast', { message: 'Gagal membuat tantangan.', kind: 'warn' });
-      return;
-    }
-    const ok = await copyText(saved.url);
-    emit('toast', { message: ok ? 'Link tantangan tersalin! ⚔️' : 'Salin manual: ' + saved.url, kind: 'gold' });
-  };
-}
-
-// ADDENDUM §1: alihkan ke kapsul bila pending; onLater = alur semula.
-function capsuleFirst(next) {
-  try {
-    if (isCapsulePending(STATE.meta)) {
-      screenManager.show('capsule', { onLater: next });
-      return true;
-    }
-  } catch { /* abaikan */ }
-  return false;
+  // V2: tombol hasil run langsung menjalankan alurnya (kapsul & tautan
+  // challenge/build dihapus bersama sistem lama).
+  document.getElementById('btn-retry').addEventListener('click', () => doRetry());
+  document.getElementById('btn-home').addEventListener('click', () => doHome());
 }
 
 function doRetry() {
 const meta = STATE.meta;
-    // Menang kampanye → lanjut bab berikutnya (sinematik clear dulu bila baru)
+    // Menang kampanye → lanjut bab berikutnya
     const wonCampaign = STATE.lastGameoverSummary && STATE.lastGameoverSummary.victory
       && STATE.lastGameoverSummary.modeId === 'kampanye';
     if (wonCampaign) {
-      const wonChapter = STATE.lastGameoverSummary.chapterId;
-      // R3 (Narrative-Cinematic): kemenangan BAB FINAL → EPILOG (naskah final
-      // 6.4 — 3D dgn fallback 2D, 60 dtk, skip-able) menggantikan clear_ lama
-      const cs = getData().cutscenes;
-      if (wonChapter === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
-        playCutscene('epilog', () => { music.stop(); screenManager.show('campaign'); });
-        return;
-      }
       const chapters = getData().campaign.chapters;
       const next = chapters.find((c) => !(meta.campaignCleared || {})[c.id]);
       if (next) {
         meta.selectedChapter = next.id;
         writeSave(meta);
-        playOnce('clear_' + wonChapter, () => screenManager.show('prep'));
+        screenManager.show('dashboard');
         return;
       }
-      playOnce('clear_' + wonChapter, () => screenManager.show('campaign'));
+      // Tak ada bab tersisa → seluruh kampanye tamat
+      music.stop();
+      screenManager.show('campaign');
       return;
     }
     game.startRun(meta.selectedHero); // 'runstart' → HUD tampil otomatis
@@ -469,16 +415,7 @@ const meta = STATE.meta;
 
 function doHome() {
 const summary = STATE.lastGameoverSummary;
-    if (summary && summary.victory && summary.modeId === 'kampanye') {
-      // R3: bab final → EPILOG (6.4) sebelum pulang
-      const cs = getData().cutscenes;
-      if (summary.chapterId === 'bab_final' && cs && cs.scenes && cs.scenes.epilog) {
-        playCutscene('epilog', () => { music.stop(); window.__IMUNVERSE_goDashboard(); });
-        return;
-      }
-      playOnce('clear_' + summary.chapterId, () => window.__IMUNVERSE_goDashboard());
-      return;
-    }
+    if (summary && summary.victory && summary.chapterId === 'bab_final') music.stop();
     window.__IMUNVERSE_goDashboard();
 }
 

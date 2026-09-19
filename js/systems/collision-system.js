@@ -86,11 +86,12 @@ export class CollisionSystem {
   }
 
   /** Cari musuh terdekat dalam radius tertentu dari titik (x, y). */
-  findNearestEnemy(x, y, range) {
+  findNearestEnemy(x, y, range, filter = null) {
     let best = null;
     let bestD2 = range * range;
     this.grid.queryCircle(x, y, range, (e) => {
       if (!e.alive) return;
+      if (filter && !filter(e)) return;
       const dx = e.x - x;
       const dy = e.y - y;
       const d2 = dx * dx + dy * dy;
@@ -150,6 +151,23 @@ export class CollisionSystem {
           p.hitSet.add(e.uid);
           const died = onHit(p, e);
           if (died) killed.push(e.uid);
+          // V2 §17 archetype CHAIN: proyektil melompat ke target berikutnya
+          // (bukan menembus lurus seperti pierce).
+          if (p.chainHops > 0) {
+            const next = this.findNearestEnemy(p.x, p.y, p.chainRadius,
+              (cand) => !p.hitSet.has(cand.uid));
+            if (next) {
+              p.chainHops -= 1;
+              p.chainLinks = (p.chainLinks || 0) + 1;
+              p.damage *= (1 - (p.chainDecay || 0));
+              const ang = Math.atan2(next.y - p.y, next.x - p.x);
+              p.angle = ang;
+              p.vx = Math.cos(ang) * p.speed;
+              p.vy = Math.sin(ang) * p.speed;
+              p.chainFrom = { x: e.x, y: e.y };
+              return; // proyektil hidup terus untuk lompatan berikutnya
+            }
+          }
           if (p.hitSet.size >= p.pierce) {
             p.alive = false;
           }

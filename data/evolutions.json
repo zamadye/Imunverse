@@ -1,95 +1,195 @@
 {
-  "parts": [
-    {
-      "id": "fragmen_diferensiasi",
-      "name": "Fragmen Diferensiasi",
-      "sprite": "assets/sprites/part_equity_memory_core.png",
-      "dropWeight": 100,
-      "collectionTag": "Diferensiasi",
-      "description": "Fragmen sel untuk Diferensiasi (tahap diferensiasi) hero. Dikumpulkan dari semua musuh."
-    }
-  ],
+  "schemaVersion": 3,
+  "doc": "P2 — Pohon evolusi per hero: BASE → MUT1 → MUT2 → APEX. Tahap dihitung dari MUTASI AKTIF se-run (bukan fragmen meta lama): mut1 butuh ≥1 mutasi, mut2 ≥3, apex ≥5 mutasi DAN ≥2 mutasi KHAS hero. Mutasi khas = mutasi yang blok `attack`-nya (data/mutations.json) menyentuh archetype hero itu — entah menimpa payload[archetype] atau mengubah bentuknya lewat archetypeFrom. Jadi pohon tiap hero berbeda karena CARA BERTEMPUR-nya berbeda.",
   "stages": [
     {
-      "stage": 0,
-      "id": "polos",
-      "name": "Polos Base",
-      "tier": "Base",
+      "id": "base",
+      "name": "BASE",
+      "minMutations": 0,
       "tierColor": "#9db1a8",
-      "cost": {},
-      "damageMult": 1.0,
-      "maxHPMult": 1.0,
       "killFx": "ring",
-      "ability": "tebasan",
-      "collectionLabel": "Stage 0 Polos",
-      "visualRule": "Tanpa overlay diferensiasi; hanya tubuh dasar hero."
+      "spriteKey": "spriteIdle",
+      "statMult": {
+        "maxHP": 1,
+        "damage": 1,
+        "speed": 1
+      }
     },
     {
-      "stage": 1,
-      "id": "diferensiasi_1",
-      "name": "Diferensiasi I",
-      "tier": "Uncommon",
+      "id": "mut1",
+      "name": "MUT1",
+      "minMutations": 1,
       "tierColor": "#63c76a",
-      "cost": {
-        "fragmen_diferensiasi": 50
-      },
-      "damageMult": 1.08,
-      "maxHPMult": 1.06,
       "killFx": "slash",
-      "ability": "tebasan",
-      "collectionLabel": "Diferensiasi I",
-      "visualRule": "Cue anatomi pertama per hero muncul jelas di siluet."
+      "spriteKey": "spriteMut1Idle",
+      "statMult": {
+        "maxHP": 1.06,
+        "damage": 1.08,
+        "speed": 1.02
+      }
     },
     {
-      "stage": 2,
-      "id": "diferensiasi_2",
-      "name": "Diferensiasi II",
-      "tier": "Rare",
+      "id": "mut2",
+      "name": "MUT2",
+      "minMutations": 3,
       "tierColor": "#4aa3e0",
-      "cost": {
-        "fragmen_diferensiasi": 50
-      },
-      "damageMult": 1.16,
-      "maxHPMult": 1.12,
       "killFx": "wind",
-      "ability": "siklon",
-      "collectionLabel": "Diferensiasi II",
-      "visualRule": "Organela/alat membran kedua aktif sesuai desain hero."
+      "spriteKey": "spriteMut2Idle",
+      "statMult": {
+        "maxHP": 1.12,
+        "damage": 1.16,
+        "speed": 1.04
+      }
     },
     {
-      "stage": 3,
-      "id": "diferensiasi_3",
-      "name": "Diferensiasi III",
-      "tier": "Epic",
-      "tierColor": "#b07ae0",
-      "cost": {
-        "fragmen_diferensiasi": 50
-      },
-      "damageMult": 1.25,
-      "maxHPMult": 1.18,
-      "killFx": "bolt",
-      "ability": "petir",
-      "collectionLabel": "Diferensiasi III",
-      "visualRule": "Payoff ofensif/defensif hero terbaca dan lebih agresif."
-    },
-    {
-      "stage": 4,
-      "id": "diferensiasi_4",
-      "name": "Diferensiasi IV",
-      "tier": "Legendary",
+      "id": "apex",
+      "name": "APEX",
+      "minMutations": 5,
       "tierColor": "#f5c64f",
-      "cost": {
-        "fragmen_diferensiasi": 17
-      },
-      "damageMult": 1.35,
-      "maxHPMult": 1.25,
       "killFx": "legend",
-      "ability": "beku",
-      "collectionLabel": "Diferensiasi IV",
-      "visualRule": "Seluruh diferensiasi aktif; mahkota inti diferensiasi muncul."
+      "spriteKey": "spriteMut2Idle",
+      "aura": "#f5c64f",
+      "statMult": {
+        "maxHP": 1.25,
+        "damage": 1.35,
+        "speed": 1.06
+      }
     }
   ],
-  "dropChanceNormal": 0.004,
-  "dropChanceElite": 0.04,
-  "bossGuaranteedParts": 1
+  "apexRule": {
+    "minMutations": 5,
+    "minSignature": 2
+  },
+  "heroes": {
+    "macrophage": {
+      "archetype": "area",
+      "signature": [
+        "berduri",
+        "elastis",
+        "ledakan_dalam",
+        "membran_ganda",
+        "nova"
+      ]
+    },
+    "dendritic": {
+      "archetype": "chain",
+      "signature": [
+        "beracun",
+        "parasit",
+        "rantai"
+      ]
+    },
+    "neutrophil": {
+      "archetype": "area",
+      "signature": [
+        "berduri",
+        "elastis",
+        "ledakan_dalam",
+        "membran_ganda",
+        "nova"
+      ]
+    },
+    "eosinophil": {
+      "archetype": "projectile",
+      "signature": [
+        "tipis",
+        "membran_ganda",
+        "evolusi_total",
+        "rantai"
+      ]
+    },
+    "basophil": {
+      "archetype": "zone",
+      "signature": [
+        "lengket",
+        "beracun",
+        "ledakan_dalam",
+        "nova",
+        "simbiosis",
+        "medan_hidup"
+      ]
+    },
+    "mastcell": {
+      "archetype": "area",
+      "signature": [
+        "berduri",
+        "elastis",
+        "ledakan_dalam",
+        "membran_ganda",
+        "nova"
+      ]
+    },
+    "tcd8": {
+      "archetype": "beam",
+      "signature": [
+        "elastis",
+        "tipis",
+        "evolusi_total"
+      ]
+    },
+    "tcd4": {
+      "archetype": "summon",
+      "signature": [
+        "penyerap",
+        "medan_pulsa",
+        "simbiosis"
+      ]
+    },
+    "treg": {
+      "archetype": "zone",
+      "signature": [
+        "lengket",
+        "beracun",
+        "ledakan_dalam",
+        "nova",
+        "simbiosis",
+        "medan_hidup"
+      ]
+    },
+    "bcell": {
+      "archetype": "homing",
+      "signature": [
+        "parasit",
+        "evolusi_total",
+        "rantai"
+      ]
+    },
+    "nkcell": {
+      "archetype": "melee",
+      "signature": [
+        "berduri",
+        "lengket",
+        "penyerap",
+        "nova"
+      ]
+    }
+  },
+  "cinematic": {
+    "_doc": "§9 mutation cinematic: jeda → energi → bentuk lama pecah → bentuk baru → lanjut.",
+    "phases": [
+      {
+        "id": "pause",
+        "durSec": 0.25
+      },
+      {
+        "id": "charge",
+        "durSec": 0.85
+      },
+      {
+        "id": "break",
+        "durSec": 0.35
+      },
+      {
+        "id": "reveal",
+        "durSec": 0.95
+      },
+      {
+        "id": "resume",
+        "durSec": 0.25
+      }
+    ],
+    "skipAfterSec": 0.2,
+    "shakeAmp": 6,
+    "shardCount": 14
+  }
 }

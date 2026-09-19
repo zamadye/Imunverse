@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <!-- Imunverse UI icon · "Masuk / Mulai run": dua mata panah tebal miring
+       (bukan segitiga play media) — dipakai di tombol CTA dashboard yang
+       diwarnai ulang via filter CSS (lihat .dash-play-icon di dashboard-map.css). -->
+  <path d="M8 8 L34 32 L8 56 L8 41 L19 32 L8 23 Z"/>
+  <path d="M30 8 L56 32 L30 56 L30 41 L41 32 L30 23 Z"/>
+</svg>

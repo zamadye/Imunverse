@@ -14,7 +14,6 @@
  */
 
 import { STATE, setPaused, setLevelUpOpen, setScreen } from './state-manager.js';
-import { hidePresenter } from '../ui/presenter.js';
 import {
   getData, getHero, getEnemyDef, getNutrientDef, getWaveConfig,
   xpToNextLevel, getMembrane,
@@ -24,24 +23,34 @@ import { getTintedSprite } from '../render/sprite-loader.js';
 import { t as tr } from '../systems/i18n.js';
 import { writeSave } from '../save/save-manager.js';
 import { markSeen } from '../systems/codex-system.js';
-import { applyRunGP } from '../systems/rank-system.js';
 import { addMasteryXP } from '../systems/mastery-system.js'; // V2 Phase 6
-import { bossBark, resetNarrativeRun } from '../systems/narrative-system.js'; // R2: barks RIA
 import { initAntigenRun, onAntigenKill, antigenDamageMult, antigenIgnoreArmor, recordAntigenMeta } from '../systems/antigen-memory.js'; // R3: Modul A
 import { phagoUpdateEnemy, tryDevour } from '../systems/phagocytosis.js'; // R4: Modul B
 import { inflamUpdate, inflamHeat, inflamColor } from '../systems/inflammation.js'; // R5: Modul C
 import { tagOnHit, cascadeOnDeath } from '../systems/tag-cascade.js'; // R6: Modul D
 import { chemoUpdate } from '../systems/chemotaxis.js'; // R7: Modul E
 import { SkillSystem, SKILL_TRIGGER_LABEL } from '../systems/skill-system.js';
+
+// P5: pesan saat bantuan ekonomi tidak tersedia — jelas, tidak menghard-sell.
+const AD_REASON = {
+  jeda: 'Tunggu sebentar sebelum iklan berikutnya — lanjut bertempur dulu!',
+  'kuota-habis': 'Kuota iklan hari ini habis — lanjut bertempur!',
+  'tanpa-iklan': 'Mode tanpa iklan aktif.',
+  nonaktif: 'Iklan reward sedang nonaktif.',
+};
+const RESERVE_REASON = {
+  kosong: 'Cadangan kosong — kumpulkan antibodi sambil bertempur!',
+  'habis-run': 'Cadangan sudah dipakai maksimal di run ini.',
+  cukup: 'Antibodi sudah cukup, cadangan tidak diperlukan.',
+  nonaktif: 'Cadangan sedang nonaktif.',
+};
 // PHAGOS eksperimen: membran + mutasi hero + mutasi musuh
 import {
   initMembrane, updateMembrane, tryPulse, tryEngulf, getMembraneStats,
   membraneContains, membraneOnKill, membraneAbsorbDamage, membraneOnPlayerHit,
   pulseView,
 } from '../systems/membrane-system.js';
-import { rollMutationChoices, applyMutation, isMutationId, mutationDef } from '../systems/mutation-system.js';
-import { onRunComplete as welcomeBoxOnRunComplete } from '../systems/welcome-box-system.js'; // ADDENDUM §1
-import { applyStartConsumables, updateItemBuffs, absorbMukus, isMukusActive, onPlayerDamaged } from '../systems/item-buffs.js'; // ADDENDUM §2
+import { rollMutationChoices, applyMutation, isMutationId, mutationDef, mutationPriceFor, refreshChoiceLocks } from '../systems/mutation-system.js';
 import {
   onNewWave as enemyMutOnNewWave, checkPreWarning as enemyMutPreWarning,
   maybeApplyTrait as enemyMutMaybeApply, updateEnemyMutations,
@@ -59,8 +68,6 @@ import { rollLevelUpChoices, applyLevelUp, squadMultipliers, effectiveStacks } f
 import { isDevMode } from './dev-mode.js';
 import { addCurrency } from '../systems/economy-system.js';
 import { checkMissions } from '../systems/mission-system.js';
-import { addBpXP } from '../systems/battlepass-system.js';
-import { addImun, getEquippedSkin, spendImun } from '../systems/imun-economy.js';
 import { applyGlobalUpgrades, queueHeroNotice, getRetention, synergyFor, globalHomeoLevels } from '../systems/retention-system.js'; // synergyFor: V2 Phase 4
 import { getProgressionBand, getProgression, getGameFeel, getCombat, getModules } from './data-store.js';
 import { buzz } from '../systems/haptics.js'; // V2 Phase 1: getaran mobile
@@ -69,20 +76,30 @@ import {
   passiveOnKill, passiveOnPlayerHit, passiveTick, passiveSkillCdMult,
 } from '../systems/passive-system.js'; // V2 Phase 3: identitas hero
 import { checkAutoUnlocks } from '../systems/unlock-system.js';
-import { EffectsSystem } from '../systems/effects-system.js';
+import { EffectsSystem, bindEffectsBudget } from '../systems/effects-system.js';
+// P6: teks melayang ikut budget keramaian (diikat sekali ke run aktif)
+// (arrow dieksekusi nanti, jadi aman merujuk `game` yang didefinisikan di bawah)
+bindEffectsBudget(() => labelAllowed(game.run));
 import {
   triggerRewardedAdRevive, triggerRewardedAdBossChest, canWatchAd, trackAdWatch,
+  adStatus, triggerRewardedAdAntibody,
 } from '../systems/monetization.js';
 import { AbilitySystem } from '../systems/ability-system.js';
 import { isSkillUnlocked, SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../systems/skill-unlock.js';
-import { getEvoStageDef, rollPartDrop } from '../systems/evolution-system.js';
-import { arenaUnlockStatus } from '../ui/screens/arena-screen.js';
+import { evoStageFor, evoStatMult, evoProgress, evoSprite } from '../systems/evolution-system.js';
+import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economyPhase, runAntibody, recordEconomyEvent } from '../systems/antibody-economy.js';
+// P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §14-§21, §34)
+import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
+import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
+import { initJourney, updateJourney, journeyHud, drawLandmark } from '../systems/world-journey.js';
+// P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
+import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
+import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
 import {
   applyDailyDecay, getBodyState, getBodyRunModifiers, registerRunResult,
 } from '../systems/body-system.js';
 import * as tutorial from '../systems/tutorial-system.js';
 import { audio } from '../systems/audio-system.js';
-import { Ally } from '../entities/ally.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
@@ -92,9 +109,12 @@ import { drawNestHint,
   drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
   drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
 } from '../render/shape-renderer.js';
-import { drawSprite } from '../render/sprite-loader.js';
-import { drawHeroEquity, drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { drawSprite, hasSprite } from '../render/sprite-loader.js';
+// P7-PROTOTIPE: tiga cara menggambar hero yang bisa dibandingkan
+import { drawHeroBody, drawHeroLimbs } from '../render/hero-mode.js';
+import { drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
+import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
 
 export const game = {
   canvas: null,
@@ -124,6 +144,7 @@ export const game = {
   // MULAI RUN
   // =====================================================================
   startRun(heroId) {
+    resetCinematic(); // P2: run baru tidak boleh mewarisi adegan mutasi lama
     const meta = STATE.meta;
     const heroDef = getHero(heroId) || getHero(meta.selectedHero);
     if (!heroDef) throw new Error('Hero tidak ditemukan: ' + heroId);
@@ -131,10 +152,7 @@ export const game = {
     meta.selectedHero = heroId;
     writeSave(meta); // simpan pilihan hero
 
-    // ADDENDUM §2: consumable dipakai otomatis di AKHIR startRun
-    // (applyStartConsumables — butuh player & membran yang sudah jadi).
     this.runFlags = {};
-    meta.consumables = meta.consumables || {};
 
     const startX = 0;
     const startY = 0;
@@ -144,11 +162,12 @@ export const game = {
     const bodyMods = getBodyRunModifiers(meta);
     this.lastBodyDecay = decayInfo;
 
-    // LIVEOPS: mode (Kampanye/Endless) + mutator harian seeded (khusus Endless)
-    const modes = (getData().modes && getData().modes.modes) || [];
-    const modeDef = modes.find((m) => m.id === (meta.selectedMode || 'kampanye')) || modes[0] || null;
+    // V2 §21/§34: tidak ada lagi "pilih mode" (kampanye/endless) — run selalu
+    // mengikuti bab aktif di Peta Tubuh sampai model perjalanan kontinu (P4)
+    // menggantikannya sepenuhnya.
+    const modeDef = { id: 'kampanye' };
     // KAMPANYE: bab aktif dari Peta Tubuh (cerita organ sakit → bersihkan → boss)
-    const chapterDef = modeDef && modeDef.id === 'kampanye' && getData().campaign
+    const chapterDef = getData().campaign
       ? getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0]
       : null;
     let mutatorDef = null;
@@ -161,8 +180,26 @@ export const game = {
       emit('toast', { message: `Mutator hari ini: ${daily.def.name}`, kind: 'gold' });
     }
 
+    // Workflow minimal (rombak V3): level + mutasi + Antibodi yang belum
+    // dibelanjakan TIDAK reset antar-run — dipulihkan dari meta.power di sini,
+    // ditulis balik ke meta.power di finishRun. `run` tetap satu-satunya
+    // state LIVE selama gameplay (puluhan titik baca run.level/run.activeMutations
+    // di seluruh sistem tidak perlu diubah); hanya titik seed & tulis-balik ini
+    // yang tahu soal persistensi.
+    const power = meta.power || {};
+    const persistedLevel = Number.isFinite(power.level) && power.level >= 1 ? Math.floor(power.level) : 1;
+    const persistedXp = Number.isFinite(power.xp) && power.xp >= 0 ? power.xp : 0;
+    const persistedMutations = Array.isArray(power.activeMutations) ? power.activeMutations.slice() : [];
+    const persistedMutationHistory = Array.isArray(power.mutationHistory) ? power.mutationHistory.slice() : [];
+    const persistedAntibody = Number.isFinite(power.antibody) && power.antibody >= 0 ? power.antibody : 0;
+    // Shim hanya berisi field yang dibaca evoStateFor/evoStatMult (activeMutations
+    // + heroDef) — dipakai SEBELUM this.run ada, supaya multiplier stat evolusi
+    // (maxHP/damage/speed) sudah benar sejak player pertama dibuat, bukan baru
+    // menyusul di frame berikutnya.
+    const persistedRunShim = { activeMutations: persistedMutations, heroDef };
+
     const stats = this.computePlayerStats(heroDef, upgrades);
-    this.applyMetaMultipliers(stats); // evolusi hero + bonus arena (nyata)
+    this.applyMetaMultipliers(stats, heroDef, persistedRunShim); // evolusi hero (mutasi permanen) + bonus arena
     this.applyBodyModifiers(stats, bodyMods); // kondisi tubuh (meta-layer)
     markSeen(heroDef.id); // Bio-Pedia: hero yang dimainkan
     markSeen('imun'); // Bio-Pedia: sistem imun (pasukan pemain)
@@ -177,19 +214,20 @@ export const game = {
     const focusId = meta.focusRun || 'seimbang';
     const focusDef = getData().bodySystems.focusRuns.find((f) => f.id === focusId) || null;
 
-    // Kemampuan aktif sesuai tahap evolusi hero (tombol kanan: pedang + 3 kekuatan)
-    const evoStage = getEvoStageDef(meta);
-    const unlockedAbilityIds = getData().evolutions.stages
-      .filter((st) => st.stage <= evoStage.stage && st.ability)
-      .map((st) => st.ability);
+    // P2: tahap evolusi dihitung dari MUTASI AKTIF (kini permanen lintas run,
+    // lihat persistedMutations di atas) — naik lagi saat pemain memilih mutasi
+    // baru (chooseLevelUp → evoStageFor(run,...)).
+    const evoStage = evoStageFor(persistedRunShim, heroDef);
+    const unlockedAbilityIds = []; // V2: kekuatan datang dari mutasi, bukan drop fragmen
 
     this.run = {
       heroDef,
-      heroLvl: (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0,
       globalHomeo: globalHomeoLevels(STATE.meta), // D11: cdr/radius/engulf
       player,
       enemies: [],
       projectiles: [],
+      summons: [],       // V2 archetype SUMMON: entitas biologis sementara
+      attack: null,      // V2 §17: eksekusi archetype serangan (bertelegraph)
       ebullets: [],
       pickups: [],
       hazards: [], // Fase 9: genangan toksin (area damage statis)
@@ -201,7 +239,6 @@ export const game = {
       chemoEmitT: 0,
       chemoSpeedMult: 1, // pengali speed saat menyentuh jejak matang
       chemoStat: null,
-      nftMoveFired: false, // R3 Task 4: penanda "gerakan pertama" per run
       nkPulseT: 1, // Fase 9: sorotan pengungkap Sel Abnormal (hero Sel NK)
       // BUFF TEMPUR (Fase 8.4, dokumen entitas): sementara (timer) & permanen se-run
       tempBuffs: { damage: { mult: 1, t: 0 }, cooldown: { mult: 1, t: 0 }, xp: { mult: 1, t: 0 }, speed: { mult: 1, t: 0 } },
@@ -215,9 +252,9 @@ export const game = {
       wave: 1,
       kills: 0,
       bossKills: 0,
-      xp: 0,
+      xp: persistedXp,
       xpGained: 0,
-      level: 1,
+      level: persistedLevel,
       currencyEarned: 0,
       nutrientsCollected: 0,
       upgrades,
@@ -227,6 +264,8 @@ export const game = {
       currentChoices: null,
       reviveUsed: false,
       reviveOffered: false,
+      reserveUses: 0,   // P5: berapa kali cadangan dipakai pada run ini (§15)
+      iapOffers: 0,     // P5: berapa kali tawaran IAP muncul pada run ini (§27)
       doubleCurrencyUsed: false,
       earned: 0, // total antibodi yang dibawa pulang (diisi di finishRun)
       boss: null,
@@ -237,6 +276,10 @@ export const game = {
       chapter: chapterDef,
       mutator: mutatorDef,
       mutatorDate,
+      // Sistem pasukan/ally DICABUT (workflow minimal — hanya hero + mutasi).
+      // Array kosong permanen: banyak jalur render/update lain (shadow,
+      // membran mini, arena clamp) sudah meng-iterasi run.allies — dibiarkan
+      // kosong supaya jalur itu jadi no-op alami tanpa disentuh satu per satu.
       allies: [],
       chapterTier: chapterDef ? this.getChapterTier(meta) : null,
       objective: chapterDef
@@ -251,7 +294,7 @@ export const game = {
       skills: new SkillSystem(heroDef, { cdMult: (squadMultipliers(meta).jurusCd || 1) * passiveSkillCdMult(heroDef) }),
       // lapisan pertahanan Fase 12: shield → protect → evade
       shield: 0, evadeCharges: 0, protectMult: 1, protectT: 0,
-      parts: { fragmen_diferensiasi: 0 },
+      parts: {}, // V2: fragmen evolusi DIHAPUS — progresi run = mutasi
       partsCollectedTotal: 0,
       bossChest: null,
       imuAccrued: 0, // Fase 17: IMU terkumpul live di HUD (akhir run = rumus penuh)
@@ -263,10 +306,11 @@ export const game = {
       // punya beat-nya; sisanya menunggu celah 0.24 dtk.
       hitStopCool: 0,
       ended: false,
-      // PHAGOS: membran + mutasi + bio-point + adaptasi musuh (run-only)
-      activeMutations: [],
-      mutationHistory: [],
-      bioPoints: 0,
+      // PHAGOS: membran + mutasi + bio-point + adaptasi musuh — PERMANEN lintas
+      // run (dipulihkan dari meta.power di atas, ditulis balik di finishRun).
+      activeMutations: persistedMutations,
+      mutationHistory: persistedMutationHistory,
+      antibody: persistedAntibody, // P3: ANTIBODI = satu-satunya resource evolusi (IAP §3) — permanen
       engulfStats: {},
       enemyMutation: { activeTrait: null, warnedWave: 0, history: [] },
       membrane: null,
@@ -279,25 +323,13 @@ export const game = {
       const ab = (getMembrane() && getMembrane().arena) || {};
       this.run.arenaBounds = { x: ab.cx || 0, y: ab.cy || 0, r: ab.radius || 750 };
     } catch { this.run.arenaBounds = { x: 0, y: 0, r: 750 }; }
+    // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
+    // mengikuti ZONA, bukan pilihan stage (§21).
+    try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
+    // P6: batas getar kamera dari data — rentetan dampak boss tetap nyaman.
+    try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
 
     this.run.spawnSys.mods = bodyMods; // mutator/condisi tubuh → spawn & HP musuh
-    // PASUKAN IMUN (unlock di dalam run seperti SLOT SKILL — permintaan user):
-    // Tidak ada pasukan di awal game; 1 sel bergabung tiap hero mencapai level
-    // unlock skill (3/5/10) + Lv 15 (slot ke-4). Jumlah total tetap mengikuti
-    // meta.allies + allyLevel (Fase 20); yang berubah hanya WAKTU bergabung.
-    this.run.allies = [];
-    {
-      const membersPerLv = getData().upgrades.allyUpgrade.membersPerLevels || 3;
-      const allyByLevel = 1 + Math.floor((meta.allyLevel || 0) / membersPerLv);
-      const total = Math.max(0, Math.min(6, Math.max(meta.allies || 0, allyByLevel)));
-      const allySpeedBonus = (meta.allyLevel || 0) * (getData().upgrades.allyUpgrade.speedPerLevel || 0);
-      this.run.squadPlan = {
-        total,
-        joined: 0,
-        speedBonus: allySpeedBonus,
-        unlockLevels: [...SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL], // [3, 5, 10, 15]
-      };
-    }
 
     // HOOK dampak-dini: 2 patogen pasti mendekat dalam ±3 detik pertama
     for (let gi = 0; gi < 2; gi++) {
@@ -316,9 +348,7 @@ export const game = {
     setScreen('gameplay');
     setPaused(false);
     setLevelUpOpen(false);
-    resetNarrativeRun(); // R2: bark boss boleh tampil lagi di run baru
     initAntigenRun(this.run); // R3 Modul A: memori antigen reset tiap run
-    try { applyStartConsumables(this); } catch (err) { console.warn('[item] start:', err); }
     emit('runstart', { heroDef });
     emit('wave', { wave: 1, isBoss: false });
   },
@@ -330,13 +360,19 @@ export const game = {
    * Kalikan stat dasar dengan multiplier META: tahap evolusi hero (damage/HP)
    * + bonus arena terpilih (speed/magnet). Dipanggil di startRun.
    */
-  applyMetaMultipliers(stats) {
+  applyMetaMultipliers(stats, heroDef, runOverride) {
     const meta = STATE.meta;
-    const evo = getEvoStageDef(meta);
+    // startRun memanggil ini SEBELUM this.run ada (run baru belum dibuat) —
+    // runOverride adalah shim berisi mutasi permanen yang akan diwarisi run
+    // baru, supaya evoStatMult benar sejak awal alih-alih baru menyusul.
+    const run = runOverride || this.run;
+    const hd = heroDef || (run && run.heroDef) || null;
+    // P2: pengali tahap evolusi (BASE → MUT1 → MUT2 → APEX) dari mutasi run ini.
+    const m = evoStatMult(run, hd);
     const arena = this.getRunArena();
-    stats.damage *= evo.damageMult;
-    stats.maxHP = Math.round(stats.maxHP * evo.maxHPMult);
-    stats.speed *= arena.bonus.speedMult || 1;
+    stats.damage *= m.damage;
+    stats.maxHP = Math.round(stats.maxHP * m.maxHP);
+    stats.speed *= (arena.bonus.speedMult || 1) * m.speed;
     stats.magnetRadius *= arena.bonus.magnetMult || 1;
     return stats;
   },
@@ -386,22 +422,18 @@ export const game = {
   getRunArena() {
     const meta = STATE.meta;
     const list = getData().arenas.arenas;
-    // MAP: pilihan pemain (prep/arena-screen) MENANG bila terbuka — di SEMUA
-    // mode termasuk kampanye. selectedArena menentukan environment render.
+    // V2 §21: model "pilih stage/arena" DIBUANG. selectedArena hanya dipakai
+    // renderer sebagai penentu environment, bukan sebagai pilihan pemain:
+    // kampanye menurunkannya dari organ bab aktif.
     const chosen = list.find((a) => a.id === meta.selectedArena);
-    if (chosen && arenaUnlockStatus(chosen, meta).unlocked) return chosen;
-    // Kampanye: organ bab menentukan arena (DEFAULT bila pilihan terkunci /
-    // tak dikenal; prep-screen me-default-kan picker ke organ bab).
+    if (chosen) return chosen;
     if (meta.selectedMode === 'kampanye' && getData().campaign) {
       const ch = getData().campaign.chapters.find((c) => c.id === meta.selectedChapter) || getData().campaign.chapters[0];
       const chArena = list.find((a) => a.id === ch.arenaId);
-      if (chArena) return chArena;
+      if (chArena) { meta.selectedArena = chArena.id; return chArena; }
     }
-    const fallback = list.find((a) => arenaUnlockStatus(a, meta).unlocked);
-    if (chosen || !fallback) {
-      meta.selectedArena = (fallback || list[0]).id;
-    }
-    return fallback || list[0];
+    meta.selectedArena = list[0].id;
+    return list[0];
   },
 
   computePlayerStats(heroDef, runUpgrades) {
@@ -411,9 +443,6 @@ export const game = {
     // Tier lebih tinggi = basis lebih kuat (data/heroes.json → tiers.statMult).
     const tierCfg = (getData().heroes.tiers || {})[heroDef.tier];
     const tierMult = tierCfg ? tierCfg.statMult : 1;
-    // LEVEL HERO (upgrade antibodi per hero): damage & HP tumbuh
-    const heroCfg = getData().upgrades.heroUpgrade;
-    const heroLvl = (STATE.meta.heroLevels && STATE.meta.heroLevels[heroDef.id]) || 0;
     const up = runUpgrades;
 
     // BUFF TEMPUR: nutrisi (zinc, zat besi, probiotik, serat) — nyata di statistik
@@ -428,7 +457,7 @@ export const game = {
     const syn = synergyFor(heroDef);
     const eff = (id) => effectiveStacks({ upgrades: up, heroDef }, id, syn);
 
-    const damage = base.damage * tierMult * squad.damage * squad.weapon * (1 + heroCfg.dmgPerLevel * heroLvl) * buffDamage;
+    const damage = base.damage * tierMult * squad.damage * squad.weapon * buffDamage;
     const cooldown = base.attackCooldown / squad.attackSpeed * buffCooldown;
     // PHAGOS: Treg memperlambat SEMUA termasuk dirinya sendiri (-10%)
     const tregSlow = heroDef.id === 'treg' ? 0.9 : 1;
@@ -436,7 +465,7 @@ export const game = {
     const speed = base.speed * squad.speed * (1 + eff('speed_boost') * 0.10) * (tb ? tb.speed.mult : 1) * tregSlow;
     const attackRange = base.attackRange * squad.attackRange;
     const swipeRadius = (base.swipeRadius || 0) * squad.attackRange;
-    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + heroCfg.hpPerLevel * heroLvl) * (1 + eff('hp_boost') * 0.15) + (perm.maxHP || 0));
+    const maxHP = Math.round(base.maxHP * tierMult * squad.maxHP * (1 + eff('hp_boost') * 0.15) + (perm.maxHP || 0));
     const projectileCount = base.projectileCount;
     const lifeSteal = 0; // pool life-steal dicabut (bible §14); konsumen dipertahankan utk mutasi Sprint 2
 
@@ -475,10 +504,6 @@ export const game = {
     this.applyMetaMultipliers(stats);
     this.applyBodyModifiers(stats, run.bodyMods || getBodyRunModifiers(STATE.meta));
     run.player.stats = stats;
-    // PHAGOS Sprint 1: sitokin ×1.4 adalah pengali SEMENTARA di atas stats — recompute
-    // mengganti objek stats (pengali hilang) sementara flag sitokinApplied masih owed.
-    // Terapkan ulang agar restore /1.4 saat expiry tidak membelah base (slow permanen 71%).
-    if (run.itemBuffs && run.itemBuffs.sitokinApplied) stats.speed *= 1.4;
     run.player.maxHP = stats.maxHP;
     // pertahankan HP absolut; penambahan maxHP dari upgrade menaikkan selisih
     run.player.hp = Math.min(run.player.hp + Math.max(0, stats.maxHP - oldMax), stats.maxHP);
@@ -496,12 +521,14 @@ export const game = {
     if (run.hitStopCool > 0) run.hitStopCool -= dt;
     // PHAGOS: flash merah arena (peringatan mutasi musuh) meluruh real-time
     if (run._mutationFlashT > 0) run._mutationFlashT -= dt;
+    if (run.__mutasiFxT > 0) run.__mutasiFxT -= dt; // P7-PROTOTIPE: timer keadaan 'mutate'
     // JUICE hit-stop: freeze singkat saat kill besar (render tetap jalan)
     if (run.hitStop > 0) {
       run.hitStop -= dt;
       return;
     }
     run.time += dt;
+    updateGameFeel(run, dt); // P6: isi ulang budget angka damage (keramaian)
 
     // V2 Phase 1: LOW-HP heartbeat — HP < threshold → detak jantung berkala
     {
@@ -594,8 +621,6 @@ export const game = {
       run.objective.bossSpawned = true;
       const boss = run.chapter.boss;
       if (boss) {
-        const barkText = bossBark(run.chapter.id); // R2: RIA berkomentar — non-blocking, 1×/run
-        if (barkText) emit('bossBark', { chapterId: run.chapter.id, text: barkText }); // R3: lapisan VO
         this.spawnChapterBoss(run.chapter);
       } else {
         // Bab tanpa boss → langsung bersih saat kuota tercapai
@@ -654,17 +679,11 @@ export const game = {
     // PHAGOS: jepit player di dalam cawan petri (dash/knockback tak bisa kabur)
     try { this.arenaClamp(player, player.radius || 15); } catch { /* abaikan */ }
 
-    // R3 (Narrative-Cinematic) Task 4: HOOK "gerakan pertama" — observasi
-    // ONLY (tidak menyentuh logic combat/wave). Emit 1× per run; main.js
-    // mengecek penanda meta.nft.move (sekali sejak pernah) lalu memutar
-    // VO + presenter RIA (non-blocking).
-    if (!run.nftMoveFired && (move.x !== 0 || move.y !== 0)) {
-      run.nftMoveFired = true;
-      emit('nftMove', {});
-    }
-
     // 2. Wave & spawn
     const events = run.spawnSys.update(dt, this);
+    // P4: perjalanan dunia (zona & transisi) — SETELAH spawn supaya kenaikan
+    // wave terbaca di frame yang sama (§27: wave = pacing, bukan arena).
+    try { updateJourney(this, dt); } catch (err) { if (isDevMode()) console.warn('[phagos] updateJourney:', err); }
     if (events.waveBreak) {
       emit('waveBreak', { wave: run.spawnSys.wave });
     }
@@ -764,14 +783,16 @@ export const game = {
       });
       if (!enemy.lastHitAbsorbed) this.onDamageDealt(dmg);
       if (died) this.onEnemyKilled(enemy, proj);
-      else audio.hit();
+      else playSfx(run, 'hit'); // P6: throttle — keroyokan tidak membanjiri telinga
       return died;
     });
 
     // PHAGOS Tahap 5 — MEDAN MEMBRAN vs musuh (kontak tick + engulf).
     // Proyektil di atas hanya untuk antibodi Bella/Eos + skill (sub-sistem).
     try { updateMembrane(this, dt); } catch (err) { console.warn('[phagos] updateMembrane:', err); }
-    try { updateItemBuffs(this); } catch { /* abaikan */ } // ADDENDUM §2: kedaluwarsa buff
+    // V2 §17–§19: archetype serangan hero berjalan di PULSE, dengan telegraph
+    try { updateAttack(this, dt); } catch (err) { console.warn('[phagos] updateAttack:', err); }
+    try { updateSummons(this, dt); } catch (err) { console.warn('[phagos] updateSummons:', err); }
 
     // 7. Separation antar musuh (anti menumpuk)
     run.collision.separateEnemies(run.enemies);
@@ -868,15 +889,6 @@ export const game = {
     run.effects.spawnCollect(p.x, p.y, p.def.color);
 
     switch (p.pickupType) {
-      case 'part': {
-        // Bagian evolusi: untuk upgrade bentuk hero (tangan → kaki → pedang → elemen)
-        const partId = p.partId || p.def.id;
-        run.parts[partId] = (run.parts[partId] || 0) + 1;
-        run.partsCollectedTotal += 1;
-        run.effects.spawnLabel(p.x, p.y, `${p.def.name} +1`, '#ffe082');
-        run.effects.spawnKillFx('ring', p.x, p.y, run.evoStage.tierColor, Math.random() * 10);
-        break;
-      }
       case 'xp':
         this.addXP(p.value);
         // XP TERASA: label melayang tiap orb (ramah anak)
@@ -968,30 +980,8 @@ export const game = {
       run.xp -= xpToNextLevel(run.level);
       run.level += 1;
       run.levelUpQueue += 1;
-      this.tryJoinSquad(run.level);
       this.announceSkillProgress(run.level);
     }
-  },
-
-  /**
-   * Pasukan imun bergabung di level unlock skill [3, 5, 10] (+15) — satu sel
-   * per ambang, sampai total skuad meta tercapai. Tidak ada pasukan di awal
-   * run (permintaan user): mereka "dipanggil" saat hero semakin kuat.
-   */
-  tryJoinSquad(level) {
-    const run = this.run;
-    const plan = run && run.squadPlan;
-    if (!plan || plan.joined >= plan.total) return false;
-    const slotIdx = plan.unlockLevels.indexOf(level);
-    if (slotIdx < 0 || slotIdx !== plan.joined) return false;
-    const ally = new Ally(plan.joined, run.player, plan.speedBonus);
-    plan.joined += 1;
-    run.allies.push(ally);
-    // Selebrasi kecil yang jelas: burst hijau-imun + label + toast
-    run.effects.spawnBurst(run.player.x, run.player.y, '#6cf2c3', 14, 220, 4);
-    run.effects.spawnLabel(run.player.x, run.player.y - 44, tr('PASUKAN DATANG!'), '#8df7d2');
-    emit('toast', { message: `Pasukan imun: sel #${plan.joined} bergabung bertarung!`, kind: 'gold' });
-    return true;
   },
 
   /** Fase 18: cairkan XP yang ditahan saat gerbang tertutup (dipanggil saat boss tumbang). */
@@ -1023,7 +1013,6 @@ export const game = {
     showAnnounce('BERMUTASI!', false);
     this.hitStopRun(getRetention().levelUpStopSec);
     setLevelUpOpen(true);
-    hidePresenter(); // RONDE-4: narrator jangan menumpuk modal pilih-evolusi
     setPaused(true);
     audio.levelup();
     buzz('levelup'); // V2 Phase 1: selebrasi terasa di tangan
@@ -1036,24 +1025,151 @@ export const game = {
     if (!run || !run.currentChoices) return;
     // PHAGOS: kartu mutasi vs kartu upgrade lama (safety net)
     if (isMutationId(upgradeId)) {
+      // P2 §9: bentuk SEBELUM diingat dulu untuk adegan transformasi.
+      const sebelum = evoSprite(run, run.heroDef) || run.heroDef.spriteIdle;
       const res = applyMutation(run, upgradeId);
       if (!res.ok) {
         emit('toast', { message: res.reason || 'Mutasi gagal', kind: 'warn' });
         return; // jangan tutup modal — pemain pilih kartu lain
       }
+      // Tahap evolusi naik (BASE → MUT1 → MUT2 → APEX) dari mutasi aktif.
+      run.evoStage = evoStageFor(run, run.heroDef);
+      run.__mutasiFxT = 1.6; // P7-PROTOTIPE: penanda keadaan 'mutate' untuk rig makhluk
+      this.recomputePlayerStats();
+      const sesudah = evoSprite(run, run.heroDef) || sebelum;
       showAnnounce(res.mutation.name.toUpperCase() + '!', true);
       run.effects.spawnBurst(run.player.x, run.player.y, '#8df7d2', 30, 260, 5);
       run.camera.addShake(0.4);
-      audio.evolve();
+      audio.mutation();
       buzz('levelup');
       emit('toast', { message: `MUTASI: ${res.mutation.name}!`, kind: 'gold' });
-      this.recomputePlayerStats();
-    } else {
-      const result = applyLevelUp(run, upgradeId);
-      this.recomputePlayerStats();
-      if (result.healAmount > 0) run.player.heal(result.healAmount);
+      // Dunia beku → putar adegan, lalu lanjutkan sisa antrean level-up.
+      // Mutasi SUDAH diterapkan di sini, jadi LEWATI tidak menghilangkan apa pun.
+      startMutationCinematic({
+        from: sebelum,
+        to: sesudah,
+        name: res.mutation.name,
+        stageName: run.evoStage.name || '',
+        tierColor: run.evoStage.tierColor || '#8df7d2',
+        onDone: () => this._afterLevelUpChoice(),
+      });
+      return;
     }
+    const result = applyLevelUp(run, upgradeId);
+    this.recomputePlayerStats();
+    if (result.healAmount > 0) run.player.heal(result.healAmount);
+    this._afterLevelUpChoice();
+  },
 
+  // ---------------------------------------------------------------- P5 -----
+  // HIERARKI BANTUAN EKONOMI (IAP §20):
+  //     CONTINUE (gratis)  ·  WATCH AD (gratis + jeda)  ·  USE RESERVE (IAP)
+  // Urutan ini sengaja: yang gratis selalu duluan, dan TIDAK ADA satu pun
+  // yang boleh memblokir permainan (§10) maupun mengambil alih momen
+  // transformasi (§27).
+
+  /**
+   * Jalur GRATIS: tutup tawaran mutasi dan lanjut bertempur. Antibodi tidak
+   * berkurang, level-up berikutnya menawarkan mutasi lagi — kekurangan
+   * antibodi tidak pernah menghentikan run (§10).
+   */
+  deferLevelUp() {
+    const run = this.run;
+    if (!run) return false;
+    run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
+    run.currentChoices = null;
+    setLevelUpOpen(false);
+    setPaused(false);
+    emit('toast', { message: tr('Lanjut bertempur — mutasi ditawarkan lagi di level berikutnya.'), kind: 'info' });
+    emit('resume');
+    return true;
+  },
+
+  /**
+   * Satu paket berisi semua yang dibutuhkan UI saat terjadi FRIKSI EKONOMI
+   * (kartu mutasi terkunci): kebutuhan, status iklan, bantuan cadangan, dan
+   * tawaran IAP kontekstual. Semua angka dari data/economy.json.
+   */
+  frictionAssist() {
+    const run = this.run;
+    const meta = STATE.meta;
+    const cost = mutationPriceFor(run);
+    const antibody = runAntibody(run);
+    const shortfall = Math.max(0, cost - antibody);
+    const rv = reserveAssistFor(run, meta, cost);
+    const offersLeft = Math.max(0, maxIapOffersPerRun() - ((run && run.iapOffers) || 0));
+    return {
+      cost, antibody, shortfall,
+      ad: adStatus(meta),
+      reserve: rv,
+      // IAP hanya muncul KONTEKSTUAL: saat friksi nyata, cadangan tidak cukup
+      // menutupnya, dan kuota tayang per run belum habis (IAP §17, §27).
+      iap: {
+        enabled: iapEnabled() && shortfall > 0 && rv.amount < shortfall && offersLeft > 0,
+        packs: iapPacks(),
+        offersLeft,
+      },
+    };
+  },
+
+  /** Tonton iklan reward → +antibodi (jalur gratis akselerasi, IAP §19). */
+  watchAntibodyAd(done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!run || !meta) { if (done) done({ ok: false, reason: 'no-run' }); return false; }
+    return triggerRewardedAdAntibody(meta, () => {
+      const st = adStatus(meta);
+      const n = earnAntibody(run, st.reward, { source: 'rewarded_ad' });
+      refreshChoiceLocks(run);
+      writeSave(meta);
+      if (n > 0) emit('toast', { message: tr(`+${n} Antibodi dari iklan!`), kind: 'gold' });
+      if (done) done({ ok: n > 0, granted: n });
+    }, (reason) => {
+      emit('toast', { message: AD_REASON[reason] || tr('Iklan belum tersedia — lanjut bertempur!'), kind: 'warn' });
+      if (done) done({ ok: false, reason: reason || 'gagal' });
+    });
+  },
+
+  /** Pakai cadangan → menutup MAKSIMAL X% harga mutasi (IAP §15). */
+  useReserveAssist(done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!run || !meta) { if (done) done({ granted: 0, reason: 'no-run' }); return 0; }
+    const cost = mutationPriceFor(run);
+    const masuk = useReserve(run, meta, cost);
+    if (masuk > 0) {
+      refreshChoiceLocks(run);
+      writeSave(meta);
+      emit('toast', { message: tr(`Cadangan membantu +${masuk} Antibodi`), kind: 'gold' });
+    } else {
+      const why = reserveAssistFor(run, meta, cost);
+      emit('toast', { message: RESERVE_REASON[why.reason] || tr('Cadangan belum bisa dipakai.'), kind: 'warn' });
+    }
+    if (done) done({ granted: masuk, cost });
+    return masuk;
+  },
+
+  /** Isi cadangan lewat provider MOCK — TIDAK ADA payment nyata (IAP §21). */
+  async buyReservePack(packId, done) {
+    const run = this.run;
+    const meta = STATE.meta;
+    if (!meta) { if (done) done({ ok: false, reason: 'meta-kosong' }); return null; }
+    if (run) run.iapOffers = ((run.iapOffers) || 0) + 1;
+    const res = await buyPack(meta, packId);
+    if (res.ok) {
+      writeSave(meta);
+      emit('toast', { message: tr(`Cadangan +${res.granted} (prototipe, bukan pembelian nyata)`), kind: 'gold' });
+    } else {
+      emit('toast', { message: tr('Cadangan gagal diisi (prototipe).'), kind: 'warn' });
+    }
+    if (done) done(res);
+    return res;
+  },
+
+  /** Sisa alur setelah satu pilihan level-up diproses (modal / lanjut run). */
+  _afterLevelUpChoice() {
+    const run = this.run;
+    if (!run) return;
     run.levelUpQueue = Math.max(0, run.levelUpQueue - 1);
     if (run.levelUpQueue > 0) {
       // masih ada level berlebih → tampilkan pilihan berikutnya
@@ -1069,6 +1185,12 @@ export const game = {
   // =====================================================================
   // SERANGAN & DAMAGE
   // =====================================================================
+
+  /** V2 §17: konfigurasi satu archetype serangan dari data/attacks.json. */
+  getAttackArchetype(id) {
+    const list = (getData().attacks && getData().attacks.archetypes) || [];
+    return list.find((a) => a.id === id) || null;
+  },
   /** Dipakai Player untuk spawn proyektil. */
   spawnProjectile(opts) {
     const proj = new Projectile(opts);
@@ -1139,8 +1261,9 @@ export const game = {
     const heroDef = run?.heroDef || run?.player?.heroDef || null;
     const designs = getData().characterDesigns;
     const heroDesign = heroDef ? designs?.heroes?.[heroDef.id] : null;
-    const stageRaw = run?.evoStage?.stage ?? STATE.meta?.evoStage ?? 0;
-    const stage = Math.max(0, Math.min(4, stageRaw || 0));
+    // P2: tahap visual = indeks pohon evolusi V2 (0 BASE … 3 APEX).
+    const stageRaw = run?.evoStage?.index ?? 0;
+    const stage = Math.max(0, Math.min(3, stageRaw || 0));
     const eq = stage > 0 ? (heroDesign?.equity || []).find((e) => e.stage === stage) : null;
     const dirX = Number.isFinite(opts.dirX) ? opts.dirX : ((enemy && run?.player) ? enemy.x - run.player.x : 1);
     const dirY = Number.isFinite(opts.dirY) ? opts.dirY : ((enemy && run?.player) ? enemy.y - run.player.y : 0);
@@ -1169,7 +1292,10 @@ export const game = {
     tagOnHit(enemy); // R6 Modul D: setiap hit hero menandai musuh (opsonisasi)
     const absorbed = !!enemy.lastHitAbsorbed;
     const hitVisual = this.characterHitVisual(enemy, opts);
-    if (crit && enemy.hitFlash !== undefined) enemy.hitFlash = Math.max(enemy.hitFlash, 0.18);
+    // P6 (§20): REAKSI MUSUH + getar + SFX + hit-stop lewat SATU tangga
+    // dampak (normal → heavy → elite → ultimate → bossEvent). Urutan & harga
+    // dampak tidak lagi tersebar di banyak tempat.
+    const dampak = applyHitImpact(this, enemy, { crit, died, absorbed, source: opts.sourceKind });
     run.effects.spawnSpark(enemy.x, enemy.y - enemy.radius * 0.3, died || crit || enemy.isBoss);
     run.effects.spawnImpact(enemy.x, enemy.y - enemy.radius * 0.18, absorbed ? '#cfd8e3' : (crit ? gf.crit.color : (enemy.def.color || '#ffffff')), {
       big: died || crit || enemy.isBoss,
@@ -1178,16 +1304,7 @@ export const game = {
       ...hitVisual,
     });
 
-    // Micro shake khusus hit yang BELUM kill. Kill/elite/boss tetap ditangani
-    // di onEnemyKilled agar intensitasnya tidak dobel.
-    if (!died && !absorbed && run.camera && gf.shake) {
-      const now = run.time || 0;
-      const throttle = gf.shake.hitThrottleSec ?? 0.055;
-      if (now - (run.lastHitShakeAt ?? -999) >= throttle) {
-        run.lastHitShakeAt = now;
-        run.camera.addShake(crit ? (gf.shake.critHit ?? 0.09) : (gf.shake.hit ?? 0.035));
-      }
-    }
+    // P6: getar SUDAH ditangani applyHitImpact (ber-tangga + ber-throttle).
 
     // V2 Phase 1: ukuran angka mengikuti besaran damage; crit = oranye & lebih besar
     const dn = gf.damageNumber;
@@ -1196,10 +1313,13 @@ export const game = {
     if (crit) {
       size *= gf.crit.sizeMult;
       color = gf.crit.color;
-      this.hitStopRun(gf.hitStop.crit); // jeda mikro "berat" khusus crit
       buzz('crit');
     }
-    run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
+    // P6: angka damage punya BUDGET (layar padat → angka tidak menumpuk) dan
+    // SFX crit ber-throttle (lewat sutradara di atas).
+    if (numberAllowed(run)) {
+      run.effects.spawnDamageNumber(enemy.x, enemy.y - enemy.radius - 14, damage, color, Math.round(size));
+    }
   },
 
   /** Cari musuh terdekat (dipakai auto-attack & homing). */
@@ -1250,8 +1370,8 @@ export const game = {
     const lunge = getCombat().contactAttack.lunge;
     enemy.vx += dirX * lunge;
     enemy.vy += dirY * lunge;
-    if (isMukusActive(this.run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
-    this.damagePlayer(enemy.damage);
+    // V2 §15 SUPPORT: musuh yang sedang dikuatkan aura melukai lebih keras
+    this.damagePlayer(enemy.damage * (enemy.auraDmgMult || 1));
   },
 
   /** Ledakan AOE boss: cek player dalam radius + shake. */
@@ -1259,12 +1379,12 @@ export const game = {
     const run = this.run;
     run.effects.spawnBlast(enemy.x, enemy.y, cfg.radius, '#ff4059');
     run.camera.addShake(0.55);
+    audio.bossBlast();
     const player = run.player;
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
     const rr = cfg.radius + player.radius;
     if (dx * dx + dy * dy < rr * rr) {
-      if (isMukusActive(run)) { try { enemy.applySlow(0.7, 0.5); } catch { /* abaikan */ } }
       this.damagePlayer(cfg.damage);
     }
   },
@@ -1273,17 +1393,6 @@ export const game = {
   damagePlayer(amount) {
     const run = this.run;
     const player = run.player;
-    // ADDENDUM §2 — LAPISAN MUKUS (item): serap dari pool 25% max HP
-    if (isMukusActive(run)) {
-      const before = amount;
-      amount = absorbMukus(run, amount);
-      if (amount < before) {
-        run.effects.spawnLabel(player.x, player.y - 40, tr('TERSERAP!'), '#7fd8c8');
-        run.effects.spawnBlast(player.x, player.y, 46, '#7fd8c8');
-        audio.hit();
-      }
-      if (amount <= 0) return;
-    }
     // PHAGOS: membran hidup / immunity / armor Mastia / adaptif spora
     try {
       amount = membraneAbsorbDamage(run, amount);
@@ -1312,14 +1421,14 @@ export const game = {
     emit('playerHit', { damage: amount });
     // Fase 17 (trigger 5B): percikan merah 5–8 partikel di sekitar player
     run.effects.spawnBurst(player.x, player.y, '#ff6b6b', getRetention().particles.playerHit, 120, 3);
-    // Screen shake saat kena damage besar (sesuai spek)
-    run.camera.addShake(amount >= 15 ? 0.6 : 0.22);
-    audio.playerHit();
+    // P6 (§20): getar saat pemain terluka juga lewat tangga — pukulan besar
+    // (≥15) setara elite, sisanya setara heavy; tetap di-cap trauma kamera.
+    addImpactShake(this, amount >= 15 ? (gfTier('elite').shake || 0.18) : (gfTier('heavy').shake || 0.09), { throttle: false });
+    playSfx(run, 'playerHit');
     buzz('playerHit'); // V2 Phase 1: getaran pola [30,40,30] di HP
     player.squash = 0.28; // JUICE squash saat terkena hit
     passiveOnPlayerHit(run, this); // V2 Phase 3: retaliate Masta (Degranulasi)
     try { membraneOnPlayerHit(this, amount); } catch { /* abaikan */ } // PHAGOS: reflektor cermin
-    try { onPlayerDamaged(this, amount); } catch { /* abaikan */ } // ADDENDUM §2: serum/cadangan/thorns
     if (!player.alive) {
       this.handlePlayerDeath();
     }
@@ -1553,14 +1662,15 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     const economy = getData().upgrades.economy;
     const bonusCurrency = economy.waveBonusPerWave + run.spawnSys.wave * 2;
-    const bonusPart = rollPartDrop('boss', 1) || 'fragmen_diferensiasi';
-    run.bossChest = { currency: bonusCurrency, partId: bonusPart, doubled: false };
+    // V2 P3: peti boss = suntikan ANTIBODI (resource evolusi) — bukan fragmen
+    // evolusi lama, bukan Bio-Point. Membuat mutasi akhir run terjangkau.
+    const bonusBio = Math.round(antibodyForKill('boss', run.heroDef && run.heroDef.id) * 0.5);
+    run.bossChest = { currency: bonusCurrency, bio: bonusBio, doubled: false };
     setPaused(true);
     audio.chest();
     emit('bosschest', {
       currency: bonusCurrency,
-      partName: getData().evolutions.parts.find((p) => p.id === bonusPart)?.name || 'Bagian',
-      partSprite: getData().evolutions.parts.find((p) => p.id === bonusPart)?.sprite || '',
+      bio: bonusBio,
       adAvailable: canWatchAd(STATE.meta),
     });
   },
@@ -1586,11 +1696,13 @@ applyChapterTier(enemy, run) {
     const chest = run.bossChest;
     if (!chest) return;
     const currency = chest.currency * (doubled ? 2 : 1);
+    const bio = (chest.bio || 0) * (doubled ? 2 : 1);
     meta.currency += currency;
-    meta.evoParts[chest.partId] = (meta.evoParts[chest.partId] || 0) + (doubled ? 2 : 1);
+    // P3: peti boss menambah ANTIBODI (resource evolusi), bukan Bio-Point.
+    earnAntibody(run, bio, { source: 'boss_chest', particles: 14 });
     writeSave(meta);
     run.bossChest = null;
-    emit('toast', { message: `Peti boss: +${currency} Biokredit${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
+    emit('toast', { message: `Peti boss: +${currency} Biokredit${bio > 0 ? ` · +${bio} Antibodi` : ''}${doubled ? ' (2x!)' : ''}`, kind: 'gold' });
     setPaused(false);
     emit('resume');
   },
@@ -1620,13 +1732,17 @@ applyChapterTier(enemy, run) {
   /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
   triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
-    return tryPulse(this, {});
+    const ok = tryPulse(this, {});
+    if (ok) audio.pulse(); // PHAGOS: Pulse = momen aksi utama → bunyi paling tebal
+    return ok;
   },
 
   /** ADDENDUM §2 — Pulse paksa abaikan cooldown (Ledakan ATP). */
   triggerPulseForce() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
-    return tryPulse(this, { ignoreCd: true });
+    const ok = tryPulse(this, { ignoreCd: true });
+    if (ok) audio.pulse();
+    return ok;
   },
 
   /**
@@ -1756,7 +1872,7 @@ applyChapterTier(enemy, run) {
       // PACING D14: korban telan (skill devour) = engulf → 4 XP.
       // Drop tetap tidak ada (trade-off jalur skill — D9; engulf membran tetap full kill).
       this.addXP(this.xpForKillCause(enemy, 'engulf'));
-      audio.kill();
+      audio.engulf();
       return;
     }
 
@@ -1768,6 +1884,20 @@ applyChapterTier(enemy, run) {
     run.currencyEarned += killBk;
     run.effects.spawnLabel(enemy.x, enemy.y - enemy.radius - 22, `+${killXp} XP · +${killBk} BK`, '#cde86b');
 
+    // ---- P3 (IAP §5): ANTIBODI per kill + umpan balik berantai ----
+    // Rantai wajib: musuh mati → partikel → label "+N ANTIBODI" → dompet HUD.
+    // Bukan sekadar mengubah angka.
+    {
+      const kind = enemy.isBoss ? 'boss' : (enemy.def.elite ? 'elite' : 'normal');
+      const jumlah = antibodyForKill(kind, run.heroDef && run.heroDef.id, run.antibodyMult || 1);
+      earnAntibody(run, jumlah, {
+        x: enemy.x, y: enemy.y - (enemy.radius || 12) - 6, source: kind,
+        color: kind === 'boss' ? '#f5c64f' : '#8df7d2',
+        particles: kind === 'boss' ? 18 : (kind === 'elite' ? 10 : 5),
+      });
+      recordEconomyEvent('enemy_killed', { kind, source: source || 'kill' });
+    }
+
     // Sprint 3.17: earn BK LANGSUNG per kill (lihat atas) — drop koin per tier
     // DICABUT (double-count). HARD: nutrisi bonus saja.
     if (!enemy.isBoss && (enemy.def.tier || 'medium') === 'hard') {
@@ -1778,25 +1908,20 @@ applyChapterTier(enemy, run) {
       }
     }
 
-    // ---- JUICE: hit-stop + SFX kill ----
-    audio.kill();
-    // V2 Phase 1: hit-stop BERLAPIS dari data (kill biasa juga dapat "berat")
+    // ---- JUICE (P6): hit-stop + getar + SFX kill lewat SATU tangga (§20) ----
     const gf = getGameFeel();
-    if (enemy.isBoss) { this.hitStopRun(gf.hitStop.boss); buzz('boss'); }
-    else if (enemy.def.elite) { this.hitStopRun(gf.hitStop.elite); buzz('elite'); }
+    const mati = applyDeathImpact(this, enemy, {
+      source,
+      // kill kontak membran: freeze paling kecil & tidak menumpuk (RONDE-7)
+      cooldownSec: 0.24,
+    });
+    if (enemy.isBoss) buzz('boss');
+    else if (enemy.def.elite) buzz('elite');
     else {
       // RONDE-7: kill biasa tidak menumpuk freeze — cadence PULSE tetap
       // responsif penuh di tengah keroyokan.
-      // PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi).
-      const isMembraneKill = source == null || typeof source === 'string'; // PHAGOS Sprint 1: cause string = kill membran
-      if (run.hitStopCool <= 0) {
-        this.hitStopRun(isMembraneKill ? (gf.hitStop.membraneKill ?? 0.015) : gf.hitStop.kill);
-        run.hitStopCool = 0.24;
-      }
       buzz('kill');
     }
-    // V2 Phase 1: micro shake per kill (biasa/elite; boss sudah shake 0.65 di bawah)
-    if (!enemy.isBoss) run.camera.addShake(enemy.def.elite ? gf.shake.elite : gf.shake.kill);
     // V2 Phase 5: elite VOLATILE — bangkai meledak setelah fuse ber-telegraph
     // (konsisten filosofi Phase 2: bisa dihindari dengan menjauh)
     if (enemy.eliteAffix === 'volatile') {
@@ -1804,13 +1929,16 @@ applyChapterTier(enemy, run) {
       run.pendingBlasts.push({ x: enemy.x, y: enemy.y, t: vc.fuse, radius: vc.radius, damage: vc.damage, color: vc.color });
       run.effects.spawnBlast(enemy.x, enemy.y, vc.radius, vc.color);
     }
-    // V2 Phase 1: DEATH POP — sprite membesar & memudar, kill tidak "lenyap"
+    // P6: DEATH POP bertingkat (normal/elite/boss) — sprite membesar & memudar
+    const pop = deathPopFor(enemy.isBoss, enemy.def.elite);
     run.effects.spawnKillPop(
       enemy.x, enemy.y, enemy.def.spriteIdle, enemy.radius,
-      run.player.x < enemy.x, gf.killPop.dur, gf.killPop.scaleTo,
+      run.player.x < enemy.x, pop.dur, pop.scaleTo,
     );
     const pfx = getRetention().particles;
-    run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
+    // P6: partikel mengecil saat layar ramai (§20: VFX tidak membuat kacau)
+    const partikel = particleBudget(run, enemy.isBoss ? pfx.bossDeath : pfx.enemyDeath);
+    run.effects.spawnBurst(enemy.x, enemy.y, enemy.def.color, partikel, enemy.isBoss ? 300 : 150, enemy.isBoss ? 6 : 4);
 
     // ---- VFX kill sesuai tier evolusi hero (ring→slash→angin→petir→legenda)
     const killKind = run.evoStage.killFx || 'ring';
@@ -1821,13 +1949,6 @@ applyChapterTier(enemy, run) {
 
     if (enemy.isBoss) {
       run.bossKills += 1;
-      // ADDENDUM §2.2 — boss bisa menjatuhkan Marker Opsonin (25%)
-      if (Math.random() < 0.25 && STATE.meta) {
-        STATE.meta.consumables = STATE.meta.consumables || {};
-        STATE.meta.consumables.opsonin = (STATE.meta.consumables.opsonin || 0) + 1;
-        try { writeSave(STATE.meta); } catch { /* abaikan */ }
-        emit('toast', { message: 'Boss menjatuhkan Marker Opsonin!', kind: 'gold' });
-      }
       run.boss = null;
       run.camera.addShake(0.65);
       audio.bossDie();
@@ -1852,27 +1973,9 @@ applyChapterTier(enemy, run) {
     // D9 (roadmap): korban TELAN = trade-off — heal+Bio, TANPA drop fisik.
     // (XP + BK cause tetap jalan; boss chest/opsonin tidak diganggu.)
     const devoured = source === 'engulf' && !enemy.isBoss;
-    // ---- Drop BAGIAN EVOLUSI (item upgrade hero, bukan sekadar poin) ----
-    const partMult = run.arena.bonus.partMult || 1;
-    const dropPart = (partId, ox = 0, oy = 0) => {
-      if (!partId) return;
-      const partDef = getData().evolutions.parts.find((p) => p.id === partId);
-      if (!partDef) return;
-      const pickup = new Pickup({ ...partDef, pickupType: 'part', color: partDef.sprite, radius: 13, lifetime: 25 }, enemy.x + ox, enemy.y + oy);
-      pickup.partId = partDef.id;
-      run.pickups.push(pickup);
-    };
-    if (devoured) {
-      // D9: ditelan utuh — fragmen ikut tercerna, tidak ada drop
-    } else if (enemy.isBoss) {
-      for (let i = 0; i < getData().evolutions.bossGuaranteedParts; i++) {
-        dropPart(rollPartDrop('boss', partMult), (Math.random() - 0.5) * 70, (Math.random() - 0.5) * 70);
-      }
-    } else if (enemy.def.elite) {
-      dropPart(rollPartDrop('elite', partMult));
-    } else {
-      dropPart(rollPartDrop('normal', partMult));
-    }
+    // V2 P2: drop fragmen evolusi DIHAPUS. Progresi run = mutasi (dipilih saat
+    // level-up), jadi tidak ada lagi item fragmen yang perlu dipungut.
+    void devoured;
 
     // PHAGOS Sprint 1 (bible §5): XP di-grant LANGSUNG saat kill (lihat atas) —
     // orb XP kill dicabut (sebelumnya double-grant: langsung + orb).
@@ -1945,9 +2048,6 @@ applyChapterTier(enemy, run) {
   // =====================================================================
   pause() {
     if (STATE.screen !== 'gameplay' || STATE.paused || STATE.levelUpOpen) return;
-    // RONDE-7: bark naratif (presenter-layer z 340) jangan menempel di atas
-    // menu pause — dulu menelan tombol LANJUT (#btn-resume) sampai terasa mati.
-    try { hidePresenter(); } catch { /* presenter belum siap di fase tes */ }
     setPaused(true);
     emit('pause', {});
   },
@@ -1965,53 +2065,7 @@ applyChapterTier(enemy, run) {
     triggerRewardedAdRevive(() => this.confirmRevive());
   },
 
-  /**
-   * Sprint 4.24 (bible §9.2): Lanjut Run — bangkit seharga 50 Genom
-   * (alternatif iklan; tetap sekali per run via reviveOffered).
-   */
-  requestReviveGenom() {
-    if (!spendImun(STATE.meta, 50)) {
-      emit('toast', { message: 'Genom tidak cukup (butuh 50)', kind: 'danger' });
-      return;
-    }
-    writeSave(STATE.meta);
-    this.confirmRevive();
-  },
 
-  /**
-   * Sprint 4.24 (bible §9.2): Peti Mutasi — 150 Genom untuk 1 mutasi acak
-   * (tanpa bio-cost). Pity TERPISAH: tiap Peti ke-5 menjamin tier 3.
-   * @returns {{ok:boolean, mutation?:object, pity?:boolean, reason?:string}}
-   */
-  openMutasiChest() {
-    const run = this.run;
-    const meta = STATE.meta;
-    if (!run || run.ended) return { ok: false, reason: 'Run sudah berakhir' };
-    const all = (getData().mutations && getData().mutations.mutations) || [];
-    const active = run.activeMutations || [];
-    const byId = Object.fromEntries(all.map((m) => [m.id, m]));
-    const bad = (m) => active.includes(m.id)
-      || (m.conflicts || []).some((c) => active.includes(c))
-      || active.some((a) => ((byId[a] && byId[a].conflicts) || []).includes(m.id));
-    const pool = all.filter((m) => !bad(m));
-    if (!pool.length) return { ok: false, reason: 'Semua mutasi sudah dimiliki' };
-    if ((meta.imun || 0) < 150) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
-    meta.mutasiPity = meta.mutasiPity || 0;
-    const pityHit = meta.mutasiPity >= 4;
-    let sub = pityHit ? pool.filter((m) => m.tier === 3) : pool;
-    if (!sub.length) sub = pool; // pity longgar bila T3 tak tersedia
-    const pick = sub[Math.floor(Math.random() * sub.length)];
-    if (!spendImun(meta, 150)) return { ok: false, reason: 'Genom tidak cukup (butuh 150)' };
-    meta.mutasiPity = (pityHit || pick.tier === 3) ? 0 : meta.mutasiPity + 1;
-    const res = applyMutation(run, pick.id, { skipCost: true });
-    if (!res.ok) { // seharusnya tak terjadi (pool sudah disaring) — refund
-      meta.imun += 150;
-      return { ok: false, reason: res.reason };
-    }
-    writeSave(meta);
-    emit('toast', { message: `Peti Mutasi: ${pick.name}!${pityHit && pick.tier === 3 ? ' (PITY tier 3)' : ''}`, kind: 'gold' });
-    return { ok: true, mutation: pick, pity: pityHit && pick.tier === 3 };
-  },
 
   /** Logic asli setelah iklan "selesai ditonton". */
   confirmRevive() {
@@ -2022,6 +2076,7 @@ applyChapterTier(enemy, run) {
     player.alive = true;
     player.hp = Math.round(player.maxHP * 0.5);
     player.iframes = 2.0;
+    audio.revive();
 
     // Bersihkan musuh di sekitar (tanpa drop — anti exploit)
     const clearRadius = 320;
@@ -2053,7 +2108,7 @@ applyChapterTier(enemy, run) {
     if (!run || run.ended) return;
     run.victory = true;
     if (run.chapter) run.bonusCurrency = (run.bonusCurrency || 0) + (run.chapter.reward || 0);
-    audio.evolve(); // fanfare kemenangan
+    audio.victory(); // fanfare kemenangan
     this.finishRun(false);
   },
 
@@ -2061,12 +2116,12 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     if (!run || run.ended) return;
     run.ended = true;
+    if (!run.victory) audio.gameover(); // fanfare kalah (menang sudah bunyi di winRun)
 
     const meta = STATE.meta;
-    const doubleMult = (run.itemBuffs && run.itemBuffs.katalis) ? 1.5 : 1; // ADDENDUM §2: Katalis Mitosis
     // Sprint 3.17 (bible §6.2): earn BK sudah LIVE per kill/wave — rumus bonus
     // akhir run (wave×8 + kills×0.5 + boss×50) DICABUT. Sisa: chapter/endless bonus.
-    const earned = Math.round((run.currencyEarned + (run.bonusCurrency || 0)) * doubleMult);
+    const earned = Math.round(run.currencyEarned + (run.bonusCurrency || 0));
     run.earned = earned;
     const victory = !!run.victory;
 
@@ -2077,8 +2132,6 @@ applyChapterTier(enemy, run) {
       meta.campaignCleared = meta.campaignCleared || {};
       const tierIdx = run.chapterTier ? run.chapterTier.tier : 0;
       meta.campaignCleared[run.chapter.id] = Math.max(meta.campaignCleared[run.chapter.id] || 0, tierIdx);
-      const clearedCount = Object.keys(meta.campaignCleared).length;
-      meta.allies = Math.min(6, Math.max(meta.allies || 1, 1 + clearedCount));
     }
     meta.stats.totalKills += run.kills;
     meta.stats.bossKills += run.bossKills;
@@ -2087,33 +2140,23 @@ applyChapterTier(enemy, run) {
     meta.stats.bestSurvivalTime = Math.max(meta.stats.bestSurvivalTime, Math.floor(run.time));
     meta.stats.totalSurviveSeconds += Math.floor(run.time);
     meta.stats.totalRuns += 1;
-    try { welcomeBoxOnRunComplete(meta); } catch { /* kapsul opsional */ }
     meta.stats.totalNutrients += run.nutrientsCollected;
     meta.stats.totalXP += Math.floor(run.xpGained);
-    // Bagian evolusi yang dikumpulkan selama run → inventory meta
-    for (const [partId, n] of Object.entries(run.parts)) {
-      if (n > 0) meta.evoParts[partId] = (meta.evoParts[partId] || 0) + n;
-    }
     addCurrency(meta, earned);
 
-    // FASE 14 — hasil run mengalir ke Battle Pass (XP) & Antibodi (soft).
-    // RONDE-4 (ekonomi premium ketat): Imun Coin TIDAK lagi diberikan dari
-    // hasil run — coin premium hanya dari PEMBELIAN & reward Battle Pass
-    // (aturan platform revenue; blueprint: premium ≠ gampang digratiskan).
-    const bpRes = addBpXP(meta, run.level * 40 + run.spawnSys.wave * 15 + run.kills);
-    run.bpGain = bpRes; // ringkasan akhir run
-    run.imuEarned = 0;
+    // V2: Battle Pass & Pangkat DIHAPUS. Hasil run hanya mengalir ke Antibodi
+    // (satu-satunya resource) — sudah dilakukan oleh addCurrency() di atas.
 
-    // Fase 19 — TUJUAN PEMAIN: GP Pangkat Penjaga (setiap run menghasilkan GP;
-    // kenaikan pangkat = momen emosional ala naik-rank, tanpa demosi utk anak)
-    const rankRes = applyRunGP(meta, {
-      wave: run.spawnSys.wave,
-      kills: run.kills,
-      bossKills: run.bossKills,
-      victory,
-      engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
-    });
-    run.rankGain = rankRes;
+    // Workflow minimal (rombak V3): tulis balik kekuatan permanen — level,
+    // mutasi aktif, riwayat mutasi, dan Antibodi yang belum dibelanjakan —
+    // ke meta.power, supaya PLAY berikutnya (dari dashboard ATAU tombol "Main
+    // Lagi" di layar ini) melanjutkan dari kekuatan yang sama, bukan dari nol.
+    meta.power = meta.power || {};
+    meta.power.level = run.level;
+    meta.power.xp = run.xp;
+    meta.power.activeMutations = [...(run.activeMutations || [])];
+    meta.power.mutationHistory = [...(run.mutationHistory || [])];
+    meta.power.antibody = runAntibody(run);
 
     recordAntigenMeta(meta, run); // R3: encounter record memori antigen (collection)
     // V2 Phase 6 — HERO MASTERY: progres per-hero murni dari bermain
@@ -2164,7 +2207,6 @@ applyChapterTier(enemy, run) {
     for (const h of newlyUnlocked) {
       emit('toast', { message: `Hero baru terbuka: ${h.name}!`, kind: 'gold' });
       queueHeroNotice(h.id); // Fase 17: overlay "HERO BARU!" di dashboard
-      emit('heroUnlocked', { heroId: h.id }); // E1 poin 9: Amara menjelaskan
     }
 
     writeSave(meta); // AUTO-SAVE akhir run
@@ -2185,18 +2227,17 @@ applyChapterTier(enemy, run) {
       bossKills: run.bossKills,
       heroId: run.heroDef ? run.heroDef.id : null,
       engulfs: (run.membrane && run.membrane.stats && run.membrane.stats.engulfCount) || 0,
-      bio: run.bioPoints || 0,
+      antibody: runAntibody(run),
+      antibodySpent: run.antibodySpent || 0,
+      reserve: reserveBalance(STATE.meta), // P5: saldo cadangan (eksternal)
       pulses: (run.membrane && run.membrane.stats && run.membrane.stats.pulseCount) || 0,
-      gp: rankRes ? rankRes.gained : 0,
-      bpXp: run.bpGain ? run.bpGain.granted : 0,
       xpGained: Math.floor(run.xpGained),
       nutrients: run.nutrientsCollected,
       parts: run.partsCollectedTotal,
+      mutations: (run.activeMutations || []).length, // P2: progresi run = mutasi
+      evoStage: (run.evoStage && run.evoStage.id) || 'base',
       level: run.level,
       currencyEarned: earned,
-      imuEarned: run.imuEarned || 0,
-      bpFrom: run.bpGain ? run.bpGain.from : null,
-      bpTo: run.bpGain ? run.bpGain.to : null,
       newMissions: completedMissions.length,
       // V2 Phase 6: mastery hero yang dipakai run ini
       mastery: run.masteryGain ? {
@@ -2206,17 +2247,6 @@ applyChapterTier(enemy, run) {
         levelsGained: run.masteryGain.levelsGained,
         title: run.masteryGain.title,
       } : null,
-      rank: {
-        gained: rankRes.gained,
-        gpAfter: rankRes.gpAfter,
-        tierUp: rankRes.tierUp,
-        tierName: rankRes.toTier.name,
-        tierColor: rankRes.toTier.color,
-        insignia: rankRes.toTier.insignia,
-        prevTierName: rankRes.fromTier.name,
-        need: rankRes.need,
-        nextName: rankRes.nextName,
-      },
     });
   },
 
@@ -2267,14 +2297,21 @@ applyChapterTier(enemy, run) {
     const P = cam.makeProjector(w, h);
     cam.setPlayerScreen(P.project(player.x, player.y));
     drawArena3D(ctx, P, time);
+    // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
+    // melewati gugus alveoli itu"), bukan nomor stage.
+    try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
 
     /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
-    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0 } = {}) => {
+    const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1, shear = 0 } = {}) => {
       const q = P.project(x, y);
       ctx.save();
       ctx.translate(q.x, q.y - lift * q.s);
       if (tilt) ctx.rotate(tilt);
-      ctx.scale(q.s * flip, q.s);
+      ctx.scale(q.s * flip * sx, q.s * sy);
+      // P7: jangkauan massa (skew) BERPOROS DI GARIS BAWAH — bagian bawah
+      // tidak bergeser, bagian atas condong ke arah jalan. Kalau diputar dari
+      // tengah, sel akan terlihat meluncur, bukan merayap.
+      if (shear) ctx.transform(1, 0, -shear, 1, shear * anchorHalf, 0);
       ctx.translate(-x, -y);
       return q;
     };
@@ -2379,7 +2416,11 @@ applyChapterTier(enemy, run) {
       ctx.lineWidth = 3;
       ctx.globalAlpha = 0.8;
       ctx.beginPath();
-      ctx.ellipse(player.x, player.y, player.radius * 1.25, player.radius * 1.25, 0, 0, Math.PI * 2);
+      // P7: cincin tim = telapak sel; mengikuti daya lekat hasil panggangan
+      // Godot (mengembang saat menempel, sedikit mengecil saat ditarik).
+      const _lekat = typeof player.anim.contact === 'number' ? player.anim.contact : 1;
+      const _ringR = player.radius * 1.25 * (0.94 + 0.06 * _lekat);
+      ctx.ellipse(player.x, player.y, _ringR, _ringR, 0, 0, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1;
       ctx.restore();
@@ -2394,11 +2435,20 @@ applyChapterTier(enemy, run) {
 
     // ===== PHAGOS: LAPISAN MEDAN MEMBRAN (di atas background, di bawah hero) =====
     try { this.renderMembraneLayer(ctx, run, time, ground, billboard); } catch (err) { console.warn('[phagos] renderMembrane:', err); }
+    // V2 §19: bentuk TELEGRAPH serangan digambar di lantai SEBELUM eksekusi
+    try { drawAttack(ctx, run, ground); } catch (err) { console.warn('[phagos] drawAttack:', err); }
     try { this.renderArenaWall(ctx, run, time, ground); } catch (err) { console.warn('[phagos] renderArenaWall:', err); }
 
     // ===== LAPISAN BILLBOARD (diurutkan per kedalaman — painter's algorithm) =====
     const bobOf = { player: 0 };
-    const pBob = player.moving ? Math.abs(Math.sin(player.walkPhase || 0)) * 3.4 : Math.sin(time * 2.1) * 1.1;
+    const anchorHalf = player.radius * 1.3335; // = (radius * 2.667) / 2 — garis bawah sprite hero
+    // LOCOMOTION V2: bob / condong / squash dihitung di player.update() —
+    // SATU sumber kebenaran, entah dari rig Rive (data/…/hero-locomotion.riv)
+    // atau rumus cadangannya. game.js hanya MEMAKAI nilai itu supaya tidak
+    // pernah ada dua rumus yang tidak sinkron antara update dan render.
+    const pAnim = player.anim || { bob: 0, tilt: 0, sx: 1, sy: 1 };
+    const pBob = pAnim.bob || 0;
+    bobOf.player = pBob;
     const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
     const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
     const pBody = {
@@ -2454,6 +2504,54 @@ applyChapterTier(enemy, run) {
           ctx.globalAlpha = 1;
           ctx.restore();
         }
+        // V2 §15 SUPPORT: aura pendukung — telegraph tumbuh dulu, baru menyala.
+        // Kalau pemain melihat cincin ini, ia masih punya waktu untuk membekukan
+        // atau membunuh pendukungnya sebelum buff menyala.
+        if (e.auraCfg) {
+          const cfgA = e.auraCfg;
+          const warnaA = cfgA.color || '#b39ddb';
+          ground(e.x, e.y + e.radius * 0.9);
+          if (e.auraWindup > 0) {
+            const tA = 1 - Math.max(0, e.auraWindup) / (cfgA.telegraphSec || 0.5);
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.35 + 0.45 * tA;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([7, 6]);
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * (0.3 + 0.7 * tA), 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          } else if (e.auraPulseFx > 0) {
+            const kA = Math.max(0, e.auraPulseFx) / 0.45;
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.85 * kA;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * (1.05 - 0.25 * kA), 0, Math.PI * 2);
+            ctx.stroke();
+          } else {
+            ctx.strokeStyle = warnaA;
+            ctx.globalAlpha = 0.22;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y + e.radius * 0.9, (cfgA.radius || 150) * 0.35, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+        // V2 §15 SUPPORT: musuh yang SEDANG dikuatkan aura (cincin terang)
+        if (e.auraBuffT > 0) {
+          ground(e.x, e.y + e.radius * 0.9);
+          ctx.strokeStyle = e.auraColor || '#b39ddb';
+          ctx.globalAlpha = 0.45 + 0.25 * Math.abs(Math.sin(time * 6));
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y + e.radius * 0.9, e.radius * 1.45, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
         // V2 Phase 5: aura ELITE — ring warna affix di lantai (terlihat dari jauh)
         if (e.eliteAffix) {
           ground(e.x, e.y + e.radius * 0.9);
@@ -2497,10 +2595,23 @@ applyChapterTier(enemy, run) {
         billboard(e.x + shiverX, e.y, { lift: e.radius * 0.62 + bob, flip });
         if (hidden) ctx.globalAlpha = 0.14;
         const path = e.attackSpriteHint ? e.def.spriteAttack : e.def.spriteIdle;
+        // P6 (§20): SQUASH — pop seketika saat terhantam, lalu kembali.
+        // k = 0 di awal → puncak di tengah → 0 lagi (tanpa menyentuh aset foto).
+        let sqX = 1;
+        let sqY = 1;
+        if (e.squashT > 0 && e.squashDur > 0) {
+          const p = 1 - e.squashT / e.squashDur;
+          const k = Math.sin(Math.PI * p) * (e.squashAmt || 0);
+          sqX = 1 + k;
+          sqY = Math.max(0.5, 1 - k * 0.85);
+        }
         drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
           // V2 Phase 5: boss enrage = tint merah konstan (drama fase akhir)
-          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / 0.12) : (e.enraged ? 0.3 : 0),
+          // P6: durasi flash mengikuti TINGKAT dampak (bukan 0.12 rata).
+          flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / (e.flashDur || 0.12)) : (e.enraged ? 0.3 : 0),
           flashColor: e.hitFlash > 0 ? '#ffffff' : (e.enraged ? '#ff2038' : undefined),
+          scaleX: sqX,
+          scaleY: sqY,
         });
         drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
         ctx.globalAlpha = 1;
@@ -2543,50 +2654,122 @@ applyChapterTier(enemy, run) {
         ctx.restore();
       } });
     }
+    // V2 archetype SUMMON: entitas biologis sementara (punya umur)
+    for (const sm of run.summons || []) {
+      draws.push({ y: sm.y, fn: () => {
+        const fade = Math.min(1, (sm.life - sm.t) / 1.5); // memudar sebelum habis
+        billboard(sm.x, sm.y, { lift: sm.radius * 0.55 });
+        ctx.globalAlpha = 0.35 + 0.4 * fade;
+        drawPulseGlow(ctx, sm.x, sm.y, sm.radius * 1.6, sm.color, time, sm.angle, 0.7);
+        ctx.globalAlpha = fade;
+        drawSprite(ctx, sm.sprite, sm.x, sm.y, sm.radius * 2.4, 0, { alpha: fade });
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      } });
+    }
     if (player.alive) {
       draws.push({ y: player.y, fn: () => {
         // PHAGOS Nyx: menghilang total 0,5 dtk saat Pulse (invincible)
         if (run.membrane && run.membrane.vanishT > 0) return;
         const blink = player.iframes > 0 && player.iframes < 900 && Math.floor(time * 12) % 2 === 0;
         if (!blink) {
-          const skin = getEquippedSkin(STATE.meta, player.heroDef.id); // Fase 14: skin kosmetik
-          let path = player.attackFlash > 0 ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
-          const tilt = (player.moving ? Math.sin((player.walkPhase || 0) * 2) * 0.05 : 0) + pSwingTilt * (Math.cos(player.facing) < 0 ? -1 : 1);
-          const flip = Math.cos(player.facing) < 0 ? -1 : 1;
-          billboard(pBody.x, pBody.y, { lift: player.radius * 0.62 + pBob, flip, tilt });
-          const auraAcc = STATE.meta.cosmetics?.aura
-            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.aura) : null;
-          // E1 poin 5: aura neon default DIHAPUS — hanya aura KOSMETIK
-          // (dibeli pemain) yang boleh menyala; default karakter bersih.
-          if (auraAcc) drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.5, auraAcc.color, time, 0, 0.8);
-          const bodySize = player.radius * 2.667 * (player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1);
-          const evoStage = run.evoStage?.stage || 0;
-          if (skin) {
-            const tinted = getTintedSprite(path, skin.color);
-            const scale = bodySize / Math.max(tinted.width, tinted.height);
-            ctx.drawImage(tinted, pBody.x - (tinted.width * scale) / 2, pBody.y - (tinted.height * scale) / 2, tinted.width * scale, tinted.height * scale);
-          } else {
-            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
-          }
-          drawHeroEquity(ctx, player.heroDef.id, evoStage, pBody.x, pBody.y, bodySize, time, player.heroDef.color);
-          // PHAGOS: overlay visual MUTASI (aset mut_*.png, kumulatif — tiap
-          // mutasi aktif menumpuk satu aksesori; spin pelan kecuali EKG/
-          // mahkota/kilau yang orientasinya bermakna).
-          try {
-            const muts = run.activeMutations || [];
-            for (let mi = 0; mi < muts.length; mi++) {
-              const mdef = mutationDef(muts[mi]);
-              if (!mdef || !mdef.sprite) continue;
-              const rot = mdef.spin === false ? 0 : time * 0.5 + mi * 0.7;
-              drawSprite(ctx, mdef.sprite, pBody.x, pBody.y, bodySize, rot, { alpha: 0.95 });
+          // UI-REBUILD P8: BENTUK MUTASI = foto karakter itu sendiri (bukan lagi
+          // overlay mut_*.png yang ditumpuk). Kalau fotonya belum tersedia untuk
+          // hero ini, pakai sprite dasar seperti sediakala.
+          const _muts = run.activeMutations || [];
+          // P2: BENTUK karakter mengikuti POHON EVOLUSI (BASE → MUT1 → MUT2 →
+          // APEX) — sumber tunggalnya data/evolutions.json, bukan lagi tier
+          // mutasi mentah. Bila foto tingkat itu belum ada, turun ke tingkat
+          // bawahnya; terakhir ke sprite dasar.
+          const _evo = run.evoStage || evoStageFor(run, player.heroDef);
+          const _evoId = _evo.id || 'base';
+          const _wantStage = _evo.spriteKey === 'spriteMut2Idle' ? 2 : (_evo.spriteKey === 'spriteMut1Idle' ? 1 : 0);
+          const _attacking = player.attackFlash > 0;
+          const _mutPair = (stage) => [
+            _attacking ? player.heroDef[`spriteMut${stage}Attack`] : player.heroDef[`spriteMut${stage}Idle`],
+            _attacking ? player.heroDef[`spriteMut${stage}Idle`] : null, // cadangan satu pose bila pose ini belum ada
+          ];
+          let path = _attacking ? player.heroDef.spriteAttack : player.heroDef.spriteIdle;
+          if (_wantStage > 0) {
+            const stages = _wantStage === 2 ? [2, 1] : [1];
+            for (const st of stages) {
+              const [main, fallback] = _mutPair(st);
+              if (hasSprite(main)) { path = main; break; }
+              if (fallback && hasSprite(fallback)) { path = fallback; break; }
             }
-          } catch { /* abaikan */ }
-          // Aksesori MAHKOTA (kosmetik, Pilar 3: visual-only)
-          const crownAcc = STATE.meta.cosmetics?.crown
-            ? getData().cosmetics.accs.find((a) => a.id === STATE.meta.cosmetics.crown) : null;
-          if (crownAcc) {
+          }
+          // UI-REBUILD P8: gerakan NATURAL ke semua arah.
+          //  · flip dihaluskan (animFlip lewat 0 saat berbalik → badan menipis
+          //    sesaat, bukan langsung jump ke sisi lain).
+          //  · condong searah jalan (kiri/kanan) — dikalikan animFlip karena
+          //    mirror membalik arah rotasi.
+          //  · ayunan halus saat berjalan + tebasan saat Pulse.
+          //  · gerak vertikal (atas/bawah) jadi squash-stretch halus (sx/sy),
+          //    jadi mendekat terasa "membesar" dan menjauh "mengecil".
+          const _rawFlip = typeof player.animFlip === 'number' ? player.animFlip : (Math.cos(player.facing) < 0 ? -1 : 1);
+          const _sgn = _rawFlip < 0 ? -1 : 1;
+          const flip = _sgn * Math.max(0.14, Math.abs(_rawFlip)); // jangan pernah 0 (sprite hilang)
+          const _flipAbs = Math.max(0.14, Math.abs(_rawFlip));
+          // condong sudah termasuk lean searah jalan + ayunan langkah +
+          // miring ke arah belokan (inersia). Dikalikan arah mirror karena
+          // sprite yang dibalik membalik arah rotasi.
+          const tilt = (pAnim.tilt || 0) * _sgn * _flipAbs + pSwingTilt * _sgn;
+          const _pulse = player.squash > 0 ? 1 + Math.sin(time * 48) * 0.06 : 1;
+          const sx = (pAnim.sx || 1) * _pulse;   // squash-stretch dari rig (atau cadangan)
+          const sy = (pAnim.sy || 1) * _pulse;
+          const shear = pAnim.shear || 0;
+          // P7: ANTI-MENGAMBANG — squash/stretch diputar pada GARIS BAWAH, bukan
+          // titik tengah: `lift` dikurangi setengah tinggi × (sy - 1), sehingga
+          // tepi bawah sprite TIDAK PERNAH bergeser saat badan memipih/memanjang.
+          const _lift = player.radius * 0.62 + pBob + anchorHalf * (sy - 1);
+          const bodySize = player.radius * 2.667;
+          // P7-PROTOTIPE: 'foto' = cara lama; 'hibrida' = foto + anggota
+          // prosedural; 'makhluk' = makhluk vektor penuh (rig Godot).
+          // MEKANIK TIDAK BERUBAH — hanya fungsi gambarnya.
+          const _pj = P.project(pBody.x, pBody.y - player.radius * 0.41);
+          const _cara = drawHeroBody(ctx, {
+            player, run, x: 0, y: 0, size: bodySize,
+            time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1,
+            proyeksi: _pj,
+          });
+          if (_cara === 'creature') {
+            // foto TIDAK digambar — makhluk vektor menggantikan seluruhnya
+          } else {
+            billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
+            // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
+            // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
+            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+            ctx.restore();
+            // mode hibrida: anggota gerak digambar SETELAH foto supaya
+            // pseudopodia tampak di sekeliling badan, bukan tertutup foto.
+            if (_cara === 'hybrid') {
+              drawHeroLimbs(ctx, {
+                player, run, x: 0, y: 0, size: bodySize,
+                time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1, proyeksi: _pj,
+              });
+            }
+          }
+          // APEX: aura emas prosedural (bukan tempelan gambar) — penanda
+          // puncak pohon evolusi hero.
+          if (_evoId === 'apex') {
+            drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.9, '#f5c64f', time, 0, 0.5);
+          }
+          // UI-REBUILD P8: overlay mut_*.png DICABUT — mutasi kini mengganti
+          // FOTO karakter (lihat pemilihan `path` di atas). Yang tersisa cuma
+          // aura kanvas tipis yang ikut jumlah mutasi (bukan tempelan gambar):
+          // makin banyak mutasi, rim energi makin terang.
+          if (_muts.length > 0) {
+            const _tier = _muts.reduce((mx, id) => Math.max(mx, (mutationDef(id)?.tier) || 1), 1);
+            const _glowColor = _tier >= 3 ? '#ffd166' : (_tier === 2 ? '#8df7d2' : '#7fe3d0');
+            const _glowA = Math.min(0.55, 0.12 + _muts.length * 0.07);
+            drawPulseGlow(ctx, pBody.x, pBody.y, player.radius * 1.35, _glowColor, time, 0, _glowA);
+          }
+          // V2: aksesori kosmetik (aura/mahkota) DIHAPUS — identitas karakter
+          // berasal dari evolusi/mutasi, bukan dari toko skin (V2 §3).
+          if (false) {
             const cy = pBody.y - bodySize * 0.62 + Math.sin(time * 2.4) * 1.5;
             const cw = bodySize * 0.3, ch = bodySize * 0.14;
+            const crownAcc = null;
             ctx.fillStyle = crownAcc.color;
             ctx.strokeStyle = 'rgba(122,73,4,0.8)';
             ctx.lineWidth = Math.max(1, bodySize * 0.012);
@@ -2760,8 +2943,12 @@ applyChapterTier(enemy, run) {
         wave: run.spawnSys.wave,
         abilities: run.skills.getView(run.level),
         pulse,
-        bioPoints: run.bioPoints || 0,
+        antibody: runAntibody(run),
+        nextMutationCost: mutationCost((run.activeMutations || []).length + 1),
+        ecoPhase: economyPhase((run.activeMutations || []).length),
         activeMutations: run.activeMutations || [],
+        // P2: tahap pohon evolusi (BASE → MUT1 → MUT2 → APEX) tampil di HUD
+        evoStage: run.evoStage ? { id: run.evoStage.id, name: run.evoStage.name, tierColor: run.evoStage.tierColor } : null,
         membraneLiving: run.membrane && run.membrane.livingMaxHp > 0
           ? { hp: run.membrane.livingHp, max: run.membrane.livingMaxHp, down: run.membrane.livingDownT > 0 }
           : null,
@@ -2771,10 +2958,11 @@ applyChapterTier(enemy, run) {
         timerText: this.formatTime(run.time),
         kills: run.kills,
         currency: run.currencyEarned,
-        imu: Math.floor((STATE.meta.imun || 0) + (run.imuAccrued || 0)), // F20: saldo total, bukan akruan run saja
         gate: run.spawnSys.isGateBlocked(),
         gateBank: Math.round((run.xpBank || 0) * 10) / 10,
         level: run.level,
+        // P4 §26: progres perjalanan minimal (zona sekarang → berikutnya)
+        journey: journeyHud(run),
         boss: run.boss && run.boss.alive ? { name: run.boss.def.name, pct: run.boss.hp / run.boss.maxHP } : null,
       });
       const mmCtx = getMinimapContext();
@@ -2782,6 +2970,9 @@ applyChapterTier(enemy, run) {
         drawMinimap(mmCtx, mmCtx.canvas, run, player, 760);
       }
     }
+
+    // P2 §9: sinematik mutasi digambar paling atas (dunia sedang dibekukan).
+    if (cineActive()) drawMutationCinematic(ctx, w, h, time);
   },
 
   /**
@@ -2911,20 +3102,6 @@ applyChapterTier(enemy, run) {
       const invisible = mem.shape === 'invisible';
       if (invisible) alpha *= 0.25; // Nyx: nyaris tak terlihat (tetap ada petunjuk samar)
       this.drawMembraneShape(ctx, ground, player, mem, visR, fieldColor, alpha, time, { pulsing, peak, has, fx, st });
-      // ADDENDUM §2 — Membran Cadangan: cincin kedua 0,5× saat aktif
-      if (this.run && this.run.itemBuffs && (this.run.time || 0) < (this.run.itemBuffs.cadanganUntil || 0)) {
-        ground(player.x, player.y);
-        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(time * 6);
-        ctx.strokeStyle = '#ffd166';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 6]);
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, visR * 0.5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
-        ctx.restore();
-      }
       // Dual ring: ring luar kedua
       if (fx.dualRing) {
         const outerR = st.radius * fx.outerRadiusMult * idleOsc;

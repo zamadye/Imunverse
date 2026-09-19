@@ -15,6 +15,7 @@
  */
 
 import { getData } from '../core/data-store.js';
+import { economyCfg, recordEconomyEvent } from './antibody-economy.js';
 
 const SIMULATED_AD_DURATION_MS = 900;
 
@@ -120,6 +121,67 @@ export function triggerRewardedAdOfferwall(onSuccess, onFail) {
 export function triggerIAPSuplementPremium(onSuccess, onFail) {
   console.info('[monetization] triggerIAPSuplementPremium() — pembelian simulasi');
   setTimeout(() => onSuccess(), SIMULATED_AD_DURATION_MS);
+  return true;
+}
+
+/**
+ * P5 (IAP §19): status iklan reward ANTIBODI — jalur GRATIS untuk akselerasi.
+ * Kuota harian & jeda antar-iklan dibaca dari data/economy.json →
+ * `rewardedAds` (bukan hardcode), supaya balancing bisa diutak-atik tanpa
+ * menyentuh kode.
+ * @returns {{enabled:boolean, canWatch:boolean, reason:string, reward:number,
+ *            remainingToday:number, cooldownSec:number, cooldownLeftSec:number}}
+ *   reason: '' | 'nonaktif' | 'tanpa-iklan' | 'kuota-habis' | 'jeda'
+ */
+export function adStatus(meta) {
+  const cfg = (economyCfg() && economyCfg().rewardedAds) || {};
+  const enabled = cfg.enabled !== false;
+  const reward = Math.max(0, Math.round(cfg.antibodyReward ?? 0));
+  const limit = Math.max(0, Math.floor(cfg.dailyLimit ?? 0));
+  const cooldown = Math.max(0, Number(cfg.cooldownSec ?? 0));
+  const daily = (meta && meta.adDaily) || { date: null, count: 0 };
+  const today = new Date().toISOString().slice(0, 10);
+  const watched = daily.date === today ? Math.max(0, daily.count) : 0;
+  const remaining = Math.max(0, limit - watched);
+  const last = Number((meta && meta.adLastAt) || 0);
+  const left = last > 0 ? Math.max(0, cooldown - (Date.now() - last) / 1000) : 0;
+  let reason = '';
+  if (!enabled) reason = 'nonaktif';
+  else if (meta && meta.noAds) reason = 'tanpa-iklan';
+  else if (limit > 0 && remaining <= 0) reason = 'kuota-habis';
+  else if (left > 0) reason = 'jeda';
+  return {
+    enabled, canWatch: reason === '', reason, reward,
+    remainingToday: remaining, dailyLimit: limit,
+    cooldownSec: cooldown, cooldownLeftSec: Math.ceil(left),
+  };
+}
+
+/**
+ * P5 (IAP §19): HOOK iklan reward untuk ANTIBODI — prioritas utama prototype.
+ * Kontrak SDK nanti sama seperti hook lain: onSuccess HANYA setelah iklan
+ * benar-benar selesai. Kuota & jeda dicatat di meta (trackAdWatch + adLastAt).
+ * @returns {boolean} true bila permintaan diterima
+ */
+export function triggerRewardedAdAntibody(meta, onSuccess, onFail) {
+  const st = adStatus(meta);
+  console.info('[monetization] triggerRewardedAdAntibody() — simulasi iklan reward (+antibodi)');
+  recordEconomyEvent('rewarded_ad_offered', { placement: 'antibody', canWatch: st.canWatch, reason: st.reason });
+  if (!st.canWatch) {
+    if (typeof onFail === 'function') onFail(st.reason || 'tidak-tersedia');
+    return false;
+  }
+  simulateAdPlayback(
+    () => {
+      if (meta) {
+        trackAdWatch(meta);
+        meta.adLastAt = Date.now();
+        recordEconomyEvent('rewarded_ad_completed', { placement: 'antibody', reward: st.reward });
+      }
+      onSuccess();
+    },
+    onFail,
+  );
   return true;
 }
 

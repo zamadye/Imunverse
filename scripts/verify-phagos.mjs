@@ -649,17 +649,15 @@ log('reset-10.4', msR > 13 * 3600e3 && msR < 15 * 3600e3
   `ms=${Math.round(msR / 3600e3)}j`);
 
 
-// ---------- 17e. Sapuan kosakata §3 + nada RIA (Sprint 5) ----------
+// ---------- 17e. Sapuan kosakata §3 (Sprint 5) ----------
 const langKeys = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/lang.json'), 'utf8')).strings);
 const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const misSrc = fs.readFileSync(path.join(ROOT, 'data/missions.json'), 'utf8');
-const nar = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/narrative.json'), 'utf8'));
 const banned = ['Battle Pass', 'BEREVOLUSI', 'kartu Evolusi', 'Bagian Evolusi', 'di Shop', 'dibeli di Toko', '>Shop<', 'fuel Ultimate', 'TEMBAK'];
 const hayAll = langKeys.join('\n') + '\n' + htmlSrc + '\n' + misSrc;
 const bannedHit = banned.filter((b) => hayAll.includes(b));
 const kalahHit = /kalahkan|bersihkan/i.test(misSrc) || langKeys.some((k) => /kalahkan|bersihkan/i.test(k) && /patogen|kanker|raja|ratu|jenderal|parasit/i.test(k));
-const riaBad = [...(nar.winBarks || []), ...(nar.loseBarks || [])].some((b) => /nggak|aduh|jago|gara-gara/i.test(b));
-log('kosakata-3', bannedHit.length === 0 && !kalahHit && !riaBad
+log('kosakata-3', bannedHit.length === 0 && !kalahHit
   && langKeys.includes('Siklus Mitosis') && langKeys.includes('Lab Genom')
   && htmlSrc.includes('Siklus Mitosis') && htmlSrc.includes('HOMEOSTASIS') && htmlSrc.includes('Lab Genom')
   && misSrc.includes('Telan'),

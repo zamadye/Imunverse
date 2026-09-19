@@ -30,6 +30,12 @@ export function collectSpritePaths(data) {
     record(h.spriteIdle, h.color, h.name);
     record(h.spriteAttack, h.color, h.name);
     record(h.spritePortrait, h.color, h.name);
+    // UI-REBUILD P8: foto bentuk MUTASI per hero (pengganti overlay mut_*.png)
+    // mut1 = MUTASI DASAR (tier 1) · mut2 = MUTASI LANJUT (tier 2-3)
+    record(h.spriteMut1Idle, h.color, h.name);
+    record(h.spriteMut1Attack, h.color, h.name);
+    record(h.spriteMut2Idle, h.color, h.name);
+    record(h.spriteMut2Attack, h.color, h.name);
   }
   for (const e of data.enemies.enemies) {
     record(e.sprite, e.color, e.name);
@@ -39,7 +45,9 @@ export function collectSpritePaths(data) {
   for (const n of data.nutrients.nutrients) {
     record(n.sprite, n.color, n.name);
   }
-  if (data.evolutions) {
+  // V2 P2: `parts` (fragmen diferensiasi) DIHAPUS dari data/evolutions.json —
+  // progresi run sekarang lewat mutasi, jadi tidak ada sprite fragmen lagi.
+  if (data.evolutions && Array.isArray(data.evolutions.parts)) {
     for (const p of data.evolutions.parts) {
       record(p.sprite, '#b07ae0', p.name);
     }
@@ -88,11 +96,6 @@ const EXTRA_PRELOAD = [
   'assets/sprites/ov_pseudopodia.png',
   'assets/sprites/ov_pedang.png',
   'assets/sprites/ov_inti.png',
-  // E1 poin 8: karakter naratif hidup — pose idle/talk (Dr. Amara & RIA)
-  'assets/sprites/amara_pose_idle.png',
-  'assets/sprites/amara_pose_talk.png',
-  'assets/sprites/ria_pose_idle.png',
-  'assets/sprites/ria_pose_talk.png',
 ];
 
 /**
@@ -168,6 +171,11 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   ctx.save();
   ctx.translate(x, y);
   if (rotation) ctx.rotate(rotation);
+  // P6: squash/stretch — lebar & tinggi bisa diskalakan terpisah (pop saat
+  // terhantam) tanpa mengubah aset foto sedikit pun.
+  if (opts.scaleX !== undefined || opts.scaleY !== undefined) {
+    ctx.scale(opts.scaleX ?? 1, opts.scaleY ?? 1);
+  }
   if (opts.alpha !== undefined) ctx.globalAlpha = opts.alpha;
   // sprite dibuat dengan margin — gambar sesuai rasio aslinya
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
@@ -183,6 +191,25 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
     ctx.fill();
   }
   ctx.restore();
+}
+
+/**
+ * Apakah sprite ini benar-benar tersedia (bukan placeholder fallback)?
+ * Dipakai renderer sebelum mengganti sprite dasar dengan varian khusus
+ * (mis. bentuk mutasi) — kalau fotonya belum ada, pakai sprite dasar saja
+ * daripada menampilkan placeholder.
+ */
+export function hasSprite(path) {
+  if (!path) return false;
+  const entry = cache.get(path);
+  return !!entry && !entry.isPlaceholder;
+}
+
+/** Statistik muat sprite — dipakai penguji untuk menunggu foto siap. */
+export function spriteStats() {
+  let placeholder = 0;
+  for (const e of cache.values()) if (e.isPlaceholder) placeholder++;
+  return { loaded: cache.size, placeholder };
 }
 
 /** Fase 14: cache tint skin — {src|color} → canvas. */

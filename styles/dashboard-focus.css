@@ -94,51 +94,13 @@
 #screen-roster .screen-footer .btn { min-height: 52px; }
 
 #screen-upgrade .topbar, #screen-shop .topbar { max-width: 420px; margin-bottom: 7px !important; }
-#screen-upgrade .upg-tabs { position: sticky; top: 0; z-index: 3; width: min(100%,560px); padding: 4px; background: rgba(253,246,227,.92); backdrop-filter: blur(7px); }
-#screen-upgrade .upg-tab { min-height: 38px; font-size: 10px; padding: 8px 5px; }
-#screen-upgrade .upg-banner { margin: 4px 0 8px; }
-#screen-upgrade .upgrade-list { gap: 8px; }
-#screen-upgrade .upg-row { padding: 11px 12px; border-radius: 18px; gap: 7px; }
-#screen-upgrade .upg-info b { font-size: 13px; }
-#screen-upgrade .upg-info .upg-desc { font-size: 10px; }
 #screen-upgrade .upg-slider { height: 20px; }
-#screen-upgrade .btn-buy { min-height: 38px; padding: 8px 14px; font-size: 12px; }
-
-#screen-shop .shop-sections { max-width: 620px; gap: 11px; }
-#screen-shop .shop-section { padding: 10px; border-radius: 20px; background: rgba(255,253,244,.45); }
-#screen-shop .shop-section h3 { margin-bottom: 0; font-size: 12px; }
-#screen-shop .shop-grid { gap: 8px; }
-#screen-shop .shop-card { padding: 9px 7px 9px; gap: 4px; border-radius: 17px; }
-#screen-shop .shop-sprite { width: 48px; height: 48px; }
-#screen-shop .shop-card b { font-size: 10.5px; }
-#screen-shop .shop-card .s-desc { font-size: 9px; }
 #screen-shop .shop-card .btn { min-height: 33px; font-size: 10px; }
 
 #screen-herodetail .hero-detail-body { width: min(100%,560px); margin: 0 auto; padding: 4px 6px 20px; gap: 9px; }
 #screen-herodetail .hero-detail-body > * { border-radius: 20px; }
 
-#screen-prep .prep-scroll { width: min(100%,760px); gap: 10px; }
-#screen-prep .prep-main { gap: 0; }
-#screen-prep .prep-step { margin: 7px 0 4px; font-size: 11px; }
-#screen-prep .prep-hint { font-size: 9px; }
-#screen-prep .prep-hero-row { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
-#screen-prep .prep-hero { min-height: 104px; padding: 6px 3px; gap: 3px; }
-#screen-prep .prep-hero .ph-sprite { width: 62%; }
-#screen-prep .prep-hero .ph-name { font-size: 9px; }
-#screen-prep .prep-chip-row { gap: 6px; }
-#screen-prep .prep-chip { min-height: 42px; padding: 6px 9px; font-size: 10px; }
-#screen-prep .prep-aside { padding: 11px; border-radius: 22px; }
-#screen-prep .prep-summary .ps-hero { width: 82px; height: 82px; }
-#screen-prep .prep-summary .ps-mid b { font-size: 16px; }
-#screen-prep .prep-start { min-height: 54px; font-size: 17px; }
-
 #screen-bag .bag-scroll, #screen-codex .codex-body, #screen-bp .bp-body { width: min(100%,620px); margin: 0 auto; }
-#screen-bag .bag-grid { gap: 7px; }
-#screen-bag .bag-card { padding: 9px 5px; border-radius: 16px; }
-#screen-bag .bag-card .bag-sprite { width: 38px; height: 38px; }
-#screen-bag .bag-section-title { margin-top: 7px; font-size: 11px; }
-#screen-bp .bp-body { padding-bottom: 20px; }
-#screen-bp .bp-head { padding: 10px; border-radius: 20px; }
 
 @media (min-width: 600px) {
   #screen-roster .roster-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
@@ -790,11 +752,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 .sk-chip.ult .sk-plate .pl-rim { fill: #f5c64f; }
 .sk-chip.ult .sk-plate .pl-ink { fill: #7a4e08; }
 .sk-chip.ult .sk-plate .pl-face { fill: #fff8e2; }
-/* Chip skill di Prep & detail hero: ukuran ringkas mengikuti konteksnya */
-.prep-summary .ps-abilities { align-items: flex-end; gap: 6px; }
-.prep-summary .ps-skill-chip { width: 30px; height: 30px; }
 .prep-summary .ps-skill-chip.ult { width: 36px; height: 36px; }
-.hl-skill .hl-skill-chip { width: 28px; height: 28px; }
 .hl-skill.ult .hl-skill-chip { width: 32px; height: 32px; }
 
 /* ================================================================
@@ -914,9 +872,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   box-shadow: 0 0 4px rgba(245, 198, 79, .8);
 }
 
-/* PHAGOS D5: badge upgrade (+) dihapus — skill pasif tanpa tombol. */
-  50% { transform: scale(1.12); box-shadow: 0 0 0 5px rgba(245, 198, 79, 0); }
-}
 
 /* Tombol menu2 regu: tetap di kiri PULSE, bebas dari lengkung skill */
 #screen-hud .hud-menu2-toggle { right: 190px; bottom: 100px; }
@@ -987,36 +942,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   overflow: hidden;
   height: calc(100% - 10px);
 }
-.hd-shell {
-  display: grid;
-  height: 100%;
-  gap: 8px 10px;
-  grid-template-columns: minmax(148px, 172px) minmax(0, 1fr) minmax(168px, 212px);
-  grid-template-rows: minmax(0, 1fr) auto;
-  grid-template-areas:
-    'left stage right'
-    'bottom bottom bottom';
-}
-
-/* ---------- RAIL KIRI: SKILL ---------- */
-.hd-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-height: 0;
-  align-self: center;
-}
-.hd-left { grid-area: left; align-items: flex-start; }
-.hd-right { grid-area: right; align-items: stretch; }
-.hd-rail-title {
-  font-size: 10.5px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  color: #6f8b84;
-  text-transform: uppercase;
-  padding-left: 4px;
-}
-.hd-skill-list { display: flex; flex-direction: column; gap: 9px; }
 .hero-lab-card .hl-skill,
 .hd-skill-btn,
 .hl-skill.hd-skill-btn {
@@ -1030,71 +955,12 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   cursor: pointer;
   transition: transform .12s ease, filter .12s ease;
 }
-.hd-skill-btn:hover { transform: translateX(3px); filter: brightness(1.05); }
-.hd-skill-btn:focus-visible { outline: 2px solid var(--mint, #2f9c8f); outline-offset: 2px; }
-.hd-skill-btn .hl-skill-chip { width: 46px; height: 46px; flex: none; }
-.hd-skill-btn .hl-skill-key {
-  font-size: 10px;
-  font-weight: 900;
-  color: #fff;
-  background: #3f645e;
-  border-radius: 999px;
-  padding: 2px 7px;
-  letter-spacing: .5px;
-}
 .hd-skill-btn.ult .hl-skill-key { background: #b0589b; }
 .hd-skill-lvtag {
   font-size: 10px;
   font-weight: 800;
   color: #7a938c;
 }
-.hd-passive-chip {
-  border: none;
-  background: rgba(47, 156, 143, .07);
-  color: #4c7a70;
-  font-size: 10.5px;
-  line-height: 1.35;
-  text-align: left;
-  padding: 7px 9px;
-  border-radius: 12px;
-  cursor: pointer;
-}
-.hd-passive-chip:hover { background: rgba(47, 156, 143, .13); }
-
-/* ---------- TENGAH: PANGGUNG HERO ---------- */
-.hd-stage {
-  grid-area: stage;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
-}
-.hd-arrow {
-  border: none;
-  cursor: pointer;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #fff;
-  color: #3f645e;
-  font-size: 17px;
-  font-weight: 900;
-  box-shadow: 0 3px 10px rgba(38, 84, 76, .16);
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.hd-arrow:hover { transform: scale(1.08); box-shadow: 0 5px 14px rgba(38, 84, 76, .22); }
-.hd-arrow:active { transform: scale(.96); }
-.hd-stage-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  height: 100%;
-  justify-content: center;
-}
-.hd-banner { display: inline-flex; align-items: center; gap: 8px; }
 .hd-banner .hl-banner-role {
   width: 30px; height: 30px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1102,11 +968,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   box-shadow: 0 2px 6px rgba(38, 84, 76, .2);
 }
 .hd-banner .hl-banner-role img { width: 18px; height: 18px; }
-.hd-banner .hl-banner-name { font-size: 19px; font-weight: 900; color: #25453f; }
-.hd-banner .hl-banner-tier {
-  color: #fff; font-size: 10px; font-weight: 900; letter-spacing: 1px;
-  padding: 3px 9px; border-radius: 999px; text-transform: uppercase;
-}
 .hd-hero-figure {
   position: relative;
   width: min(54vh, 360px);
@@ -1145,46 +1006,17 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 @keyframes hdSlideL { from { transform: translateX(-26px); opacity: 0; } to { transform: none; opacity: 1; } }
 .hd-hero-sprite.slide-r { animation: hdSlideR .22s ease; }
 .hd-hero-sprite.slide-l { animation: hdSlideL .22s ease; }
-.hd-nameplate { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
 .hd-name { font-size: 23px; font-weight: 900; color: #233f3a; letter-spacing: .3px; }
 .hd-nameplate .hl-level {
   color: #fff; font-weight: 900; font-size: 11.5px;
   padding: 3px 9px; border-radius: 999px;
 }
-.hd-title { font-size: 12.5px; color: #5f7d76; font-weight: 700; }
 .hd-stage-center .hl-mastery { display: flex; align-items: center; gap: 8px; min-width: 200px; }
 .hd-stage-center .hl-mastery-bar {
   width: 90px; height: 7px; border-radius: 4px;
   background: rgba(195, 155, 211, .18); overflow: hidden;
 }
-/* Dots carousel */
-.hd-dots { display: flex; gap: 7px; margin-top: 6px; }
-.hd-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  border: none; cursor: pointer; padding: 0;
-  background: color-mix(in srgb, var(--hero-color, #b9ccc6) 45%, #cfe0db);
-  opacity: .55;
-  transition: transform .12s ease, opacity .12s ease;
-}
 .hd-dot.active { opacity: 1; transform: scale(1.35); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px color-mix(in srgb, var(--hero-color) 70%, #2f9c8f); }
-
-/* ---------- RAIL KANAN: TROOPS / LOADOUT ---------- */
-.hd-troop-list { display: flex; flex-direction: column; gap: 8px; }
-.hd-troop-cell {
-  display: flex; align-items: center; gap: 8px;
-  border: none; background: rgba(255, 255, 255, .55);
-  border-radius: 999px; padding: 4px 10px 4px 4px; cursor: pointer;
-  transition: transform .12s ease, background .12s ease;
-}
-.hd-troop-cell:hover { transform: translateX(-3px); background: #fff; }
-.hd-troop-cell .hl-ally {
-  width: 38px; height: 38px; border-radius: 50%;
-  object-fit: contain; image-rendering: pixelated;
-  background: radial-gradient(circle, #eef7f3, #dcebe4);
-  padding: 3px;
-}
-.hd-troop-cell .hl-ally-tag { font-size: 11.5px; font-weight: 800; color: #3f645e; }
-.hd-troop-count { font-size: 11px; color: #5f7d76; font-weight: 700; text-align: center; }
 .hd-right .hl-level.ally {
   align-self: center;
   background: #2f9c8f; color: #fff; font-weight: 900; font-size: 11px;
@@ -1193,23 +1025,7 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 .hd-troop-chips .hl-chip { display: inline-flex; gap: 5px; align-items: baseline; font-size: 11px; }
 .hd-troop-chips .hl-chip b { font-size: 13px; color: #25453f; }
 .hd-troop-chips .hl-chip i { font-style: normal; color: #7a938c; }
-.hd-ally-up { width: 100%; font-size: 12px; padding: 8px 10px; white-space: normal; }
 .hd-right .hl-hint { font-size: 10px; color: #84a098; line-height: 1.35; text-align: center; }
-.hd-lab-btn, .hd-equity-btn { font-size: 11px; padding: 7px 9px; }
-
-/* ---------- BAWAH: STRIP STAT + AKSI ---------- */
-.hd-bottom {
-  grid-area: bottom;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 8px 12px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, .66);
-  box-shadow: 0 2px 10px rgba(38, 84, 76, .08);
-}
 .hd-stats { display: flex; gap: 8px; flex-wrap: wrap; }
 .hd-stats .hl-chip {
   display: inline-flex; flex-direction: column; align-items: center;
@@ -1222,60 +1038,18 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 .hd-stats .hl-chip i { font-style: normal; font-size: 10px; font-weight: 800; color: #3da07a; }
 .hd-stats .hl-chip.def b { color: #4a7cb5; }
 .hd-stats .hl-chip.pwr b { color: #8a5fb0; }
-.hd-up-row { display: flex; align-items: center; gap: 12px; flex: none; }
 .hd-up-slider { width: 150px; flex: none; }
 .hd-up-slider.maxed { opacity: .65; }
 #screen-herodetail .btn-hl-up { font-size: 13px; padding: 10px 18px; white-space: nowrap; }
-
-/* ---------- MODAL ---------- */
-.hd-modal { position: absolute; inset: 0; z-index: 60; }
 .hd-modal.hidden { display: none; }
-.hd-modal-backdrop {
-  position: absolute; inset: 0;
-  background: rgba(28, 52, 47, .42);
-  backdrop-filter: blur(3px);
-}
-.hd-modal-box {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(92vw, 540px);
-  max-height: min(84%, 640px);
-  overflow-y: auto;
-  background: #fbfefd;
-  border-radius: 22px;
-  box-shadow: 0 18px 50px rgba(23, 46, 41, .35);
-  padding: 18px 18px 20px;
-}
-.hd-modal-close {
-  position: sticky;
-  top: 0;
-  float: right;
-  border: none;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(63, 100, 94, .1);
-  color: #3f645e; font-size: 14px; font-weight: 900; cursor: pointer;
-  z-index: 2;
-}
-.hd-modal-close:hover { background: rgba(63, 100, 94, .2); }
 #hd-equity-slot { display: none; }
 .hd-modal .hero-lab-card { box-shadow: none; padding: 4px 0; background: transparent; }
-
-/* Konten modal detail skill / pasukan */
-.hd-skill-detail { display: flex; flex-direction: column; gap: 10px; }
-.hd-skill-detail-head { display: flex; gap: 12px; align-items: center; }
 .hd-skill-modal-ico { width: 58px; height: 58px; flex: none; }
 .hd-skill-modal-ico .sk-chip { width: 58px; height: 58px; display: block; }
 .hd-skill-modal-ico .sk-chip > svg { width: 58px; height: 58px; display: block; }
 .hd-skill-modal-ico .sk-glyph svg { width: 30px; height: 30px; }
 .hd-troop-modal-img { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle, #eef7f3, #dcebe4); padding: 4px; image-rendering: pixelated; }
-.hd-skill-detail-titles { display: flex; flex-direction: column; gap: 2px; }
-.hd-skill-detail-name { font-size: 18px; font-weight: 900; color: #233f3a; }
-.hd-skill-detail-tag { font-size: 10.5px; font-weight: 900; letter-spacing: 1px; color: #7a938c; text-transform: uppercase; }
-.hd-skill-detail-desc { font-size: 12.5px; line-height: 1.5; color: #4c6c64; margin: 0; }
-.hd-skill-detail-sec b { font-size: 11px; font-weight: 900; letter-spacing: 1px; color: #6f8b84; text-transform: uppercase; }
 .hd-skill-effects { margin: 5px 0 0; padding-left: 18px; font-size: 12px; color: #415f58; line-height: 1.6; }
-.hd-skill-detail-line { font-size: 12px; color: #4c6c64; margin: 4px 0 0; }
 .hd-skill-req { display: flex; flex-wrap: wrap; gap: 6px; }
 .hd-skill-req-chip {
   font-size: 10.5px; font-weight: 800;
@@ -1283,7 +1057,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   background: rgba(47, 156, 143, .1); color: #2f7f74;
 }
 .hd-skill-req-chip.upg { background: rgba(138, 95, 176, .12); color: #7d54a3; }
-.hd-skill-up-btn { width: 100%; opacity: .75; }
 
 /* ---------- RESPONSIF ---------- */
 @media (max-width: 900px) {
@@ -1370,9 +1143,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   #screen-herodetail .hero-detail-body { padding: 0 4px 4px; height: calc(100% - 4px); }
 }
 @media (max-height: 470px) and (prefers-reduced-motion: no-preference) { :root { scroll-behavior: auto; } }
-
-/* ---------- FIX COMPRESSION OVERRIDES ---------- */
-.hd-troop-list .hd-troop-cell { flex-direction: row; }
 @media (max-height: 470px) {
   .hd-right .btn { min-height: 0; }
 }
@@ -1814,9 +1584,16 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-kills img { width: 15px; height: 15px; }
 #screen-hud .hud-center .wave-pill,
 #screen-hud .hud-center .timer-chip { box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-/* Equity-stage chip (Polos → Equity 1..4) sebagai satu pill berdampingan */
+/* Equity-stage chip (Polos → Equity 1..4) sebagai satu pill berdampingan.
+   UI-audit: chip ini asalnya absolute + left:50%/transform:translateX(-50%)
+   (main.css) untuk dipusatkan sendiri. `position` sudah di-static-kan di sini
+   tapi `transform` lama TIDAK PERNAH DIRESET — transform tetap berlaku pada
+   elemen static (cuma layout-nya yang tidak terpengaruh), jadi chip ini
+   tergambar geser ~setengah lebarnya sendiri ke kiri, menindih chip HP di
+   sebelahnya. Reset transform/left/top supaya jadi flex item normal. */
 #screen-hud .hud-center .hud-equity-stage {
-  position: static !important; background: rgba(255,253,244,.9); color: var(--teal-dark);
+  position: static !important; left: auto !important; top: auto !important; transform: none !important;
+  background: rgba(255,253,244,.9); color: var(--teal-dark);
   border-radius: 999px; padding: 3px 10px; font-weight: 900; font-size: 11px;
   box-shadow: 0 2px 6px rgba(0,0,0,.1); white-space: nowrap;
 }
@@ -1981,8 +1758,14 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-center .avatar-wrap { width: 34px !important; height: 34px !important; flex-basis: 34px !important; }
 #screen-hud .hud-center .hud-portrait { width: 34px !important; height: 34px !important; }
 #screen-hud .hud-center .level-badge { font-size: 8px !important; padding: 1px 5px !important; bottom: -4px !important; right: -7px !important; }
-#screen-hud .hud-center .status-bars { width: 110px !important; }
-#screen-hud .hud-center .hud-equity-stage { top: -11px; }
+/* UI-audit: 110px lebih sempit dari isinya (hati + bar HP + teks "120/120"),
+   jadi teks HP meluber dan tertindih chip "POLOS" di sebelahnya. Biarkan
+   lebar mengikuti isi + kunci track HP ke ukuran ringkas yang benar-benar
+   muat di bar atas — gap flex `.hud-center` yang menjaga jarak ke chip lain. */
+#screen-hud .hud-center .status-bars { width: auto !important; }
+#screen-hud .hud-center .hud-hp-track { width: 52px !important; }
+/* (top:-11px lama dihapus — tidak berefek pada elemen position:static, dan
+   memberi kesan salah bahwa posisi vertikal chip diatur di sini.) */
 #screen-hud .hud-center .hud-currency-run { pointer-events: auto; }
 #screen-hud .hud-center .hud-boss-wrap { flex-basis: 100%; }
 /* Bar bawah: misi + buff item, tengah-bawah, semi-opaque. */
@@ -2055,9 +1838,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 #screen-hud .hud-mission { background: rgba(13, 17, 23, 0.75) !important; border-color: rgba(127, 227, 208, 0.5) !important; }
 #screen-hud .hud-mission-text { color: #d9f5ef !important; }
 #screen-hud .hud-buffs { background: rgba(13, 17, 23, 0.6) !important; }
-
-/* ============ Sprint 5.28 — §11.3 RUN SELESAI (gameover) ============ */
-.go-headline{margin:2px 0 8px;font-size:12px;font-weight:700;color:#9fb2cc;text-align:center}
 /* Hook box "kurang sedikit lagi" (§10.2 hook) */
 .go-hook{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(13,17,23,.78);
   border:1px solid rgba(74,227,194,.35);display:flex;flex-direction:column;gap:6px}
@@ -2071,10 +1851,6 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 /* Rel hero geser */
 .go-heroes-head{margin:10px 0 6px;font-size:10px;letter-spacing:.1em;color:#9fb2cc;text-align:center;font-weight:800}
 .go-heroes{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
-.go-hero{position:relative;flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:2px;
-  padding:8px 4px 6px;border-radius:12px;background:rgba(26,35,50,.9);border:1px solid #2c3a55;
-  color:#e8eef7;cursor:pointer}
-.go-hero.selected{border-color:#ffd93d;box-shadow:0 0 0 1px #ffd93d}
 .go-hero.last .go-portrait{outline:2px solid #4ae3c2;outline-offset:2px}
 .go-hero.locked{filter:grayscale(1);opacity:.55}
 .go-medan{width:30px;height:30px;margin-bottom:-24px;z-index:0}
@@ -2089,7 +1865,11 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
 /* ============ Sprint 5.29 — Font self-host (offline PWA, tanpa CDN) ============
    TODO-ASET: jatuhkan file woff2 ke assets/fonts/ (Binari tidak bisa diunduh
    di sandbox ini — firewall). Sampai file ada, stack sistem rounded dipakai.
-   Rekomendasi: Nunito-ExtraBold (heading) + Nunito-Black atau "Baloo 2" (angka). */
+   Rekomendasi: Nunito-ExtraBold (heading) + Nunito-Black atau "Baloo 2" (angka).
+   UI-audit: @font-face DINONAKTIFKAN SEMENTARA — filenya belum ada di
+   assets/fonts/, jadi tiap load memicu 2 request 404 percuma. Aktifkan lagi
+   begitu imunverse-head.woff2 & imunverse-num.woff2 benar-benar di-commit. */
+/*
 @font-face{
   font-family:'Imunverse Head';font-weight:800 900;font-style:normal;font-display:swap;
   src:url('../assets/fonts/imunverse-head.woff2') format('woff2');
@@ -2098,9 +1878,10 @@ body.in-run .toast { padding: 5px 10px; font-size: 10.5px; max-width: 250px; bor
   font-family:'Imunverse Num';font-weight:700 900;font-style:normal;font-display:swap;
   src:url('../assets/fonts/imunverse-num.woff2') format('woff2');
 }
+*/
 :root{
-  --font-head:'Imunverse Head','Nunito','Quicksand','Varela Round',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
-  --font-num:'Imunverse Num','Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-head:'Nunito','Quicksand','Varela Round',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+  --font-num:'Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
 }
 /* Heading + angka memakai font self-host */
 h1,h2,h3,.gameover-title,.card-title,.dock-label,.btn,.quest-heading,.go-hook-title,
@@ -2119,18 +1900,3 @@ h1,h2,h3,.gameover-title,.card-title,.dock-label,.btn,.quest-heading,.go-hook-ti
 .go-reset{margin:6px 0 2px;text-align:center}
 .go-reset .reset-chip{margin-left:0}
 .active-quests .reset-chip{margin:0 0 6px}
-
-/* ============ Sprint 6.31 — §10.1 Comeback ============ */
-.comeback-box{text-align:center}
-.comeback-emoji{font-size:44px;line-height:1}
-.comeback-title{font-size:20px;font-weight:900;color:#ffd93d;letter-spacing:.04em}
-.comeback-desc{font-size:13px;color:#9fb2cc}
-.comeback-reward{font-size:14px;font-weight:800;color:#4ae3c2}
-
-/* ============ Sprint 6.35 — Banner PASANG (PWA) ============ */
-.pwa-banner{display:flex;align-items:center;gap:10px;margin-top:10px}
-.pwa-ico{width:40px;height:40px;border-radius:12px}
-.pwa-text{flex:1;display:flex;flex-direction:column;font-size:12px}
-.pwa-text span{color:#9fb2cc}
-.pwa-btn{padding:8px 16px;min-height:0;font-size:13px}
-.pwa-x{background:none;border:none;color:#9fb2cc;font-size:16px;cursor:pointer;padding:6px}

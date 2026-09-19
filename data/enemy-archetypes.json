@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 §15 — identitas perilaku musuh. Musuh tidak boleh hanya HP↑/Damage↑; tiap archetype punya ancaman yang bisa dibaca dan jawaban pemain yang jelas. status: implemented = sudah dipakai runtime, planned = menunggu P1 lanjutan.",
+  "archetypes": [
+    {
+      "id": "swarm",
+      "label": "Gerombolan",
+      "threat": "Jumlah banyak, HP rendah, mengepung dari segala arah.",
+      "counter": "Area/chain — jangan kejar satu-satu.",
+      "realizedBy": "spawn weight di data/waves.json + baseHP rendah",
+      "status": "implemented"
+    },
+    {
+      "id": "armored",
+      "label": "Berlapis",
+      "threat": "Lapisan luar menyerap serangan (armorLayers).",
+      "counter": "Serangan menembus (pierce/beam) atau burst besar.",
+      "realizedBy": "Enemy.takeDamage → armorLayers",
+      "status": "implemented"
+    },
+    {
+      "id": "fast",
+      "label": "Cepat",
+      "threat": "Menyusul dan memotong jalur kabur.",
+      "counter": "Jarak & kontrol; jangan biarkan ia masuk.",
+      "realizedBy": "speed tinggi di data/enemies.json",
+      "status": "implemented"
+    },
+    {
+      "id": "ranged",
+      "label": "Peludah",
+      "threat": "Menembak dari jauh sambil menjaga jarak (telegraph 0.38s sebelum ludah).",
+      "counter": "Putar mengitari proyektil; tekan sebelum windup selesai.",
+      "realizedBy": "Enemy.armShooter() + game.tryEnemyShoot/updateEnemyBullets",
+      "status": "implemented"
+    },
+    {
+      "id": "regenerative",
+      "label": "Regeneratif",
+      "threat": "Memulihkan HP bibi dibiarkan tanpa damage beberapa detik.",
+      "counter": "Tekan terus atau akhiri dengan burst — jangan ditinggal.",
+      "realizedBy": "Enemy.update → regenCfg (delaySec/pctPerSec)",
+      "status": "implemented"
+    },
+    {
+      "id": "splitter",
+      "label": "Pembelah",
+      "threat": "Mati = musuh baru yang lebih kecil.",
+      "counter": "Bunuh di tempat aman; area menuntaskan pecahannya.",
+      "realizedBy": "splitOnDeath (game.js)",
+      "status": "implemented"
+    },
+    {
+      "id": "stealth",
+      "label": "Mengendap",
+      "threat": "Tidak terlihat/tersamarkan sampai terungkap.",
+      "counter": "Sensor (NK Cell) atau serangan area.",
+      "realizedBy": "stealth/stealthExposed di Enemy",
+      "status": "implemented"
+    },
+    {
+      "id": "elite",
+      "label": "Elit",
+      "threat": "Kombinasi beberapa perilaku (brute/swift/regen/volatile).",
+      "counter": "Baca affix-nya dulu, lalu pilih jarak & tempo.",
+      "realizedBy": "Enemy.makeElite + waves.json elite.*",
+      "status": "implemented"
+    },
+    {
+      "id": "support",
+      "label": "Pendukung",
+      "threat": "Menguatkan patogen di sekitarnya: damage & gerak naik, dan mereka menahan sebagian serangan.",
+      "counter": "Bekukan atau bunuh pendukungnya lebih dulu (aura SELALU bertelegraph ~0,5 dtk sebelum aktif), atau pancing keluar dari radius aura.",
+      "realizedBy": "Enemy.auraCfg → emitSupportAura() (enemies[].aura untuk Sel Kanker; affix elite \"aura\" di waves.json) + game.js auraDmgMult/auraDr",
+      "status": "implemented"
+    }
+  ]
+}

@@ -10,10 +10,11 @@
  *   • Detail skill = POPUP SATU LEVEL menempel di ikon (nama/tipe/deskripsi/
  *     "Upgrade Preview"/syarat merah) — bukan halaman kedua, bukan nested.
  * Mapping Imunverse: rail=koleksi hero·tengah=sprite hero + "Cell Power"·
- * panel=identitas+mastery+Lv+slider+big upgrade+DMG/HP/DEF/PWR+bar 4 ikon skill
- * (3 skill + pasif ✦) + pasukan + jalur equity via float satu level.
+ * panel=identitas+mastery+DMG/HP/DEF/PWR+bar 4 ikon skill (3 skill + pasif ✦)
+ * + jalur equity via float satu level. Hero-upgrade/pasukan berbayar DICABUT
+ * (workflow minimal — kekuatan murni dari mutasi in-run, bukan pembelian).
  * Kelas yang dipakai suite E2E lama (.hl-equity-card/.hl-passive/.hl-mastery/
- * .btn-hl-up/.btn-ally-up/.hl-arrow/.hl-sprite) DIPERTAHANKAN.
+ * .hl-arrow/.hl-sprite) DIPERTAHANKAN.
  */
 
 import { STATE } from '../../core/state-manager.js';
@@ -23,13 +24,16 @@ import { skillChip } from '../skill-icons.js';
 import { roleIconSrc, roleTint } from '../menu-icons.js';
 import { spriteToDataURL } from '../../render/sprite-loader.js';
 import { createHeroEquityPreview } from '../../render/character-preview.js';
-import { heroLevelCost, purchaseHeroLevel, allyLevelCost, purchaseAllyLevel } from '../../systems/economy-system.js';
 import { getEvoStageDef } from '../../systems/evolution-system.js';
 import { squadMultipliers } from '../../systems/upgrade-system.js';
 import { t as tr } from '../../systems/i18n.js';
 import { masteryInfo } from '../../systems/mastery-system.js';
 import { SKILL_UNLOCK_LEVELS, SKILL_RANK2_LEVEL } from '../../systems/skill-unlock.js';
 import { SKILL_TRIGGER_LABEL } from '../../systems/skill-system.js';
+import { getHeroStatus, purchaseHero } from '../../systems/unlock-system.js';
+import { emit } from '../../core/ui-bridge.js';
+import { audio } from '../../systems/audio-system.js';
+import { writeSave } from '../../save/save-manager.js';
 
 let heroId = null;
 let keyHandler = null;
@@ -127,19 +131,6 @@ function buildPassiveFloatContent(heroDef) {
   ]);
 }
 
-function buildTroopFloatContent(troop) {
-  return el('div', { class: 'hd-skill-pop' }, [
-    el('div', { class: 'hd-skill-pop-head' }, [
-      el('img', { class: 'hd-troop-modal-img', src: troop.src, alt: troop.name }),
-      el('div', { class: 'hd-skill-pop-titles' }, [
-        el('b', { class: 'hd-skill-pop-name', text: troop.name }),
-        el('span', { class: 'hd-skill-pop-tag', text: tr('Pasukan imun — ikut bertarung otomatis') }),
-      ]),
-    ]),
-    el('p', { class: 'hd-skill-pop-desc', text: troop.desc }),
-  ]);
-}
-
 /* ---------- Kartu jalur equity (kelas E2E dipertahankan; tampil via float) ---------- */
 function renderEquityPathCard(heroDef, currentStage) {
   const designs = getCharacterDesigns();
@@ -175,25 +166,57 @@ function renderEquityPathCard(heroDef, currentStage) {
   ]);
 }
 
+/* ---------- Banner unlock (hero terkunci): syarat gratis ATAU beli Antibodi ---------- */
+function buildUnlockBanner(meta, heroDef, status) {
+  const rows = [
+    el('div', { class: 'hd-unlock-row hd-unlock-free' }, [
+      el('span', { class: 'hd-unlock-ico', text: status.conditionMet ? '✓' : '○' }),
+      el('span', { class: 'hd-unlock-label', text: tr(status.conditionLabel) }),
+    ]),
+  ];
+  if (status.shopCost > 0) {
+    rows.push(el('div', { class: 'hd-unlock-row hd-unlock-buy' }, [
+      el('span', { class: 'hd-unlock-ico', text: '◉' }),
+      el('span', { class: 'hd-unlock-label', text: `${status.shopCost.toLocaleString('id-ID')} Antibodi (kamu punya ${Math.round(meta.currency || 0).toLocaleString('id-ID')})` }),
+      el('button', {
+        class: 'btn btn-gold hd-unlock-btn',
+        id: 'btn-buy-hero',
+        text: status.canBuy ? tr('BELI HERO') : tr('KURANG ANTIBODI'),
+        disabled: status.canBuy ? undefined : 'true',
+        onclick: () => {
+          const res = purchaseHero(meta, heroDef);
+          if (res.ok) {
+            audio.coin();
+            emit('toast', { message: `${heroDef.name} terbuka! -${res.cost} Antibodi`, kind: 'gold' });
+            meta.selectedHero = heroDef.id;
+            writeSave(meta);
+            selectHero(0);
+          } else {
+            audio.warn();
+            emit('toast', { message: res.reason || 'Gagal membeli', kind: 'warn' });
+          }
+        },
+      }),
+    ]));
+  }
+  return el('div', { class: 'hd-unlock-banner' }, [
+    el('b', { class: 'hd-unlock-title', text: tr('BELUM TERBUKA — pilih salah satu jalur') }),
+    ...rows,
+  ]);
+}
+
 /* ================= SELEKSI HERO — bangun ulang halaman ================= */
 function selectHero(dir = 0) {
   const meta = STATE.meta;
   const heroes = getData().heroes.heroes;
   const heroDef = heroes.find((h) => h.id === heroId) || heroes[0];
   heroId = heroDef.id;
-  const cfg = getData().upgrades.heroUpgrade;
-  const allyCfg = getData().upgrades.allyUpgrade;
-  const level = (meta.heroLevels && meta.heroLevels[heroId]) || 0;
-  const maxed = level >= cfg.maxLevel;
-  const cost = heroLevelCost(cfg, level);
   const stageDef = getEvoStageDef(meta);
 
   const base = heroDef.baseStats;
-  const sq = squadMultipliers(meta);
-  const nowDamage = base.damage * sq.damage * sq.weapon * (1 + cfg.dmgPerLevel * level);
-  const nextDamage = base.damage * sq.damage * sq.weapon * (1 + cfg.dmgPerLevel * (level + 1));
-  const nowHP = Math.round(base.maxHP * sq.maxHP * (1 + cfg.hpPerLevel * level));
-  const nextHP = Math.round(base.maxHP * sq.maxHP * (1 + cfg.hpPerLevel * (level + 1)));
+  const sq = squadMultipliers();
+  const nowDamage = base.damage * sq.damage * sq.weapon;
+  const nowHP = Math.round(base.maxHP * sq.maxHP);
   const defense = Math.round(nowHP / 12 + base.speed / 50);
   const power = Math.round((nowDamage * (base.projectileCount || 1)) / base.attackCooldown);
 
@@ -211,6 +234,10 @@ function selectHero(dir = 0) {
   const skillDefs = (heroDef.skills || []).map((id) => getData().skills.skills.find((sk) => sk.id === id)).filter(Boolean);
   const tier = (getData().heroes.tiers || {})[heroDef.tier] || {};
   const unlockedSet = new Set(meta.unlockedHeroes || []);
+  // Workflow minimal: dua jalur unlock — gratis (syarat statistik) ATAU beli
+  // instan dengan Antibodi (meta.currency). status.unlocked = false berarti
+  // kartu ini menampilkan BANNER unlock, bukan stat langsung dipakai.
+  const status = getHeroStatus(meta, heroDef);
 
   /* ---------- RAIL KIRI: daftar hero (carousel terintegrasi, gaya RoK) ---------- */
   const railItems = heroes.map((h, i) => {
@@ -288,16 +315,6 @@ function selectHero(dir = 0) {
     ]) : null,
   ]);
 
-  const aLvl = meta.allyLevel || 0;
-  const aMaxed = aLvl >= allyCfg.maxLevel;
-  const aCost = allyLevelCost(allyCfg, aLvl);
-  const troops = [
-    { name: 'Sel B', src: spriteToDataURL('assets/sprites/hero_bcell_idle.png'), desc: tr('Spesialis antibodi — proyektil pemburu otomatis.') },
-    { name: 'Sel NK', src: spriteToDataURL('assets/sprites/hero_nkcell_idle.png'), desc: tr('Pembunuh alami — agresif ke target sekarat.') },
-    { name: 'Makrofag', src: spriteToDataURL('assets/sprites/hero_macrophage_idle.png'), desc: tr('Fagosit garis depan — menyerap dan menghabisi patogen.') },
-  ];
-  const allyVisible = Math.max(0, Math.min(6, Math.max(meta.allies || 1, 1 + Math.floor(aLvl / (allyCfg.membersPerLevels || 3)))));
-
   const panel = el('aside', { class: 'hd-rok-panel' }, [
     // Identitas
     el('header', { class: 'hd-rok-id' }, [
@@ -318,23 +335,13 @@ function selectHero(dir = 0) {
         ]),
       ]),
     ]),
-    // Level + upgrade besar (aksi utama, seperti tombol RoK)
-    el('div', { class: 'hd-rok-lvrow' }, [
-      el('span', { class: 'hl-level', style: `background:${heroDef.color}`, text: `Lv ${level}` }),
-      el('div', { class: 'hl-slider upg-slider hd-up-slider' + (maxed ? ' maxed' : '') }, [
-        el('div', { class: 'upg-fill', style: `width:${(level / cfg.maxLevel) * 100}%` }),
-        el('div', { class: 'upg-knob', style: `left:${(level / cfg.maxLevel) * 100}%` }),
-      ]),
-    ]),
-    el('button', {
-      class: 'btn btn-primary btn-hl-up hd-rok-upbig',
-      disabled: maxed || meta.currency < cost,
-      text: maxed ? 'LEVEL MAKSIMAL ✓' : `UPGRADE — ${cost} antibodi`,
-    }),
-    // Stat strip
+    // Workflow minimal: hero terkunci → banner dua jalur (gratis/beli) di
+    // atas stat, stat di bawahnya tetap tampil sebagai PREVIEW kekuatannya.
+    status.unlocked ? null : buildUnlockBanner(meta, heroDef, status),
+    // Stat strip (kekuatan hero murni dari mutasi in-run, bukan pembelian)
     el('div', { class: 'hl-chips hd-stats hd-rok-stats' }, [
-      el('span', { class: 'hl-chip atk', title: tr('Damage per serangan (termasuk bonus level & tim)') }, [el('small', { text: 'DMG' }), el('b', { text: `${Math.round(nowDamage)}` }), el('i', { text: `+${Math.round((nextDamage - nowDamage) * 10) / 10}` })]),
-      el('span', { class: 'hl-chip hp', title: tr('HP maksimum (termasuk bonus level & tim)') }, [el('small', { text: 'HP' }), el('b', { text: `${nowHP}` }), el('i', { text: `+${nextHP - nowHP}` })]),
+      el('span', { class: 'hl-chip atk', title: tr('Damage per serangan') }, [el('small', { text: 'DMG' }), el('b', { text: `${Math.round(nowDamage)}` })]),
+      el('span', { class: 'hl-chip hp', title: tr('HP maksimum') }, [el('small', { text: 'HP' }), el('b', { text: `${nowHP}` })]),
       el('span', { class: 'hl-chip def', title: tr('Ketahanan komposit — dari HP & kecepatan') }, [el('small', { text: 'DEF' }), el('b', { text: `${defense}` })]),
       el('span', { class: 'hl-chip pwr', title: tr('Power score — damage per detik efektif') }, [el('small', { text: 'PWR' }), el('b', { text: `${power}` })]),
     ]),
@@ -343,22 +350,8 @@ function selectHero(dir = 0) {
       el('span', { class: 'hd-rok-sec-title', text: tr('SKILL') }),
       skillRow,
     ]),
-    // PASUKAN
-    el('div', { class: 'hd-rok-sec' }, [
-      el('span', { class: 'hd-rok-sec-title', text: `${tr('PASUKAN')} · Lv ${aLvl}` }),
-      el('div', { class: 'hd-rok-troop-row' }, [
-        ...troops.map((tp) => el('button', { class: 'hd-rok-troop', title: `${tp.name} — ${tr('ketuk untuk detail')}`, onclick: () => openFloat(buildTroopFloatContent(tp), 'pop-skill') }, [
-          el('img', { src: tp.src, alt: tp.name }),
-        ])),
-        el('span', { class: 'hl-count hd-rok-troop-count', text: tr(`${allyVisible} sel ikut bertarung`) }),
-        el('span', { class: 'hl-chip atk hd-rok-dmgchip', text: `+${Math.round(allyCfg.dmgPerLevel * aLvl * 100)}% dmg` }),
-      ]),
-      el('button', { class: 'btn btn-primary btn-ally-up hd-rok-ally-up', disabled: aMaxed || meta.currency < aCost, text: aMaxed ? 'LEVEL MAKSIMAL ✓' : `UPGRADE PASUKAN — ${aCost}` }),
-      el('span', { class: 'hl-hint', text: tr(`${allyCfg.desc} · jumlah sel bertambah tiap bab kampanye bersih`) }),
-    ]),
     // Pintasan (satu level)
     el('div', { class: 'hd-rok-links' }, [
-      el('button', { class: 'btn hd-rok-link', text: tr('Laboratorium Tim →'), onclick: () => screenManager.show('upgrade') }),
       el('button', {
         class: 'btn hd-rok-link', text: tr('Jalur Design Equity →'),
         onclick: () => {
@@ -378,15 +371,6 @@ function selectHero(dir = 0) {
   const equityCard = renderEquityPathCard(heroDef, stageDef.stage || 0);
   if (equityCard) equityHost.appendChild(equityCard);
   box.appendChild(equityHost);
-
-  box.querySelector('.btn-hl-up').addEventListener('click', () => {
-    const res = purchaseHeroLevel(meta, heroId);
-    if (res.ok) selectHero(0);
-  });
-  box.querySelector('.btn-ally-up').addEventListener('click', () => {
-    const res = purchaseAllyLevel(meta);
-    if (res.ok) selectHero(0);
-  });
 
   // Swipe carousel pada panggung (RoK: geser model untuk ganti commander)
   let sx = null;

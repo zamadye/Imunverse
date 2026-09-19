@@ -44,31 +44,104 @@ ok('homeo-tracks', gs.length === 6 && gs.every((g) => g.maxLevel === 25
 // ---------- heroes.json ----------
 const heroes = load('data/heroes.json').heroes || [];
 const types = heroes.map((h) => (h.unlock || {}).type);
+// V2 §33 + IAP §22: hero TIDAK dibuka dengan mata uang premium — semua dari progress bermain.
 ok('hero-census', heroes.length === 11 && types.filter((t) => t === 'default').length === 1
-  && types.filter((t) => t === 'imu').length === 3
-  && types.filter((t) => t === 'stat' || t === 'imu_stat').length === 7);
-ok('hero-genom-wall', heroes.reduce((a, h) => a + ((h.unlock && h.unlock.imuCost) || 0), 0) === 2460);
+  && types.filter((t) => t === 'stat').length === 10);
+ok('hero-tanpa-harga-premium', heroes.every((h) => !h.unlock?.imuCost && !h.shopCost));
 ok('hero-membrane', heroes.every((h) => h.membrane && typeof h.membrane === 'object'));
 
 // ---------- evolutions.json ----------
+// V2 P2: format lama (fragmen diferensiasi) DIGANTI pohon evolusi per hero.
+// Validasi baru: 4 tahap BASE→MUT1→MUT2→APEX, ambang naik, dan 11 hero
+// punya ≥2 mutasi khas sesuai archetype-nya.
 const evo = load('data/evolutions.json');
-ok('diferensiasi', evo.parts.length === 1 && evo.parts[0].id === 'fragmen_diferensiasi'
-  && evo.dropChanceNormal === 0.004 && evo.dropChanceElite === 0.04 && evo.bossGuaranteedParts === 1
-  && evo.stages.map((s) => Object.values(s.cost || {}).reduce((a, b) => a + b, 0)).join(',') === '0,50,50,50,17');
+const muts = load('data/mutations.json').mutations || [];
+ok('pohon-evolusi', evo.schemaVersion === 3
+  && evo.stages.map((s) => s.id).join('>') === 'base>mut1>mut2>apex'
+  && evo.stages.every((s, i) => i === 0 || s.minMutations > evo.stages[i - 1].minMutations)
+  && Object.keys(evo.heroes || {}).length === 11);
+ok('jalur-khas-per-hero', heroes.every((h) => {
+  const arch = h.identity?.attackArchetype;
+  const sig = (evo.heroes[h.id] || {}).signature || [];
+  return sig.length >= 2 && sig.every((id) => {
+    const atk = (muts.find((m) => m.id === id) || {}).attack || {};
+    return !!(atk.payload && atk.payload[arch]) || !!(atk.archetypeFrom && atk.archetypeFrom[arch]);
+  });
+}));
+ok('sinematik-mutasi-terdata', Array.isArray(evo.cinematic?.phases)
+  && evo.cinematic.phases.map((p) => p.id).join('>') === 'pause>charge>break>reveal>resume');
 
-// ---------- battlepass.json ----------
-const bp = load('data/battlepass.json');
-ok('mitosis-config', bp.premiumCostImun === 800 && bp.xpNeed?.base === 120 && bp.xpNeed?.step === 30
-  && bp.maxLevel === 30 && bp.runXpCap === 150 && bp.dailyRunCap === 450
-  && (bp.premium || []).length === 30 && (bp.free || []).length === 30);
-ok('mitosis-return', (bp.premium || []).filter((x) => x.type === 'imun').reduce((a, x) => a + (x.n || 0), 0) === 500);
+// ---------- zones.json (P4: dunia kontinu) ----------
+const zon = load('data/zones.json');
+const rute = zon.route || [];
+ok('rute-kontinu', rute.length === 12 && rute[0].id === 'lung'
+  && rute.every((z, i) => z.order === i + 1 && z.arenaId && z.landmark && z.mechanic)
+  && ['bloodstream', 'heart', 'tumor'].every((id) => rute.some((z) => z.id === id)));
+ok('transisi-zona', rute.every((z) => typeof z.transitionSec === 'number'
+  && z.transitionSec >= 20 && z.transitionSec <= 60 && z.wavesPerZone >= 1));
+ok('mekanik-lingkungan', ['oxygenMucus', 'narrowPath', 'gasExchange', 'narrowMovement',
+  'bloodCurrent', 'heartbeatPulse'].every((m) => rute.some((z) => z.mechanic === m))
+  && rute.every((z) => z.params && Object.keys(z.params).length > 0));
 
-// ---------- ranks.json ----------
-const rk = load('data/ranks.json');
-const pts = rk.points || {};
-ok('pangkat', pts.perWave === 4 && pts.perKill === 0.2 && pts.perEngulf === 4
-  && pts.perBoss === 25 && pts.victoryBonus === 50 && pts.chapterBonus === undefined
-  && Math.max(...(rk.tiers || []).map((t) => t.min)) === 12000);
+// ---------- P7c: rig makhluk hasil panggang Godot (prototipe) ----------
+const makhluk = load('data/creature-rigs.json');
+const daftarMakhluk = Object.values(makhluk.creatures || {});
+const keadaanWajib = ['idle', 'walk', 'turn', 'attack', 'skill', 'hit', 'death', 'mutate'];
+ok('rig-makhluk-godot', daftarMakhluk.length >= 1
+  && daftarMakhluk.every((c) => keadaanWajib.every((s) => c.states && c.states[s] && c.states[s].frames && c.states[s].frames.length >= 16))
+  // foot planting: ujung kaki yang menapak harus bergerak MUNDUR (badan maju)
+  && daftarMakhluk.every((c) => {
+    const f = c.states.walk.frames;
+    return f.every((fr, i) => fr.limbs.every((la, k) => {
+      const lb = f[(i + 1) % f.length].limbs[k];
+      return !(la.plant && lb.plant) || (lb.x <= la.x + 1e-6 && Math.abs(lb.y - la.y) <= 1e-6);
+    }));
+  }));
+
+// ---------- P7b: siklus merayap hasil panggang Godot ----------
+const rayap = load('data/crawl-cycles.json');
+const nHero = load('data/heroes.json').heroes.length;
+const framesRayap = Object.values(rayap.heroes || {});
+ok('siklus-merayap-godot', Object.keys(rayap.heroes || {}).length === nHero
+  && framesRayap.every((h) => h.frames && h.frames.length >= 16)
+  // kanal vertikal dikunci = tidak ada badan diangkat (anti mengambang)
+  && framesRayap.every((h) => h.frames.every((f) => f.y === 0))
+  && framesRayap.every((h) => h.frames.every((f) => Math.abs(f.sx * f.sy - 1) <= 0.03)));
+
+// ---------- P7: tanda tangan serangan per hero ----------
+const ser = load('data/attacks.json');
+const ttd = ser.heroSignatures || {};
+const daftarHero = load('data/heroes.json').heroes;
+ok('tanda-tangan-serangan', daftarHero.every((h) => ttd[h.id])
+  && new Set(daftarHero.map((h) => `${ttd[h.id].tint}|${ttd[h.id].sizeMult || 1}|${ttd[h.id].countMult || 1}|${ttd[h.id].speedMult || 1}`)).size === daftarHero.length);
+
+// ---------- P6: game feel (tangga dampak + keramaian) ----------
+const gf = load('data/gamefeel.json');
+const tangga = (gf.tiers || {});
+const urut = ['normal', 'heavy', 'elite', 'ultimate', 'bossEvent'];
+ok('tangga-dampak-naik', urut.every((k) => tangga[k])
+  && ['shake', 'killSec', 'flashSec', 'squash'].every((f) => urut.every((k, i) => i === 0 || (tangga[k][f] ?? 0) > (tangga[urut[i - 1]][f] ?? 0)))
+  && tangga.normal.hitSec === 0 && tangga.bossEvent.staggerSec === 0);
+ok('keramaian-terkendali', (gf.crowd || {}).numbersMax > 0 && (gf.crowd || {}).numbersPerSec > 0
+  && (gf.crowd || {}).labelsMax > 0 && (gf.crowd || {}).busyEnemyCount > (gf.crowd || {}).calmEnemyCount
+  && (gf.crowd || {}).particleScale < 1 && (gf.crowd || {}).shakeScale < 1
+  && Object.keys((gf.crowd || {}).sfxThrottleMs || {}).length >= 3);
+ok('kamera-di-cap', (gf.camera || {}).traumaCap > 0 && (gf.camera || {}).traumaCap <= 1);
+
+// ---------- P5: reserve · rewarded ads · IAP mock ----------
+const eko = load('data/economy.json');
+const rv = eko.reserve || {};
+ok('reserve-terbatas', rv.enabled === true && rv.separateFromAntibody === true
+  && rv.assistancePctOfMutationCost > 0 && rv.assistancePctOfMutationCost < 1
+  && rv.maxUsesPerRun >= 1 && rv.capacity > 0);
+ok('iklan-reward-tertunable', (eko.rewardedAds || {}).enabled === true
+  && (eko.rewardedAds || {}).antibodyReward > 0 && (eko.rewardedAds || {}).dailyLimit > 0
+  && (eko.rewardedAds || {}).cooldownSec >= 0);
+ok('iap-mock-tanpa-payment', (eko.iap || {}).provider === 'mock'
+  && (eko.iap || {}).realPayment === false
+  && Array.isArray((eko.iap || {}).packs) && (eko.iap || {}).packs.length > 0
+  && (eko.iap || {}).packs.every((pk) => pk.id && pk.grant > 0)
+  && (eko.iap || {}).maxOffersPerRun > 0);
 
 // ---------- mastery.json ----------
 const my = load('data/mastery.json');

@@ -44,6 +44,7 @@ ok(`${jsFiles.length} file JS diperiksa`);
 console.log('— Data JSON —');
 const dataDir = path.join(ROOT, 'data');
 const spritePaths = new Set();
+const optionalSpritePaths = new Set(); // foto mutasi: boleh belum ada (fallback sprite dasar)
 for (const name of fs.readdirSync(dataDir)) {
   if (!name.endsWith('.json')) continue;
   const p = path.join(dataDir, name);
@@ -54,8 +55,13 @@ for (const name of fs.readdirSync(dataDir)) {
       if (Array.isArray(obj)) { obj.forEach(scan); return; }
       if (obj && typeof obj === 'object') {
         for (const [k, v] of Object.entries(obj)) {
+          // UI-REBUILD P8: foto bentuk mutasi per hero ikut diperiksa, tapi
+          // bersifat OPSIONAL (belum semua hero punya foto) → kumpulan terpisah.
           if (['sprite', 'spriteIdle', 'spriteAttack'].includes(k) && typeof v === 'string') {
             spritePaths.add(v);
+          }
+          if (['spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack'].includes(k) && typeof v === 'string') {
+            optionalSpritePaths.add(v);
           }
           scan(v);
         }
@@ -68,7 +74,45 @@ for (const name of fs.readdirSync(dataDir)) {
   }
 }
 
+// — Regresi layar: aturan ID #screen-* yang memaksa display tanpa .active —
+// Selektor ID menang dari `.screen { display:none }` → layar itu akan SELALU
+// terlihat dan menutupi layar lain (pernah: dashboard menutupi gameplay).
+console.log('— CSS layar —');
+{
+  const cssFiles = ['styles/main.css', 'styles/dashboard-focus.css', 'styles/portrait.css', 'styles/dashboard-map.css'];
+  let masalah = 0;
+  for (const rel of cssFiles) {
+    const p2 = path.join(ROOT, rel);
+    if (!fs.existsSync(p2)) continue;
+    const css = fs.readFileSync(p2, 'utf8');
+    const re = /([^{}]+)\{([^{}]*)\}/g;
+    let m;
+    while ((m = re.exec(css))) {
+      const sel = m[1].trim().split('\n').pop().trim();
+      if (!/^#screen-[a-z0-9-]+$/i.test(sel)) continue;
+      if (/display\s*:/.test(m[2])) {
+        fail(`${rel}: ${sel} mengatur "display" tanpa .active — layar akan selalu tampil & menutupi layar lain`);
+        masalah++;
+      }
+    }
+  }
+  if (!masalah) ok('aturan #screen-* aman (display hanya saat .active)');
+}
+
 console.log('— Sprite assets —');
+// Laporkan foto mutasi yang BELUM ada sebagai INFO (bukan kegagalan).
+let mutReady = 0;
+for (const sp of optionalSpritePaths) {
+  const p = path.join(ROOT, sp);
+  if (fs.existsSync(p)) mutReady += 1;
+}
+if (optionalSpritePaths.size > 0) {
+  const total = optionalSpritePaths.size;
+  ok(mutReady === total
+    ? `foto mutasi: LENGKAP ${mutReady}/${total}`
+    : `foto mutasi: ${mutReady}/${total} tersedia (sisanya pakai sprite dasar)`);
+}
+
 for (const sp of spritePaths) {
   const p = path.join(ROOT, sp);
   if (!fs.existsSync(p)) fail(`sprite hilang: ${sp}`);

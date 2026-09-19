@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "doc": "V2 world transition (PHAGOS_V2_REBUILD.txt §23-§24, §28, §46). Transisi terjadi SAAT BERTEMPUR — tanpa loading, tanpa stage-select. P4.",
+  "default": {
+    "minSec": 20,
+    "maxSec": 60,
+    "blend": {
+      "environment": "oldZone + newZone bercampur",
+      "enemies": "oldEnemies + newEnemies bercampur",
+      "rule": "Pemain tetap bergerak, menyerang, mengambil XP, dan bermutasi selama transisi"
+    }
+  },
+  "events": [
+    {
+      "id": "heartEntry",
+      "zone": "heart",
+      "benchmark": true,
+      "steps": [
+        "heartbeat pertama → musuh terdorong",
+        "lingkungan bergerak",
+        "heartbeat kedua → struktur jantung mulai terlihat",
+        "aliran darah berubah",
+        "ekosistem musuh berubah"
+      ],
+      "rule": "Tanpa banner 'STAGE 3: HEART' (§28)"
+    }
+  ],
+  "technical": {
+    "chunking": "boleh streaming/chunking; CURRENT + TRANSITION + NEXT chunk wajib bisa coexist (§46)",
+    "forbidden": ["loadZone() sebagai pengalaman pemain", "loading screen antar zona", "stage-select"]
+  }
+}

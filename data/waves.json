@@ -68,7 +68,8 @@
       "brute",
       "swift",
       "regen",
-      "volatile"
+      "volatile",
+      "aura"
     ],
     "affixParams": {
       "brute": {
@@ -93,6 +94,17 @@
         "damage": 12,
         "color": "#ffd93d",
         "label": "LEDAK"
+      },
+      "aura": {
+        "radius": 150,
+        "pulseSec": 3.2,
+        "telegraphSec": 0.5,
+        "durationSec": 3.5,
+        "dmgMult": 1.25,
+        "speedMult": 1.15,
+        "dr": 0.2,
+        "color": "#b39ddb",
+        "label": "AURA"
       }
     }
   },

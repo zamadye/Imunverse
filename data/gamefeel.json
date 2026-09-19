@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "doc": "V2 Phase 1 — GAME FEEL. Semua angka rantai feedback hidup di sini (docs/v2/phase-01-game-feel.md).",
+  "schemaVersion": 2,
+  "doc": "V2 Phase 1 + P6 — GAME FEEL. Semua angka rantai feedback hidup di sini. P6 menambahkan TANGGA dampak (§20), reaksi musuh, dan pengendali keramaian.",
   "knockback": {
     "projectile": 120,
     "melee": 150,
@@ -76,5 +76,108 @@
   "membrane": {
     "contactShake": 0.02,
     "note": "PHAGOS: kill kontak lebih kecil dari kill Pulse (hierarki aksi)"
+  },
+  "tiers": {
+    "normal": {
+      "shake": 0.035,
+      "hitSec": 0,
+      "killSec": 0.03,
+      "flashSec": 0.12,
+      "squash": 0.12,
+      "staggerSec": 0,
+      "spark": false,
+      "sfx": "hit"
+    },
+    "heavy": {
+      "shake": 0.09,
+      "hitSec": 0.025,
+      "killSec": 0.04,
+      "flashSec": 0.18,
+      "squash": 0.2,
+      "staggerSec": 0.05,
+      "spark": true,
+      "sfx": "crit"
+    },
+    "elite": {
+      "shake": 0.18,
+      "hitSec": 0.04,
+      "killSec": 0.05,
+      "flashSec": 0.2,
+      "squash": 0.24,
+      "staggerSec": 0.09,
+      "spark": true,
+      "sfx": "crit"
+    },
+    "ultimate": {
+      "shake": 0.35,
+      "hitSec": 0.05,
+      "killSec": 0.06,
+      "flashSec": 0.22,
+      "squash": 0.28,
+      "staggerSec": 0.12,
+      "spark": true,
+      "sfx": "pulse"
+    },
+    "bossEvent": {
+      "shake": 0.65,
+      "hitSec": 0.07,
+      "killSec": 0.09,
+      "flashSec": 0.26,
+      "squash": 0.32,
+      "staggerSec": 0,
+      "spark": true,
+      "sfx": "bossDie",
+      "note": "Boss imun stagger & knockback — reaksinya lewat flash lebih lama + getar besar"
+    }
+  },
+  "tierRule": {
+    "normal": "hit & kill biasa",
+    "heavy": "critical hit (§20 heavy → micro shake)",
+    "elite": "musuh elite / affix",
+    "ultimate": "Pulse & ultimate hero",
+    "bossEvent": "boss spawn, blast, dan boss tumbang (respons sinematik)"
+  },
+  "reaction": {
+    "squashDurSec": 0.16,
+    "staggerSlowMult": 0.35,
+    "armorSparkColor": "#cfd8e3",
+    "flashPeakAlpha": 0.75,
+    "deathPop": {
+      "normal": {
+        "scaleTo": 1.3,
+        "dur": 0.15
+      },
+      "elite": {
+        "scaleTo": 1.45,
+        "dur": 0.18
+      },
+      "boss": {
+        "scaleTo": 1.7,
+        "dur": 0.28
+      }
+    }
+  },
+  "camera": {
+    "traumaCap": 0.85,
+    "note": "Trauma kamera di-cap supaya rentetan kill boss tidak membuat layar bergetar melampaui batas nyaman"
+  },
+  "crowd": {
+    "calmEnemyCount": 8,
+    "busyEnemyCount": 26,
+    "particleScale": 0.5,
+    "shakeScale": 0.6,
+    "numbersMax": 18,
+    "numbersPerSec": 22,
+    "labelsMax": 10,
+    "labelsPerSec": 14,
+    "shakeThrottleSec": 0.055,
+    "sfxThrottleMs": {
+      "hit": 55,
+      "kill": 70,
+      "crit": 90,
+      "engulf": 70,
+      "playerHit": 120
+    },
+    "note": "Keramaian: partikel, getar, angka, dan SFX mengecil saat layar padat — layar tetap terbaca (§20: VFX tidak membuat layar kacau)"
   }
 }

@@ -1,0 +1,12 @@
+; Project minimal untuk MEMANGGANG (bake) animasi merayap hero.
+; Tidak pernah dibuka dari editor Godot — hanya dijalankan headless:
+;   node tools/godot/bake-crawl.mjs
+config_version=5
+
+[application]
+config/name="Imunverse Crawl Rig"
+run/main_scene=""
+config/features=PackedStringArray("4.7")
+
+[rendering]
+renderer/rendering_method="gl_compatibility"

@@ -170,8 +170,6 @@ export function resetHUD() {
   setBar('hud-xp-fill', 0);
   document.getElementById('hud-kills').textContent = '0';
   document.getElementById('hud-currency').textContent = '0';
-  const imuEl0 = document.getElementById('hud-imu');
-  if (imuEl0) imuEl0.textContent = '0';
   document.getElementById('hud-timer-text').textContent = '00:00';
   document.getElementById('hud-boss-bar-wrap').classList.add('hidden');
   document.getElementById('hp-pill').classList.remove('low');
@@ -224,23 +222,13 @@ export function updateHUD(data) {
   document.getElementById('hud-timer-text').textContent = data.timerText;
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
-  // Fase 17: chip Imun Coin live (pulse halus saat angka berubah)
-  const imuEl = document.getElementById('hud-imu');
-  if (imuEl && imuEl.textContent !== String(data.imu ?? 0)) {
-    imuEl.textContent = data.imu ?? 0;
-    const chipEl = document.getElementById('hud-imu-chip');
-    if (chipEl) {
-      chipEl.classList.remove('imu-pulse');
-      void chipEl.offsetWidth;
-      chipEl.classList.add('imu-pulse');
-    }
-  }
 
   updateAbilityBar(data.abilities);
   updateBuffChips();
   // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
   try { updatePulseButton(data.pulse); } catch { /* abaikan */ }
-  try { updateBioChip(data.bioPoints, data.activeMutations); } catch { /* abaikan */ }
+  try { updateAntibodyChip(data.antibody, data.activeMutations, data.evoStage, data.nextMutationCost); } catch { /* abaikan */ }
+  try { updateJourneyBar(data.journey); } catch { /* abaikan */ }
   try { updateLivingBar(data.membraneLiving); } catch { /* abaikan */ }
 
   // Fase 18: pill GERBANG DITUTUP — penjaga boss harus dikalahkan dulu
@@ -336,7 +324,34 @@ function updatePulseButton(pulse) {
 }
 
 /** PHAGOS: chip Bio-Point + ikon mutasi aktif (run-only). */
-function updateBioChip(bio, mutations) {
+/**
+ * P4 §26 — HUD progres perjalanan MINIMAL: "Paru ──●── Kapiler".
+ * Sangat kecil; tidak boleh mengambil fokus gameplay.
+ */
+function updateJourneyBar(journey) {
+  if (!journey || !journey.zone) return;
+  let bar = document.getElementById('hud-journey');
+  if (!bar) {
+    const top = document.querySelector('.hud-top .hud-center');
+    if (!top) return;
+    bar = document.createElement('div');
+    bar.id = 'hud-journey';
+    bar.className = 'hud-journey';
+    top.appendChild(bar);
+  }
+  const pct = Math.round((journey.progress || 0) * 100);
+  const html = `<span class="jz">${journey.zone}</span>`
+    + `<span class="jtrack"><span class="jdot" style="left:${pct}%"></span></span>`
+    + `<span class="jnext">${journey.next || ''}</span>`;
+  if (bar.dataset.html !== html) {
+    bar.innerHTML = html;
+    bar.dataset.html = html;
+  }
+  bar.title = journey.landmark ? `Landmark: ${journey.landmark}` : '';
+  bar.classList.toggle('transitioning', !!journey.transitioning);
+}
+
+function updateAntibodyChip(bio, mutations, evoStage, nextCost) {
   let chip = document.getElementById('hud-bio-chip');
   if (!chip) {
     const top = document.querySelector('.hud-top .hud-center');
@@ -344,19 +359,36 @@ function updateBioChip(bio, mutations) {
     chip = document.createElement('div');
     chip.id = 'hud-bio-chip';
     chip.className = 'hud-bio-chip';
-    chip.title = 'Bio-Point: material mutasi dari engulf';
+    chip.title = 'Antibodi: material evolusi — dari kill, elite, boss, event & telan';
     top.appendChild(chip);
   }
   const n = bio || 0;
   const muts = mutations || [];
-  const html = `<span class="bio-dot">◉</span><b>${n}</b><small>BIO</small>` +
-    (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '');
+  // P2: tahap evolusi ikut tampil — pemain selalu tahu di mana ia berada di
+  // pohon BASE → MUT1 → MUT2 → APEX (warna mengikuti data/evolutions.json).
+  const evo = evoStage && evoStage.id && evoStage.id !== 'base'
+    ? `<span class="bio-evo" style="background:${evoStage.tierColor || '#8df7d2'}">${evoStage.name || evoStage.id}</span>`
+    : '';
+  // P3 (IAP §26): HUD hanya menampilkan yang penting — dompet antibodi dan
+  // harga mutasi berikutnya (tujuan), bukan dashboard finansial.
+  const tujuan = (typeof nextCost === 'number' && nextCost > 0)
+    ? `<small class="bio-next" title="Harga mutasi berikutnya">/${nextCost}</small>`
+    : '';
+  const html = `<span class="bio-dot">◉</span><b>${n}</b><small>ANTIBODI</small>${tujuan}` +
+    (muts.length > 0 ? `<span class="bio-muts" title="${muts.join(', ')}">🧬${muts.length}</span>` : '') + evo;
   if (chip.dataset.html !== html) {
     chip.innerHTML = html;
     chip.dataset.html = html;
   }
   chip.classList.toggle('rich', n >= 5);
   chip.classList.toggle('richer', n >= 15);
+  // IAP §5: dompet BERGERAK saat antibodi masuk (bukan sekadar angka berubah).
+  const siap = typeof nextCost === 'number' && nextCost > 0 && n >= nextCost;
+  if (siap && !chip.classList.contains('siap-mutasi')) {
+    chip.classList.add('siap-mutasi');
+  } else if (!siap) {
+    chip.classList.remove('siap-mutasi');
+  }
 }
 
 /** PHAGOS: bar HP membran hidup (mutasi medan_hidup). */

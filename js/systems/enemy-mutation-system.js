@@ -6,12 +6,12 @@
  * SATU trait yang meng-counter kelemahan build. Trait diterapkan sebagai
  * MODIFIER pada musuh existing (bukan tipe baru).
  *
- * Sinyal anti-curang: peringatan 5 dtk + label STRAIN BERMUTASI + RIA + tint.
+ * Sinyal anti-curang: peringatan 5 dtk + label STRAIN BERMUTASI + tint.
  */
 
 import { getEnemyMutations } from '../core/data-store.js';
 import { emit } from '../core/ui-bridge.js';
-import { showPresenter } from '../ui/presenter.js';
+import { audio } from './audio-system.js';
 import { currentStrainId, WEEKLY_STRAIN_CHANCE, WEEKLY_STRAIN_MIN_WAVE } from './weekly-strain-system.js'; // ADDENDUM §3.5
 
 function cfg() {
@@ -81,7 +81,7 @@ function triggerMatches(trigger, stats, run) {
 
 /**
  * Dipanggil saat wave BARU dimulai. Menjadwalkan atau mengeksekusi mutasi.
- * - Jika wave+1 adalah wave mutasi → peringatan 5 dtk (flash + teks + RIA teaser).
+ * - Jika wave+1 adalah wave mutasi → peringatan 5 dtk (flash + teks).
  * - Jika wave ini adalah wave mutasi → pilih trait + inject ke spawn berikutnya.
  */
 export function onNewWave(game, wave) {
@@ -96,9 +96,6 @@ export function onNewWave(game, wave) {
     run.enemyMutation.history.push({ wave, trait: trait ? trait.id : null });
     if (trait) {
       emit('toast', { message: `STRAIN BERMUTASI: ${traitName(trait)}!`, kind: 'danger' });
-      try {
-        showPresenter('ria', trait.riaLine || 'Mereka bermutasi! Beradaptasilah!', { duration: 5 });
-      } catch { /* presenter belum siap */ }
       run.camera.addShake(0.5);
     }
   } else if (waves.includes(wave + 1) && run.enemyMutation.warnedWave !== wave + 1) {
@@ -125,11 +122,9 @@ export function checkPreWarning(game) {
   if (run.enemyMutation.warnedWave === next) return;
   run.enemyMutation.warnedWave = next;
   emit('toast', { message: 'PATOGEN BERMUTASI...', kind: 'danger' });
+  audio.strain(); // peringatan audio: patogen beradaptasi
   // Flash merah arena sesaat
   run._mutationFlashT = 1.2;
-  try {
-    showPresenter('ria', 'Getaran aneh... mereka BERUBAH! Siap-siap!', { duration: 4 });
-  } catch { /* abaikan */ }
 }
 
 /**

@@ -19,12 +19,6 @@ const APP_STATE_BY_SCREEN = {
   loading: 'loading',
   dashboard: 'dashboard',
   roster: 'roster',
-  upgrade: 'upgrade',
-  shop: 'shop',
-  arena: 'dashboard', // modal di atas dashboard — state tetap dashboard
-  focus: 'dashboard',
-  prep: 'dashboard',  // layar persiapan (bagian dari alur dashboard)
-  bag: 'dashboard',
   herodetail: 'roster', // detail upgrade hero (bagian alur Heroes)
   hud: 'gameplay',
   gameover: 'gameover',
@@ -51,6 +45,14 @@ export function show(id, params) {
   }
   // Fase 12b: toast di bawah saat pertempuran (tidak menutup wave/timer), atas saat menu
   document.body.classList.toggle('in-run', id === 'hud');
+  // UI-audit: posisi toast (#toasts) perlu tahu screen aktif — tiap layar
+  // punya "zona aman" berbeda (dashboard vs roster vs lainnya) supaya toast
+  // tidak menimpa CTA/konten penting layar itu (lihat main.css). PENTING:
+  // atribut BEDA dari "data-screen" — elFor() mencari elemen [data-screen]
+  // dan <body> ikut cocok kalau namanya sama (body selalu lebih dulu di
+  // document order), sehingga classList.add('active') salah sasaran ke
+  // <body>, bukan ke <section> screen-nya.
+  document.body.dataset.activeScreen = id;
   const el = elFor(id);
   if (el) el.classList.add('active');
   currentId = id;

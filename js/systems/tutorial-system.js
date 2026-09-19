@@ -20,7 +20,6 @@
 
 import { STATE } from '../core/state-manager.js';
 import { writeSave } from '../save/save-manager.js';
-import { setPresenterInteractive } from '../ui/presenter.js';
 
 const T = (id) => document.getElementById(id);
 
@@ -217,19 +216,9 @@ function advance() {
   renderStep();
 }
 
-function setPresenterSoft() {
-  // Selama tutorial run pertama, presenter naratif (RIA/bark) tidak boleh
-  // menyerap drag layar — pemain sedang dilatih menggerakkan hero.
-  setPresenterInteractive(false);
-}
-function clearPresenterSoft() {
-  setPresenterInteractive(true);
-}
-
 function finish() {
   active = false;
   clearTimeout(hudObserver);
-  clearPresenterSoft();
   const layer = T('tutorial-layer');
   if (layer) layer.classList.add('hidden');
   const meta = STATE.meta;
@@ -253,10 +242,8 @@ export function onRunStart() {
   idx = 0;
   movedDist = 0;
   active = shouldRun();
-  setPresenterSoft();
   if (active) renderStep();
   else {
-    clearPresenterSoft();
     const layer = T('tutorial-layer');
     if (layer) layer.classList.add('hidden');
   }

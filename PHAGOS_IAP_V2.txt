@@ -1,0 +1,1349 @@
+PHAGOS V2 — ECONOMY & IAP IMPLEMENTATION BLUEPRINT
+
+Document 02 — Correlated with PHAGOS V2 Gameplay / Mutation / Continuous Adventure Blueprint
+
+Status: Implementation Blueprint / Prototype Economy
+Purpose: Menjadi dasar bagi coding agent untuk menyusun roadmap dan mengimplementasikan economy baru ke game yang sudah ada.
+
+> Penting: Dokumen ini tidak mengunci angka ekonomi final. Semua angka harus dianggap tunable parameters dan divalidasi melalui gameplay langsung.
+
+
+
+
+---
+
+1. HUBUNGAN DENGAN BLUEPRINT V2 SEBELUMNYA
+
+Blueprint Gameplay V2 menetapkan core loop:
+
+DASHBOARD
+    ↓
+PLAY
+    ↓
+CONTINUOUS ADVENTURE
+    ↓
+COMBAT
+    ↓
+KILL ENEMY
+    ↓
+EARN ANTIBODY
+    ↓
+MUTATION OPPORTUNITY
+    ↓
+SPEND ANTIBODY
+    ↓
+TRANSFORMATION
+    ↓
+CONTINUE JOURNEY
+    ↓
+NEW AREA / NEW THREAT
+    ↓
+COMBAT
+
+Document Economy V2 tidak boleh membuat loop ini berubah.
+
+Economy harus menjadi pendukung:
+
+GAMEPLAY
+   │
+   ├── Combat
+   ├── Exploration
+   ├── Mutation
+   └── Progression
+          │
+          ▼
+       ANTIBODY
+          │
+          ▼
+      MUTATION
+
+IAP berada sebagai lapisan tambahan:
+
+┌── Rewarded Ad
+                    │
+GAMEPLAY → ANTIBODY ─┼── Free Progression
+                    │
+                    └── IAP / Reserve
+
+
+---
+
+2. TUJUAN ECONOMY V2
+
+Economy baru harus menyelesaikan masalah utama versi sebelumnya:
+
+Masalah lama
+
+terlalu banyak currency;
+
+terlalu banyak menu;
+
+terlalu banyak progression system;
+
+shop;
+
+battle pass;
+
+skin shop;
+
+upgrade page;
+
+economy sulit dibalance;
+
+player tidak jelas apa nilai setiap currency;
+
+monetization tidak memiliki hubungan kuat dengan gameplay.
+
+
+Target V2
+
+PHAGOS harus dapat dijelaskan hanya dengan:
+
+> Kill → Antibody → Mutation → Evolution → Go Deeper
+
+
+
+Economy tidak boleh menjadi game kedua di dalam game.
+
+
+---
+
+3. CURRENCY ARCHITECTURE
+
+Untuk prototype V2:
+
+PRIMARY GAMEPLAY CURRENCY
+
+ANTIBODY
+
+Antibody diperoleh melalui gameplay.
+
+Sumber utama:
+
+Enemy Kill
+Elite Kill
+Boss Kill
+Special Combat Events
+Potential Hero-specific earning mechanics
+
+Antibody digunakan terutama untuk:
+
+Mutation
+
+Antibody adalah earned gameplay resource, bukan premium currency.
+
+
+---
+
+4. HAPUS / NONAKTIFKAN ECONOMY LAMA
+
+Untuk V2 prototype, sistem berikut tidak menjadi bagian core economy:
+
+❌ Imun Coin
+❌ Upgrade Shop
+❌ Battle Pass
+❌ Equipment economy
+❌ Item shop
+❌ Energy
+❌ Lives system
+❌ Multiple gameplay currencies
+❌ Upgrade page
+❌ Large cosmetic shop
+
+Jika sistem tersebut masih ada di repository, agent harus:
+
+1. mengidentifikasi dependensinya;
+
+
+2. memutuskan apakah aman dihapus;
+
+
+3. menonaktifkan UI;
+
+
+4. memastikan tidak mengganggu gameplay V2.
+
+
+
+Jangan melakukan destructive deletion terhadap sistem lama sebelum dependency diperiksa.
+
+
+---
+
+5. ANTIBODY GAMEPLAY LOOP
+
+Setiap enemy memberikan Antibody berdasarkan aturan yang dapat dikonfigurasi.
+
+Contoh konseptual:
+
+Kill Virus
+    ↓
++ Antibody
+    ↓
+Wallet updated
+    ↓
+Mutation meter / requirement updated
+
+Antibody harus terasa sebagai bagian dari dunia PHAGOS.
+
+Visual feedback wajib jelas:
+
+Enemy dies
+    ↓
+Antibody pickup / particle
+    ↓
++XX Antibody
+    ↓
+Wallet animation
+
+Jangan hanya mengubah angka di HUD.
+
+
+---
+
+6. MUTATION ADALAH PRIMARY ANTIBODY SINK
+
+Antibody terutama digunakan untuk Mutation.
+
+Contoh:
+
+Current Mutation: 2
+
+Next Mutation:
+Cost: 300 Antibody
+
+Player:
+420 Antibody
+
+[ MUTATE ]
+
+Setelah mutation:
+
+420
+-300
+----
+120
+
+Kemudian:
+
+Mutation #3
+Cost ↑
+
+
+---
+
+7. MUTATION COST SYSTEM
+
+Cost harus scalable tetapi tidak boleh exponential tanpa batas.
+
+Gunakan configurable formula.
+
+Contoh awal:
+
+mutationCost =
+baseCost × growthFunction(mutationIndex)
+
+Growth function harus dapat diganti tanpa mengubah gameplay code.
+
+Contoh prototype:
+
+Mutation 1 → 100
+Mutation 2 → 150
+Mutation 3 → 225
+Mutation 4 → 325
+Mutation 5 → 475
+...
+
+Angka di atas hanya contoh. Bukan angka final.
+
+Agent wajib membuat parameter tersebut mudah dituning.
+
+
+---
+
+8. TIGA ECONOMIC PHASE
+
+Balance harus menghasilkan tiga kondisi.
+
+PHASE A — ABUNDANCE
+
+Early game:
+
+Antibody income > mutation pressure
+
+Player dapat mutation relatif cepat.
+
+Tujuan:
+
+> memberikan excitement dan fantasy evolution.
+
+
+
+
+---
+
+PHASE B — TENSION
+
+Mid game:
+
+Antibody income ≈ mutation cost
+
+Player mulai mempertimbangkan:
+
+> Mutate sekarang atau terus farm?
+
+
+
+Ini menciptakan decision-making.
+
+
+---
+
+PHASE C — SCARCITY
+
+Late game:
+
+Antibody income < mutation pressure
+
+Player harus:
+
+survive;
+
+kill lebih banyak;
+
+memilih waktu mutation;
+
+menggunakan kemampuan hero dengan baik;
+
+mengelola resource.
+
+
+Scarcity bukan bug. Scarcity adalah bagian dari progression.
+
+Namun scarcity tidak boleh berubah menjadi repetitive grinding.
+
+
+---
+
+9. MUTATION HARUS MEMBERIKAN POWER YANG TERASA
+
+Kenaikan cost harus memiliki hubungan dengan power.
+
+Tidak boleh:
+
+Cost ↑↑↑
+Power ↑ sedikit
+
+Setiap evolution harus memberikan perubahan yang dapat dirasakan:
+
+Visual
++
+Combat capability
++
+Ability / behavior
++
+Potential strategic change
+
+Transformation harus tetap mengikuti Blueprint Gameplay V2:
+
+FORM A
+ ↓
+DESTROY / BREAK APART
+ ↓
+BIOLOGICAL TRANSFORMATION
+ ↓
+FORM B
+ ↓
+VFX
+ ↓
+GAMEPLAY RESUME
+
+
+---
+
+10. ANTIBODY TIDAK BOLEH MEMATIKAN CORE GAMEPLAY
+
+Jika player tidak memiliki cukup Antibody:
+
+gameplay tidak berhenti.
+
+Contoh:
+
+Antibody: 180
+
+Next Mutation:
+Cost: 300
+
+Missing: 120
+
+Player tetap dapat:
+
+CONTINUE
+
+dan kembali bertempur.
+
+Jangan membuat:
+
+No Antibody
+↓
+Game blocked
+↓
+Buy
+
+
+---
+
+11. HERO ECONOMIC IDENTITY
+
+11 hero tidak boleh sekadar memiliki:
+
+Hero A = 100 antibody
+Hero B = 120 antibody
+Hero C = 150 antibody
+
+Karena hero dengan angka tertinggi akan menjadi farming meta.
+
+Sebaliknya setiap hero memiliki Antibody Earning Profile.
+
+Contoh:
+
+Mako
+
+Strength:
+survival / swarm
+
+Potential earning:
+multiple enemy kills
+
+Nyx
+
+Strength:
+high burst / high risk
+
+Potential earning:
+elite / high-value target
+
+T-Bolt
+
+Strength:
+single-target damage
+
+Potential earning:
+elite/boss interaction
+
+Dendri
+
+Strength:
+support / chain
+
+Potential earning:
+assist / chain combat
+
+Contoh ini hanya kerangka. Agent harus menerapkannya berdasarkan combat identity masing-masing hero.
+
+
+---
+
+12. HERO BALANCE RULE
+
+Tidak boleh ada:
+
+Best Hero = Best Farming Hero = Best Progression Hero
+
+Target:
+
+Hero A
+different strength
+
+Hero B
+different strength
+
+Hero C
+different strength
+
+Total progression opportunity harus berada dalam range yang masih kompetitif.
+
+Player memilih hero karena:
+
+> playstyle + combat identity
+
+
+
+bukan karena:
+
+> "Hero ini menghasilkan Antibody paling banyak."
+
+
+
+
+---
+
+13. HERO UNLOCK
+
+Hero unlock merupakan progression layer terpisah dari mutation.
+
+Konsep:
+
+Current Hero
+     ↓
+Progress
+     ↓
+Unlock New Hero
+     ↓
+New Combat Identity
+     ↓
+New Economic Profile
+
+Hero baru harus memberikan:
+
+gameplay variation;
+
+combat variation;
+
+mutation variation;
+
+earning variation.
+
+
+Bukan hanya:
+
++Skin
+
+atau:
+
++Damage
+
+
+---
+
+14. ANTIBODY RESERVE
+
+Ini adalah prototype monetization layer.
+
+Reserve berbeda dari Antibody gameplay.
+
+ANTIBODY
+
+Earned during gameplay
+↓
+Used for mutation
+
+RESERVE
+
+External support resource
+↓
+Can assist when gameplay Antibody is insufficient
+
+HUD prototype:
+
+ANTIBODY     320
+RESERVE     2,000
+
+Reserve harus diperlakukan sebagai sistem terpisah sehingga nantinya dapat dihubungkan ke IAP.
+
+
+---
+
+15. RESERVE RULE
+
+Reserve tidak boleh menghilangkan gameplay requirement sepenuhnya.
+
+Contoh:
+
+Mutation Cost = 1,000
+
+Player Antibody = 300
+Reserve = 5,000
+
+Jangan langsung:
+
+-700 Reserve
+Mutation
+
+dengan unlimited usage.
+
+Prototype harus menyediakan constraint yang dapat dituning, misalnya:
+
+Maximum Reserve Assistance
+= X% of mutation cost
+
+Nilai X harus configurable.
+
+Tujuannya:
+
+> IAP membantu progression tetapi tidak menggantikan gameplay.
+
+
+
+
+---
+
+16. IAP VALUE PROPOSITION
+
+IAP tidak menjual:
+
+> "You need to pay to play."
+
+
+
+IAP menjual:
+
+> Acceleration / Convenience / Optional Cosmetic Value
+
+
+
+Core progression tetap dapat dicapai melalui gameplay.
+
+
+---
+
+17. PRIMARY IAP ENTRY POINT
+
+IAP tidak boleh memenuhi dashboard.
+
+Jangan:
+
+DASHBOARD
+PLAY
+SHOP
+BATTLE PASS
+PACK
+SKIN
+...
+
+Gameplay V2 harus tetap:
+
+DASHBOARD
+
+        PLAY
+
+IAP muncul contextually ketika player memiliki economic friction.
+
+
+---
+
+18. CONTEXTUAL IAP FLOW
+
+Contoh:
+
+Player
+Antibody = 320
+
+Mutation
+Cost = 500
+
+Mutation modal:
+
+┌────────────────────────────┐
+│          MUTATION          │
+│                            │
+│      NEXT EVOLUTION        │
+│                            │
+│ Cost             500       │
+│ Antibody         320       │
+│                            │
+│ Need             180       │
+│                            │
+│ [ CONTINUE ]               │
+│                            │
+│ [ WATCH AD ]               │
+│ [ USE RESERVE ]            │
+└────────────────────────────┘
+
+Tidak langsung:
+
+BUY NOW
+
+Player tetap mempunyai free path.
+
+
+---
+
+19. REWARDED ADS
+
+Rewarded Ads menjadi jalur gratis untuk acceleration.
+
+Possible rewards:
+
++ Antibody
++
+Revive
++
+Run reward multiplier
+
+Untuk prototype pertama, prioritaskan:
+
+Antibody reward
+
+Contoh:
+
+Need 180 Antibody
+
+[ WATCH AD ]
++100 Antibody
+
+Reward amount harus configurable.
+
+
+---
+
+20. IAP + REWARDED AD HIERARCHY
+
+Flow yang diinginkan:
+
+NEED ANTIBODY
+                       │
+            ┌──────────┼──────────┐
+            │          │          │
+            ▼          ▼          ▼
+        CONTINUE    WATCH AD   USE RESERVE
+            │                     │
+            │                     ▼
+            │                  IAP
+            │
+            ▼
+        KEEP PLAYING
+
+Ini menciptakan tiga pilihan:
+
+Free
+
+Main lebih lama.
+
+Ad-supported
+
+Accelerate dengan iklan.
+
+Paying
+
+Gunakan purchased Reserve.
+
+
+---
+
+21. IAP PACKS
+
+Untuk prototype:
+
+Reserve Pack S
+Reserve Pack M
+Reserve Pack L
+Reserve Pack XL
+
+Jangan menentukan harga final dulu.
+
+Jangan menghubungkan ke payment provider pada phase pertama.
+
+Prototype menggunakan:
+
+DEV GRANT
+
+misalnya:
+
++500 Reserve
++1500 Reserve
++4000 Reserve
+
+Tujuan:
+
+> merasakan value, bukan menghasilkan revenue.
+
+
+
+
+---
+
+22. IAP TIDAK BOLEH MEMBUAT HERO PAY-TO-WIN
+
+Tidak boleh:
+
+Paid Hero
++
+Higher Antibody
++
+Higher Damage
++
+Better Mutation
+
+Jika hero berbayar nantinya ada, power level harus tetap berada dalam balancing framework yang sama.
+
+
+---
+
+23. COSMETIC IAP
+
+Cosmetic bukan prioritas prototype economy pertama.
+
+Namun architecture harus memungkinkan:
+
+Hero
+ ↓
+Evolution
+ ↓
+Cosmetic Variant
+
+Cosmetic dapat mengubah:
+
+character appearance;
+
+transformation VFX;
+
+attack VFX;
+
+death effect;
+
+movement effect;
+
+mutation cinematic.
+
+
+Tidak mengubah combat stats.
+
+
+---
+
+24. END-OF-RUN ECONOMY
+
+Setelah player mati atau menyelesaikan run:
+
+RUN COMPLETE
+
+Distance
+Enemies defeated
+Mutations
+Antibody earned
+
+Kemudian:
+
+NEXT MUTATION
+
+Cost: 1,200
+Current: 850
+Missing: 350
+
+Player mendapatkan tujuan yang jelas untuk run berikutnya.
+
+Tidak membutuhkan mission system tambahan.
+
+
+---
+
+25. ECONOMIC GOAL SYSTEM
+
+Progression motivation menjadi:
+
+NEXT MUTATION
+      ↓
+NEXT EVOLUTION
+      ↓
+DEEPER AREA
+      ↓
+NEW THREAT
+      ↓
+NEW HERO
+
+Jadi game tidak membutuhkan banyak artificial progression menus.
+
+
+---
+
+26. ECONOMY UI PRINCIPLE
+
+HUD gameplay hanya menampilkan informasi yang benar-benar penting.
+
+Prioritas:
+
+HP
+XP
+Antibody
+Current mutation/progression
+Area / journey progress
+
+Reserve tidak harus selalu prominent.
+
+Jangan membuat gameplay terasa seperti dashboard financial app.
+
+
+---
+
+27. IAP UI PRINCIPLE
+
+Monetization UI harus:
+
+contextual;
+
+minimal;
+
+optional;
+
+tidak mengganggu combat;
+
+tidak muncul setiap beberapa detik;
+
+tidak memblokir progression;
+
+tidak mengambil alih transformation cinematic.
+
+
+Transformation harus selalu menjadi hero moment, bukan sales moment.
+
+
+---
+
+28. ECONOMIC EVENTS YANG HARUS DICATAT
+
+Engine harus menyediakan telemetry/logging untuk prototype.
+
+Minimal:
+
+run_started
+enemy_killed
+antibody_earned
+mutation_offered
+mutation_purchased
+mutation_failed_insufficient_antibody
+reserve_used
+rewarded_ad_offered
+rewarded_ad_completed
+iap_mock_granted
+run_completed
+run_failed
+hero_selected
+hero_unlocked
+
+Tujuannya bukan analytics kompleks.
+
+Tujuannya mengetahui:
+
+> bagaimana ekonomi benar-benar berperilaku saat dimainkan.
+
+
+
+
+---
+
+29. PARAMETER YANG WAJIB TUNABLE
+
+Semua ini harus berada di configuration layer:
+
+ANTIBODY
+- base enemy reward
+- elite reward
+- boss reward
+- hero modifier
+- reward multipliers
+
+MUTATION
+- base cost
+- growth curve
+- minimum cost
+- maximum cost
+- mutation count
+
+RESERVE
+- assistance percentage
+- maximum usage
+- reserve capacity
+
+REWARDED ADS
+- antibody reward
+- cooldown
+- daily limit
+
+IAP MOCK
+- pack quantities
+- grant amounts
+
+Tidak hardcode tersebar di berbagai file.
+
+
+---
+
+30. BALANCING TARGET
+
+Agent tidak boleh menganggap formula lama sebagai final.
+
+Target gameplay yang harus diuji:
+
+Early
+
+Fast progression
+Frequent mutation
+Strong excitement
+
+Mid
+
+Resource tension
+Meaningful mutation choices
+
+Late
+
+Scarcity
+Danger
+Strategic resource management
+
+Tetapi:
+
+Scarcity ≠ tedious grinding
+
+
+---
+
+31. TEST MATRIX
+
+Prototype wajib diuji minimal dengan:
+
+TEST A — ZERO RESERVE
+
+Player never uses IAP
+No reserve
+
+Tujuan:
+
+> Apakah game masih fun?
+
+
+
+
+---
+
+TEST B — SMALL RESERVE
+
+Limited reserve
+
+Tujuan:
+
+> Apakah Reserve terasa berguna?
+
+
+
+
+---
+
+TEST C — LARGE RESERVE
+
+Large reserve
+
+Tujuan:
+
+> Apakah Reserve membuat game terlalu mudah?
+
+
+
+
+---
+
+TEST D — REWARDED ADS
+
+Use ads whenever available
+
+Tujuan:
+
+> Apakah ads terasa sebagai optional acceleration?
+
+
+
+
+---
+
+TEST E — DIFFERENT HEROES
+
+Gunakan beberapa hero dengan earning profile berbeda.
+
+Tujuan:
+
+> Apakah ada satu hero yang menjadi mandatory farming meta?
+
+
+
+
+---
+
+32. SUCCESS CRITERIA
+
+Prototype economy dianggap berhasil apabila:
+
+1.
+
+Player memahami fungsi Antibody tanpa tutorial panjang.
+
+2.
+
+Mutation terasa sebagai reward, bukan expense.
+
+3.
+
+Mutation berikutnya menciptakan anticipation.
+
+4.
+
+Scarcity muncul secara natural.
+
+5.
+
+Player masih dapat bermain ketika Antibody habis.
+
+6.
+
+Reserve terasa bernilai tetapi tidak mandatory.
+
+7.
+
+Rewarded Ad terasa sebagai pilihan.
+
+8.
+
+IAP terasa sebagai acceleration/convenience.
+
+9.
+
+Tidak ada hero yang jelas menjadi "farming-only hero".
+
+10.
+
+Economy tidak mengganggu continuous adventure.
+
+
+---
+
+33. PAYMENT IMPLEMENTATION — DITUNDA
+
+Phase prototype tidak membutuhkan real payment.
+
+Architecture harus dibuat agar:
+
+EconomyService
+      │
+      ├── GameplayRewardProvider
+      ├── RewardedAdProvider
+      └── PurchaseProvider
+
+Untuk sekarang:
+
+PurchaseProvider
+       ↓
+MockPurchaseProvider
+
+Nanti dapat diganti:
+
+Google Play Billing
+
+tanpa mengubah core mutation system.
+
+
+---
+
+34. FUTURE IAP ARCHITECTURE
+
+Final production flow nantinya:
+
+PLAYER
+ ↓
+PURCHASE
+ ↓
+STORE
+ ↓
+PURCHASE VERIFICATION
+ ↓
+ENTITLEMENT
+ ↓
+RESERVE GRANTED
+ ↓
+ECONOMYSERVICE
+
+Payment implementation bukan bagian dari prototype balancing phase.
+
+
+---
+
+35. RELATIONSHIP DENGAN CONTINUOUS ADVENTURE
+
+Ini sangat penting.
+
+Economy tidak boleh membuat:
+
+Zone 1
+ ↓
+Stop
+ ↓
+Shop
+ ↓
+Upgrade
+ ↓
+Zone 2
+
+Blueprint Gameplay V2 menetapkan:
+
+COMBAT
+ ↓
+JOURNEY
+ ↓
+ENVIRONMENT TRANSITION
+ ↓
+NEW AREA
+ ↓
+COMBAT
+
+Economy berjalan di dalam perjalanan, bukan memotong perjalanan.
+
+Mutation cinematic:
+
+Combat
+ ↓
+Mutation condition
+ ↓
+Mutation modal
+ ↓
+Transformation
+ ↓
+Gameplay
+
+IAP hanya dapat masuk pada resource decision tersebut tanpa menghentikan adventure secara permanen.
+
+
+---
+
+36. CORE ECONOMY DIAGRAM
+
+PHAGOS V2
+                             │
+                     CONTINUOUS RUN
+                             │
+                             ▼
+                         COMBAT
+                             │
+                             ▼
+                         KILL ENEMY
+                             │
+                             ▼
+                         ANTIBODY
+                             │
+                  ┌──────────┴──────────┐
+                  │                     │
+             ENOUGH                  NOT ENOUGH
+                  │                     │
+                  ▼                     ▼
+              MUTATION              CONTINUE
+                  │                     │
+                  ▼               ┌─────┼─────┐
+             EVOLUTION            │     │     │
+                  │             PLAY   AD   RESERVE
+                  │                    │     │
+                  └──────────────┬─────┘     │
+                                 │           │
+                                 ▼           ▼
+                              MUTATION ←─────┘
+                                 │
+                                 ▼
+                           GO DEEPER
+                                 │
+                                 ▼
+                         HARDER ENEMIES
+                                 │
+                                 ▼
+                         MORE ANTIBODY
+
+
+---
+
+37. IMPLEMENTATION PRIORITY
+
+Agent harus menentukan roadmap sendiri berdasarkan repository aktual, tetapi dependency priority harus mengikuti prinsip:
+
+P0
+Existing architecture audit
+        ↓
+P1
+Antibody economy refactor
+        ↓
+P2
+Mutation cost/progression integration
+        ↓
+P3
+Reserve system
+        ↓
+P4
+Rewarded Ad mock
+        ↓
+P5
+IAP mock
+        ↓
+P6
+Hero economic identity
+        ↓
+P7
+Telemetry / balancing
+        ↓
+P8
+Playtesting
+        ↓
+P9
+Real payment implementation
+
+Agent boleh mengubah pembagian phase, tetapi tidak boleh mengimplementasikan real payment sebelum core economy dapat dimainkan dan diuji.
+
+
+---
+
+38. NON-GOALS
+
+jangan mengembangkan:
+
+❌ Battle Pass
+❌ Large Shop
+❌ Skin marketplace
+❌ Subscription
+❌ Gacha
+❌ Equipment system
+❌ Multiple premium currencies
+❌ Complex missions
+❌ Guild
+❌ PvP
+❌ NFT
+
+Semua itu berada di luar Economy V2 prototype.
+
+
+---
+
+39. FINAL DESIGN PRINCIPLE
+
+PHAGOS bukan game tentang membeli mutation.
+
+PHAGOS adalah game tentang:
+
+> surviving long enough to evolve.
+
+
+
+Antibody adalah jembatannya.
+
+SURVIVE
+   ↓
+KILL
+   ↓
+EARN
+   ↓
+MUTATE
+   ↓
+TRANSFORM
+   ↓
+BECOME STRONGER
+   ↓
+GO DEEPER
+   ↓
+FACE SOMETHING WORSE
+
+Dan monetization berada di luar core fantasy:
+
+FREE
+→ play
+
+ADS
+→ accelerate
+
+IAP
+→ accelerate/convenience + cosmetic
+
+Tidak ada satu pun dari tiga jalur tersebut yang boleh menghilangkan alasan utama player bermain: ingin melihat seberapa jauh selnya bisa berevolusi dan seberapa dalam dia bisa masuk ke tubuh.
+

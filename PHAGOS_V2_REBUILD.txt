@@ -1,0 +1,2192 @@
+ PHAGOS V2 — MASTER GAMEPLAY BLUEPRINT
+
+Continuous Biological Survival • Evolution • Adaptation
+
+Status: Design Lock Candidate
+Target: HTML5 / Mobile-first / PC compatible
+Core Genre: Biological Survival Adventure + Roguelike Evolution
+Primary Fantasy:
+
+> Enter the human body as an immune cell, survive an evolving biological ecosystem, mutate into stronger forms, and continuously travel deeper through the body until the infection source is eliminated.
+
+
+
+
+---
+
+01 — V2 CORE VISION
+
+PHAGOS V2 tidak lagi diposisikan sebagai:
+
+> "Survival game dengan banyak menu, upgrade, shop, squad dan battle pass."
+
+
+
+PHAGOS V2 menjadi:
+
+> A continuous biological journey where the player fights, adapts and evolves while physically travelling through the human body.
+
+
+
+Tiga hal harus berkembang bersamaan:
+
+PLAYER
+  ↓
+Hero → Mutation → Evolution
+
+WORLD
+  ↓
+Lung → Bloodstream → Heart → Tissue → Tumor
+
+THREAT
+  ↓
+Basic → Specialized → Combined → Elite → Boss
+
+Tidak boleh ada satu sistem yang berkembang sendirian.
+
+
+---
+
+02 — MASALAH GAME SAAT INI
+
+Repo saat ini masih dibangun di atas struktur:
+
+Wave
+ ↓
+Enemy scaling
+ ↓
+Level up
+ ↓
+3 random upgrades
+ ↓
+Wave berikutnya
+
+README mendokumentasikan bahwa wave berubah setiap 25 detik, boss muncul setiap 5 wave, level-up memberikan 3 upgrade acak, dan Antibodi digunakan untuk squad upgrade, unlock hero, serta shop. Background saat ini juga berupa procedural body background dengan parallax. 
+
+Masalah desain utama:
+
+1. Power terlalu banyak berasal dari angka
+
+2. Hero belum mempunyai alasan gameplay yang cukup kuat untuk berbeda
+
+3. Mutation belum menjadi inti progression
+
+4. Enemy meningkat terutama melalui scaling
+
+5. Arena tidak memberi perjalanan geografis yang jelas
+
+6. Wave terasa seperti timer, bukan perjalanan
+
+7. UI memiliki terlalu banyak sistem
+
+8. Banyak sistem membutuhkan balancing tambahan tetapi tidak memperkuat core fantasy
+
+V2 harus mengatasi semuanya dengan lebih sedikit sistem, bukan menambah sistem baru.
+
+
+---
+
+03 — FITUR YANG DIHAPUS DARI CORE GAMEPLAY
+
+REMOVE
+
+❌ Upgrade Page
+
+Tidak ada lagi halaman:
+
+> permanent upgrade tree
+
+
+
+
+---
+
+❌ Squad / Pasukan
+
+Hapus:
+
+> Squad progression
+Squad upgrade
+Army management
+
+
+
+
+---
+
+❌ Battle system
+
+Hapus:
+
+> Battle mode / separate battle progression
+
+
+
+
+---
+
+❌ Shop gameplay
+
+Tidak ada lagi shop untuk:
+
+power item
+
+gameplay equipment
+
+combat booster
+
+stat upgrade
+
+
+
+---
+
+❌ Skin shop
+
+Untuk V2 core:
+
+> Skin tidak menjadi sistem utama.
+
+
+
+Character identity tetap berasal dari evolution/mutation.
+
+Cosmetic system dapat dipertimbangkan kemudian, tetapi tidak boleh menjadi dependency gameplay V2.
+
+
+---
+
+❌ Mission-driven hero unlock
+
+Jangan membuat player harus menyelesaikan banyak misi hanya untuk mendapatkan hero.
+
+Hero harus menjadi bagian dari:
+
+> character collection / gameplay discovery
+
+
+
+bukan dependency dari mission tree.
+
+
+---
+
+❌ Battle Pass
+
+Dikeluarkan dari core V2.
+
+
+---
+
+❌ Upgrade economy kompleks
+
+Tidak ada:
+
+Hero level
+Weapon level
+Squad level
+Item level
+Equipment level
+
+
+---
+
+04 — YANG DIPERTAHANKAN
+
+Tidak semuanya dibuang.
+
+Tetap pertahankan:
+
+Hero
+
+11 immune-cell heroes.
+
+Enemy
+
+13 biological/pathogen families dan turunannya.
+
+Antibody
+
+Tetap menjadi resource utama.
+
+Run
+
+Continuous survival journey.
+
+Boss
+
+Tetap ada.
+
+Rewarded Ads
+
+Tetap dapat digunakan.
+
+Save
+
+Tetap ada.
+
+Account/progression dasar
+
+Tetap dapat dipertahankan jika dibutuhkan secara teknis.
+
+Pause
+
+Tetap.
+
+
+---
+
+05 — NEW CORE LOOP
+
+Workflow baru:
+
+DASHBOARD
+    ↓
+    PLAY
+    ↓
+HERO SELECTION
+    ↓
+START JOURNEY
+    ↓
+COMBAT
+    ↓
+KILL ENEMIES
+    ↓
+COLLECT ANTIBODY / XP
+    ↓
+SURVIVE
+    ↓
+MUTATION OPPORTUNITY
+    ↓
+MUTATE OR SAVE
+    ↓
+CINEMATIC EVOLUTION
+    ↓
+RETURN TO COMBAT
+    ↓
+CONTINUE JOURNEY
+    ↓
+WORLD TRANSITION
+    ↓
+NEW BIOLOGICAL ECOSYSTEM
+    ↓
+NEW THREATS
+    ↓
+MORE MUTATION
+    ↓
+ELITE
+    ↓
+BOSS
+    ↓
+ZONE/OBJECTIVE CLEARED
+    ↓
+RUN RESULT
+    ↓
+PLAY AGAIN
+
+Tidak ada interruption untuk masuk ke halaman upgrade.
+
+
+---
+
+06 — MUTATION MENJADI JANTUNG GAME
+
+Mutation bukan:
+
+> +20 Damage
+
+
+
+Mutation adalah:
+
+> Evolution of combat behavior.
+
+
+
+Setiap mutation harus minimal mengubah salah satu:
+
+attack behavior
+
+attack range
+
+projectile behavior
+
+area behavior
+
+mobility
+
+defense
+
+control
+
+survivability
+
+target priority
+
+interaction dengan environment
+
+
+Idealnya beberapa aspek berubah sekaligus.
+
+
+---
+
+07 — MUTATION FLOW
+
+Ketika mutation opportunity muncul:
+
+COMBAT
+   ↓
+GAMEPLAY SLOWS/PAUSES
+   ↓
+MUTATION WINDOW
+
+Modal menampilkan:
+
+CURRENT FORM
+
+      MAKO
+      Lv.X
+
+ANTIBODY
+     82
+
+AVAILABLE MUTATION
+
+[ MUTATION A ]
+Cost: 30
+
+[ MUTATION B ]
+Cost: 30
+
+[ MUTATION C ]
+Cost: 30
+
+[ SKIP ]
+
+Player tidak dipaksa mutate.
+
+
+---
+
+08 — SKIP HARUS VALID
+
+Player boleh:
+
+> Skip Mutation
+
+
+
+karena resource harus menjadi keputusan.
+
+Contoh:
+
+Antibody = 70
+
+Mutation = 40
+
+Player dapat:
+
+Mutate
+
+Power bertambah sekarang.
+
+atau:
+
+Save
+
+Menyimpan resource untuk mutation berikutnya.
+
+Dengan begitu Antibody menjadi:
+
+> decision resource
+
+
+
+bukan sekadar currency.
+
+
+---
+
+09 — MUTATION CINEMATIC
+
+Ini adalah salah satu signature feature PHAGOS V2.
+
+Setelah player memilih mutation:
+
+COMBAT PAUSES
+       ↓
+CHARACTER FREEZES
+       ↓
+BIOLOGICAL ENERGY BUILDUP
+       ↓
+OLD FORM BREAKS
+       ↓
+MEMBRANE / CELL STRUCTURE COLLAPSES
+       ↓
+BIOLOGICAL TRANSFORMATION
+       ↓
+NEW FORM EMERGES
+       ↓
+NEW ATTACK ACTIVATES
+       ↓
+CAMERA RETURNS
+       ↓
+COMBAT CONTINUES
+
+Tidak boleh terasa seperti:
+
+> UI popup → stat berubah → selesai.
+
+
+
+Player harus melihat:
+
+> "Saya baru berevolusi."
+
+
+
+
+---
+
+10 — EVOLUTION MUST BE VISUAL
+
+Contoh:
+
+MAKO BASE
+    ↓
+PHAGOCYTE
+    ↓
+ACIDIC PHAGOCYTE
+    ↓
+APEX MACROPHAGE
+
+Setiap tahap harus memiliki perubahan:
+
+silhouette
+
+body structure
+
+membrane
+
+weapon/organ
+
+VFX
+
+attack
+
+animation
+
+
+Bukan sekadar warna.
+
+
+---
+
+11 — POWER SYSTEM
+
+Kita menggunakan:
+
+PLAYER POWER
+=
+BASE HERO
++
+MUTATION
++
+PLAYER EXECUTION
+
+Bukan:
+
+POWER
+=
+SHOP
++
+ITEM
++
+UPGRADE TREE
+
+
+---
+
+12 — 11 HERO HARUS BERBEDA SECARA FUNDAMENTAL
+
+Setiap hero harus memiliki:
+
+Strength
+
+Apa yang dia lakukan dengan sangat baik.
+
+Weakness
+
+Apa yang membuatnya kesulitan.
+
+Combat identity
+
+Bagaimana dia membunuh.
+
+Scaling identity
+
+Bagaimana dia menjadi semakin kuat melalui mutation.
+
+
+---
+
+13 — CONTOH POWER PROFILE
+
+MAKO
+
+Strength
+
+survivability
+
+close-range
+
+swarm control
+
+sustain
+
+
+Weakness
+
+mobility
+
+ranged threats
+
+chasing fast targets
+
+
+
+---
+
+NYX
+
+Strength
+
+mobility
+
+burst
+
+elite/boss damage
+
+single target
+
+
+Weakness
+
+swarm
+
+sustained pressure
+
+mistakes are costly
+
+
+
+---
+
+T-BOLT
+
+Strength
+
+ranged
+
+burst
+
+chain/energy
+
+scaling
+
+
+Weakness
+
+positioning
+
+close-range pressure
+
+resource timing
+
+
+
+---
+
+Ini hanya identity framework, bukan final numerical balance.
+
+Semua 11 hero harus mendapatkan treatment yang sama.
+
+
+---
+
+14 — NO HERO SHOULD BE "THE BEST"
+
+Tidak boleh ada:
+
+> Mako + semua kelebihan hero lain.
+
+
+
+Setiap hero harus memiliki trade-off.
+
+Strong
+   ↓
+Weak somewhere else
+
+Tetapi:
+
+> semua hero harus tetap mampu menyelesaikan journey.
+
+
+
+Tidak boleh ada enemy yang secara absolut memaksa:
+
+> "Gunakan hero X."
+
+
+
+
+---
+
+15 — ENEMY SYSTEM
+
+Enemy tidak boleh hanya:
+
+HP ↑
+Damage ↑
+Speed ↑
+
+Enemy harus memiliki behavior identity.
+
+Minimal enemy archetypes:
+
+Swarm
+
+Jumlah banyak.
+
+Armored
+
+Defense tinggi.
+
+Fast
+
+Mobilitas tinggi.
+
+Ranged
+
+Menyerang dari jauh.
+
+Regenerative
+
+Recover HP.
+
+Splitter
+
+Membelah ketika mati.
+
+Support
+
+Membuff enemy lain.
+
+Control
+
+Mengganggu movement.
+
+Elite
+
+Kombinasi beberapa behavior.
+
+
+---
+
+16 — THREAT ESCALATION
+
+Difficulty:
+
+BASIC
+ ↓
+SPECIALIZED
+ ↓
+COMBINATION
+ ↓
+ELITE
+ ↓
+BOSS
+
+Bukan:
+
+HP × 10
+
+
+---
+
+17 — ATTACK LANGUAGE
+
+Semua attack harus dapat dikenali secara visual.
+
+Core attack archetypes:
+
+1. Projectile
+
+
+2. Homing
+
+
+3. Melee
+
+
+4. Area/Burst
+
+
+5. Beam
+
+
+6. Chain
+
+
+7. Zone
+
+
+8. Summon/Biological Entity
+
+
+
+
+---
+
+18 — ATTACK READABILITY
+
+Player harus mengetahui:
+
+> apa yang terjadi
+
+
+
+tanpa membaca angka.
+
+Contoh:
+
+Projectile
+
+● ─────→ Enemy
+
+Beam
+
+Hero ═══════════ Enemy
+
+Area
+
+○
+ ○ HERO ○
+    ○
+
+Chain
+
+A → B → C → D
+
+Zone
+
+┌─────────┐
+│ DANGER  │
+└─────────┘
+
+
+---
+
+19 — ATTACK TELEGRAPH
+
+Setiap serangan penting:
+
+ANTICIPATION
+     ↓
+TELEGRAPH
+     ↓
+EXECUTION
+     ↓
+IMPACT
+     ↓
+RECOVERY
+
+Player harus memiliki kesempatan memahami bahaya.
+
+
+---
+
+20 — GAME FEEL
+
+Setiap serangan membutuhkan kombinasi:
+
+ANIMATION
++
+VFX
++
+SFX
++
+ENEMY REACTION
++
+CAMERA RESPONSE
+
+Tidak semua membutuhkan screen shake.
+
+Hierarchy:
+
+Normal
+→ minimal
+
+Heavy
+→ micro shake
+
+Elite
+→ stronger reaction
+
+Ultimate
+→ major response
+
+Boss event
+→ cinematic response
+
+
+---
+
+21 — CONTINUOUS BIOLOGICAL WORLD
+
+Ini perubahan terbesar pada map.
+
+HAPUS MODEL:
+
+Stage selected
+↓
+load arena
+↓
+play
+↓
+finish
+↓
+select next stage
+
+Tidak ada lagi feeling:
+
+> "Saya masuk level baru."
+
+
+
+
+---
+
+22 — GANTI MENJADI BIOLOGICAL JOURNEY
+
+Contoh perjalanan:
+
+LUNG
+ ↓
+BRONCHIOLE
+ ↓
+ALVEOLI
+ ↓
+CAPILLARY
+ ↓
+BLOODSTREAM
+ ↓
+HEART
+ ↓
+ARTERY
+ ↓
+TISSUE
+ ↓
+LYMPHATIC SYSTEM
+ ↓
+LYMPH NODE
+ ↓
+INFECTED TISSUE
+ ↓
+TUMOR
+
+Ini adalah continuous route, bukan menu stage.
+
+
+---
+
+23 — WORLD TRANSITION TERJADI SAAT COMBAT
+
+Contoh:
+
+LUNG
+
+Player bertempur.
+
+Kemudian lingkungan mulai berubah:
+
+alveoli
+ ↓
+capillary
+ ↓
+blood cells
+ ↓
+bloodstream
+
+Player tetap:
+
+bergerak
+
+menyerang
+
+membunuh
+
+mengambil XP
+
+melakukan mutation
+
+
+Tidak ada loading screen.
+
+Tidak ada stage-select.
+
+
+---
+
+24 — TRANSITION ZONE
+
+Setiap biological zone mempunyai transition period.
+
+Misalnya:
+
+20–60 detik gameplay, tergantung pacing.
+
+Selama transition:
+
+OLD ENVIRONMENT
+      +
+NEW ENVIRONMENT
+      +
+OLD ENEMIES
+      +
+NEW ENEMIES
+
+bercampur.
+
+Ini menciptakan:
+
+> biological continuity.
+
+
+
+
+---
+
+25 — ENVIRONMENT HARUS MENGUBAH GAMEPLAY
+
+Bukan hanya background.
+
+LUNG
+
+Mechanic:
+
+Oxygen / mucus / respiratory hazards
+
+
+---
+
+CAPILLARY
+
+Mechanic:
+
+narrow movement / blood flow
+
+
+---
+
+BLOODSTREAM
+
+Mechanic:
+
+current
+
+Player terdorong oleh aliran.
+
+
+---
+
+HEART
+
+Mechanic:
+
+heartbeat pulse
+
+Secara berkala:
+
+HEARTBEAT
+ ↓
+environment pulse
+ ↓
+enemy reaction
+ ↓
+movement disturbance
+
+
+---
+
+TISSUE
+
+Mechanic:
+
+obstacles / narrow paths / infected cells
+
+
+---
+
+LYMPHATIC
+
+Mechanic:
+
+immune signal
+
+Risk/reward zone.
+
+
+---
+
+TUMOR
+
+Mechanic:
+
+regeneration / corruption / growth nodes
+
+Environment menjadi bagian dari ancaman.
+
+
+---
+
+26 — WORLD PROGRESSION HARUS TERLIHAT
+
+Karena journey continuous, player tetap membutuhkan orientasi.
+
+HUD minimal:
+
+🫁 LUNG ───────●────── 🫀 HEART
+
+atau:
+
+LUNG
+ ↓
+CAPILLARY
+ ●
+ ↓
+BLOODSTREAM
+ ↓
+HEART
+
+Sangat kecil.
+
+Tidak boleh mengambil fokus gameplay.
+
+
+---
+
+27 — WAVE DIDEFINISIKAN ULANG
+
+Wave bukan lagi:
+
+> arena baru.
+
+
+
+Wave adalah:
+
+> spawn/intensity milestone.
+
+
+
+Contoh:
+
+LUNG
+Wave 1
+Wave 2
+Wave 3
+
+TRANSITION
+
+CAPILLARY
+Wave 4
+Wave 5
+Wave 6
+
+TRANSITION
+
+BLOODSTREAM
+Wave 7
+Wave 8
+
+Jadi:
+
+Wave = combat pacing
+
+Journey = world progression
+
+
+---
+
+28 — HEART ENTRY EVENT
+
+Heart harus menjadi contoh benchmark untuk continuous transition.
+
+Player sedang bertempur.
+
+Kemudian:
+
+heartbeat
+
+BOOM.
+
+Enemy terdorong.
+
+Environment bergerak.
+
+Heartbeat kedua.
+
+Struktur jantung mulai terlihat.
+
+Blood flow berubah.
+
+Enemy ecosystem berubah.
+
+Tanpa:
+
+> "STAGE 3: HEART"
+
+
+
+Player menyadari:
+
+> "Saya sudah sampai jantung."
+
+
+
+
+---
+
+29 — MAP PROGRESS + COMBAT PROGRESS
+
+Tiga progression berjalan bersamaan:
+
+CHARACTER
+Cell
+ ↓
+Mutation
+ ↓
+Evolution
+
+WORLD
+Lung
+ ↓
+Bloodstream
+ ↓
+Heart
+ ↓
+Tissue
+ ↓
+Tumor
+
+THREAT
+Basic
+ ↓
+Specialized
+ ↓
+Combined
+ ↓
+Elite
+ ↓
+Boss
+
+Inilah progression utama PHAGOS V2.
+
+
+---
+
+30 — BOSS
+
+Boss bukan hanya:
+
+> HP besar.
+
+
+
+Boss harus menjadi:
+
+BUILD TEST
+
+Boss menguji:
+
+damage
+
+mobility
+
+survivability
+
+positioning
+
+mutation choices
+
+environmental awareness
+
+
+Contoh:
+
+Boss punya:
+
+armor
+
+ranged attack
+
+summon swarm
+
+
+Mako masih unggul terhadap swarm.
+
+Tetapi harus mengatasi armor + ranged attack.
+
+
+---
+
+31 — ANTIBODY ECONOMY
+
+Antibody sekarang memiliki satu fungsi utama:
+
+> Evolution resource.
+
+
+
+Sumber:
+
+enemy drops
+
+special biological drops
+
+boss
+
+run reward
+
+rewarded ad bonus
+
+
+Penggunaan:
+
+> Mutation.
+
+
+
+Tidak lagi dibebani dengan:
+
+squad upgrade
+
+shop item
+
+hero upgrade
+
+equipment.
+
+
+README repo saat ini menyebut Antibodi digunakan untuk squad upgrade, unlock hero, dan item toko; semua dependency tersebut harus dilepas dalam V2. 
+
+
+---
+
+32 — IAP
+
+Dengan sistem baru, IAP tidak menjual:
+
+> kemenangan.
+
+
+
+IAP dapat berfokus pada:
+
+Antibody Packs
+
+Tetapi gameplay tetap harus memungkinkan player mendapatkan resource melalui bermain.
+
+Rewarded ad:
+
+2× Antibody
+
+sangat natural terhadap sistem ini.
+
+Hook monetization yang sudah ada di repo untuk rewarded revive / double currency dapat diadaptasi, bukan harus dibuang seluruhnya. 
+
+
+---
+
+33 — HERO UNLOCK
+
+Hero tetap menjadi progression.
+
+Namun:
+
+> hero bukan upgrade dari hero lain.
+
+
+
+Contoh:
+
+MAKO
+Tank / swarm / sustain
+
+NYX
+Assassin / mobility / burst
+
+T-BOLT
+Ranged / energy / scaling
+
+Player unlock hero untuk mendapatkan:
+
+> pengalaman bermain berbeda.
+
+
+
+Bukan:
+
+> hero yang levelnya lebih tinggi.
+
+
+
+
+---
+
+34 — DASHBOARD V2
+
+Dashboard harus sangat sederhana.
+
+HAPUS
+
+7–10 navigation destinations
+
+upgrade page
+
+squad
+
+battle
+
+shop
+
+item management
+
+complicated economy display
+
+
+
+---
+
+35 — NEW DASHBOARD
+
+Fokus:
+
+PHAGOS
+
+      [ HERO ]
+
+     CURRENT FORM
+
+        PLAY
+
+    Continue Journey
+
+Secondary:
+
+Heroes
+Progress
+Settings
+
+Tidak perlu lebih banyak pada initial V2.
+
+
+---
+
+36 — HERO SELECTION
+
+Sebelum PLAY:
+
+SELECT YOUR CELL
+
+< Mako >
+
+FORM
+Current Evolution
+
+STRENGTH
+Swarm / Tank
+
+WEAKNESS
+Mobility / Ranged
+
+[ START JOURNEY ]
+
+Player harus mengetahui bagaimana hero bermain, bukan hanya melihat stat.
+
+
+---
+
+37 — GAMEPLAY HUD
+
+HUD harus minimal.
+
+Top:
+
+ZONE PROGRESS
+
+Center:
+
+> gameplay
+
+
+
+Bottom:
+
+HP
+Antibody
+Mutation progress
+
+Pause:
+
+⏸
+
+Jangan memenuhi layar dengan dashboard-style UI.
+
+
+---
+
+38 — MUTATION MODAL
+
+Saat mutation tersedia:
+
+MUTATION
+
+    Choose your evolution
+
+┌─────────────┐
+│  MUTATION A │
+│             │
+│  description│
+│             │
+│  30 🧬      │
+└─────────────┘
+
+┌─────────────┐
+│  MUTATION B │
+│             │
+│  description│
+│             │
+│  30 🧬      │
+└─────────────┘
+
+          SKIP
+
+Visual mutation harus memperlihatkan:
+
+BEFORE → AFTER
+
+bukan sekadar icon.
+
+
+---
+
+39 — MUTATION CINEMATIC UI
+
+Setelah memilih:
+
+UI DISAPPEARS
+      ↓
+CAMERA FOCUS
+      ↓
+CHARACTER
+      ↓
+TRANSFORMATION
+      ↓
+NEW FORM
+      ↓
+NEW ATTACK
+      ↓
+RETURN TO GAMEPLAY
+
+Durasi harus cukup untuk terasa spesial tetapi tidak mengganggu pacing.
+
+
+---
+
+40 — REMOVE CURRENT LEVEL-UP MODEL
+
+Repo saat ini memiliki:
+
+> XP → level → pause → 3 random upgrades. 
+
+
+
+Untuk V2:
+
+jangan pertahankan sistem upgrade random sebagai progression utama.
+
+XP boleh tetap digunakan sebagai:
+
+> gameplay feedback / mutation opportunity trigger
+
+
+
+tetapi keputusan power utama harus:
+
+MUTATION.
+
+
+---
+
+41 — DATA ARCHITECTURE V2
+
+Repo saat ini sudah memisahkan data ke JSON seperti:
+
+heroes
+
+enemies
+
+nutrients
+
+waves
+
+upgrades
+
+missions. 
+
+
+Pertahankan pendekatan data-driven tersebut.
+
+V2 sebaiknya menjadi:
+
+data/
+  heroes.json
+
+  mutations.json
+
+  enemies.json
+
+  enemy-variants.json
+
+  zones.json
+
+  transitions.json
+
+  bosses.json
+
+  attacks.json
+
+  economy.json
+
+
+---
+
+42 — CONTOH DATA HERO
+
+Secara konsep:
+
+hero:
+  id: mako
+
+  baseForm:
+    attackType: area
+    range: close
+    strength:
+      swarm: high
+      sustain: high
+    weakness:
+      mobility: low
+      ranged: low
+
+  mutations:
+    - phagocyte
+    - acidic_phagocyte
+    - apex_macrophage
+
+Agent engine yang menentukan struktur final JSON.
+
+
+---
+
+43 — CONTOH DATA ZONE
+
+zone:
+  id: bloodstream
+
+  visual:
+    environment
+    particles
+    lighting
+
+  mechanic:
+    blood_current
+
+  enemies:
+    bloodborne
+    bacteria
+    infected_cells
+
+  transitionFrom:
+    lung
+
+  transitionTo:
+    heart
+
+
+---
+
+44 — ASSET REQUIREMENTS V2
+
+Setiap Hero membutuhkan:
+
+Base
+
+idle
+
+movement
+
+attack
+
+hit
+
+death
+
+
+Mutation
+
+Setiap evolution:
+
+new silhouette
+
+new sprite/model
+
+new idle
+
+new movement
+
+new attack
+
+skill VFX
+
+transformation animation
+
+
+UI
+
+portrait
+
+hero card
+
+mutation preview
+
+transformation preview
+
+
+
+---
+
+45 — WORLD ASSET REQUIREMENTS
+
+Setiap biological zone membutuhkan:
+
+foreground
+
+midground
+
+background
+
+particles
+
+environmental animation
+
+hazards
+
+transition assets
+
+landmark
+
+enemy spawn visual
+
+
+Yang paling penting:
+
+> transition assets
+
+
+
+karena world tidak boleh berubah secara abrupt.
+
+
+---
+
+46 — CONTINUOUS WORLD TECHNICAL REQUIREMENT
+
+Engine tidak boleh berpikir:
+
+loadZone()
+unloadZone()
+
+sebagai pengalaman player.
+
+Secara teknis boleh melakukan streaming/chunking.
+
+Tetapi secara visual:
+
+CURRENT CHUNK
+     +
+TRANSITION CHUNK
+     +
+NEXT CHUNK
+
+harus dapat coexist.
+
+
+---
+
+47 — LANDMARK SYSTEM
+
+Untuk membuat progress terasa:
+
+setiap biological region memiliki landmark.
+
+Contoh:
+
+Lung
+
+Alveolar cluster
+
+Bloodstream
+
+Massive blood-cell flow
+
+Heart
+
+Heart wall / valve
+
+Tissue
+
+Dense cellular structure
+
+Tumor
+
+Massive tumor growth
+
+Player akan mengingat:
+
+> "Saya sudah melewati landmark itu."
+
+
+
+Ini jauh lebih kuat daripada nomor stage.
+
+
+---
+
+48 — FINAL PLAYER EXPERIENCE
+
+Idealnya player tidak berpikir:
+
+> "Saya sedang memainkan Wave 7."
+
+
+
+Player berpikir:
+
+> "Saya sudah keluar dari paru."
+
+
+
+kemudian:
+
+> "Saya masuk bloodstream."
+
+
+
+kemudian:
+
+> "Jantung sudah terlihat."
+
+
+
+kemudian:
+
+> "Saya harus bertahan sampai tumor."
+
+
+
+Itulah journey.
+
+
+---
+
+49 — FINAL PHAGOS V2 LOOP
+
+PHAGOS
+                     │
+                     ▼
+                 DASHBOARD
+                     │
+                    PLAY
+                     │
+                     ▼
+               SELECT HERO
+                     │
+                     ▼
+              ENTER THE BODY
+                     │
+                     ▼
+                 COMBAT
+                     │
+             ┌───────┴───────┐
+             │               │
+          ANTIBODY          XP
+             │               │
+             └───────┬───────┘
+                     ▼
+               MUTATION
+                /     \
+              SKIP    EVOLVE
+                       │
+                       ▼
+              CINEMATIC TRANSFORM
+                       │
+                       ▼
+                  NEW FORM
+                       │
+                       ▼
+                  COMBAT
+                       │
+                       ▼
+             BIOLOGICAL TRANSITION
+                       │
+                       ▼
+               NEW ECOSYSTEM
+                       │
+                       ▼
+                NEW THREATS
+                       │
+                       ▼
+                  MUTATION
+                       │
+                       ▼
+                    ELITE
+                       │
+                       ▼
+                    BOSS
+                       │
+                       ▼
+                JOURNEY COMPLETE
+                       │
+                       ▼
+                  RUN RESULT
+                       │
+                       ▼
+                   PLAY AGAIN
+
+
+---
+
+50 — V2 DEFINITION OF DONE
+
+PHAGOS V2 tidak dianggap selesai hanya karena:
+
+UI baru selesai
+
+sprite baru selesai
+
+map baru selesai
+
+mutation sudah ada.
+
+
+V2 selesai apabila:
+
+CORE
+
+[ ] Player bisa langsung PLAY dari dashboard
+
+[ ] Hero memiliki gameplay identity
+
+[ ] Hero memiliki weakness
+
+[ ] Mutation mengubah gameplay
+
+[ ] Mutation mengubah visual
+
+[ ] Mutation memiliki cinematic transformation
+
+[ ] Antibody menjadi resource evolution
+
+[ ] Enemy memiliki behavioral identity
+
+[ ] Difficulty tidak hanya HP scaling
+
+
+WORLD
+
+[ ] Journey continuous
+
+[ ] Tidak ada stage loading sebagai pengalaman
+
+[ ] Biological zones terhubung
+
+[ ] Transition terjadi saat combat
+
+[ ] Enemy ecosystem berubah sepanjang journey
+
+[ ] Environment memiliki gameplay mechanics
+
+[ ] Landmark menunjukkan progress
+
+
+COMBAT
+
+[ ] Attack type terbaca
+
+[ ] Enemy telegraph terbaca
+
+[ ] Hit reaction terbaca
+
+[ ] VFX tidak membuat layar kacau
+
+[ ] Animation + VFX + SFX sinkron
+
+[ ] Boss menguji build
+
+
+UI/UX
+
+[ ] Dashboard sederhana
+
+[ ] PLAY menjadi primary CTA
+
+[ ] Tidak ada upgrade page
+
+[ ] Tidak ada squad page
+
+[ ] Tidak ada battle page
+
+[ ] Tidak ada gameplay shop
+
+[ ] Tidak ada battle pass
+
+[ ] Mutation modal sederhana
+
+[ ] HUD minimal
+
+[ ] World progress terlihat
+
+
+ECONOMY
+
+[ ] Antibody income jelas
+
+[ ] Mutation cost jelas
+
+[ ] Mutation cost scaling jelas
+
+[ ] IAP tidak menjadi auto-win
+
+[ ] Rewarded ad terintegrasi secara natural
+
+
+
+---
+
+51 — PRIORITAS IMPLEMENTASI
+
+Jangan kerjakan semuanya sekaligus.
+
+PHASE 1 — CORE COMBAT
+
+Lock:
+
+Hero base identity
+
+attack types
+
+enemy types
+
+damage model
+
+weakness
+
+threat model
+
+
+↓
+
+PHASE 2 — MUTATION
+
+mutation tree
+
+cost
+
+evolution states
+
+transformation
+
+attack changes
+
+
+↓
+
+PHASE 3 — CONTINUOUS WORLD
+
+Lung
+
+transition
+
+Bloodstream
+
+Heart
+
+transition system
+
+
+↓
+
+PHASE 4 — WORLD EXPANSION
+
+Tissue
+
+Lymphatic
+
+Tumor
+
+
+↓
+
+PHASE 5 — GAME FEEL
+
+animation
+
+VFX
+
+SFX
+
+camera
+
+impact
+
+
+↓
+
+PHASE 6 — UI/UX
+
+Dashboard
+
+Hero selection
+
+HUD
+
+Mutation modal
+
+Result
+
+
+↓
+
+PHASE 7 — BALANCE
+
+11 heroes
+
+13 enemy families
+
+mutation costs
+
+spawn
+
+difficulty
+
+boss
+
+
+↓
+
+PHASE 8 — MONETIZATION
+
+Antibody IAP
+
+rewarded ads
+
+revive
+
+double reward
+
+
+
+---
+
+52 — CRITICAL RULE FOR THE AGENT
+
+DO NOT simply modify the existing game by adding new menus or reskinning existing waves.
+
+The current repository architecture contains explicit systems for:
+
+upgrade-system, economy-system, unlock-system, mission-system, multiple screens including upgrade/shop/roster/level-up, and a procedural body background. 
+
+The V2 agent must treat those as legacy systems to be refactored or removed, not as mandatory foundations.
+
+The new architecture should be driven by:
+
+HERO
+MUTATION
+COMBAT
+ENEMY
+WORLD
+TRANSITION
+BOSS
+ECONOMY
+
+
+---
+
+53 — THE NORTH STAR
+
+PHAGOS V2 is not about having more content.
+
+It is about making three things continuously visible to the player:
+
+> I am getting stronger.
+
+
+
+through:
+
+MUTATION
+
+> I am going deeper.
+
+
+
+through:
+
+BIOLOGICAL JOURNEY
+
+> The world is becoming harder.
+
+
+
+through:
+
+THREAT EVOLUTION
+
+And all three must happen inside one uninterrupted run.
+
+GET STRONGER
+                  ↑
+                  │
+                  │
+GO DEEPER ←── PLAYER ──→ FACE HARDER THREATS
+                  │
+                  │
+                  ↓
+               EVOLVE
+
+That is the V2 identity.
+
+
+---
+
+Repo-specific starting point
+
+Repository saat ini memang cocok untuk pendekatan ini karena game sudah data-driven, memakai JSON untuk hero/enemy/wave dan memiliki pemisahan system seperti spawn, collision, effects, economy, monetization, serta renderer/camera. Jadi team tidak harus membuang seluruh engine; yang perlu dibuang adalah model gameplay lama dan layer UI/progression yang sekarang mengikatnya. 
+
+[Open Imunverse GitHub repository](https://github.com/zamadye/Imunverse?utm_source=chatgpt.com)
+
+Satu hal yang saya sengaja belum kunci di dokumen ini: angka final damage/HP/cost untuk 11 hero × 13 virus. Itu sebaiknya menjadi Balance Bible terpisah setelah core design ini di-lock. Kalau angka dimasukkan sekarang, kamu akan cenderung mengoptimalkan spreadsheet sebelum kita memastikan gameplay-nya benar.

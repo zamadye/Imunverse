@@ -1,16 +1,25 @@
 /**
- * mutation-system.js — PHAGOS eksperimen: Evolusi Dalam Run.
+ * mutation-system.js — PHAGOS V2: Evolusi Dalam Run.
  *
  * Setiap level-up, pemain memilih 1 dari 3 MUTASI BENTUK (bukan +stat).
- * Mutasi kumulatif se-run, ada konflik, ada tier + biaya Bio-Point:
- *  - Tier 1 gratis (level 2-4), tier 2 = 5 Bio (level 5-8), tier 3 = 15 Bio (level 9+).
- *  - Level 2-4: 2 mutasi + 1 upgrade stat lama (jaring pengaman).
+ * Mutasi kumulatif se-run, ada konflik, ada tier.
  *
- * Visual kumulatif: run.activeMutations[] dirender berurutan sebagai layer
- * di atas sprite dasar (lihat membrane-render di game.js).
+ * P3 (IAP §6–§7): mutasi adalah SATU-SATUNYA pembuang Antibodi. Harganya
+ * mengikuti INDEKS mutasi (mutasi ke-1 termurah) dengan kurva yang seluruhnya
+ * ada di data/economy.json — bukan `bioCost` lama per mutasi:
+ *    ke-1 100 → ke-2 150 → ke-3 218 → ke-4 309 → ke-5 432 …
+ * Kekurangan antibodi MENGUNCI kartu, tetapi TIDAK PERNAH memblokir permainan
+ * (§10): selalu ada jaring pengaman, dan pemain tetap lanjut bertempur.
  */
 
 import { getMutations, getData } from '../core/data-store.js';
+import { mutationCost, canAffordMutation, spendAntibody, runAntibody, recordEconomyEvent } from './antibody-economy.js';
+
+/** Harga mutasi berikutnya untuk run ini (indeks = jumlah mutasi + 1). */
+export function mutationPriceFor(run) {
+  const n = ((run && run.activeMutations) || []).length;
+  return mutationCost(n + 1);
+}
 
 /** Tier yang boleh muncul di level tertentu (bible §4.1). */
 export function tiersForLevel(level) {
@@ -29,12 +38,14 @@ export function rollMutationChoices(run) {
   const level = run.level || 2;
   const tiers = tiersForLevel(level);
   const active = run.activeMutations || [];
-  const bio = run.bioPoints || 0;
+  const harga = mutationPriceFor(run);
+  const mampu = canAffordMutation(run, active.length + 1);
 
-  // Kandidat: tier cocok + belum dipilih + tidak konflik + (bio cukup ATAU gratis)
-  // Catatan: kartu mahal tetap boleh muncul (terkunci) agar pemain tahu target menabung?
-  // Keputusan: hanya tampilkan yang TERBELI (bio cukup) agar tidak ada dead-choice.
-  // Jika kandidat terbeli < kebutuhan, izinkan kartu terkunci sebagai info (1 slot).
+  // Kandidat: tier cocok + belum dipilih + tidak konflik. Harga mengikuti
+  // INDEKS mutasi, jadi semua kartu dalam satu tawaran sama mahalnya — pemain
+  // memilih BENTUK yang diinginkan, bukan yang termurah. Kekurangan antibodi
+  // membuat kartu terkunci (tetap tampil sebagai info), tetapi tidak pernah
+  // memblokir: jaring pengaman di bawah selalu menyisipkan pilihan valid.
   const conflicts = new Set();
   for (const id of active) {
     const def = all.find((m) => m.id === id);
@@ -46,16 +57,9 @@ export function rollMutationChoices(run) {
   for (const m of all) {
     if (m.conflicts && m.conflicts.some((c) => active.includes(c))) conflicts.add(m.id);
   }
-  const affordable = all.filter((m) =>
-    tiers.includes(m.tier) &&
-    !active.includes(m.id) &&
-    !conflicts.has(m.id) &&
-    (m.bioCost || 0) <= bio);
-  const locked = all.filter((m) =>
-    tiers.includes(m.tier) &&
-    !active.includes(m.id) &&
-    !conflicts.has(m.id) &&
-    (m.bioCost || 0) > bio);
+  const layak = (m) => tiers.includes(m.tier) && !active.includes(m.id) && !conflicts.has(m.id);
+  const affordable = all.filter(layak).filter(() => mampu);
+  const locked = all.filter(layak).filter(() => !mampu);
 
   const safety = level >= 2 && level <= 4;
   const needMutations = safety ? 2 : 3;
@@ -64,7 +68,7 @@ export function rollMutationChoices(run) {
   if (picked.length < needMutations) {
     for (const m of shuffle([...locked])) {
       if (picked.length >= needMutations) break;
-      picked.push({ ...m, lockedByBio: true });
+      picked.push({ ...m, lockedByAntibody: true, cost: harga });
     }
   }
   const cards = picked.map((m) => ({ ...m, isMutation: true, kind: 'mutation' }));
@@ -75,15 +79,15 @@ export function rollMutationChoices(run) {
     if (u) {
       cards.push(u);
     } else if (locked.length > 0) {
-      cards.push({ ...locked[0], isMutation: true, kind: 'mutation', lockedByBio: (locked[0].bioCost || 0) > bio });
+      cards.push({ ...locked[0], isMutation: true, kind: 'mutation', lockedByAntibody: true, cost: harga });
     }
   }
   // Acak urutan akhir agar posisi tidak tertebak
-  const final = shuffle(cards).slice(0, 3);
+  const final = shuffle(cards).slice(0, 3).map((c) => (c.isMutation ? { ...c, cost: harga, lockedByAntibody: !mampu } : c));
   // PHAGOS iterasi — KATUP ANTI-BUNTU: modal tak boleh hanya berisi kartu
   // terkunci (mis. Bio habis di Lv5+ tanpa safety net). Selipkan 1 upgrade
   // lama di slot terakhir agar selalu ada pilihan valid.
-  if (final.length > 0 && !final.some((c) => !c.lockedByBio)) {
+  if (final.length > 0 && !final.some((c) => !c.lockedByAntibody)) {
     const u = rollLegacySafety(run);
     if (u) return [...final.slice(0, 2), u];
   }
@@ -94,6 +98,22 @@ export function rollMutationChoices(run) {
  * Terapkan pilihan mutasi ke run.
  * @returns {{ok:boolean, reason?:string, mutation?:object}}
  */
+/**
+ * P5: segarkan status kunci tawaran yang SEDANG tampil setelah dompet
+ * berubah (iklan +antibodi / cadangan membantu), tanpa mengganti BENTUK yang
+ * sudah ditawarkan — pemain tidak kehilangan mutasi yang sedang diincar.
+ * @returns {object[]} kartu yang sama dengan status terbaru
+ */
+export function refreshChoiceLocks(run) {
+  if (!run || !Array.isArray(run.currentChoices) || run.currentChoices.length === 0) return run ? run.currentChoices : null;
+  const harga = mutationPriceFor(run);
+  const mampu = canAffordMutation(run, ((run && run.activeMutations) || []).length + 1);
+  run.currentChoices = run.currentChoices.map((c) => (c && c.isMutation
+    ? { ...c, cost: harga, lockedByAntibody: !mampu }
+    : c));
+  return run.currentChoices;
+}
+
 export function applyMutation(run, mutationId, opts = {}) {
   const all = (getMutations() && getMutations().mutations) || [];
   const def = all.find((m) => m.id === mutationId);
@@ -115,12 +135,13 @@ export function applyMutation(run, mutationId, opts = {}) {
       }
     }
   }
-  // Bio cost (Peti Mutasi 150G melewatinya — opts.skipCost)
-  const cost = def.bioCost || 0;
-  if (!opts.skipCost) {
-    if ((run.bioPoints || 0) < cost) return { ok: false, reason: `Butuh ${cost} Bio-Point` };
-    run.bioPoints -= cost;
+  // P3 (IAP §6): bayar dengan ANTIBODI; harga mengikuti indeks mutasi.
+  const cost = opts.cost != null ? opts.cost : mutationPriceFor(run);
+  if (!opts.skipCost && !spendAntibody(run, cost)) {
+    return { ok: false, reason: `Butuh ${cost} Antibodi` };
   }
+  run.antibodySpent = (run.antibodySpent || 0) + cost;
+  recordEconomyEvent('mutation_purchased', { id: mutationId, cost, remaining: runAntibody(run) });
   active.push(mutationId);
   run.mutationHistory = run.mutationHistory || [];
   run.mutationHistory.push({ id: mutationId, level: run.level, wave: run.spawnSys ? run.spawnSys.wave : 1 });

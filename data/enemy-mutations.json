@@ -19,7 +19,6 @@
       },
       "visualMod": "glow_yellow_green",
       "tint": "#b6ff3d",
-      "riaLine": "Mereka berevolusi menembak dari LUAR medanmu! Kejar dan Pulse langsung!",
       "lore": "Patogen berevolusi untuk menyerang dari jarak aman."
     },
     {
@@ -33,7 +32,6 @@
       },
       "visualMod": "armored_plates",
       "tint": "#8fa3bf",
-      "riaLine": "Kontak saja tak cukup — mereka kebal membran! Timing Pulse-mu harus tepat!",
       "lore": "Dinding sel menebal melawan sentuhan membran."
     },
     {
@@ -46,7 +44,6 @@
       },
       "visualMod": "toxic_veins",
       "tint": "#7dff5e",
-      "riaLine": "Hati-hati! Strain ini BERACUN saat diserap — engulf jadi keputusan, bukan refleks!",
       "lore": "Toksin terpendam meledak saat mangsa ditelan."
     },
     {
@@ -59,7 +56,6 @@
       },
       "visualMod": "anchored_roots",
       "tint": "#ff9f43",
-      "riaLine": "Mereka menancapkan diri! Tahan mereka di medan >2 detik sebelum Pulse!",
       "lore": "Akar kitin menancap — tak bisa dilempar."
     },
     {
@@ -73,7 +69,6 @@
       },
       "visualMod": "pure_white",
       "tint": "#eaf6ff",
-      "riaLine": "Strain Pemurni membersihkan jejakmu dan menyembuhkan kawanannya! Ubah taktik!",
       "lore": "Enzim pemurni menetralkan racun menjadi nutrisi musuh."
     },
     {
@@ -86,7 +81,6 @@
       },
       "visualMod": "shifting_chaos",
       "tint": "#c39bd3",
-      "riaLine": "Mereka tak bisa menebakmu — jadi mereka bermutasi ACAK! Tetap beradaptasi!",
       "lore": "Genom tak stabil — trait berganti setiap 10 detik."
     }
   ]

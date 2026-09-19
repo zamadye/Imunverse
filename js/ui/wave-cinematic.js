@@ -8,7 +8,7 @@
  *   BABAK 2 (2.6–5.4s): imun MELAWAN & MENANG — dash + shockwave, virus pop.
  *   BABAK 3 (5.4–8s) : ancaman baru — SILUET VIRUS RAKSASA bangkit menjulang
  *                      dari kegelapan, mata menyala... layar memudar.
- * Selesai → kembali ke gameplay → RIA menyambut (dipasang pemanggil).
+ * Selesai → kembali ke gameplay (dipasang pemanggil).
  * Bisa di-skip (tap / LEWATI). Non-recursive: hanya untuk wave milestone.
  */
 

@@ -1,76 +1,149 @@
 /**
- * evolution-system.js — Evolusi hero berbasis drop bagian (parts) dari musuh.
+ * evolution-system.js — P2: POHON EVOLUSI per hero (BASE → MUT1 → MUT2 → APEX).
  *
- * Hero berevolusi 5 tahap: Stage 0 Polos → Full Equity. Setiap tahap butuh
- * fragmen equity (reseptor/membran/efektor/inti memori) yang di-drop musuh saat
- * pertempuran. Visual equity per hero diambil dari data/character-designs.json,
- * sementara angka damage/HP tetap lewat data/evolutions.json seperti semula.
+ * Menggantikan sistem lama "fragmen diferensiasi" (parts drop dari musuh +
+ * meta.evoStage). Di V2, evolusi adalah JANTUNG PROGRESI RUN: tahap hero
+ * dihitung dari MUTASI YANG AKTIF se-run, bukan dari koleksi meta.
+ *
+ * Aturan (semua di data/evolutions.json):
+ *   BASE (0 mutasi) → MUT1 (≥1) → MUT2 (≥3) → APEX (≥5 mutasi DAN ≥2 mutasi
+ *   KHAS hero). Mutasi khas = mutasi yang blok `attack`-nya menyentuh
+ *   archetype hero (menimpa payload[archetype] atau mengubah bentuknya lewat
+ *   archetypeFrom) — jadi pohon tiap hero berbeda karena cara bertempurnya
+ *   berbeda.
+ *
+ * Yang dipakai game.js: run.evoStage (warna kill-FX, statMult, sprite bentuk)
+ * dan evoProgress() untuk HUD/modal.
  */
 
 import { getData } from '../core/data-store.js';
-import { STATE } from '../core/state-manager.js';
-import { writeSave } from '../save/save-manager.js';
 
-export function getEvoStageDef(meta = STATE.meta) {
-  const stage = meta.evoStage || 0;
-  return getData().evolutions.stages.find((s) => s.stage === stage)
-    || getData().evolutions.stages[0];
+function evo() {
+  return (getData() && getData().evolutions) || null;
 }
 
-export function getNextEvoStageDef(meta = STATE.meta) {
-  const stage = meta.evoStage || 0;
-  return getData().evolutions.stages.find((s) => s.stage === stage + 1) || null;
+function stages() {
+  const e = evo();
+  return (e && e.stages) || [];
 }
 
-export function getPartDef(partId) {
-  return getData().evolutions.parts.find((p) => p.id === partId) || null;
+/** Definisi mutasi (untuk menghitung mutasi khas). */
+function mutDefs() {
+  return (getData() && getData().mutations && getData().mutations.mutations) || [];
 }
 
-/** Apakah bagian meta.evoParts cukup untuk evolusi ke tahap berikutnya? */
-export function canEvolve(meta = STATE.meta) {
-  const next = getNextEvoStageDef(meta);
-  if (!next) return false;
-  return Object.entries(next.cost).every(([partId, need]) => (meta.evoParts[partId] || 0) >= need);
-}
-
-/** Konsumsi bagian & naikkan tahap. @returns {object|null} stage baru bila sukses. */
-export function evolve(meta = STATE.meta) {
-  if (!canEvolve(meta)) return null;
-  const next = getNextEvoStageDef(meta);
-  for (const [partId, need] of Object.entries(next.cost)) {
-    meta.evoParts[partId] -= need;
-  }
-  meta.evoStage = next.stage;
-  writeSave(meta);
-  return next;
-}
-
-/** Id kemampuan aktif yang terbuka pada tahap sekarang (kumulatif). */
-export function getUnlockedAbilityIds(meta = STATE.meta) {
-  const stage = meta.evoStage || 0;
-  return getData().evolutions.stages
-    .filter((s) => s.stage <= stage && s.ability)
-    .map((s) => s.ability);
+/** Archetype hero yang sedang dipakai (sumber: identity dari P1). */
+function archetypeOf(run, heroDef) {
+  const hd = heroDef || (run && run.heroDef) || null;
+  return (hd && hd.identity && hd.identity.attackArchetype) || null;
 }
 
 /**
- * Status kandidat drop bagian dari musuh.
- * @param {'normal'|'elite'|'boss'} kind
- * @param {number} partMult pengali arena
+ * Daftar id mutasi khas hero: blok `attack` mutasi menyentuh archetype hero.
+ * Dipakai syarat APEX — jadi APEX tiap hero beda jalurnya.
  */
-export function rollPartDrop(kind, partMult, rng = Math.random) {
-  const evo = getData().evolutions;
-  let chance = 0;
-  if (kind === 'normal') chance = evo.dropChanceNormal;
-  else if (kind === 'elite') chance = evo.dropChanceElite;
-  else chance = 1; // boss selalu
-  if (rng() > chance * partMult) return null;
-  // boss: beberapa drop sekaligus ditangani pemanggil (bossGuaranteedParts)
-  const total = evo.parts.reduce((a, p) => a + p.dropWeight, 0);
-  let roll = rng() * total;
-  for (const p of evo.parts) {
-    roll -= p.dropWeight;
-    if (roll <= 0) return p.id;
+export function signatureMutations(heroDef) {
+  const e = evo();
+  const hd = heroDef || null;
+  if (hd && e && e.heroes && e.heroes[hd.id] && Array.isArray(e.heroes[hd.id].signature)) {
+    return e.heroes[hd.id].signature.slice();
   }
-  return evo.parts[0].id;
+  // Hitung dari data bila belum tertulis di file (fallback deterministik).
+  const arch = archetypeOf(null, hd);
+  if (!arch) return [];
+  return mutDefs()
+    .filter((m) => {
+      const a = m.attack || {};
+      return !!(a.payload && a.payload[arch]) || !!(a.archetypeFrom && a.archetypeFrom[arch]);
+    })
+    .map((m) => m.id);
+}
+
+/** Jumlah mutasi aktif & jumlah mutasi khas yang sudah diambil. */
+export function evoCounts(run, heroDef) {
+  const active = (run && run.activeMutations) || [];
+  const sig = new Set(signatureMutations(heroDef || (run && run.heroDef)));
+  let khas = 0;
+  for (const id of active) if (sig.has(id)) khas += 1;
+  return { total: active.length, signature: khas, signatureIds: [...sig] };
+}
+
+/**
+ * Tahap evolusi run sekarang.
+ * @returns {object} def tahap + `index` (0..3)
+ */
+export function evoStageFor(run, heroDef) {
+  const list = stages();
+  const base = list[0] || { id: 'base', name: 'BASE', tierColor: '#9db1a8', killFx: 'ring', statMult: { maxHP: 1, damage: 1, speed: 1 }, spriteKey: 'spriteIdle' };
+  if (!run) return { ...base, index: 0 };
+  const hd = heroDef || run.heroDef || null;
+  const c = evoCounts(run, hd);
+  const e = evo() || {};
+  const rule = e.apexRule || { minMutations: 5, minSignature: 2 };
+  let picked = base;
+  let idx = 0;
+  for (let i = 0; i < list.length; i++) {
+    const s = list[i];
+    if (c.total < (s.minMutations || 0)) break;
+    // APEX (dan tahap apa pun bertanda apex) butuh mutasi khas yang cukup.
+    if (s.id === 'apex' && c.signature < (rule.minSignature || 2)) break;
+    if (s.id === 'apex' && c.total < (rule.minMutations || 5)) break;
+    picked = s; idx = i;
+  }
+  return { ...picked, index: idx, mutations: c.total, signature: c.signature };
+}
+
+/** Kompatibilitas nama lama: dipanggil game.js dengan run (dulu meta). */
+export function getEvoStageDef(run, heroDef) {
+  return evoStageFor(run, heroDef);
+}
+
+/** Apakah run sudah mencapai APEX? */
+export function isApex(run, heroDef) {
+  return (evoStageFor(run, heroDef).id || '') === 'apex';
+}
+
+/** Sprite bentuk hero sesuai tahap evolusi (FOTO karakter, bukan overlay). */
+export function evoSprite(run, heroDef) {
+  const hd = heroDef || (run && run.heroDef) || null;
+  if (!hd) return null;
+  const st = evoStageFor(run, hd);
+  const key = st.spriteKey || 'spriteIdle';
+  return hd[key] || hd.spriteMut2Idle || hd.spriteMut1Idle || hd.spriteIdle || hd.sprite || null;
+}
+
+/**
+ * Kemajuan menuju tahap berikutnya — dipakai HUD & modal mutasi supaya
+ * pemain tahu apa yang sedang dia kejar.
+ */
+export function evoProgress(run, heroDef) {
+  const list = stages();
+  const st = evoStageFor(run, heroDef);
+  const c = evoCounts(run, heroDef || (run && run.heroDef));
+  const next = list[st.index + 1] || null;
+  return {
+    id: st.id,
+    name: st.name,
+    index: st.index,
+    tierColor: st.tierColor,
+    mutations: c.total,
+    signature: c.signature,
+    signatureIds: c.signatureIds,
+    next: next ? { id: next.id, name: next.name, needMutations: next.minMutations || 0 } : null,
+    needMutations: next ? Math.max(0, (next.minMutations || 0) - c.total) : 0,
+    needSignature: next && next.id === 'apex'
+      ? Math.max(0, ((evo() && evo().apexRule && evo().apexRule.minSignature) || 2) - c.signature)
+      : 0,
+  };
+}
+
+/** Pengali stat dari tahap evolusi (dipakai recomputePlayerStats). */
+export function evoStatMult(run, heroDef) {
+  const st = evoStageFor(run, heroDef);
+  const m = st.statMult || {};
+  return {
+    maxHP: typeof m.maxHP === 'number' ? m.maxHP : 1,
+    damage: typeof m.damage === 'number' ? m.damage : 1,
+    speed: typeof m.speed === 'number' ? m.speed : 1,
+  };
 }
