@@ -138,7 +138,10 @@ async function loadTBolt() {
     });
 
     const path = options.rig || DEFAULT_RIVE;
-    const response = await fetch(path);
+    // Cache-bust: nama file .riv sama antar versi, tanpa ini browser bisa
+    // menyajikan rig basi (setup lama) sehingga karakter salah render.
+    const sep = path.includes('?') ? '&' : '?';
+    const response = await fetch(`${path}${sep}v=${BUILD || '54k'}`);
     if (!response.ok) throw new Error(`gagal memuat ${path} (${response.status})`);
     const bytes = new Uint8Array(await response.arrayBuffer());
     const file = await runtime.load(bytes);
