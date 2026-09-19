@@ -7,7 +7,8 @@
   <ImageAsset file="parts/mako_arm_front.png" name="arm_front" id="0:105"/>
   <ImageAsset file="parts/mako_head.png" name="head" id="0:106"/>
   <ImageAsset file="parts/mako_mouth_open.png" name="mouth_open" id="0:107"/>
-  <Artboard name="Mako" id="0:2" width="1024" height="1024" defaultStateMachineId="0:600">
+  <Artboard name="Mako" id="0:2" width="1024" height="1024" defaultStateMachineId="0:600" styleId="0:700">
+    <LayoutComponentStyle name="MakoLayoutStyle" id="0:700" layoutWidthScaleType="fixed" layoutHeightScaleType="fixed"/>
     <RootBone x="540" y="815" length="120" name="leg_backBone" id="0:40"/>
     <RootBone x="430" y="535" length="120" name="arm_backBone" id="0:41"/>
     <RootBone x="512" y="605" length="120" name="torsoBone" id="0:42"/>
@@ -18,10 +19,10 @@
     <RootBone x="515" y="397" length="120" name="mouth_openBone" id="0:47"/>
     <StateMachine name="MakoStateMachine" id="0:600">
       <StateMachineLayer name="Main" id="0:601">
-        <EntryState id="0:602">
+        <EntryState x="0" y="120" id="0:602">
           <StateTransition stateToId="0:603"/>
         </EntryState>
-        <AnimationState animationId="0:500" id="0:603"/>
+        <AnimationState x="220" y="120" animationId="0:500" id="0:603"/>
       </StateMachineLayer>
     </StateMachine>
     <LinearAnimation loopValue="loop" duration="90" fps="30" name="idle" id="0:500">
