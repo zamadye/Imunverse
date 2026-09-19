@@ -19,7 +19,7 @@
   "verify:mako-parts": "node tools/verify-mako-parts.mjs",
   "verify": "npm run check && npm run verify:photos && npm run verify:screens && npm run verify:animasi && npm run verify:crawl && npm run verify:prototype && npm run verify:visual && npm run verify:rive && npm run verify:combat && npm run verify:economy && npm run verify:world && npm run verify:p5 && npm run verify:gamefeel && npm run verify:attacks",
   "verify:combat": "node tools/verify-combat.mjs",
-  "rive": "node tools/gen-hero-rig.mjs",
+  "rive": "npm run rive:cli -- assets/character-anim-src/mako --once",
   "rive:cli:install": "node tools/rive/install.mjs",
   "rive:cli:runtime": "node tools/rive/setup-runtime.mjs",
   "rive:cli": "node tools/rive/run.mjs",

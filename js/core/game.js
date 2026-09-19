@@ -113,6 +113,8 @@ import { drawSprite, hasSprite } from '../render/sprite-loader.js';
 // P7-PROTOTIPE: tiga cara menggambar hero yang bisa dibandingkan
 import { drawHeroBody, drawHeroLimbs } from '../render/hero-mode.js';
 import { drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
+import { ensureMakoRive, drawMakoRive, fireMakoRive, setMakoRiveInput } from '../render/mako-rive.js';
+import { quantizeMakoDirection, DEFAULT_DIRECTION_ANGLES } from '../render/mako-animation.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
 
@@ -205,6 +207,7 @@ export const game = {
     markSeen('imun'); // Bio-Pedia: sistem imun (pasukan pemain)
 
     const player = new Player(heroDef, stats, startX, startY);
+    if (heroDef.id === 'macrophage') ensureMakoRive();
 
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
@@ -636,7 +639,10 @@ export const game = {
     // PHAGOS Tahap 3 — input → PULSE (edge-trigger, bukan hold-to-fire).
     // Medan kontak selalu aktif; tombol PULSE satu-satunya aksi eksplisit.
     if (this.input.consumePulse && this.input.consumePulse()) {
-      tryPulse(this, {});
+      const pulseFired = tryPulse(this, {});
+      if (pulseFired && player.heroDef?.id === 'macrophage') {
+        this.triggerMakoRive('attack');
+      }
     }
 
     // PHAGOS Opsi A — PASUKAN: membran mini kontak-pasif (tanpa Pulse/engulf).
@@ -1303,6 +1309,7 @@ export const game = {
       absorbed,
       ...hitVisual,
     });
+    this.triggerMakoRive('vfx');
 
     // P6: getar SUDAH ditangani applyHitImpact (ber-tangga + ber-throttle).
 
@@ -1417,6 +1424,8 @@ export const game = {
     // PERTAHANAN (upgrade permanen): kurangi damage diterima
     amount = Math.max(1, Math.round(amount * (squadMultipliers(STATE.meta).armor || 1)));
     if (!player.takeDamage(amount)) return;
+    this.setMakoRiveValue('damage', amount);
+    this.triggerMakoRive(player.alive ? 'hit' : 'death');
     this.fireSkillTrigger('damaged');
     emit('playerHit', { damage: amount });
     // Fase 17 (trigger 5B): percikan merah 5–8 partikel di sekitar player
@@ -1729,11 +1738,26 @@ applyChapterTier(enemy, run) {
     }
   },
 
+  /** Sinkronisasi gameplay → input/trigger state machine Mako Rive. */
+  setMakoRiveValue(name, value) {
+    if (this.run?.heroDef?.id !== 'macrophage') return;
+    setMakoRiveInput(name, value);
+  },
+
+  triggerMakoRive(name) {
+    if (this.run?.heroDef?.id !== 'macrophage') return;
+    fireMakoRive(name);
+  },
+
   /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
   triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
     const ok = tryPulse(this, {});
-    if (ok) audio.pulse(); // PHAGOS: Pulse = momen aksi utama → bunyi paling tebal
+    if (ok) {
+      this.triggerMakoRive('attack');
+      this.triggerMakoRive('vfx');
+      audio.pulse(); // PHAGOS: Pulse = momen aksi utama → bunyi paling tebal
+    }
     return ok;
   },
 
@@ -1741,7 +1765,11 @@ applyChapterTier(enemy, run) {
   triggerPulseForce() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
     const ok = tryPulse(this, { ignoreCd: true });
-    if (ok) audio.pulse();
+    if (ok) {
+      this.triggerMakoRive('attack');
+      this.triggerMakoRive('vfx');
+      audio.pulse();
+    }
     return ok;
   },
 
@@ -1832,7 +1860,10 @@ applyChapterTier(enemy, run) {
 
   /** JUICE: hentikan update sesaat (dtk) — render tetap berjalan. */
   hitStopRun(sec) {
-    if (this.run) this.run.hitStop = Math.max(this.run.hitStop, sec);
+    if (this.run) {
+      this.run.hitStop = Math.max(this.run.hitStop, sec);
+      this.setMakoRiveValue('hitStop', sec);
+    }
   },
 
   /** Musuh mati: kill count, partikel, drop nutrisi, splitter, boss reward. */
@@ -2443,8 +2474,8 @@ applyChapterTier(enemy, run) {
     const bobOf = { player: 0 };
     const anchorHalf = player.radius * 1.3335; // = (radius * 2.667) / 2 — garis bawah sprite hero
     // LOCOMOTION V2: bob / condong / squash dihitung di player.update() —
-    // SATU sumber kebenaran, entah dari rig Rive (data/…/hero-locomotion.riv)
-    // atau rumus cadangannya. game.js hanya MEMAKAI nilai itu supaya tidak
+    // artboard Mako Rive menguasai artwork visible secara langsung; hero lain
+    // memakai sumber locomotion masing-masing. game.js hanya MEMAKAI nilai itu supaya tidak
     // pernah ada dua rumus yang tidak sinkron antara update dan render.
     const pAnim = player.anim || { bob: 0, tilt: 0, sx: 1, sy: 1 };
     const pBob = pAnim.bob || 0;
@@ -2727,26 +2758,43 @@ applyChapterTier(enemy, run) {
           // prosedural; 'makhluk' = makhluk vektor penuh (rig Godot).
           // MEKANIK TIDAK BERUBAH — hanya fungsi gambarnya.
           const _pj = P.project(pBody.x, pBody.y - player.radius * 0.41);
-          const _cara = drawHeroBody(ctx, {
-            player, run, x: 0, y: 0, size: bodySize,
-            time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1,
-            proyeksi: _pj,
-          });
-          if (_cara === 'creature') {
-            // foto TIDAK digambar — makhluk vektor menggantikan seluruhnya
+          const _isMakoRive = player.heroDef?.id === 'macrophage';
+          let _cara = 'none';
+          if (_isMakoRive) {
+            // Keep the same balanced canvas save/restore contract as the
+            // non-Mako billboard path; drawMakoRive manages its own inner
+            // transform while the shared aura/nameplate code runs afterward.
+            ctx.save();
+            // Mako tidak lagi melewati billboard→PNG. Artboard Rive visible
+            // dirender ke gameplay canvas dengan arah 8-way yang dikuantisasi.
+            const _ground = P.project(pBody.x, pBody.y);
+            const _dir = quantizeMakoDirection(player.facing, { directionAngles: DEFAULT_DIRECTION_ANGLES });
+            const _dirAngle = DEFAULT_DIRECTION_ANGLES[_dir] || 0;
+            drawMakoRive(
+              ctx,
+              _ground.x,
+              _ground.y - _lift * _ground.s,
+              bodySize * _ground.s,
+              { rotation: _dirAngle + tilt, scaleX: sx, scaleY: sy },
+            );
           } else {
-            billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
-            // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
-            // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
-            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
-            ctx.restore();
-            // mode hibrida: anggota gerak digambar SETELAH foto supaya
-            // pseudopodia tampak di sekeliling badan, bukan tertutup foto.
-            if (_cara === 'hybrid') {
-              drawHeroLimbs(ctx, {
-                player, run, x: 0, y: 0, size: bodySize,
-                time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1, proyeksi: _pj,
-              });
+            _cara = drawHeroBody(ctx, {
+              player, run, x: 0, y: 0, size: bodySize,
+              time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1,
+              proyeksi: _pj,
+            });
+            if (_cara !== 'creature') {
+              billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
+              // Hero non-Mako masih memakai renderer roster sampai artboard
+              // Rive khususnya tersedia; Mako tidak pernah memakai jalur ini.
+              drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+              ctx.restore();
+              if (_cara === 'hybrid') {
+                drawHeroLimbs(ctx, {
+                  player, run, x: 0, y: 0, size: bodySize,
+                  time: (time || 0) / 1000, dt: (dt || 16) / 1000, alpha: 1, proyeksi: _pj,
+                });
+              }
             }
           }
           // APEX: aura emas prosedural (bukan tempelan gambar) — penanda

@@ -37,15 +37,18 @@
   },
   "rive": {
     "enabled": true,
-    "rig": "assets/rive/hero-locomotion.riv",
-    "artboard": "hero",
+    "rig": "assets/character-anim-src/mako/mako-rive-draft.riv",
+    "makoRig": "assets/character-anim-src/mako/mako-rive-draft.riv",
+    "artboard": "Mako",
+    "makoArtboard": "Mako",
+    "stateMachine": "MakoStateMachine",
     "animIdle": "idle",
     "animWalk": "walk",
     "unitPx": 0.65,
     "bobUnitPx": 1.25,
     "minRate": 0.15,
     "maxRate": 2.8,
-    "note": "Rig .riv dibuat oleh tools/gen-hero-rig.mjs. Nilai posisi rig (unit) dikali unitPx/bobUnitPx menjadi piksel; rotasi (rad) & skala dipakai langsung. legLenUnits/legSpanUnits HARUS sama dengan RIG.amp di tools/gen-hero-rig.mjs — jalankan `npm run rive` bila mengubahnya.",
+    "note": "Mako dirender langsung dari artboard visible assets/character-anim-src/mako/mako-rive-draft.riv. Input state-machine moving/attack/devour/hit/death dan data damage/heal/hitStop/vfx dikirim runtime; nilai legacy legLenUnits/legSpanUnits dipertahankan hanya untuk statistik foot-planting.",
     "legLenUnits": 70.9,
     "legSpanUnits": 36.9
   }

@@ -12,10 +12,10 @@ Karakter contoh: **Macrophage (Mako)**. Bentuk dasar: **sel beranggota gerak**
 | Hal | Keadaan | Dampak |
 |---|---|---|
 | Aset hero | **1 foto datar 128 px per keadaan** (`hero_<id>_idle/attack` + 4 foto mutasi 256 px) | Tidak punya anggota gerak, tidak punya sisi depan/belakang |
-| Cara gambar di arena | `drawSprite()` — satu `drawImage` per frame | Yang bisa diubah hanya transformasi (geser, putar, skala, miring) |
-| Gerak (P7 tahap 2) | Rig merayap Godot: squash berporos bawah + skew jangkauan + gelombang lobus | **Mengambang hilang**, tapi arah hanya terbaca dari kemiringan — bukan dari bentuk |
-| Rig Rive | `js/render/rive-rig.js`, dipakai bila `.riv` tersedia (kalau tidak, rumus analitik) | Kanalnya tetap bob/tilt/squash → sumber yang sama dengan rig merayap |
-| Vektor hero | `drawHeroEquity()` di `character-visuals.js` — **sudah ada**, tapi hanya untuk kartu/UI | Belum dipakai di arena; belum punya kerangka/animasi |
+| Cara gambar di arena | Mako memakai `drawMakoRive()` untuk merender artboard visible ke gameplay canvas | Artwork 8 bagian, mesh, dan deformasi berasal dari file `.riv`, bukan foto datar yang dipindah oleh node kosong |
+| Gerak Mako | `js/render/mako-rive.js` + `MakoStateMachine`: idle/walk dan one-shot attack/devour/hit/death | Input gameplay dikirim sebagai bool, trigger, dan numeric signal; orientasi dipilih dalam 8 arah |
+| Gerak hero non-Mako | Rig merayap Godot: squash berporos bawah + skew jangkauan + gelombang lobus | Jalur non-Mako belum dipindahkan ke Rive visible artboard |
+| Vektor hero | `drawHeroEquity()` tetap dipakai untuk kartu/UI | Tidak menjadi sumber artwork Mako di arena; artboard Rive adalah sumber langsung |
 | Penghasil aset | `tools/gen_assets.py`, `build-mutation-sprites.py` (penjepit frame) | Foto mutasi dijepit pada **garis bawah** — fondasi anti-lompat yang sudah benar |
 
 Kesimpulan: yang hilang bukan "frame", melainkan **anatomi yang bisa digerakkan**.

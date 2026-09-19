@@ -202,19 +202,18 @@ Lokomosi hero (prasyarat P2 — gerakan harus mulus sebelum mutasi menimpa bentu
 
 | Langkah | Hasil |
 |---|---|
-| Animasi jalan pakai **Rive** | `npm i @rive-app/canvas` (runtime resmi) + rig `.riv` yang **dibuat dari kode** oleh `tools/gen-hero-rig.mjs` (`npm run rive` → `assets/rive/hero-locomotion.riv`, 4,7 KB). Runtime di-vendor ke `js/vendor/rive/` (MIT) supaya offline/PWA, dimuat **malas** di luar jalur kritis. Rig = node transform kosong (root→body→head/armF/armB/legF/legB) — yang digambar tetap **FOTO karakter**, rig hanya **sumber gerakan** |
-| Foot-planting (kaki tidak selip) | Fase langkah dikunci ke **jarak**, bukan waktu: `walkPhase += (jarak / stride) × π`. Laju putar animasi Rive `rate = kecepatan / nominalSpeed` (nominal = 2 × stride / 0,667 s ≈ 144 px/s). Lintasan kaki dibalik dari telapak yang diinginkan (stance = mundur lurus, swing = terangkat) **bukan** sinus — sinus membuat telapak menyapu tanah ~110% stride; sekarang selip terukur **0,2 px (0,4% stride)** |
-| Putaran halus 360° | `facing` **dikejar** dengan batas `turn.rate` 13 rad/dtk lewat jalan terpendek (dulu diset seketika saat tombol ditekan) |
-| Bobot & inersia | Head-bob 2× per siklus (turun saat menapak), twist badan ±2°, squash-stretch, **miring 5° ke arah belokan** (`turn.leanMax`), debu menyentuh tanah TE PAT pada frame telapak mendarat (dulu timer tetap 0,24 s) |
-| Semua angka di data | `data/locomotion.json` baru (stride, turn, bob, tilt, step, rive) + `getLocomotion()` di data-store — nol angka gerak di `js/` |
-| Gagal = aman | Runtime/wasm gagal dimuat → status `fallback`, hero memakai rumus cadangan yang sama mulusnya (terbukti di penguji jsdom) |
-| Penguji baru | `tools/verify-rive.mjs` (`npm run verify:rive`, 18 pemeriksaan) ikut di `npm run verify`; `tools/verify-animasi.mjs` diperluas jadi 23 pemeriksaan (putaran halus, miring belok, langkah vs jarak, panjang langkah seragam, bob tidak melompat) |
+| Animasi Mako pakai **Rive visible artboard** | Runtime resmi di-vendor ke `js/vendor/rive/`; archive authoring CLI resmi dipasang offline di `tools/rive/`. Source `assets/character-anim-src/mako/scene.rml` dikompilasi ke `mako-rive-draft.riv`: artwork 8 bagian, 8 root bones, 8 mesh skin, 6 gameplay animasi, dan VFX pulse. Gameplay menggambar artboard ini langsung; bukan transform node kosong yang menggerakkan foto |
+| State machine + sinyal gameplay | `MakoStateMachine` memiliki `moving`, trigger `attack/devour/hit/death`, numeric `damage/heal/hitStop`, dan trigger `vfx`. `js/render/mako-rive.js` mengirim nilai/trigger tersebut dari `game.js`, sementara `scene.rml` menentukan transisi idle→walk dan one-shot kembali ke idle |
+| 8-direction locomotion | `quantizeMakoDirection()` memilih 8 arah konsisten dari `data/mako-animation.json`; artboard Rive dirender dengan orientasi arah yang terkuantisasi, sementara fase langkah tetap dikunci ke jarak |
+| Foot-planting (kaki tidak selip) | Fase langkah dikunci ke **jarak**, bukan waktu: `walkPhase += (jarak / stride) × π`. Parameter stride tetap berasal dari `data/locomotion.json` |
+| Putaran halus & feedback | `facing` dikejar dengan batas `turn.rate`; input `damage`, `heal`, `hitStop`, dan `vfx` ikut dikirim sebagai sinyal runtime. Attack dan Devour memicu fase one-shot Rive |
+| Gagal = aman | Runtime/wasm gagal dimuat → status `fallback`; game tidak memakai jalur transform-to-static-photo Mako. Artboard direct renderer tetap lazy di luar jalur kritis |
+| Penguji baru | `tools/verify-rive.mjs` menjalankan official CLI + inspector: visible artboard, 8 image/mesh, 8 bone, 6 animation, state-machine inputs, dan zero inspector problems |
 
-Catatan format `.riv` (ditemukan dari percobaan, bukan asumsi — tertulis di
-`tools/gen-hero-rig.mjs`): `parentId` = 0 untuk anak artboard, selainnya **jarak
-mundur ke induk**; `KeyedObject.objectId` = indeks **lokal terhadap artboard**;
-dan kurva satu animasi harus ditulis **menempel** setelah objek animasinya
-(kalau tidak, runtime menempelkan kurva ke animasi yang salah).
+Catatan authoring `.riv`: syntax RML, skinning mesh, state-machine transitions,
+dan input trigger/data Mako didokumentasikan lewat `npm run rive:cli -- docs ...`.
+Binary draft hanya diregenerasi dari `assets/character-anim-src/mako/scene.rml`
+oleh official CLI; tidak ada transform-only hero rig yang menjadi sumber artwork.
 
 Delapan archetype diwujudkan (§19) — satu modul, satu rantai waktu:
 

@@ -1,11 +1,10 @@
 /**
- * mako-animation.js — frame-driven Mako state machine.
+ * mako-animation.js — shared Mako direction/state contract.
  *
- * This module is deliberately separate from the legacy static-sprite renderer
- * until the frame pack in assets/character-anim-src/mako/ is complete.
- * It owns direction quantization, state transitions, frame selection, and
- * one-shot animation events. VFX/gameplay code should consume `events` from
- * update(); it must not use a second timer to guess impact timing.
+ * The visible Mako pose is now authored and rendered by the Rive artboard.
+ * This module remains the data-side contract for eight-direction quantization,
+ * state names, frame-pack compatibility, and one-shot event timing used by
+ * gameplay/VFX tests. Rive transitions are driven by js/render/mako-rive.js.
  */
 
 export const MAKO_DIRECTIONS = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne'];

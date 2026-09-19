@@ -33,10 +33,18 @@ npm run rive:cli -- myproject --once
 npm run rive:cli -- myproject --screenshot=preview.png --advance=1
 ```
 
-`--once` writes a local `.riv`; it does not require a Rive account. The official
-CLI links EGL/GLES, Wayland, and xkbcommon even for headless startup. The
-runtime setup uses Chromium's SwiftShader npm payload for EGL/GLES and local
-compatibility shims for the non-window headless path. It is ignored by Git and
-is only needed in this restricted sandbox; a normal Linux machine should use
-its system libraries. Watch-mode preview is not claimed to work with these
-headless shims.
+`--once` writes a local `.riv`; it does not require a Rive account. Mako's
+source project can be rebuilt and checked with:
+
+```bash
+npm run rive
+npm run verify:rive
+```
+
+The output is `assets/character-anim-src/mako/mako-rive-draft.riv`, which is the
+visible artboard consumed by gameplay. The official CLI links EGL/GLES, Wayland,
+and xkbcommon even for headless startup. The runtime setup uses Chromium's
+SwiftShader npm payload for EGL/GLES and local compatibility shims for the
+non-window headless path. It is ignored by Git and is only needed in this
+restricted sandbox; a normal Linux machine should use its system libraries.
+Watch-mode preview is not claimed to work with these headless shims.

@@ -30,10 +30,12 @@ separated part layers. The generated `mako-rive-draft.riv` contains:
 - the eight image assets as separate objects;
 - eight planned root bones;
 - an image mesh and skin/tendon/weight data for each part;
-- idle, walk, attack, Devour, hit, and death linear animations;
-- a `MakoStateMachine` with an idle entry state.
+- idle, walk, attack, Devour, hit, death, and VFX pulse linear animations;
+- a `MakoStateMachine` with idle/walk transitions, one-shot attack/Devour/hit/death
+  transitions, and gameplay inputs for movement, triggers, damage, heal,
+  hit-stop, and VFX.
 
-This is a **source review draft**, not gameplay-complete animation. It has been
-compiled and structurally inspected with the Rive CLI, but it still needs visual
-render review, state-machine input transitions, event/data bindings, and direct
-integration in gameplay before it can replace the old rig.
+`js/render/mako-rive.js` renders this artboard directly into gameplay. This is
+still a **source review draft**, not the final art pass: visual deform review,
+8-direction tuning, and a full gameplay acceptance pass remain. The old
+transform-to-static-photo Mako path is no longer used.

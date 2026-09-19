@@ -137,13 +137,10 @@ cek('gaya merayap tiap hero berbeda',
 
 // ---------- 6. RUNTIME: tidak mengambang & rig dipakai ----------
 const DT = 1 / 60;
-game.startRun('macrophage');
-const run = game.run;
-await sleep(80);
-const p = run.player;
+const crawlHeroes = daftar.filter((h) => h !== 'macrophage');
 let pakaiRig = 0;
 const dasar = [];
-for (const h of daftar) {
+for (const h of crawlHeroes) {
   game.startRun(h);
   await sleep(20);
   const pl = game.run.player;
@@ -151,8 +148,11 @@ for (const h of daftar) {
   if (pl.rigSource === 'crawl') pakaiRig++;
   dasar.push({ h, rig: pl.rigSource, bob: pl.anim.bob, sy: pl.anim.sy, shear: pl.anim.shear });
 }
-cek('runtime memakai rig merayap Godot (11/11 hero)',
-  pakaiRig === daftar.length, `${pakaiRig}/${daftar.length} — ${dasar.filter((d) => d.rig !== 'crawl').map((d) => d.h).join(',') || 'semua'}`);
+cek(`runtime memakai rig merayap Godot (${crawlHeroes.length}/${crawlHeroes.length} hero non-Mako)`,
+  pakaiRig === crawlHeroes.length, `${pakaiRig}/${crawlHeroes.length} — ${dasar.filter((d) => d.rig !== 'crawl').map((d) => d.h).join(',') || 'semua'}`);
+cek('Mako dikecualikan dari rig Godot karena memakai artboard Rive langsung',
+  !daftar.includes('macrophage') || !crawlHeroes.includes('macrophage'),
+  'macrophage harus memakai direct Mako artboard');
 cek('runtime: badan tidak pernah diangkat (bob = 0)',
   dasar.every((d) => Math.abs(d.bob) < 1e-9), JSON.stringify(dasar.slice(0, 2)));
 

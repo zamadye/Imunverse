@@ -10,7 +10,7 @@ import { PERSP } from '../render/camera.js';
 
 import { audio } from '../systems/audio-system.js';
 import { getCombat, getLocomotion } from '../core/data-store.js';
-import { ensureRig, updateRig } from '../render/rive-rig.js';
+import { ensureMakoRive, updateMakoRive, setMakoRiveInput } from '../render/mako-rive.js';
 // P7: rig merayap hasil PANGGANGAN GODOT — sumber gerak utama (anti mengambang)
 import { crawlPose, crawlLobe } from '../systems/crawl-rig.js';
 
@@ -51,9 +51,9 @@ export class Player {
     this.stepEvent = 0;     // 1 pada frame kaki menapak (untuk debu)
     this.stridePx = 48;     // panjang satu langkah (dihitung dari data)
     this.nominalSpeed = 144;// kecepatan saat animasi jalan berputar 1×
-    this.rigActive = false; // true bila gerakan datang dari rig Rive
+    this.rigActive = false; // true bila sumber locomotion non-analitik aktif
     this.anim = { bob: 0, tilt: 0, sx: 1, sy: 1, legSwing: 0, armSwing: 0, headTilt: 0, shear: 0, contact: 1 };
-    this.rigSource = 'analytic'; // 'crawl' (Godot) | 'rive' | 'analytic'
+    this.rigSource = 'analytic'; // 'crawl' | 'rive-artboard' | 'analytic'
     this.time = 0;               // dipakai napas saat diam
     // ---- ANIMASI HALUS (UI-REBUILD P8) ----
     // Dulu sprite hanya dibalik kiri↔kanan secara instan (flip = ±1), jadi
@@ -165,16 +165,21 @@ export class Player {
     }
 
     // ---- Rig Rive (sumber gerakan) + cadangan analitik ----
-    if (!this._rigAsked) { this._rigAsked = true; ensureRig(); }
     const _vlen = Math.hypot(this.vx, this.vy);
-    // P7: rig merayap GODOT jadi SUMBER GERAK UTAMA. Urutan: crawl → Rive →
-    // rumus analitik (cadangan terakhir). crawl menang karena satu-satunya
-    // yang berporos di GARIS BAWAH (tidak mengambang).
     const _heroId = (this.heroDef && this.heroDef.id) || null;
-    const _crawl = crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
-    const pose = _crawl ? null : updateRig(dt, { moveAmt: this.moveAmt, speed: _vlen, nominalSpeed: this.nominalSpeed, cfg: loco });
-    this.rigActive = !!(_crawl || pose);
-    this.rigSource = _crawl ? 'crawl' : (pose ? 'rive' : 'analytic');
+    const _isMako = _heroId === 'macrophage';
+    // Mako memakai artboard Rive visible sebagai sumber pose langsung. Rig
+    // crawl/Godot dan transform-to-static-photo tidak ikut campur pada Mako.
+    // Hero lain tetap memakai jalur locomotion lama sampai artboard Rive mereka
+    // tersedia.
+    if (_isMako) {
+      if (!this._makoRigAsked) { this._makoRigAsked = true; ensureMakoRive(); }
+      updateMakoRive(dt, { moving: _vlen > 4, direction: this.facing });
+    }
+    const _crawl = _isMako ? null : crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
+    const pose = null;
+    this.rigActive = _isMako || !!_crawl;
+    this.rigSource = _isMako ? 'rive-artboard' : (_crawl ? 'crawl' : 'analytic');
     {
       const bobCfg = loco.bob || {};
       const tiltCfg = loco.tilt || {};
@@ -413,6 +418,10 @@ export class Player {
   /** Pulihkan HP (vitamin / efek upgrade). */
   heal(amount) {
     if (!this.alive) return;
+    const before = this.hp;
     this.hp = Math.min(this.maxHP, this.hp + amount);
+    if (this.heroDef?.id === 'macrophage' && this.hp > before) {
+      setMakoRiveInput('heal', this.hp - before);
+    }
   }
 }

@@ -62,6 +62,8 @@ export function tryDevour(game, ctx) {
   t.hp = 0;
   t.devoured = true; // onEnemyKilled melewati drop XP/koin utk korban telan
   ctx.player.heal(cfg.healOnDevour || 8);
+  game.triggerMakoRive?.('devour');
+  game.triggerMakoRive?.('vfx');
   run.effects.spawnBlast(t.x, t.y, t.radius * 2.2, '#ffd93d');
   run.effects.spawnLabel(t.x, t.y - t.radius - 16, 'TELAN!', '#ffd93d');
   addPhagoMeter(run, cfg.meterPerDevour || 25, game);

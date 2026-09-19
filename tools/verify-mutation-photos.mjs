@@ -8,7 +8,9 @@
  *  B. Runtime (jsdom + bundle asli): game MEMILIH foto yang tepat per hero &
  *     per tier/pose, file benar-benar termuat (bukan placeholder), dan
  *     ukuran/posisi karakter tidak melompat saat berganti mutasi, dibalik
- *     kiri/kanan, atau saat bob naik-turun.
+ *     kiri/kanan, atau saat bob naik-turun. Mako dikecualikan dari bagian ini
+ *     karena arena Mako sekarang memakai artboard Rive visible secara langsung;
+ *     berkas fotonya tetap diperiksa di A dan UI level-up di C.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -271,6 +273,10 @@ const tier1 = tierIds(1);
 const tier3 = tierIds(2).concat(tierIds(3));
 
 const runtimeRows = [];
+// Mako's arena artwork is now the visible Rive artboard, so the legacy
+// drawImage/photo assertions below apply only to the remaining roster. Mako's
+// generated photos stay covered by the file and level-up checks.
+const photoRuntimeHeroes = heroes.filter((h) => h.id !== 'macrophage');
 if (API?.game) {
   const { game } = API;
   // P7: TUNGGU sampai semua foto mutasi benar-benar terdekode. Sebelumnya tes
@@ -281,7 +287,7 @@ if (API?.game) {
   // (mode bawaan game sekarang 'makhluk', yang tidak menggambar foto sama sekali).
   try { API.hero?.setHeroMode?.('foto'); } catch { /* abaikan */ }
   const butuh = [];
-  for (const h of heroes) {
+  for (const h of photoRuntimeHeroes) {
     for (const k of ['spriteIdle', 'spriteAttack', 'spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack']) {
       if (h[k]) butuh.push(h[k]);
     }
@@ -295,7 +301,7 @@ if (API?.game) {
     const st = API.sprites?.stats?.() || {};
     errors.push(`foto belum siap: ${butuh.filter((p) => !API.sprites.has(p)).length}/${butuh.length} belum termuat (cache=${st.loaded}, placeholder=${st.placeholder})`);
   }
-  for (const h of heroes) {
+  for (const h of photoRuntimeHeroes) {
     const row = { hero: h.id, langkah: [] };
     try {
       game.startRun(h.id);
