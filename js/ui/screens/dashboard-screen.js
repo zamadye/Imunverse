@@ -71,9 +71,41 @@ function statusBadgeText(status) {
   return status === 'cleared' ? 'BERSIH ✓' : status === 'current' ? 'AKTIF' : 'TERKUNCI';
 }
 
-function buildNode(ch, i, meta) {
+/** Node bab.
+ *  - `variant: 'silhouette'` → dashboard preview: bulatan bernomor di atas
+ *     siluet tubuh SVG. Posisi dari mapPos (viewBox 300×520).
+ *  - `variant: 'photo'` → peta penuh: cincin TRANSPARAN yang menyoroti node
+ *     bernomor yang SUDAH ADA di foto bg-fullmap.jpg. Tak ada nomor/badge
+ *     ekstra kita gambar — foto sudah punya nomor & bintang sendiri; kita
+ *     cuma menandai "titik yang aktif/terpilih" + hotspot klik. Posisi
+ *     dari mapPhotoPos (persen 0-100 dari dimensi foto).
+ */
+function buildNode(ch, i, meta, variant = 'silhouette') {
   const status = chapterStatus(ch, meta);
   const selected = meta.selectedChapter === ch.id;
+
+  if (variant === 'photo') {
+    const pos = ch.mapPhotoPos || { xp: 50, yp: 50 };
+    const node = el('button', {
+      class: `chap-hotspot ${status}${selected ? ' selected' : ''}`,
+      style: `left:${pos.xp}%; top:${pos.yp}%;`,
+      'data-ch': ch.id,
+      'aria-label': `Bab ${i + 1}: ${ch.title}${status === 'locked' ? ' (terkunci)' : ''}`,
+      title: ch.title,
+    }, [
+      el('span', { class: 'chap-hotspot-ring', 'aria-hidden': 'true' }),
+    ]);
+    node.addEventListener('click', () => {
+      if (status === 'locked') {
+        audio.warn();
+        emit('toast', { message: 'Bab ini terkunci — bersihkan bab sebelumnya dulu!', kind: 'warn' });
+        return;
+      }
+      selectChapter(ch.id);
+    });
+    return node;
+  }
+
   const pos = ch.mapPos || { x: 150, y: 260 };
   const node = el('button', {
     class: `chap-node ${status}${selected ? ' selected' : ''}`,
@@ -123,13 +155,17 @@ function buildPathSegments(list, meta, groupId = 'chapter-path-group') {
 /** Isi satu host node (dashboard preview ATAU peta penuh modal) — dipanggil
  * dua kali dari renderMap() supaya keduanya selalu identik/sinkron, tanpa
  * peta penuh perlu me-render ulang sendiri saat dibuka (datanya sudah siap
- * di DOM begitu bab dipilih/pindah, modal cuma menampilkannya). */
-function paintHost(list, meta, hostId, groupId) {
+ * di DOM begitu bab dipilih/pindah, modal cuma menampilkannya).
+ *
+ * Peta penuh (variant 'photo') TIDAK menggambar jalur SVG — foto latarnya
+ * bg-fullmap.jpg sudah membawa jalur bergayanya sendiri, kita hanya
+ * menyoroti node bernomor yang sudah ada di sana lewat cincin transparan. */
+function paintHost(list, meta, hostId, groupId, variant = 'silhouette') {
   const host = document.getElementById(hostId);
   if (!host) return;
   host.textContent = '';
-  buildPathSegments(list, meta, groupId);
-  list.forEach((ch, i) => host.appendChild(buildNode(ch, i, meta)));
+  if (variant === 'silhouette') buildPathSegments(list, meta, groupId);
+  list.forEach((ch, i) => host.appendChild(buildNode(ch, i, meta, variant)));
 }
 
 /** Preview dashboard sengaja dipotong pendek (UI-audit: peta penuh di
@@ -161,8 +197,8 @@ function renderMap(meta) {
   const selIdx = Math.max(0, list.findIndex((c) => c.id === selId));
   chapterIndex = selIdx;
 
-  paintHost(list, meta, 'chapter-nodes', 'chapter-path-group');
-  paintHost(list, meta, 'chapter-nodes-full', 'chapter-path-group-full');
+  paintHost(list, meta, 'chapter-nodes', 'chapter-path-group', 'silhouette');
+  paintHost(list, meta, 'chapter-nodes-full', null, 'photo');
 
   updateMapChrome(meta, selIdx);
 }

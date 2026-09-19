@@ -46,7 +46,8 @@
       "objective": "Bersihkan 120 patogen dari jaringan luka, tumbangkan Gumpalan Luka",
       "art": "assets/chapters/ch1_luka.jpg",
       "mapTag": "Saluran Limfe",
-      "mapPos": { "x": 117, "y": 462 }
+      "mapPos": { "x": 117, "y": 462 },
+      "mapPhotoPos": { "xp": 46, "yp": 15 }
     },
     {
       "id": "bab_demam",
@@ -65,7 +66,8 @@
       "objective": "Tahan gelombang flu, tumbangkan Raja Flu Mutan",
       "art": "assets/chapters/ch2_demam.jpg",
       "mapTag": "Paru",
-      "mapPos": { "x": 180, "y": 190 }
+      "mapPos": { "x": 180, "y": 190 },
+      "mapPhotoPos": { "xp": 44.4, "yp": 31.6 }
     },
     {
       "id": "bab_racun",
@@ -84,7 +86,8 @@
       "objective": "Basmi bakteri pencernaan, kalahkan Ratu Racun",
       "art": "assets/chapters/ch3_racun.jpg",
       "mapTag": "Lambung",
-      "mapPos": { "x": 150, "y": 260 }
+      "mapPos": { "x": 150, "y": 260 },
+      "mapPhotoPos": { "xp": 38.9, "yp": 45.6 }
     },
     {
       "id": "bab_alergi",
@@ -110,7 +113,8 @@
       "objective": "Redakan reaksi berlebih, taklukkan Alergen Purba",
       "art": "assets/chapters/ch4_alergi.jpg",
       "mapTag": "Paru",
-      "mapPos": { "x": 150, "y": 110 }
+      "mapPos": { "x": 150, "y": 110 },
+      "mapPhotoPos": { "xp": 47.8, "yp": 61.9 }
     },
     {
       "id": "bab_kanker",
@@ -136,7 +140,8 @@
       "objective": "Buru sel yang menyamar, hancurkan Bayang Dalam",
       "art": "assets/chapters/ch5_kanker.jpg",
       "mapTag": "Saluran Limfe",
-      "mapPos": { "x": 225, "y": 175 }
+      "mapPos": { "x": 225, "y": 175 },
+      "mapPhotoPos": { "xp": 46.1, "yp": 73.1 }
     },
     {
       "id": "bab_final",
@@ -162,7 +167,8 @@
       "objective": "Bertahan dari segalanya. Tumbangkan Mahakrisis.",
       "art": "assets/chapters/ch6_final.jpg",
       "mapTag": "Sumbu Saraf",
-      "mapPos": { "x": 150, "y": 55 }
+      "mapPos": { "x": 150, "y": 55 },
+      "mapPhotoPos": { "xp": 48.9, "yp": 96.9 }
     }
   ]
 }
