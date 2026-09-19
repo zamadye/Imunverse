@@ -45,6 +45,10 @@ const FIELDS = ['spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteM
 const fileRows = [];
 let fileFails = 0;
 for (const h of heroes) {
+  if (h.render === 'rive') {
+    fileRows.push({ hero: h.id, base: { size: 'RIVE', render: h.riveArtboard || 'rive-artboard' }, foto: [], status: 'RIVE — foto gameplay digantikan artboard, dilewati' });
+    continue;
+  }
   const base = path.join(ROOT, h.spriteIdle);
   const basePng = readPng(base);
   const baseM = contentMetrics(basePng.rgba, basePng.w, basePng.h);
@@ -83,7 +87,7 @@ for (const h of heroes) {
   }
   fileRows.push(row);
 }
-report.berkas = { hero: fileRows.length, foto: fileRows.length * 4, gagal: fileFails };
+report.berkas = { hero: fileRows.length, foto: fileRows.filter((r) => !r.status).length * 4, rive: fileRows.filter((r) => r.status).map((r) => r.hero), gagal: fileFails };
 
 // ============================ B. PEMERIKSAAN RUNTIME ============================
 let JSDOM = null;
@@ -276,7 +280,7 @@ const runtimeRows = [];
 // Mako's arena artwork is now the visible Rive artboard, so the legacy
 // drawImage/photo assertions below apply only to the remaining roster. Mako's
 // generated photos stay covered by the file and level-up checks.
-const photoRuntimeHeroes = heroes.filter((h) => h.id !== 'macrophage');
+const photoRuntimeHeroes = heroes.filter((h) => h.id !== 'macrophage' && h.render !== 'rive');
 if (API?.game) {
   const { game } = API;
   // P7: TUNGGU sampai semua foto mutasi benar-benar terdekode. Sebelumnya tes

@@ -107,6 +107,8 @@ export class SkillSystem {
     ctx.effects?.spawnAbilityCharge(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind, ...charFx });
     for (const fx of s.def.effects) this.#apply(fx, ctx, run);
     ctx.effects?.spawnAbilityPayoff(ctx.player.x, ctx.player.y, castColor, { ult: s.ult, kind: primaryKind, ...charFx });
+    // T-Bolt Rive: peta skill id -> trigger animasi artboard (visual saja, tanpa ubah gameplay).
+    try { ctx.game?.triggerTBoltSkill?.(s.def.id); } catch { /* abaikan */ }
     // R7 Modul E: skill gerak/buff-diri meninggalkan jejak sinyal kemotaksis
     if (s.def.effects.some((fx) => fx.kind === 'dash' || fx.kind === 'buff_self')) {
       chemoActivate(ctx.game);

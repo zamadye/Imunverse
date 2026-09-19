@@ -114,6 +114,7 @@ import { drawSprite, hasSprite } from '../render/sprite-loader.js';
 import { drawHeroBody, drawHeroLimbs } from '../render/hero-mode.js';
 import { drawPathogenMutation, pathogenVisualTier } from '../render/character-visuals.js';
 import { ensureMakoRive, drawMakoRive, fireMakoRive, setMakoRiveInput } from '../render/mako-rive.js';
+import { ensureTBoltRive, drawTBoltRive, fireTBoltRive, resetTBoltRive, setTBoltRiveInput } from '../render/tbolt-rive.js';
 import { quantizeMakoDirection, DEFAULT_DIRECTION_ANGLES } from '../render/mako-animation.js';
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
@@ -208,6 +209,7 @@ export const game = {
 
     const player = new Player(heroDef, stats, startX, startY);
     if (heroDef.id === 'macrophage') ensureMakoRive();
+    if (heroDef.id === 'tcd8') ensureTBoltRive();
 
     // Arena terpilih → palet latar + properti khas arena
     const arena = this.getRunArena();
@@ -642,6 +644,9 @@ export const game = {
       const pulseFired = tryPulse(this, {});
       if (pulseFired && player.heroDef?.id === 'macrophage') {
         this.triggerMakoRive('attack');
+      }
+      if (pulseFired && player.heroDef?.id === 'tcd8') {
+        this.triggerTBoltRive('attack');
       }
     }
 
@@ -1310,6 +1315,7 @@ export const game = {
       ...hitVisual,
     });
     this.triggerMakoRive('vfx');
+    this.triggerTBoltRive('vfx');
 
     // P6: getar SUDAH ditangani applyHitImpact (ber-tangga + ber-throttle).
 
@@ -1426,6 +1432,8 @@ export const game = {
     if (!player.takeDamage(amount)) return;
     this.setMakoRiveValue('damage', amount);
     this.triggerMakoRive(player.alive ? 'hit' : 'death');
+    this.setTBoltRiveValue('damage', amount);
+    this.triggerTBoltRive(player.alive ? 'hit' : 'death');
     this.fireSkillTrigger('damaged');
     emit('playerHit', { damage: amount });
     // Fase 17 (trigger 5B): percikan merah 5–8 partikel di sekitar player
@@ -1749,6 +1757,25 @@ applyChapterTier(enemy, run) {
     fireMakoRive(name);
   },
 
+  /** Sinkronisasi gameplay → input/trigger state machine TBolt Rive. */
+  setTBoltRiveValue(name, value) {
+    if (this.run?.heroDef?.id !== 'tcd8') return;
+    setTBoltRiveInput(name, value);
+  },
+
+  triggerTBoltRive(name) {
+    if (this.run?.heroDef?.id !== 'tcd8') return;
+    fireTBoltRive(name);
+  },
+
+  /** T-Bolt: peta skill id → trigger animasi artboard (dipanggil skill-system). */
+  triggerTBoltSkill(skillId) {
+    if (this.run?.heroDef?.id !== 'tcd8') return;
+    const map = { precision_shot: 'attack', lock_on: 'skill_lockon', execute: 'execute' };
+    const trigger = map[skillId];
+    if (trigger) fireTBoltRive(trigger);
+  },
+
   /** PHAGOS: PULSE — ledakkan medan membran (tombol PULSE / Spasi / tombol 4). */
   triggerPulse() {
     if (!this.run || this.run.ended || STATE.levelUpOpen) return false;
@@ -1756,6 +1783,8 @@ applyChapterTier(enemy, run) {
     if (ok) {
       this.triggerMakoRive('attack');
       this.triggerMakoRive('vfx');
+      this.triggerTBoltRive('attack');
+      this.triggerTBoltRive('vfx');
       audio.pulse(); // PHAGOS: Pulse = momen aksi utama → bunyi paling tebal
     }
     return ok;
@@ -1768,6 +1797,8 @@ applyChapterTier(enemy, run) {
     if (ok) {
       this.triggerMakoRive('attack');
       this.triggerMakoRive('vfx');
+      this.triggerTBoltRive('attack');
+      this.triggerTBoltRive('vfx');
       audio.pulse();
     }
     return ok;
@@ -1863,6 +1894,7 @@ applyChapterTier(enemy, run) {
     if (this.run) {
       this.run.hitStop = Math.max(this.run.hitStop, sec);
       this.setMakoRiveValue('hitStop', sec);
+      this.setTBoltRiveValue('hitStop', sec);
     }
   },
 
@@ -2759,6 +2791,7 @@ applyChapterTier(enemy, run) {
           // MEKANIK TIDAK BERUBAH — hanya fungsi gambarnya.
           const _pj = P.project(pBody.x, pBody.y - player.radius * 0.41);
           const _isMakoRive = player.heroDef?.id === 'macrophage';
+          const _isTBoltRive = player.heroDef?.id === 'tcd8';
           let _cara = 'none';
           if (_isMakoRive) {
             // Keep the same balanced canvas save/restore contract as the
@@ -2776,6 +2809,19 @@ applyChapterTier(enemy, run) {
               _ground.y - _lift * _ground.s,
               bodySize * _ground.s,
               { rotation: _dirAngle + tilt, scaleX: sx, scaleY: sy },
+            );
+          } else if (_isTBoltRive) {
+            // T-Bolt: artboard Rive visible (21 part), arah 8-way + stage evolusi.
+            const _tground = P.project(pBody.x, pBody.y);
+            const _tdir = quantizeMakoDirection(player.facing, { directionAngles: DEFAULT_DIRECTION_ANGLES });
+            const _tdirAngle = DEFAULT_DIRECTION_ANGLES[_tdir] || 0;
+            setTBoltRiveInput('stage', _evoId === 'apex' ? 3 : _wantStage);
+            drawTBoltRive(
+              ctx,
+              _tground.x,
+              _tground.y - _lift * _tground.s,
+              bodySize * _tground.s,
+              { rotation: _tdirAngle + tilt, scaleX: sx, scaleY: sy },
             );
           } else {
             _cara = drawHeroBody(ctx, {

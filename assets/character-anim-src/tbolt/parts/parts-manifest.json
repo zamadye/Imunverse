@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "tbolt-separable-parts",
+  "character": "T-Bolt",
+  "heroId": "tcd8",
+  "status": "cut-from-single-sheet-v1",
+  "reference": [
+    "tmp/old-tbolt-art/art-src/hero_tcd8_idle.png (foto lama dipensiunkan)",
+    "tmp/old-tbolt-art/art-src/hero_tcd8_attack.png (foto lama dipensiunkan)"
+  ],
+  "sourceSpec": {
+    "method": "SATU sheet utuh -> cut matematis presisi (bukan generate terpisah, agar art sinkron).",
+    "sheet": "tools/.tboltsrc/tbolt_sheet_v1.png (gitignored, sumber mentah)",
+    "sheetSize": { "width": 1024, "height": 1024, "ratio": "1:1" },
+    "grid": { "cols": 4, "rows": 4, "cellPx": 256, "formula": "sel(row,col) = crop(col*W/4, row*H/4, W/4, H/4)" },
+    "keying": "chroma-key magenta terang + garis grid gelap batas-sel -> alpha 0, feather tepi, despill; TANPA erode (garis tipis FX dipertahankan).",
+    "partCanvas": { "width": 512, "height": 512, "format": "png", "colorType": "RGBA", "background": "fully-transparent" },
+    "normalization": "Tiap sel 256px ditempel 1:1 TANPA resize di tengah kanvas 512; skala antar-part tetap sinkron.",
+    "buildScript": "tools/build-tbolt-pack.py (cut + key + mirror + contact sheet + verifikasi)",
+    "review": "assets/character-anim-src/tbolt/CONTACT-SHEET.png"
+  },
+  "sideConvention": {
+    "note": "Side-view menghadap kanan/timur. _r = lapis DEPAN/near (digambar di sheet). _l = lapis BELAKANG/far (CERMIN piksel _r, art dijamin identik). R/L = lapisan depan/belakang, bukan tangan anatomis.",
+    "marks": [
+      "suffix nama file: *_r.png (KANAN/depan) vs *_l.png (KIRI/belakang), *_*.png tanpa suffix = CENTER",
+      "field side + mirrorOf di manifest ini",
+      "tag warna di CONTACT-SHEET: biru R-KANAN / kuning L-KIRI / abu C",
+      "riveNode art/<id> selalu menyertakan _r/_l untuk pasangan"
+    ],
+    "pairs": [
+      { "right": "arm_upper_r", "left": "arm_upper_l" },
+      { "right": "arm_fore_r", "left": "arm_fore_l" },
+      { "right": "leg_thigh_r", "left": "leg_thigh_l" },
+      { "right": "leg_shin_r", "left": "leg_shin_l" },
+      { "right": "blade_r", "left": "blade_l" }
+    ]
+  },
+  "targetRive": {
+    "artboard": "TBolt",
+    "artboardSize": { "width": 1024, "height": 1024 },
+    "coordinateSystem": "origin-top-left, x-right, y-down",
+    "rendering": "direct-artboard",
+    "facing": "east (kanan); flip horizontal untuk barat",
+    "notReadyForRuntime": true,
+    "reviewGate": "Rakit artboard + cek pose idle/walk/attack/lockon/execute sebelum promosi ke runtime."
+  },
+  "layerOrderBackToFront": [
+    "arm_upper_l", "leg_thigh_l", "leg_shin_l", "arm_fore_l", "blade_l",
+    "backfin", "tail", "torso", "core",
+    "leg_thigh_r", "leg_shin_r", "arm_upper_r", "arm_fore_r", "blade_r",
+    "head", "visor", "scanner",
+    "fx_bolt", "fx_lockon", "fx_execute", "seal"
+  ],
+  "bones": [
+    { "name": "root", "parent": null, "pivot": [0.5, 0.86], "purpose": "Penempatan seluruh karakter; translasi dunia milik gameplay." },
+    { "name": "torso", "parent": "root", "pivot": [0.5, 0.75], "purpose": "Napas, squash/stretch, goyang lokomosi." },
+    { "name": "head", "parent": "torso", "pivot": [0.5, 0.9], "purpose": "Bidik wajah, recoil hit, antisipasi serang." },
+    { "name": "arm_upper_r", "parent": "torso", "pivot": [0.5, 0.08], "purpose": "Ayun bahu depan." },
+    { "name": "arm_fore_r", "parent": "arm_upper_r", "pivot": [0.5, 0.06], "purpose": "Siku + tembak bolt depan." },
+    { "name": "arm_upper_l", "parent": "torso", "pivot": [0.5, 0.08], "purpose": "Ayun bahu belakang (counterbalance)." },
+    { "name": "arm_fore_l", "parent": "arm_upper_l", "pivot": [0.5, 0.06], "purpose": "Siku belakang." },
+    { "name": "leg_thigh_r", "parent": "root", "pivot": [0.5, 0.08], "purpose": "Paha depan, pijakan." },
+    { "name": "leg_shin_r", "parent": "leg_thigh_r", "pivot": [0.5, 0.06], "purpose": "Lutut + kaki depan menapak." },
+    { "name": "leg_thigh_l", "parent": "root", "pivot": [0.5, 0.08], "purpose": "Paha belakang, pijakan lawan fase." },
+    { "name": "leg_shin_l", "parent": "leg_thigh_l", "pivot": [0.5, 0.06], "purpose": "Lutut + kaki belakang." },
+    { "name": "tail", "parent": "root", "pivot": [0.9, 0.5], "purpose": "Cambuk ekor, counterbalance." },
+    { "name": "backfin", "parent": "torso", "pivot": [0.8, 0.8], "purpose": "Sirip dorsal, settle sekunder." },
+    { "name": "blade_r", "parent": "arm_fore_r", "pivot": [0.05, 0.5], "purpose": "Perforin Blade depan (mut2)." },
+    { "name": "blade_l", "parent": "arm_fore_l", "pivot": [0.95, 0.5], "purpose": "Perforin Blade belakang (mut2, cermin)." },
+    { "name": "visor", "parent": "head", "pivot": [0.5, 0.5], "purpose": "Overlay visor Sniper (mut1)." },
+    { "name": "scanner", "parent": "head", "pivot": [0.5, 0.7], "purpose": "Overlay TCR Scanner (mut1/stage1)." },
+    { "name": "core", "parent": "torso", "pivot": [0.5, 0.5], "purpose": "Overlay Granzyme Core (mut2/stage3)." },
+    { "name": "fx", "parent": "root", "pivot": [0.0, 0.5], "purpose": "Anchor efek skill; posisi runtime." }
+  ],
+  "parts": [
+    { "id": "head", "file": "tbolt_head.png", "side": "center", "riveNode": "art/head", "bone": "head", "zIndex": 60, "artboardPlacement": { "x": 430, "y": 140, "width": 280, "height": 200, "pivot": [0.5, 0.9] }, "mesh": { "enabled": true, "suggestedGrid": "6x5", "deformationPurpose": "Bidik kepala + squash ekspresi ringan; jaga identitas wajah." } },
+    { "id": "torso", "file": "tbolt_torso.png", "side": "center", "riveNode": "art/torso", "bone": "torso", "zIndex": 30, "artboardPlacement": { "x": 390, "y": 330, "width": 250, "height": 300, "pivot": [0.5, 0.75] }, "mesh": { "enabled": true, "suggestedGrid": "6x6", "deformationPurpose": "Napas, squash/stretch, recoil badan." } },
+    { "id": "arm_upper_r", "file": "tbolt_arm_upper_r.png", "side": "right", "mirrorOf": null, "riveNode": "art/arm_upper_r", "bone": "arm_upper_r", "zIndex": 50, "artboardPlacement": { "x": 560, "y": 380, "width": 110, "height": 180, "pivot": [0.5, 0.08] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Ayun bahu; pivot di sendi bahu." } },
+    { "id": "arm_upper_l", "file": "tbolt_arm_upper_l.png", "side": "left", "mirrorOf": "arm_upper_r", "riveNode": "art/arm_upper_l", "bone": "arm_upper_l", "zIndex": 10, "artboardPlacement": { "x": 400, "y": 380, "width": 110, "height": 180, "pivot": [0.5, 0.08] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Cermin arm_upper_r; gerak lawan-fase." } },
+    { "id": "arm_fore_r", "file": "tbolt_arm_fore_r.png", "side": "right", "mirrorOf": null, "riveNode": "art/arm_fore_r", "bone": "arm_fore_r", "zIndex": 51, "artboardPlacement": { "x": 560, "y": 540, "width": 130, "height": 200, "pivot": [0.5, 0.06] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Ekstensi siku saat menembak bolt." } },
+    { "id": "arm_fore_l", "file": "tbolt_arm_fore_l.png", "side": "left", "mirrorOf": "arm_fore_r", "riveNode": "art/arm_fore_l", "bone": "arm_fore_l", "zIndex": 13, "artboardPlacement": { "x": 390, "y": 540, "width": 130, "height": 200, "pivot": [0.5, 0.06] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Cermin arm_fore_r." } },
+    { "id": "leg_thigh_r", "file": "tbolt_leg_thigh_r.png", "side": "right", "mirrorOf": null, "riveNode": "art/leg_thigh_r", "bone": "leg_thigh_r", "zIndex": 40, "artboardPlacement": { "x": 540, "y": 600, "width": 120, "height": 170, "pivot": [0.5, 0.08] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Langkah depan; lutut tekuk saat tapak." } },
+    { "id": "leg_thigh_l", "file": "tbolt_leg_thigh_l.png", "side": "left", "mirrorOf": "leg_thigh_r", "riveNode": "art/leg_thigh_l", "bone": "leg_thigh_l", "zIndex": 11, "artboardPlacement": { "x": 430, "y": 600, "width": 120, "height": 170, "pivot": [0.5, 0.08] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Cermin leg_thigh_r; lawan-fase." } },
+    { "id": "leg_shin_r", "file": "tbolt_leg_shin_r.png", "side": "right", "mirrorOf": null, "riveNode": "art/leg_shin_r", "bone": "leg_shin_r", "zIndex": 41, "artboardPlacement": { "x": 540, "y": 750, "width": 130, "height": 160, "pivot": [0.5, 0.06] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Kaki depan menapak (foot-planting). Cakar menghadap kanan." } },
+    { "id": "leg_shin_l", "file": "tbolt_leg_shin_l.png", "side": "left", "mirrorOf": "leg_shin_r", "riveNode": "art/leg_shin_l", "bone": "leg_shin_l", "zIndex": 12, "artboardPlacement": { "x": 420, "y": 750, "width": 130, "height": 160, "pivot": [0.5, 0.06] }, "mesh": { "enabled": true, "suggestedGrid": "4x5", "deformationPurpose": "Cermin leg_shin_r." } },
+    { "id": "tail", "file": "tbolt_tail.png", "side": "center", "riveNode": "art/tail", "bone": "tail", "zIndex": 25, "artboardPlacement": { "x": 170, "y": 580, "width": 280, "height": 160, "pivot": [0.9, 0.5] }, "mesh": { "enabled": true, "suggestedGrid": "6x3", "deformationPurpose": "Cambuk/lengkung ekor; deformasi mesh, bukan rotasi kaku." } },
+    { "id": "backfin", "file": "tbolt_backfin.png", "side": "center", "riveNode": "art/backfin", "bone": "backfin", "zIndex": 20, "artboardPlacement": { "x": 300, "y": 330, "width": 170, "height": 200, "pivot": [0.8, 0.8] }, "mesh": { "enabled": true, "suggestedGrid": "4x4", "deformationPurpose": "Settle sekunder mengikuti torso." } },
+    { "id": "visor", "file": "tbolt_visor.png", "side": "center", "riveNode": "art/visor", "bone": "visor", "zIndex": 61, "artboardPlacement": { "x": 445, "y": 195, "width": 210, "height": 70, "pivot": [0.5, 0.5] }, "mesh": { "enabled": false, "deformationPurpose": "Overlay mut1 Sniper; opacity 0 di base form." }, "equity": { "stage": "mut1", "id": "visor" } },
+    { "id": "scanner", "file": "tbolt_scanner.png", "side": "center", "riveNode": "art/scanner", "bone": "scanner", "zIndex": 62, "artboardPlacement": { "x": 470, "y": 150, "width": 120, "height": 60, "pivot": [0.5, 0.7] }, "mesh": { "enabled": false, "deformationPurpose": "Overlay TCR Scanner stage1; efek scan saat lock_on." }, "equity": { "stage": 1, "id": "tcr_scanner" } },
+    { "id": "blade_r", "file": "tbolt_blade_r.png", "side": "right", "mirrorOf": null, "riveNode": "art/blade_r", "bone": "blade_r", "zIndex": 52, "artboardPlacement": { "x": 620, "y": 580, "width": 280, "height": 70, "pivot": [0.05, 0.5] }, "mesh": { "enabled": false, "deformationPurpose": "Perforin Blade depan (mut2/stage2); pivot di cuff." }, "equity": { "stage": 2, "id": "perforin_blade" } },
+    { "id": "blade_l", "file": "tbolt_blade_l.png", "side": "left", "mirrorOf": "blade_r", "riveNode": "art/blade_l", "bone": "blade_l", "zIndex": 14, "artboardPlacement": { "x": 180, "y": 580, "width": 280, "height": 70, "pivot": [0.95, 0.5] }, "mesh": { "enabled": false, "deformationPurpose": "Cermin blade_r (bilah menunjuk kiri, di belakang)." }, "equity": { "stage": 2, "id": "perforin_blade" } },
+    { "id": "core", "file": "tbolt_core.png", "side": "center", "riveNode": "art/core", "bone": "core", "zIndex": 31, "artboardPlacement": { "x": 455, "y": 390, "width": 120, "height": 120, "pivot": [0.5, 0.5] }, "mesh": { "enabled": false, "deformationPurpose": "Granzyme Core stage3; pulse scale saat execute." }, "equity": { "stage": 3, "id": "granzyme_core" } },
+    { "id": "seal", "file": "tbolt_seal.png", "side": "center", "riveNode": "fx/seal", "bone": "fx", "zIndex": 75, "artboardPlacement": { "x": 437, "y": 437, "width": 150, "height": 150, "pivot": [0.5, 0.5], "runtime": "diposisikan di target" }, "mesh": { "enabled": false, "deformationPurpose": "Apoptosis Seal stage4; marker di atas target." }, "equity": { "stage": 4, "id": "apoptosis_seal" } },
+    { "id": "fx_bolt", "file": "tbolt_fx_bolt.png", "side": "center", "riveNode": "fx/bolt", "bone": "fx", "zIndex": 70, "artboardPlacement": { "x": 620, "y": 560, "width": 280, "height": 80, "pivot": [0.0, 0.5], "runtime": "projectile precision_shot, gerak +x" }, "mesh": { "enabled": false, "deformationPurpose": "Proyektil Precision Shot; opacity/translate dianimasikan." }, "skill": "precision_shot" },
+    { "id": "fx_lockon", "file": "tbolt_fx_lockon.png", "side": "center", "riveNode": "fx/lockon", "bone": "fx", "zIndex": 71, "artboardPlacement": { "x": 432, "y": 432, "width": 160, "height": 160, "pivot": [0.5, 0.5], "runtime": "reticle di atas target terkunci" }, "mesh": { "enabled": false, "deformationPurpose": "Reticle Lock On; scale-in + rotasi pelan + blink." }, "skill": "lock_on" },
+    { "id": "fx_execute", "file": "tbolt_fx_execute.png", "side": "center", "riveNode": "fx/execute", "bone": "fx", "zIndex": 72, "artboardPlacement": { "x": 382, "y": 382, "width": 260, "height": 260, "pivot": [0.5, 0.5], "runtime": "slash one-shot di posisi target" }, "mesh": { "enabled": false, "deformationPurpose": "Slash Execute one-shot; scale/opacity cepat." }, "skill": "execute" }
+  ],
+  "skills": [
+    { "id": "precision_shot", "name": "Precision Shot", "fx": ["fx_bolt"], "desc": "Tembakan presisi 2.5x; bolt meluncur dari fist depan." },
+    { "id": "lock_on", "name": "Lock On", "fx": ["fx_lockon", "scanner"], "desc": "Target dikunci +50% dmg 5 dtk; scanner menyala, reticle di target." },
+    { "id": "execute", "name": "Execute", "fx": ["fx_execute", "core", "blade_r", "blade_l"], "desc": "3x (8x bila HP<20%); core flare + slash + blade thrust." }
+  ],
+  "statePlan": {
+    "idle": "napas torso + settle fin/tail; loop",
+    "walk": "kaki R/L lawan-fase menapak + ayun lengan; loop",
+    "attack": "antisipasi, ekstensi arm_fore_r, bolt meluncur, recovery; one-shot (S1 precision_shot)",
+    "skill_lockon": "scanner glow + reticle muncul di target; one-shot",
+    "skill_execute": "core flare + blade thrust + slash; one-shot",
+    "hit": "recoil seluruh rig + squash head/torso; one-shot",
+    "death": "collapse + fade; one-shot"
+  },
+  "requiredStateMachineInputs": [
+    { "name": "moving", "type": "bool", "purpose": "idle <-> walk" },
+    { "name": "attack", "type": "trigger", "purpose": "Mulai attack/precision_shot one-shot." },
+    { "name": "skill_lockon", "type": "trigger", "purpose": "Mulai lock_on one-shot." },
+    { "name": "execute", "type": "trigger", "purpose": "Mulai execute one-shot." },
+    { "name": "hit", "type": "trigger", "purpose": "Recoil + hit-stop." },
+    { "name": "death", "type": "trigger", "purpose": "Death one-shot." },
+    { "name": "damage", "type": "number", "purpose": "Intensitas hit." },
+    { "name": "hitStop", "type": "number", "purpose": "Bekukan jam animasi sementara." },
+    { "name": "vfx", "type": "trigger", "purpose": "Pulse VFX umum." },
+    { "name": "stage", "type": "number", "purpose": "0=base,1=mut1(visor+scanner),2=mut2(+blade+core),3=apex(+seal); opacity overlay." }
+  ],
+  "authoringNotes": [
+    "Semua part dari 1 sheet -> gaya/garis/palet sinkron; JANGAN campur art dari sumber lain.",
+    "File _l adalah CERMIN _r: jangan di-repaint manual; regenerate via tools/build-tbolt-pack.py bila sheet berubah.",
+    "Gunakan tiap PNG sebagai image/mesh terpisah; JANGAN flatten.",
+    "Buat bones HIERARKIS sesuai daftar bones (bukan RootBone flat) agar squash torso mewaris ke head/limb.",
+    "Root translasi dunia milik gameplay; pose/squash/jaw/limb milik state machine Rive.",
+    "Pasang marker event di timeline attack/lockon/execute agar damage & VFX sinkron event, bukan timer.",
+    "Manifest ini panduan rakit, bukan bukti .riv sudah ada."
+  ]
+}

@@ -86,6 +86,8 @@ export function heroAnimState(player, run, timeSec, dtSec) {
 export function drawHeroBody(ctx, o) {
   const player = o.player;
   const id = player.heroDef && player.heroDef.id;
+  // T-Bolt 100% Rive (artboard TBolt) — tidak pernah lewat foto/creature rig.
+  if (id === 'tcd8') return 'none';
   if (_mode === 'foto' || !creatureAvailable(id)) return 'none';
   if (o.limbsOnly) return gambar(ctx, o, true);
   return gambar(ctx, o, _mode === 'hibrida');

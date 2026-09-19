@@ -15,6 +15,8 @@ image-search/
 
 # Sumber foto mutasi mentah (latar magenta) — hanya dipakai tools/build-mutation-sprites.py
 tools/.mutsrc/
+# Sheet mentah T-Bolt (tools/build-tbolt-pack.py) — yg di-commit hanya parts/
+tools/.tboltsrc/
 # Sumber audio mentah (tools/build-audio.sh)
 tools/.audiosrc/
 
@@ -27,12 +29,16 @@ node_modules/
 # berkas diagnostik sementara (bukan aset game)
 .tmp-*
 
+# Arsip foto lama yang digantikan Rive (mis. tmp/old-tbolt-art/) — riwayat ada di git
+tmp/
+
 # mesin Godot (dipasang ulang dengan: node tools/godot/install.mjs)
 tools/godot/engine/
 tools/rive/engine/
 tools/rive/runtime-libs/
 tools/rive/incoming/
 assets/character-anim-src/mako/build/
+assets/character-anim-src/tbolt/build/
 
 # P7: salinan sumber panggangan Godot (dibuat ulang oleh bake-crawl / bake-creature)
 tools/godot/rig/crawl-src.json

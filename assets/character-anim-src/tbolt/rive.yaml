@@ -1,0 +1,11 @@
+name: tbolt-rive
+main: TBolt
+artboard:
+  width: 1024
+  height: 1024
+  background: "#202820"
+output:
+  dir: build
+logs:
+  file: build/rive.log
+  problems: build/problems.log

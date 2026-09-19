@@ -11,6 +11,7 @@ import { PERSP } from '../render/camera.js';
 import { audio } from '../systems/audio-system.js';
 import { getCombat, getLocomotion } from '../core/data-store.js';
 import { ensureMakoRive, updateMakoRive, setMakoRiveInput } from '../render/mako-rive.js';
+import { ensureTBoltRive, updateTBoltRive } from '../render/tbolt-rive.js';
 // P7: rig merayap hasil PANGGANGAN GODOT — sumber gerak utama (anti mengambang)
 import { crawlPose, crawlLobe } from '../systems/crawl-rig.js';
 
@@ -168,18 +169,24 @@ export class Player {
     const _vlen = Math.hypot(this.vx, this.vy);
     const _heroId = (this.heroDef && this.heroDef.id) || null;
     const _isMako = _heroId === 'macrophage';
-    // Mako memakai artboard Rive visible sebagai sumber pose langsung. Rig
-    // crawl/Godot dan transform-to-static-photo tidak ikut campur pada Mako.
-    // Hero lain tetap memakai jalur locomotion lama sampai artboard Rive mereka
-    // tersedia.
+    const _isTBolt = _heroId === 'tcd8';
+    const _isRiveHero = _isMako || _isTBolt;
+    // Hero Rive (Mako, T-Bolt) memakai artboard Rive visible sebagai sumber
+    // pose langsung. Rig crawl/Godot dan transform-to-static-photo tidak ikut
+    // campur pada mereka. Hero lain tetap memakai jalur locomotion lama sampai
+    // artboard Rive mereka tersedia.
     if (_isMako) {
       if (!this._makoRigAsked) { this._makoRigAsked = true; ensureMakoRive(); }
       updateMakoRive(dt, { moving: _vlen > 4, direction: this.facing });
     }
-    const _crawl = _isMako ? null : crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
+    if (_isTBolt) {
+      if (!this._tboltRigAsked) { this._tboltRigAsked = true; ensureTBoltRive(); }
+      updateTBoltRive(dt, { moving: _vlen > 4, direction: this.facing });
+    }
+    const _crawl = _isRiveHero ? null : crawlPose(_heroId, this.walkPhase, this.moveAmt, this.facing, this.time);
     const pose = null;
-    this.rigActive = _isMako || !!_crawl;
-    this.rigSource = _isMako ? 'rive-artboard' : (_crawl ? 'crawl' : 'analytic');
+    this.rigActive = _isRiveHero || !!_crawl;
+    this.rigSource = _isRiveHero ? 'rive-artboard' : (_crawl ? 'crawl' : 'analytic');
     {
       const bobCfg = loco.bob || {};
       const tiltCfg = loco.tilt || {};

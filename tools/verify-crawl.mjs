@@ -137,7 +137,7 @@ cek('gaya merayap tiap hero berbeda',
 
 // ---------- 6. RUNTIME: tidak mengambang & rig dipakai ----------
 const DT = 1 / 60;
-const crawlHeroes = daftar.filter((h) => h !== 'macrophage');
+const crawlHeroes = daftar.filter((h) => h !== 'macrophage' && h !== 'tcd8');
 let pakaiRig = 0;
 const dasar = [];
 for (const h of crawlHeroes) {
@@ -148,11 +148,14 @@ for (const h of crawlHeroes) {
   if (pl.rigSource === 'crawl') pakaiRig++;
   dasar.push({ h, rig: pl.rigSource, bob: pl.anim.bob, sy: pl.anim.sy, shear: pl.anim.shear });
 }
-cek(`runtime memakai rig merayap Godot (${crawlHeroes.length}/${crawlHeroes.length} hero non-Mako)`,
+cek(`runtime memakai rig merayap Godot (${crawlHeroes.length}/${crawlHeroes.length} hero non-Rive)`,
   pakaiRig === crawlHeroes.length, `${pakaiRig}/${crawlHeroes.length} — ${dasar.filter((d) => d.rig !== 'crawl').map((d) => d.h).join(',') || 'semua'}`);
 cek('Mako dikecualikan dari rig Godot karena memakai artboard Rive langsung',
   !daftar.includes('macrophage') || !crawlHeroes.includes('macrophage'),
   'macrophage harus memakai direct Mako artboard');
+cek('T-Bolt dikecualikan dari rig Godot karena memakai artboard Rive langsung',
+  !daftar.includes('tcd8') || !crawlHeroes.includes('tcd8'),
+  'tcd8 harus memakai direct TBolt artboard');
 cek('runtime: badan tidak pernah diangkat (bob = 0)',
   dasar.every((d) => Math.abs(d.bob) < 1e-9), JSON.stringify(dasar.slice(0, 2)));
 

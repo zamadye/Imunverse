@@ -14,6 +14,12 @@ if (!fs.existsSync(engine)) {
 const env = { ...process.env };
 if (fs.existsSync(libraries)) {
   env.LD_LIBRARY_PATH = [libraries, env.LD_LIBRARY_PATH].filter(Boolean).join(':');
+  // Headless --screenshot/--bench butuh driver Vulkan SwiftShader; tanpa ini
+  // loader tidak menemukan ICD dan eglInitialize gagal (no display server).
+  if (!env.VK_ICD_FILENAMES) {
+    const icd = path.join(libraries, 'vk_swiftshader_icd.json');
+    if (fs.existsSync(icd)) env.VK_ICD_FILENAMES = icd;
+  }
 }
 const result = spawnSync(engine, process.argv.slice(2), {
   cwd: root,

@@ -51,5 +51,12 @@
     "note": "Mako dirender langsung dari artboard visible assets/character-anim-src/mako/mako-rive-draft.riv. Input state-machine moving/attack/devour/hit/death dan data damage/heal/hitStop/vfx dikirim runtime; nilai legacy legLenUnits/legSpanUnits dipertahankan hanya untuk statistik foot-planting.",
     "legLenUnits": 70.9,
     "legSpanUnits": 36.9
+  },
+  "tbolt": {
+    "enabled": true,
+    "rig": "assets/character-anim-src/tbolt/tbolt-rive-draft.riv",
+    "artboard": "TBolt",
+    "stateMachine": "TBoltStateMachine",
+    "note": "T-Bolt dirender langsung dari artboard visible tbolt-rive-draft.riv (21 part dari 1 sheet). Input: moving, trigger attack/skill_lockon/execute/hit/death/vfx, number damage/hitStop/stage. Foto PNG T-Bolt lama dipensiunkan ke tmp/old-tbolt-art/."
   }
 }

@@ -4,7 +4,7 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v25-mako-rive';
+const CACHE_VER = 'phagos-v26-tbolt-rive';
 const PRECACHE = [
   './',
   './index.html',
@@ -14,8 +14,9 @@ const PRECACHE = [
   './styles/dashboard-map.css',
   './styles/portrait.css',
   './js/main.js',
-  // Artboard Mako visible — runtime wasm-nya di-cache saat dipakai
+  // Artboard Mako + TBolt visible — runtime wasm-nya di-cache saat dipakai
   './assets/character-anim-src/mako/mako-rive-draft.riv',
+  './assets/character-anim-src/tbolt/tbolt-rive-draft.riv',
   // Latar foto dashboard & loading (UI-REBUILD P8)
   './assets/ui/bg-dashboard.jpg',
   './assets/ui/bg-loading.jpg',

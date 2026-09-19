@@ -606,11 +606,13 @@
       "title": "Avenger Adaptif",
       "role": "Damage",
       "description": "T-Bolt — Avenger Adaptif. Peran Damage.",
-      "sprite": "assets/sprites/hero_tcd8_idle.png",
-      "spriteIdle": "assets/sprites/hero_tcd8_idle.png",
-      "spriteAttack": "assets/sprites/hero_tcd8_attack.png",
+      "sprite": "assets/sprites/portrait_tcd8.png",
+      "spriteIdle": "assets/sprites/portrait_tcd8.png",
+      "spriteAttack": "assets/sprites/portrait_tcd8.png",
       "color": "#00d2ff",
       "roleColor": "#e74c3c",
+  "render": "rive",
+  "riveArtboard": "TBolt",
       "attackPattern": "ranged_pierce",
       "baseStats": {
         "maxHP": 85,
@@ -681,10 +683,10 @@
         },
         "note": "PHAGOS eksperimen: pola proyektil dibekukan, bukan dihapus. Hapus field membrane & restore dari sini bila eksperimen dibatalkan."
       },
-      "spriteMut1Idle": "assets/sprites/hero_tcd8_mut1_idle.png",
-      "spriteMut1Attack": "assets/sprites/hero_tcd8_mut1_attack.png",
-      "spriteMut2Idle": "assets/sprites/hero_tcd8_mut2_idle.png",
-      "spriteMut2Attack": "assets/sprites/hero_tcd8_mut2_attack.png",
+      "spriteMut1Idle": "assets/sprites/portrait_tcd8.png",
+      "spriteMut1Attack": "assets/sprites/portrait_tcd8.png",
+      "spriteMut2Idle": "assets/sprites/portrait_tcd8.png",
+      "spriteMut2Attack": "assets/sprites/portrait_tcd8.png",
       "identity": {
         "attackArchetype": "beam",
         "strength": [
