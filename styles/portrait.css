@@ -164,6 +164,14 @@
     top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto;
     flex-direction: column; width: min(86vw, 360px);
   }
+  /* Peta penuh: modal generik di atas menaruh toast di y:8px — bentrok
+     dengan header tipisnya sendiri (tombol tutup + judul + BAB x/y duduk
+     persis di situ). Override lebih spesifik (id ganda) supaya menang
+     lawan aturan generik di atas. */
+  #app:has(#screen-fullmap.active) #toasts {
+    top: calc(64px + env(safe-area-inset-top, 0px)); bottom: auto;
+    flex-direction: column; width: min(86vw, 360px);
+  }
 
   /* ======== KEPALA LAYAR (semua menu): judul tak terpotong ======== */
   .ui-head { gap: 7px; }

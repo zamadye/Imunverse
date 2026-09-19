@@ -413,6 +413,7 @@ async function boot() {
   screenManager.registerScreen('curguide', {}); // modal panduan currency (konten diisi main.js saat dibuka)
   screenManager.registerScreen('missions', missionsScreen); // UI-REBUILD P8: modal Misi & Quest (footer)
   screenManager.registerScreen('shop', shopScreen); // UI-REBUILD P7: modal Shop (kartu atas dashboard)
+  screenManager.registerScreen('fullmap', {}); // UI-audit: modal peta penuh dramatis — DOM-nya diisi dashboard-screen.js (paintHost), tak perlu modul show/hide sendiri
   titleScreen.wire(); // F21: layar judul gameplay-first
 
   // Tampilkan loading lewat manager agar transisi berikutnya bersih

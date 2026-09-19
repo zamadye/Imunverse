@@ -49,9 +49,23 @@
             <img class="deco dot d1" src="assets/sprites/deco_dots.png" alt="" />
             <img class="load-emblem" src="assets/sprites/ui_shield_emblem.png" alt="" />
           </div>
-          <!-- Logo PHAGOS (maskot + wordmark jadi satu aset, latar sudah transparan) -->
+          <!-- Logo PHAGOS lama (maskot + wordmark terpisah) — DISEMBUNYIKAN sekarang:
+               foto latar baru (bg-loading.jpg) sudah membawa wordmark "PHAGOS" sendiri,
+               dua logo tumpuk akan terlihat dobel. Elemen tetap ada (dipakai layar lain
+               yang mungkin masih mereferensikan .load-logo) tapi disembunyikan via CSS
+               khusus #screen-loading. -->
           <div class="load-brand">
             <img class="load-logo" src="assets/ui/phagos-logo.png?v=55a" alt="PHAGOS" />
+          </div>
+          <!-- Cincin loading — posisinya meniru slot kosong di tengah foto latar baru
+               (bentuk sel + dua mata titik berdenyut, ala mockup owner). -->
+          <div class="load-ring-slot" aria-hidden="true">
+            <span class="load-ring load-ring-outer"></span>
+            <span class="load-ring load-ring-inner"></span>
+            <span class="load-blob">
+              <span class="load-blob-eye"></span>
+              <span class="load-blob-eye"></span>
+            </span>
           </div>
           <!-- Animasi loading: SELALU menempel di bawah layar. -->
           <div class="load-bottom">
@@ -167,18 +181,61 @@
               </svg>
               <div class="chapter-nodes" id="chapter-nodes"><!-- node per bab, diisi dashboard-screen.js --></div>
             </div>
+            <!-- UI-audit ("map overlay terlalu HTML, tak ada efek dramatis"):
+                 preview dashboard sengaja dipotong pendek (lihat CSS §2 —
+                 kanvas digeser fokus ke bab aktif) dan seluruh jendelanya
+                 jadi SATU tombol besar menuju peta penuh (bg-fullmap.jpg,
+                 dramatis, semua bab kelihatan). data-nav dipakai supaya
+                 lewat handler navigasi generik yang sudah ada di main.js. -->
+            <button class="map-expand-veil" data-nav="fullmap" aria-label="Buka peta penuh">
+              <span class="map-expand-badge">⤢ Peta Penuh</span>
+            </button>
           </div>
           <div class="chap-info-panel" id="chap-info-panel"><!-- kartu info bab terpilih, diisi dashboard-screen.js --></div>
         </section>
 
-        <!-- Satu-satunya CTA: PLAY — ikon saja, bentuk lingkaran jelas (UI-audit:
-             bentuk "sel meleleh" lama tidak terbaca sebagai tombol; label MAIN
-             dicabut, fungsinya sudah jelas dari ikon + posisi + denyut). -->
+        <!-- Satu-satunya CTA: MASUK — lencana heksagon beraksen taring
+             (UI-audit: lingkaran + ikon segitiga play lama terbaca sebagai
+             tombol player musik, bukan tombol game; diganti bentuk bersudut
+             + ikon panah ganda + label singkat supaya tegas sebagai CTA aksi). -->
         <button class="dash-play" id="btn-play" aria-label="Main sekarang">
           <span class="dash-play-ring" aria-hidden="true"></span>
           <span class="dash-play-ring dash-play-ring2" aria-hidden="true"></span>
-          <img class="dash-play-icon" src="assets/icons/ui-play.svg" alt="" />
+          <span class="dash-play-hex" aria-hidden="true"></span>
+          <span class="dash-play-fang dash-play-fang-l" aria-hidden="true"></span>
+          <span class="dash-play-fang dash-play-fang-r" aria-hidden="true"></span>
+          <img class="dash-play-icon" src="assets/icons/ui-start.svg" alt="" />
+          <span class="dash-play-label">MASUK</span>
         </button>
+      </section>
+
+      <!-- ============ PETA PENUH (modal dramatis dari preview dashboard) ====
+           UI-audit: overlay peta lama "terlalu HTML, tak ada efek dramatis" —
+           versi ini pakai foto latar bg-fullmap.jpg (organ tubuh bergaya
+           ilustrasi, bukan siluet flat), animasi zoom-in saat dibuka, dan
+           SEMUA bab kelihatan sekaligus (beda dari preview dashboard yang
+           sengaja dipotong pendek). Node/jalur = data yang SAMA dari
+           dashboard-screen.js (paintHost dipanggil ke dua host sekaligus)
+           supaya tak ada logika ganda yang bisa tidak sinkron. ============ -->
+      <section id="screen-fullmap" class="screen modal fullmap-modal" data-screen="fullmap">
+        <div class="fullmap-bg" aria-hidden="true"></div>
+        <div class="fullmap-veil" aria-hidden="true"></div>
+        <div class="fullmap-box">
+          <header class="fullmap-head">
+            <button class="btn-back" data-back="dashboard" aria-label="Tutup peta penuh"><img src="assets/icons/ui-back.svg" alt="" /></button>
+            <span class="fullmap-title">PETA TUBUH</span>
+            <span class="fullmap-pos" id="fullmap-pos">BAB 1/6</span>
+          </header>
+          <div class="fullmap-viewport" id="fullmap-viewport">
+            <div class="body-map-canvas fullmap-canvas" id="body-map-canvas-full">
+              <svg class="body-silhouette fullmap-silhouette" viewBox="0 0 300 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <g id="chapter-path-group-full" class="chapter-path-group"></g>
+              </svg>
+              <div class="chapter-nodes" id="chapter-nodes-full"><!-- node per bab, diisi dashboard-screen.js --></div>
+            </div>
+          </div>
+          <div class="chap-info-panel fullmap-info" id="chap-info-panel-full"><!-- kartu info bab terpilih, diisi dashboard-screen.js --></div>
+        </div>
       </section>
 
       <!-- ============ SHOP (modal dari kartu atas dashboard) ============ -->

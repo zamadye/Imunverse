@@ -98,9 +98,11 @@ function buildNode(ch, i, meta) {
   return node;
 }
 
-/** Gambar jalur (segmen garis) antar node berurutan di dalam SVG siluet. */
-function buildPathSegments(list, meta) {
-  const group = document.getElementById('chapter-path-group');
+/** Gambar jalur (segmen garis) antar node berurutan di dalam SVG siluet.
+ * `groupId` dipakai dua kali: sekali untuk preview dashboard, sekali untuk
+ * peta penuh modal — dua <g> berbeda, isi identik. */
+function buildPathSegments(list, meta, groupId = 'chapter-path-group') {
+  const group = document.getElementById(groupId);
   if (!group) return;
   group.textContent = '';
   for (let i = 0; i < list.length - 1; i++) {
@@ -118,11 +120,38 @@ function buildPathSegments(list, meta) {
   }
 }
 
+/** Isi satu host node (dashboard preview ATAU peta penuh modal) — dipanggil
+ * dua kali dari renderMap() supaya keduanya selalu identik/sinkron, tanpa
+ * peta penuh perlu me-render ulang sendiri saat dibuka (datanya sudah siap
+ * di DOM begitu bab dipilih/pindah, modal cuma menampilkannya). */
+function paintHost(list, meta, hostId, groupId) {
+  const host = document.getElementById(hostId);
+  if (!host) return;
+  host.textContent = '';
+  buildPathSegments(list, meta, groupId);
+  list.forEach((ch, i) => host.appendChild(buildNode(ch, i, meta)));
+}
+
+/** Preview dashboard sengaja dipotong pendek (UI-audit: peta penuh di
+ * dashboard "terlalu HTML", tak ada efek dramatis) — hanya jendela kecil
+ * di sekitar bab AKTIF yang terlihat ("beberapa level saja"), kanvasnya
+ * digeser vertikal (bukan di-scale) supaya posisi node tetap presisi 1:1
+ * dengan mapPos yang sama dipakai peta penuh. Bab jauh dari titik ini
+ * terpotong di luar frame — pemain ketuk untuk buka peta penuh. */
+const PREVIEW_CANVAS_H = 480; // harus sama dengan --preview-canvas-h di CSS
+
+function updatePreviewFocus(ch) {
+  const viewport = document.getElementById('map-viewport');
+  const canvas = document.getElementById('body-map-canvas');
+  if (!viewport || !canvas || !ch) return;
+  const pos = ch.mapPos || { x: 150, y: 260 };
+  const focusYPx = (pos.y / 520) * PREVIEW_CANVAS_H;
+  const vpHalf = viewport.clientHeight / 2;
+  canvas.style.setProperty('--preview-pan', `${(vpHalf - focusYPx).toFixed(1)}px`);
+}
+
 function renderMap(meta) {
-  const nodesHost = document.getElementById('chapter-nodes');
-  if (!nodesHost) return;
   const list = chapters();
-  nodesHost.textContent = '';
 
   // Bab terpilih wajib valid (save lama / bab terkunci).
   const selId = list.some((c) => c.id === meta.selectedChapter)
@@ -132,8 +161,8 @@ function renderMap(meta) {
   const selIdx = Math.max(0, list.findIndex((c) => c.id === selId));
   chapterIndex = selIdx;
 
-  buildPathSegments(list, meta);
-  list.forEach((ch, i) => nodesHost.appendChild(buildNode(ch, i, meta)));
+  paintHost(list, meta, 'chapter-nodes', 'chapter-path-group');
+  paintHost(list, meta, 'chapter-nodes-full', 'chapter-path-group-full');
 
   updateMapChrome(meta, selIdx);
 }
@@ -142,6 +171,8 @@ function updateMapChrome(meta, idx = chapterIndex) {
   const list = chapters();
   const pos = document.getElementById('map-pos');
   if (pos) pos.textContent = `BAB ${idx + 1}/${list.length}`;
+  const posFull = document.getElementById('fullmap-pos');
+  if (posFull) posFull.textContent = `BAB ${idx + 1}/${list.length}`;
   const prev = document.getElementById('map-prev');
   const next = document.getElementById('map-next');
   if (prev) prev.disabled = idx <= 0;
@@ -156,9 +187,17 @@ function updateMapChrome(meta, idx = chapterIndex) {
   const sub = document.getElementById('play-sub');
   if (sub) sub.textContent = locked ? `Bab ${idx + 1} · Terkunci` : `Bab ${idx + 1} · ${ch.organ}`;
 
-  // Kartu info bab terpilih (dulu tertulis langsung di kartu carousel besar;
-  // sekarang node kecil di peta, jadi detailnya pindah ke panel ini).
-  const panel = document.getElementById('chap-info-panel');
+  // Jendela preview dashboard mengikuti bab yang sedang dipilih.
+  updatePreviewFocus(ch);
+
+  // Kartu info bab terpilih — dirender ke DUA panel (preview dashboard +
+  // peta penuh modal) supaya kontennya identik di mana pun dilihat.
+  paintInfoPanel('chap-info-panel', list, idx, ch, status, locked);
+  paintInfoPanel('chap-info-panel-full', list, idx, ch, status, locked);
+}
+
+function paintInfoPanel(panelId, list, idx, ch, status, locked) {
+  const panel = document.getElementById(panelId);
   if (!panel) return;
   panel.className = `chap-info-panel ${status}`;
   panel.textContent = '';

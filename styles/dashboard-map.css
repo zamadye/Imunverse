@@ -209,33 +209,40 @@
 }
 
 #screen-dashboard .map-viewport {
-  /* Bingkai peta: tinggi mengisi sisa ruang antara kartu ringkasan & tombol
-     PLAY (flex:1 1 auto, warisan dari .body-map), dijepit max-height supaya
-     wajar di tablet/layar sangat tinggi. Canvas peta di dalamnya (persegi
-     panjang portrait, viewBox 300×520) dipusatkan & di-scale mengikuti
-     tinggi yang tersedia — bukan lagi jalur/lorong horizontal digeser. */
-  flex: 1 1 auto;
-  min-height: 0;
+  /* UI-audit ("map overlay terlalu HTML, tak ada efek dramatis"): preview
+     dashboard sekarang jendela PENDEK yang cuma menampakkan bab aktif +
+     tetangga terdekatnya ("di dashboard yg terlihat cuma beberapa level
+     saja" — owner) — bukan lagi seluruh siluet 6 bab sekaligus. Peta
+     LENGKAP + dramatis pindah ke modal peta penuh (§7 di bawah + index.html
+     #screen-fullmap), dibuka lewat tombol veil transparan (.map-expand-veil)
+     yang menutupi seluruh jendela ini. */
+  flex: 0 0 auto;
   width: 100%;
   max-width: 640px;
-  max-height: clamp(300px, 52vh, 480px);
+  height: clamp(150px, 24vh, 208px);
   margin: 0 auto;
-  display: flex;
-  justify-content: center;
+  position: relative;
   overflow: hidden;
   border-radius: 18px;
+  cursor: pointer;
 }
 @media (max-height: 700px) {
-  #screen-dashboard .map-viewport { max-height: clamp(240px, 42vh, 360px); }
+  #screen-dashboard .map-viewport { height: clamp(128px, 19vh, 174px); }
 }
 
-/* Kanvas peta: rasio TETAP sama dengan viewBox SVG siluet (300×520) supaya
-   node yang diposisikan via persen (mapPos.x/300 · mapPos.y/520) selalu
-   presisi menempel di badan siluet, di ukuran layar berapa pun. */
+/* Kanvas peta preview: TINGGI TETAP (bukan 100% dari jendela pendek di
+   atas) supaya node yang diposisikan via persen (mapPos.x/300 · mapPos.y/520)
+   tetap presisi di skala "penuh" yang sama dengan peta lengkap — lalu
+   digeser vertikal (--preview-pan, dihitung JS di dashboard-screen.js →
+   updatePreviewFocus) supaya bab aktif selalu jatuh di tengah jendela. */
 #screen-dashboard .body-map-canvas {
-  position: relative;
-  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 480px;
   aspect-ratio: 300 / 520;
+  transform: translateX(-50%) translateY(var(--preview-pan, 0px));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   border-radius: 18px;
   overflow: hidden;
   /* UI-audit ("peta kurang sesuai"): foto latar dashboard (kosmik, ramai)
@@ -248,6 +255,38 @@
     linear-gradient(180deg, rgba(6, 34, 32, 0.82) 0%, rgba(4, 20, 19, 0.95) 100%);
   border: 1px solid var(--dash-edge);
   box-shadow: var(--dash-shadow);
+}
+
+/* Tombol veil: menutupi SELURUH jendela preview, satu ketukan di mana pun
+   (termasuk di atas node) langsung membuka peta penuh — preview bukan lagi
+   permukaan interaksi per-node, cuma teaser. */
+#screen-dashboard .map-expand-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(4, 20, 19, 0) 42%, rgba(4, 20, 19, 0.85) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  transition: background 0.2s ease;
+}
+#screen-dashboard .map-expand-veil:active { background: linear-gradient(180deg, rgba(4, 20, 19, 0.12) 42%, rgba(4, 20, 19, 0.94) 100%); }
+
+#screen-dashboard .map-expand-badge {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--dash-ink);
+  background: var(--dash-glass-2);
+  border: 1px solid var(--dash-edge-2);
+  border-radius: 999px;
+  padding: 5px 14px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
 #screen-dashboard .body-silhouette {
@@ -284,28 +323,28 @@
 /* Jalur antar-bab: segmen garis dari node ke node berurutan. Terbuka =
    menyala teal (boleh dijalani/diketuk balik utk farm); terkunci = redup
    putus-putus (arah cerita yang belum sampai sana). */
-#screen-dashboard .chapter-path-seg {
+:is(#screen-dashboard, #screen-fullmap) .chapter-path-seg {
   stroke-width: 4;
   stroke-linecap: round;
   fill: none;
 }
-#screen-dashboard .chapter-path-seg.open {
+:is(#screen-dashboard, #screen-fullmap) .chapter-path-seg.open {
   stroke: var(--dash-accent-2);
   opacity: 0.85;
   filter: drop-shadow(0 0 5px rgba(53, 208, 186, 0.55));
 }
-#screen-dashboard .chapter-path-seg.locked {
+:is(#screen-dashboard, #screen-fullmap) .chapter-path-seg.locked {
   stroke: rgba(198, 236, 227, 0.22);
   stroke-dasharray: 3 7;
 }
 
 /* Overlay node — HTML di atas SVG (tombol asli, gampang disentuh & AT-friendly). */
-#screen-dashboard .chapter-nodes {
+:is(#screen-dashboard, #screen-fullmap) .chapter-nodes {
   position: absolute;
   inset: 0;
 }
 
-#screen-dashboard .chap-node {
+:is(#screen-dashboard, #screen-fullmap) .chap-node {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 15%;
@@ -324,9 +363,9 @@
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
   transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
-#screen-dashboard .chap-node:active { transform: translate(-50%, -50%) scale(0.92); }
+:is(#screen-dashboard, #screen-fullmap) .chap-node:active { transform: translate(-50%, -50%) scale(0.92); }
 
-#screen-dashboard .chap-node-ring {
+:is(#screen-dashboard, #screen-fullmap) .chap-node-ring {
   position: absolute;
   inset: -7px;
   border-radius: 999px;
@@ -335,9 +374,9 @@
   pointer-events: none;
 }
 
-#screen-dashboard .chap-node-no { position: relative; z-index: 1; }
+:is(#screen-dashboard, #screen-fullmap) .chap-node-no { position: relative; z-index: 1; }
 
-#screen-dashboard .chap-node-badge {
+:is(#screen-dashboard, #screen-fullmap) .chap-node-badge {
   position: absolute;
   right: -3px;
   bottom: -3px;
@@ -350,20 +389,20 @@
 }
 
 /* Terkunci: redup + gembok, tetap bisa diketuk (menampilkan syarat via toast). */
-#screen-dashboard .chap-node.locked {
+:is(#screen-dashboard, #screen-fullmap) .chap-node.locked {
   background: radial-gradient(circle at 34% 28%, rgba(120, 140, 135, 0.28), rgba(6, 20, 19, 0.92));
   border-color: rgba(198, 236, 227, 0.22);
   color: rgba(230, 251, 245, 0.45);
 }
 
 /* Bersih (cleared): boleh dijalani ulang — "jalan balik utk farm". */
-#screen-dashboard .chap-node.cleared {
+:is(#screen-dashboard, #screen-fullmap) .chap-node.cleared {
   border-color: rgba(120, 240, 170, 0.55);
   background: radial-gradient(circle at 34% 28%, rgba(120, 240, 170, 0.38), rgba(6, 30, 28, 0.92));
 }
 
 /* Aktif (bab sekarang di alur cerita) — cincin berdenyut, ala "kamu di sini". */
-#screen-dashboard .chap-node.current .chap-node-ring {
+:is(#screen-dashboard, #screen-fullmap) .chap-node.current .chap-node-ring {
   opacity: 1;
   animation: chap-node-pulse 2s ease-out infinite;
 }
@@ -375,7 +414,7 @@
 }
 
 /* Terpilih (mau dimainkan tombol PLAY) — sorot emas. */
-#screen-dashboard .chap-node.selected {
+:is(#screen-dashboard, #screen-fullmap) .chap-node.selected {
   border-color: rgba(255, 209, 102, 0.95);
   box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.3), 0 10px 22px rgba(0, 0, 0, 0.5);
 }
@@ -385,7 +424,7 @@
    langsung di kartu carousel besar; sekarang node di peta kecil,
    jadi detailnya pindah ke satu strip ringkas di bawah peta.
    --------------------------------------------------------------- */
-#screen-dashboard .chap-info-panel {
+:is(#screen-dashboard, #screen-fullmap) .chap-info-panel {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -397,7 +436,7 @@
   min-height: 54px;
 }
 
-#screen-dashboard .cip-art {
+:is(#screen-dashboard, #screen-fullmap) .cip-art {
   width: 46px;
   height: 46px;
   border-radius: 10px;
@@ -406,16 +445,16 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-#screen-dashboard .chap-info-panel.locked .cip-art { filter: grayscale(0.6) brightness(0.6); }
+:is(#screen-dashboard, #screen-fullmap) .chap-info-panel.locked .cip-art { filter: grayscale(0.6) brightness(0.6); }
 
-#screen-dashboard .cip-body {
+:is(#screen-dashboard, #screen-fullmap) .cip-body {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
 }
 
-#screen-dashboard .cip-status {
+:is(#screen-dashboard, #screen-fullmap) .cip-status {
   align-self: flex-start;
   font-size: 9px;
   font-weight: 900;
@@ -425,10 +464,10 @@
   background: rgba(53, 208, 186, 0.18);
   color: #9fe8d8;
 }
-#screen-dashboard .cip-status.cleared { background: rgba(120, 240, 170, 0.18); color: #b9f6c9; }
-#screen-dashboard .cip-status.locked { background: rgba(255, 140, 110, 0.18); color: #ffc9b5; }
+:is(#screen-dashboard, #screen-fullmap) .cip-status.cleared { background: rgba(120, 240, 170, 0.18); color: #b9f6c9; }
+:is(#screen-dashboard, #screen-fullmap) .cip-status.locked { background: rgba(255, 140, 110, 0.18); color: #ffc9b5; }
 
-#screen-dashboard .cip-title {
+:is(#screen-dashboard, #screen-fullmap) .cip-title {
   font-size: 13px;
   font-weight: 900;
   color: #f2fffb;
@@ -437,14 +476,14 @@
   text-overflow: ellipsis;
 }
 
-#screen-dashboard .cip-organ {
+:is(#screen-dashboard, #screen-fullmap) .cip-organ {
   font-size: 10.5px;
   font-weight: 700;
   color: #9fe8d8;
 }
 
-#screen-dashboard .cip-obj,
-#screen-dashboard .cip-lock {
+:is(#screen-dashboard, #screen-fullmap) .cip-obj,
+:is(#screen-dashboard, #screen-fullmap) .cip-lock {
   font-size: 10.5px;
   font-weight: 600;
   color: rgba(226, 245, 240, 0.78);
@@ -452,64 +491,92 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#screen-dashboard .cip-lock { color: #ffc9b5; }
+:is(#screen-dashboard, #screen-fullmap) .cip-lock { color: #ffc9b5; }
 
 @media (max-width: 380px) {
-  #screen-dashboard .cip-organ { display: none; }
+  :is(#screen-dashboard, #screen-fullmap) .cip-organ { display: none; }
 }
 
 /* ---------------------------------------------------------------
-   3. TOMBOL MAIN — satu-satunya CTA, besar di tengah
+   3. TOMBOL MASUK — satu-satunya CTA, lencana heksagon + taring
+   (lingkaran polos + ikon segitiga play lama terbaca sebagai tombol
+   player musik — diganti bentuk bersudut khas game + aksen organik). ---
    --------------------------------------------------------------- */
 #screen-dashboard .dash-play {
   align-self: center;
   margin: clamp(6px, 1.4vh, 14px) 0 clamp(4px, 1vh, 10px);
-  width: clamp(104px, 15vh, 152px);
-  height: clamp(104px, 15vh, 152px);
-  border-radius: 999px;
+  width: clamp(108px, 15.5vh, 156px);
+  height: clamp(108px, 15.5vh, 156px);
+  position: relative;
   border: 0;
-  display: grid;
-  place-items: center;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 2px;
   cursor: pointer;
   color: #2a0b06;
-  background: radial-gradient(circle at 32% 28%, #ffb37a 0%, #ff7a5c 46%, #e8492f 100%);
-  box-shadow:
-    0 12px 28px rgba(232, 73, 47, 0.42),
-    0 0 0 6px rgba(255, 122, 92, 0.14),
-    inset 0 -6px 14px rgba(120, 20, 10, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  filter: drop-shadow(0 12px 22px rgba(232, 73, 47, 0.45));
+  transition: transform 0.12s ease;
 }
 
 #screen-dashboard .dash-play:active { transform: scale(0.93); }
 
-#screen-dashboard .dash-play img {
-  width: 34%;
-  min-width: 30px;
+/* Lencana heksagon: .dash-play-hex ITU SENDIRI adalah bingkai luar gelap
+   (lapisan bawah, dicat lebih dulu); intinya yang terang adalah ::after
+   (dicat belakangan → di atas) supaya urutan cat CSS benar (pseudo-elemen
+   selalu di atas background elemen induknya sendiri, sekecil apa pun inset
+   atau z-index yang dipakai — makanya inti terang HARUS jadi elemen yang
+   dicat setelahnya, bukan sebaliknya). */
+#screen-dashboard .dash-play-hex {
+  position: absolute;
+  inset: 1%;
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  background: linear-gradient(155deg, #ffe3b8 0%, #1d6a5e 42%, #0a2e29 100%);
+}
+
+#screen-dashboard .dash-play-hex::after {
+  content: '';
+  position: absolute;
+  inset: 7%;
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  background: radial-gradient(circle at 32% 26%, #ffb37a 0%, #ff7a5c 46%, #e8492f 100%);
+  box-shadow:
+    inset 0 -8px 16px rgba(120, 20, 10, 0.4),
+    inset 0 6px 10px rgba(255, 216, 190, 0.35);
+}
+
+/* Dua "taring" segitiga kecil di sisi bawah lencana — aksen organik bio,
+   bukan sekadar heksagon generik. Dicat setelah .dash-play-hex (urutan DOM)
+   supaya tampak menempel di depan tepi bawah lencana. */
+#screen-dashboard .dash-play-fang {
+  position: absolute;
+  width: 20%;
+  aspect-ratio: 0.62;
+  bottom: 6%;
+  background: linear-gradient(180deg, #1d6a5e, #0a2e29);
+  clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+}
+#screen-dashboard .dash-play-fang-l { left: -2%; transform: rotate(-18deg); }
+#screen-dashboard .dash-play-fang-r { right: -2%; transform: rotate(18deg) scaleX(-1); }
+
+#screen-dashboard .dash-play-icon {
+  width: 32%;
+  min-width: 28px;
+  position: relative;
+  z-index: 1;
   filter: brightness(0) saturate(100%) invert(12%) sepia(60%) saturate(2000%) hue-rotate(340deg);
 }
 
-#screen-dashboard .dash-play-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-}
-
-#screen-dashboard .dash-play-copy b {
-  font-size: clamp(15px, 2.4vh, 21px);
+#screen-dashboard .dash-play-label {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(11px, 1.7vh, 13px);
   font-weight: 900;
-  letter-spacing: 0.08em;
-}
-
-#screen-dashboard .dash-play-copy small {
-  font-size: 9px;
-  font-weight: 700;
-  opacity: 0.75;
-  max-width: 96px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: 0.14em;
+  color: #2a0b06;
+  text-shadow: 0 1px 0 rgba(255, 216, 190, 0.4);
 }
 
 #screen-dashboard .dash-play-ring {
@@ -816,7 +883,7 @@
    Penyesuaian layar kecil / portrait
    --------------------------------------------------------------- */
 @media (max-width: 560px) {
-  #screen-dashboard .cip-obj { display: none; }
+  :is(#screen-dashboard, #screen-fullmap) .cip-obj { display: none; }
   #screen-dashboard .dash-play { width: clamp(88px, 13vh, 120px); height: clamp(88px, 13vh, 120px); }
 }
 
@@ -830,7 +897,7 @@
   #screen-dashboard .bs-leg,
   #screen-dashboard .bs-hand,
   #screen-dashboard .bs-foot,
-  #screen-dashboard .chap-node.current .chap-node-ring { animation: none; }
+  :is(#screen-dashboard, #screen-fullmap) .chap-node.current .chap-node-ring { animation: none; }
 }
 
 /* ---------------------------------------------------------------
@@ -872,3 +939,127 @@
 #screen-dashboard .float-pill span { opacity: 0.8; font-weight: 700; }
 #screen-dashboard .float-pill.strain { cursor: default; }
 #screen-dashboard .float-pill.strain b { color: #ffd166; }
+
+/* ---------------------------------------------------------------
+   7. PETA PENUH (modal dramatis) — dibuka dari veil preview dashboard.
+   Foto latar bg-fullmap.jpg (organ tubuh gaya ilustrasi "Small Cells
+   Big Missions") full-bleed, SEMUA bab kelihatan sekaligus (beda dari
+   preview dashboard yang sengaja dipotong pendek), animasi zoom-in saat
+   dibuka. Node/jalur = data SAMA dari dashboard-screen.js (paintHost).
+   --------------------------------------------------------------- */
+#screen-fullmap.screen.modal {
+  padding: 0;
+  background: rgba(2, 10, 10, 0.7);
+  backdrop-filter: blur(3px);
+  overflow: hidden;
+}
+
+#screen-fullmap .fullmap-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--dash-bg-deep);
+  background-image: url('../assets/ui/bg-fullmap.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Foto sumbernya bawa nomor jalur & label organ sendiri (1-13, dilukis
+     di gambar) — kalau dibiarkan tajam, teks/nomor itu bentrok dan
+     membingungkan dengan node interaktif kita sendiri (chap-node, angka
+     bab 1-6) yang digambar di atasnya (dua "peta" seolah tumpang tindih).
+     Diredupkan + sedikit blur supaya teks/nomornya tidak terbaca lagi —
+     yang tersisa cuma suasana warna & bentuk organ (backdrop), sedangkan
+     SATU-SATUNYA peta yang terbaca adalah jalur+node HTML kita. */
+  filter: brightness(0.4) saturate(0.5) blur(2px);
+  transform: scale(1.03); /* tutup tepi buram akibat blur supaya tak ada garis putih di pinggir */
+}
+
+#screen-fullmap .fullmap-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 15, 15, 0.8) 0%, rgba(3, 15, 15, 0.42) 20%, rgba(3, 15, 15, 0.52) 55%, rgba(3, 15, 15, 0.46) 75%, rgba(3, 15, 15, 0.92) 100%);
+}
+
+#screen-fullmap .fullmap-box {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 640px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
+  /* Efek "zoom dramatis" saat modal dibuka — bukan sekadar fade generik
+     bawaan .screen.active (screen-in), supaya terasa beda dari layar biasa. */
+  animation: fullmap-zoom-in 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fullmap-zoom-in {
+  from { opacity: 0; transform: scale(1.12); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+#screen-fullmap .fullmap-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+#screen-fullmap .fullmap-title {
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: var(--dash-ink);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+#screen-fullmap .fullmap-pos {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--dash-ink-soft);
+  background: var(--dash-glass-2);
+  border: 1px solid var(--dash-edge);
+  border-radius: 999px;
+  padding: 5px 12px;
+  backdrop-filter: blur(6px);
+}
+
+#screen-fullmap .fullmap-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Kanvas peta penuh: SELALU tampil 100% (tak ada pan/zoom seperti preview
+   dashboard) — inilah tempat semua 6 bab kelihatan sekaligus. Tidak ada
+   siluet SVG flat di sini (foto latar sudah menggambarkan organ tubuh) —
+   hanya jalur (chapter-path-group-full) + node HTML di atasnya. */
+#screen-fullmap .fullmap-canvas {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 300 / 520;
+}
+
+#screen-fullmap .fullmap-silhouette {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#screen-fullmap .fullmap-info {
+  flex: 0 0 auto;
+  background: var(--dash-glass-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #screen-fullmap .fullmap-box { animation: none; }
+}

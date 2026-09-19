@@ -121,6 +121,12 @@ body[data-active-screen="dashboard"]:not(.in-run) #toasts {
   bottom: calc(172px + env(safe-area-inset-bottom));
   flex-direction: column-reverse;
 }
+/* Peta penuh: header tipis (tombol tutup + judul + BAB x/y) duduk di baris
+   paling atas — toast default (top:150px) menimpanya. Ditaruh tepat di
+   bawah header itu saja. */
+body[data-active-screen="fullmap"]:not(.in-run) #toasts {
+  top: calc(64px + env(safe-area-inset-top));
+}
 body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 .toast {
   background: var(--card); color: var(--ink);
@@ -2304,20 +2310,16 @@ img.lock-badge {
    .chap-info-panel di bawah peta. Semua styling ada di dashboard-map.css
    (§2/§2b) supaya tidak ada dua sumber ukuran yang bentrok. */
 
-/* ---------- 3. Tombol PLAY — ikon saja, lingkaran jelas (UI-audit) ----------
-   Bentuk "sel meleleh" (clip-path .netes) lama tidak terbaca sebagai tombol
-   ("bentuknya tidak jelas" — user). Diganti lingkaran solid dengan cincin
-   ganda berdenyut + ikon play — jelas dari jauh, unik lewat gerak & glow-nya,
-   bukan lewat siluet yang aneh. Ukuran/posisi dasar dari dashboard-map.css §3,
-   di sini hanya menimpa detail ikon & cincin. */
-#screen-dashboard .dash-play {
-  display: flex; align-items: center; justify-content: center;
-}
-/* Selector setara/lebih spesifik dari `.dash-play img` (dashboard-map.css §3)
+/* ---------- 3. Tombol MASUK — lencana heksagon + taring (UI-audit) ----------
+   Lingkaran + ikon segitiga play lama terbaca sebagai tombol player musik,
+   bukan tombol game ("bentuknya lebih mirip play musik" — user). Bentuk
+   dasar (heksagon, taring, label) dari dashboard-map.css §3, di sini hanya
+   menimpa detail ikon & delay cincin kedua. */
+/* Selector setara/lebih spesifik dari `.dash-play-icon` (dashboard-map.css §3)
    supaya width & filter recolor di sini tidak kalah kaskade — filter digabung
    satu deklarasi (recolor + drop-shadow), bukan menimpa sebagian. */
 #screen-dashboard .dash-play img.dash-play-icon {
-  width: 38%; min-width: 32px; position: relative; z-index: 2;
+  width: 34%; min-width: 30px; position: relative; z-index: 1;
   filter: brightness(0) saturate(100%) invert(12%) sepia(60%) saturate(2000%) hue-rotate(340deg)
     drop-shadow(0 2px 3px rgba(90, 20, 8, 0.35));
 }
@@ -2325,24 +2327,70 @@ img.lock-badge {
   animation-delay: 1.2s;
 }
 
-/* ---------- 4. Loading: logo PHAGOS (satu aset, latar transparan) di sepertiga atas ----------
-   Tidak ada lagi modal "MULAI" (UI-audit): loading selesai → main.js langsung
-   berpindah ke Dashboard. Brand didorong sedikit dari atas; sisa ruang kosong
-   dipakai .load-bottom (main.css §LOADING) untuk animasi loading di dasar layar. */
+/* ---------- 4. Loading: foto latar baru (bg-loading.jpg) sudah membawa
+   wordmark "PHAGOS" sendiri + karakter di tepi + dekorasi virus — logo
+   HTML terpisah (.load-brand) DISEMBUNYIKAN di layar ini supaya tidak
+   dobel. Ruang kosong di tengah foto diisi cincin loading berdenyut
+   (.load-ring-slot); progress bar tetap di dasar layar (.load-bottom). ---------- */
 #screen-loading .load-stage { display: none !important; }   /* dekorasi = "UI lain" */
-#screen-loading .load-box { position: relative; z-index: 2; }
-#screen-loading .load-brand {
-  display: flex; flex-direction: column; align-items: center;
-  margin-top: clamp(48px, 16vh, 140px);
-}
-/* Logo gabungan maskot + wordmark, latar sudah dibersihkan jadi transparan —
-   tidak ada lagi kotak/blok gelap menempel di belakangnya. */
-#screen-loading .load-logo {
-  width: clamp(200px, 62vw, 420px);
-  height: auto;
-  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.45));
-}
+#screen-loading .load-box { position: relative; z-index: 2; display: flex; flex-direction: column; }
+#screen-loading .load-brand { display: none; }
 #screen-loading .progress-track { width: min(300px, 74vw); }
+
+/* Cincin loading — diposisikan meniru slot kosong di foto latar baru
+   (kira-kira di tengah layar, sedikit di atas titik tengah). */
+#screen-loading .load-ring-slot {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: clamp(150px, 42vw, 220px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+#screen-loading .load-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1.5px solid rgba(159, 232, 216, 0.35);
+}
+#screen-loading .load-ring-inner { inset: 14%; border-color: rgba(159, 232, 216, 0.55); }
+#screen-loading .load-ring-outer { animation: load-ring-spin 5s linear infinite; border-style: dashed; }
+#screen-loading .load-ring-inner { animation: load-ring-pulse 2.2s ease-in-out infinite; }
+#screen-loading .load-blob {
+  position: relative;
+  width: 46%;
+  aspect-ratio: 1.1;
+  border-radius: 46% 54% 52% 48% / 52% 48% 54% 46%;
+  background: linear-gradient(160deg, rgba(159, 232, 216, 0.55), rgba(53, 208, 186, 0.28));
+  box-shadow: 0 0 24px rgba(127, 227, 208, 0.35);
+  animation: load-blob-breathe 2.2s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14%;
+}
+#screen-loading .load-blob-eye {
+  width: 14%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: rgba(6, 34, 32, 0.75);
+}
+@keyframes load-ring-spin { to { transform: rotate(360deg); } }
+@keyframes load-ring-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+@keyframes load-blob-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #screen-loading .load-ring-outer,
+  #screen-loading .load-ring-inner,
+  #screen-loading .load-blob { animation: none; }
+}
 
 /* ---------- 5. Modal Shop ---------- */
 .shop-sub { font-size: 12px; font-weight: 700; opacity: 0.86; margin: 2px 0 10px; }
