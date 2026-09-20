@@ -261,10 +261,61 @@ export function drawCreature(ctx, o) {
     ctx.stroke();
     ctx.globalAlpha = alpha;
 
-    // ---------- tepi depan (lamellipodium) — penanda ARAH ----------
+    // ---------- RUFFLE MEMBRAN (opsional, data `body.ruffle`) ----------
+    // Identitas makrofag: tepi membran berkerut halus (bukan bulat licin),
+    // kerutan paling rapat di sisi depan (arah jangkauan). Tanpa wajah.
+    const ruf = body.ruffle || null;
+    if (ruf && ruf.count) {
+      const nR = ruf.count | 0;
+      ctx.strokeStyle = ruf.color || body.rim || '#8fe6c8';
+      ctx.lineWidth = Math.max(1, S * (ruf.thick || 0.014));
+      ctx.globalAlpha = alpha * (ruf.alpha == null ? 0.55 : ruf.alpha);
+      ctx.beginPath();
+      for (let k = 0; k < nR; k++) {
+        const a = (k / nR) * TAU + waktu * (ruf.spin || 0.15);
+        // lebih panjang ke arah depan (cos a > 0 = depan dalam ruang badan)
+        const depan = 0.5 + 0.5 * Math.cos(a);
+        // sisi bawah (sin a > 0 = menempel alas) hampir tanpa kerutan supaya
+        // garis alas makhluk tetap = garis alas foto lama (uji 0,42×S).
+        const atas = 0.5 - 0.5 * Math.sin(a);
+        const len = (ruf.len || 0.08) * (0.4 + 0.6 * depan) * (0.15 + 0.85 * atas) * (1 + 0.35 * Math.sin(waktu * 3.1 + k * 1.7));
+        const ri = 1 + Math.sin(a * lobes + waktu * speed) * amp;
+        const x0 = Math.cos(a) * rx * ri, y0 = Math.sin(a) * ry * ri;
+        const x1 = Math.cos(a + 0.04) * rx * (ri + len), y1 = Math.sin(a + 0.04) * ry * (ri + len);
+        const xm = Math.cos(a - 0.06) * rx * (ri + len * 0.6), ym = Math.sin(a - 0.06) * ry * (ri + len * 0.6);
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(xm, ym, x1, y1);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+    }
+
+    // ---------- tepi depan: MANGKUK FAGOSIT (data `front.cup`) atau lamellipodium ----------
     const frontCfg = c.front || {};
     const panjangDepan = pose.front * (0.35 + 0.65 * (viewFront + 0.45 * viewSide));
-    if (panjangDepan > 0.03) {
+    if (frontCfg.cup && panjangDepan > 0.03) {
+      // Mangkuk terbuka ke depan — "mulut" biologis yang BUKAN wajah: dua
+      // lengan membran melengkung mengapit rongga, lebar ikut pose.front.
+      const buka = (frontCfg.cup.open || 0.55) * panjangDepan;
+      const reach = rx * (0.55 + 0.9 * panjangDepan);
+      ctx.beginPath();
+      ctx.moveTo(rx * 0.35, -ry * 0.55);
+      ctx.quadraticCurveTo(reach * 1.05, -ry * (0.55 + buka), reach, -ry * buka * 0.45);
+      ctx.quadraticCurveTo(reach * 0.72, -ry * buka * 0.1, reach * 0.72, 0);
+      ctx.quadraticCurveTo(reach * 0.72, ry * buka * 0.1, reach, ry * buka * 0.45);
+      ctx.quadraticCurveTo(reach * 1.05, ry * (0.55 + buka), rx * 0.35, ry * 0.55);
+      ctx.closePath();
+      ctx.fillStyle = frontCfg.color || '#7fe3d0';
+      ctx.globalAlpha = alpha * (0.35 + 0.45 * (viewFront + 0.4 * viewSide));
+      ctx.fill();
+      // rongga mangkuk: lebih gelap (kedalaman), tanpa fitur wajah
+      ctx.beginPath();
+      ctx.ellipse(reach * 0.78, 0, rx * 0.16 * panjangDepan, ry * buka * 0.32, 0, 0, TAU);
+      ctx.fillStyle = frontCfg.cup.inner || body.belly || '#3a6146';
+      ctx.globalAlpha = alpha * 0.55;
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+    } else if (panjangDepan > 0.03) {
       ctx.beginPath();
       ctx.moveTo(-ry * 0.75, 0);
       ctx.quadraticCurveTo(rx * panjangDepan * 1.5, -ry * 0.25, rx * panjangDepan * 1.5, 0);
@@ -303,6 +354,42 @@ export function drawCreature(ctx, o) {
     ctx.globalAlpha = alpha * 0.5;
     ctx.stroke();
     ctx.globalAlpha = alpha;
+
+    // ---------- VAKUOLA FAGOSITOSIS (data `vacuoles`) ----------
+    // Identitas "pemakan": gelembung isi (patogen tercerna) melayang pelan di
+    // sitoplasma, ukuran berbeda-beda, mengecil-membesar (mencerna). Digambar
+    // di atas nukleus tapi tembus pandang — bukan mata (jumlah ganjil, acak,
+    // tidak simetris, tidak menghadap kamera).
+    const vac = c.vacuoles || null;
+    if (vac && vac.count) {
+      const nV = vac.count | 0;
+      for (let k = 0; k < nV; k++) {
+        const seed = k * 2.399 + 0.7;
+        const ang = seed + waktu * (vac.drift || 0.18) * (k % 2 ? 1 : -0.7);
+        const orb = (vac.orbit || 0.3) * (0.55 + 0.45 * ((k * 7) % 5) / 4);
+        const vx = Math.cos(ang) * orb * S * pose.core.sx * 0.9;
+        const vy = Math.sin(ang) * orb * S * pose.core.sy * 0.75 + (nuk.y || 0) * S * 0.3;
+        const vr = (vac.r || 0.06) * S * (0.6 + 0.4 * ((k * 3) % 4) / 3) * (1 + 0.12 * Math.sin(waktu * 1.9 + seed));
+        ctx.beginPath();
+        ctx.ellipse(vx, vy, vr * pose.core.sx, vr * pose.core.sy, 0, 0, TAU);
+        ctx.fillStyle = vac.color || '#c7f7e5';
+        ctx.globalAlpha = alpha * (vac.alpha == null ? 0.42 : vac.alpha);
+        ctx.fill();
+        ctx.strokeStyle = vac.rim || body.rim || '#8fe6c8';
+        ctx.lineWidth = Math.max(1, S * 0.008);
+        ctx.globalAlpha = alpha * 0.35;
+        ctx.stroke();
+        // isi vakuola: butir gelap (sisa patogen), bergeser pelan
+        if (vac.content) {
+          ctx.beginPath();
+          ctx.arc(vx + Math.cos(waktu * 0.9 + seed) * vr * 0.35, vy + Math.sin(waktu * 1.1 + seed) * vr * 0.3, vr * 0.32, 0, TAU);
+          ctx.fillStyle = vac.content;
+          ctx.globalAlpha = alpha * 0.5;
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = alpha;
+    }
 
     // ---------- MUTASI A → B: duri & warna muncul perlahan (prosedural) ----------
     const mut = Math.max(0, Math.min(1, o.mut || 0));

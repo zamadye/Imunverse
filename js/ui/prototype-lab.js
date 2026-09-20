@@ -18,7 +18,7 @@ import { getData } from '../core/data-store.js';
 import { drawSprite } from '../render/sprite-loader.js';
 import { crawlPose } from '../systems/crawl-rig.js';
 import { drawCreature, creatureStateInfo, creatureAvailable, creatureStates } from '../render/creature-rig.js';
-import { heroMode, setHeroMode, heroModes } from '../render/hero-mode.js';
+import { setHeroMode, heroModes, heroModeFor } from '../render/hero-mode.js';
 
 const TAU = Math.PI * 2;
 const STATES = [
@@ -181,13 +181,16 @@ function bangun(id) {
   const deret = el('div', 'lab-row');
   panel.__kanvas = {};
   const NAMA = { foto: '① Deformasi foto', hibrida: '② Hibrida (foto + anggota)', makhluk: '③ Makhluk vektor — rig Godot' };
+  // Mode yang BENAR-BENAR dipakai hero ini di arena (hero pilot Mako = makhluk
+  // secara bawaan walau mode global masih foto).
+  const aktif = heroModeFor(id);
   for (const m of heroModes()) {
-    const sel = el('div', 'lab-cell' + (heroMode() === m ? ' terpilih' : ''));
+    const sel = el('div', 'lab-cell' + (aktif === m ? ' terpilih' : ''));
     sel.appendChild(el('div', 'lab-judul', NAMA[m] || m));
     const c = kanvasAi();
     sel.appendChild(c);
     panel.__kanvas[m] = c;
-    const pakai = el('button', 'lab-pakai', heroMode() === m ? 'Dipakai di arena' : 'Pakai di arena');
+    const pakai = el('button', 'lab-pakai', aktif === m ? 'Dipakai di arena' : 'Pakai di arena');
     pakai.onclick = () => {
       setHeroMode(m);
       for (const s of deret.children) s.classList.remove('terpilih');

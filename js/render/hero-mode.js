@@ -12,16 +12,31 @@
 import { drawCreature, creatureAvailable, creatureStateInfo } from './creature-rig.js';
 
 const MODES = ['foto', 'hibrida', 'makhluk'];
-// DEFAULT = 'foto': karakter yang tampil di layar HARUS foto hero asli
-// (assets/sprites/*.png) — bukan blob vektor prosedural. 'makhluk' hanya
-// prototipe eksperimen, tidak boleh jadi tampilan bawaan pemain.
+// DEFAULT GLOBAL = 'foto' (10 hero non-pilot masih memakai foto lama).
+//
+// PILOT "Abstract Bio-Forms": brief "human anime chibi" DIBATALKAN owner —
+// hero pilot (Mako/macrophage) TAMPIL SEBAGAI MAKHLUK VEKTOR ABSTRAK (tanpa
+// mata/mulut) secara bawaan, walau mode global masih 'foto'. Hero lain tidak
+// tersentuh sampai pilot divalidasi. Pemain/penguji tetap bisa memaksa
+// 'foto' untuk pembanding lewat ?heroMode=foto / tombol M (mode EKSPLISIT
+// mengalahkan bawaan pilot).
+export const PILOT_CREATURE_HEROES = ['macrophage'];
 let _mode = 'foto';
+let _explicit = false; // true bila pemain/URL memilih mode secara sadar
 let _lastT = 0;
 
-/** Mode aktif. */
+/** Mode aktif (global). */
 export function heroMode() { return _mode; }
+/** Mode EFEKTIF untuk satu hero: hero pilot → 'makhluk' kecuali dipilih eksplisit. */
+export function heroModeFor(heroId) {
+  if (!_explicit && PILOT_CREATURE_HEROES.includes(heroId) && creatureAvailable(heroId)) return 'makhluk';
+  return _mode;
+}
+export function isPilotCreatureHero(heroId) { return PILOT_CREATURE_HEROES.includes(heroId); }
 export function heroModes() { return MODES.slice(); }
-export function setHeroMode(m) { if (MODES.includes(m)) { _mode = m; try { localStorage.setItem('phagos.heroMode', m); } catch { /* abaikan */ } } }
+export function setHeroMode(m) { if (MODES.includes(m)) { _mode = m; _explicit = true; try { localStorage.setItem('phagos.heroMode', m); } catch { /* abaikan */ } } }
+/** Kembalikan ke bawaan (hero pilot = makhluk, lainnya = foto) — untuk penguji/lab. */
+export function resetHeroMode() { _mode = 'foto'; _explicit = false; try { localStorage.removeItem('phagos.heroMode'); } catch { /* abaikan */ } }
 export function cycleHeroMode() { setHeroMode(MODES[(MODES.indexOf(_mode) + 1) % MODES.length]); return _mode; }
 
 /** Baca preferensi dari URL (?heroMode=makhluk) atau localStorage. */
@@ -29,9 +44,9 @@ export function initHeroMode(search) {
   try {
     const q = new URLSearchParams(search || (typeof location !== 'undefined' ? location.search : ''));
     const m = q.get('heroMode');
-    if (m && MODES.includes(m)) { _mode = m; return _mode; }
+    if (m && MODES.includes(m)) { _mode = m; _explicit = true; return _mode; }
     const s = localStorage.getItem('phagos.heroMode');
-    if (s && MODES.includes(s)) _mode = s;
+    if (s && MODES.includes(s)) { _mode = s; _explicit = true; }
   } catch { /* abaikan */ }
   return _mode;
 }
@@ -85,9 +100,10 @@ export function heroAnimState(player, run, timeSec, dtSec) {
 export function drawHeroBody(ctx, o) {
   const player = o.player;
   const id = player.heroDef && player.heroDef.id;
-  if (_mode === 'foto' || !creatureAvailable(id)) return 'none';
+  const mode = heroModeFor(id);
+  if (mode === 'foto' || !creatureAvailable(id)) return 'none';
   if (o.limbsOnly) return gambar(ctx, o, true);
-  return gambar(ctx, o, _mode === 'hibrida');
+  return gambar(ctx, o, mode === 'hibrida');
 }
 
 /** Hanya anggota geraknya (mode hibrida: foto sudah digambar lebih dulu). */

@@ -5,21 +5,35 @@
       "body": {
         "belly": "#3a6146",
         "catatan": "radius dalam satuan badan (1.0 = lebar penuh sprite)",
-        "color": "#4a7c59",
+        "color": "#4f8a62",
         "radius": 0.5,
-        "rim": "#8fe6c8",
+        "rim": "#9df0d2",
         "wobble": {
           "amp": 0.03,
           "lobes": 7,
           "secondary": 0.012,
           "speed": 1.7
+        },
+        "ruffle": {
+          "catatan": "PILOT Abstract Bio-Form: kerutan membran (ruffled border) \u2014 identitas makrofag, tanpa wajah",
+          "count": 22,
+          "len": 0.09,
+          "thick": 0.014,
+          "alpha": 0.55,
+          "spin": 0.12,
+          "color": "#a5f0d6"
         }
       },
       "front": {
         "arc": 0.62,
         "catatan": "lamellipodium \u2014 tepi depan yang menjangkau; penanda arah hadap",
         "color": "#7fe3d0",
-        "thickness": 0.13
+        "thickness": 0.13,
+        "cup": {
+          "catatan": "mangkuk fagosit terbuka ke depan menggantikan lamellipodium polos \u2014 penanda arah + identitas 'pemakan'",
+          "open": 0.6,
+          "inner": "#2f5b47"
+        }
       },
       "limbs": {
         "catatan": "mount = sudut pangkal (rad, 0 = depan). duty = porsi siklus menapak; lift = tinggi ayun.",
@@ -9918,6 +9932,17 @@
         "color": "#3a6146",
         "len": 0.3,
         "thick": 0.1
+      },
+      "vacuoles": {
+        "catatan": "gelembung fagositosis di sitoplasma \u2014 jumlah ganjil, asimetris, bukan mata",
+        "count": 5,
+        "r": 0.065,
+        "orbit": 0.3,
+        "drift": 0.18,
+        "alpha": 0.42,
+        "color": "#cdf7e7",
+        "rim": "#8fe6c8",
+        "content": "#274a3b"
       }
     },
     "dendritic": {
