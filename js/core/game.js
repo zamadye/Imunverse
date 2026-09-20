@@ -852,6 +852,8 @@ export const game = {
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
     run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
+    // PILOT Organ Ascent: sedikit menjauh saat di koridor organ (dari data shape.cameraZoom)
+    try { run.camera.setCorridorZoom(run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1); } catch { /* abaikan */ }
 
     // Tutorial langkah "bergerak": akumulasi jarak pemain
     const mv = this.input.getMoveVector();

@@ -282,6 +282,18 @@ cek('PILOT: keluar zona jantung → kembali ke cawan lama berpusat di pemain (ti
   && Math.abs(runS.arenaBounds.x - posSebelum.x) < 1 && Math.abs(runS.arenaBounds.y - posSebelum.y) < 1
   && pl.x === posSebelum.x && pl.y === posSebelum.y,
   `shape=${runS.arenaShape} bounds=${JSON.stringify(runS.arenaBounds)}`);
+// kamera: di koridor sedikit menjauh (target < 1), keluar → kembali 1; tidak pernah ekstrem
+_jumpToZone(game, 'heart');
+{
+  const cam = runS.camera;
+  for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
+  const diKoridor = cam.corridorTarget;
+  _jumpToZone(game, 'artery');
+  for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
+  cek('PILOT: kamera menjauh ringan di koridor (0,8–0,95) dan kembali normal (1) di cawan',
+    diKoridor >= 0.8 && diKoridor <= 0.95 && cam.corridorTarget === 1,
+    `koridor=${diKoridor} → cawan=${cam.corridorTarget}`);
+}
 // render koridor tidak error & tidak NaN (ctx perekam)
 _jumpToZone(game, 'heart');
 {

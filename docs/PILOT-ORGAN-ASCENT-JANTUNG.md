@@ -56,7 +56,7 @@ npx esbuild --bundle js/main.js --outfile=.tmp-bundle.js --format=iife   ✔
 node tools/verify-animasi.mjs    === ERROR (0) ===
 node tools/verify-crawl.mjs      === ERROR (0) ===
 node tools/verify-prototype.mjs  === ERROR (0) ===   (asersi diperbarui, +6 cek)
-node tools/verify-world.mjs      === ERROR (0) ===   (+11 cek PILOT)
+node tools/verify-world.mjs      === ERROR (0) ===   (+12 cek PILOT)
 node tools/verify-rive/combat/economy/p5/gamefeel/attacks.mjs  === ERROR (0) ===
 node scripts/check-imports.mjs   Semua pemeriksaan lolos ✔
 ```
@@ -81,9 +81,10 @@ HP 99999 → 99999 di keduanya; jarak tempuh vertikal per detik identik (perbeda
 
 Siap di-scale karena: (1) pola data-driven — organ baru = blok `shape.profile` (belasan angka) + warna `wall`, hero baru = 3 field opsional di rig; (2) 0 perubahan di mekanik terbukti oleh test; (3) jalur lama tetap utuh sebagai fallback.
 
-Yang sebaiknya dibereskan sebelum 6 organ lain:
-1. **Kamera zoom-out sedikit saat berada di koridor** (mis. `ZONE_ZOOM` 0.9 saat `arenaShape` aktif) — di lebar bilik 780 unit, kedua dinding baru terlihat bersamaan di bagian sempit; owner mungkin ingin siluet lebih sering terbaca penuh.
-2. **Musuh dari bawah** — spawn masih radial di sekeliling player (mekanik lama, sengaja tidak diubah). Untuk rasa "didaki", bias spawn ke bawah (y > player) bisa jadi tweak `getSpawnPosition` opsional per-shape — ini perubahan gameplay ringan, butuh keputusan owner.
-3. Untuk **paru** (bercabang) profil tunggal tidak cukup — perlu ekstensi `kind:'branch'` (2–3 koridor bergabung). Pola `halfAt/centerAt` masih bisa dipakai per cabang.
+Sudah dikerjakan di PR ini (revisi #1): **zoom-out ringan saat di koridor** — layer `corridorScale` di `Camera` (independen dari zona/punch, tanpa getar), target dari `shape.cameraZoom` (jantung 0,88), kembali 1 saat keluar koridor; dicek `verify-world`. Screenshot `after-*` sudah memakai zoom ini.
+
+Yang masih butuh keputusan owner sebelum 6 organ lain:
+1. **Musuh dari bawah** — spawn masih radial di sekeliling player (mekanik lama, sengaja tidak diubah). Untuk rasa "didaki", bias spawn ke bawah (y > player) bisa jadi tweak `getSpawnPosition` opsional per-shape — ini perubahan gameplay ringan, butuh keputusan owner.
+2. Untuk **paru** (bercabang) profil tunggal tidak cukup — perlu ekstensi `kind:'branch'` (2–3 koridor bergabung). Pola `halfAt/centerAt` masih bisa dipakai per cabang.
 
 Hero berikutnya: neutrophil & dendritic sudah punya rig penuh; cukup tambah `PILOT_CREATURE_HEROES` + field identitas (granula multi-lobus / dendrit) — tanpa kode baru di renderer kecuali bentuk khas yang diinginkan.

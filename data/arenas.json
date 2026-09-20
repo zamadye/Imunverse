@@ -630,6 +630,7 @@
         "doc": "PILOT Organ Ascent: koridor vertikal bersiluet bilik jantung. t=0 dasar (apeks), t=1 puncak (aorta). half=setengah lebar, cx=kelokan pusat. Luas ~ setara cawan lama (pi*750^2=1,77 jt) agar kepadatan spawn tidak berubah. Hanya batas & visual — mekanik identik.",
         "height": 3200,
         "startT": 0.1,
+        "cameraZoom": 0.88,
         "profile": [
           {
             "t": 0.0,

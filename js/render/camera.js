@@ -73,6 +73,11 @@ export class Camera {
     // zoneTarget (diset tiap frame oleh game.js dari posisi zona).
     this.zoneScale = 1;
     this.zoneTarget = 1;
+    // PILOT Organ Ascent: layer zoom-out ringan saat berada di koridor organ
+    // (siluet & kedua dinding lebih sering terbaca penuh). Independen dari
+    // zona/punch — tidak memicu getar, tidak dibatasi ≥1.
+    this.corridorScale = 1;
+    this.corridorTarget = 1;
   }
 
   reset(tx, ty) {
@@ -91,6 +96,8 @@ export class Camera {
     this.punchScale = 1;
     this.zoneScale = 1;
     this.zoneTarget = 1;
+    this.corridorScale = 1;
+    this.corridorTarget = 1;
   }
 
   /**
@@ -209,6 +216,12 @@ export class Camera {
       this.zoneScale += (this.zoneTarget - this.zoneScale) * k;
       if (Math.abs(this.zoneScale - this.zoneTarget) <= 1e-4) this.zoneScale = this.zoneTarget;
     }
+    // PILOT: zoom koridor menuju target, halus dua arah (~1 dtk)
+    if (Math.abs(this.corridorScale - this.corridorTarget) > 1e-4) {
+      const kc = 1 - Math.exp(-1.8 * dt);
+      this.corridorScale += (this.corridorTarget - this.corridorScale) * kc;
+      if (Math.abs(this.corridorScale - this.corridorTarget) <= 1e-4) this.corridorScale = this.corridorTarget;
+    }
     // Third-person: zoom kecepatan dihaluskan lambat (anti mual)
     if (Math.abs(this.speedScale - this.speedTarget) > 1e-4) {
       const kz = 1 - Math.exp(-THIRD_PERSON.ZOOM_RATE * dt);
@@ -217,9 +230,14 @@ export class Camera {
     }
   }
 
-  /** Faktor zoom total (urutan layer: speed → punch → zona). */
+  /** PILOT: target zoom koridor (1 = normal; <1 = sedikit menjauh). */
+  setCorridorZoom(target) {
+    this.corridorTarget = Math.max(0.7, Math.min(1, target == null ? 1 : target));
+  }
+
+  /** Faktor zoom total (urutan layer: speed → punch → zona → koridor). */
   totalZoom() {
-    return this.zoom * this.speedScale * this.punchScale * this.zoneScale;
+    return this.zoom * this.speedScale * this.punchScale * this.zoneScale * this.corridorScale;
   }
 
   /** Terapkan transform kamera ke ctx (w/h = ukuran viewport CSS px). */
