@@ -218,6 +218,82 @@ cek('HUD progres perjalanan minimal (zona → berikutnya, §26)',
   && hudSrc.includes('updateJourneyBar') && cssSrc.includes('.hud-journey'),
   `${hud.zone} → ${hud.next} (${Math.round(hud.progress * 100)}%)`);
 
+// ---------- 9. PILOT "ORGAN ASCENT" — arena bersiluet organ (jantung) ----------
+// docs/ARENA-CHARACTER-REDESIGN-STRATEGY.md §5: dari cawan bundar → koridor
+// vertikal bersiluet organ. PILOT hanya jantung; 6 organ lain tetap cawan.
+// Yang dijamin: (a) bentuk aktif tepat saat masuk zona jantung, lepas saat
+// keluar; (b) clamp menahan semua entitas DI DALAM siluet; (c) luas setara
+// cawan lama (kepadatan spawn tak berubah); (d) mekanik tak berubah.
+const _jumpToZone = WD._jumpToZone;
+const arenasDef = baca('data/arenas.json').arenas;
+const berkoridor = arenasDef.filter((a) => a.shape && a.shape.kind === 'corridor').map((a) => a.id);
+cek('PILOT: hanya arena jantung yang berbentuk koridor organ (6 organ lain belum disentuh)',
+  berkoridor.length === 1 && berkoridor[0] === 'jantung', `koridor=[${berkoridor.join(',')}]`);
+
+game.startRun('macrophage');
+const runS = game.run;
+const bentukAwal = runS.arenaShape; // zona pertama = paru → masih cawan
+_jumpToZone(game, 'heart');
+const SH = runS.arenaShape;
+cek('PILOT: masuk zona JANTUNG → arena berganti jadi koridor organ (zona lain tetap cawan)',
+  bentukAwal == null && !!SH && SH.kind === 'corridor' && SH.id === 'jantung',
+  `awal=${bentukAwal ? bentukAwal.kind : 'cawan'} → ${SH ? SH.kind + ':' + SH.id : 'null'}`);
+const luasCawan = Math.PI * 750 * 750;
+cek('PILOT: luas koridor setara cawan lama ±15% (kepadatan spawn tak berubah)',
+  !!SH && Math.abs(SH.area / luasCawan - 1) <= 0.15,
+  SH ? `${Math.round(SH.area)} vs ${Math.round(luasCawan)} (${(SH.area / luasCawan).toFixed(2)}×)` : 'tidak ada shape');
+cek('PILOT: koridor VERTIKAL — tinggi ≥ 3× lebar maksimum (bukan lapangan terbuka)',
+  !!SH && SH.height >= 3 * 2 * SH.summary.maxHalf, SH ? `tinggi=${SH.height} lebar maks=${2 * SH.summary.maxHalf}` : '');
+cek('PILOT: siluet organ melebar–menyempit (bukan lorong lurus)',
+  !!SH && (() => { const hs = []; for (let k = 0; k <= 20; k++) hs.push(SH.halfAt(SH.bottomY - (k / 20) * SH.height)); return Math.max(...hs) / Math.min(...hs) >= 2; })(),
+  'rasio lebar maks/min');
+// (b) clamp: sebar entitas jauh di luar, semua harus kembali ke dalam siluet
+const { insideShape, clampToShape } = await import('../js/systems/arena-shape.js');
+let luar = 0, total = 0;
+for (let k = 0; k < 400; k++) {
+  const e = { x: (Math.random() - 0.5) * 6000, y: SH.bottomY - Math.random() * SH.height * 1.4 + 300 };
+  game.arenaClamp(e, 14);
+  total++;
+  if (!insideShape(SH, e.x, e.y, 0)) luar++;
+}
+cek('PILOT: arenaClamp menahan 400 titik acak DI DALAM siluet organ (0 di luar)', luar === 0, `${luar}/${total} di luar`);
+// spawn musuh & boss juga masuk siluet
+let spawnLuar = 0;
+for (let k = 0; k < 40; k++) { game.spawnEnemy('bakteri', false); const e = runS.enemies[runS.enemies.length - 1]; if (!insideShape(SH, e.x, e.y, 0)) spawnLuar++; }
+cek('PILOT: 40 spawn musuh semuanya jatuh di dalam koridor', spawnLuar === 0, `${spawnLuar} di luar`);
+// pemain berjalan ke kiri 6 detik → tertahan dinding, tidak menembus
+const pl = runS.player;
+pl.x = SH.centerAt(pl.y); const yAwal = pl.y;
+for (let i = 0; i < 360; i++) { pl.update(1 / 60, { x: -1, y: 0, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
+const jarakDinding = Math.abs(pl.x - (SH.centerAt(pl.y) - SH.halfAt(pl.y)));
+cek('PILOT: pemain tertahan dinding kiri (tidak menembus siluet)',
+  insideShape(SH, pl.x, pl.y, 0) && jarakDinding <= (pl.radius || 15) + 1 && Math.abs(pl.y - yAwal) < 1,
+  `x=${pl.x.toFixed(1)} dinding=${(SH.centerAt(pl.y) - SH.halfAt(pl.y)).toFixed(1)} jarak=${jarakDinding.toFixed(1)}`);
+// (d) mekanik identik: jalur clamp lama vs baru tidak menyentuh HP/kecepatan
+const hpSebelum = pl.hp, spdSebelum = pl.speed;
+for (let i = 0; i < 60; i++) { pl.update(1 / 60, { x: 0, y: -1, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
+cek('PILOT: mekanik tak berubah — HP & kecepatan identik setelah clamp koridor',
+  pl.hp === hpSebelum && pl.speed === spdSebelum, `hp ${hpSebelum}→${pl.hp}, speed ${spdSebelum}→${pl.speed}`);
+// (a) keluar dari jantung → cawan kembali, berpusat di pemain (tidak terlempar)
+const posSebelum = { x: pl.x, y: pl.y };
+_jumpToZone(game, 'artery');
+cek('PILOT: keluar zona jantung → kembali ke cawan lama berpusat di pemain (tidak terlempar)',
+  runS.arenaShape == null && runS.arenaBounds && runS.arenaBounds.r === 750
+  && Math.abs(runS.arenaBounds.x - posSebelum.x) < 1 && Math.abs(runS.arenaBounds.y - posSebelum.y) < 1
+  && pl.x === posSebelum.x && pl.y === posSebelum.y,
+  `shape=${runS.arenaShape} bounds=${JSON.stringify(runS.arenaBounds)}`);
+// render koridor tidak error & tidak NaN (ctx perekam)
+_jumpToZone(game, 'heart');
+{
+  let nan = 0, ops = 0;
+  const grad = { addColorStop() {} };
+  const base = { canvas: { width: 400, height: 300 }, createLinearGradient: () => grad, createRadialGradient: () => grad, createPattern: () => null, measureText: () => ({ width: 0 }), getImageData: () => ({ data: new Uint8ClampedArray(4), width: 1, height: 1 }), createImageData: (w, h) => ({ data: new Uint8ClampedArray(4), width: w, height: h }), putImageData() {} };
+  const ctx = new Proxy(base, { get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line(Width|Cap|Join|DashOffset)$|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$/.test(p)) return ''; return (t[p] = (...a) => { ops++; for (const v of a) if (typeof v === 'number' && !Number.isFinite(v)) nan++; }); }, set(t, p, v) { t[p] = v; return true; } });
+  let err = null;
+  try { game.ctx = ctx; game.viewW = 400; game.viewH = 300; game.dpr = 1; game.render(16, 3000); } catch (e) { err = e.message; }
+  cek('PILOT: render koridor organ berjalan tanpa error & tanpa NaN', !err && nan === 0 && ops > 0, err || `ops=${ops} nan=${nan}`);
+}
+
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);
 for (const e of errors.slice(0, 15)) console.log('- ' + e);
