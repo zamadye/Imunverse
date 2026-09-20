@@ -1,6 +1,6 @@
 # PHAGOS — Laporan PILOT: Arena "Organ Ascent" (Bilik Jantung) + Character "Abstract Bio-Form" (Mako)
 
-**Status:** pilot selesai, menunggu validasi owner sebelum di-scale.
+**Status:** pilot divalidasi owner → **SUDAH DI-SCALE** (lihat §7). Bagian §1–§6 = laporan pilot asli.
 **Rujukan mandat:** `docs/ARENA-CHARACTER-REDESIGN-STRATEGY.md` (§5, §6, §8) dan
 `docs/AGENT-KICKOFF-ARENA-CHARACTER.md`.
 **Scope:** 1 organ (`jantung`) + 1 hero (`macrophage`). 6 organ & 10 hero lain
@@ -88,3 +88,40 @@ Yang masih butuh keputusan owner sebelum 6 organ lain:
 2. Untuk **paru** (bercabang) profil tunggal tidak cukup — perlu ekstensi `kind:'branch'` (2–3 koridor bergabung). Pola `halfAt/centerAt` masih bisa dipakai per cabang.
 
 Hero berikutnya: neutrophil & dendritic sudah punya rig penuh; cukup tambah `PILOT_CREATURE_HEROES` + field identitas (granula multi-lobus / dendrit) — tanpa kode baru di renderer kecuali bentuk khas yang diinginkan.
+
+---
+
+## 7. SCALE (setelah validasi owner) — 7 organ + 7 hero + bias spawn
+
+Keputusan owner: scale ke **semua 6 organ termasuk paru** dan **aktifkan bias spawn dari bawah**.
+
+### Arena — 7 organ bersiluet
+| Organ | kind | Siluet | Luas vs cawan | cameraZoom | spawnBias |
+|---|---|---|---|---|---|
+| limfe | corridor | pembuluh berkatup: 4 sinus melebar–menyempit | 0,95× | 0,90 | 0,65 |
+| lambung | corridor | kardia → fundus lebar → antrum → pilorus sempit | 1,04× | 0,86 | 0,50 |
+| **paru** | **branch** | bronkus → karina → 2 bronkiolus kiri/kanan → alveoli | 1,04× | 0,84 | 0,60 |
+| saraf | corridor | akson panjang, 3 nodus Ranvier, badan sel di puncak | 1,05× | 0,90 | 0,70 |
+| jantung | corridor | (pilot) apeks → bilik → katup → serambi → aorta | 1,01× | 0,88 | 0,60 |
+| kapiler | corridor | terowongan tersempit, berkelok, panjang 5200 | 0,99× | 0,95 | 0,80 |
+| aliran_darah | corridor | pembuluh besar lebar, kelok halus | 1,04× | 0,86 | 0,75 |
+
+- `arena-shape.js` diperluas: `kind:'branch'` = gabungan **lajur** (`lanes[]`, tiap lajur profil sendiri + rentang `t0..t1`). `insideShape`/`clampToShape`/`outsideDistance` bekerja per lajur terdekat; `halfAt/centerAt` tetap = lajur utama (kompatibel). Semua flowcell 7 organ kini mengalir **ke atas**.
+- `organ-corridor.js`: jaringan luar = layar penuh dilubangi gabungan lajur (offscreen `destination-out`) → cabang paru yang tumpang tindih tidak bocor; lapisan otot/pembuluh di-klip ke gabungan lajur. Fallback tanpa DOM untuk penguji jsdom.
+- **Bias spawn** (`game.organSpawnPosition`): porsi `spawnBias` musuh dipaksa datang dari **bawah** pemain (jarak spawn tetap rumus lama → tekanan sama, arah berubah); tanpa shape = radial lama persis. Ini satu-satunya perubahan gameplay, disetujui owner.
+- Fallback cawan tetap utuh: organ tanpa blok `shape` → lingkaran r=750 berpusat pemain (diuji).
+
+### Character — 7 hero ber-rig, identitas dari siluet
+`PILOT_CREATURE_HEROES` = 7 hero yang sudah punya rig; 4 hero tanpa rig (tcd4, treg, bcell, nkcell) otomatis tetap foto sampai rignya dipanggang. Field baru di `creature-rig.js` (semua opsional, data-driven):
+- `nucleus.lobes/lobeSpread/lobeAngle` — nukleus berlobus (neutrofil 3, eosinofil 2, basofil 2)
+- `granules` — butir sitoplasma padat (eosinofil besar oranye, basofil besar gelap, mast cell sedang, neutrofil halus)
+- `spikes` — tonjolan membran: dendrit bercabang (dendritik), vili rapat (mast cell), mikrovili tajam sedikit (tcd8)
+- `ruffle` juga dipakai dendritik & basofil; `front.cup` sempit-tajam untuk tcd8 (sinaps)
+Uji: 7 kombinasi penanda **semuanya berbeda** (bukan Mako diwarnai ulang), tanpa fitur wajah, alas tetap 0,42×S. Organel dipudarkan (alpha 0,32) dan lobus disusun miring/vertikal supaya tidak pernah terbaca sebagai sepasang mata.
+
+### Verifikasi
+`animasi / crawl / prototype / world` = **ERROR (0)**. `verify-world` kini +22 cek ORGAN ASCENT (per-organ luas/vertikal/clamp, paru bercabang, bias spawn, fallback cawan, kamera per organ, render tanpa NaN). e2e Playwright dijalankan untuk **ke-7 zona** (0 error browser) — `docs/pilot-jantung/organ-*-arena-up.png` + `after-hero-sheet.png` (7 hero × samping/depan/belakang/idle, render `drawCreature` asli).
+
+### Yang masih terbuka
+- 4 hero tanpa rig (tcd4, treg, bcell, nkcell): perlu dipanggang lewat `npm run bake:creature` (Godot) sebelum bisa ikut — di luar kemampuan sandbox ini.
+- Elemen anatomi masih visual; arus/otot fungsional (mendorong/menghalangi) tetap menunggu keputusan terpisah.

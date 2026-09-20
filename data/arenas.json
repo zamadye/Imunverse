@@ -22,6 +22,78 @@
         "speedMult": 1.0,
         "magnetMult": 1.0
       },
+      "shape": {
+        "kind": "corridor",
+        "doc": "Saluran limfe: pembuluh berkatup — kantung-kantung (sinus) berulang yang menyempit di tiap katup semilunar. Aliran lambat, hijau jernih.",
+        "height": 3600,
+        "startT": 0.08,
+        "cameraZoom": 0.9,
+        "spawnBias": 0.65,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 150,
+            "cx": 0
+          },
+          {
+            "t": 0.12,
+            "half": 300,
+            "cx": -30
+          },
+          {
+            "t": 0.24,
+            "half": 150,
+            "cx": 0,
+            "label": "katup"
+          },
+          {
+            "t": 0.38,
+            "half": 320,
+            "cx": 40
+          },
+          {
+            "t": 0.5,
+            "half": 140,
+            "cx": 10,
+            "label": "katup"
+          },
+          {
+            "t": 0.64,
+            "half": 330,
+            "cx": -40
+          },
+          {
+            "t": 0.76,
+            "half": 150,
+            "cx": -10,
+            "label": "katup"
+          },
+          {
+            "t": 0.9,
+            "half": 300,
+            "cx": 30
+          },
+          {
+            "t": 1.0,
+            "half": 160,
+            "cx": 20
+          }
+        ],
+        "wall": {
+          "tissue": "34,70,50",
+          "tissueFar": "18,40,30",
+          "muscle": "70,130,95",
+          "muscleLight": "150,220,175",
+          "vessel": "120,200,160",
+          "vesselArt": "200,240,210",
+          "flow": "230,255,240",
+          "rim": "170,240,200",
+          "fiberSpacing": 64,
+          "vesselCount": 2,
+          "cordEvery": 0,
+          "bpm": 60
+        }
+      },
       "palette": {
         "hex": "#e2ecc9",
         "vignette": "rgba(24,70,52,0.28)",
@@ -110,8 +182,8 @@
               "color": "70,130,95",
               "count": 24,
               "size": 5,
-              "dx": 0.8,
-              "dy": 0.4,
+              "dx": 0.1,
+              "dy": -1,
               "speed": 12,
               "span": 700,
               "alpha": 0.8
@@ -173,6 +245,64 @@
         "partMult": 1.0,
         "speedMult": 1.0,
         "magnetMult": 1.0
+      },
+      "shape": {
+        "kind": "corridor",
+        "doc": "Lambung: kantung besar berlipat (rugae) — melebar drastis di fundus lalu menyempit ke pilorus di atas.",
+        "height": 2900,
+        "startT": 0.1,
+        "cameraZoom": 0.86,
+        "spawnBias": 0.5,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 200,
+            "cx": 0,
+            "label": "kardia"
+          },
+          {
+            "t": 0.25,
+            "half": 430,
+            "cx": -70,
+            "label": "fundus"
+          },
+          {
+            "t": 0.5,
+            "half": 400,
+            "cx": -30
+          },
+          {
+            "t": 0.72,
+            "half": 300,
+            "cx": 50,
+            "label": "antrum"
+          },
+          {
+            "t": 0.88,
+            "half": 160,
+            "cx": 90
+          },
+          {
+            "t": 1.0,
+            "half": 110,
+            "cx": 120,
+            "label": "pilorus"
+          }
+        ],
+        "wall": {
+          "tissue": "105,50,35",
+          "tissueFar": "60,25,15",
+          "muscle": "180,95,70",
+          "muscleLight": "235,170,130",
+          "vessel": "90,80,170",
+          "vesselArt": "220,90,80",
+          "flow": "255,220,180",
+          "rim": "245,190,150",
+          "fiberSpacing": 40,
+          "vesselCount": 2,
+          "cordEvery": 200,
+          "bpm": 76
+        }
       },
       "palette": {
         "hex": "#f3d3ac",
@@ -275,8 +405,8 @@
               "color": "230,200,150",
               "count": 20,
               "size": 6,
-              "dx": 1,
-              "dy": 0.25,
+              "dx": 0.1,
+              "dy": -1,
               "speed": 24,
               "span": 700,
               "alpha": 0.8
@@ -338,6 +468,116 @@
         "partMult": 1.0,
         "speedMult": 1.08,
         "magnetMult": 1.2
+      },
+      "shape": {
+        "kind": "branch",
+        "doc": "Paru: bronkus utama bercabang jadi dua bronkiolus (kiri/kanan) yang mengembang ke gugus alveoli di puncak. Lajur 0 = batang tempat pemain mulai.",
+        "height": 2900,
+        "startT": 0.08,
+        "cameraZoom": 0.84,
+        "spawnBias": 0.6,
+        "lanes": [
+          {
+            "id": "bronkus",
+            "t0": 0.0,
+            "t1": 0.52,
+            "profile": [
+              {
+                "t": 0.0,
+                "half": 170,
+                "cx": 0
+              },
+              {
+                "t": 0.5,
+                "half": 260,
+                "cx": 0
+              },
+              {
+                "t": 0.85,
+                "half": 330,
+                "cx": 0,
+                "label": "karina"
+              },
+              {
+                "t": 1.0,
+                "half": 420,
+                "cx": 0
+              }
+            ]
+          },
+          {
+            "id": "kiri",
+            "t0": 0.42,
+            "t1": 1.0,
+            "profile": [
+              {
+                "t": 0.0,
+                "half": 123,
+                "cx": -120
+              },
+              {
+                "t": 0.3,
+                "half": 148,
+                "cx": -330
+              },
+              {
+                "t": 0.65,
+                "half": 189,
+                "cx": -420,
+                "label": "bronkiolus"
+              },
+              {
+                "t": 1.0,
+                "half": 246,
+                "cx": -380,
+                "label": "alveoli"
+              }
+            ]
+          },
+          {
+            "id": "kanan",
+            "t0": 0.42,
+            "t1": 1.0,
+            "profile": [
+              {
+                "t": 0.0,
+                "half": 123,
+                "cx": 120
+              },
+              {
+                "t": 0.3,
+                "half": 148,
+                "cx": 330
+              },
+              {
+                "t": 0.65,
+                "half": 189,
+                "cx": 420,
+                "label": "bronkiolus"
+              },
+              {
+                "t": 1.0,
+                "half": 246,
+                "cx": 380,
+                "label": "alveoli"
+              }
+            ]
+          }
+        ],
+        "wall": {
+          "tissue": "110,55,85",
+          "tissueFar": "60,25,45",
+          "muscle": "190,110,140",
+          "muscleLight": "245,190,210",
+          "vessel": "90,110,210",
+          "vesselArt": "230,80,100",
+          "flow": "255,225,235",
+          "rim": "250,200,220",
+          "fiberSpacing": 54,
+          "vesselCount": 2,
+          "cordEvery": 0,
+          "bpm": 68
+        }
       },
       "palette": {
         "hex": "#f4ccd6",
@@ -418,7 +658,7 @@
               "color": "255,240,245",
               "count": 14,
               "size": 4,
-              "dx": 0.3,
+              "dx": 0.1,
               "dy": -1,
               "speed": 30,
               "span": 700,
@@ -482,6 +722,79 @@
         "partMult": 1.5,
         "speedMult": 1.0,
         "magnetMult": 1.0
+      },
+      "shape": {
+        "kind": "corridor",
+        "doc": "Sumbu saraf: berkas akson panjang lurus-sempit dengan simpul Ranvier (menyempit tajam berkala) dan badan sel besar di ujung atas.",
+        "height": 4200,
+        "startT": 0.07,
+        "cameraZoom": 0.9,
+        "spawnBias": 0.7,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 180,
+            "cx": 0
+          },
+          {
+            "t": 0.15,
+            "half": 260,
+            "cx": 20
+          },
+          {
+            "t": 0.22,
+            "half": 120,
+            "cx": 20,
+            "label": "nodus Ranvier"
+          },
+          {
+            "t": 0.4,
+            "half": 270,
+            "cx": -30
+          },
+          {
+            "t": 0.47,
+            "half": 120,
+            "cx": -30,
+            "label": "nodus"
+          },
+          {
+            "t": 0.65,
+            "half": 270,
+            "cx": 30
+          },
+          {
+            "t": 0.72,
+            "half": 120,
+            "cx": 30,
+            "label": "nodus"
+          },
+          {
+            "t": 0.88,
+            "half": 380,
+            "cx": 0,
+            "label": "badan sel"
+          },
+          {
+            "t": 1.0,
+            "half": 200,
+            "cx": 0
+          }
+        ],
+        "wall": {
+          "tissue": "90,75,35",
+          "tissueFar": "50,40,15",
+          "muscle": "170,145,70",
+          "muscleLight": "240,220,140",
+          "vessel": "220,200,90",
+          "vesselArt": "255,240,150",
+          "flow": "255,255,220",
+          "rim": "250,235,170",
+          "fiberSpacing": 30,
+          "vesselCount": 1,
+          "cordEvery": 0,
+          "bpm": 88
+        }
       },
       "palette": {
         "hex": "#ecdcab",
@@ -631,6 +944,7 @@
         "height": 3200,
         "startT": 0.1,
         "cameraZoom": 0.88,
+        "spawnBias": 0.6,
         "profile": [
           {
             "t": 0.0,
@@ -839,6 +1153,60 @@
         "speedMult": 1.0,
         "magnetMult": 1.0
       },
+      "shape": {
+        "kind": "corridor",
+        "doc": "Kapiler: terowongan paling sempit — sel darah lewat berbaris; lebar hampir konstan, berkelok.",
+        "height": 5200,
+        "startT": 0.06,
+        "cameraZoom": 0.95,
+        "spawnBias": 0.8,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 190,
+            "cx": 0
+          },
+          {
+            "t": 0.2,
+            "half": 160,
+            "cx": 90
+          },
+          {
+            "t": 0.4,
+            "half": 175,
+            "cx": -80
+          },
+          {
+            "t": 0.6,
+            "half": 150,
+            "cx": 100
+          },
+          {
+            "t": 0.8,
+            "half": 180,
+            "cx": -60
+          },
+          {
+            "t": 1.0,
+            "half": 170,
+            "cx": 40
+          }
+        ],
+        "wall": {
+          "tissue": "100,40,60",
+          "tissueFar": "55,15,30",
+          "muscle": "185,80,110",
+          "muscleLight": "240,160,185",
+          "vessel": "80,90,190",
+          "vesselArt": "230,70,90",
+          "flow": "255,210,215",
+          "rim": "250,180,195",
+          "fiberSpacing": 36,
+          "vesselCount": 1,
+          "cordEvery": 0,
+          "bpm": 80
+        }
+      },
       "palette": {
         "hex": "#f0b7c4",
         "vignette": "rgba(110,20,40,0.34)",
@@ -908,6 +1276,55 @@
         "speedMult": 1.0,
         "magnetMult": 1.0
       },
+      "shape": {
+        "kind": "corridor",
+        "doc": "Aliran darah: pembuluh besar, lebar, sedikit berkelok — arus deras satu arah ke atas.",
+        "height": 3300,
+        "startT": 0.1,
+        "cameraZoom": 0.86,
+        "spawnBias": 0.75,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 264,
+            "cx": 0
+          },
+          {
+            "t": 0.3,
+            "half": 290,
+            "cx": -60
+          },
+          {
+            "t": 0.55,
+            "half": 255,
+            "cx": 40
+          },
+          {
+            "t": 0.8,
+            "half": 299,
+            "cx": -20
+          },
+          {
+            "t": 1.0,
+            "half": 264,
+            "cx": 30
+          }
+        ],
+        "wall": {
+          "tissue": "80,15,30",
+          "tissueFar": "40,5,15",
+          "muscle": "160,40,60",
+          "muscleLight": "220,110,120",
+          "vessel": "70,80,180",
+          "vesselArt": "240,80,90",
+          "flow": "255,200,200",
+          "rim": "245,150,160",
+          "fiberSpacing": 50,
+          "vesselCount": 3,
+          "cordEvery": 0,
+          "bpm": 72
+        }
+      },
       "palette": {
         "hex": "#c8384f",
         "vignette": "rgba(80,0,20,0.42)",
@@ -937,7 +1354,9 @@
               "density": 0.9,
               "size": 30,
               "speed": 60,
-              "alpha": 0.55
+              "alpha": 0.55,
+              "dx": 0.1,
+              "dy": -1
             },
             {
               "type": "motes",

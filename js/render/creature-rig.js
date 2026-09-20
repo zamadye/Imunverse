@@ -345,7 +345,21 @@ export function drawCreature(ctx, o) {
     const nx = pose.nuk.x * S * ax - rx * 0.18 * viewSide * cf;
     const ny = pose.nuk.y * S + (nuk.y || 0) * S + Math.sin(waktu * (nuk.bob ? 1 / nuk.bob : 50) * 0.6) * (nuk.bob || 0) * S;
     ctx.beginPath();
-    ctx.ellipse(nx, ny, nr * pose.nuk.sx, nr * pose.nuk.sy, 0, 0, TAU);
+    if ((nuk.lobes | 0) > 1) {
+      // NUKLEUS BERLOBUS (neutrofil/eosinofil/basofil): 2–5 lobus tersambung —
+      // penanda identitas granulosit; tidak simetris menghadap kamera.
+      const nl = nuk.lobes | 0;
+      const spread = (nuk.lobeSpread || 0.55) * nr;
+      for (let k = 0; k < nl; k++) {
+        // lobeAngle: sudut awal susunan lobus (default miring 0.6 rad; ~1.57 = tersusun vertikal — hindari sepasang lobus horizontal yang terbaca sebagai mata)
+        const a = (k / nl) * TAU + (nuk.lobeAngle == null ? 0.6 : nuk.lobeAngle) + Math.sin(waktu * 0.5 + k) * 0.08;
+        const lr = nr * (0.62 - 0.06 * nl / 3);
+        ctx.moveTo(nx + Math.cos(a) * spread * pose.nuk.sx + lr * pose.nuk.sx, ny + Math.sin(a) * spread * 0.7 * pose.nuk.sy);
+        ctx.ellipse(nx + Math.cos(a) * spread * pose.nuk.sx, ny + Math.sin(a) * spread * 0.7 * pose.nuk.sy, lr * pose.nuk.sx, lr * 0.85 * pose.nuk.sy, a, 0, TAU);
+      }
+    } else {
+      ctx.ellipse(nx, ny, nr * pose.nuk.sx, nr * pose.nuk.sy, 0, 0, TAU);
+    }
     ctx.fillStyle = nuk.color || '#2c5540';
     ctx.globalAlpha = alpha * (0.55 + 0.35 * (1 - viewBack * 0.5));
     ctx.fill();
@@ -411,6 +425,64 @@ export function drawCreature(ctx, o) {
       ctx.globalAlpha = alpha;
     }
 
+    // ---------- GRANULA (data `granules`) — sitoplasma padat butir ----------
+    // Eosinofil/basofil/sel mast: identitas dari kepadatan & warna butir, bukan wajah.
+    const gr = c.granules || null;
+    if (gr && gr.count) {
+      const ng = gr.count | 0;
+      ctx.fillStyle = gr.color || body.rim || '#8fe6c8';
+      ctx.globalAlpha = alpha * (gr.alpha == null ? 0.55 : gr.alpha);
+      for (let k = 0; k < ng; k++) {
+        // sebaran deterministik (hash) — tidak berkedip antar frame
+        const h1 = Math.sin(k * 12.9898 + 78.233) * 43758.5453, u1 = h1 - Math.floor(h1);
+        const h2 = Math.sin(k * 39.346 + 11.135) * 24634.6345, u2 = h2 - Math.floor(h2);
+        const a = u1 * TAU, rr = Math.sqrt(u2) * (gr.spread || 0.8);
+        const gx = Math.cos(a) * rx * rr + Math.sin(waktu * 0.8 + k) * S * 0.006;
+        const gy = Math.sin(a) * ry * rr + Math.cos(waktu * 0.7 + k * 1.3) * S * 0.006;
+        const grad = (gr.r || 0.028) * S * (0.7 + 0.6 * ((k * 5) % 3) / 2);
+        ctx.beginPath();
+        ctx.arc(gx, gy, grad, 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = alpha;
+    }
+
+    // ---------- TONJOLAN MEMBRAN (data `spikes`) — dendrit / vili / duri ----------
+    // Dendritik: dendrit panjang bercabang; sel mast: vili pendek rapat; tcd8: sedikit, tajam.
+    const sp = c.spikes || null;
+    if (sp && sp.count) {
+      const ns = sp.count | 0;
+      ctx.strokeStyle = sp.color || body.rim || '#8fe6c8';
+      ctx.lineCap = 'round';
+      ctx.globalAlpha = alpha * (sp.alpha == null ? 0.8 : sp.alpha);
+      for (let k = 0; k < ns; k++) {
+        const a = (k / ns) * TAU + (sp.offset || 0.3) + Math.sin(waktu * (sp.sway || 0.9) + k * 2.1) * (sp.swayAmp || 0.06);
+        const depan = 0.5 + 0.5 * Math.cos(a);
+        const atas = 0.5 - 0.5 * Math.sin(a);
+        const len = (sp.len || 0.2) * (0.6 + 0.4 * depan) * (0.3 + 0.7 * atas) * (1 + 0.15 * Math.sin(waktu * 1.7 + k));
+        const ri = 1 + Math.sin(a * lobes + waktu * speed) * amp;
+        const x0 = Math.cos(a) * rx * ri * 0.96, y0 = Math.sin(a) * ry * ri * 0.96;
+        const x1 = Math.cos(a) * rx * (ri + len), y1 = Math.sin(a) * ry * (ri + len);
+        ctx.lineWidth = Math.max(1, S * (sp.thick || 0.03));
+        ctx.beginPath(); ctx.moveTo(x0, y0);
+        if (sp.branch) {
+          const xm = Math.cos(a) * rx * (ri + len * 0.55), ym = Math.sin(a) * ry * (ri + len * 0.55);
+          ctx.lineTo(xm, ym);
+          ctx.lineTo(Math.cos(a + 0.18) * rx * (ri + len), Math.sin(a + 0.18) * ry * (ri + len));
+          ctx.moveTo(xm, ym);
+          ctx.lineTo(Math.cos(a - 0.14) * rx * (ri + len * 0.9), Math.sin(a - 0.14) * ry * (ri + len * 0.9));
+        } else {
+          ctx.lineTo(x1, y1);
+        }
+        ctx.stroke();
+        if (sp.tipR) {
+          ctx.fillStyle = sp.tip || sp.color || '#8fe6c8';
+          ctx.beginPath(); ctx.arc(x1, y1, sp.tipR * S, 0, TAU); ctx.fill();
+        }
+      }
+      ctx.globalAlpha = alpha;
+    }
+
     // ---------- organel (gerak sekunder: mengorbit pelan) ----------
     const org = c.organelles || {};
     const jo = org.count || 0;
@@ -420,7 +492,7 @@ export function drawCreature(ctx, o) {
       ctx.beginPath();
       ctx.arc(nx + Math.cos(a) * rr * pose.core.sx, ny + Math.sin(a) * rr * pose.core.sy * 0.8, (org.r || 0.045) * S, 0, TAU);
       ctx.fillStyle = org.color || '#b6f26f';
-      ctx.globalAlpha = alpha * 0.5;
+      ctx.globalAlpha = alpha * 0.32; // pudar: organel = tekstur, jangan terbaca sebagai "mata"
       ctx.fill();
     }
     ctx.globalAlpha = alpha;

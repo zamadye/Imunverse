@@ -20,7 +20,10 @@ const MODES = ['foto', 'hibrida', 'makhluk'];
 // tersentuh sampai pilot divalidasi. Pemain/penguji tetap bisa memaksa
 // 'foto' untuk pembanding lewat ?heroMode=foto / tombol M (mode EKSPLISIT
 // mengalahkan bawaan pilot).
-export const PILOT_CREATURE_HEROES = ['macrophage'];
+// SCALE (setelah pilot Mako divalidasi owner): semua hero yang sudah punya rig
+// makhluk tampil sebagai bio-form abstrak. 4 hero tanpa rig (tcd4, treg,
+// bcell, nkcell) otomatis tetap foto (creatureAvailable=false) sampai rignya dipanggang.
+export const PILOT_CREATURE_HEROES = ['macrophage', 'dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
 let _mode = 'foto';
 let _explicit = false; // true bila pemain/URL memilih mode secara sadar
 let _lastT = 0;

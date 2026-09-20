@@ -226,20 +226,45 @@ cek('HUD progres perjalanan minimal (zona → berikutnya, §26)',
 // cawan lama (kepadatan spawn tak berubah); (d) mekanik tak berubah.
 const _jumpToZone = WD._jumpToZone;
 const arenasDef = baca('data/arenas.json').arenas;
-const berkoridor = arenasDef.filter((a) => a.shape && a.shape.kind === 'corridor').map((a) => a.id);
-cek('PILOT: hanya arena jantung yang berbentuk koridor organ (6 organ lain belum disentuh)',
-  berkoridor.length === 1 && berkoridor[0] === 'jantung', `koridor=[${berkoridor.join(',')}]`);
+const { buildCorridorShape, insideShape, clampToShape } = await import('../js/systems/arena-shape.js');
+const luasCawan = Math.PI * 750 * 750;
+const berbentuk = arenasDef.filter((a) => a.shape && (a.shape.kind === 'corridor' || a.shape.kind === 'branch')).map((a) => a.id);
+cek('ORGAN ASCENT: semua 7 organ punya siluet (corridor/branch) — scale dari pilot jantung',
+  berbentuk.length === arenasDef.length && arenasDef.length === 7, `berbentuk=[${berbentuk.join(',')}]`);
+// tiap organ: luas setara cawan lama ±15%, vertikal, melebar-menyempit, semua titik clamp masuk
+for (const a of arenasDef) {
+  const S = buildCorridorShape(Object.assign({ id: a.id }, a.shape), 0, 0);
+  const hs = []; for (let k = 0; k <= 20; k++) hs.push(S.halfAt(S.bottomY - (k / 20) * S.height));
+  let luarN = 0;
+  for (let k = 0; k < 200; k++) { const e = { x: (Math.random() - 0.5) * 6000, y: S.bottomY - Math.random() * S.height * 1.4 + 300 }; clampToShape(S, e, 14); if (!insideShape(S, e.x, e.y, 0)) luarN++; }
+  cek(`ORGAN ASCENT [${a.id}]: luas ±15% cawan, tinggi ≥ 3× lebar, tidak lurus, 200 clamp masuk`,
+    Math.abs(S.area / luasCawan - 1) <= 0.15 && S.height >= 3 * 2 * S.summary.maxHalf && Math.max(...hs) / Math.min(...hs) >= 1.15 && luarN === 0,
+    `${S.kind} luas=${(S.area / luasCawan).toFixed(2)}× tinggi=${S.height} lebar=${2 * S.summary.maxHalf} rasio=${(Math.max(...hs) / Math.min(...hs)).toFixed(2)} luar=${luarN} lajur=${S.summary.lanes}`);
+}
+// paru bercabang: dua cabang benar-benar terpisah di puncak & keduanya bisa dihuni
+{
+  const paru = arenasDef.find((a) => a.id === 'paru');
+  const S = buildCorridorShape(Object.assign({ id: 'paru' }, paru.shape), 0, 0);
+  const yTop = S.topY + 200;
+  const ln = S.lanesAt(yTop);
+  const kiri = ln.find((L) => L.centerAt(yTop) < -50), kanan = ln.find((L) => L.centerAt(yTop) > 50);
+  const celah = kiri && kanan && (kanan.centerAt(yTop) - kanan.halfAt(yTop)) - (kiri.centerAt(yTop) + kiri.halfAt(yTop)) > 50;
+  const tengahLuar = !insideShape(S, 0, yTop, 0);
+  const eK = { x: kiri ? kiri.centerAt(yTop) : 0, y: yTop }; clampToShape(S, eK, 14);
+  cek('ORGAN ASCENT [paru]: kind=branch — 2 cabang terpisah di puncak, tengah di antaranya = dinding, entitas di cabang kiri tidak ditarik ke batang',
+    S.kind === 'branch' && !!kiri && !!kanan && celah && tengahLuar && Math.abs(eK.x - kiri.centerAt(yTop)) < 1,
+    `lajur puncak=${ln.length} kiri=${kiri ? Math.round(kiri.centerAt(yTop)) : '-'} kanan=${kanan ? Math.round(kanan.centerAt(yTop)) : '-'} tengahDinding=${tengahLuar}`);
+}
 
 game.startRun('macrophage');
 const runS = game.run;
-const bentukAwal = runS.arenaShape; // zona pertama = paru → masih cawan
+const bentukAwal = runS.arenaShape; // zona pertama = lung → paru (branch)
 _jumpToZone(game, 'heart');
 const SH = runS.arenaShape;
-cek('PILOT: masuk zona JANTUNG → arena berganti jadi koridor organ (zona lain tetap cawan)',
-  bentukAwal == null && !!SH && SH.kind === 'corridor' && SH.id === 'jantung',
-  `awal=${bentukAwal ? bentukAwal.kind : 'cawan'} → ${SH ? SH.kind + ':' + SH.id : 'null'}`);
-const luasCawan = Math.PI * 750 * 750;
-cek('PILOT: luas koridor setara cawan lama ±15% (kepadatan spawn tak berubah)',
+cek('ORGAN ASCENT: bentuk aktif sejak zona pertama (paru) dan berganti saat masuk JANTUNG',
+  !!bentukAwal && bentukAwal.id === 'paru' && !!SH && SH.kind === 'corridor' && SH.id === 'jantung',
+  `awal=${bentukAwal ? bentukAwal.kind + ':' + bentukAwal.id : 'cawan'} → ${SH ? SH.kind + ':' + SH.id : 'null'}`);
+cek('PILOT: luas koridor jantung setara cawan lama ±15% (kepadatan spawn tak berubah)',
   !!SH && Math.abs(SH.area / luasCawan - 1) <= 0.15,
   SH ? `${Math.round(SH.area)} vs ${Math.round(luasCawan)} (${(SH.area / luasCawan).toFixed(2)}×)` : 'tidak ada shape');
 cek('PILOT: koridor VERTIKAL — tinggi ≥ 3× lebar maksimum (bukan lapangan terbuka)',
@@ -248,7 +273,6 @@ cek('PILOT: siluet organ melebar–menyempit (bukan lorong lurus)',
   !!SH && (() => { const hs = []; for (let k = 0; k <= 20; k++) hs.push(SH.halfAt(SH.bottomY - (k / 20) * SH.height)); return Math.max(...hs) / Math.min(...hs) >= 2; })(),
   'rasio lebar maks/min');
 // (b) clamp: sebar entitas jauh di luar, semua harus kembali ke dalam siluet
-const { insideShape, clampToShape } = await import('../js/systems/arena-shape.js');
 let luar = 0, total = 0;
 for (let k = 0; k < 400; k++) {
   const e = { x: (Math.random() - 0.5) * 6000, y: SH.bottomY - Math.random() * SH.height * 1.4 + 300 };
@@ -274,14 +298,39 @@ const hpSebelum = pl.hp, spdSebelum = pl.speed;
 for (let i = 0; i < 60; i++) { pl.update(1 / 60, { x: 0, y: -1, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
 cek('PILOT: mekanik tak berubah — HP & kecepatan identik setelah clamp koridor',
   pl.hp === hpSebelum && pl.speed === spdSebelum, `hp ${hpSebelum}→${pl.hp}, speed ${spdSebelum}→${pl.speed}`);
-// (a) keluar dari jantung → cawan kembali, berpusat di pemain (tidak terlempar)
+// spawn bias: mayoritas musuh datang dari BAWAH pemain (y lebih besar) saat di koridor
+{
+  pl.x = SH.centerAt(pl.y); pl.y = SH.bottomY - SH.height * 0.5;
+  let bawah = 0, n = 0;
+  for (let k = 0; k < 120; k++) { const p = game.organSpawnPosition(); n++; if (p.y > pl.y + 1) bawah++; }
+  const bias = SH.def.spawnBias;
+  cek('ORGAN ASCENT: spawnBias — porsi musuh dari bawah ≈ bias + separuh sisanya (radial), ±12%',
+    Math.abs(bawah / n - (bias + (1 - bias) * 0.5)) <= 0.12, `dari bawah ${bawah}/${n} (bias=${bias})`);
+  // tanpa shape (cawan) → radial lama, ~50/50
+  const shTmp = runS.arenaShape; runS.arenaShape = null;
+  let b2 = 0; for (let k = 0; k < 200; k++) if (game.organSpawnPosition().y > pl.y) b2++;
+  runS.arenaShape = shTmp;
+  cek('ORGAN ASCENT: tanpa shape spawn tetap radial lama (~50% bawah)', Math.abs(b2 / 200 - 0.5) <= 0.12, `${b2}/200`);
+}
+// (a) berganti organ → bentuk baru dipasang DI POSISI pemain (tidak terlempar); jalur cawan tetap ada bila shape dilepas
 const posSebelum = { x: pl.x, y: pl.y };
 _jumpToZone(game, 'artery');
-cek('PILOT: keluar zona jantung → kembali ke cawan lama berpusat di pemain (tidak terlempar)',
-  runS.arenaShape == null && runS.arenaBounds && runS.arenaBounds.r === 750
-  && Math.abs(runS.arenaBounds.x - posSebelum.x) < 1 && Math.abs(runS.arenaBounds.y - posSebelum.y) < 1
-  && pl.x === posSebelum.x && pl.y === posSebelum.y,
-  `shape=${runS.arenaShape} bounds=${JSON.stringify(runS.arenaBounds)}`);
+const SA = runS.arenaShape;
+cek('ORGAN ASCENT: keluar jantung → arteri (aliran_darah) dipasang di posisi pemain, pemain tidak terlempar',
+  !!SA && SA.id === 'aliran_darah' && Math.abs(pl.x - posSebelum.x) < 1 && Math.abs(pl.y - posSebelum.y) < 1 && insideShape(SA, pl.x, pl.y, 0),
+  `shape=${SA && SA.id} pos=(${pl.x.toFixed(0)},${pl.y.toFixed(0)})`);
+{
+  // lepas shape secara paksa (organ tanpa blok shape) → cawan lama berpusat pemain
+  // data-store yang SAMA dengan bundle (API.getData), bukan modul terpisah
+  const dataArenas = API.getData().arenas.arenas.find((a) => a.id === 'aliran_darah');
+  const simpan2 = dataArenas.shape; delete dataArenas.shape;
+  game.syncArenaShape('aliran_darah');
+  const B = runS.arenaBounds;
+  cek('ORGAN ASCENT: organ TANPA blok shape → kembali ke cawan lama r=750 berpusat pemain (fallback utuh)',
+    runS.arenaShape == null && B && B.r === 750 && Math.abs(B.x - pl.x) < 1 && Math.abs(B.y - pl.y) < 1, JSON.stringify(B));
+  dataArenas.shape = simpan2;
+  game.syncArenaShape('aliran_darah');
+}
 // kamera: di koridor sedikit menjauh (target < 1), keluar → kembali 1; tidak pernah ekstrem
 _jumpToZone(game, 'heart');
 {
@@ -290,9 +339,13 @@ _jumpToZone(game, 'heart');
   const diKoridor = cam.corridorTarget;
   _jumpToZone(game, 'artery');
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
-  cek('PILOT: kamera menjauh ringan di koridor (0,8–0,95) dan kembali normal (1) di cawan',
-    diKoridor >= 0.8 && diKoridor <= 0.95 && cam.corridorTarget === 1,
-    `koridor=${diKoridor} → cawan=${cam.corridorTarget}`);
+  const diArteri = cam.corridorTarget;
+  const shTmp = runS.arenaShape; runS.arenaShape = null;
+  for (let i = 0; i < 60; i++) { game.update && game.update(1 / 60); }
+  const diCawan = cam.corridorTarget; runS.arenaShape = shTmp;
+  cek('ORGAN ASCENT: kamera menjauh ringan per organ (0,8–0,95, dari shape.cameraZoom) dan normal (1) tanpa shape',
+    diKoridor >= 0.8 && diKoridor <= 0.95 && diArteri >= 0.8 && diArteri <= 0.95 && diCawan === 1,
+    `jantung=${diKoridor} arteri=${diArteri} cawan=${diCawan}`);
 }
 // render koridor tidak error & tidak NaN (ctx perekam)
 _jumpToZone(game, 'heart');

@@ -1489,12 +1489,12 @@ applyChapterTier(enemy, run) {
     if (!def) return;
     const scalers = run.spawnSys.getScalers();
     scalers.hpScale *= (bossCfg.hpMult || 1) * run.spawnSys.getBossHPMultiplier();
-    const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    const pos = this.organSpawnPosition();
     // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
     try {
       const B = run.arenaBounds;
       if (run.arenaShape) {
-        clampToShape(run.arenaShape, pos, 60); // PILOT: tarik ke dalam koridor organ
+        clampToShape(run.arenaShape, pos, 60); // Organ Ascent: tarik ke dalam koridor organ
       } else if (B) {
         const sdx = pos.x - B.x, sdy = pos.y - B.y;
         const smaxR = Math.max(60, B.r - 60);
@@ -1621,12 +1621,12 @@ applyChapterTier(enemy, run) {
     const plvl = Math.max(1, run.level || 1);
     scalers.hpScale *= 1 + (plvl - 1) * pls.hpPerLevel;
     scalers.speedScale += Math.min(pls.speedMax, (plvl - 1) * pls.speedPerLevel);
-    const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    const pos = this.organSpawnPosition();
     // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
     try {
       const B = run.arenaBounds;
       if (run.arenaShape) {
-        clampToShape(run.arenaShape, pos, 60); // PILOT: tarik ke dalam koridor organ
+        clampToShape(run.arenaShape, pos, 60); // Organ Ascent: tarik ke dalam koridor organ
       } else if (B) {
         const sdx = pos.x - B.x, sdy = pos.y - B.y;
         const smaxR = Math.max(60, B.r - 60);
@@ -1728,6 +1728,29 @@ applyChapterTier(enemy, run) {
    * Aktivasi kemampuan aktif via tombol HUD / keyboard (slot 1-4).
    * @returns {boolean} true bila kemampuan terluncur.
    */
+  /**
+   * Organ Ascent: titik spawn musuh. Di cawan = radial lama (tak berubah).
+   * Di koridor dengan `shape.spawnBias` (0..1) = porsi spawn yang dipaksa
+   * datang dari BAWAH (arah yang ditinggalkan pemain) — sisanya radial biasa.
+   * Jarak spawn tetap rumus lama (di luar pandang), jadi tekanan tidak berubah,
+   * hanya arahnya yang mengikuti "didaki dari bawah".
+   */
+  organSpawnPosition() {
+    const run = this.run;
+    const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
+    const SH = run.arenaShape;
+    const bias = SH && SH.def ? Number(SH.def.spawnBias) || 0 : 0;
+    if (!SH || bias <= 0 || Math.random() >= bias) return pos;
+    const d = Math.hypot(pos.x - run.player.x, pos.y - run.player.y);
+    // sudut 30°..150° (y ke bawah positif) → selalu di bawah pemain
+    const a = Math.PI * (0.17 + Math.random() * 0.66);
+    const py = run.player.y + Math.sin(a) * d;
+    if (py > SH.bottomY - 60) return pos; // sudah di dasar organ → biarkan radial
+    pos.x = run.player.x + Math.cos(a) * d;
+    pos.y = py;
+    return pos;
+  },
+
   /**
    * PILOT Organ Ascent: pasang/lepas koridor organ mengikuti arena yang
    * sedang berlaku (zona perjalanan → arenaId; tanpa perjalanan → arena

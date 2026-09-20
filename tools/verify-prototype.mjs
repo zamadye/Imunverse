@@ -38,9 +38,12 @@ API.hero.resetHeroMode();
 const modeBawaan = API.hero.heroMode();
 cek('mode GLOBAL bawaan = foto (10 hero non-pilot tetap foto asli)',
   modeBawaan === 'foto', 'mode=' + modeBawaan);
-cek('hero PILOT (macrophage) bawaan = makhluk abstrak; hero lain = foto',
-  API.hero.heroModeFor('macrophage') === 'makhluk' && API.hero.heroModeFor('neutrophil') === 'foto' && API.hero.heroModeFor('bcell') === 'foto',
-  `macrophage=${API.hero.heroModeFor('macrophage')} neutrophil=${API.hero.heroModeFor('neutrophil')} bcell=${API.hero.heroModeFor('bcell')}`);
+// SCALE: 7 hero ber-rig = makhluk bawaan; 4 hero tanpa rig (tcd4/treg/bcell/nkcell) tetap foto.
+const berRig = ['macrophage', 'dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
+const tanpaRig = ['tcd4', 'treg', 'bcell', 'nkcell'];
+cek('7 hero ber-rig bawaan = makhluk abstrak; 4 hero tanpa rig tetap foto',
+  berRig.every((h) => API.hero.heroModeFor(h) === 'makhluk') && tanpaRig.every((h) => API.hero.heroModeFor(h) === 'foto'),
+  berRig.concat(tanpaRig).map((h) => `${h}=${API.hero.heroModeFor(h)}`).join(' '));
 API.hero.setHeroMode('foto');
 cek('pilihan EKSPLISIT foto mengalahkan bawaan pilot (pembanding tetap bisa dilihat)',
   API.hero.heroModeFor('macrophage') === 'foto', 'macrophage=' + API.hero.heroModeFor('macrophage'));
@@ -197,8 +200,18 @@ cek('rig pilot TANPA fitur wajah (tidak ada eye/mata/mouth/mulut/face/wajah di a
 cek('rig pilot punya penanda identitas abstrak (ruffle membran + mangkuk fagosit + vakuola)',
   !!(rigMako && rigMako.body && rigMako.body.ruffle && rigMako.front && rigMako.front.cup && rigMako.vacuoles && rigMako.vacuoles.count >= 3),
   `ruffle=${!!(rigMako && rigMako.body && rigMako.body.ruffle)} cup=${!!(rigMako && rigMako.front && rigMako.front.cup)} vakuola=${rigMako && rigMako.vacuoles ? rigMako.vacuoles.count : 0}`);
-cek('hero lain TIDAK ikut berubah (dendritic/neutrophil belum punya field pilot)',
-  ['dendritic', 'neutrophil'].every((h) => { const a = CRE.creatureAnatomy(h); return a && !(a.body && a.body.ruffle) && !a.vacuoles; }), 'scope pilot terjaga');
+// SCALE: tiap hero ber-rig punya kombinasi penanda identitas abstrak BERBEDA (bukan Mako diwarnai ulang)
+const tanda = (a) => ({
+  ruffle: !!(a.body && a.body.ruffle), cup: !!(a.front && a.front.cup), vac: !!a.vacuoles,
+  lobes: (a.nucleus && a.nucleus.lobes) || 1, gran: !!a.granules, spikes: !!a.spikes, branch: !!(a.spikes && a.spikes.branch),
+  limbs: (a.limbs && a.limbs.count) || 0,
+});
+const sidik = berRig.map((h) => JSON.stringify(tanda(CRE.creatureAnatomy(h))));
+cek('7 hero ber-rig punya kombinasi penanda identitas yang SEMUANYA berbeda (siluet, bukan warna)',
+  new Set(sidik).size === berRig.length && berRig.every((h) => { const t = tanda(CRE.creatureAnatomy(h)); return t.ruffle || t.cup || t.vac || t.lobes > 1 || t.gran || t.spikes; }),
+  `${new Set(sidik).size}/${berRig.length} unik`);
+cek('semua rig TANPA fitur wajah',
+  berRig.every((h) => !/"(eye|eyes|mata|mouth|mulut|face|wajah|pupil)"/.test(JSON.stringify(CRE.creatureAnatomy(h)).toLowerCase())), 'anatomi 7 hero');
 
 // ---------- 4b. BENAR-BENAR TAMPIL DI ARENA (bukan hanya fungsi dipanggil) ----------
 // Uji ini memakai game.render() sungguhan dengan ctx perekam, lalu MEMBANDINGKAN
@@ -245,13 +258,16 @@ const hitungArena = async (mode, heroId = 'macrophage') => {
 const rFoto = await hitungArena('foto');
 const rMakhluk = await hitungArena('makhluk');
 const rBawaan = await hitungArena('bawaan');             // Mako tanpa pilihan eksplisit
-const rBawaanLain = await hitungArena('bawaan', 'neutrophil'); // hero non-pilot
+const rBawaanLain = await hitungArena('bawaan', 'bcell'); // hero TANPA rig
+const rNeut = await hitungArena('bawaan', 'neutrophil');  // hero ber-rig lain
 cek('arena: hero PILOT bawaan digambar sebagai MAKHLUK (foto hero tidak digambar)',
   rBawaan.drawImage < rFoto.drawImage && rBawaan.path > rFoto.path + 40,
   `drawImage bawaan=${rBawaan.drawImage} vs foto=${rFoto.drawImage}; path bawaan=${rBawaan.path} vs foto=${rFoto.path}`);
-cek('arena: hero NON-PILOT bawaan tetap menggambar FOTO HERO ASLI (drawImage > 0)',
+cek('arena: hero TANPA RIG (bcell) bawaan tetap menggambar FOTO HERO ASLI (drawImage > 0)',
   rBawaanLain.drawImage > 0 && rBawaanLain.drawImage >= rFoto.drawImage,
-  `drawImage neutrophil=${rBawaanLain.drawImage} vs foto mako=${rFoto.drawImage}`);
+  `drawImage bcell=${rBawaanLain.drawImage} vs foto mako=${rFoto.drawImage}`);
+cek('arena: hero ber-rig lain (neutrophil) bawaan digambar MAKHLUK',
+  rNeut.drawImage < rFoto.drawImage && rNeut.path > rFoto.path + 40, `drawImage=${rNeut.drawImage} path=${rNeut.path}`);
 API.hero.resetHeroMode();
 cek('arena: mode makhluk (eksperimen) tetap menggambar GEOMETRI berbeda dari foto',
   rMakhluk.path > rFoto.path + 40,

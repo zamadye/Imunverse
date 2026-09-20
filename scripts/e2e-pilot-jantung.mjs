@@ -26,11 +26,12 @@ const OUT_DIR = process.env.OUT_DIR || 'shots/pilot-jantung';
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8000/';
 const VIEW = { width: Number(process.env.VIEW_W || 900), height: Number(process.env.VIEW_H || 600) };
 const WALK_SEC = Number(process.env.WALK_SEC || 4);
+const ZONE = process.env.ZONE || 'heart'; // id zona di data/zones.json (lung, capillary, bloodstream, heart, tissue, lymphatic, tumor, …)
 
 const { chromium: pw } = require(process.env.PW_PATH || 'playwright-core');
 let exe = process.env.CHROMIUM_PATH;
 if (!exe) {
-  try { exe = await require('@sparticuz/chromium').executablePath(); } catch { exe = '/tmp/chromium'; }
+  try { const c = require('@sparticuz/chromium'); exe = await (c.default || c).executablePath(); } catch { exe = '/tmp/chromium'; }
 }
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const out = (n) => path.join(OUT_DIR, `${TAG}-${n}`);
@@ -53,7 +54,7 @@ await page.waitForFunction(() => window.__IMUNVERSE.STATE.screen !== 'loading', 
 await page.waitForTimeout(700);
 
 // Paksa arena jantung + hero Mako, lalu mulai run.
-await page.evaluate(({ process_env_STAY_LUNG, process_env_FORCE_FOTO }) => {
+await page.evaluate(({ process_env_STAY_LUNG, process_env_FORCE_FOTO, ZONE }) => {
   const app = window.__IMUNVERSE;
   const { STATE, game } = app;
   const meta = STATE.meta;
@@ -77,11 +78,11 @@ await page.evaluate(({ process_env_STAY_LUNG, process_env_FORCE_FOTO }) => {
   // Perjalanan dunia (world-journey) menentukan organ aktif — lompat ke zona
   // JANTUNG persis seperti saat pemain benar-benar sampai di sana.
   if (!process_env_STAY_LUNG) {
-    app.world._jumpToZone(game, 'heart');
+    app.world._jumpToZone(game, ZONE);
   }
   document.getElementById('tutorial-layer')?.classList.add('hidden');
   document.querySelectorAll('.presenter, .toast').forEach((el) => el.remove());
-}, { process_env_STAY_LUNG: process.env.STAY_LUNG === '1', process_env_FORCE_FOTO: process.env.FORCE_FOTO === '1' });
+}, { process_env_STAY_LUNG: process.env.STAY_LUNG === '1', process_env_FORCE_FOTO: process.env.FORCE_FOTO === '1', ZONE });
 await page.waitForFunction(() => document.querySelector('#screen-hud')?.classList.contains('active'), null, { timeout: 8000 });
 await page.waitForTimeout(600);
 
