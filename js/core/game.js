@@ -91,7 +91,7 @@ import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economy
 // P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §14-§21, §34)
 import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
 import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
-import { initJourney, updateJourney, journeyHud, drawLandmark } from '../systems/world-journey.js';
+import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone } from '../systems/world-journey.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
@@ -103,6 +103,8 @@ import { audio } from '../systems/audio-system.js';
 import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../systems/liveops-system.js';
 
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
+import { buildCorridorShape, clampToShape, outsideDistance, shapeDefOf } from '../systems/arena-shape.js';
+import { drawOrganCorridor } from '../render/organ-corridor.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
 import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
@@ -323,9 +325,14 @@ export const game = {
       const ab = (getMembrane() && getMembrane().arena) || {};
       this.run.arenaBounds = { x: ab.cx || 0, y: ab.cy || 0, r: ab.radius || 750 };
     } catch { this.run.arenaBounds = { x: 0, y: 0, r: 750 }; }
+    // PILOT Organ Ascent: arena bersiluet organ (koridor vertikal) — hanya
+    // untuk arena yang punya blok `shape` (saat ini: jantung). null = model
+    // cawan lama tetap dipakai apa adanya (6 organ lain tidak tersentuh).
+    this.run.arenaShape = null;
     // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
     // mengikuti ZONA, bukan pilihan stage (§21).
     try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
+    try { this.syncArenaShape(); } catch (err) { if (isDevMode()) console.warn('[phagos] syncArenaShape:', err); }
     // P6: batas getar kamera dari data — rentetan dampak boss tetap nyaman.
     try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
 
@@ -737,7 +744,11 @@ export const game = {
       for (const a of run.allies) this.arenaClamp(a, a.radius || 12);
       for (const h of run.hazards) this.arenaClamp(h, 0);
       const B = run.arenaBounds;
-      if (B) {
+      const SH = run.arenaShape;
+      if (SH) {
+        for (const p of run.projectiles) if (p.alive && outsideDistance(SH, p.x, p.y) > 60) p.alive = false;
+        for (const b of run.ebullets) if (b.alive && outsideDistance(SH, b.x, b.y) > 60) b.alive = false;
+      } else if (B) {
         for (const p of run.projectiles) {
           if (p.alive && Math.hypot(p.x - B.x, p.y - B.y) > B.r + 60) p.alive = false;
         }
@@ -1480,7 +1491,9 @@ applyChapterTier(enemy, run) {
     // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
     try {
       const B = run.arenaBounds;
-      if (B) {
+      if (run.arenaShape) {
+        clampToShape(run.arenaShape, pos, 60); // PILOT: tarik ke dalam koridor organ
+      } else if (B) {
         const sdx = pos.x - B.x, sdy = pos.y - B.y;
         const smaxR = Math.max(60, B.r - 60);
         if (Math.hypot(sdx, sdy) > smaxR) {
@@ -1610,7 +1623,9 @@ applyChapterTier(enemy, run) {
     // PHAGOS: titik spawn di luar pandang bisa jatuh di luar cawan — tarik masuk
     try {
       const B = run.arenaBounds;
-      if (B) {
+      if (run.arenaShape) {
+        clampToShape(run.arenaShape, pos, 60); // PILOT: tarik ke dalam koridor organ
+      } else if (B) {
         const sdx = pos.x - B.x, sdy = pos.y - B.y;
         const smaxR = Math.max(60, B.r - 60);
         if (Math.hypot(sdx, sdy) > smaxR) {
@@ -1712,13 +1727,62 @@ applyChapterTier(enemy, run) {
    * @returns {boolean} true bila kemampuan terluncur.
    */
   /**
+   * PILOT Organ Ascent: pasang/lepas koridor organ mengikuti arena yang
+   * sedang berlaku (zona perjalanan → arenaId; tanpa perjalanan → arena
+   * terpilih). Koridor DIPASANG DI POSISI PLAYER saat aktivasi supaya
+   * pergantian zona tidak melempar siapa pun; semua entitas hidup dijepit
+   * masuk sekali (sama seperti clamp cawan lama tiap frame).
+   * Dipanggil di startRun & saat zona berganti (world-journey).
+   */
+  syncArenaShape(arenaId) {
+    const run = this.run;
+    if (!run) return null;
+    let id = arenaId;
+    if (!id) {
+      try { const z = currentZone(run); id = (z && z.arenaId) || null; } catch { id = null; }
+      if (!id) id = this.getRunArena().id;
+    }
+    const list = (getData().arenas && getData().arenas.arenas) || [];
+    const def = shapeDefOf(list.find((a) => a.id === id));
+    if (!def) {
+      if (run.arenaShape) {
+        // Keluar dari organ berkoridor → kembali ke cawan lama (radius dari
+        // data/membrane.json) BERPUSAT DI PLAYER supaya tidak ada yang terlempar.
+        let r = 750;
+        try { r = (getMembrane() && getMembrane().arena && getMembrane().arena.radius) || 750; } catch { /* abaikan */ }
+        const p = run.player;
+        run.arenaBounds = { x: p ? p.x : 0, y: p ? p.y : 0, r };
+      }
+      run.arenaShape = null;
+      return null;
+    }
+    if (run.arenaShape && run.arenaShape.id === id) return run.arenaShape;
+    const p = run.player;
+    const shape = buildCorridorShape(Object.assign({ id }, def), p ? p.x : 0, p ? p.y : 0);
+    run.arenaShape = shape;
+    // bounding circle setara — jalur lama yang membaca arenaBounds secara
+    // kasar (mis. narrowPath mengecilkan r) tetap punya angka yang masuk akal.
+    run.arenaBounds = { x: shape.bounds.x, y: shape.bounds.y, r: shape.bounds.r };
+    try {
+      if (p) clampToShape(shape, p, p.radius || 15);
+      for (const e of run.enemies) if (e.alive) clampToShape(shape, e, (e.radius || 14) * 0.5);
+      for (const h of run.hazards) clampToShape(shape, h, 0);
+      for (const k of run.pickups || []) clampToShape(shape, k, 0);
+    } catch { /* abaikan */ }
+    return shape;
+  },
+
+  /**
    * PHAGOS: jepit entitas ke dalam lingkaran arena (cawan petri).
    * @param {object} ent {x, y} yang digeser bila di luar dinding
    * @param {number} margin jarak aman dari dinding (radius entitas)
    */
   arenaClamp(ent, margin = 0) {
-    const B = this.run && this.run.arenaBounds;
-    if (!B || !ent) return;
+    if (!this.run || !ent) return;
+    // PILOT Organ Ascent: koridor organ menggantikan lingkaran bila aktif.
+    if (this.run.arenaShape) { clampToShape(this.run.arenaShape, ent, margin || 0); return; }
+    const B = this.run.arenaBounds;
+    if (!B) return;
     const dx = ent.x - B.x, dy = ent.y - B.y;
     const maxR = Math.max(50, B.r - (margin || 0));
     const d = Math.hypot(dx, dy);
@@ -2297,6 +2361,9 @@ applyChapterTier(enemy, run) {
     const P = cam.makeProjector(w, h);
     cam.setPlayerScreen(P.project(player.x, player.y));
     drawArena3D(ctx, P, time);
+    // PILOT Organ Ascent: dinding organ + serat otot + pembuluh (di atas
+    // tekstur tanah, di bawah entitas). Hanya bila arena berbentuk koridor.
+    if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
     try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
@@ -2985,6 +3052,7 @@ applyChapterTier(enemy, run) {
    * Selalu terlihat saat kamera dekat tepi; di luar jangkau = di-skip.
    */
   renderArenaWall(ctx, run, time, ground) {
+    if (run.arenaShape) return; // PILOT: dinding organ digambar drawOrganCorridor()
     const B = run.arenaBounds;
     if (!B || !B.r) return;
     const player = run.player;

@@ -260,6 +260,9 @@ export function updateJourney(game, dt) {
         j.visited.push(now.id);
         j.landmark = { zoneId: now.id, t: 0 };
         setArenaPalette(arenaPalet(now.arenaId));
+        // PILOT Organ Ascent: bentuk arena mengikuti organ zona baru
+        // (koridor bila organ itu punya `shape`, cawan lama bila tidak).
+        try { game.syncArenaShape && game.syncArenaShape(now.arenaId); } catch { /* abaikan */ }
         try {
           run.effects.spawnLabel(run.player.x, run.player.y - 70, `⬡ ${now.landmark}`, '#f5c64f');
           run.effects.spawnBlast(run.player.x, run.player.y, 220, '#f5c64f');
@@ -443,5 +446,28 @@ export function _forceAdvance(run) {
   const j = run && run.journey;
   if (!j) return null;
   j.waveInZone = num(zoneAt(j.index) && zoneAt(j.index).wavesPerZone, 3) + 1;
+  return j;
+}
+
+/**
+ * Lompat LANGSUNG ke zona tertentu (dipakai penguji/lab & dev-mode) — melalui
+ * jalur komit yang sama dengan pergantian zona alami: palet arena + bentuk
+ * arena (syncArenaShape) + landmark. Bukan jalur gameplay normal.
+ */
+export function _jumpToZone(game, zoneId) {
+  const run = game && game.run;
+  const j = run && run.journey;
+  const list = zones();
+  const idx = list.findIndex((z) => z.id === zoneId);
+  if (!j || idx < 0) return null;
+  j.index = idx;
+  j.nextIndex = Math.min(idx + 1, list.length - 1);
+  j.zoneId = zoneId;
+  j.phase = 'combat'; j.t = 0; j.blend = 0; j.waveInZone = 1;
+  if (!j.visited.includes(zoneId)) j.visited.push(zoneId);
+  j.landmark = { zoneId, t: 0 };
+  const now = list[idx];
+  setArenaPalette(arenaPalet(now.arenaId));
+  try { game.syncArenaShape && game.syncArenaShape(now.arenaId); } catch { /* abaikan */ }
   return j;
 }

@@ -625,6 +625,67 @@
         "speedMult": 1.05,
         "magnetMult": 1.0
       },
+      "shape": {
+        "kind": "corridor",
+        "doc": "PILOT Organ Ascent: koridor vertikal bersiluet bilik jantung. t=0 dasar (apeks), t=1 puncak (aorta). half=setengah lebar, cx=kelokan pusat. Luas ~ setara cawan lama (pi*750^2=1,77 jt) agar kepadatan spawn tidak berubah. Hanya batas & visual — mekanik identik.",
+        "height": 3200,
+        "startT": 0.1,
+        "profile": [
+          {
+            "t": 0.0,
+            "half": 120,
+            "cx": 0,
+            "label": "apeks"
+          },
+          {
+            "t": 0.16,
+            "half": 300,
+            "cx": -20
+          },
+          {
+            "t": 0.4,
+            "half": 390,
+            "cx": -50,
+            "label": "bilik kiri"
+          },
+          {
+            "t": 0.6,
+            "half": 310,
+            "cx": 10
+          },
+          {
+            "t": 0.72,
+            "half": 185,
+            "cx": 40,
+            "label": "katup (menyempit)"
+          },
+          {
+            "t": 0.86,
+            "half": 270,
+            "cx": 30,
+            "label": "serambi"
+          },
+          {
+            "t": 1.0,
+            "half": 130,
+            "cx": 70,
+            "label": "aorta"
+          }
+        ],
+        "wall": {
+          "tissue": "96,22,30",
+          "tissueFar": "58,10,16",
+          "muscle": "178,56,66",
+          "muscleLight": "222,120,120",
+          "vessel": "64,88,190",
+          "vesselArt": "232,74,84",
+          "flow": "255,190,180",
+          "rim": "255,170,160",
+          "fiberSpacing": 46,
+          "vesselCount": 3,
+          "cordEvery": 260
+        }
+      },
       "palette": {
         "hex": "#efc2b6",
         "vignette": "rgba(70,12,18,0.32)",
@@ -650,23 +711,24 @@
               "type": "fold",
               "color": "150,55,60",
               "color2": "190,90,95",
-              "spacing": 380,
-              "density": 0.85,
-              "width": 34,
-              "len": 800,
-              "wave": 60,
-              "angle": 1.2,
+              "spacing": 300,
+              "density": 0.7,
+              "width": 14,
+              "len": 520,
+              "wave": 40,
+              "angle": 1.57,
               "crawl": 1.6,
               "pulse": true,
-              "pulseSpeed": 0.5
+              "pulseSpeed": 0.5,
+              "alpha": 0.55
             },
             {
               "type": "pool",
               "color": "170,50,60",
               "color2": "210,100,110",
               "spacing": 560,
-              "density": 0.45,
-              "size": 90,
+              "density": 0.3,
+              "size": 60,
               "bubbles": false,
               "danger": true
             },
@@ -683,8 +745,8 @@
               "color": "220,70,80",
               "count": 30,
               "size": 7,
-              "dx": 1,
-              "dy": 0.15,
+              "dx": 0.12,
+              "dy": -1,
               "speed": 90,
               "span": 800,
               "alpha": 0.85
@@ -694,8 +756,8 @@
               "color": "255,160,150",
               "count": 16,
               "size": 4,
-              "dx": 1,
-              "dy": 0.15,
+              "dx": 0.12,
+              "dy": -1,
               "speed": 90,
               "span": 800,
               "alpha": 0.8

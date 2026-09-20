@@ -27,7 +27,7 @@ import {
 } from './systems/antibody-economy.js'; // P3: ekonomi antibodi
 import {
   initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
-  enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+  enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance, _jumpToZone,
 } from './systems/world-journey.js'; // P4: dunia kontinu
 // P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §21) + iklan reward
 import { reserveCfg, reserveBalance, reserveAssistFor, useReserve, grantReserve, maxAssistFor, reserveUsesLeft, reserveEnabled } from './systems/reserve-system.js';
@@ -37,7 +37,7 @@ import { adStatus, triggerRewardedAdAntibody } from './systems/monetization.js';
 import { beginAttack, updateAttack, attackActive, attackProgress, signatureFor, archetypeCfg, archetypeForHero, describeAttackChange, mutationAttackMods } from './systems/attack-archetype.js';
 import { crawlPose, crawlLobe, crawlStatus } from './systems/crawl-rig.js';
 // P7-PROTOTIPE: lab & pemilih cara gambar hero
-import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode, heroModeLabel } from './render/hero-mode.js';
+import { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, initHeroMode, heroModeLabel, heroModeFor, resetHeroMode, isPilotCreatureHero } from './render/hero-mode.js';
 import { bukaLab, tutupLab, gantiLab, initLab, labTerbuka } from './ui/prototype-lab.js';
 import { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy } from './render/creature-rig.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
@@ -772,7 +772,7 @@ async function boot() {
   // P4: permukaan debug perjalanan dunia (dipakai penguji & autotest).
   window.__IMUNVERSE.world = {
     initJourney, updateJourney, journeyHud, currentZone, nextZone, inTransition,
-    enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance,
+    enemyPoolFor, blendedPalette, mixHex, journeyProgress, _forceAdvance, _jumpToZone,
   };
   // P3: permukaan debug ekonomi antibodi (dipakai penguji & autotest).
   window.__IMUNVERSE.economy = {
@@ -789,7 +789,13 @@ async function boot() {
   {
     const bLab = document.getElementById('btn-proto-lab');
     const bMode = document.getElementById('btn-proto-mode');
-    const segar = () => { if (bMode) bMode.textContent = 'Mode hero: ' + heroModeLabel(); };
+    // Label mengikuti mode EFEKTIF hero yang sedang dimainkan (pilot Mako =
+    // makhluk secara bawaan; hero lain = mode global).
+    const segar = () => {
+      if (!bMode) return;
+      const hid = (game.run && game.run.heroDef && game.run.heroDef.id) || STATE.meta.selectedHero || 'macrophage';
+      bMode.textContent = 'Mode hero: ' + heroModeLabel(heroModeFor(hid));
+    };
     if (bLab) bLab.addEventListener('click', () => { audio.ui(); bukaLab('macrophage'); });
     if (bMode) bMode.addEventListener('click', () => {
       audio.ui();
@@ -806,7 +812,7 @@ async function boot() {
       }
     } catch { /* abaikan */ }
   }
-  window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, bukaLab, tutupLab, labTerbuka };
+  window.__IMUNVERSE.hero = { heroMode, setHeroMode, cycleHeroMode, heroModes, heroAnimState, heroModeFor, resetHeroMode, isPilotCreatureHero, bukaLab, tutupLab, labTerbuka };
   window.__IMUNVERSE.creature = { drawCreature, creaturePose, creatureStates, creatureStateInfo, creatureAvailable, creatureIds, creatureAnatomy };
   // P7: penguji butuh tahu kapan foto benar-benar siap (bukan placeholder)
   window.__IMUNVERSE.sprites = { has: hasSprite, stats: spriteStats };
