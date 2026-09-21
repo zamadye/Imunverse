@@ -9,8 +9,8 @@
 > | Poin | Keputusan | Status |
 > |---|---|---|
 > | Scope penghapusan (§4) | **Opsi B — semua aset visual**; audio & ikon PWA diselamatkan | ✅ **SELESAI** — 269 file / ~64 MB dicabut, `assets/` 67 MB → 2,8 MB. Manifest + cara restore: `docs/UI-UX-RESET-DELETED-ASSETS.md` |
-> | Nasib arah PR #44 (pixel-art + Organ Ascent + Last Asylum) | **"Video yang memutuskan"** — dibandingkan dengan isi video dulu | ⏳ Menunggu video |
-> | Video referensi (§3) | Owner **re-commit** file aslinya ke branch | ⏳ **BLOCKER** — file di repo masih 2 byte |
+> | Nasib arah PR #44 (pixel-art + Organ Ascent + Last Asylum) | **"Video yang memutuskan"** — dibandingkan dengan isi video dulu | ✅ **SELESAI** — putusan + rekomendasi eksekusi: `docs/VIDEO-REFERENCE-ANALYSIS.md` §5-6 |
+> | Video referensi (§3) | Owner **re-commit** file aslinya ke branch | ✅ **TERPECAHKAN TANPA UPLOAD ULANG** — video asli 13,4 MB ditemukan utuh di history (commit `33ab2600`, blob `17b7f553`) dan dipulihkan; commit `6db9a72` ternyata me-rename sebagai operasi teks sehingga jadi stub 2 byte |
 >
 > Yang belum disentuh dan menunggu video: `styles/` (5.687 baris), markup 19 screen,
 > token palet cream/teal/coral, `data/creature-rigs.json` (1,7 MB), `data/crawl-cycles.json`.
@@ -170,7 +170,14 @@ Audio yang hilang juga tidak crash (audio-system punya guard).
 
 ---
 
-## 3. ⚠️ BLOCKER: video referensi KOSONG
+## 3. ⚠️ BLOCKER: video referensi KOSONG — **TERPECAHKAN (2026-09-21)**
+
+> **RESOLUSI:** tidak perlu upload ulang. Video asli 13,4 MB ternyata **masih utuh di
+> history git** pada commit `33ab2600` (blob `17b7f553`). Commit `6db9a72` yang
+> me-rename-nya mengerjakan operasi **teks** (bukan `git mv`), itulah yang mengubahnya
+> jadi stub 2 byte. File asli sudah dipulihkan di commit `3473e17` dengan memakai ulang
+> blob tersebut, dan analisis vision-nya ada di `docs/VIDEO-REFERENCE-ANALYSIS.md`.
+> Tabel di bawah dipertahankan sebagai catatan forensik.
 
 `Character_and_arena_reference.mp4` **bukan video** — isinya 2 byte.
 
