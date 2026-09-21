@@ -140,6 +140,43 @@ body:not(.in-run) .toast { font-size: 11px; padding: 6px 12px; opacity: .95; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-14px) scale(0.95); } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(-10px); } }
 
+/* ============================================================
+   PERANCAH SEMENTARA UI-RESET (2026-09-21)
+   Seluruh aset VISUAL dicabut owner untuk reset UI/UX total
+   (docs/UI-UX-RESET-AUDIT.md §4 opsi B). Yang tersisa di assets/
+   hanya audio (34) + ikon PWA (3) + 2 README.
+
+   Aturan ini menyembunyikan <img> yang 404 supaya tiap layar tidak
+   jadi tembok ikon "broken image" selama masa reset. Kelas
+   `.asset-missing` dipasang oleh skrip inline di <head> index.html
+   (gambar markup) dan js/ui/reset-scaffold.js (gambar dinamis).
+
+   Ini BUKAN pengganti visual — keadaan kosong memang yang diminta.
+   HAPUS blok ini + kedua pemasang kelasnya begitu UI/UX baru masuk.
+   ============================================================ */
+img.asset-missing {
+  visibility: hidden !important;
+  /* tinggi/lebar dipertahankan supaya layout tidak runtuh — jejak slotnya
+     masih kelihatan saat menyusun UI baru */
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(18, 63, 58, 0.05) 0 6px,
+      rgba(18, 63, 58, 0.00) 6px 12px);
+  border-radius: var(--r-sm);
+}
+/* Latar foto yang ikut hilang (bg-loading / bg-dashboard / bg-fullmap) —
+   tanpa ini layar jatuh ke --cream polos dan teks di atasnya bisa tak terbaca.
+   Gradasi netral sementara, bukan identitas visual baru. */
+#screen-loading,
+.dash-bg,
+.fullmap-photo {
+  background-color: var(--teal-dark);
+  background-image:
+    radial-gradient(120% 90% at 50% 0%, rgba(53, 208, 186, 0.22), rgba(20, 88, 79, 0) 60%),
+    radial-gradient(90% 70% at 50% 100%, rgba(18, 63, 58, 0.55), rgba(20, 88, 79, 0) 70%);
+}
+/* --- akhir perancah UI-RESET --- */
+
 /* ---------------- Screen dasar ---------------- */
 .screen {
   position: fixed; inset: 0; height: 100dvh; /* Fase 16: dinamis mengikuti URL-bar HP */

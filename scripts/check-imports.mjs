@@ -16,6 +16,20 @@ let errors = 0;
 const fail = (msg) => { console.error('  ✗', msg); errors++; };
 const ok = (msg) => console.log('  ✓', msg);
 
+/**
+ * UI-RESET (2026-09-21): owner mencabut SELURUH aset visual untuk reset UI/UX
+ * total — lihat docs/UI-UX-RESET-AUDIT.md §4 opsi B. Selama masa reset, "sprite
+ * hilang" adalah kondisi YANG DIHARAPKAN, bukan regresi, jadi diturunkan jadi
+ * INFO. Semua pemeriksaan lain (import antar modul, validitas JSON, regresi CSS
+ * #screen-*, referensi index.html) TETAP STRICT.
+ *
+ * Matikan dengan `PHAGOS_STRICT_ASSETS=1 node scripts/check-imports.mjs`, atau
+ * balik konstanta ini ke false begitu aset UI baru sudah masuk — pada titik itu
+ * pemeriksaan sprite harus keras lagi.
+ */
+const UI_RESET_ASSETS_ABSENT = process.env.PHAGOS_STRICT_ASSETS !== '1';
+const info = (msg) => console.log('  ·', msg);
+
 function walk(dir, out = []) {
   for (const name of fs.readdirSync(dir)) {
     const p = path.join(dir, name);
@@ -100,6 +114,7 @@ console.log('— CSS layar —');
 }
 
 console.log('— Sprite assets —');
+const missingSprites = [];
 // Laporkan foto mutasi yang BELUM ada sebagai INFO (bukan kegagalan).
 let mutReady = 0;
 for (const sp of optionalSpritePaths) {
@@ -115,7 +130,13 @@ if (optionalSpritePaths.size > 0) {
 
 for (const sp of spritePaths) {
   const p = path.join(ROOT, sp);
-  if (!fs.existsSync(p)) fail(`sprite hilang: ${sp}`);
+  if (!fs.existsSync(p)) {
+    if (UI_RESET_ASSETS_ABSENT) missingSprites.push(sp);
+    else fail(`sprite hilang: ${sp}`);
+  }
+}
+if (UI_RESET_ASSETS_ABSENT && missingSprites.length) {
+  info(`UI-RESET: ${missingSprites.length}/${spritePaths.size} sprite belum ada (aset visual dicabut owner — diharapkan, lihat docs/UI-UX-RESET-AUDIT.md). Pakai PHAGOS_STRICT_ASSETS=1 untuk memaksa keras.`);
 }
 ok(`${spritePaths.size} path sprite diperiksa`);
 

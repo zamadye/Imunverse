@@ -4,7 +4,13 @@
  * (data JSON, sprite, audio). Naikkan CACHE_VER tiap rilis agar klien
  * mengambil aset baru.
  */
-const CACHE_VER = 'phagos-v23';
+// UI-RESET (2026-09-21): seluruh aset VISUAL dicabut owner untuk reset UI/UX
+// (lihat docs/UI-UX-RESET-AUDIT.md §4 opsi B). Tiga entri precache ikut hilang:
+//   ./assets/rive/hero-locomotion.riv · ./assets/ui/bg-dashboard.jpg · ./assets/ui/bg-loading.jpg
+// cache.addAll() gagal ATOMIK kalau satu saja URL 404 → precache lama pasti
+// gagal install, jadi daftar ini dipangkas ke berkas yang masih ADA.
+// Kembalikan entri aset visual ke sini begitu UI baru jadi.
+const CACHE_VER = 'phagos-v24-uireset';
 const PRECACHE = [
   './',
   './index.html',
@@ -14,12 +20,8 @@ const PRECACHE = [
   './styles/dashboard-map.css',
   './styles/portrait.css',
   './js/main.js',
-  // Rig lokomosi Rive (4,7 KB) — runtime wasm-nya di-cache saat dipakai
-  './assets/rive/hero-locomotion.riv',
-  // Latar foto dashboard & loading (UI-REBUILD P8)
-  './assets/ui/bg-dashboard.jpg',
-  './assets/ui/bg-loading.jpg',
-  // Musik CC0 (data/audio.json) — diputar saat menu & run
+  // Musik CC0 (data/audio.json) — diputar saat menu & run.
+  // Audio SENGAJA DIPERTAHANKAN saat reset (bukan bagian UI/UX).
   './assets/audio/music/bgm_menu.mp3',
   './assets/audio/music/bgm_run.mp3',
 ];

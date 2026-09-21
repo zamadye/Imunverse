@@ -11,10 +11,39 @@
   <link rel="apple-touch-icon" href="assets/icons/pwa-192.png" />
   <meta name="description" content="PHAGOS — Telan. Bermutasi. Bertahan. Roguelike survival membran sel imun di phagos.space!" />
   <title>PHAGOS — Telan. Bermutasi. Bertahan.</title>
-  <link rel="stylesheet" href="styles/main.css?v=54i" />
-  <link rel="stylesheet" href="styles/dashboard-focus.css?v=54i" />
-  <link rel="stylesheet" href="styles/portrait.css?v=54i" />
-  <link rel="stylesheet" href="styles/dashboard-map.css?v=54i" />
+
+  <!-- ===== PERANCAH SEMENTARA UI-RESET (2026-09-21) =====
+       Seluruh aset VISUAL dicabut owner untuk reset UI/UX (docs/UI-UX-RESET-AUDIT.md §4 opsi B).
+       Skrip inline ini harus jalan SEBELUM <img> markup mulai dimuat, karena itu
+       ditaruh di <head> sebagai skrip klasik (modul ES deferred = terlalu telat).
+       Pasangannya: js/ui/reset-scaffold.js (gambar dinamis) + CSS `.asset-missing`.
+       HAPUS blok ini begitu UI/UX baru dan asetnya masuk. -->
+  <script>
+    (function () {
+      var mark = function (el) {
+        if (el && el.tagName === 'IMG' && !el.classList.contains('asset-missing')) {
+          el.classList.add('asset-missing');
+        }
+      };
+      // error <img> tidak bubble → wajib capture phase di window
+      window.addEventListener('error', function (ev) { mark(ev.target); }, true);
+      var sweep = function () {
+        var imgs = document.querySelectorAll('img');
+        for (var i = 0; i < imgs.length; i++) {
+          if (imgs[i].complete && imgs[i].naturalWidth === 0) mark(imgs[i]);
+        }
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', sweep, { once: true });
+      } else { sweep(); }
+      window.addEventListener('load', sweep, { once: true });
+    })();
+  </script>
+
+  <link rel="stylesheet" href="styles/main.css?v=uireset1" />
+  <link rel="stylesheet" href="styles/dashboard-focus.css?v=uireset1" />
+  <link rel="stylesheet" href="styles/portrait.css?v=uireset1" />
+  <link rel="stylesheet" href="styles/dashboard-map.css?v=uireset1" />
 </head>
 <body>
 <!-- ===== BENTUK SEL MELELEH (clip-path) — kartu atas & tombol PLAY ===== -->
@@ -598,6 +627,6 @@
     <div id="toasts"></div>
   </div>
 
-  <script type="module" src="js/main.js?v=54i"></script>
+  <script type="module" src="js/main.js?v=uireset1"></script>
 </body>
 </html>

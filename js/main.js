@@ -54,6 +54,9 @@ import { music } from './systems/music-system.js';
 import { gateFor, hudMenuGate, applyHudMenuGates } from './systems/feature-gate.js';
 import { renderBadges, markSeen } from './systems/unlock-badge-system.js';
 import { getQuestProgress, acceptQuest, claimQuest } from './systems/mission-system.js';
+// UI-RESET (2026-09-21): perancah sementara — sembunyikan <img> yang 404 karena
+// seluruh aset visual dicabut owner. Hapus begitu UI/UX baru masuk.
+import { initResetScaffold, resetScaffoldSummary } from './ui/reset-scaffold.js';
 
 import * as screenManager from './ui/screen-manager.js';
 import * as loadingScreen from './ui/screens/loading-screen.js';
@@ -335,6 +338,10 @@ function wireUiBridge() {
 // Boot
 // ---------------------------------------------------------------------
 async function boot() {
+  // UI-RESET: pasang pemantau <img> dinamis lebih dulu, sebelum modul UI
+  // mulai menyuntik markup (roster/codex/shop/missions membangun innerHTML).
+  try { initResetScaffold(); } catch { /* perancah tidak boleh menggagalkan boot */ }
+
   resize();
   loadingScreen.setProgress(4, 'Menyiapkan organisme…');
 
@@ -369,6 +376,19 @@ async function boot() {
     loadingScreen.setProgress(pct, `Memuat sprite… (${done}/${total})${isFallback ? ' [fallback dev]' : ''}`);
   });
   loadingScreen.setProgress(98, 'Mengaktifkan sistem imun…');
+
+  // UI-RESET: laporkan lubang aset ke console di dev supaya jelas bagian mana
+  // yang harus diisi UI/UX baru. Bukan error — ini kondisi yang diharapkan.
+  if (isDevMode()) {
+    const spriteStat = spriteStats();
+    const imgStat = resetScaffoldSummary();
+    console.info(
+      '[ui-reset] aset visual dicabut. sprite canvas placeholder: '
+      + `${spriteStat.placeholder}/${spriteStat.loaded} · `
+      + `<img> DOM hilang: ${imgStat.count} (${imgStat.uniquePaths.length} path unik)`,
+    );
+    if (imgStat.uniquePaths.length) console.info('[ui-reset] path <img> hilang:', imgStat.uniquePaths);
+  }
 
   // 3) Save / meta
   const raw = loadSave();
