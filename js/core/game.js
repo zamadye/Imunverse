@@ -91,7 +91,9 @@ import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economy
 // P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §14-§21, §34)
 import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
 import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
-import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone } from '../systems/world-journey.js';
+import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _forceAdvance } from '../systems/world-journey.js';
+import { BioChamber } from '../systems/bio-chamber.js';
+import { drawChamberCanvas } from '../render/body-micro.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
@@ -339,17 +341,14 @@ export const game = {
     // MIGRASI DUNIA KONTINU (mandat owner): satu dunia tubuh tunggal; pemain
     // mulai dari anchor START; koridor per-zona pensiun (arenaShape=null).
     try {
-      const bwDef = getData().bodyMap || null;
-      this.run.bodyWorld = bwDef ? buildBodyWorld(bwDef) : null;
-      if (this.run.bodyWorld) {
-        const st = this.run.bodyWorld.anchorPx('start');
-        if (st && this.run.player) {
-          this.run.player.x = st.x; this.run.player.y = st.y;
-          this.run.player.vx = 0; this.run.player.vy = 0;
-        }
-        this.run.arenaShape = null; this.run.arenaBounds = null;
-      }
+      // SPEC OWNER: MAP = denah navigasi statis (overlay B), BUKAN ruang main.
+      // Gameplay = ARENA tertutup (BioChamber) per zona; worldMapDef tetap ada
+      // untuk denah macro saja.
+      this.run.bodyWorld = null;
+      this.run.arenaShape = null; this.run.arenaBounds = null;
+      this.run.chamber = null;
     } catch (err) { if (isDevMode()) console.warn('[phagos] bodyWorld:', err); }
+    try { this.ensureChamber(); } catch (err) { if (isDevMode()) console.warn('[phagos] ensureChamber:', err); }
     try { this.syncArenaShape(); } catch (err) { if (isDevMode()) console.warn('[phagos] syncArenaShape:', err); }
     // P6: batas getar kamera dari data — rentetan dampak boss tetap nyaman.
     try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
@@ -709,6 +708,27 @@ export const game = {
     // P4: perjalanan dunia (zona & transisi) — SETELAH spawn supaya kenaikan
     // wave terbaca di frame yang sama (§27: wave = pacing, bukan arena).
     try { updateJourney(this, dt); } catch (err) { if (isDevMode()) console.warn('[phagos] updateJourney:', err); }
+    // ARENA TERTUTUP: instance BioChamber mengikuti zona aktif; state machine
+    // ENTRY->LOCKDOWN->SWARM->PURIFIED->OPEN; pintu terbuka => rute lanjut.
+    try {
+      const runC = this.run;
+      if (runC) {
+        this.ensureChamber();
+        if (runC.chamber) {
+          runC.chamber.update(dt, runC, {
+            onSwarmStart: () => { try { runC.effects.spawnLabel(runC.player.x, runC.player.y - 80, 'SPASME VASKULAR — KATUP TERKUNCI', '#ff8a7a'); } catch { /* abaikan */ } },
+            onPurified: () => {
+              try { runC.effects.spawnLabel(runC.player.x, runC.player.y - 80, 'ARENA PURIFIED', '#7dffd4'); } catch { /* abaikan */ }
+              try { runC.camera.addShake && runC.camera.addShake(0.5); } catch { /* abaikan */ }
+            },
+            onOpen: () => {
+              try { runC.effects.spawnLabel(runC.player.x, runC.player.y - 80, 'KATUP TERBUKA — LANJUT', '#8df7d2'); } catch { /* abaikan */ }
+              try { _forceAdvance(runC); } catch { /* abaikan */ }
+            },
+          });
+        }
+      }
+    } catch (err) { if (isDevMode()) console.warn('[phagos] chamber:', err); }
     if (events.waveBreak) {
       emit('waveBreak', { wave: run.spawnSys.wave });
     }
@@ -764,8 +784,8 @@ export const game = {
       const B = run.arenaBounds;
       const SH = run.arenaShape;
       if (SH || run.bodyWorld) {
-        for (const p of run.projectiles) if (p.alive && (run.bodyWorld ? !run.bodyWorld.insideLumen(p.x, p.y) : outsideDistance(SH, p.x, p.y) > 60)) p.alive = false;
-        for (const b of run.ebullets) if (b.alive && (run.bodyWorld ? !run.bodyWorld.insideLumen(b.x, b.y) : outsideDistance(SH, b.x, b.y) > 60)) b.alive = false;
+        for (const p of run.projectiles) if (p.alive && (run.chamber ? (() => { const dx = p.x - run.chamber.cx, dy = p.y - run.chamber.cy; const r = Math.hypot(dx, dy); return r > run.chamber.radiusAt(Math.atan2(dy, dx)) + 34; })() : (run.bodyWorld ? !run.bodyWorld.insideLumen(p.x, p.y) : outsideDistance(SH, p.x, p.y) > 60))) { p.alive = false; try { run.chamber && run.chamber.applyImpact(Math.atan2(p.y - run.chamber.cy, p.x - run.chamber.cx), 6); } catch { /* abaikan */ } }
+        for (const b of run.ebullets) if (b.alive && (run.chamber ? (() => { const dx = b.x - run.chamber.cx, dy = b.y - run.chamber.cy; const r = Math.hypot(dx, dy); return r > run.chamber.radiusAt(Math.atan2(dy, dx)) + 34; })() : (run.bodyWorld ? !run.bodyWorld.insideLumen(b.x, b.y) : outsideDistance(SH, b.x, b.y) > 60))) b.alive = false;
       } else if (B) {
         for (const p of run.projectiles) {
           if (p.alive && Math.hypot(p.x - B.x, p.y - B.y) > B.r + 60) p.alive = false;
@@ -866,7 +886,9 @@ export const game = {
     const lookX = spd > 4 ? (player.vx / (spd || 1)) : 0;
     const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
     // saat SNAP MACRO aktif, kamera milik peta (pusat tubuh) — bukan follow pemain
-    const macroActiveNow = !!(run.arenaShape || run.bodyWorld)
+    if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
+    const hasWorldView = !!(run.arenaShape || run.bodyWorld || run.chamber || run.worldMapDef);
+    const macroActiveNow = hasWorldView
       && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
     if (!macroActiveNow) run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
     run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
@@ -878,15 +900,15 @@ export const game = {
     // SELURUH struktur organ dari jauh (zoom 0,34), lalu kamera meluncur masuk ke
     // area starter (shape.cameraZoom). Sekali per run — ganti zona tidak mengulang.
     try {
-      const targetZoom = run.bodyWorld
+      // ARENA TERTUTUP: zoom arena dari zone.zoom (rujukan ARENA_ZOOM_OUT_REFERENCE)
+      const targetZoom = (run.chamber || run.bodyWorld)
         ? (((() => { try { return (currentZone(run) || {}).zoom; } catch { return null; } })()) || 0.66)
         : (run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1);
       run.introT = (run.introT == null ? 0 : run.introT) + dt;
       // SNAP MACRO (bukti "arena full"): auto-fit SELURUH struktur organ ke layar.
       // Otomatis ~1,15 dtk pertama run; kapan pun bisa ditahan lewat tombol M.
       const macroHold = !!(this.input && this.input.keys && this.input.keys.has('map'));
-      if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
-      const macroOn = !!(run.arenaShape || run.bodyWorld) && (macroHold || run.introT < 1.7);
+      const macroOn = hasWorldView && (macroHold || run.introT < 1.7);
       if (macroOn) {
         // SNAP MACRO ke PETA TUBUH penuh (bila ada) — bukan hanya koridor zona
         let fit, cxm, cym;
@@ -1801,6 +1823,13 @@ applyChapterTier(enemy, run) {
     const run = this.run;
     // MIGRASI: spawn HARUS di dalam lumen dunia kontinu (ring sekitar pemain,
     // bias bawah dipertahankan lewat spawnRing preferBelow).
+    if (run.chamber) {
+      const ch = run.chamber;
+      if (ch.swarm) { const v = ch.ventPosition(Math.floor(Math.random() * ch.vents.length)); return { x: v.x, y: v.y }; }
+      const a = Math.PI * (0.17 + Math.random() * 0.66); // bias bawah
+      const rr = ch.R * (0.45 + Math.random() * 0.35);
+      return { x: ch.cx + Math.cos(a) * rr, y: ch.cy + Math.sin(a) * rr };
+    }
     if (run.bodyWorld) {
       return run.bodyWorld.spawnRing(run.player.x, run.player.y, 260, 620, true);
     }
@@ -1871,9 +1900,35 @@ applyChapterTier(enemy, run) {
    * @param {object} ent {x, y} yang digeser bila di luar dinding
    * @param {number} margin jarak aman dari dinding (radius entitas)
    */
+  /**
+   * ARENA TERTUTUP (spec owner): satu instance BioChamber per zona aktif.
+   * Zona berganti => chamber lama pensiun, chamber baru LOCKDOWN ulang.
+   * MAP (body-map.json) TIDAK dipakai sebagai ruang main — hanya denah.
+   */
+  ensureChamber() {
+    const runC = this.run;
+    if (!runC) return;
+    let zid = null;
+    try { zid = (currentZone(runC) || {}).id || null; } catch { zid = null; }
+    if (!zid) zid = (runC.journey && runC.journey.zoneId) || 'start';
+    if (runC.chamber && runC.chamber.zoneId === zid) return;
+    const list = (getData().arenas && getData().arenas.arenas) || [];
+    const zdef = ((getData().zones && getData().zones.route) || []).find((z) => z.id === zid);
+    const def = list.find((a) => a.id === ((zdef && zdef.arenaId) || '')) || list[0];
+    const px = (runC.player && runC.player.x) || 0;
+    const py = (runC.player && runC.player.y) || 0;
+    runC.chamber = new BioChamber(def, px, py);
+    runC.chamber.zoneId = zid;
+    runC.chamber.enter();
+    // pemain dipusatkan di arena baru
+    if (runC.player) { runC.player.x = runC.chamber.cx; runC.player.y = runC.chamber.cy; runC.player.vx = 0; runC.player.vy = 0; }
+    if (this._bodyGL && this._bodyGL.setPalette) { try { this._bodyGL.setPalette(def); } catch { /* abaikan */ } }
+  },
+
   arenaClamp(ent, margin = 0) {
     if (!this.run || !ent) return;
-    // MIGRASI DUNIA KONTINU: pantul elastis di daging; lumen bebas penuh.
+    // ARENA TERTUTUP: dinding membran soft-body menahan di dalam chamber.
+    if (this.run.chamber) { this.run.chamber.collide(ent, margin || ent.radius || 14); return; }
     if (this.run.bodyWorld) { this.run.bodyWorld.reflect(ent, margin || ent.radius || 14); return; }
     // PILOT Organ Ascent: koridor organ menggantikan lingkaran bila aktif.
     if (this.run.arenaShape) { clampToShape(this.run.arenaShape, ent, margin || 0); return; }
@@ -2490,9 +2545,9 @@ applyChapterTier(enemy, run) {
         run.glActive = !!(gl && gl.ok);
       }
       let drew = false;
-      if (gl && gl.ok) { try { drew = gl.render(run, P, time); } catch { drew = false; gl.ok = false; } }
+      if (gl && gl.ok && run.chamber) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
       if (drew) ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
-      else { try { drawBodyMicro(ctx, P, run.bodyWorld, time); } catch (err) { console.warn('[phagos] bodyMicro:', err); } }
+      else { try { drawChamberCanvas(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] chamberCanvas:', err); } }
     }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah

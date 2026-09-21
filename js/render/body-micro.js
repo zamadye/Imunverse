@@ -223,3 +223,59 @@ export function drawBodyMicro(ctx, P, world, time) {
 
   ctx.restore();
 }
+
+/**
+ * FALLBACK Canvas 2D untuk ARENA tertutup (bila WebGL2 tiada): cincin membran
+ * terdeformasi + interior backlit + tissue sederhana. Bahasa visual sama dgn
+ * body-gl.js versi shader, tanpa efek per-piksel lanjutan.
+ */
+export function drawChamberCanvas(ctx, P, chamber, time) {
+  if (!chamber) return;
+  const w = P.w, h = P.h;
+  const pr = (x, y) => P.project(x, y);
+  const beat = heartbeat(time, chamber.bpm || 72);
+  ctx.save();
+  // tissue latar
+  const bg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.1, w / 2, h / 2, Math.max(w, h) * 0.8);
+  bg.addColorStop(0, 'rgb(96,20,38)'); bg.addColorStop(1, 'rgb(40,8,18)');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+  // interior backlit
+  const c0 = pr(chamber.cx, chamber.cy);
+  const N = 48;
+  const path = (scale = 1) => {
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const k = i % N;
+      const a = (k / N) * Math.PI * 2;
+      const r = chamber.points[k].r * scale;
+      const q = pr(chamber.cx + Math.cos(a) * r, chamber.cy + Math.sin(a) * r);
+      if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    }
+    ctx.closePath();
+  };
+  const g = ctx.createRadialGradient(c0.x, c0.y, 10, c0.x, c0.y, chamber.R * 1.15 * c0.s);
+  g.addColorStop(0, `rgba(255,232,168,${0.9 + beat * 0.05})`);
+  g.addColorStop(0.55, 'rgba(255,176,96,0.9)');
+  g.addColorStop(1, 'rgba(186,84,52,0.95)');
+  ctx.fillStyle = g; path(1); ctx.fill();
+  // pita membran glossy + bayangan punggung
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(28,6,14,0.65)'; ctx.lineWidth = Math.max(6, 34 * c0.s); path(1.04); ctx.stroke();
+  ctx.strokeStyle = 'rgba(196,30,44,0.95)'; ctx.lineWidth = Math.max(4, 18 * c0.s); path(1); ctx.stroke();
+  ctx.strokeStyle = `rgba(255,150,140,${0.4 + beat * 0.15})`; ctx.lineWidth = Math.max(1.5, 4 * c0.s); path(0.97); ctx.stroke();
+  // pintu terbuka
+  if (chamber.openAmt > 0.05) {
+    const a = chamber.doorAngle;
+    const r = chamber.radiusAt(a);
+    const q = pr(chamber.cx + Math.cos(a) * r, chamber.cy + Math.sin(a) * r);
+    const gg = ctx.createRadialGradient(q.x, q.y, 0, q.x, q.y, 90 * q.s);
+    gg.addColorStop(0, `rgba(80,230,210,${0.75 * chamber.openAmt})`);
+    gg.addColorStop(1, 'rgba(80,230,210,0)');
+    ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(q.x, q.y, 90 * q.s, 0, TAU); ctx.fill();
+  }
+  // vignette
+  const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.34, w / 2, h / 2, Math.max(w, h) * 0.74);
+  vg.addColorStop(0, 'rgba(16,4,10,0)'); vg.addColorStop(1, 'rgba(16,4,10,0.45)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+}

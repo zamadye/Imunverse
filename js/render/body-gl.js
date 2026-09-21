@@ -1,18 +1,20 @@
 /**
- * body-gl.js — RENDERER DUNIA KONTINU VIA WEBGL2 (SDF fragment shader).
+ * body-gl.js — RENDERER BIO-CHAMBER TERTUTUP VIA WEBGL2 (SDF radial terdeformasi).
  *
- * Alasan: bahasa visual video referensi (mosaik voronoi multi-hue, pita crimson
- * glossy berspecular, fringe fbm irregular, interior haze + ray + massa
- * honeycomb, AO celah, vignette lipat, grain) adalah operasi PER-PIKSEL yang
- * tidak terjangkau Canvas 2D gradients. Shader ini menghitung union SDF
- * chamber+pembuluh dari DATA YANG SAMA dengan body-world.js (satu sumber
- * kebenaran geometri) dan men-shading tiap piksel.
+ * Mencetak ARENA (bukan MAP): satu chamber tertutup per visual. Geometri dinding
+ * dibaca dari array radii hasil simulasi spring-mass `BioChamber` (satu sumber
+ * kebenaran dengan collision), sehingga dinding yang PENYOK saat ditabrak juga
+ * terlihat penyok di layar (soft-body mesh). Shading per-piksel mengikuti pilar
+ * visual referensi: interior backlit + haze + ray + massa honeycomb, pita
+ * crimson glossy berspecular + rumbai tuft, mosaik voronoi tissue ber-grout
+ * gelap + AO, vignette lipat, grain, pulsasi BPM, plus efek state-machine:
+ * nada infeksi saat LOCKDOWN, pori SPORE VENTS menyala saat SWARM, cincin
+ * shockwave bioluminesensi saat PURIFIED, dan mulut pintu teal saat OPEN.
  *
- * Fallback: bila WebGL2 tidak tersedia (jsdom, perangkat lama) game.js kembali
- * ke renderer Canvas 2D (body-micro.js). Entitas/HUD tetap di canvas utama;
- * lapisan GL di-drawImage ke bawahnya.
+ * Fallback: Canvas 2D (body-micro.js) bila WebGL2 tiada (jsdom/perangkat lama).
  */
 import { heartbeat, cameraOf } from './background.js';
+import { CHAMBER_POINTS } from '../systems/bio-chamber.js';
 
 const VERT = `#version 300 es
 void main() {
@@ -27,14 +29,18 @@ uniform vec2 u_cam;
 uniform float u_scale;
 uniform float u_time;
 uniform float u_beat;
-uniform int u_nCh;
-uniform vec4 u_ch[16];
-uniform vec3 u_chFill[16];
-uniform vec3 u_chDeep[16];
-uniform int u_nSeg;
-uniform vec4 u_seg[64];
-uniform float u_segR[64];
-uniform float u_segK[64];
+uniform vec2 u_center;
+uniform float u_radii[${CHAMBER_POINTS}];
+uniform vec3 u_glow;      // interior glow rgb
+uniform vec3 u_glowHot;
+uniform vec3 u_fill;      // palet organ
+uniform vec3 u_deep;
+uniform float u_state;    // 0 lockdown 1 swarm 2 purified 3 open
+uniform float u_shock;    // 0..1
+uniform float u_door;     // sudut pintu
+uniform float u_open;     // 0..1
+uniform float u_vents[8];
+uniform int u_nVents;
 out vec4 frag;
 
 float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
@@ -42,114 +48,100 @@ float noise(vec2 p) {
   vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
 }
-float fbm(vec2 p) {
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; }
-  return v;
-}
-// voronoi: F2-F1 (edge) + hash sel
+float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; } return v; }
 vec3 vor(vec2 p) {
   vec2 i = floor(p), f = fract(p);
   float f1 = 8.0, f2 = 8.0, h1 = 0.0;
   for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
     vec2 g = vec2(float(x), float(y));
     vec2 o = vec2(hash(i + g), hash(i + g + 7.7));
-    vec2 r = g + o - f;
-    float d = dot(r, r);
-    if (d < f1) { f2 = f1; f1 = d; h1 = hash(i + g + 3.3); }
-    else if (d < f2) { f2 = d; }
+    vec2 r = g + o - f; float d = dot(r, r);
+    if (d < f1) { f2 = f1; f1 = d; h1 = hash(i + g + 3.3); } else if (d < f2) { f2 = d; }
   }
   return vec3(sqrt(f2) - sqrt(f1), h1, f1);
 }
-float sdEll(vec2 p, vec4 e) { vec2 q = (p - e.xy) / e.zw; return (length(q) - 1.0) * min(e.z, e.w); }
-float sdSeg(vec2 p, vec4 s) {
-  vec2 a = s.xy, b = s.zw; vec2 pa = p - a, ba = b - a;
-  float h = clamp(dot(pa, ba) / max(1e-6, dot(ba, ba)), 0.0, 1.0);
-  return length(pa - ba * h);
+float radAt(float a) {
+  float f = fract(a / 6.2831853) * ${CHAMBER_POINTS}.0;
+  int i = int(floor(f)) % ${CHAMBER_POINTS};
+  int j = (i + 1) % ${CHAMBER_POINTS};
+  float t = f - floor(f);
+  return u_radii[i] * (1.0 - t) + u_radii[j] * t;
 }
 
 void main() {
   vec2 px = gl_FragCoord.xy;
   vec2 w = u_cam + vec2(px.x - u_res.x * 0.5, u_res.y * 0.5 - px.y) / u_scale;
+  vec2 q = w - u_center;
+  float r = length(q);
+  float a = atan(q.y, q.x);
+  float d = r - radAt(a);                       // SDF dinding terdeformasi
+  float W = 16.0 * (1.0 + 0.05 * u_beat);
+  d += 6.0 * (fbm(w * 0.012) - 0.5);            // kelok organik
 
-  // ---- union SDF lumen + palette chamber terdekat ----
-  float d = 1e9; vec3 fill = vec3(0.85, 0.45, 0.30); vec3 deep = vec3(0.45, 0.15, 0.15);
-  float cm = 1e9;
-  for (int i = 0; i < 16; i++) {
-    if (i >= u_nCh) break;
-    float di = sdEll(w, u_ch[i]);
-    if (di < d) { d = di; fill = u_chFill[i]; deep = u_chDeep[i]; }
-    float rn = length((w - u_ch[i].xy) / u_ch[i].zw + 0.30 * vec2(fbm(w * 0.008 + float(i)) - 0.5));
-    cm = min(cm, rn);
-  }
-  float routeD = 1e9;
-  for (int i = 0; i < 64; i++) {
-    if (i >= u_nSeg) break;
-    float di = sdSeg(w, u_seg[i]) - u_segR[i];
-    if (di < d) d = di;
-    if (u_segK[i] > 2.5) routeD = min(routeD, sdSeg(w, u_seg[i]) - u_segR[i] * 0.5);
-  }
+  // sektor pintu terbuka = mulut keluar (dinding menghilang, glow teal)
+  float da = abs(mod(a - u_door + 3.14159265, 6.2831853) - 3.14159265);
+  float doorMask = u_open * smoothstep(0.34, 0.10, da);
 
-  d += 7.0 * (fbm(w * 0.010) - 0.5); // kelok organik boundary (video tidak mulus)
-  float W = 15.0 * (1.0 + 0.05 * u_beat);
-
-  // ---- INTERIOR: amber backlit + haze + ray + massa honeycomb + debu ----
-  vec3 glowHot = vec3(1.0, 0.76, 0.40);
-  float pool = fbm(w * 0.006 + vec2(0.0, u_time * 0.03));
-  vec3 colIn = mix(glowHot, fill * 1.10, smoothstep(-140.0, -18.0, d));
-  colIn += 0.12 * pool * vec3(1.0, 0.75, 0.45);
-  float ray = pow(max(0.0, sin(w.x * 0.018 + fbm(w * 0.004) * 4.0)), 8.0);
-  colIn += ray * 0.16 * vec3(1.0, 0.85, 0.55);
-  if (cm < 0.52) {
+  // ---- INTERIOR ----
+  vec3 colIn = mix(u_glowHot, u_fill * 1.10, smoothstep(-150.0, -16.0, d));
+  colIn += 0.12 * fbm(w * 0.006 + vec2(0.0, u_time * 0.03)) * vec3(1.0, 0.75, 0.45);
+  colIn += pow(max(0.0, sin(w.x * 0.018 + fbm(w * 0.004) * 4.0)), 8.0) * 0.16 * vec3(1.0, 0.85, 0.55);
+  float cm = r / max(1.0, radAt(a));
+  if (cm < 0.55) {
     vec3 v = vor(w * 0.052);
     vec3 mass = mix(vec3(0.40, 0.23, 0.19), vec3(0.56, 0.35, 0.26), v.y);
     mass *= 0.72 + 0.28 * smoothstep(0.0, 0.14, v.x);
-    colIn = mix(colIn, mass, smoothstep(0.50, 0.28, cm) * 0.62);
+    colIn = mix(colIn, mass, smoothstep(0.52, 0.30, cm) * 0.60);
   }
-  float dust = pow(noise(w * 0.14 - vec2(0.0, u_time * 0.6)), 14.0);
-  colIn += dust * 0.35;
-  float tuft = smoothstep(0.55, 0.86, fbm(w * 0.035));
-  float lipIn = exp(-pow((d + W * 1.1) / (W * 0.9), 2.0));
-  colIn = mix(colIn, vec3(0.46, 0.13, 0.11), tuft * lipIn * 0.85);
-  float inRoute = smoothstep(10.0, -30.0, routeD);
-  colIn = mix(colIn, vec3(0.30, 0.85, 0.80), inRoute * 0.55);
-  float chv = smoothstep(0.55, 0.95, sin((w.x + w.y) * 0.045 - u_time * 2.6)) * smoothstep(10.0, -18.0, routeD);
-  colIn += chv * vec3(0.15, 0.65, 0.55) * 0.55;
+  colIn += pow(noise(w * 0.14 - vec2(0.0, u_time * 0.6)), 14.0) * 0.35;   // debu
+  // LOCKDOWN: nada infeksi gelap merah-oranye
+  colIn = mix(colIn, colIn * vec3(1.25, 0.55, 0.35) * 0.75, (1.0 - step(0.5, u_state)) * 0.55);
+  // SPORE VENTS menyala saat SWARM
+  for (int i = 0; i < 8; i++) {
+    if (i >= u_nVents) break;
+    float va = u_vents[i];
+    float vd = abs(mod(a - va + 3.14159265, 6.2831853) - 3.14159265);
+    float ring = exp(-pow((d + 34.0) / 26.0, 2.0));
+    colIn += step(0.5, u_state) * (1.0 - step(1.5, u_state)) *
+             exp(-pow(vd / 0.16, 2.0)) * ring * vec3(1.0, 0.55, 0.25) * (0.6 + 0.4 * sin(u_time * 9.0 + float(i)));
+  }
+  // SHOCKWAVE purified: cincin bioluminesensi menyapu
+  float shockR = u_shock * (radAt(a) + 60.0);
+  colIn += (1.0 - step(0.0, u_shock - 0.001)) * 0.0; // placeholder no-op
+  colIn += step(1.5, u_state) * (1.0 - step(2.5, u_state)) *
+           exp(-pow((r - shockR) / 34.0, 2.0)) * vec3(0.45, 1.0, 0.85) * (1.0 - u_shock) * 1.2;
+  // mulut pintu: glow teal
+  colIn = mix(colIn, vec3(0.30, 0.88, 0.82), doorMask * smoothstep(-20.0, -120.0, d) * 0.7);
 
-  // ---- BAND DINDING: pita crimson glossy 3-nada + specular + fringe fbm ----
+  // ---- BAND DINDING ----
   float t = clamp((d + W) / (2.0 * W), 0.0, 1.0);
   vec3 wDark = vec3(0.32, 0.04, 0.10), wBright = vec3(0.86, 0.11, 0.17);
   vec3 colBand = mix(wDark, wBright, smoothstep(0.0, 0.38, t));
   colBand = mix(colBand, wDark * 0.75, smoothstep(0.72, 1.0, t));
-  float spec = exp(-pow((t - 0.30) * 9.0, 2.0));
-  colBand += spec * vec3(1.0, 0.55, 0.55) * 0.55;
+  colBand += exp(-pow((t - 0.30) * 9.0, 2.0)) * vec3(1.0, 0.55, 0.55) * 0.55;
   float fr = fbm(w * 0.013);
   colBand = mix(colBand, vec3(0.74, 0.26, 0.19), smoothstep(0.44, 0.76, fr) * smoothstep(0.35, 1.0, t));
+  colBand = mix(colBand, colBand * vec3(1.2, 0.6, 0.4), (1.0 - step(0.5, u_state)) * 0.4); // infeksi
 
-  // ---- TISSUE: mosaik voronoi multi-hue + grout gelap + AO + lipatan ----
+  // ---- TISSUE LUAR ----
   vec3 v3 = vor(w * 0.046 + 0.45 * vec2(sin(w.y * 0.017), cos(w.x * 0.017)));
   vec3 c1 = vec3(0.15, 0.31, 0.62), c2 = vec3(0.09, 0.48, 0.53), c3 = vec3(0.70, 0.19, 0.22);
   vec3 tc = v3.y < 0.55 ? c1 : (v3.y < 0.80 ? c2 : c3);
   tc *= 0.70 + 0.55 * fract(v3.y * 7.31);
-  float grout = smoothstep(0.0, 0.11, v3.x);
-  vec3 colOut = mix(vec3(0.05, 0.02, 0.07), tc, grout);
-  colOut += 0.16 * smoothstep(0.55, 1.0, fract(v3.y * 3.7)) * tc; // kilau sel
-  colOut += 0.22 * (1.0 - smoothstep(0.05, 0.42, v3.z)) * tc; // punggung sel membulat
-  float ao = smoothstep(0.0, 95.0, d);
-  colOut *= 0.16 + 0.84 * ao;
-  float fold = fbm(w * 0.0016);
-  colOut *= 0.50 + 0.50 * smoothstep(0.25, 0.75, fold);
+  vec3 colOut = mix(vec3(0.05, 0.02, 0.07), tc, smoothstep(0.0, 0.11, v3.x));
+  colOut += 0.16 * smoothstep(0.55, 1.0, fract(v3.y * 3.7)) * tc;
+  colOut += 0.22 * (1.0 - smoothstep(0.05, 0.42, v3.z)) * tc;
+  colOut *= 0.16 + 0.84 * smoothstep(0.0, 95.0, d);
+  colOut *= 0.50 + 0.50 * smoothstep(0.25, 0.75, fbm(w * 0.0016));
 
-  // ---- komposisi wilayah (AA alami per-pixel) ----
+  // ---- komposisi + pintu melubangi dinding ----
   vec3 col = mix(colIn, colBand, smoothstep(-W - 2.0, -W + 2.0, d));
   col = mix(col, colOut, smoothstep(W - 2.0, W + 2.0, d));
+  col = mix(col, vec3(0.25, 0.85, 0.80) * (0.7 + 0.3 * u_beat), doorMask * smoothstep(W + 4.0, -W - 4.0, -abs(d)) * 0.9);
 
-  // ---- vignette lipat gelap + grain ----
-  vec2 q = px / u_res;
-  float vig = pow(clamp(16.0 * q.x * q.y * (1.0 - q.x) * (1.0 - q.y), 0.0, 1.0), 0.30);
-  col *= 0.22 + 0.78 * vig;
+  vec2 qn = px / u_res;
+  col *= 0.22 + 0.78 * pow(clamp(16.0 * qn.x * qn.y * (1.0 - qn.x) * (1.0 - qn.y), 0.0, 1.0), 0.30);
   col += (hash(px + fract(u_time) * 61.7) - 0.5) * 0.035;
-
   frag = vec4(col, 1.0);
 }`;
 
@@ -176,61 +168,34 @@ export class BodyGL {
       this.prog = prog;
       gl.useProgram(prog);
       this.u = {};
-      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_nCh', 'u_ch', 'u_chFill', 'u_chDeep', 'u_nSeg', 'u_seg', 'u_segR', 'u_segK']) {
+      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_center', 'u_radii', 'u_glow', 'u_glowHot', 'u_fill', 'u_deep', 'u_state', 'u_shock', 'u_door', 'u_open', 'u_vents', 'u_nVents']) {
         this.u[n] = gl.getUniformLocation(prog, n);
       }
+      this.radii = new Float32Array(CHAMBER_POINTS);
+      this.vents = new Float32Array(8);
       this.ok = true;
     } catch (err) {
       this.ok = false;
-      this.err = String(err && err.message || err);
+      this.err = String((err && err.message) || err);
     }
   }
 
-  /** Muat geometri dunia (sekali) ke uniform array. */
-  setData(world) {
-    if (!this.ok || !world) return false;
-    const def = world.def;
-    const W = def.world.w, H = def.world.h;
-    const XY = (nx, ny) => [nx * W, (1 - ny) * H];
+  /** Palet chamber dari definisi arena (data-driven). */
+  setPalette(def) {
+    if (!this.ok) return;
+    const wall = (def && def.wall) || {};
+    const it = wall.interior || {};
+    const rgb = (s, d) => (s || d).split(',').map((v) => Number(v) / 255);
     const gl = this.gl;
-    const ch = new Float32Array(16 * 4), fill = new Float32Array(16 * 3), deep = new Float32Array(16 * 3);
-    const organs = (def.organs || []).slice(0, 16);
-    organs.forEach((o, i) => {
-      const [cx, cy] = XY(o.x, o.y);
-      ch.set([cx, cy, o.rx * W, o.ry * H], i * 4);
-      const rgb = (s, d) => (s || d).split(',').map((v) => Number(v) / 255);
-      fill.set(rgb(o.palette && o.palette.fill, '214,110,90'), i * 3);
-      deep.set(rgb(o.palette && o.palette.deep, '140,50,44'), i * 3);
-    });
-    const KIND = { artery: 0, vein: 1, lymph: 2, route: 3 };
-    const seg = [], segR = [], segK = [];
-    for (const v of def.vessels || []) {
-      const pts = (v.points || []).map(([nx, ny]) => XY(nx, ny));
-      for (let i = 0; i + 1 < pts.length && seg.length / 4 < 64; i++) {
-        seg.push(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
-        segR.push(v.r || 40);
-        segK.push(KIND[v.kind] == null ? 1 : KIND[v.kind]);
-      }
-    }
-    this.nCh = organs.length;
-    this.nSeg = segR.length;
-    this.ch = ch; this.fill = fill; this.deep = deep;
-    this.seg = new Float32Array(seg); this.segR = new Float32Array(segR); this.segK = new Float32Array(segK);
     gl.useProgram(this.prog);
-    gl.uniform4fv(this.u.u_ch, ch);
-    gl.uniform3fv(this.u.u_chFill, fill);
-    gl.uniform3fv(this.u.u_chDeep, deep);
-    gl.uniform1i(this.u.u_nCh, this.nCh);
-    gl.uniform4fv(this.u.u_seg, this.seg);
-    gl.uniform1fv(this.u.u_segR, this.segR);
-    gl.uniform1fv(this.u.u_segK, this.segK);
-    gl.uniform1i(this.u.u_nSeg, this.nSeg);
-    return true;
+    gl.uniform3fv(this.u.u_glow, rgb(it.glow, '255,186,104'));
+    gl.uniform3fv(this.u.u_glowHot, rgb(it.glowHot, '255,232,168'));
+    gl.uniform3fv(this.u.u_fill, rgb(it.edge, '214,116,58'));
+    gl.uniform3fv(this.u.u_deep, rgb(it.mottle, '196,120,84'));
   }
 
-  /** Render satu frame; return true bila sukses (game.js drawImage lapisan ini). */
-  render(run, P, time) {
-    if (!this.ok) return false;
+  render(run, P, time, chamber) {
+    if (!this.ok || !chamber) return false;
     const gl = this.gl;
     const w = Math.max(2, Math.round(P.w)), h = Math.max(2, Math.round(P.h));
     if (this.canvas.width !== w || this.canvas.height !== h) {
@@ -244,7 +209,18 @@ export class BodyGL {
     gl.uniform2f(this.u.u_cam, cam.x, cam.y);
     gl.uniform1f(this.u.u_scale, s);
     gl.uniform1f(this.u.u_time, time);
-    gl.uniform1f(this.u.u_beat, heartbeat(time, 68));
+    gl.uniform1f(this.u.u_beat, heartbeat(time, chamber.bpm || 72));
+    gl.uniform2f(this.u.u_center, chamber.cx, chamber.cy);
+    gl.uniform1fv(this.u.u_radii, chamber.radiiArray(this.radii));
+    const st = chamber.state === 'lockdown' || chamber.state === 'entry' ? 0
+      : chamber.state === 'swarm' ? 1 : chamber.state === 'purified' ? 2 : 3;
+    gl.uniform1f(this.u.u_state, st);
+    gl.uniform1f(this.u.u_shock, chamber.shock || 0);
+    gl.uniform1f(this.u.u_door, chamber.doorAngle);
+    gl.uniform1f(this.u.u_open, chamber.openAmt || 0);
+    for (let i = 0; i < 8; i++) this.vents[i] = i < chamber.vents.length ? chamber.vents[i].a : 0;
+    gl.uniform1fv(this.u.u_vents, this.vents);
+    gl.uniform1i(this.u.u_nVents, Math.min(8, chamber.vents.length));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     return gl.getError() === gl.NO_ERROR;
   }

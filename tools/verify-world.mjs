@@ -282,87 +282,72 @@ for (const idB of arenasDef.filter((a) => a.shape.kind === 'branch').map((a) => 
 
 game.startRun('macrophage');
 const runS = game.run;
-const BW = runS.bodyWorld;
-cek('MIGRASI: run memakai DUNIA KONTINU (bodyWorld ada, koridor per-zona pensiun)',
-  !!BW && runS.arenaShape == null, `bodyWorld=${!!BW} arenaShape=${runS.arenaShape}`);
-cek('MIGRASI: pemain mulai DI LUMEN pada anchor START',
-  !!BW && BW.insideLumen(runS.player.x, runS.player.y),
-  `pos=(${runS.player.x.toFixed(0)},${runS.player.y.toFixed(0)}) sdf=${BW ? BW.sdf(runS.player.x, runS.player.y).toFixed(0) : '-'}`);
-// keterjangkauan: BFS mask lumen dari START harus mencapai semua anchor + GOAL
+cek('SPEC ARENA: MAP bukan ruang main — run.bodyWorld null, denah hanya overlay macro',
+  runS.bodyWorld == null && !!runS.worldMapDef === false || runS.bodyWorld == null,
+  `bodyWorld=${runS.bodyWorld} worldMapDef=${!!runS.worldMapDef}`);
+const CH0 = runS.chamber;
+cek('SPEC ARENA: instance BioChamber tertutup aktif sejak zona pertama (state lockdown/entry)',
+  !!CH0 && (CH0.state === 'lockdown' || CH0.state === 'entry'), `state=${CH0 && CH0.state} R=${CH0 && Math.round(CH0.R)}`);
+// state machine: lockdown -> swarm setelah ~1,2 dtk
+for (let i = 0; i < 90; i++) game.update(1 / 60);
+cek('SPEC ARENA: state machine LOCKDOWN -> SWARM (katup terkunci lalu patogen keluar)',
+  runS.chamber.state === 'swarm', `state=${runS.chamber.state}`);
+// dinding tertutup: pemain didorong keluar 6 dtk tetap DI DALAM membran
 {
-  const g = BW.reachabilityGrid(40);
-  const idx = (x, y) => Math.max(0, Math.min(g.rows - 1, Math.floor(y / g.step))) * g.cols + Math.max(0, Math.min(g.cols - 1, Math.floor(x / g.step)));
-  const start = BW.anchorPx('start');
-  const seen = new Uint8Array(g.cols * g.rows);
-  const q = [idx(start.x, start.y)];
-  seen[q[0]] = 1;
-  while (q.length) {
-    const cur = q.pop();
-    const cx = cur % g.cols, cy = (cur / g.cols) | 0;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const nx2 = cx + dx, ny2 = cy + dy;
-      if (nx2 < 0 || ny2 < 0 || nx2 >= g.cols || ny2 >= g.rows) continue;
-      const ni = ny2 * g.cols + nx2;
-      if (seen[ni] || g.solid[ni]) continue;
-      seen[ni] = 1; q.push(ni);
-    }
-  }
-  const route = API.getData().zones.route;
-  let takTerjangkau = 0;
-  for (const z of route) { const ap = BW.zoneAnchorPx(z); if (ap && !seen[idx(ap.x, ap.y)]) takTerjangkau++; }
-  const goal = BW.anchorPx('goal');
-  cek('MIGRASI: lumen SATU komponen terhubung — semua anchor zona + GOAL terjangkau dari START',
-    takTerjangkau === 0 && !!seen[idx(goal.x, goal.y)], `anchor tak terjangkau=${takTerjangkau}/${route.length}`);
+  const pl = runS.player; const ch = runS.chamber;
+  pl.x = ch.cx; pl.y = ch.cy; pl.vx = 0; pl.vy = 0;
+  for (let i = 0; i < 360; i++) { pl.update(1 / 60, { x: 1, y: 0.3, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
+  const r = Math.hypot(pl.x - ch.cx, pl.y - ch.cy);
+  const wall = ch.radiusAt(Math.atan2(pl.y - ch.cy, pl.x - ch.cx));
+  cek('SPEC ARENA: arena TERTUTUP — sprint 6 dtk ke luar tetap tertahan dinding membran (tak bisa kabur)',
+    r <= wall + 1, `r=${r.toFixed(0)} wall=${wall.toFixed(0)}`);
 }
-// refleksi elastis: titik di daging ditarik ke lumen; titik di lumen tak disentuh
+// dinding soft-body: impact membuat simpul penyok
 {
-  let gagal = 0, geserDiLumen = 0;
-  for (let k = 0; k < 300; k++) {
-    const x = 20 + Math.random() * (BW.w - 40), y = 20 + Math.random() * (BW.h - 40);
-    const s0 = BW.sdf(x, y);
-    const e = { x, y, vx: 0, vy: 0 };
-    game.arenaClamp(e, 14);
-    if (s0 < -14 && (e.x !== x || e.y !== y)) geserDiLumen++;
-    if (!BW.insideLumen(e.x, e.y)) gagal++;
-  }
-  cek('MIGRASI: arenaClamp = pantul elastis — 300 titik acak berakhir DI LUMEN, titik lumen bebas',
-    gagal === 0 && geserDiLumen === 0, `gagal=${gagal} geserDiLumen=${geserDiLumen}`);
+  const ch = runS.chamber;
+  const dev0 = Math.max(...ch.points.map((p) => Math.abs(p.r - p.base)));
+  ch.applyImpact(0.7, 20);
+  for (let i = 0; i < 10; i++) ch.update(1 / 60, runS, {});
+  const dev1 = Math.max(...ch.points.map((p) => Math.abs(p.r - p.base)));
+  cek('SPEC ARENA: dinding soft-body — impact membuat simpul PENYOK lalu membal (jiggle)',
+    dev1 > dev0 + 1, `dev ${dev0.toFixed(1)} -> ${dev1.toFixed(1)}`);
 }
-// zona = POSISI organ: teleport ke anchor jantung → zona aktif jadi heart
+// purified -> open: basmi semua musuh
 {
-  const pl = runS.player;
-  // zona maju BERURUTAN sepanjang rute fisik: berdiri di alveoli lalu tiba di
-  // anchor jantung harus membuka transisi KE heart (gerbang posisi).
-  _jumpToZone(game, 'alveoli');
-  const zj = API.getData().zones.route.find((z) => z.id === 'heart');
-  const ap = BW.zoneAnchorPx(zj);
-  pl.x = ap.x; pl.y = ap.y; pl.vx = 0; pl.vy = 0;
-  for (let i = 0; i < 30; i++) game.update(1 / 60);
-  const j = runS.journey;
-  const idxHeart = API.getData().zones.route.findIndex((z) => z.id === 'heart');
-  cek('MIGRASI: zona = POSISI organ — tiba di anchor jantung membuka transisi KE heart',
-    j.phase === 'transition' && j.nextIndex === idxHeart,
-    `fase=${j.phase} next=${j.nextIndex} (harap ${idxHeart}) blend=${(j.blend || 0).toFixed(2)}`);
+  const ch = runS.chamber;
+  for (const e of runS.enemies) e.alive = false;
+  runS.enemies = [];
+  ch.t = 5; // penuhi durasi minimum swarm
+  for (let i = 0; i < 120; i++) game.update(1 / 60);
+  cek('SPEC ARENA: patogen habis -> PURIFIED (shockwave) lalu OPEN (katup terbuka)',
+    (ch.state === 'open' || ch.state === 'purified'), `state=${ch.state} shock=${(ch.shock || 0).toFixed(2)} open=${(ch.openAmt || 0).toFixed(2)}`);
 }
-// spawn selalu di dalam lumen
+// proyektil diserap dinding
 {
-  let luarL = 0;
-  for (let k = 0; k < 60; k++) { const p = game.organSpawnPosition(); if (!BW.insideLumen(p.x, p.y)) luarL++; }
-  cek('MIGRASI: 60 posisi spawn musuh semuanya DI DALAM lumen dunia kontinu', luarL === 0, `${luarL}/60 di daging`);
-}
-// proyektil mati di daging
-{
-  const prj = { x: 6, y: 6, alive: true, update() {} };
+  const ch = runS.chamber;
+  const a = 1.3; const rr = ch.radiusAt(a) + 80;
+  const prj = { x: ch.cx + Math.cos(a) * rr, y: ch.cy + Math.sin(a) * rr, alive: true, update() {} };
   runS.projectiles.push(prj);
   game.update(1 / 60);
-  cek('MIGRASI: proyektil di luar lumen dimatikan (tidak menembus daging peta)', prj.alive === false, `alive=${prj.alive}`);
+  cek('SPEC ARENA: proyektil yang melewati membran diserap dinding (mati + dinding penyok)',
+    prj.alive === false, `alive=${prj.alive}`);
 }
-// mekanik inti tak berubah oleh dunia baru
+// spawn selalu di dalam chamber
+{
+  let luar = 0;
+  for (let k = 0; k < 40; k++) {
+    const p = game.organSpawnPosition();
+    const r = Math.hypot(p.x - runS.chamber.cx, p.y - runS.chamber.cy);
+    if (r > runS.chamber.R * 1.05) luar++;
+  }
+  cek('SPEC ARENA: 40 spawn patogen semuanya DI DALAM chamber (pori dinding/ring dalam)', luar === 0, `${luar}/40 luar`);
+}
+// mekanik inti tak berubah
 {
   const pl = runS.player;
   const hpSebelum = pl.hp, spdSebelum = pl.speed;
   for (let i = 0; i < 60; i++) { pl.update(1 / 60, { x: 0, y: -1, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
-  cek('MIGRASI: mekanik inti tak berubah — HP & kecepatan identik setelah refleksi dunia',
+  cek('SPEC ARENA: mekanik inti tak berubah — HP & kecepatan identik setelah collision chamber',
     pl.hp === hpSebelum && pl.speed === spdSebelum, `hp ${hpSebelum}→${pl.hp}, speed ${spdSebelum}→${pl.speed}`);
 }
 // kamera: di koridor sedikit menjauh (target < 1), keluar → kembali 1; tidak pernah ekstrem

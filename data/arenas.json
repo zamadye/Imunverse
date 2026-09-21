@@ -359,6 +359,14 @@
           "alpha": 0.12,
           "parallax": 0.3
         }
+      },
+      "chamber": {
+        "radius": 690,
+        "lobes": 5,
+        "bpm": 64,
+        "amp": 8,
+        "vents": 6,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -706,6 +714,14 @@
           "alpha": 0.2,
           "parallax": 0.3
         }
+      },
+      "chamber": {
+        "radius": 700,
+        "lobes": 4,
+        "bpm": 66,
+        "amp": 9,
+        "vents": 5,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -1060,6 +1076,14 @@
           "alpha": 0.16,
           "parallax": 0.3
         }
+      },
+      "chamber": {
+        "radius": 680,
+        "lobes": 5,
+        "bpm": 74,
+        "amp": 10,
+        "vents": 5,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -1409,6 +1433,14 @@
           "alpha": 0.5,
           "parallax": 0.3
         }
+      },
+      "chamber": {
+        "radius": 650,
+        "lobes": 6,
+        "bpm": 70,
+        "amp": 9,
+        "vents": 6,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -1756,6 +1788,14 @@
           "alpha": 0.25,
           "parallax": 0.3
         }
+      },
+      "chamber": {
+        "radius": 640,
+        "lobes": 4,
+        "bpm": 82,
+        "amp": 12,
+        "vents": 4,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -2032,6 +2072,14 @@
             }
           ]
         }
+      },
+      "chamber": {
+        "radius": 620,
+        "lobes": 4,
+        "bpm": 86,
+        "amp": 10,
+        "vents": 6,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     },
     {
@@ -2290,6 +2338,14 @@
             }
           ]
         }
+      },
+      "chamber": {
+        "radius": 660,
+        "lobes": 3,
+        "bpm": 78,
+        "amp": 11,
+        "vents": 4,
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
       }
     }
   ]
