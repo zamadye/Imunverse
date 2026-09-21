@@ -133,6 +133,14 @@ function drawScaleTissue(g, w, h, cfg, cam, pr, shape) {
       // kilau tipis di sisi atas sel (cahaya datang dari dalam rongga)
       g.fillStyle = `rgba(${lr},${lg},${lb},${0.14 + hsh * 0.2})`;
       g.beginPath(); g.ellipse(cx, cy - ry * 0.32, rx * 0.62, ry * 0.34, (hsh - 0.5) * 0.8, 0, TAU); g.fill();
+      // GAYA VIDEO: celah antar-sel GELAP (kontras tinggi) + titik spekular kecil
+      g.strokeStyle = `rgba(8,4,14,${0.30 + hsh * 0.14})`;
+      g.lineWidth = Math.max(1, pw * 0.10);
+      g.beginPath(); g.ellipse(cx, cy, rx, ry, (hsh - 0.5) * 0.8, 0, TAU); g.stroke();
+      if (hsh > 0.55) {
+        g.fillStyle = `rgba(255,255,255,${0.10 + (hsh - 0.55) * 0.34})`;
+        g.beginPath(); g.ellipse(cx - rx * 0.25, cy - ry * 0.42, rx * 0.16, ry * 0.12, 0, 0, TAU); g.fill();
+      }
       void lr0; void lg0; void lb0;
     }
   }
@@ -185,6 +193,12 @@ function drawBacklitInterior(ctx, cfg, lanes, beat, tAtY, timeRef) {
       for (let i = e.Rp.length - 1; i >= 0; i--) ctx.lineTo(e.Rp[i].x, e.Rp[i].y);
       ctx.closePath(); ctx.fill();
     }
+    // DORONG SATURASI HANGAT: video dominan amber-jingga dalam, bukan krem
+    ctx.fillStyle = 'rgba(255,112,28,0.14)';
+    ctx.beginPath();
+    for (let i = 0; i < e.Lp.length; i++) ctx.lineTo(e.Lp[i].x, e.Lp[i].y);
+    for (let i = e.Rp.length - 1; i >= 0; i--) ctx.lineTo(e.Rp[i].x, e.Rp[i].y);
+    ctx.closePath(); ctx.fill();
     // SUNBURST: berkas cahaya radial dari atas rongga (khas video referensi)
     const sb = cfg.sunburst || {};
     const nR = Math.max(6, sb.rays || 14);
@@ -199,6 +213,27 @@ function drawBacklitInterior(ctx, cfg, lanes, beat, tAtY, timeRef) {
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, rad, a0, a1); ctx.closePath(); ctx.fill();
     }
     ctx.restore();
+    // KABUT KEDALAMAN: blob amber hangat melayang lambat (video: haze menyala)
+    const nB = 5;
+    for (let bi = 0; bi < nB; bi++) {
+      const hh1 = hash1(bi * 7.7 + 3.1), hh2 = hash1(bi * 5.3 - 1.7);
+      const drift = Math.sin(timeRef * 0.25 + bi * 2.1) * 0.08;
+      const bx2 = q.x + (r.x - q.x) * (0.15 + hh1 * 0.7 + drift);
+      const by2 = top + (bot - top) * (0.12 + hh2 * 0.76);
+      const br = halfW * (0.5 + hh1 * 0.7);
+      const hg = ctx.createRadialGradient(bx2, by2, 0, bx2, by2, br);
+      hg.addColorStop(0, `rgba(${it.glow},${0.16 + hh2 * 0.10})`);
+      hg.addColorStop(1, `rgba(${it.glow},0)`);
+      ctx.fillStyle = hg;
+      ctx.beginPath(); ctx.arc(bx2, by2, br, 0, TAU); ctx.fill();
+    }
+    // RIM BAYANGAN DALAM: tepi rongga menggelap -> kedalaman dinding (video)
+    ctx.strokeStyle = 'rgba(38,10,8,0.34)';
+    ctx.lineWidth = Math.max(10, halfW * 0.30);
+    ctx.beginPath();
+    for (let i = 0; i < e.Lp.length; i++) ctx.lineTo(e.Lp[i].x, e.Lp[i].y);
+    for (let i = e.Rp.length - 1; i >= 0; i--) ctx.lineTo(e.Rp[i].x, e.Rp[i].y);
+    ctx.closePath(); ctx.stroke();
     void cx; void halfW;
   }
 }
@@ -338,10 +373,21 @@ function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid, shape, tAt
   for (const run of runs) {
     const zc = zcAt(side[run[0]][1]);
     const rb = zc.ribbon;
+    // GAYA VIDEO: pita bayangan marun GELAP di punggung membran (dinding tebal)
+    strokeIdx(run, 'rgba(28,6,14,0.62)', (rb.width + 36) * sMid, 0);
     strokeIdx(run, `rgba(${rb.dark},1)`, (rb.width + 10) * sMid, 0);
     strokeIdx(run, `rgba(${rb.color},1)`, rb.width * sMid, 0);
     // kilau tipis di sisi dalam pita (cahaya interior memantul)
     strokeIdx(run, `rgba(255,214,150,${0.22 + beat * 0.1})`, 3 * sMid, rb.width * 0.42);
+    // GAYA VIDEO: lapisan sel KOBALT menempel di punggung membran
+    // (urutan lapis: fringe merah -> membran -> marun -> sel biru, seperti video)
+    ctx.fillStyle = `rgba(${zc.tissue.cell},0.9)`;
+    for (let k = 0; k < run.length; k += 2) {
+      const i2 = run[k];
+      const pC = pr(side[i2][0] - dir * (rb.width * 1.15), side[i2][1]);
+      const rr = rb.width * 0.42 * pC.s * (0.75 + hash1(i2 * 3.3 + dir) * 0.55);
+      ctx.beginPath(); ctx.arc(pC.x, pC.y, rr, 0, TAU); ctx.fill();
+    }
     // bibir pintu: tepian run yang bersebelahan lubang diberi kilau lembut
     // supaya bukaan persimpangan terbaca sebagai portal, bukan patahan.
     for (const i of [run[0], run[run.length - 1]]) {
@@ -384,6 +430,11 @@ function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid, shape, tAt
     // kilau punggung bulus (cahaya interior)
     ctx.fillStyle = `rgba(${sc.light},${0.42 + beat * 0.22})`;
     ctx.beginPath(); ctx.arc(p.x - dir * r * 0.16, p.y - r * 0.34, r * 0.42, 0, TAU); ctx.fill();
+    // baris kedua: bulus lebih kecil & gelap, selang-seling (fringe berlapis video)
+    if (hash1(y * 0.71 + dir * 2.2) > 0.42) {
+      ctx.fillStyle = `rgba(${sc.dark || '120,20,28'},0.85)`;
+      ctx.beginPath(); ctx.arc(p.x + dir * r * 0.95, p.y + stepF * 0.5, r * 0.5, 0, TAU); ctx.fill();
+    }
   }
 
   // --- 3. KELENJAR: titik menyala tertanam, sesekali (warna per zona) ---
@@ -555,6 +606,14 @@ export function drawOrganCorridor(ctx, P, run, time) {
   for (const e of lanes) drawOrganMasses(ctx, cfg, e.L, pr, y0, y1, time);
   for (const e of lanes) drawChordae(ctx, cfg, e.L, pr, y0, y1, time);
   ctx.restore();
+
+  // ---------- 2b. VIGNETTE SINEMATIK: tepi bingkai tenggelam (kedalaman video) ----------
+  {
+    const vgn = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.34, w / 2, h / 2, Math.max(w, h) * 0.74);
+    vgn.addColorStop(0, 'rgba(16,4,10,0)');
+    vgn.addColorStop(1, 'rgba(16,4,10,0.42)');
+    ctx.fillStyle = vgn; ctx.fillRect(0, 0, w, h);
+  }
 
   // ---------- 3. DINDING: membran + scute + kelenjar + frill ----------
   for (const e of lanes) {

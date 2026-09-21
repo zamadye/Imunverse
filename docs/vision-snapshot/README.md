@@ -5,11 +5,15 @@
 peta tubuh SELURUH organ, proyeksi datar auto-fit) & `after-macro-hold.jpg`;
 `compare-macro-vs-reference.jpg` = macro game vs ARENA_ZOOM_OUT_REFERENCE_.png.
 Gerak karakter dipercepat (hero ×2,2; accel 13→22) karena dunia 2,3× lebih besar.
-**Pass OPEN-WORLD:** batas arena dihapus (clamp no-op → persimpangan cabang bisa
-dilewati, pemain bebas explore), struktur organ dibuat PENUH (tinggi 6,0–7,6 rb,
-bercabang/berkelok), zona warna kreatif per organ (`shape.wall.zones`), dan kamera
-membuka run dengan establishing shot seluruh struktur (zoom 0,34) sebelum masuk
-area starter. Pasangan before/after di bawah mencerminkan pass ini.
+**Pass POLISH VIDEO (2026-09-21, lanjutan keluhan owner):** frame asli video
+diekstrak & dibandingkan; renderer mikrokoridor mendapat lapis gaya video —
+pita bayangan marun + lapisan sel kobalt di punggung membran (fringe merah →
+membran → marun → sel biru), celah antar-sel gelap + titik spekular, kabut
+amber hangat melayang + dorong saturasi hangat, rim bayangan dalam rongga,
+dan vignette sinematik. Intro SNAP MACRO diperpanjang 1,15 → 1,7 dtk + hint
+on-screen "SELURUH TUBUH — tahan B untuk peta kapan pun" supaya zoom-out
+seluruh tubuh tidak terlewatkan. Pasangan before/after di bawah = pass ini
+(BEFORE = d3242b6).
 **Pass ini menyertakan ZOOM-OUT kamera** (`shape.cameraZoom` 0,84–0,95 → 0,62–0,70)
 sesuai referensi owner `ARENA_ZOOM_OUT_REFERENCE_.png` (commit `8acc8c5`): arena harus
 terbaca sebagai STRUKTUR ORGAN yang utuh (siluet chamber + cincin scute + jaringan sisik),

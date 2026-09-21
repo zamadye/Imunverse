@@ -850,7 +850,7 @@ export const game = {
     const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
     // saat SNAP MACRO aktif, kamera milik peta (pusat tubuh) — bukan follow pemain
     const macroActiveNow = !!run.arenaShape
-      && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.15);
+      && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
     if (!macroActiveNow) run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
     run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
     run.camera.update(dt);
@@ -867,7 +867,7 @@ export const game = {
       // Otomatis ~1,15 dtk pertama run; kapan pun bisa ditahan lewat tombol M.
       const macroHold = !!(this.input && this.input.keys && this.input.keys.has('map'));
       if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
-      const macroOn = !!run.arenaShape && (macroHold || run.introT < 1.15);
+      const macroOn = !!run.arenaShape && (macroHold || run.introT < 1.7);
       if (macroOn) {
         // SNAP MACRO ke PETA TUBUH penuh (bila ada) — bukan hanya koridor zona
         let fit, cxm, cym;
@@ -2436,6 +2436,23 @@ applyChapterTier(enemy, run) {
     if (macroView) {
       // SNAP MACRO: tampilkan PETA TUBUH seluruh organ (referensi owner 8acc8c5)
       try { drawWorldMap(ctx, P, run.worldMapDef, time); } catch (err) { console.warn('[phagos] worldMap:', err); }
+      // HINT on-screen saat macro aktif supaya zoom-out seluruh tubuh TIDAK terlewatkan
+      try {
+        const macroNow = !!run.arenaShape && ((this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
+        if (macroNow) {
+          const fs = Math.max(11, Math.round(P.w * 0.016));
+          ctx.save();
+          ctx.font = `600 ${fs}px system-ui, sans-serif`;
+          const msg = 'SELURUH TUBUH — tahan B untuk peta kapan pun';
+          const tw = ctx.measureText(msg).width;
+          const bx = P.w / 2 - tw / 2 - fs * 0.8, by = P.h - fs * 2.6;
+          ctx.fillStyle = 'rgba(12,6,10,0.55)';
+          ctx.beginPath(); ctx.roundRect(bx, by, tw + fs * 1.6, fs * 2, fs); ctx.fill();
+          ctx.fillStyle = 'rgba(255,236,200,0.95)';
+          ctx.fillText(msg, P.w / 2 - tw / 2, by + fs * 1.35);
+          ctx.restore();
+        }
+      } catch { /* abaikan */ }
     } else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
