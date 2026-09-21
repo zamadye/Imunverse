@@ -40,25 +40,36 @@ cek('mode GLOBAL bawaan = foto (10 hero non-pilot tetap foto asli)',
   modeBawaan === 'foto', 'mode=' + modeBawaan);
 // PILOT PX (revisi owner): Mako/macrophage = SPRITE PIXEL-ART (assets/sprites/px),
 // bukan rig vektor. 6 hero ber-rig lain tetap makhluk bawaan; 4 tanpa rig tetap foto.
-const berRig = ['dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
+// UI-RESET / VIDEO-REFERENCE (2026-09-21): pivot PIXEL-ART DIBATALKAN lewat video
+// referensi (docs/VIDEO-REFERENCE-ANALYSIS.md §5). Macrophaage KEMBALI ber-rig vektor;
+// yang dijaga sekarang adalah VOCABULARY DINDING BARU (interior backlit + ribbon +
+// scute + jaringan sel sisik + kelenjar) dan tidak adanya sisa referensi px/.
+const berRig = ['macrophage', 'dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
 const tanpaRig = ['tcd4', 'treg', 'bcell', 'nkcell'];
-cek('6 hero ber-rig bawaan = makhluk abstrak; macrophage + 4 hero tanpa rig = sprite/foto',
-  API.hero.heroModeFor('macrophage') === 'foto' && berRig.every((h) => API.hero.heroModeFor(h) === 'makhluk') && tanpaRig.every((h) => API.hero.heroModeFor(h) === 'foto'),
-  ['macrophage'].concat(berRig, tanpaRig).map((h) => `${h}=${API.hero.heroModeFor(h)}`).join(' '));
+cek('7 hero ber-rig bawaan = makhluk abstrak prosedural; 4 hero tanpa rig = sprite/foto',
+  berRig.every((h) => API.hero.heroModeFor(h) === 'makhluk') && tanpaRig.every((h) => API.hero.heroModeFor(h) === 'foto'),
+  berRig.concat(tanpaRig).map((h) => `${h}=${API.hero.heroModeFor(h)}`).join(' '));
 {
-  const mk = API.getData().heroes.heroes.find((h) => h.id === 'macrophage') || {};
-  const px = (p) => typeof p === 'string' && p.startsWith('assets/sprites/px/');
-  cek('macrophage: strip jalan px (spriteWalk, 4 frame) terdata',
-    px(mk.spriteWalk) && mk.spriteWalkFrames === 4, `${mk.spriteWalk} ×${mk.spriteWalkFrames}`);
-  cek('macrophage: spriteIdle/spriteAttack menunjuk ke sprite pixel-art px/ (bukan foto lama)',
-    px(mk.spriteIdle) && px(mk.spriteAttack) && mk.spriteIdle !== mk.spriteAttack, `${mk.spriteIdle} | ${mk.spriteAttack}`);
-  const ens = API.getData().enemies.enemies;
-  const pxEn = ['bakteri', 'virus', 'parasit'].filter((id) => { const e = ens.find((x) => x.id === id); return e && px(e.spriteIdle); });
-  cek('3 musuh pilot (bakteri/virus/parasit) memakai sprite pixel-art px/', pxEn.length === 3, pxEn.join(','));
-  const ar = API.getData().arenas.arenas.find((a) => a.id === 'jantung');
-  const wl = (ar && ar.shape && ar.shape.wall) || {};
-  cek('jantung: lantai + dinding bertekstur + prop korda terdata (wall.floor/wallTex/cordProps)',
-    px(wl.floor) && px(wl.wallTex) && Array.isArray(wl.cordProps) && wl.cordProps.length >= 2, JSON.stringify([wl.floor, wl.wallTex, (wl.cordProps || []).length]));
+  const pxRef = (s) => typeof s === 'string' && s.includes('sprites/px/');
+  const scanPx = (o) => JSON.stringify(o || {}).includes('sprites/px/');
+  cek('TIDAK ada sisa referensi pixel-art assets/sprites/px/ di heroes/enemies/arenas (arah px dibatalkan)',
+    !scanPx(API.getData().heroes) && !scanPx(API.getData().enemies) && !scanPx(API.getData().arenas),
+    'heroes/enemies/arenas bersih');
+  const ars = API.getData().arenas.arenas.filter((a) => a.shape);
+  const voc = (wl) => wl && wl.interior && wl.interior.glow && wl.ribbon && wl.ribbon.color
+    && wl.scutes && wl.scutes.every > 0 && wl.tissue && wl.tissue.cell && wl.tissue.cellDark
+    && wl.tissue.cellLight && wl.glands && wl.frills && wl.chords;
+  cek('semua organ bersiluet memakai vocabulary dinding VIDEO (interior backlit + ribbon + scutes + tissue sisik + glands + frills + chords)',
+    ars.length === 7 && ars.every((a) => voc(a.shape.wall)),
+    ars.map((a) => `${a.id}=${voc(a.shape && a.shape.wall) ? 'ok' : 'KURANG'}`).join(' '));
+  cek('interior organ TERANG backlit (bukan lantai gelap pilot px): glow lebih terang dari edge',
+    ars.every((a) => {
+      const [gr, gg, gb] = a.shape.wall.interior.glow.split(',').map(Number);
+      const [er, eg, eb] = a.shape.wall.interior.edge.split(',').map(Number);
+      return (gr + gg + gb) > (er + eg + eb) * 1.25;
+    }),
+    ars.map((a) => a.id).join(' '));
+  void pxRef;
 }
 API.hero.setHeroMode('foto');
 cek('pilihan EKSPLISIT foto mengalahkan bawaan pilot (pembanding tetap bisa dilihat)',
@@ -276,9 +287,11 @@ const rMakhluk = await hitungArena('makhluk');
 const rBawaan = await hitungArena('bawaan');             // Mako tanpa pilihan eksplisit
 const rBawaanLain = await hitungArena('bawaan', 'bcell'); // hero TANPA rig
 const rNeut = await hitungArena('bawaan', 'neutrophil');  // hero ber-rig lain
-cek('arena: Mako bawaan digambar sebagai SPRITE pixel-art (drawImage sama dengan mode foto, tanpa geometri rig tambahan)',
-  rBawaan.drawImage === rFoto.drawImage && rBawaan.path <= rFoto.path + 40,
-  `drawImage bawaan=${rBawaan.drawImage} vs foto=${rFoto.drawImage}; path bawaan=${rBawaan.path} vs foto=${rFoto.path}`);
+// UI-RESET / VIDEO-REFERENCE: arah pixel-art dibatalkan → Mako bawaan harus digambar
+// sebagai MAKHLUK vektor (geometri rig), identik dengan mode 'makhluk' eksplisit.
+cek('arena: Mako bawaan digambar sebagai MAKHLUK vektor prosedural (geometri rig, bukan sprite px/foto)',
+  rBawaan.drawImage === rMakhluk.drawImage && rBawaan.path > rFoto.path + 40 && Math.abs(rBawaan.path - rMakhluk.path) <= 40,
+  `drawImage bawaan=${rBawaan.drawImage} vs makhluk=${rMakhluk.drawImage}; path bawaan=${rBawaan.path} vs makhluk=${rMakhluk.path} vs foto=${rFoto.path}`);
 cek('arena: hero TANPA RIG (bcell) bawaan tetap menggambar FOTO HERO ASLI (drawImage > 0)',
   rBawaanLain.drawImage > 0 && rBawaanLain.drawImage >= rFoto.drawImage,
   `drawImage bcell=${rBawaanLain.drawImage} vs foto mako=${rFoto.drawImage}`);

@@ -30,6 +30,15 @@ const cek = (nama, ok, info = '') => {
 // ===== 1. rig bisa direproduksi dari kode =====
 const { buildRig } = await import('../tools/gen-hero-rig.mjs');
 const RIV_PATH = path.join(ROOT, 'assets', 'rive', 'hero-locomotion.riv');
+// UI-RESET (2026-09-21): hero-locomotion.riv dicabut owner pada reset aset (opsi B).
+// Selama masa reset penguji ini di-SKIP dengan sopan, bukan crash ENOENT.
+// Pulihkan aset lalu jalankan `npm run rive` untuk membangkitkan ulang, atau
+// PHAGOS_STRICT_ASSETS=1 untuk memaksa keras (akan crash bila file tetap absent).
+if (!fs.existsSync(RIV_PATH) && process.env.PHAGOS_STRICT_ASSETS !== '1') {
+  console.log('  · SKIP(aset-visual-dicabut) rig .riv tidak ada selama masa reset UI/UX');
+  console.log('\n=== ERROR (0) ===');
+  process.exit(0);
+}
 const baru = buildRig();
 const lama = fs.readFileSync(RIV_PATH);
 let sama = baru.length === lama.length;

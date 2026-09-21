@@ -23,8 +23,13 @@ const MODES = ['foto', 'hibrida', 'makhluk'];
 // SCALE (setelah pilot Mako divalidasi owner): semua hero yang sudah punya rig
 // makhluk tampil sebagai bio-form abstrak. 4 hero tanpa rig (tcd4, treg,
 // bcell, nkcell) otomatis tetap foto (creatureAvailable=false) sampai rignya dipanggang.
-// PILOT PX: macrophage kini pakai sprite pixel-art (assets/sprites/px), bukan rig vektor.
-export const PILOT_CREATURE_HEROES = ['dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
+// UI-RESET / VIDEO-REFERENCE (2026-09-21): pivot PIXEL-ART DIBATALKAN owner lewat
+// video referensi (docs/VIDEO-REFERENCE-ANALYSIS.md §5) — video menunjukkan bio-form
+// prosedural bercahaya, bukan sprite px. Sprite assets/sprites/px/ sudah dicabut pada
+// reset aset, jadi macrophage KEMBALI ke rig vektor ('makhluk') bersama 6 hero ber-rig
+// lain. 4 hero tanpa rig (tcd4, treg, bcell, nkcell) otomatis tetap foto
+// (creatureAvailable=false) sampai rignya dipanggang.
+export const PILOT_CREATURE_HEROES = ['macrophage', 'dendritic', 'neutrophil', 'eosinophil', 'basophil', 'mastcell', 'tcd8'];
 let _mode = 'foto';
 let _explicit = false; // true bila pemain/URL memilih mode secara sadar
 let _lastT = 0;

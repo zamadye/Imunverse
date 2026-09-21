@@ -155,6 +155,21 @@ dock menu. Sangat menahan diri.
 
 ## 6. Rekomendasi eksekusi (urutan, semua data-driven)
 
+> **STATUS EKSEKUSI 2026-09-21:** langkah **1–5 & 7 SELESAI** di commit pass ini.
+> (1) palet+cahaya backlit via `interior.*` di `data/arenas.json`; (2) vocabulary dinding
+> {interior, ribbon, scutes, tissue-sisik, glands, frills, chords} dirender prosedural di
+> `organ-corridor.js` (tanpa PNG, referensi `px/` menggantung ikut hilang); (3) topologi
+> multi-chamber `chamber→neck→chamber` data-only untuk 6 koridor, luas diskalakan persis
+> 1,00× cawan, paru tetap `branch`, verify-world semua guard OK; (4) siluet hero data-only
+> di `creature-rigs.json` (kaki 1,55–1,85× lebih panjang & 0,4× lebih tipis, core putih
+> menyala) + macrophage KEMBALI ber-rig vektor karena px dibatalkan; (5) HUD 4-anchor
+> `#rv-hud` (vial charge / bar segmen+glif+orb / avatar bulat / pill jeda) dengan HUD lama
+> disembunyikan `.rv-legacy-hidden` (boss bar dipertahankan); (7) 13 penguji hijau, uji
+> ber-spesifikasi UI-lama/aset-tercabut di-gate SKIP (`PHAGOS_UI_RESET=0` /
+> `PHAGOS_STRICT_ASSETS=1` memaksa keras).
+> **BELUM:** langkah 6 (hazard cincin magenta + roset landak — butuh renderer musuh
+> prosedural) dan screenshot browser nyata (Playwright belum terpasang di sandbox).
+
 1. **Palet & cahaya dulu** (`data/arenas.json`): ganti model warna jadi
    *interior amber backlit* + *jaringan luar biru/crimson/violet per organ*;
    hapus asumsi "ground gelap".

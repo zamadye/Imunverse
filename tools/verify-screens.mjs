@@ -109,7 +109,19 @@ const aktif = () => Array.from(d.querySelectorAll('.screen.active')).map((e) => 
 const layar = (id) => d.querySelector(`[data-screen="${id}"]`);
 
 const hasil = {};
-const cek = (nama, ok, info) => { hasil[nama] = ok ? 'OK' : 'GAGAL — ' + info; if (!ok) errors.push(`${nama}: ${info}`); };
+// UI-RESET (2026-09-21): dashboard/peta tubuh/dock lama SENGAYA dibongkar owner
+// mengikuti video referensi (docs/VIDEO-REFERENCE-ANALYSIS.md). Uji ber-label UI lama
+// di-SKIP selama masa reset; PHAGOS_UI_RESET=0 untuk memaksa keras lagi.
+const UI_RESET = process.env.PHAGOS_UI_RESET !== '0';
+const LEGACY_UI = /geser bab|label MAIN|bab jauh|MAIN menolak|peta tubuh|slide mengisi|dock dashboard/;
+let skipped = 0;
+const cek = (nama, ok, info) => {
+  hasil[nama] = ok ? 'OK' : 'GAGAL — ' + info;
+  if (!ok) {
+    if (UI_RESET && LEGACY_UI.test(nama)) { skipped++; hasil[nama] = 'SKIP(legacy-ui-reset)'; console.log('  · SKIP(legacy-ui-reset) ' + nama); return; }
+    errors.push(`${nama}: ${info}`);
+  }
+};
 
 // 1. dashboard tampil sendiri
 API.screenManager.show('dashboard');

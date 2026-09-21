@@ -18,6 +18,7 @@ import { emit } from '../../core/ui-bridge.js';
 import { skillIconSvg, skillPlateSvg } from '../skill-icons.js';
 
 export function show() {
+  initRvHud(); // UI-RESET: HUD 4-anchor
   // Sprint 5.27 (§11.2): HP pindah ke bar atas (HP/wave/kill/timer/BK/G).
   try {
     const top = document.querySelector('#screen-hud .hud-top .hud-center');
@@ -223,6 +224,7 @@ export function updateHUD(data) {
   document.getElementById('hud-kills').textContent = data.kills;
   document.getElementById('hud-currency').textContent = data.currency;
 
+  updateRvHud(data); // UI-RESET: isi 4 anchor (bar segmen, orb, vial)
   updateAbilityBar(data.abilities);
   updateBuffChips();
   // PHAGOS: indikator PULSE + Bio-Point + mutasi aktif + membran hidup
@@ -479,4 +481,58 @@ function updateBuffChips() {
     el.innerHTML = html;
     el.dataset.html = html;
   }
+}
+
+/* ============================================================
+   HUD 4-ANCHOR (UI-RESET 2026-09-21) — docs/VIDEO-REFERENCE-ANALYSIS.md §4
+   vial charge (kiri-atas) · bar segmen + glif + orb (kiri-bawah) ·
+   avatar bulat (kanan-bawah) · pill kontekstual (kanan-atas).
+   HAPUS blok ini saat UI/UX baru final menggantikan HUD lama sepenuhnya.
+   ============================================================ */
+const RV_SEG = 6;
+let rvInited = false;
+
+function rvEl(id) { return document.getElementById(id); }
+
+/** Bangun segmen bar sekali + wiring pill jeda + avatar hero. */
+export function initRvHud() {
+  if (rvInited) return;
+  const bar = rvEl('rv-bar');
+  if (!bar) return;
+  rvInited = true;
+  bar.textContent = '';
+  for (let i = 0; i < RV_SEG; i++) bar.appendChild(document.createElement('i'));
+  const pill = rvEl('rv-pill');
+  if (pill) {
+    pill.addEventListener('click', () => {
+      try {
+        if (STATE.screen === 'gameplay') { game.pause(); emit('pause', {}); }
+      } catch { /* abaikan */ }
+    });
+  }
+  // avatar: potret hero aktif (gambar hilang akan disembunyikan reset-scaffold)
+  try {
+    const img = rvEl('rv-avatar-img');
+    const hid = (game.run && game.run.heroId) || (STATE.meta && STATE.meta.selectedHero) || 'macrophage';
+    const hero = (getData().heroes.heroes || []).find((h) => h.id === hid);
+    if (img && hero) img.src = hero.spritePortrait || hero.spriteIdle || img.src;
+  } catch { /* abaikan */ }
+}
+
+/** Isi 4 anchor dari payload updateHUD. */
+export function updateRvHud(data) {
+  const bar = rvEl('rv-bar');
+  if (bar && bar.children.length) {
+    const hp = Math.max(0, Math.min(1, data.hpPct || 0));
+    const on = Math.round(hp * RV_SEG);
+    for (let i = 0; i < bar.children.length; i++) {
+      const el = bar.children[i];
+      const isOn = i < on;
+      el.className = isOn ? (hp < 0.2 ? 'on crit' : hp < 0.4 ? 'on warn' : 'on') : '';
+    }
+  }
+  const cur = rvEl('rv-currency');
+  if (cur) cur.textContent = String(Math.floor(data.antibody || 0));
+  const fill = rvEl('rv-vial-fill');
+  if (fill) fill.style.height = `${Math.round(Math.max(0, Math.min(1, data.xpPct || 0)) * 100)}%`;
 }

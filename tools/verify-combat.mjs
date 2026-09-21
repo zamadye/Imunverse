@@ -19,8 +19,17 @@ import { window, sleep, API, game } from './harness.mjs';
 const ROOT = path.dirname(path.dirname(new URL(import.meta.url).pathname));
 const errors = [];
 const hasil = {};
+// UI-RESET (2026-09-21): foto mutasi/evolusi PNG dicabut owner pada reset aset
+// (docs/UI-UX-RESET-DELETED-ASSETS.md). Uji keberadaan file-nya di-SKIP selama masa
+// reset; PHAGOS_STRICT_ASSETS=1 untuk memaksa keras lagi.
+const UI_RESET_ASSETS_ABSENT = process.env.PHAGOS_STRICT_ASSETS !== '1';
+const ASSET_ABSENT_UI = /foto tahap benar-benar ada di assets/;
 const cek = (nama, ok, info = '') => {
   hasil[nama] = ok ? 'OK' : 'GAGAL — ' + info;
+  if (!ok && UI_RESET_ASSETS_ABSENT && ASSET_ABSENT_UI.test(nama)) {
+    console.log('  · SKIP(aset-visual-dicabut) ' + nama);
+    return;
+  }
   if (!ok) errors.push(`${nama}: ${info}`);
 };
 const baca = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));

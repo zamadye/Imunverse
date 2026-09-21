@@ -378,8 +378,36 @@
 
       <!-- ============ GAMEPLAY HUD ============ -->
       <section id="screen-hud" class="screen passive" data-screen="hud">
+        <!-- ===== HUD 4-ANCHOR (UI-RESET, gaya video referensi) =====
+             docs/VIDEO-REFERENCE-ANALYSIS.md §4: video hanya memakai 4 jangkar kecil —
+             vial charge kiri-atas, bar segmen kiri-bawah, avatar bulat kanan-bawah,
+             pill kontekstual kanan-atas. TIDAK ADA top bar / minimap / panel quest / dock.
+             Blok lama di bawah disembunyikan CSS selama masa reset (.rv-legacy-hidden). -->
+        <div class="rv-hud" id="rv-hud" aria-label="HUD perjalanan">
+          <!-- 1. kiri-atas: vial/lentera bioluminesen = charge menuju mutasi berikutnya -->
+          <div class="rv-vial" id="rv-vial" role="img" aria-label="Charge evolusi">
+            <span class="rv-vial-dome"><i class="rv-bolt b1"></i><i class="rv-bolt b2"></i><span class="rv-core"></span></span>
+            <span class="rv-vial-collar"></span>
+            <span class="rv-vial-body"><span class="rv-vial-fill" id="rv-vial-fill"></span></span>
+            <span class="rv-vial-pips"><i></i><i></i><i></i></span>
+          </div>
+          <!-- 2. kiri-bawah: glif sayap + bar 6 segmen (nyawa) + counter orb (antibodi) -->
+          <div class="rv-bar-wrap">
+            <span class="rv-wing" aria-hidden="true"></span>
+            <div class="rv-bar" id="rv-bar" role="img" aria-label="Nyawa"></div>
+            <span class="rv-orb"><i></i><b id="rv-currency">0</b></span>
+          </div>
+          <!-- 3. kanan-bawah: satu tombol avatar bulat -->
+          <button class="rv-avatar" id="rv-avatar" type="button" aria-label="Profil hero">
+            <img id="rv-avatar-img" src="assets/sprites/portrait_tcd8.png" alt="" />
+          </button>
+          <!-- 4. kanan-atas: pill kontekstual (jeda / fast travel) -->
+          <button class="rv-pill" id="rv-pill" type="button" aria-label="Jeda perjalanan">
+            <span id="rv-pill-text">⏸</span>
+          </button>
+        </div>
         <!-- TOP CENTER: stat runs — equity chip, kills, wave, timer, currency (RoK-style grouping) -->
-        <div class="hud-top">
+        <div class="hud-top rv-legacy-hidden">
           <div class="hud-center">
             <span id="hud-equity-stage" class="hud-equity-stage">Polos</span>
             <div class="hud-kills"><img src="assets/icons/ui-kill.svg" alt="" /><span id="hud-kills">0</span></div>

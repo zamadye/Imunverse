@@ -1,1395 +1,1670 @@
 {
-  "schemaVersion": 6,
-  "doc": "MAP AGENT: skema data-driven per-map. Seluruh layar = permukaan organ TANPA BATAS (tak ada tambalan/ring). palette.hex = warna dasar jaringan; palette.ground.features = isi anatomi world-anchored (mengikuti kamera saat menjelajah). Tipe: blotch|fold|chunk|pool|sacs|thread|flowcell|villi|mist|motes. Lihat docs/map-environment-schema.md. P4: dua palet prosedural baru (kapiler & aliran darah) dibuat dari kode — warna & fitur tanah saja, TANPA aset gambar baru (foto dibekukan).",
-  "arenas": [
-    {
-      "id": "limfe",
-      "name": "Saluran Limfe",
-      "thumb": "assets/sprites/arena_limfe.png",
-      "organ": {
-        "name": "Kelenjar Limfe",
-        "system": "Sistem Limfatik",
-        "condition": "Pembuluh getah bening — cairan jernih kehijauan mengalir lambat"
-      },
-      "unlock": {
-        "type": "default",
-        "value": 0
-      },
-      "bonus": {
-        "desc": "Arena dasar — seimbang",
-        "nutrientMult": 1.0,
-        "partMult": 1.0,
-        "speedMult": 1.0,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "Saluran limfe: pembuluh berkatup — kantung-kantung (sinus) berulang yang menyempit di tiap katup semilunar. Aliran lambat, hijau jernih.",
-        "height": 3600,
-        "startT": 0.08,
-        "cameraZoom": 0.9,
-        "spawnBias": 0.65,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 150,
-            "cx": 0
-          },
-          {
-            "t": 0.12,
-            "half": 300,
-            "cx": -30
-          },
-          {
-            "t": 0.24,
-            "half": 150,
-            "cx": 0,
-            "label": "katup"
-          },
-          {
-            "t": 0.38,
-            "half": 320,
-            "cx": 40
-          },
-          {
-            "t": 0.5,
-            "half": 140,
-            "cx": 10,
-            "label": "katup"
-          },
-          {
-            "t": 0.64,
-            "half": 330,
-            "cx": -40
-          },
-          {
-            "t": 0.76,
-            "half": 150,
-            "cx": -10,
-            "label": "katup"
-          },
-          {
-            "t": 0.9,
-            "half": 300,
-            "cx": 30
-          },
-          {
-            "t": 1.0,
-            "half": 160,
-            "cx": 20
-          }
-        ],
-        "wall": {
-          "tissue": "34,70,50",
-          "tissueFar": "18,40,30",
-          "muscle": "70,130,95",
-          "muscleLight": "150,220,175",
-          "vessel": "120,200,160",
-          "vesselArt": "200,240,210",
-          "flow": "230,255,240",
-          "rim": "170,240,200",
-          "fiberSpacing": 64,
-          "vesselCount": 2,
-          "cordEvery": 0,
-          "bpm": 60
-        }
-      },
-      "palette": {
-        "hex": "#e2ecc9",
-        "vignette": "rgba(24,70,52,0.28)",
-        "props": [
-          "prop_weed.png",
-          "prop_cell.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "50,100,70",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "170,205,150",
-              "color2": "200,220,180",
-              "spacing": 380,
-              "density": 0.6,
-              "size": 70,
-              "alpha": 0.5
-            },
-            {
-              "type": "fold",
-              "color": "150,200,160",
-              "color2": "190,225,195",
-              "spacing": 520,
-              "density": 0.6,
-              "width": 22,
-              "len": 700,
-              "wave": 70,
-              "angle": 0.9,
-              "crawl": 0.4
-            },
-            {
-              "type": "chunk",
-              "colors": [
-                "235,245,225",
-                "215,235,200",
-                "200,225,185"
-              ],
-              "line": "90,140,105",
-              "spacing": 280,
-              "density": 0.5,
-              "size": 34,
-              "var": 16,
-              "bob": 2
-            },
-            {
-              "type": "pool",
-              "color": "200,230,205",
-              "color2": "230,245,230",
-              "spacing": 540,
-              "density": 0.45,
-              "size": 85,
-              "bubbles": true
-            },
-            {
-              "type": "villi",
-              "color": "160,210,170",
-              "color2": "200,235,205",
-              "spacing": 420,
-              "density": 0.45,
-              "size": 44,
-              "alpha": 0.8
-            },
-            {
-              "type": "mist",
-              "color": "220,240,225",
-              "spacing": 700,
-              "density": 0.6,
-              "size": 150,
-              "alpha": 0.1
-            },
-            {
-              "type": "motes",
-              "color": "180,220,185",
-              "color2": "230,245,230",
-              "spacing": 380,
-              "density": 0.5,
-              "size": 90,
-              "dot": 3,
-              "alpha": 0.5
-            },
-            {
-              "type": "flowcell",
-              "color": "70,130,95",
-              "count": 24,
-              "size": 5,
-              "dx": 0.1,
-              "dy": -1,
-              "speed": 12,
-              "span": 700,
-              "alpha": 0.8
-            }
-          ]
-        },
-        "ambient": {
-          "density": 0.55,
-          "spacing": 250,
-          "size": 26,
-          "drift": 8,
-          "opacity": 0.16,
-          "parallax": 0.08,
-          "tint": "240,250,235",
-          "shade": "40,110,80"
-        },
-        "pulse": {
-          "bpm": 60,
-          "strength": 0.9,
-          "glowAlpha": 0.05
-        },
-        "tint": {
-          "prop": "#55aa7f",
-          "corner": "#4a9a72"
-        },
-        "bubbles": {
-          "c1": "rgba(255,255,255,0.10)",
-          "c2": "rgba(230,245,230,0.16)"
-        },
-        "element": {
-          "type": "flow",
-          "color": "190,230,190",
-          "color2": "120,180,140",
-          "density": 0.5,
-          "spacing": 300,
-          "size": 34,
-          "speed": 7,
-          "alpha": 0.12,
-          "parallax": 0.3
-        }
-      }
-    },
-    {
-      "id": "lambung",
-      "name": "Lambung Asam",
-      "thumb": "assets/sprites/arena_lambung.png",
-      "organ": {
-        "name": "Lambung",
-        "system": "Saluran Cerna",
-        "condition": "Rongga lambung: lipatan rugae, gumpalan makanan, kolam asam"
-      },
-      "unlock": {
-        "type": "totalKills",
-        "value": 150
-      },
-      "bonus": {
-        "desc": "Nutrisi bernilai +15%",
-        "nutrientMult": 1.15,
-        "partMult": 1.0,
-        "speedMult": 1.0,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "Lambung: kantung besar berlipat (rugae) — melebar drastis di fundus lalu menyempit ke pilorus di atas.",
-        "height": 2900,
-        "startT": 0.1,
-        "cameraZoom": 0.86,
-        "spawnBias": 0.5,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 200,
-            "cx": 0,
-            "label": "kardia"
-          },
-          {
-            "t": 0.25,
-            "half": 430,
-            "cx": -70,
-            "label": "fundus"
-          },
-          {
-            "t": 0.5,
-            "half": 400,
-            "cx": -30
-          },
-          {
-            "t": 0.72,
-            "half": 300,
-            "cx": 50,
-            "label": "antrum"
-          },
-          {
-            "t": 0.88,
-            "half": 160,
-            "cx": 90
-          },
-          {
-            "t": 1.0,
-            "half": 110,
-            "cx": 120,
-            "label": "pilorus"
-          }
-        ],
-        "wall": {
-          "tissue": "105,50,35",
-          "tissueFar": "60,25,15",
-          "muscle": "180,95,70",
-          "muscleLight": "235,170,130",
-          "vessel": "90,80,170",
-          "vesselArt": "220,90,80",
-          "flow": "255,220,180",
-          "rim": "245,190,150",
-          "fiberSpacing": 40,
-          "vesselCount": 2,
-          "cordEvery": 200,
-          "bpm": 76
-        }
-      },
-      "palette": {
-        "hex": "#f3d3ac",
-        "vignette": "rgba(90,30,22,0.3)",
-        "props": [
-          "prop_asam.png",
-          "prop_weed.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "120,60,45",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "210,140,115",
-              "color2": "225,175,140",
-              "spacing": 380,
-              "density": 0.6,
-              "size": 70,
-              "alpha": 0.5
-            },
-            {
-              "type": "fold",
-              "color": "200,110,95",
-              "color2": "235,170,150",
-              "spacing": 420,
-              "density": 0.8,
-              "width": 30,
-              "len": 750,
-              "wave": 90,
-              "angle": 0.4,
-              "crawl": 0.7
-            },
-            {
-              "type": "chunk",
-              "colors": [
-                "245,240,225",
-                "165,103,74",
-                "127,174,90",
-                "224,138,60",
-                "217,176,106"
-              ],
-              "line": "150,100,80",
-              "spacing": 260,
-              "density": 0.55,
-              "size": 30,
-              "var": 18,
-              "bob": 3
-            },
-            {
-              "type": "pool",
-              "color": "205,215,110",
-              "color2": "235,245,170",
-              "spacing": 520,
-              "density": 0.5,
-              "size": 95,
-              "bubbles": true,
-              "boil": true,
-              "danger": true
-            },
-            {
-              "type": "thread",
-              "color": "240,200,180",
-              "spacing": 480,
-              "density": 0.5,
-              "len": 380,
-              "width": 5,
-              "sway": 16
-            },
-            {
-              "type": "villi",
-              "color": "215,150,130",
-              "color2": "240,190,170",
-              "spacing": 400,
-              "density": 0.5,
-              "size": 46,
-              "alpha": 0.85
-            },
-            {
-              "type": "mist",
-              "color": "225,230,160",
-              "spacing": 700,
-              "density": 0.55,
-              "size": 150,
-              "alpha": 0.1
-            },
-            {
-              "type": "motes",
-              "color": "240,210,170",
-              "color2": "255,240,220",
-              "spacing": 360,
-              "density": 0.5,
-              "size": 90,
-              "dot": 3,
-              "alpha": 0.5
-            },
-            {
-              "type": "flowcell",
-              "color": "230,200,150",
-              "count": 20,
-              "size": 6,
-              "dx": 0.1,
-              "dy": -1,
-              "speed": 24,
-              "span": 700,
-              "alpha": 0.8
-            }
-          ]
-        },
-        "ambient": {
-          "density": 0.6,
-          "spacing": 230,
-          "size": 24,
-          "drift": 16,
-          "opacity": 0.15,
-          "parallax": 0.08,
-          "tint": "255,225,190",
-          "shade": "150,70,45"
-        },
-        "pulse": {
-          "bpm": 76,
-          "strength": 1.1,
-          "glowAlpha": 0.055
-        },
-        "tint": {
-          "prop": "#c05a45",
-          "corner": "#a84a38"
-        },
-        "bubbles": {
-          "c1": "rgba(225,235,140,0.12)",
-          "c2": "rgba(200,220,110,0.18)"
-        },
-        "element": {
-          "type": "acid",
-          "color": "215,230,120",
-          "color2": "150,180,70",
-          "density": 0.55,
-          "spacing": 260,
-          "size": 16,
-          "speed": 26,
-          "alpha": 0.2,
-          "parallax": 0.3
-        }
-      }
-    },
-    {
-      "id": "paru",
-      "name": "Paru Kristal",
-      "thumb": "assets/sprites/arena_paru.png",
-      "organ": {
-        "name": "Paru-paru",
-        "system": "Saluran Napas",
-        "condition": "Bronkiolus bercabang, gugus alveoli, kapiler merah-biru"
-      },
-      "unlock": {
-        "type": "bestWave",
-        "value": 8
-      },
-      "bonus": {
-        "desc": "Gerak +8%, magnet +20%",
-        "nutrientMult": 1.0,
-        "partMult": 1.0,
-        "speedMult": 1.08,
-        "magnetMult": 1.2
-      },
-      "shape": {
-        "kind": "branch",
-        "doc": "Paru: bronkus utama bercabang jadi dua bronkiolus (kiri/kanan) yang mengembang ke gugus alveoli di puncak. Lajur 0 = batang tempat pemain mulai.",
-        "height": 2900,
-        "startT": 0.08,
-        "cameraZoom": 0.84,
-        "spawnBias": 0.6,
-        "lanes": [
-          {
-            "id": "bronkus",
-            "t0": 0.0,
-            "t1": 0.52,
-            "profile": [
-              {
-                "t": 0.0,
-                "half": 170,
-                "cx": 0
-              },
-              {
-                "t": 0.5,
-                "half": 260,
-                "cx": 0
-              },
-              {
-                "t": 0.85,
-                "half": 330,
-                "cx": 0,
-                "label": "karina"
-              },
-              {
-                "t": 1.0,
-                "half": 420,
-                "cx": 0
-              }
-            ]
-          },
-          {
-            "id": "kiri",
-            "t0": 0.42,
-            "t1": 1.0,
-            "profile": [
-              {
-                "t": 0.0,
-                "half": 123,
-                "cx": -120
-              },
-              {
-                "t": 0.3,
-                "half": 148,
-                "cx": -330
-              },
-              {
-                "t": 0.65,
-                "half": 189,
-                "cx": -420,
-                "label": "bronkiolus"
-              },
-              {
-                "t": 1.0,
-                "half": 246,
-                "cx": -380,
-                "label": "alveoli"
-              }
-            ]
-          },
-          {
-            "id": "kanan",
-            "t0": 0.42,
-            "t1": 1.0,
-            "profile": [
-              {
-                "t": 0.0,
-                "half": 123,
-                "cx": 120
-              },
-              {
-                "t": 0.3,
-                "half": 148,
-                "cx": 330
-              },
-              {
-                "t": 0.65,
-                "half": 189,
-                "cx": 420,
-                "label": "bronkiolus"
-              },
-              {
-                "t": 1.0,
-                "half": 246,
-                "cx": 380,
-                "label": "alveoli"
-              }
-            ]
-          }
-        ],
-        "wall": {
-          "tissue": "110,55,85",
-          "tissueFar": "60,25,45",
-          "muscle": "190,110,140",
-          "muscleLight": "245,190,210",
-          "vessel": "90,110,210",
-          "vesselArt": "230,80,100",
-          "flow": "255,225,235",
-          "rim": "250,200,220",
-          "fiberSpacing": 54,
-          "vesselCount": 2,
-          "cordEvery": 0,
-          "bpm": 68
-        }
-      },
-      "palette": {
-        "hex": "#f4ccd6",
-        "vignette": "rgba(90,30,50,0.3)",
-        "props": [
-          "prop_cell.png",
-          "prop_dots.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "130,70,95",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "225,160,180",
-              "color2": "235,190,200",
-              "spacing": 380,
-              "density": 0.6,
-              "size": 70,
-              "alpha": 0.5
-            },
-            {
-              "type": "thread",
-              "color": "215,140,160",
-              "color2": "240,190,205",
-              "spacing": 460,
-              "density": 0.6,
-              "len": 420,
-              "width": 16,
-              "sway": 20
-            },
-            {
-              "type": "thread",
-              "color": "200,80,100",
-              "spacing": 420,
-              "density": 0.5,
-              "len": 350,
-              "width": 3
-            },
-            {
-              "type": "thread",
-              "color": "110,140,200",
-              "spacing": 430,
-              "density": 0.45,
-              "len": 350,
-              "width": 3
-            },
-            {
-              "type": "sacs",
-              "color": "245,200,215",
-              "color2": "230,150,175",
-              "spacing": 300,
-              "density": 0.55,
-              "size": 26,
-              "n": 6
-            },
-            {
-              "type": "mist",
-              "color": "255,225,235",
-              "spacing": 680,
-              "density": 0.6,
-              "size": 150,
-              "alpha": 0.12
-            },
-            {
-              "type": "motes",
-              "color": "255,235,240",
-              "color2": "255,255,255",
-              "spacing": 380,
-              "density": 0.45,
-              "size": 90,
-              "dot": 2.5,
-              "alpha": 0.5
-            },
-            {
-              "type": "flowcell",
-              "color": "255,240,245",
-              "count": 14,
-              "size": 4,
-              "dx": 0.1,
-              "dy": -1,
-              "speed": 30,
-              "span": 700,
-              "alpha": 0.8
-            }
-          ]
-        },
-        "ambient": {
-          "density": 0.5,
-          "spacing": 270,
-          "size": 20,
-          "drift": 14,
-          "opacity": 0.13,
-          "parallax": 0.08,
-          "tint": "255,230,238",
-          "shade": "170,90,110"
-        },
-        "pulse": {
-          "bpm": 68,
-          "strength": 1.0,
-          "glowAlpha": 0.045
-        },
-        "tint": {
-          "prop": "#c0708a",
-          "corner": "#a85a76"
-        },
-        "bubbles": {
-          "c1": "rgba(255,235,240,0.10)",
-          "c2": "rgba(255,220,230,0.16)"
-        },
-        "element": {
-          "type": "breath",
-          "color": "255,200,215",
-          "color2": "220,130,155",
-          "breathSec": 4,
-          "density": 0.5,
-          "spacing": 280,
-          "size": 22,
-          "speed": 1,
-          "alpha": 0.16,
-          "parallax": 0.3
-        }
-      }
-    },
-    {
-      "id": "saraf",
-      "name": "Sumbu Saraf",
-      "thumb": "assets/sprites/arena_saraf.png",
-      "organ": {
-        "name": "Jaringan Saraf",
-        "system": "Sistem Saraf",
-        "condition": "Berkas akson, selubung mielin, badan sel saraf, sinapsis"
-      },
-      "unlock": {
-        "type": "bossKills",
-        "value": 2
-      },
-      "bonus": {
-        "desc": "Drop bagian evolusi +50%",
-        "nutrientMult": 1.0,
-        "partMult": 1.5,
-        "speedMult": 1.0,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "Sumbu saraf: berkas akson panjang lurus-sempit dengan simpul Ranvier (menyempit tajam berkala) dan badan sel besar di ujung atas.",
-        "height": 4200,
-        "startT": 0.07,
-        "cameraZoom": 0.9,
-        "spawnBias": 0.7,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 180,
-            "cx": 0
-          },
-          {
-            "t": 0.15,
-            "half": 260,
-            "cx": 20
-          },
-          {
-            "t": 0.22,
-            "half": 120,
-            "cx": 20,
-            "label": "nodus Ranvier"
-          },
-          {
-            "t": 0.4,
-            "half": 270,
-            "cx": -30
-          },
-          {
-            "t": 0.47,
-            "half": 120,
-            "cx": -30,
-            "label": "nodus"
-          },
-          {
-            "t": 0.65,
-            "half": 270,
-            "cx": 30
-          },
-          {
-            "t": 0.72,
-            "half": 120,
-            "cx": 30,
-            "label": "nodus"
-          },
-          {
-            "t": 0.88,
-            "half": 380,
-            "cx": 0,
-            "label": "badan sel"
-          },
-          {
-            "t": 1.0,
-            "half": 200,
-            "cx": 0
-          }
-        ],
-        "wall": {
-          "tissue": "90,75,35",
-          "tissueFar": "50,40,15",
-          "muscle": "170,145,70",
-          "muscleLight": "240,220,140",
-          "vessel": "220,200,90",
-          "vesselArt": "255,240,150",
-          "flow": "255,255,220",
-          "rim": "250,235,170",
-          "fiberSpacing": 30,
-          "vesselCount": 1,
-          "cordEvery": 0,
-          "bpm": 88
-        }
-      },
-      "palette": {
-        "hex": "#ecdcab",
-        "vignette": "rgba(60,50,18,0.32)",
-        "props": [
-          "prop_kristal.png",
-          "prop_dots.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "110,95,50",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "205,185,130",
-              "color2": "220,205,160",
-              "spacing": 380,
-              "density": 0.6,
-              "size": 70,
-              "alpha": 0.5
-            },
-            {
-              "type": "fold",
-              "color": "200,175,100",
-              "color2": "230,210,140",
-              "spacing": 400,
-              "density": 0.8,
-              "width": 14,
-              "len": 800,
-              "wave": 50,
-              "angle": 0.2,
-              "pulse": true,
-              "pulseSpeed": 0.3
-            },
-            {
-              "type": "chunk",
-              "colors": [
-                "240,225,170",
-                "225,205,140",
-                "250,240,200"
-              ],
-              "line": "150,130,80",
-              "spacing": 300,
-              "density": 0.5,
-              "size": 26,
-              "var": 14,
-              "bob": 0
-            },
-            {
-              "type": "thread",
-              "color": "255,235,160",
-              "color2": "255,255,255",
-              "spacing": 340,
-              "density": 0.55,
-              "len": 300,
-              "width": 3,
-              "flicker": true
-            },
-            {
-              "type": "thread",
-              "color": "180,155,90",
-              "spacing": 460,
-              "density": 0.5,
-              "len": 380,
-              "width": 5
-            },
-            {
-              "type": "mist",
-              "color": "240,225,170",
-              "spacing": 720,
-              "density": 0.5,
-              "size": 150,
-              "alpha": 0.1
-            },
-            {
-              "type": "motes",
-              "color": "255,240,190",
-              "color2": "255,255,255",
-              "spacing": 360,
-              "density": 0.5,
-              "size": 90,
-              "dot": 3,
-              "alpha": 0.55
-            }
-          ]
-        },
-        "ambient": {
-          "density": 0.5,
-          "spacing": 260,
-          "size": 22,
-          "drift": 7,
-          "opacity": 0.17,
-          "parallax": 0.08,
-          "tint": "250,240,200",
-          "shade": "130,110,50"
-        },
-        "pulse": {
-          "bpm": 88,
-          "strength": 1.15,
-          "glowAlpha": 0.06
-        },
-        "tint": {
-          "prop": "#b09440",
-          "corner": "#9a8034"
-        },
-        "bubbles": {
-          "c1": "rgba(255,250,220,0.10)",
-          "c2": "rgba(255,240,180,0.16)"
-        },
-        "element": {
-          "type": "spark",
-          "color": "255,240,170",
-          "color2": "255,200,90",
-          "density": 0.4,
-          "spacing": 300,
-          "size": 46,
-          "speed": 3,
-          "alpha": 0.5,
-          "parallax": 0.3
-        }
-      }
-    },
-    {
-      "id": "jantung",
-      "name": "Bilik Jantung",
-      "thumb": "assets/sprites/arena_jantung.png",
-      "organ": {
-        "name": "Jantung",
-        "system": "Sistem Sirkulasi",
-        "condition": "Serat otot jantung, aliran darah deras, korda tendinea"
-      },
-      "unlock": {
-        "type": "bestWave",
-        "value": 12
-      },
-      "bonus": {
-        "desc": "Darah deras: nutrisi +10%, gerak +5%",
-        "nutrientMult": 1.1,
-        "partMult": 1.0,
-        "speedMult": 1.05,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "PILOT Organ Ascent: koridor vertikal bersiluet bilik jantung. t=0 dasar (apeks), t=1 puncak (aorta). half=setengah lebar, cx=kelokan pusat. Luas ~ setara cawan lama (pi*750^2=1,77 jt) agar kepadatan spawn tidak berubah. Hanya batas & visual — mekanik identik.",
-        "height": 3200,
-        "startT": 0.1,
-        "cameraZoom": 0.88,
-        "spawnBias": 0.6,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 120,
-            "cx": 0,
-            "label": "apeks"
-          },
-          {
-            "t": 0.16,
-            "half": 300,
-            "cx": -20
-          },
-          {
-            "t": 0.4,
-            "half": 390,
-            "cx": -50,
-            "label": "bilik kiri"
-          },
-          {
-            "t": 0.6,
-            "half": 310,
-            "cx": 10
-          },
-          {
-            "t": 0.72,
-            "half": 185,
-            "cx": 40,
-            "label": "katup (menyempit)"
-          },
-          {
-            "t": 0.86,
-            "half": 270,
-            "cx": 30,
-            "label": "serambi"
-          },
-          {
-            "t": 1.0,
-            "half": 130,
-            "cx": 70,
-            "label": "aorta"
-          }
-        ],
-        "wall": {
-          "tissue": "38,8,12",
-          "tissueFar": "18,4,8",
-          "muscle": "96,26,34",
-          "muscleLight": "150,60,66",
-          "vessel": "60,70,140",
-          "vesselArt": "170,50,60",
-          "flow": "255,190,180",
-          "rim": "170,70,70",
-          "fiberSpacing": 46,
-          "vesselCount": 3,
-          "cordEvery": 230,
-          "floor": "assets/sprites/px/floor_jantung.png",
-          "floorTile": 640,
-          "floorAlpha": 1,
-          "wallTex": "assets/sprites/px/wall_jantung.png",
-          "wallTile": 560,
-          "wallAlpha": 0.92,
-          "cordProps": [
-            "assets/sprites/px/prop_trabecula.png",
-            "assets/sprites/px/prop_clot.png",
-            "assets/sprites/px/prop_clot.png"
-          ],
-          "cordSize": 96
-        }
-      },
-      "palette": {
-        "hex": "#2a0a0e",
-        "vignette": "rgba(0,0,0,0.55)",
-        "props": [
-          "prop_cell.png",
-          "prop_dots.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "30,8,10",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "210,135,125",
-              "color2": "225,165,150",
-              "spacing": 380,
-              "density": 0.6,
-              "size": 70,
-              "alpha": 0.12
-            },
-            {
-              "type": "fold",
-              "color": "150,55,60",
-              "color2": "190,90,95",
-              "spacing": 300,
-              "density": 0.7,
-              "width": 14,
-              "len": 520,
-              "wave": 40,
-              "angle": 1.57,
-              "crawl": 1.6,
-              "pulse": true,
-              "pulseSpeed": 0.5,
-              "alpha": 0.55
-            },
-            {
-              "type": "pool",
-              "color": "170,50,60",
-              "color2": "210,100,110",
-              "spacing": 560,
-              "density": 0.3,
-              "size": 60,
-              "bubbles": false,
-              "danger": true,
-              "alpha": 0.12
-            },
-            {
-              "type": "thread",
-              "color": "235,180,175",
-              "spacing": 480,
-              "density": 0.5,
-              "len": 400,
-              "width": 3,
-              "alpha": 0.12
-            },
-            {
-              "type": "flowcell",
-              "color": "220,70,80",
-              "count": 30,
-              "size": 7,
-              "dx": 0.12,
-              "dy": -1,
-              "speed": 90,
-              "span": 800,
-              "alpha": 0.35
-            },
-            {
-              "type": "flowcell",
-              "color": "255,160,150",
-              "count": 16,
-              "size": 4,
-              "dx": 0.12,
-              "dy": -1,
-              "speed": 90,
-              "span": 800,
-              "alpha": 0.35
-            },
-            {
-              "type": "mist",
-              "color": "230,150,140",
-              "spacing": 720,
-              "density": 0.5,
-              "size": 150,
-              "alpha": 0.1
-            },
-            {
-              "type": "motes",
-              "color": "255,170,160",
-              "color2": "255,220,210",
-              "spacing": 360,
-              "density": 0.5,
-              "size": 90,
-              "dot": 3,
-              "alpha": 0.12
-            }
-          ]
-        },
-        "ambient": {
-          "density": 0.6,
-          "spacing": 230,
-          "size": 26,
-          "drift": 10,
-          "opacity": 0.06,
-          "parallax": 0.08,
-          "tint": "255,200,190",
-          "shade": "140,40,45"
-        },
-        "pulse": {
-          "bpm": 72,
-          "strength": 1.3,
-          "glowAlpha": 0.06
-        },
-        "tint": {
-          "prop": "#b03040",
-          "corner": "#96242f"
-        },
-        "bubbles": {
-          "c1": "rgba(255,180,170,0.10)",
-          "c2": "rgba(255,150,140,0.16)"
-        },
-        "element": {
-          "type": "pulsering",
-          "color": "255,150,140",
-          "color2": "255,90,100",
-          "density": 0.4,
-          "spacing": 340,
-          "size": 120,
-          "speed": 90,
-          "alpha": 0.25,
-          "parallax": 0.3
-        }
-      }
-    },
-    {
-      "id": "kapiler",
-      "name": "Kapiler",
-      "thumb": "assets/sprites/arena_paru.png",
-      "organ": {
-        "name": "Kapiler",
-        "system": "Sirkulasi Mikro",
-        "condition": "Terowongan sempit; sel darah lewat berbaris"
-      },
-      "unlock": {
-        "type": "none",
-        "value": 0
-      },
-      "bonus": {
-        "desc": "Ruang sempit — fokus posisi",
-        "nutrientMult": 1.0,
-        "partMult": 1.0,
-        "speedMult": 1.0,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "Kapiler: terowongan paling sempit — sel darah lewat berbaris; lebar hampir konstan, berkelok.",
-        "height": 5200,
-        "startT": 0.06,
-        "cameraZoom": 0.95,
-        "spawnBias": 0.8,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 190,
-            "cx": 0
-          },
-          {
-            "t": 0.2,
-            "half": 160,
-            "cx": 90
-          },
-          {
-            "t": 0.4,
-            "half": 175,
-            "cx": -80
-          },
-          {
-            "t": 0.6,
-            "half": 150,
-            "cx": 100
-          },
-          {
-            "t": 0.8,
-            "half": 180,
-            "cx": -60
-          },
-          {
-            "t": 1.0,
-            "half": 170,
-            "cx": 40
-          }
-        ],
-        "wall": {
-          "tissue": "100,40,60",
-          "tissueFar": "55,15,30",
-          "muscle": "185,80,110",
-          "muscleLight": "240,160,185",
-          "vessel": "80,90,190",
-          "vesselArt": "230,70,90",
-          "flow": "255,210,215",
-          "rim": "250,180,195",
-          "fiberSpacing": 36,
-          "vesselCount": 1,
-          "cordEvery": 0,
-          "bpm": 80
-        }
-      },
-      "palette": {
-        "hex": "#f0b7c4",
-        "vignette": "rgba(110,20,40,0.34)",
-        "props": [
-          "prop_cell.png",
-          "prop_dots.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "120,55,75",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "230,150,170",
-              "color2": "245,195,210",
-              "spacing": 300,
-              "density": 0.65,
-              "size": 52,
-              "alpha": 0.5
-            },
-            {
-              "type": "thread",
-              "color": "205,95,120",
-              "spacing": 210,
-              "density": 0.85,
-              "len": 520,
-              "width": 10,
-              "sway": 12
-            },
-            {
-              "type": "thread",
-              "color": "235,170,185",
-              "spacing": 190,
-              "density": 0.8,
-              "len": 480,
-              "width": 4
-            },
-            {
-              "type": "motes",
-              "color": "255,205,215",
-              "spacing": 240,
-              "density": 0.7,
-              "size": 9
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "aliran_darah",
-      "name": "Aliran Darah",
-      "thumb": "assets/sprites/arena_paru.png",
-      "organ": {
-        "name": "Pembuluh Darah",
-        "system": "Sirkulasi",
-        "condition": "Arus deras; sel darah mengalir satu arah"
-      },
-      "unlock": {
-        "type": "none",
-        "value": 0
-      },
-      "bonus": {
-        "desc": "Arus mendorong — memengaruhi posisi",
-        "nutrientMult": 1.0,
-        "partMult": 1.0,
-        "speedMult": 1.0,
-        "magnetMult": 1.0
-      },
-      "shape": {
-        "kind": "corridor",
-        "doc": "Aliran darah: pembuluh besar, lebar, sedikit berkelok — arus deras satu arah ke atas.",
-        "height": 3300,
-        "startT": 0.1,
-        "cameraZoom": 0.86,
-        "spawnBias": 0.75,
-        "profile": [
-          {
-            "t": 0.0,
-            "half": 264,
-            "cx": 0
-          },
-          {
-            "t": 0.3,
-            "half": 290,
-            "cx": -60
-          },
-          {
-            "t": 0.55,
-            "half": 255,
-            "cx": 40
-          },
-          {
-            "t": 0.8,
-            "half": 299,
-            "cx": -20
-          },
-          {
-            "t": 1.0,
-            "half": 264,
-            "cx": 30
-          }
-        ],
-        "wall": {
-          "tissue": "80,15,30",
-          "tissueFar": "40,5,15",
-          "muscle": "160,40,60",
-          "muscleLight": "220,110,120",
-          "vessel": "70,80,180",
-          "vesselArt": "240,80,90",
-          "flow": "255,200,200",
-          "rim": "245,150,160",
-          "fiberSpacing": 50,
-          "vesselCount": 3,
-          "cordEvery": 0,
-          "bpm": 72
-        }
-      },
-      "palette": {
-        "hex": "#c8384f",
-        "vignette": "rgba(80,0,20,0.42)",
-        "props": [
-          "prop_cell.png",
-          "prop_dots.png"
-        ],
-        "cornerWeed": "assets/sprites/deco_weed_big.png",
-        "cornerReef": "assets/sprites/deco_reef_big.png",
-        "ground": {
-          "shade": "95,20,35",
-          "features": [
-            {
-              "type": "blotch",
-              "color": "190,60,80",
-              "color2": "225,110,130",
-              "spacing": 340,
-              "density": 0.6,
-              "size": 80,
-              "alpha": 0.45
-            },
-            {
-              "type": "flowcell",
-              "color": "235,120,140",
-              "color2": "255,190,200",
-              "spacing": 260,
-              "density": 0.9,
-              "size": 30,
-              "speed": 60,
-              "alpha": 0.55,
-              "dx": 0.1,
-              "dy": -1
-            },
-            {
-              "type": "motes",
-              "color": "255,170,180",
-              "spacing": 200,
-              "density": 0.8,
-              "size": 11
-            },
-            {
-              "type": "mist",
-              "color": "255,160,175",
-              "spacing": 520,
-              "density": 0.4,
-              "size": 180,
-              "alpha": 0.16
-            }
-          ]
-        }
-      }
+ "schemaVersion": 6,
+ "doc": "MAP AGENT: skema data-driven per-map. Seluruh layar = permukaan organ TANPA BATAS (tak ada tambalan/ring). palette.hex = warna dasar jaringan; palette.ground.features = isi anatomi world-anchored (mengikuti kamera saat menjelajah). Tipe: blotch|fold|chunk|pool|sacs|thread|flowcell|villi|mist|motes. Lihat docs/map-environment-schema.md. P4: dua palet prosedural baru (kapiler & aliran darah) dibuat dari kode — warna & fitur tanah saja, TANPA aset gambar baru (foto dibekukan).",
+ "arenas": [
+  {
+   "id": "limfe",
+   "name": "Saluran Limfe",
+   "thumb": "assets/sprites/arena_limfe.png",
+   "organ": {
+    "name": "Kelenjar Limfe",
+    "system": "Sistem Limfatik",
+    "condition": "Pembuluh getah bening — cairan jernih kehijauan mengalir lambat"
+   },
+   "unlock": {
+    "type": "default",
+    "value": 0
+   },
+   "bonus": {
+    "desc": "Arena dasar — seimbang",
+    "nutrientMult": 1.0,
+    "partMult": 1.0,
+    "speedMult": 1.0,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "Saluran limfe: pembuluh berkatup — kantung-kantung (sinus) berulang yang menyempit di tiap katup semilunar. Aliran lambat, hijau jernih.",
+    "height": 3600,
+    "startT": 0.08,
+    "cameraZoom": 0.9,
+    "spawnBias": 0.65,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 127,
+      "cx": 0
+     },
+     {
+      "t": 0.12,
+      "half": 300,
+      "cx": -20
+     },
+     {
+      "t": 0.26,
+      "half": 327,
+      "cx": -40,
+      "label": "sinus bawah"
+     },
+     {
+      "t": 0.36,
+      "half": 118,
+      "cx": -10
+     },
+     {
+      "t": 0.5,
+      "half": 309,
+      "cx": 15
+     },
+     {
+      "t": 0.64,
+      "half": 337,
+      "cx": 30,
+      "label": "sinus tengah"
+     },
+     {
+      "t": 0.74,
+      "half": 123,
+      "cx": 45
+     },
+     {
+      "t": 0.86,
+      "half": 291,
+      "cx": 35,
+      "label": "sinus atas"
+     },
+     {
+      "t": 1.0,
+      "half": 109,
+      "cx": 50
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,186,104",
+      "glowHot": "255,232,168",
+      "edge": "214,116,58",
+      "mottle": "196,120,84"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "104,84,186",
+      "cellDark": "46,32,96",
+      "cellLight": "176,150,236",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
     }
-  ]
+   },
+   "palette": {
+    "hex": "#e2ecc9",
+    "vignette": "rgba(24,70,52,0.28)",
+    "props": [
+     "prop_weed.png",
+     "prop_cell.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "50,100,70",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "170,205,150",
+       "color2": "200,220,180",
+       "spacing": 380,
+       "density": 0.6,
+       "size": 70,
+       "alpha": 0.5
+      },
+      {
+       "type": "fold",
+       "color": "150,200,160",
+       "color2": "190,225,195",
+       "spacing": 520,
+       "density": 0.6,
+       "width": 22,
+       "len": 700,
+       "wave": 70,
+       "angle": 0.9,
+       "crawl": 0.4
+      },
+      {
+       "type": "chunk",
+       "colors": [
+        "235,245,225",
+        "215,235,200",
+        "200,225,185"
+       ],
+       "line": "90,140,105",
+       "spacing": 280,
+       "density": 0.5,
+       "size": 34,
+       "var": 16,
+       "bob": 2
+      },
+      {
+       "type": "pool",
+       "color": "200,230,205",
+       "color2": "230,245,230",
+       "spacing": 540,
+       "density": 0.45,
+       "size": 85,
+       "bubbles": true
+      },
+      {
+       "type": "villi",
+       "color": "160,210,170",
+       "color2": "200,235,205",
+       "spacing": 420,
+       "density": 0.45,
+       "size": 44,
+       "alpha": 0.8
+      },
+      {
+       "type": "mist",
+       "color": "220,240,225",
+       "spacing": 700,
+       "density": 0.6,
+       "size": 150,
+       "alpha": 0.1
+      },
+      {
+       "type": "motes",
+       "color": "180,220,185",
+       "color2": "230,245,230",
+       "spacing": 380,
+       "density": 0.5,
+       "size": 90,
+       "dot": 3,
+       "alpha": 0.5
+      },
+      {
+       "type": "flowcell",
+       "color": "70,130,95",
+       "count": 24,
+       "size": 5,
+       "dx": 0.1,
+       "dy": -1,
+       "speed": 12,
+       "span": 700,
+       "alpha": 0.8
+      }
+     ]
+    },
+    "ambient": {
+     "density": 0.55,
+     "spacing": 250,
+     "size": 26,
+     "drift": 8,
+     "opacity": 0.16,
+     "parallax": 0.08,
+     "tint": "240,250,235",
+     "shade": "40,110,80"
+    },
+    "pulse": {
+     "bpm": 60,
+     "strength": 0.9,
+     "glowAlpha": 0.05
+    },
+    "tint": {
+     "prop": "#55aa7f",
+     "corner": "#4a9a72"
+    },
+    "bubbles": {
+     "c1": "rgba(255,255,255,0.10)",
+     "c2": "rgba(230,245,230,0.16)"
+    },
+    "element": {
+     "type": "flow",
+     "color": "190,230,190",
+     "color2": "120,180,140",
+     "density": 0.5,
+     "spacing": 300,
+     "size": 34,
+     "speed": 7,
+     "alpha": 0.12,
+     "parallax": 0.3
+    }
+   }
+  },
+  {
+   "id": "lambung",
+   "name": "Lambung Asam",
+   "thumb": "assets/sprites/arena_lambung.png",
+   "organ": {
+    "name": "Lambung",
+    "system": "Saluran Cerna",
+    "condition": "Rongga lambung: lipatan rugae, gumpalan makanan, kolam asam"
+   },
+   "unlock": {
+    "type": "totalKills",
+    "value": 150
+   },
+   "bonus": {
+    "desc": "Nutrisi bernilai +15%",
+    "nutrientMult": 1.15,
+    "partMult": 1.0,
+    "speedMult": 1.0,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "Lambung: kantung besar berlipat (rugae) — melebar drastis di fundus lalu menyempit ke pilorus di atas.",
+    "height": 2900,
+    "startT": 0.1,
+    "cameraZoom": 0.86,
+    "spawnBias": 0.5,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 169,
+      "cx": 0,
+      "label": "pilorus"
+     },
+     {
+      "t": 0.14,
+      "half": 402,
+      "cx": -25
+     },
+     {
+      "t": 0.3,
+      "half": 434,
+      "cx": -45,
+      "label": "korpus"
+     },
+     {
+      "t": 0.42,
+      "half": 159,
+      "cx": -15
+     },
+     {
+      "t": 0.56,
+      "half": 391,
+      "cx": 10
+     },
+     {
+      "t": 0.7,
+      "half": 423,
+      "cx": 25,
+      "label": "fundus"
+     },
+     {
+      "t": 0.82,
+      "half": 159,
+      "cx": 40
+     },
+     {
+      "t": 1.0,
+      "half": 180,
+      "cx": 50,
+      "label": "kardia"
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "246,206,96",
+      "glowHot": "255,240,168",
+      "edge": "206,132,52",
+      "mottle": "188,132,80"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "176,56,74",
+      "cellDark": "84,20,34",
+      "cellLight": "236,124,124",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#f3d3ac",
+    "vignette": "rgba(90,30,22,0.3)",
+    "props": [
+     "prop_asam.png",
+     "prop_weed.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "120,60,45",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "210,140,115",
+       "color2": "225,175,140",
+       "spacing": 380,
+       "density": 0.6,
+       "size": 70,
+       "alpha": 0.5
+      },
+      {
+       "type": "fold",
+       "color": "200,110,95",
+       "color2": "235,170,150",
+       "spacing": 420,
+       "density": 0.8,
+       "width": 30,
+       "len": 750,
+       "wave": 90,
+       "angle": 0.4,
+       "crawl": 0.7
+      },
+      {
+       "type": "chunk",
+       "colors": [
+        "245,240,225",
+        "165,103,74",
+        "127,174,90",
+        "224,138,60",
+        "217,176,106"
+       ],
+       "line": "150,100,80",
+       "spacing": 260,
+       "density": 0.55,
+       "size": 30,
+       "var": 18,
+       "bob": 3
+      },
+      {
+       "type": "pool",
+       "color": "205,215,110",
+       "color2": "235,245,170",
+       "spacing": 520,
+       "density": 0.5,
+       "size": 95,
+       "bubbles": true,
+       "boil": true,
+       "danger": true
+      },
+      {
+       "type": "thread",
+       "color": "240,200,180",
+       "spacing": 480,
+       "density": 0.5,
+       "len": 380,
+       "width": 5,
+       "sway": 16
+      },
+      {
+       "type": "villi",
+       "color": "215,150,130",
+       "color2": "240,190,170",
+       "spacing": 400,
+       "density": 0.5,
+       "size": 46,
+       "alpha": 0.85
+      },
+      {
+       "type": "mist",
+       "color": "225,230,160",
+       "spacing": 700,
+       "density": 0.55,
+       "size": 150,
+       "alpha": 0.1
+      },
+      {
+       "type": "motes",
+       "color": "240,210,170",
+       "color2": "255,240,220",
+       "spacing": 360,
+       "density": 0.5,
+       "size": 90,
+       "dot": 3,
+       "alpha": 0.5
+      },
+      {
+       "type": "flowcell",
+       "color": "230,200,150",
+       "count": 20,
+       "size": 6,
+       "dx": 0.1,
+       "dy": -1,
+       "speed": 24,
+       "span": 700,
+       "alpha": 0.8
+      }
+     ]
+    },
+    "ambient": {
+     "density": 0.6,
+     "spacing": 230,
+     "size": 24,
+     "drift": 16,
+     "opacity": 0.15,
+     "parallax": 0.08,
+     "tint": "255,225,190",
+     "shade": "150,70,45"
+    },
+    "pulse": {
+     "bpm": 76,
+     "strength": 1.1,
+     "glowAlpha": 0.055
+    },
+    "tint": {
+     "prop": "#c05a45",
+     "corner": "#a84a38"
+    },
+    "bubbles": {
+     "c1": "rgba(225,235,140,0.12)",
+     "c2": "rgba(200,220,110,0.18)"
+    },
+    "element": {
+     "type": "acid",
+     "color": "215,230,120",
+     "color2": "150,180,70",
+     "density": 0.55,
+     "spacing": 260,
+     "size": 16,
+     "speed": 26,
+     "alpha": 0.2,
+     "parallax": 0.3
+    }
+   }
+  },
+  {
+   "id": "paru",
+   "name": "Paru Kristal",
+   "thumb": "assets/sprites/arena_paru.png",
+   "organ": {
+    "name": "Paru-paru",
+    "system": "Saluran Napas",
+    "condition": "Bronkiolus bercabang, gugus alveoli, kapiler merah-biru"
+   },
+   "unlock": {
+    "type": "bestWave",
+    "value": 8
+   },
+   "bonus": {
+    "desc": "Gerak +8%, magnet +20%",
+    "nutrientMult": 1.0,
+    "partMult": 1.0,
+    "speedMult": 1.08,
+    "magnetMult": 1.2
+   },
+   "shape": {
+    "kind": "branch",
+    "doc": "Paru: bronkus utama bercabang jadi dua bronkiolus (kiri/kanan) yang mengembang ke gugus alveoli di puncak. Lajur 0 = batang tempat pemain mulai.",
+    "height": 2900,
+    "startT": 0.08,
+    "cameraZoom": 0.84,
+    "spawnBias": 0.6,
+    "lanes": [
+     {
+      "id": "bronkus",
+      "t0": 0.0,
+      "t1": 0.52,
+      "profile": [
+       {
+        "t": 0.0,
+        "half": 170,
+        "cx": 0
+       },
+       {
+        "t": 0.5,
+        "half": 260,
+        "cx": 0
+       },
+       {
+        "t": 0.85,
+        "half": 330,
+        "cx": 0,
+        "label": "karina"
+       },
+       {
+        "t": 1.0,
+        "half": 420,
+        "cx": 0
+       }
+      ]
+     },
+     {
+      "id": "kiri",
+      "t0": 0.42,
+      "t1": 1.0,
+      "profile": [
+       {
+        "t": 0.0,
+        "half": 123,
+        "cx": -120
+       },
+       {
+        "t": 0.3,
+        "half": 148,
+        "cx": -330
+       },
+       {
+        "t": 0.65,
+        "half": 189,
+        "cx": -420,
+        "label": "bronkiolus"
+       },
+       {
+        "t": 1.0,
+        "half": 246,
+        "cx": -380,
+        "label": "alveoli"
+       }
+      ]
+     },
+     {
+      "id": "kanan",
+      "t0": 0.42,
+      "t1": 1.0,
+      "profile": [
+       {
+        "t": 0.0,
+        "half": 123,
+        "cx": 120
+       },
+       {
+        "t": 0.3,
+        "half": 148,
+        "cx": 330
+       },
+       {
+        "t": 0.65,
+        "half": 189,
+        "cx": 420,
+        "label": "bronkiolus"
+       },
+       {
+        "t": 1.0,
+        "half": 246,
+        "cx": 380,
+        "label": "alveoli"
+       }
+      ]
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,196,120",
+      "glowHot": "255,236,178",
+      "edge": "214,120,60",
+      "mottle": "196,124,86"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "52,124,170",
+      "cellDark": "22,60,100",
+      "cellLight": "126,200,228",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#f4ccd6",
+    "vignette": "rgba(90,30,50,0.3)",
+    "props": [
+     "prop_cell.png",
+     "prop_dots.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "130,70,95",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "225,160,180",
+       "color2": "235,190,200",
+       "spacing": 380,
+       "density": 0.6,
+       "size": 70,
+       "alpha": 0.5
+      },
+      {
+       "type": "thread",
+       "color": "215,140,160",
+       "color2": "240,190,205",
+       "spacing": 460,
+       "density": 0.6,
+       "len": 420,
+       "width": 16,
+       "sway": 20
+      },
+      {
+       "type": "thread",
+       "color": "200,80,100",
+       "spacing": 420,
+       "density": 0.5,
+       "len": 350,
+       "width": 3
+      },
+      {
+       "type": "thread",
+       "color": "110,140,200",
+       "spacing": 430,
+       "density": 0.45,
+       "len": 350,
+       "width": 3
+      },
+      {
+       "type": "sacs",
+       "color": "245,200,215",
+       "color2": "230,150,175",
+       "spacing": 300,
+       "density": 0.55,
+       "size": 26,
+       "n": 6
+      },
+      {
+       "type": "mist",
+       "color": "255,225,235",
+       "spacing": 680,
+       "density": 0.6,
+       "size": 150,
+       "alpha": 0.12
+      },
+      {
+       "type": "motes",
+       "color": "255,235,240",
+       "color2": "255,255,255",
+       "spacing": 380,
+       "density": 0.45,
+       "size": 90,
+       "dot": 2.5,
+       "alpha": 0.5
+      },
+      {
+       "type": "flowcell",
+       "color": "255,240,245",
+       "count": 14,
+       "size": 4,
+       "dx": 0.1,
+       "dy": -1,
+       "speed": 30,
+       "span": 700,
+       "alpha": 0.8
+      }
+     ]
+    },
+    "ambient": {
+     "density": 0.5,
+     "spacing": 270,
+     "size": 20,
+     "drift": 14,
+     "opacity": 0.13,
+     "parallax": 0.08,
+     "tint": "255,230,238",
+     "shade": "170,90,110"
+    },
+    "pulse": {
+     "bpm": 68,
+     "strength": 1.0,
+     "glowAlpha": 0.045
+    },
+    "tint": {
+     "prop": "#c0708a",
+     "corner": "#a85a76"
+    },
+    "bubbles": {
+     "c1": "rgba(255,235,240,0.10)",
+     "c2": "rgba(255,220,230,0.16)"
+    },
+    "element": {
+     "type": "breath",
+     "color": "255,200,215",
+     "color2": "220,130,155",
+     "breathSec": 4,
+     "density": 0.5,
+     "spacing": 280,
+     "size": 22,
+     "speed": 1,
+     "alpha": 0.16,
+     "parallax": 0.3
+    }
+   }
+  },
+  {
+   "id": "saraf",
+   "name": "Sumbu Saraf",
+   "thumb": "assets/sprites/arena_saraf.png",
+   "organ": {
+    "name": "Jaringan Saraf",
+    "system": "Sistem Saraf",
+    "condition": "Berkas akson, selubung mielin, badan sel saraf, sinapsis"
+   },
+   "unlock": {
+    "type": "bossKills",
+    "value": 2
+   },
+   "bonus": {
+    "desc": "Drop bagian evolusi +50%",
+    "nutrientMult": 1.0,
+    "partMult": 1.5,
+    "speedMult": 1.0,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "Sumbu saraf: berkas akson panjang lurus-sempit dengan simpul Ranvier (menyempit tajam berkala) dan badan sel besar di ujung atas.",
+    "height": 4200,
+    "startT": 0.07,
+    "cameraZoom": 0.9,
+    "spawnBias": 0.7,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 108,
+      "cx": 0,
+      "label": "medula"
+     },
+     {
+      "t": 0.12,
+      "half": 250,
+      "cx": -15
+     },
+     {
+      "t": 0.24,
+      "half": 275,
+      "cx": -30
+     },
+     {
+      "t": 0.34,
+      "half": 100,
+      "cx": -5
+     },
+     {
+      "t": 0.46,
+      "half": 259,
+      "cx": 15
+     },
+     {
+      "t": 0.58,
+      "half": 284,
+      "cx": 30
+     },
+     {
+      "t": 0.68,
+      "half": 104,
+      "cx": 45
+     },
+     {
+      "t": 0.8,
+      "half": 250,
+      "cx": 35
+     },
+     {
+      "t": 0.92,
+      "half": 234,
+      "cx": 45
+     },
+     {
+      "t": 1.0,
+      "half": 96,
+      "cx": 55
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,186,104",
+      "glowHot": "255,232,168",
+      "edge": "214,116,58",
+      "mottle": "196,120,84"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "112,74,196",
+      "cellDark": "50,26,104",
+      "cellLight": "184,146,240",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#ecdcab",
+    "vignette": "rgba(60,50,18,0.32)",
+    "props": [
+     "prop_kristal.png",
+     "prop_dots.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "110,95,50",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "205,185,130",
+       "color2": "220,205,160",
+       "spacing": 380,
+       "density": 0.6,
+       "size": 70,
+       "alpha": 0.5
+      },
+      {
+       "type": "fold",
+       "color": "200,175,100",
+       "color2": "230,210,140",
+       "spacing": 400,
+       "density": 0.8,
+       "width": 14,
+       "len": 800,
+       "wave": 50,
+       "angle": 0.2,
+       "pulse": true,
+       "pulseSpeed": 0.3
+      },
+      {
+       "type": "chunk",
+       "colors": [
+        "240,225,170",
+        "225,205,140",
+        "250,240,200"
+       ],
+       "line": "150,130,80",
+       "spacing": 300,
+       "density": 0.5,
+       "size": 26,
+       "var": 14,
+       "bob": 0
+      },
+      {
+       "type": "thread",
+       "color": "255,235,160",
+       "color2": "255,255,255",
+       "spacing": 340,
+       "density": 0.55,
+       "len": 300,
+       "width": 3,
+       "flicker": true
+      },
+      {
+       "type": "thread",
+       "color": "180,155,90",
+       "spacing": 460,
+       "density": 0.5,
+       "len": 380,
+       "width": 5
+      },
+      {
+       "type": "mist",
+       "color": "240,225,170",
+       "spacing": 720,
+       "density": 0.5,
+       "size": 150,
+       "alpha": 0.1
+      },
+      {
+       "type": "motes",
+       "color": "255,240,190",
+       "color2": "255,255,255",
+       "spacing": 360,
+       "density": 0.5,
+       "size": 90,
+       "dot": 3,
+       "alpha": 0.55
+      }
+     ]
+    },
+    "ambient": {
+     "density": 0.5,
+     "spacing": 260,
+     "size": 22,
+     "drift": 7,
+     "opacity": 0.17,
+     "parallax": 0.08,
+     "tint": "250,240,200",
+     "shade": "130,110,50"
+    },
+    "pulse": {
+     "bpm": 88,
+     "strength": 1.15,
+     "glowAlpha": 0.06
+    },
+    "tint": {
+     "prop": "#b09440",
+     "corner": "#9a8034"
+    },
+    "bubbles": {
+     "c1": "rgba(255,250,220,0.10)",
+     "c2": "rgba(255,240,180,0.16)"
+    },
+    "element": {
+     "type": "spark",
+     "color": "255,240,170",
+     "color2": "255,200,90",
+     "density": 0.4,
+     "spacing": 300,
+     "size": 46,
+     "speed": 3,
+     "alpha": 0.5,
+     "parallax": 0.3
+    }
+   }
+  },
+  {
+   "id": "jantung",
+   "name": "Bilik Jantung",
+   "thumb": "assets/sprites/arena_jantung.png",
+   "organ": {
+    "name": "Jantung",
+    "system": "Sistem Sirkulasi",
+    "condition": "Serat otot jantung, aliran darah deras, korda tendinea"
+   },
+   "unlock": {
+    "type": "bestWave",
+    "value": 12
+   },
+   "bonus": {
+    "desc": "Darah deras: nutrisi +10%, gerak +5%",
+    "nutrientMult": 1.1,
+    "partMult": 1.0,
+    "speedMult": 1.05,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "PILOT Organ Ascent: koridor vertikal bersiluet bilik jantung. t=0 dasar (apeks), t=1 puncak (aorta). half=setengah lebar, cx=kelokan pusat. Luas ~ setara cawan lama (pi*750^2=1,77 jt) agar kepadatan spawn tidak berubah. Hanya batas & visual — mekanik identik.",
+    "height": 3200,
+    "startT": 0.1,
+    "cameraZoom": 0.88,
+    "spawnBias": 0.6,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 144,
+      "cx": 0,
+      "label": "apeks"
+     },
+     {
+      "t": 0.1,
+      "half": 326,
+      "cx": -15
+     },
+     {
+      "t": 0.22,
+      "half": 369,
+      "cx": -35,
+      "label": "bilik kiri"
+     },
+     {
+      "t": 0.32,
+      "half": 139,
+      "cx": 5,
+      "label": "katup"
+     },
+     {
+      "t": 0.45,
+      "half": 345,
+      "cx": 20
+     },
+     {
+      "t": 0.58,
+      "half": 376,
+      "cx": 35,
+      "label": "bilik kanan"
+     },
+     {
+      "t": 0.68,
+      "half": 134,
+      "cx": 50
+     },
+     {
+      "t": 0.8,
+      "half": 316,
+      "cx": 40,
+      "label": "serambi"
+     },
+     {
+      "t": 0.92,
+      "half": 288,
+      "cx": 55
+     },
+     {
+      "t": 1.0,
+      "half": 115,
+      "cx": 70,
+      "label": "aorta"
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,186,104",
+      "glowHot": "255,232,168",
+      "edge": "214,116,58",
+      "mottle": "196,120,84"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "60,96,168",
+      "cellDark": "26,44,92",
+      "cellLight": "132,180,232",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#2a0a0e",
+    "vignette": "rgba(0,0,0,0.55)",
+    "props": [
+     "prop_cell.png",
+     "prop_dots.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "30,8,10",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "210,135,125",
+       "color2": "225,165,150",
+       "spacing": 380,
+       "density": 0.6,
+       "size": 70,
+       "alpha": 0.12
+      },
+      {
+       "type": "fold",
+       "color": "150,55,60",
+       "color2": "190,90,95",
+       "spacing": 300,
+       "density": 0.7,
+       "width": 14,
+       "len": 520,
+       "wave": 40,
+       "angle": 1.57,
+       "crawl": 1.6,
+       "pulse": true,
+       "pulseSpeed": 0.5,
+       "alpha": 0.55
+      },
+      {
+       "type": "pool",
+       "color": "170,50,60",
+       "color2": "210,100,110",
+       "spacing": 560,
+       "density": 0.3,
+       "size": 60,
+       "bubbles": false,
+       "danger": true,
+       "alpha": 0.12
+      },
+      {
+       "type": "thread",
+       "color": "235,180,175",
+       "spacing": 480,
+       "density": 0.5,
+       "len": 400,
+       "width": 3,
+       "alpha": 0.12
+      },
+      {
+       "type": "flowcell",
+       "color": "220,70,80",
+       "count": 30,
+       "size": 7,
+       "dx": 0.12,
+       "dy": -1,
+       "speed": 90,
+       "span": 800,
+       "alpha": 0.35
+      },
+      {
+       "type": "flowcell",
+       "color": "255,160,150",
+       "count": 16,
+       "size": 4,
+       "dx": 0.12,
+       "dy": -1,
+       "speed": 90,
+       "span": 800,
+       "alpha": 0.35
+      },
+      {
+       "type": "mist",
+       "color": "230,150,140",
+       "spacing": 720,
+       "density": 0.5,
+       "size": 150,
+       "alpha": 0.1
+      },
+      {
+       "type": "motes",
+       "color": "255,170,160",
+       "color2": "255,220,210",
+       "spacing": 360,
+       "density": 0.5,
+       "size": 90,
+       "dot": 3,
+       "alpha": 0.12
+      }
+     ]
+    },
+    "ambient": {
+     "density": 0.6,
+     "spacing": 230,
+     "size": 26,
+     "drift": 10,
+     "opacity": 0.06,
+     "parallax": 0.08,
+     "tint": "255,200,190",
+     "shade": "140,40,45"
+    },
+    "pulse": {
+     "bpm": 72,
+     "strength": 1.3,
+     "glowAlpha": 0.06
+    },
+    "tint": {
+     "prop": "#b03040",
+     "corner": "#96242f"
+    },
+    "bubbles": {
+     "c1": "rgba(255,180,170,0.10)",
+     "c2": "rgba(255,150,140,0.16)"
+    },
+    "element": {
+     "type": "pulsering",
+     "color": "255,150,140",
+     "color2": "255,90,100",
+     "density": 0.4,
+     "spacing": 340,
+     "size": 120,
+     "speed": 90,
+     "alpha": 0.25,
+     "parallax": 0.3
+    }
+   }
+  },
+  {
+   "id": "kapiler",
+   "name": "Kapiler",
+   "thumb": "assets/sprites/arena_paru.png",
+   "organ": {
+    "name": "Kapiler",
+    "system": "Sirkulasi Mikro",
+    "condition": "Terowongan sempit; sel darah lewat berbaris"
+   },
+   "unlock": {
+    "type": "none",
+    "value": 0
+   },
+   "bonus": {
+    "desc": "Ruang sempit — fokus posisi",
+    "nutrientMult": 1.0,
+    "partMult": 1.0,
+    "speedMult": 1.0,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "Kapiler: terowongan paling sempit — sel darah lewat berbaris; lebar hampir konstan, berkelok.",
+    "height": 5200,
+    "startT": 0.06,
+    "cameraZoom": 0.95,
+    "spawnBias": 0.8,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 98,
+      "cx": 0
+     },
+     {
+      "t": 0.15,
+      "half": 213,
+      "cx": -15
+     },
+     {
+      "t": 0.3,
+      "half": 238,
+      "cx": -30
+     },
+     {
+      "t": 0.42,
+      "half": 90,
+      "cx": -5
+     },
+     {
+      "t": 0.55,
+      "half": 221,
+      "cx": 15
+     },
+     {
+      "t": 0.68,
+      "half": 246,
+      "cx": 30
+     },
+     {
+      "t": 0.8,
+      "half": 94,
+      "cx": 45
+     },
+     {
+      "t": 1.0,
+      "half": 123,
+      "cx": 50
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,186,104",
+      "glowHot": "255,232,168",
+      "edge": "214,116,58",
+      "mottle": "196,120,84"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "44,142,152",
+      "cellDark": "16,66,74",
+      "cellLight": "122,214,214",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#f0b7c4",
+    "vignette": "rgba(110,20,40,0.34)",
+    "props": [
+     "prop_cell.png",
+     "prop_dots.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "120,55,75",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "230,150,170",
+       "color2": "245,195,210",
+       "spacing": 300,
+       "density": 0.65,
+       "size": 52,
+       "alpha": 0.5
+      },
+      {
+       "type": "thread",
+       "color": "205,95,120",
+       "spacing": 210,
+       "density": 0.85,
+       "len": 520,
+       "width": 10,
+       "sway": 12
+      },
+      {
+       "type": "thread",
+       "color": "235,170,185",
+       "spacing": 190,
+       "density": 0.8,
+       "len": 480,
+       "width": 4
+      },
+      {
+       "type": "motes",
+       "color": "255,205,215",
+       "spacing": 240,
+       "density": 0.7,
+       "size": 9
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "aliran_darah",
+   "name": "Aliran Darah",
+   "thumb": "assets/sprites/arena_paru.png",
+   "organ": {
+    "name": "Pembuluh Darah",
+    "system": "Sirkulasi",
+    "condition": "Arus deras; sel darah mengalir satu arah"
+   },
+   "unlock": {
+    "type": "none",
+    "value": 0
+   },
+   "bonus": {
+    "desc": "Arus mendorong — memengaruhi posisi",
+    "nutrientMult": 1.0,
+    "partMult": 1.0,
+    "speedMult": 1.0,
+    "magnetMult": 1.0
+   },
+   "shape": {
+    "kind": "corridor",
+    "doc": "Aliran darah: pembuluh besar, lebar, sedikit berkelok — arus deras satu arah ke atas.",
+    "height": 3300,
+    "startT": 0.1,
+    "cameraZoom": 0.86,
+    "spawnBias": 0.75,
+    "profile": [
+     {
+      "t": 0.0,
+      "half": 150,
+      "cx": 0
+     },
+     {
+      "t": 0.16,
+      "half": 318,
+      "cx": -20
+     },
+     {
+      "t": 0.32,
+      "half": 345,
+      "cx": -40
+     },
+     {
+      "t": 0.44,
+      "half": 133,
+      "cx": -10
+     },
+     {
+      "t": 0.6,
+      "half": 318,
+      "cx": 15
+     },
+     {
+      "t": 0.76,
+      "half": 336,
+      "cx": 30
+     },
+     {
+      "t": 1.0,
+      "half": 142,
+      "cx": 45
+     }
+    ],
+    "wall": {
+     "interior": {
+      "glow": "255,186,104",
+      "glowHot": "255,232,168",
+      "edge": "214,116,58",
+      "mottle": "196,120,84"
+     },
+     "ribbon": {
+      "color": "152,98,64",
+      "dark": "92,54,34",
+      "width": 24
+     },
+     "scutes": {
+      "color": "206,44,48",
+      "light": "242,104,88",
+      "size": 24,
+      "every": 44
+     },
+     "tissue": {
+      "cell": "182,46,62",
+      "cellDark": "88,16,28",
+      "cellLight": "240,116,116",
+      "band": 120,
+      "scale": 46
+     },
+     "glands": {
+      "color": "255,206,84",
+      "glow": "255,238,158",
+      "every": 430,
+      "size": 16
+     },
+     "frills": {
+      "color": "198,36,44",
+      "every": 300,
+      "len": 24
+     },
+     "chords": {
+      "color": "234,208,170",
+      "every": 380,
+      "alpha": 0.3,
+      "width": 3
+     },
+     "vessel": "64,88,190",
+     "vesselArt": "232,74,84",
+     "flow": "255,200,180",
+     "vesselCount": 2,
+     "bpm": 72
+    }
+   },
+   "palette": {
+    "hex": "#c8384f",
+    "vignette": "rgba(80,0,20,0.42)",
+    "props": [
+     "prop_cell.png",
+     "prop_dots.png"
+    ],
+    "cornerWeed": "assets/sprites/deco_weed_big.png",
+    "cornerReef": "assets/sprites/deco_reef_big.png",
+    "ground": {
+     "shade": "95,20,35",
+     "features": [
+      {
+       "type": "blotch",
+       "color": "190,60,80",
+       "color2": "225,110,130",
+       "spacing": 340,
+       "density": 0.6,
+       "size": 80,
+       "alpha": 0.45
+      },
+      {
+       "type": "flowcell",
+       "color": "235,120,140",
+       "color2": "255,190,200",
+       "spacing": 260,
+       "density": 0.9,
+       "size": 30,
+       "speed": 60,
+       "alpha": 0.55,
+       "dx": 0.1,
+       "dy": -1
+      },
+      {
+       "type": "motes",
+       "color": "255,170,180",
+       "spacing": 200,
+       "density": 0.8,
+       "size": 11
+      },
+      {
+       "type": "mist",
+       "color": "255,160,175",
+       "spacing": 520,
+       "density": 0.4,
+       "size": 180,
+       "alpha": 0.16
+      }
+     ]
+    }
+   }
+  }
+ ]
 }

@@ -2458,3 +2458,108 @@ img.lock-badge {
 @media (prefers-reduced-motion: reduce) {
   #screen-dashboard .dash-play-ring, #screen-dashboard .dash-play-ring2 { animation: none; }
 }
+
+/* ============================================================
+   HUD 4-ANCHOR — UI-RESET (2026-09-21), gaya video referensi
+   docs/VIDEO-REFERENCE-ANALYSIS.md §4. Hanya 4 jangkar kecil;
+   elemen HUD lama disembunyikan selama masa reset.
+   HAPUS/rombak blok .rv-legacy-hidden saat UI baru final.
+   ============================================================ */
+.rv-hud { position: absolute; inset: 0; pointer-events: none; z-index: 12; }
+.rv-hud > * { pointer-events: auto; }
+
+/* elemen HUD lama: sembunyikan selama reset (boss bar DIPERTAHANKAN) */
+.rv-legacy-hidden .hud-center > *:not(#hud-boss-bar-wrap) { display: none !important; }
+#screen-hud .hud-game-menu, #screen-hud .hud-game-menu2,
+#screen-hud .hud-quests, #screen-hud .hud-buffs, #screen-hud .hud-antigen,
+#screen-hud .phago-meter, #screen-hud .hud-xp-top, #screen-hud .hud-minimap,
+#screen-hud .hud-gate, #screen-hud .hud-mission, #screen-hud .ability-banner,
+#screen-hud .hud-hint, #screen-hud .hp-pill, #screen-hud .hud-announce { display: none !important; }
+/* ability bar tetap (kebutuhan fungsional) tapi diringkas ke tengah-bawah */
+#screen-hud .hud-controls { bottom: calc(10px + env(safe-area-inset-bottom)); }
+
+/* ---- 1. VIAL / LENTERA (kiri-atas) ---- */
+.rv-vial {
+  position: absolute; top: calc(14px + env(safe-area-inset-top)); left: 14px;
+  width: 46px; display: flex; flex-direction: column; align-items: center;
+  filter: drop-shadow(0 0 10px rgba(255, 200, 90, 0.35));
+}
+.rv-vial-dome {
+  position: relative; width: 40px; height: 34px; border-radius: 20px 20px 8px 8px;
+  background: radial-gradient(circle at 50% 62%, #fff3c4 0%, #ffd35e 42%, #c98a1e 78%, #8a5a10 100%);
+  box-shadow: 0 0 16px 4px rgba(255, 206, 84, 0.5);
+}
+.rv-core {
+  position: absolute; left: 50%; top: 52%; width: 15px; height: 15px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: #fffbe8; box-shadow: 0 0 10px 3px rgba(255, 246, 200, 0.9);
+}
+.rv-bolt { position: absolute; top: 6px; width: 9px; height: 15px; background: #ffe14a;
+  clip-path: polygon(60% 0, 20% 55%, 48% 55%, 34% 100%, 82% 42%, 52% 42%); }
+.rv-bolt.b1 { left: 4px; transform: rotate(-14deg); }
+.rv-bolt.b2 { right: 4px; transform: rotate(14deg) scaleX(-1); }
+.rv-vial-collar {
+  width: 34px; height: 12px; margin-top: -3px;
+  background: radial-gradient(circle at 50% 0%, #e6d4ff 0%, #a878f0 55%, rgba(120,70,200,0) 100%);
+  clip-path: polygon(0 0, 100% 0, 78% 100%, 22% 100%);
+  filter: drop-shadow(0 0 6px rgba(168, 120, 240, 0.8));
+}
+.rv-vial-body {
+  position: relative; width: 26px; height: 52px; margin-top: -2px; overflow: hidden;
+  border-radius: 6px 6px 13px 13px; background: rgba(16, 26, 22, 0.55);
+  border: 1px solid rgba(180, 240, 220, 0.25);
+}
+.rv-vial-fill {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: linear-gradient(180deg, rgba(255, 240, 190, 0.95), rgba(255, 200, 90, 0.75));
+  box-shadow: 0 0 10px 2px rgba(255, 214, 110, 0.6); transition: height 0.25s ease;
+}
+.rv-vial-pips { display: flex; gap: 5px; margin-top: 3px; }
+.rv-vial-pips i { width: 5px; height: 5px; border-radius: 50%; background: rgba(230, 244, 238, 0.55); }
+
+/* ---- 2. BAR SEGMEN + glif sayap + counter orb (kiri-bawah) ---- */
+.rv-bar-wrap {
+  position: absolute; left: 14px; bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 8px;
+}
+.rv-wing {
+  width: 26px; height: 16px;
+  background:
+    linear-gradient(115deg, transparent 42%, #bfe0ff 43%, #eaf6ff 52%, transparent 53%),
+    linear-gradient(65deg, transparent 42%, #7fb4f2 43%, #bfe0ff 55%, transparent 56%);
+  filter: drop-shadow(0 0 4px rgba(140, 190, 255, 0.7));
+}
+.rv-bar { display: flex; gap: 3px; }
+.rv-bar i {
+  width: 30px; height: 13px; border-radius: 4px; background: rgba(20, 30, 26, 0.5);
+  border: 1px solid rgba(10, 16, 14, 0.8); box-sizing: border-box;
+}
+.rv-bar i.on { background: #35e05a; box-shadow: 0 0 6px rgba(53, 224, 90, 0.55); }
+.rv-bar i.warn { background: #f07a1e; }
+.rv-bar i.crit {
+  background:
+    repeating-linear-gradient(45deg, #f0561e 0 3px, #b23310 3px 6px);
+}
+.rv-orb { display: flex; align-items: center; gap: 4px; }
+.rv-orb i {
+  width: 15px; height: 15px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffd7e8 0%, #ff77b4 38%, #2f7bd8 78%, #1b4fa0 100%);
+  box-shadow: 0 0 6px rgba(90, 150, 255, 0.6);
+}
+.rv-orb b { color: #fff; font: 800 13px/1 var(--font); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+
+/* ---- 3. AVATAR bulat (kanan-bawah) ---- */
+.rv-avatar {
+  position: absolute; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom));
+  width: 44px; height: 44px; border-radius: 50%; padding: 0; border: 2px solid rgba(140, 220, 235, 0.75);
+  background: radial-gradient(circle at 40% 32%, #2b6f7d, #123c46 78%);
+  box-shadow: 0 0 10px rgba(70, 190, 210, 0.45); overflow: hidden;
+}
+.rv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- 4. PILL kontekstual (kanan-atas) ---- */
+.rv-pill {
+  position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px;
+  display: flex; align-items: center; gap: 6px; padding: 7px 13px; border: 0;
+  border-radius: var(--pill); background: rgba(255, 253, 244, 0.92); color: var(--ink);
+  font: 800 12px/1 var(--font); box-shadow: var(--shadow-card);
+}
