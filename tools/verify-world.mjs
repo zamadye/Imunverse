@@ -343,8 +343,11 @@ _jumpToZone(game, 'heart');
   const shTmp = runS.arenaShape; runS.arenaShape = null;
   for (let i = 0; i < 60; i++) { game.update && game.update(1 / 60); }
   const diCawan = cam.corridorTarget; runS.arenaShape = shTmp;
-  cek('ORGAN ASCENT: kamera menjauh ringan per organ (0,8–0,95, dari shape.cameraZoom) dan normal (1) tanpa shape',
-    diKoridor >= 0.8 && diKoridor <= 0.95 && diArteri >= 0.8 && diArteri <= 0.95 && diCawan === 1,
+  // ARENA_ZOOM_OUT_REFERENCE_.png (commit owner 8acc8c5): arena harus terbaca LEBAR —
+  // struktur organ/rute terlihat, bukan lorong rapat. Rentang kamera karenanya turun
+  // dari 0,8-0,95 (pilot lama) menjadi 0,55-0,75 (zoom-out).
+  cek('ORGAN ASCENT: kamera zoom-out per organ (0,55-0,75, dari shape.cameraZoom; rujukan ARENA_ZOOM_OUT_REFERENCE) dan normal (1) tanpa shape',
+    diKoridor >= 0.55 && diKoridor <= 0.75 && diArteri >= 0.55 && diArteri <= 0.75 && diCawan === 1,
     `jantung=${diKoridor} arteri=${diArteri} cawan=${diCawan}`);
 }
 // render koridor tidak error & tidak NaN (ctx perekam)

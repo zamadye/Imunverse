@@ -27,7 +27,7 @@
     "doc": "Saluran limfe: pembuluh berkatup — kantung-kantung (sinus) berulang yang menyempit di tiap katup semilunar. Aliran lambat, hijau jernih.",
     "height": 3600,
     "startT": 0.08,
-    "cameraZoom": 0.9,
+    "cameraZoom": 0.66,
     "spawnBias": 0.65,
     "profile": [
      {
@@ -285,7 +285,7 @@
     "doc": "Lambung: kantung besar berlipat (rugae) — melebar drastis di fundus lalu menyempit ke pilorus di atas.",
     "height": 2900,
     "startT": 0.1,
-    "cameraZoom": 0.86,
+    "cameraZoom": 0.63,
     "spawnBias": 0.5,
     "profile": [
      {
@@ -552,7 +552,7 @@
     "doc": "Paru: bronkus utama bercabang jadi dua bronkiolus (kiri/kanan) yang mengembang ke gugus alveoli di puncak. Lajur 0 = batang tempat pemain mulai.",
     "height": 2900,
     "startT": 0.08,
-    "cameraZoom": 0.84,
+    "cameraZoom": 0.62,
     "spawnBias": 0.6,
     "lanes": [
      {
@@ -840,7 +840,7 @@
     "doc": "Sumbu saraf: berkas akson panjang lurus-sempit dengan simpul Ranvier (menyempit tajam berkala) dan badan sel besar di ujung atas.",
     "height": 4200,
     "startT": 0.07,
-    "cameraZoom": 0.9,
+    "cameraZoom": 0.66,
     "spawnBias": 0.7,
     "profile": [
      {
@@ -1091,7 +1091,7 @@
     "doc": "PILOT Organ Ascent: koridor vertikal bersiluet bilik jantung. t=0 dasar (apeks), t=1 puncak (aorta). half=setengah lebar, cx=kelokan pusat. Luas ~ setara cawan lama (pi*750^2=1,77 jt) agar kepadatan spawn tidak berubah. Hanya batas & visual — mekanik identik.",
     "height": 3200,
     "startT": 0.1,
-    "cameraZoom": 0.88,
+    "cameraZoom": 0.65,
     "spawnBias": 0.6,
     "profile": [
      {
@@ -1359,7 +1359,7 @@
     "doc": "Kapiler: terowongan paling sempit — sel darah lewat berbaris; lebar hampir konstan, berkelok.",
     "height": 5200,
     "startT": 0.06,
-    "cameraZoom": 0.95,
+    "cameraZoom": 0.7,
     "spawnBias": 0.8,
     "profile": [
      {
@@ -1526,7 +1526,7 @@
     "doc": "Aliran darah: pembuluh besar, lebar, sedikit berkelok — arus deras satu arah ke atas.",
     "height": 3300,
     "startT": 0.1,
-    "cameraZoom": 0.86,
+    "cameraZoom": 0.63,
     "spawnBias": 0.75,
     "profile": [
      {

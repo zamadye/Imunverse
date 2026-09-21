@@ -1,6 +1,10 @@
 # Vision Snapshot — arah UI/UX baru (video referensi)
 
-**Diambil:** 2026-09-21 · Chromium headless 960×540 (swiftshader) · `?dev=1`
+**Diambil ulang:** 2026-09-21 · Chromium headless 960×540 (swiftshader) · `?dev=1`
+**Pass ini menyertakan ZOOM-OUT kamera** (`shape.cameraZoom` 0,84–0,95 → 0,62–0,70)
+sesuai referensi owner `ARENA_ZOOM_OUT_REFERENCE_.png` (commit `8acc8c5`): arena harus
+terbaca sebagai STRUKTUR ORGAN yang utuh (siluet chamber + cincin scute + jaringan sisik),
+bukan lorong rapat. Guard kamera diperbarui di `tools/verify-world.mjs` (rentang 0,55–0,75).
 **Cara regenerasi:** lihat header `scripts/e2e-vision-snapshot.mjs`.
 Ringkasnya:
 
