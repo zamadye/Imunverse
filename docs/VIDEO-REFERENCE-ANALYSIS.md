@@ -168,7 +168,15 @@ dock menu. Sangat menahan diri.
 > ber-spesifikasi UI-lama/aset-tercabut di-gate SKIP (`PHAGOS_UI_RESET=0` /
 > `PHAGOS_STRICT_ASSETS=1` memaksa keras).
 > **BELUM:** langkah 6 (hazard cincin magenta + roset landak — butuh renderer musuh
-> prosedural) dan screenshot browser nyata (Playwright belum terpasang di sandbox).
+> prosedural).
+> ✅ **Vision snapshot browser nyata SUDAH** (pass berikutnya): Chromium headless lewat
+> `playwright-core` + `@sparticuz/chromium`, before (`d3242b6`) vs after (HEAD), tersimpan
+> di `docs/vision-snapshot/` (compare + after, ~1,1 MB). Screenshot pilot lama
+> `docs/pilot-jantung/` & `tools/mutation-art/CONTACT-SHEET.png` **dihapus** pada pass
+> yang sama karena mengarah ke arah visual yang dibatalkan.
+> ➕ Perbaikan siluet hasil inspect snapshot: renderer rig kini punya faktor **reach**
+> data-driven (`limbs.len`) supaya kaki menjulur spindly; kontinuitas putaran 360° tetap
+> lolos verify-prototype.
 
 1. **Palet & cahaya dulu** (`data/arenas.json`): ganti model warna jadi
    *interior amber backlit* + *jaringan luar biru/crimson/violet per organ*;

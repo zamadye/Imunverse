@@ -1,5 +1,12 @@
 # PHAGOS — Laporan PILOT: Arena "Organ Ascent" (Bilik Jantung) + Character "Abstract Bio-Form" (Mako)
 
+> **CATATAN UI-RESET (2026-09-21):** seluruh screenshot di `docs/pilot-jantung/`
+> **sudah dihapus** bersama arah pixel-art/"Last Asylum" yang dibatalkan owner lewat
+> video referensi. Tautan gambar di dokumen ini karena itu tidak lagi menunjuk ke
+> berkas. Penggantinya — snapshot arah BARU (before/after) — ada di
+> `docs/vision-snapshot/` (lihat `docs/VIDEO-REFERENCE-ANALYSIS.md`).
+> Isi laporan teknis di bawah dipertahankan sebagai riwayat keputusan.
+
 **Status:** pilot divalidasi owner → **SUDAH DI-SCALE** (lihat §7). Bagian §1–§6 = laporan pilot asli.
 **Rujukan mandat:** `docs/ARENA-CHARACTER-REDESIGN-STRATEGY.md` (§5, §6, §8) dan
 `docs/AGENT-KICKOFF-ARENA-CHARACTER.md`.

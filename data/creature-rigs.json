@@ -7,7 +7,7 @@
     "catatan": "radius dalam satuan badan (1.0 = lebar penuh sprite)",
     "color": "#4f8a62",
     "radius": 0.42,
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "wobble": {
      "amp": 0.03,
      "lobes": 7,
@@ -37,10 +37,10 @@
    },
    "limbs": {
     "catatan": "mount = sudut pangkal (rad, 0 = depan). duty = porsi siklus menapak; lift = tinggi ayun.",
-    "color": "#5c9873",
+    "color": "#1d6b60",
     "count": 6,
     "duty": 0.62,
-    "len": 1.05,
+    "len": 0.825,
     "lift": 0.221,
     "mount": [
      -2.55,
@@ -67,14 +67,14 @@
      1
     ],
     "taper": 0.16,
-    "thick": 0.058,
-    "tip": "#ffffff"
+    "thick": 0.067,
+    "tip": "#c9fff0"
    },
    "nucleus": {
     "bob": 0.018,
-    "color": "#f2fffa",
+    "color": "#e6fff2",
     "r": 0.218,
-    "rim": "#ffffff",
+    "rim": "#cfffe9",
     "x": 0,
     "y": -0.05
    },
@@ -9949,7 +9949,7 @@
    "body": {
     "color": "#c47a20",
     "belly": "#8c5a10",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.403,
     "wobble": {
      "lobes": 5,
@@ -9974,11 +9974,11 @@
    },
    "limbs": {
     "count": 4,
-    "len": 1.085,
-    "thick": 0.044,
+    "len": 0.843,
+    "thick": 0.051,
     "taper": 0.11,
-    "color": "#d49030",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.58,
     "lift": 0.26,
     "mount": [
@@ -10002,8 +10002,8 @@
     "catatan": "dendrit panjang bercabang — lebih sedikit tapi menjangkau jauh"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.196,
     "x": 0,
     "y": -0.04,
@@ -17956,7 +17956,7 @@
    "body": {
     "color": "#2c6e99",
     "belly": "#1a4a6b",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.386,
     "wobble": {
      "lobes": 8,
@@ -17973,11 +17973,11 @@
    },
    "limbs": {
     "count": 8,
-    "len": 0.9,
-    "thick": 0.052,
+    "len": 0.75,
+    "thick": 0.06,
     "taper": 0.175,
-    "color": "#3580a8",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.65,
     "lift": 0.195,
     "mount": [
@@ -18013,8 +18013,8 @@
     "catatan": "pseudopodia pendek dan banyak — gerakan cepat agresif"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.196,
     "x": 0,
     "y": -0.03,
@@ -29804,7 +29804,7 @@
    "body": {
     "color": "#d94e6a",
     "belly": "#a83050",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.395,
     "wobble": {
      "lobes": 6,
@@ -29821,11 +29821,11 @@
    },
    "limbs": {
     "count": 6,
-    "len": 0.935,
-    "thick": 0.048,
+    "len": 0.768,
+    "thick": 0.055,
     "taper": 0.15,
-    "color": "#cc4060",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.6,
     "lift": 0.234,
     "mount": [
@@ -29855,8 +29855,8 @@
     "catatan": "kaki sedang — gesit tapi tidak secepat neutrofil"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.207,
     "x": 0,
     "y": -0.05,
@@ -39727,7 +39727,7 @@
    "body": {
     "color": "#7b3ea0",
     "belly": "#5a2880",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.42,
     "wobble": {
      "lobes": 7,
@@ -39753,11 +39753,11 @@
    },
    "limbs": {
     "count": 6,
-    "len": 0.957,
-    "thick": 0.056,
+    "len": 0.778,
+    "thick": 0.064,
     "taper": 0.14,
-    "color": "#9050b0",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.6,
     "lift": 0.208,
     "mount": [
@@ -39787,8 +39787,8 @@
     "catatan": "kaki berat — basofil bergerak pelan tapi berdampak besar"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.241,
     "x": 0,
     "y": -0.04,
@@ -49659,7 +49659,7 @@
    "body": {
     "color": "#8c3020",
     "belly": "#602018",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.437,
     "wobble": {
      "lobes": 7,
@@ -49676,11 +49676,11 @@
    },
    "limbs": {
     "count": 6,
-    "len": 0.88,
-    "thick": 0.064,
+    "len": 0.74,
+    "thick": 0.074,
     "taper": 0.15,
-    "color": "#a04030",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.65,
     "lift": 0.182,
     "mount": [
@@ -49710,8 +49710,8 @@
     "catatan": "kaki kokoh pendek — sentinel yang bertahan di posisi"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.196,
     "x": 0,
     "y": -0.03,
@@ -59589,7 +59589,7 @@
    "body": {
     "color": "#0099cc",
     "belly": "#006b8f",
-    "rim": "#eafff8",
+    "rim": "#bff2dc",
     "radius": 0.37,
     "wobble": {
      "lobes": 5,
@@ -59611,11 +59611,11 @@
    },
    "limbs": {
     "count": 4,
-    "len": 0.962,
-    "thick": 0.048,
+    "len": 0.781,
+    "thick": 0.055,
     "taper": 0.125,
-    "color": "#20a0cc",
-    "tip": "#ffffff",
+    "color": "#1d6b60",
+    "tip": "#c9fff0",
     "duty": 0.55,
     "lift": 0.286,
     "mount": [
@@ -59639,8 +59639,8 @@
     "catatan": "kaki sedikit tapi cepat — sel T sitotoksik presisi tinggi"
    },
    "nucleus": {
-    "color": "#f2fffa",
-    "rim": "#ffffff",
+    "color": "#e6fff2",
+    "rim": "#cfffe9",
     "r": 0.253,
     "x": 0,
     "y": -0.06,

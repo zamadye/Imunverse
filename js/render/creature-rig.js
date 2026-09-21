@@ -135,6 +135,10 @@ export function drawCreature(ctx, o) {
   const warnaUjung = limb.tip || '#8fe6c8';
   const thick = limb.thick || 0.14;
   const taper = limb.taper || 0.32;
+  // VIDEO-REFERENCE (2026-09-21): posisi kaki datang dari frame BAKE, jadi panjang
+  // visual kaki dikendalikan faktor reach data-driven: limbs.len (satuan radius badan,
+  // baseline bake 0.6). >1 = kaki menjulur spindly seperti artropoda di video referensi.
+  const reach = Math.max(0.4, (limb.len || 0.6) / 0.6);
 
   ctx.save();
   if (alpha < 1) ctx.globalAlpha = alpha;
@@ -146,7 +150,7 @@ export function drawCreature(ctx, o) {
     const tinggi = Math.max(0, tanah - L.y);           // 0 = menapak
     const jelas = 1 - Math.min(1, tinggi / 0.22);
     if (jelas <= 0.02) continue;
-    const tx = px(L.x, 0), ty = py(L.x, 0) + 0;
+    const tx = px(L.x * reach, 0), ty = py(L.x * reach, 0) + 0;
     ctx.globalAlpha = alpha * 0.22 * jelas;
     ctx.fillStyle = '#08221d';
     ctx.beginPath();
@@ -176,11 +180,13 @@ export function drawCreature(ctx, o) {
     const mDown = bodyCy + R * 0.55 * pose.core.sy;
     const mx = px(mFore, mSide, mDown);
     const my = py(mFore, mSide, mDown);
-    // ujung: tanah + geser mundur/maju sesuai fase langkah
-    const tx = px(L.x, ent.side0 * 0.55);
-    const ty = py(L.x, ent.side0 * 0.55) + (L.y - tanah) * S;
+    // ujung: tanah + geser mundur/maju sesuai fase langkah. Reach HANYA pada sumbu
+    // depan-belakang (L.x) supaya kontinuitas putaran 360° terjaga; sebaran samping
+    // tetap dari bake supaya tidak ada lompatan bentuk saat arah membelok.
+    const tx = px(L.x * reach, ent.side0 * 0.55);
+    const ty = py(L.x * reach, ent.side0 * 0.55) + (L.y - tanah) * S;
     // lutut: melengkung keluar (pseudopodia tidak punya sendi, tapi ada busur)
-    const cFore = (mFore + L.x) * 0.5 + ent.sisi * 0.03;
+    const cFore = (mFore + L.x * reach) * 0.5 + ent.sisi * 0.03;
     const cSide = (mSide + ent.side0 * 0.55) * 0.5 + ent.sisi * 0.05;
     const cDown = (mDown + (L.y - tanah)) * 0.5 - 0.02;
     const cx = px(cFore, cSide, cDown);
