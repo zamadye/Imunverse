@@ -104,6 +104,10 @@ export function buildCorridorShape(def, ox = 0, oy = 0) {
     kind: def.kind === 'branch' ? 'branch' : 'corridor',
     id: def.id || 'corridor',
     height: H, bottomY, topY, cx: ox,
+    // OPEN-WORLD (mandat owner 2026-09-21): arena TANPA batas — persimpangan
+    // antar-cabang harus bisa dilewati, pemain bebas explore maju/samping.
+    // shape kini hanya menjadi STRUKTUR VISUAL + panduan spawn, bukan penjara.
+    open: def.open !== false,
     lanes, lanesAt, nearestLane,
     halfAt, centerAt, tOf,
     bounds: { x: ox, y: (bottomY + topY) / 2, r: Math.hypot(H / 2, extent) },
@@ -116,6 +120,7 @@ export function buildCorridorShape(def, ox = 0, oy = 0) {
 /** Apakah titik di dalam organ (salah satu lajur), dengan margin ke dalam. */
 export function insideShape(shape, x, y, margin = 0) {
   if (!shape) return true;
+  if (shape.open) return true; // OPEN-WORLD: tidak ada konsep "di luar"
   if (y > shape.bottomY - margin || y < shape.topY + margin) return false;
   for (const L of shape.lanesAt(y)) {
     if (y > L.bottomY - margin || y < L.topY + margin) continue;
@@ -131,6 +136,9 @@ export function insideShape(shape, x, y, margin = 0) {
  */
 export function clampToShape(shape, ent, margin = 0) {
   if (!shape || !ent) return false;
+  // OPEN-WORLD (mandat owner): TIDAK ADA clamp — persimpangan antar-cabang
+  // harus lolos, pemain bebas menjelajah maju/samping/berputar.
+  if (shape.open) return false;
   const m = Math.max(0, margin);
   let moved = false;
   const yMax = shape.bottomY - m, yMin = shape.topY + m;
@@ -155,6 +163,7 @@ export function clampToShape(shape, ent, margin = 0) {
 /** Jarak (kasar, positif = di luar) dari titik ke dinding terdekat — untuk kill proyektil. */
 export function outsideDistance(shape, x, y) {
   if (!shape) return -Infinity;
+  if (shape.open) return -Infinity; // OPEN-WORLD: proyektil tidak mati oleh "dinding"
   const yc = Math.max(shape.topY, Math.min(shape.bottomY, y));
   const dy = Math.max(y - shape.bottomY, shape.topY - y, 0);
   let dx = Infinity;
