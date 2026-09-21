@@ -359,13 +359,36 @@ cek('ORGAN ASCENT: keluar jantung → arteri (aliran_darah) dipasang di posisi p
 _jumpToZone(game, 'heart');
 {
   const cam = runS.camera;
-  // OPEN-WORLD establishing shot (mandat owner): awal run kamera menampilkan
-  // SELURUH struktur organ dari jauh (zoom 0,34) sebelum masuk area starter.
-  runS.introT = 0;
+  // SNAP MACRO (mandat owner, bukti "arena full"): awal run kamera auto-fit
+  // SELURUH struktur organ ke layar; target harus == macroFitZoom(shape) & kecil.
+  runS.introT = 0; runS.macroSnapped = false;
   for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
   const establishing = cam.corridorTarget;
-  cek('OPEN-WORLD: establishing shot — awal run kamera lihat seluruh struktur (zoom 0,34)',
-    Math.abs(establishing - 0.34) < 1e-6, `target=${establishing}`);
+  // macro kini mem-fit PETA TUBUH bila body-map.json ada (fallback: koridor zona)
+  const bmDef = API.getData().bodyMap;
+  const fitHarap = bmDef
+    ? cam.macroFitZoom({ height: bmDef.world.h, lanes: [{ topY: 0, bottomY: bmDef.world.h, centerAt: () => bmDef.world.w / 2, halfAt: () => bmDef.world.w / 2 }] })
+    : cam.macroFitZoom(runS.arenaShape);
+  cek('OPEN-WORLD: SNAP MACRO — awal run kamera auto-fit SELURUH struktur/peta (target == macroFitZoom, < 0,2)',
+    Math.abs(establishing - fitHarap) < 1e-6 && establishing < 0.2,
+    `target=${establishing.toFixed(4)} fit=${fitHarap.toFixed(4)} sumber=${bmDef ? 'body-map' : 'koridor'}`);
+  // tombol M: tahan kapan pun → macro lagi, lepas → kembali zoom starter
+  runS.introT = 10;
+  for (let i = 0; i < 90; i++) { game.update && game.update(1 / 60); }
+  const zoomStarter = cam.corridorTarget;
+  game.input.keys.add('map');
+  for (let i = 0; i < 30; i++) { game.update && game.update(1 / 60); }
+  const zoomM = cam.corridorTarget;
+  // hitung pada momen yang sama (peta tubuh bila ada)
+  const fitM = bmDef
+    ? cam.macroFitZoom({ height: bmDef.world.h, lanes: [{ topY: 0, bottomY: bmDef.world.h, centerAt: () => bmDef.world.w / 2, halfAt: () => bmDef.world.w / 2 }] })
+    : cam.macroFitZoom(runS.arenaShape);
+  game.input.keys.delete('map');
+  for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
+  const zoomLepas = cam.corridorTarget;
+  cek('OPEN-WORLD: tahan M = SNAP MACRO kapan pun; lepas → kembali zoom starter',
+    zoomM < 0.2 && Math.abs(zoomM - fitM) < 1e-6 && zoomStarter >= 0.55 && zoomLepas >= 0.55,
+    `starter=${zoomStarter} M=${zoomM.toFixed(4)} fitM=${fitM.toFixed(4)} lepas=${zoomLepas}`);
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
   const diKoridor = cam.corridorTarget;
   _jumpToZone(game, 'artery');
@@ -391,6 +414,42 @@ _jumpToZone(game, 'heart');
   let err = null;
   try { game.ctx = ctx; game.viewW = 400; game.viewH = 300; game.dpr = 1; game.render(16, 3000); } catch (e) { err = e.message; }
   cek('PILOT: render koridor organ berjalan tanpa error & tanpa NaN', !err && nan === 0 && ops > 0, err || `ops=${ops} nan=${nan}`);
+}
+
+// ---------- SNAP MACRO: PETA TUBUH (data/body-map.json + js/render/world-map.js) ----------
+{
+  const def = API.getData().bodyMap;
+  const okData = !!def && Array.isArray(def.organs) && def.organs.length === 9
+    && Array.isArray(def.vessels) && def.vessels.length >= 9
+    && def.anchors && def.anchors.start && def.anchors.goal;
+  cek('WORLD MAP: body-map.json dimuat — 9 chamber organ, ≥9 pembuluh, anchor START/GOAL',
+    okData, def ? `organs=${def.organs.length} vessels=${def.vessels.length} world=${def.world.w}x${def.world.h}` : 'null');
+  let routeOk = false, detail = '';
+  if (def) {
+    const r = def.vessels.find((v) => v.kind === 'route');
+    if (r) {
+      routeOk = r.points.every((p, i) => i === 0 || Math.hypot(p[0] - r.points[i - 1][0], p[1] - r.points[i - 1][1]) < 0.35)
+        && Math.hypot(r.points[0][0] - def.anchors.start.x, r.points[0][1] - def.anchors.start.y) < 0.05
+        && Math.hypot(r.points[r.points.length - 1][0] - def.anchors.goal.x, r.points[r.points.length - 1][1] - def.anchors.goal.y) < 0.08;
+      detail = `route pts=${r.points.length}`;
+    }
+  }
+  cek('WORLD MAP: rute teal START→GOAL kontinu (tanpa lompatan > 0,35)', routeOk, detail);
+  let nan = 0, ops = 0, err = null;
+  const grad = { addColorStop() {} };
+  const base = { canvas: { width: 400, height: 300 }, createLinearGradient: () => grad, createRadialGradient: () => grad, measureText: () => ({ width: 40 }), roundRect() {} };
+  const ctx2 = new Proxy(base, { get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line(Width|Cap|Join|DashOffset)$|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$/.test(p)) return ''; return (t[p] = (...a) => { ops++; for (const v of a) if (typeof v === 'number' && !Number.isFinite(v)) nan++; }); }, set(t, p, v) { t[p] = v; return true; } });
+  try {
+    const { drawWorldMap } = await import('../js/render/world-map.js');
+    const P2 = { w: 400, h: 300, project: (x, y) => ({ x: x * 0.1, y: y * 0.1, s: 0.1 }) };
+    drawWorldMap(ctx2, P2, def, 1.23);
+  } catch (e) { err = e.message; }
+  cek('WORLD MAP: render macro berjalan tanpa error & tanpa NaN', !err && nan === 0 && ops > 0, err || `ops=${ops} nan=${nan}`);
+  runS.worldMapDef = def; runS.introT = 0; runS.macroSnapped = false;
+  for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
+  const tMap = runS.camera.corridorTarget;
+  cek('WORLD MAP: SNAP MACRO auto-fit SELURUH tubuh (target < 0,12)', tMap < 0.12, `target=${tMap.toFixed(4)}`);
+  runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
 }
 
 console.log(JSON.stringify(hasil, null, 2));

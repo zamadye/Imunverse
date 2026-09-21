@@ -25,6 +25,7 @@ const KEY_MAP = {
   KeyA: 'left', ArrowLeft: 'left',
   KeyD: 'right', ArrowRight: 'right',
   Space: 'pulse', KeyK: 'pulse', // PULSE (desktop)
+  KeyB: 'map', // SNAP MACRO: tahan B untuk lihat SELURUH peta tubuh (M sudah untuk mode hero)
 };
 
 const isTypingTarget = (t) =>

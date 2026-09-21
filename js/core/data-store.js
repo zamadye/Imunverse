@@ -30,6 +30,7 @@ const store = {
   modules: null,     // data/modules.json (R3+: flag & config 5 modul combat)
   characterDesigns: null, // data/character-designs.json (Character Agent: equity + mutation visuals)
   membrane: null,    // data/membrane.json (PHAGOS: properti medan membran)
+  bodyMap: null,     // data/body-map.json (SNAP MACRO: peta tubuh seluruh organ)
   mutations: null,   // data/mutations.json (PHAGOS: 18 mutasi bentuk hero)
   enemyMutations: null, // data/enemy-mutations.json (PHAGOS: trait adaptasi patogen)
   audio: null,       // data/audio.json (peta MP3 + volume; CC0)
@@ -76,6 +77,7 @@ export async function loadAllData() {
     modules: 'data/modules.json',
     characterDesigns: 'data/character-designs.json',
     membrane: 'data/membrane.json',
+    bodyMap: 'data/body-map.json',
     mutations: 'data/mutations.json',
     enemyMutations: 'data/enemy-mutations.json',
     audio: 'data/audio.json', // Audio: peta file MP3 + rantai volume (CC0)

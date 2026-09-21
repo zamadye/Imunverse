@@ -235,10 +235,32 @@ export class Camera {
   }
 
   /** PILOT: target zoom koridor (1 = normal; <1 = sedikit menjauh). */
+  /**
+   * Zoom yang memuat SELURUH struktur organ (auto-fit viewport) — bukti nyata
+   * "arena full", bukan klaim: dihitung dari bounding box lajur vs ukuran layar.
+   */
+  macroFitZoom(shape) {
+    if (!shape) return 1;
+    const vw = this.viewW || 960, vh = this.viewH || 540;
+    let minX = Infinity, maxX = -Infinity;
+    for (const L of (shape.lanes || [])) {
+      for (let k = 0; k <= 8; k++) {
+        const y = L.bottomY - (k / 8) * (L.bottomY - L.topY);
+        const c = L.centerAt(y), h = L.halfAt(y);
+        minX = Math.min(minX, c - h); maxX = Math.max(maxX, c + h);
+      }
+    }
+    if (!Number.isFinite(minX) || !Number.isFinite(maxX)) { minX = -500; maxX = 500; }
+    const W = Math.max(200, maxX - minX), H = Math.max(200, shape.height);
+    const s = Math.min(vh / (H * 1.06), vw / (W * 1.06));
+    const base = this.zoom * this.speedScale * this.punchScale * this.zoneScale;
+    return Math.max(0.02, Math.min(1, s / Math.max(1e-6, base)));
+  }
+
   setCorridorZoom(target) {
-    // OPEN-WORLD: rentang dilebarkan ke 0,3 — perlu untuk establishing shot
-    // "seluruh struktur organ" di awal run (mandat owner 2026-09-21).
-    this.corridorTarget = Math.max(0.3, Math.min(1, target == null ? 1 : target));
+    // OPEN-WORLD: rentang dilebarkan ke 0,02 — perlu untuk SNAP MACRO yang
+    // memuat SELURUH struktur organ di layar (mandat owner 2026-09-21).
+    this.corridorTarget = Math.max(0.02, Math.min(1, target == null ? 1 : target));
   }
 
   /** Faktor zoom total (urutan layer: speed → punch → zona → koridor). */
@@ -261,18 +283,22 @@ export class Camera {
    * Billboard (sprite karakter) TIDAK disquash — mereka "berdiri" di ground.
    */
   makeProjector(w, h) {
+    this.viewW = w; this.viewH = h;
     const cam = this;
-    const anchorY = h * THIRD_PERSON.ANCHOR_Y; // player duduk di bawah tengah layar
+    // SNAP MACRO: proyeksi ORTOGRAFIS datar & berpusat — peta tubuh tidak boleh
+    // distorsi perspektif/tilt (bawah membengkak, atas kosong) saat zoom jauh.
+    const flat = !!cam.macroFlat;
+    const anchorY = flat ? h / 2 : h * THIRD_PERSON.ANCHOR_Y; // player duduk di bawah tengah layar
     return {
       w, h,
       anchorY,
       project(wx, wy) {
         const dx = wx - cam.x + cam.shakeX;
         const dy = wy - cam.y + cam.shakeY;
-        let persp = PERSP.F / (PERSP.F - dy * PERSP.K);
-        persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
+        let persp = flat ? 1 : PERSP.F / (PERSP.F - dy * PERSP.K);
+        if (!flat) persp = Math.max(PERSP.MIN, Math.min(PERSP.MAX, persp));
         const s = persp * cam.totalZoom();
-        return { x: w / 2 + dx * s, y: anchorY + dy * s * PERSP.YS, s, persp };
+        return { x: w / 2 + dx * s, y: anchorY + dy * s * (flat ? 1 : PERSP.YS), s, persp };
       },
     };
   }

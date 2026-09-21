@@ -1,6 +1,10 @@
 # Vision Snapshot — arah UI/UX baru (video referensi)
 
 **Diambil ulang:** 2026-09-21 (pass OPEN-WORLD) · Chromium headless 960×540 (swiftshader) · `?dev=1`
+**Pass OPEN-WORLD + SNAP MACRO:** tambahan shot `after-<zona>-macro.jpg` (tahan B:
+peta tubuh SELURUH organ, proyeksi datar auto-fit) & `after-macro-hold.jpg`;
+`compare-macro-vs-reference.jpg` = macro game vs ARENA_ZOOM_OUT_REFERENCE_.png.
+Gerak karakter dipercepat (hero ×2,2; accel 13→22) karena dunia 2,3× lebih besar.
 **Pass OPEN-WORLD:** batas arena dihapus (clamp no-op → persimpangan cabang bisa
 dilewati, pemain bebas explore), struktur organ dibuat PENUH (tinggi 6,0–7,6 rb,
 bercabang/berkelok), zona warna kreatif per organ (`shape.wall.zones`), dan kamera

@@ -105,6 +105,7 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
 import { buildCorridorShape, clampToShape, outsideDistance, shapeDefOf } from '../systems/arena-shape.js';
 import { drawOrganCorridor } from '../render/organ-corridor.js';
+import { drawWorldMap } from '../render/world-map.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
 import { drawNestHint,
   drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
@@ -847,8 +848,11 @@ export const game = {
     const spd01 = Math.max(0, Math.min(1, spd / (maxSpd + 1e-6)));
     const lookX = spd > 4 ? (player.vx / (spd || 1)) : 0;
     const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
-    run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
-    run.camera.setSpeedZoom(spd01);
+    // saat SNAP MACRO aktif, kamera milik peta (pusat tubuh) — bukan follow pemain
+    const macroActiveNow = !!run.arenaShape
+      && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.15);
+    if (!macroActiveNow) run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
+    run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
     run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
@@ -859,10 +863,37 @@ export const game = {
     try {
       const targetZoom = run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1;
       run.introT = (run.introT == null ? 0 : run.introT) + dt;
-      if (run.arenaShape && run.introT < 1.4) {
-        if (run.introT <= dt + 1e-9) run.camera.corridorScale = 0.34; // snap frame pertama
-        run.camera.setCorridorZoom(0.34);
+      // SNAP MACRO (bukti "arena full"): auto-fit SELURUH struktur organ ke layar.
+      // Otomatis ~1,15 dtk pertama run; kapan pun bisa ditahan lewat tombol M.
+      const macroHold = !!(this.input && this.input.keys && this.input.keys.has('map'));
+      if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
+      const macroOn = !!run.arenaShape && (macroHold || run.introT < 1.15);
+      if (macroOn) {
+        // SNAP MACRO ke PETA TUBUH penuh (bila ada) — bukan hanya koridor zona
+        let fit, cxm, cym;
+        if (run.worldMapDef) {
+          const W = run.worldMapDef.world.w, H = run.worldMapDef.world.h;
+          fit = run.camera.macroFitZoom({ height: H, lanes: [{ topY: 0, bottomY: H, centerAt: () => W / 2, halfAt: () => W / 2 }] });
+          cxm = W / 2; cym = H / 2;
+        } else {
+          fit = run.camera.macroFitZoom(run.arenaShape);
+          const midY = (run.arenaShape.topY + run.arenaShape.bottomY) / 2;
+          cxm = run.arenaShape.centerAt(midY); cym = midY;
+        }
+        // snap pada TEPI NAIK macro (intro maupun tekan-B): pusat & zoom langsung
+        const edge = macroOn && !run.macroWasOn;
+        run.macroWasOn = macroOn;
+        if (edge) {
+          run.camera.corridorScale = fit;
+          run.camera.x = cxm; run.camera.y = cym; // snap pusat peta (tanpa delay lerp)
+        }
+        run.camera.macroFlat = true; // proyeksi datar untuk peta
+        run.camera.setCorridorZoom(fit);
+        // pusatkan ke tengah peta supaya SELURUH tubuh masuk bingkai
+        run.camera.follow(cxm, cym, dt, false, 0, 0);
       } else {
+        run.macroWasOn = false; // tepi naik berikutnya akan snap lagi
+        run.camera.macroFlat = false;
         run.camera.setCorridorZoom(targetZoom);
       }
     } catch { /* abaikan */ }
@@ -2400,7 +2431,12 @@ applyChapterTier(enemy, run) {
     drawArena3D(ctx, P, time);
     // PILOT Organ Ascent: dinding organ + serat otot + pembuluh (di atas
     // tekstur tanah, di bawah entitas). Hanya bila arena berbentuk koridor.
-    if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
+    if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
+    const macroView = !!run.worldMapDef && run.camera.corridorScale < 0.25;
+    if (macroView) {
+      // SNAP MACRO: tampilkan PETA TUBUH seluruh organ (referensi owner 8acc8c5)
+      try { drawWorldMap(ctx, P, run.worldMapDef, time); } catch (err) { console.warn('[phagos] worldMap:', err); }
+    } else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
     try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }

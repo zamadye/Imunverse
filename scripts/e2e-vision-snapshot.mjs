@@ -83,11 +83,39 @@ const setup = (ZONE) => page.evaluate((ZONE) => {
   document.querySelectorAll('.hud-hint, #hud-hint, .control-hint').forEach((el) => { el.style.display = 'none'; });
 }, ZONE);
 
+// Headless swiftshader bisa <5 fps → waktu game hampir beku. Majukan simulasi
+// secara DETERMINISTIK lewat game.update, biarkan rAF merender frame terakhir.
+const tick = (n) => page.evaluate((n) => {
+  const g = window.__IMUNVERSE.game;
+  for (let i = 0; i < n; i++) g.update(1 / 60);
+}, n);
+const renderWait = () => page.waitForTimeout(700);
+
 for (const ZONE of ZONES) {
   await setup(ZONE);
   await page.waitForFunction(() => document.querySelector('#screen-hud')?.classList.contains('active'), null, { timeout: 8000 });
-  await page.waitForTimeout(900); // biarkan denyut/chordae/aliran terlihat
+  // BUKTI SNAP MACRO: tahan M (deterministik, tak bergantung fps headless)
+  await page.keyboard.down('KeyB');
+  await tick(25); await renderWait();
+  const dbg = await page.evaluate(() => {
+    const g = window.__IMUNVERSE.game; const r = g.run; const c = r.camera;
+    return { camX: Math.round(c.x), camY: Math.round(c.y), scale: +c.corridorScale.toFixed(4), target: +c.corridorTarget.toFixed(4), introT: +(r.introT || 0).toFixed(2), wasOn: !!r.macroWasOn, wmd: !!r.worldMapDef };
+  });
+  console.log('MACRO_DBG', JSON.stringify(dbg));
+  await page.screenshot({ path: out(`${ZONE}-macro.png`) });
+  await page.keyboard.up('KeyB');
+  await tick(10);
+  // lalu majukan melewati intro + ease → potret gameplay zoom starter
+  await tick(200); await renderWait(); // biarkan denyut/chordae/aliran terlihat
   await page.screenshot({ path: out(`${ZONE}-wide.png`) });
+  if (ZONE === ZONES[0]) {
+    // tahan M kapan pun → SNAP MACRO lagi (bukti kontrol peta penuh)
+    await page.keyboard.down('KeyB');
+    await tick(60); await renderWait();
+    await page.screenshot({ path: out('macro-hold.png') });
+    await page.keyboard.up('KeyB');
+    await tick(20);
+  }
   if (ZONE === ZONES[0]) {
     // crop protagonis 4× (nearest) untuk inspeksi siluet
     const heroBox = await page.evaluate(() => {
