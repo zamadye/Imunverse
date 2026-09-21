@@ -447,6 +447,45 @@ _jumpToZone(game, 'heart');
   runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
 }
 
+// ---------- PILAR 4 SPEC: eritrosit fluid-drag di dalam chamber ----------
+{
+  const er = runS.erythro;
+  cek('PILAR 4: medan eritrosit aktif per chamber (partikel tersebar di dalam arena)',
+    !!er && er.ps.length >= 40, er ? `n=${er.ps.length}` : 'null');
+  let luar = 0;
+  if (er) {
+    for (let i = 0; i < 600; i++) er.update(1 / 60, runS.chamber, { x: 0.4, y: 0.1 }, i / 60);
+    for (const p of er.ps) {
+      const rr = Math.hypot(p.x - runS.chamber.cx, p.y - runS.chamber.cy);
+      if (rr > runS.chamber.radiusAt(Math.atan2(p.y - runS.chamber.cy, p.x - runS.chamber.cx))) luar++;
+    }
+  }
+  cek('PILAR 4: 10 dtk arus + drift zona — SEMUA eritrosit tetap tertahan dinding membran',
+    luar === 0, `${luar}/${er ? er.ps.length : 0} luar`);
+  let lembam = true;
+  if (er) {
+    const p0 = er.ps[0];
+    const v0 = Math.hypot(p0.vx, p0.vy);
+    for (let i = 0; i < 30; i++) er.update(1 / 60, runS.chamber, null, 3 + i / 60);
+    const v1 = Math.hypot(p0.vx, p0.vy);
+    lembam = v1 < 400; // drag cairan membatasi ledakan kecepatan
+  }
+  cek('PILAR 4: fluid drag — kecepatan partikel lembam (terbatas, tidak balistik)', lembam, '');
+}
+
+// ---------- Dolly nudge kamera saat katup terbuka ----------
+{
+  const chN = runS.chamber;
+  runS._doorNudge = { t: 0 };
+  const cx0 = runS.camera.x, cy0 = runS.camera.y;
+  for (let i = 0; i < 34; i++) game.update(1 / 60); // ~0,57 dtk: puncak bump
+  const bergerak = Math.hypot(runS.camera.x - cx0, runS.camera.y - cy0) > 0;
+  for (let i = 0; i < 90; i++) game.update(1 / 60); // selesai: nudge pulih
+  cek('SPEC ARENA: pintu terbuka => dolly nudge kamera ke mulut pintu lalu pulih',
+    bergerak && runS._doorNudge == null, `bergerak=${bergerak} nudge=${runS._doorNudge}`);
+  void chN;
+}
+
 // ---------- HUD ARENA TERTUTUP (spec owner): 5 elemen kanvas ----------
 {
   const texts = [];

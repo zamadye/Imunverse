@@ -68,10 +68,27 @@ Chromium headless + SwiftShader, renderer GL aktif = true)
 
 Reproduksi: `LD_LIBRARY_PATH=/tmp/al2023/lib node tools/shoot-arena.mjs`.
 
-## 5. Sisa pekerjaan (increment berikutnya)
+## 5. Increment 3 — empat pilar visual spec LENGKAP
+
+- **Pilar 2 (bioluminescent lighting)**: tiga titik cahaya teal pengembara
+  mengarungi cincin membran dalam (`body-gl.js`, loop `for i<3` di interior).
+- **Pilar 3 (pulsating perlin UV distortion)**: koordinat tekstur interior
+  `wi = w + (fbm−0.5)·(22+40·u_beat)` — jaringan "bernapas" mengikuti heartbeat.
+- **Pilar 4 (fluid-drag erythrocytes)**: `js/render/erythrocytes.js`
+  (`ErythroFlow`): 84 cakram bikonkaf hanyut oleh medan arus curl-noise +
+  swirl + drift zona, vel di-drag eksponensial (lembam), containment dinding
+  via `radiusAt`; digambar di atas interior, di bawah entitas.
+- **Dolly nudge pintu**: saat `onOpen`, kamera condong 120 px ke mulut pintu
+  dengan ease bump 1,15 s lalu pulih (`run._doorNudge`).
+- Guard baru (`verify-world.mjs`): eritrosit aktif per chamber; 10 dtk arus +
+  drift semua partikel tertahan dinding; kecepatan lembam; nudge bergerak lalu
+  pulih. Suite world/combat/gamefeel/visual/screens: ERROR 0.
+- Bukti: `docs/vision-snapshot/after-chamber-swarm-hud.jpg` (eritrosit merah
+  bikonkaf terlihat hanyut di interior), set snapshot di-regenerate dengan
+  pilar 2–4 aktif (renderer GL = true).
+
+## 6. Sisa pekerjaan (increment berikutnya)
 
 - Chordae strands & penempatan massa per organ di dalam chamber (doc §D lama).
 - Sprite patogen berduri (attire per keluarga musuh) di dalam arena.
-- Transisi kamera "nudge" saat pintu terbuka sudah ada via shake; bisa ditambah
-  dolly singkat ke arah pintu.
 - Bind tap slot E kanvas ke trigger skill untuk layar sentuh (DOM tetap fallback).

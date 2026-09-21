@@ -83,17 +83,32 @@ void main() {
   float doorMask = u_open * smoothstep(0.34, 0.10, da);
 
   // ---- INTERIOR ----
+  // PILAR 3 SPEC: DISTORSI UV PERLIN BERDENYUT — jaringan interior "bernapas"
+  // mengikuti heartbeat (u_beat), bukan w statis.
+  vec2 wi = w + (vec2(fbm(w * 0.008 + vec2(u_time * 0.05, 0.0)),
+                      fbm(w * 0.008 + vec2(0.0, u_time * 0.05))) - 0.5)
+              * (22.0 + 40.0 * u_beat);
   vec3 colIn = mix(u_glowHot, u_fill * 1.10, smoothstep(-150.0, -16.0, d));
-  colIn += 0.12 * fbm(w * 0.006 + vec2(0.0, u_time * 0.03)) * vec3(1.0, 0.75, 0.45);
-  colIn += pow(max(0.0, sin(w.x * 0.018 + fbm(w * 0.004) * 4.0)), 8.0) * 0.16 * vec3(1.0, 0.85, 0.55);
+  colIn += 0.12 * fbm(wi * 0.006 + vec2(0.0, u_time * 0.03)) * vec3(1.0, 0.75, 0.45);
+  colIn += pow(max(0.0, sin(wi.x * 0.018 + fbm(wi * 0.004) * 4.0)), 8.0) * 0.16 * vec3(1.0, 0.85, 0.55);
   float cm = r / max(1.0, radAt(a));
   if (cm < 0.55) {
-    vec3 v = vor(w * 0.052);
+    vec3 v = vor(wi * 0.052);
     vec3 mass = mix(vec3(0.40, 0.23, 0.19), vec3(0.56, 0.35, 0.26), v.y);
     mass *= 0.72 + 0.28 * smoothstep(0.0, 0.14, v.x);
     colIn = mix(colIn, mass, smoothstep(0.52, 0.30, cm) * 0.60);
   }
-  colIn += pow(noise(w * 0.14 - vec2(0.0, u_time * 0.6)), 14.0) * 0.35;   // debu
+  colIn += pow(noise(wi * 0.14 - vec2(0.0, u_time * 0.6)), 14.0) * 0.35;   // debu
+  // PILAR 2 SPEC: BIOLUMINESSENSI pengembara di sepanjang membran dalam —
+  // tiga titik cahaya teal mengarungi cincin, hanya di dalam dinding.
+  for (int i = 0; i < 3; i++) {
+    float fi = float(i);
+    float la = u_time * (0.11 + 0.047 * fi) + fi * 2.094;
+    vec2 lp = u_center + vec2(cos(la), sin(la)) * max(40.0, radAt(la) - 52.0);
+    float ld = length(w - lp);
+    colIn += exp(-pow(ld / 115.0, 2.0)) * vec3(0.30, 1.0, 0.82)
+           * (0.26 + 0.18 * sin(u_time * 2.1 + fi * 2.4)) * (1.0 - step(0.0, d));
+  }
   // LOCKDOWN: nada infeksi gelap merah-oranye
   colIn = mix(colIn, colIn * vec3(1.25, 0.55, 0.35) * 0.75, (1.0 - step(0.5, u_state)) * 0.55);
   // SPORE VENTS menyala saat SWARM

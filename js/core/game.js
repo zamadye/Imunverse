@@ -95,6 +95,7 @@ import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _for
 import { BioChamber } from '../systems/bio-chamber.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
 import { drawArenaHud } from '../ui/hud-arena.js';
+import { ErythroFlow } from '../render/erythrocytes.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
@@ -714,6 +715,9 @@ export const game = {
       const runC = this.run;
       if (runC) {
         this.ensureChamber();
+        if (runC.erythro && runC.chamber) {
+          try { runC.erythro.update(dt, runC.chamber, (runC.journey && runC.journey.drift) || null, runC.time || 0); } catch { /* abaikan */ }
+        }
         if (runC.chamber) {
           runC.chamber.update(dt, runC, {
             onSwarmStart: () => { try { runC.effects.spawnLabel(runC.player.x, runC.player.y - 80, 'SPASME VASKULAR — KATUP TERKUNCI', '#ff8a7a'); } catch { /* abaikan */ } },
@@ -723,6 +727,7 @@ export const game = {
             },
             onOpen: () => {
               try { runC.effects.spawnLabel(runC.player.x, runC.player.y - 80, 'KATUP TERBUKA — LANJUT', '#8df7d2'); } catch { /* abaikan */ }
+              runC._doorNudge = { t: 0 }; // dolly singkat ke arah mulut pintu
               try { _forceAdvance(runC); } catch { /* abaikan */ }
             },
           });
@@ -890,7 +895,19 @@ export const game = {
     const hasWorldView = !!(run.arenaShape || run.bodyWorld || run.chamber || run.worldMapDef);
     const macroActiveNow = hasWorldView
       && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
-    if (!macroActiveNow) run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
+    // dolly nudge saat katup terbuka: kamera condong ke mulut pintu (ease bump)
+    let nudgeX = 0, nudgeY = 0;
+    if (run._doorNudge && run.chamber) {
+      const dn = run._doorNudge;
+      dn.t += dt;
+      if (dn.t > 1.15) run._doorNudge = null;
+      else {
+        const k = Math.sin(Math.min(1, dn.t / 1.15) * Math.PI);
+        nudgeX = Math.cos(run.chamber.doorAngle) * 120 * k;
+        nudgeY = Math.sin(run.chamber.doorAngle) * 120 * k;
+      }
+    }
+    if (!macroActiveNow) run.camera.follow(player.x + nudgeX, player.y + nudgeY, dt, false, lookX, lookY);
     run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
@@ -1922,6 +1939,8 @@ applyChapterTier(enemy, run) {
     runC.chamber = new BioChamber(def, px, py);
     runC.chamber.zoneId = zid;
     runC.chamber.enter();
+    // PILAR 4: medan eritrosit baru mengikuti chamber (fluid drag per arena)
+    try { runC.erythro = new ErythroFlow(); runC.erythro.seed(runC.chamber); } catch { runC.erythro = null; }
     // pemain dipusatkan di arena baru
     if (runC.player) { runC.player.x = runC.chamber.cx; runC.player.y = runC.chamber.cy; runC.player.vx = 0; runC.player.vy = 0; }
     if (this._bodyGL && this._bodyGL.setPalette) { try { this._bodyGL.setPalette(def); } catch { /* abaikan */ } }
@@ -2573,6 +2592,10 @@ applyChapterTier(enemy, run) {
       else { try { drawChamberCanvas(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] chamberCanvas:', err); } }
     }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
+    // PILAR 4 SPEC: eritrosit hanyut fluid-drag di DALAM chamber (di bawah entitas)
+    if (run.erythro && run.chamber && !macroView) {
+      try { run.erythro.draw(ctx, P, run.chamber); } catch { /* abaikan */ }
+    }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
     try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
