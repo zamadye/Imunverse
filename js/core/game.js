@@ -94,6 +94,7 @@ import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } f
 import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _forceAdvance } from '../systems/world-journey.js';
 import { BioChamber } from '../systems/bio-chamber.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
+import { drawArenaHud } from '../ui/hud-arena.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
 import { startMutationCinematic, drawMutationCinematic, cineActive, resetCinematic } from '../systems/mutation-cinematic.js';
@@ -107,7 +108,6 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
 import { buildCorridorShape, clampToShape, outsideDistance, shapeDefOf } from '../systems/arena-shape.js';
 import { buildBodyWorld } from '../systems/body-world.js';
-import { drawBodyMicro } from '../render/body-micro.js';
 import { BodyGL } from '../render/body-gl.js';
 import { drawOrganCorridor } from '../render/organ-corridor.js';
 import { drawWorldMap } from '../render/world-map.js';
@@ -1603,6 +1603,7 @@ applyChapterTier(enemy, run) {
     enemy.visualFamily = enemy.def.visualFamily || enemy.def.family || null;
     if (run.bodyMods && run.bodyMods.enemySpeedMult) enemy.speed *= run.bodyMods.enemySpeedMult;
     run.enemies.push(enemy);
+    if (run.chamber) run.chamber.spawned++;
     run.boss = enemy;
     run.chapterBoss = enemy;
     audio.bossSpawn();
@@ -1747,6 +1748,7 @@ applyChapterTier(enemy, run) {
     // PHAGOS: inject trait strain bermutasi (wave 6/10/14)
     try { enemyMutMaybeApply(run, enemy); } catch { /* abaikan */ }
     run.enemies.push(enemy);
+    if (run.chamber) run.chamber.spawned++;
     if (def.isBoss) {
       run.boss = enemy;
       run.bossHazardT = undefined; // Fase 9: timer genangan di-reset per boss
@@ -2242,6 +2244,7 @@ applyChapterTier(enemy, run) {
           child.visualTier = pathogenVisualTier(run.spawnSys?.wave || 1, child);
           child.visualFamily = child.def.visualFamily || child.def.family || null;
           run.enemies.push(child);
+            if (run.chamber) run.chamber.spawned++;
         }
       }
     }
@@ -2518,7 +2521,24 @@ applyChapterTier(enemy, run) {
     const macroView = !!run.worldMapDef && run.camera.corridorScale < 0.25;
     if (macroView) {
       // SNAP MACRO: tampilkan PETA TUBUH seluruh organ (referensi owner 8acc8c5)
-      try { drawWorldMap(ctx, P, run.worldMapDef, time); } catch (err) { console.warn('[phagos] worldMap:', err); }
+      // MAP = denah navigasi: penanda status per organ (cleared/active/locked)
+      let mapStates = null;
+      try {
+        const jn = run.journey;
+        if (jn) {
+          const route = (getData().zones && getData().zones.route) || [];
+          const arenaOf = (zid) => { const z = route.find((r) => r.id === zid); return z ? z.arenaId : null; };
+          mapStates = {};
+          const visitedArena = new Set((jn.visited || []).map(arenaOf).filter(Boolean));
+          const activeArena = arenaOf(jn.zoneId) || (route[jn.index] && route[jn.index].arenaId);
+          for (const org of (run.worldMapDef && run.worldMapDef.organs) || []) {
+            if (org.id === activeArena) mapStates[org.id] = 'active';
+            else if (visitedArena.has(org.id)) mapStates[org.id] = 'cleared';
+            else mapStates[org.id] = 'locked';
+          }
+        }
+      } catch { mapStates = null; }
+      try { drawWorldMap(ctx, P, run.worldMapDef, time, mapStates); } catch (err) { console.warn('[phagos] worldMap:', err); }
       // HINT on-screen saat macro aktif supaya zoom-out seluruh tubuh TIDAK terlewatkan
       try {
         const macroNow = !!run.arenaShape && ((this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
@@ -2536,11 +2556,14 @@ applyChapterTier(enemy, run) {
           ctx.restore();
         }
       } catch { /* abaikan */ }
-    } else if (run.bodyWorld) {
-      // WEBGL2 SDF dulu (visual production); fallback Canvas 2D bila tak tersedia
+    } else if (run.chamber || run.bodyWorld) {
+      // ARENA TERTUTUP: WEBGL2 SDF radial dulu (production); fallback Canvas 2D
       let gl = this._bodyGL;
       if (gl === undefined) {
-        try { gl = new BodyGL(); if (gl.ok && !gl.setData(run.bodyWorld)) gl.ok = false; } catch (e) { gl = null; }
+        try {
+          gl = new BodyGL();
+          if (gl && gl.ok && run.chamber && gl.setPalette) gl.setPalette(run.chamber.def || null);
+        } catch (e) { gl = null; }
         this._bodyGL = gl;
         run.glActive = !!(gl && gl.ok);
       }
@@ -3212,6 +3235,10 @@ applyChapterTier(enemy, run) {
     cam.drawBossIndicatorIfOffscreen(ctx, run.boss, w, h, time);
     drawNestHint(ctx, run, cam.x, cam.y, w, h, time); // F26: petunjuk arah sarang terdekat
     drawJoystick(ctx, this.input.joystick, this.input.maxRadius, drawImageAt);
+
+    // HUD ARENA TERTUTUP (spec owner): 5 elemen kanvas di atas dunia
+    run._macroNow = macroView;
+    try { drawArenaHud(ctx, P, run, this, time); } catch (err) { if (isDevMode()) console.warn('[phagos] arenaHud:', err); }
 
     // ---- HUD DOM + minimap ----
     if (STATE.screen === 'gameplay' || STATE.screen === 'gameover') {

@@ -49,7 +49,7 @@ function chamberPath(ctx, o, xy, beat, pr) {
  * @param {object} def isi data/body-map.json
  * @param {number} time detik
  */
-export function drawWorldMap(ctx, P, def, time) {
+export function drawWorldMap(ctx, P, def, time, states = null) {
   if (!def) return;
   const xy = makeXY(def);
   const pr = (x, y) => P.project(x, y);
@@ -156,6 +156,47 @@ export function drawWorldMap(ctx, P, def, time) {
     ctx.fill();
     ctx.fillStyle = 'rgba(255,240,244,0.95)';
     ctx.fillText(o.label, lx + fs * 0.6, ly + fs * 1.3);
+    // ---- PENANDA STATUS ARENA (spec owner): MAP = denah navigasi ----
+    // cleared = hijau ✓ | active = cincin teal berdenyut | locked = gembok redup
+    const st = states ? states[o.id] : null;
+    if (st === 'locked') {
+      chamberPath(ctx, o, xy, beat, pr);
+      ctx.fillStyle = 'rgba(16,4,10,0.5)';
+      ctx.fill();
+      const bx = pc.x + o.rx * 2600 * s0 * 0.62, by = pc.y - o.ry * 3600 * s0 * 0.62;
+      const br = Math.max(8, 20 * s0);
+      ctx.strokeStyle = 'rgba(255,120,110,0.75)'; ctx.lineWidth = Math.max(1, 2.4 * s0);
+      ctx.beginPath(); ctx.arc(bx, by - br * 0.35, br * 0.5, Math.PI, 0); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,90,80,0.85)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(bx - br * 0.72, by - br * 0.35, br * 1.44, br * 1.15, br * 0.3);
+      else ctx.rect(bx - br * 0.72, by - br * 0.35, br * 1.44, br * 1.15);
+      ctx.fill();
+    } else if (st === 'cleared') {
+      const bx = pc.x + o.rx * 2600 * s0 * 0.62, by = pc.y - o.ry * 3600 * s0 * 0.62;
+      const br = Math.max(8, 20 * s0);
+      ctx.fillStyle = 'rgba(90,235,170,0.9)';
+      ctx.beginPath(); ctx.arc(bx, by, br * 0.8, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(12,40,28,0.95)'; ctx.lineWidth = Math.max(1.2, br * 0.28);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(bx - br * 0.36, by + br * 0.02);
+      ctx.lineTo(bx - br * 0.08, by + br * 0.32);
+      ctx.lineTo(bx + br * 0.4, by - br * 0.28);
+      ctx.stroke();
+    } else if (st === 'active') {
+      const pr2 = 0.5 + 0.5 * Math.sin(time * 4.5);
+      ctx.strokeStyle = `rgba(90,240,220,${0.55 + 0.4 * pr2})`;
+      ctx.lineWidth = Math.max(1.5, (3 + 2 * pr2) * s0);
+      chamberPath(ctx, o, xy, beat, pr);
+      ctx.stroke();
+      const fs2 = Math.max(10, 15 * s0);
+      ctx.font = `800 ${fs2}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(140,255,235,${0.8 + 0.2 * pr2})`;
+      ctx.fillText('ARENA AKTIF — KATUP TERKUNCI', pc.x, pc.y + o.ry * 3600 * s0 + fs2 * 1.7);
+      ctx.textAlign = 'left';
+    }
   }
 
   // ---------- 4. BADGE START / GOAL ----------

@@ -447,6 +447,59 @@ _jumpToZone(game, 'heart');
   runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
 }
 
+// ---------- HUD ARENA TERTUTUP (spec owner): 5 elemen kanvas ----------
+{
+  const texts = [];
+  let nan = 0, ops = 0, err = null;
+  const grad = { addColorStop() {} };
+  const base = {
+    canvas: { width: 400, height: 300 },
+    createLinearGradient: () => grad, createRadialGradient: () => grad,
+    measureText: () => ({ width: 40 }), roundRect() {},
+    fillText: (t) => { ops++; texts.push(String(t)); },
+  };
+  const ctxH = new Proxy(base, { get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line(Width|Cap|Join|DashOffset)$|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$/.test(p)) return ''; return (t[p] = (...a) => { ops++; for (const v of a) if (typeof v === 'number' && !Number.isFinite(v)) nan++; }); }, set(t, p, v) { t[p] = v; return true; } });
+  try {
+    const { drawArenaHud } = await import('../js/ui/hud-arena.js');
+    const PH = { w: 400, h: 300, project: (x, y) => ({ x: 200 + x * 0.05, y: 150 + y * 0.05, s: 0.05 }) };
+    runS.chamber.spawned = Math.max(runS.chamber.spawned || 0, runS.enemies.length + 2);
+    drawArenaHud(ctxH, PH, runS, game, 4.2);
+  } catch (e) { err = e.message; }
+  const joined = texts.join('|');
+  const lima = ['SPECIMEN BIO-CORE', 'THREAT RADAR', 'Patogen Tersisa', 'VITAL STABILITY', 'Bio-Essence']
+    .every((k) => joined.includes(k));
+  cek('HUD ARENA: 5 elemen spec owner tergambar (A bio-core, B radar+X/Y+katup, C crosshair, D vitals 5-seg+ATP+essence, E slot)',
+    !err && nan === 0 && lima, err || `teks=${texts.length} nan=${nan} labels=[${joined.slice(0, 120)}]`);
+  const gembok = joined.includes('TERKUNCI') || joined.includes('KATUP TERBUKA');
+  cek('HUD ARENA: ikon katup radar mengikuti state chamber (TERKUNCI saat lockdown/swarm, KATUP TERBUKA saat open)',
+    gembok, `state=${runS.chamber.state} label katup ada=${gembok}`);
+}
+
+// ---------- MAP = DENAH: penanda status organ (cleared/active/locked) ----------
+{
+  let nan = 0, opsNo = 0, opsSt = 0, err = null;
+  const grad = { addColorStop() {} };
+  const mk = () => {
+    const base = { canvas: { width: 400, height: 300 }, createLinearGradient: () => grad, createRadialGradient: () => grad, measureText: () => ({ width: 40 }), roundRect() {} };
+    return new Proxy(base, { get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line(Width|Cap|Join|DashOffset)$|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$/.test(p)) return ''; return (t[p] = (...a) => { for (const v of a) if (typeof v === 'number' && !Number.isFinite(v)) nan++; }); }, set(t, p, v) { t[p] = v; return true; } });
+  };
+  try {
+    const { drawWorldMap } = await import('../js/render/world-map.js');
+    const P2 = { w: 400, h: 300, project: (x, y) => ({ x: x * 0.1, y: y * 0.1, s: 0.1 }) };
+    const defM = API.getData().bodyMap;
+    const ctxA = mk(); drawWorldMap(ctxA, P2, defM, 1.0);
+    opsNo = 1;
+    const states = {};
+    for (const o of defM.organs) states[o.id] = 'locked';
+    states[defM.organs[0].id] = 'active';
+    if (defM.organs[1]) states[defM.organs[1].id] = 'cleared';
+    const ctxB = mk(); drawWorldMap(ctxB, P2, defM, 1.0, states);
+    opsSt = 1;
+  } catch (e) { err = e.message; }
+  cek('MAP DENAH: penanda status organ (cleared ✓ / active cincin teal / locked gembok) render tanpa error & NaN',
+    !err && nan === 0 && opsNo > 0 && opsSt > 0, err || `nan=${nan}`);
+}
+
 console.log(JSON.stringify(hasil, null, 2));
 console.log(`\n=== ERROR (${errors.length}) ===`);
 for (const e of errors.slice(0, 15)) console.log('- ' + e);

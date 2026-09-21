@@ -2563,3 +2563,9 @@ img.lock-badge {
   border-radius: var(--pill); background: rgba(255, 253, 244, 0.92); color: var(--ink);
   font: 800 12px/1 var(--font); box-shadow: var(--shadow-card);
 }
+
+/* ERA ARENA TERTUTUP: HUD kanvas 5-elemen (spec owner) menggantikan bar lama
+   yang duplikat — HP & mata uang kini di Vital Stability Monitor kanvas. */
+body.in-run #hp-pill,
+body.in-run #hud-currency,
+body.in-run .rv-bar-wrap { display: none; }

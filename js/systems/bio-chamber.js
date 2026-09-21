@@ -54,6 +54,7 @@ export class BioChamber {
     this.time = 0;
     this.state = 'entry';
     this.t = 0;
+    this.spawned = 0;        // total patogen keluar sejak chamber aktif (radar X/Y)
     this.shock = 0;          // 0..1 gelombang purified
     this.doorAngle = -Math.PI / 2; // arah pintu keluar (menuju rute berikutnya)
     this.openAmt = 0;        // 0 tertutup .. 1 terbuka
