@@ -236,7 +236,9 @@ export class Camera {
 
   /** PILOT: target zoom koridor (1 = normal; <1 = sedikit menjauh). */
   setCorridorZoom(target) {
-    this.corridorTarget = Math.max(0.7, Math.min(1, target == null ? 1 : target));
+    // OPEN-WORLD: rentang dilebarkan ke 0,3 — perlu untuk establishing shot
+    // "seluruh struktur organ" di awal run (mandat owner 2026-09-21).
+    this.corridorTarget = Math.max(0.3, Math.min(1, target == null ? 1 : target));
   }
 
   /** Faktor zoom total (urutan layer: speed → punch → zona → koridor). */

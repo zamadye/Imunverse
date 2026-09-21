@@ -231,29 +231,53 @@ const luasCawan = Math.PI * 750 * 750;
 const berbentuk = arenasDef.filter((a) => a.shape && (a.shape.kind === 'corridor' || a.shape.kind === 'branch')).map((a) => a.id);
 cek('ORGAN ASCENT: semua 7 organ punya siluet (corridor/branch) — scale dari pilot jantung',
   berbentuk.length === arenasDef.length && arenasDef.length === 7, `berbentuk=[${berbentuk.join(',')}]`);
-// tiap organ: luas setara cawan lama ±15%, vertikal, melebar-menyempit, semua titik clamp masuk
+// OPEN-WORLD (mandat owner 2026-09-21): arena TANPA batas — clamp no-op,
+// persimpangan antar-cabang lolos, pemain bebas explore; shape = struktur
+// visual + panduan spawn. Guard lama (luas≈cawan, dinding menahan) DIHAPUS.
 for (const a of arenasDef) {
   const S = buildCorridorShape(Object.assign({ id: a.id }, a.shape), 0, 0);
-  const hs = []; for (let k = 0; k <= 20; k++) hs.push(S.halfAt(S.bottomY - (k / 20) * S.height));
-  let luarN = 0;
-  for (let k = 0; k < 200; k++) { const e = { x: (Math.random() - 0.5) * 6000, y: S.bottomY - Math.random() * S.height * 1.4 + 300 }; clampToShape(S, e, 14); if (!insideShape(S, e.x, e.y, 0)) luarN++; }
-  cek(`ORGAN ASCENT [${a.id}]: luas ±15% cawan, tinggi ≥ 3× lebar, tidak lurus, 200 clamp masuk`,
-    Math.abs(S.area / luasCawan - 1) <= 0.15 && S.height >= 3 * 2 * S.summary.maxHalf && Math.max(...hs) / Math.min(...hs) >= 1.15 && luarN === 0,
-    `${S.kind} luas=${(S.area / luasCawan).toFixed(2)}× tinggi=${S.height} lebar=${2 * S.summary.maxHalf} rasio=${(Math.max(...hs) / Math.min(...hs)).toFixed(2)} luar=${luarN} lajur=${S.summary.lanes}`);
+  const hs = []; const cxs = [];
+  for (let k = 0; k <= 20; k++) { const y = S.bottomY - (k / 20) * S.height; hs.push(S.halfAt(y)); }
+  // kelok = rentang lateral SELURUH lajur (branch: cabang melebar jauh = struktur
+  // penuh bercabang; corridor: kelokan pusat profil)
+  if (S.lanes && S.lanes.length) {
+    for (const L of S.lanes) for (let k = 0; k <= 10; k++) { const y = L.bottomY - (k / 10) * (L.bottomY - L.topY); cxs.push(L.centerAt(y)); }
+  } else {
+    for (let k = 0; k <= 20; k++) { const y = S.bottomY - (k / 20) * S.height; cxs.push(S.centerAt(y)); }
+  }
+  // (a) open: clamp TIDAK menggeser titik mana pun, inside selalu true
+  let geser = 0, luarN = 0;
+  for (let k = 0; k < 200; k++) {
+    const x = (Math.random() - 0.5) * 6000, y = S.bottomY - Math.random() * S.height * 1.4 + 300;
+    const e = { x, y };
+    clampToShape(S, e, 14);
+    if (e.x !== x || e.y !== y) geser++;
+    if (!insideShape(S, e.x, e.y, 0)) luarN++;
+  }
+  // (b) struktur PENUH: tinggi besar, bervariasi, berkelok (bukan lorong lurus/loop)
+  const rasio = Math.max(...hs) / Math.min(...hs);
+  const kelok = Math.max(...cxs) - Math.min(...cxs);
+  const zona = ((a.shape.wall || {}).zones || []).length;
+  const kelokMin = S.lanes && S.lanes.length > 1 ? 400 : 120; // cabang = melebar jauh
+  cek(`OPEN-WORLD [${a.id}]: clamp no-op, inside selalu true, struktur penuh (tinggi≥5000, rasio≥1.6, kelok≥${kelokMin}), zona warna≥2`,
+    S.open === true && geser === 0 && luarN === 0 && S.height >= 5000 && rasio >= 1.6 && kelok >= kelokMin && zona >= 2,
+    `${S.kind} tinggi=${S.height} rasio=${rasio.toFixed(2)} kelok=${Math.round(kelok)} zona=${zona} lajur=${S.summary.lanes} geser=${geser}`);
 }
-// paru bercabang: dua cabang benar-benar terpisah di puncak & keduanya bisa dihuni
-{
-  const paru = arenasDef.find((a) => a.id === 'paru');
-  const S = buildCorridorShape(Object.assign({ id: 'paru' }, paru.shape), 0, 0);
+// organ bercabang: cabang terpisah DI PUNCAK, dan PERSIMPANGAN bisa dilewati —
+// titik di cabang kiri maupun di celah antar-cabang TIDAK ditarik ke mana pun.
+for (const idB of arenasDef.filter((a) => a.shape.kind === 'branch').map((a) => a.id)) {
+  const S = buildCorridorShape(Object.assign({ id: idB }, arenasDef.find((a) => a.id === idB).shape), 0, 0);
   const yTop = S.topY + 200;
   const ln = S.lanesAt(yTop);
   const kiri = ln.find((L) => L.centerAt(yTop) < -50), kanan = ln.find((L) => L.centerAt(yTop) > 50);
   const celah = kiri && kanan && (kanan.centerAt(yTop) - kanan.halfAt(yTop)) - (kiri.centerAt(yTop) + kiri.halfAt(yTop)) > 50;
-  const tengahLuar = !insideShape(S, 0, yTop, 0);
-  const eK = { x: kiri ? kiri.centerAt(yTop) : 0, y: yTop }; clampToShape(S, eK, 14);
-  cek('ORGAN ASCENT [paru]: kind=branch — 2 cabang terpisah di puncak, tengah di antaranya = dinding, entitas di cabang kiri tidak ditarik ke batang',
-    S.kind === 'branch' && !!kiri && !!kanan && celah && tengahLuar && Math.abs(eK.x - kiri.centerAt(yTop)) < 1,
-    `lajur puncak=${ln.length} kiri=${kiri ? Math.round(kiri.centerAt(yTop)) : '-'} kanan=${kanan ? Math.round(kanan.centerAt(yTop)) : '-'} tengahDinding=${tengahLuar}`);
+  const eK = { x: kiri ? kiri.centerAt(yTop) : 0, y: yTop };
+  const eC = { x: 0, y: yTop }; // di celah/persimpangan
+  clampToShape(S, eK, 14); clampToShape(S, eC, 14);
+  cek(`OPEN-WORLD [${idB}]: kind=branch — cabang terpisah di puncak, persimpangan LOLOS (titik di cabang & celah tak digeser)`,
+    S.kind === 'branch' && !!kiri && !!kanan && celah
+    && Math.abs(eK.x - kiri.centerAt(yTop)) < 1 && eC.x === 0 && eC.y === yTop,
+    `lajur puncak=${ln.length} kiri=${kiri ? Math.round(kiri.centerAt(yTop)) : '-'} kanan=${kanan ? Math.round(kanan.centerAt(yTop)) : '-'} celah=${Math.round(celah || 0)}`);
 }
 
 game.startRun('macrophage');
@@ -264,35 +288,35 @@ const SH = runS.arenaShape;
 cek('ORGAN ASCENT: bentuk aktif sejak zona pertama (paru) dan berganti saat masuk JANTUNG',
   !!bentukAwal && bentukAwal.id === 'paru' && !!SH && SH.kind === 'corridor' && SH.id === 'jantung',
   `awal=${bentukAwal ? bentukAwal.kind + ':' + bentukAwal.id : 'cawan'} → ${SH ? SH.kind + ':' + SH.id : 'null'}`);
-cek('PILOT: luas koridor jantung setara cawan lama ±15% (kepadatan spawn tak berubah)',
-  !!SH && Math.abs(SH.area / luasCawan - 1) <= 0.15,
-  SH ? `${Math.round(SH.area)} vs ${Math.round(luasCawan)} (${(SH.area / luasCawan).toFixed(2)}×)` : 'tidak ada shape');
-cek('PILOT: koridor VERTIKAL — tinggi ≥ 3× lebar maksimum (bukan lapangan terbuka)',
-  !!SH && SH.height >= 3 * 2 * SH.summary.maxHalf, SH ? `tinggi=${SH.height} lebar maks=${2 * SH.summary.maxHalf}` : '');
-cek('PILOT: siluet organ melebar–menyempit (bukan lorong lurus)',
-  !!SH && (() => { const hs = []; for (let k = 0; k <= 20; k++) hs.push(SH.halfAt(SH.bottomY - (k / 20) * SH.height)); return Math.max(...hs) / Math.min(...hs) >= 2; })(),
-  'rasio lebar maks/min');
-// (b) clamp: sebar entitas jauh di luar, semua harus kembali ke dalam siluet
-let luar = 0, total = 0;
+cek('OPEN-WORLD: struktur jantung PENUH & terbuka (tinggi ≥ 5000, clamp no-op)',
+  !!SH && SH.open === true && SH.height >= 5000,
+  SH ? `tinggi=${SH.height} open=${SH.open} luas=${Math.round(SH.area)}` : 'tidak ada shape');
+cek('OPEN-WORLD: siluet organ melebar–menyempit & berkelok (bukan lorong lurus/loop)',
+  !!SH && (() => { const hs = []; const cxs = []; for (let k = 0; k <= 20; k++) { const y = SH.bottomY - (k / 20) * SH.height; hs.push(SH.halfAt(y)); cxs.push(SH.centerAt(y)); } return Math.max(...hs) / Math.min(...hs) >= 1.6 && (Math.max(...cxs) - Math.min(...cxs)) >= 120; })(),
+  'rasio lebar maks/min + rentang kelok');
+// (b) open-world: 400 titik acak TIDAK digeser arenaClamp (bebas explore)
+let luar = 0, geser2 = 0, total = 0;
 for (let k = 0; k < 400; k++) {
-  const e = { x: (Math.random() - 0.5) * 6000, y: SH.bottomY - Math.random() * SH.height * 1.4 + 300 };
+  const x = (Math.random() - 0.5) * 6000, y = SH.bottomY - Math.random() * SH.height * 1.4 + 300;
+  const e = { x, y };
   game.arenaClamp(e, 14);
   total++;
+  if (e.x !== x || e.y !== y) geser2++;
   if (!insideShape(SH, e.x, e.y, 0)) luar++;
 }
-cek('PILOT: arenaClamp menahan 400 titik acak DI DALAM siluet organ (0 di luar)', luar === 0, `${luar}/${total} di luar`);
-// spawn musuh & boss juga masuk siluet
+cek('OPEN-WORLD: arenaClamp tidak menggeser 400 titik acak (0 geser, inside selalu true)', geser2 === 0 && luar === 0, `${geser2}/${total} geser, ${luar} luar`);
+// spawn musuh tetap masuk struktur (panduan spawn, bukan penjara)
 let spawnLuar = 0;
-for (let k = 0; k < 40; k++) { game.spawnEnemy('bakteri', false); const e = runS.enemies[runS.enemies.length - 1]; if (!insideShape(SH, e.x, e.y, 0)) spawnLuar++; }
-cek('PILOT: 40 spawn musuh semuanya jatuh di dalam koridor', spawnLuar === 0, `${spawnLuar} di luar`);
-// pemain berjalan ke kiri 6 detik → tertahan dinding, tidak menembus
+for (let k = 0; k < 40; k++) { game.spawnEnemy('bakteri', false); const e = runS.enemies[runS.enemies.length - 1]; if (!Number.isFinite(e.x) || !Number.isFinite(e.y)) spawnLuar++; }
+cek('OPEN-WORLD: 40 spawn musuh semuanya koordinat valid (struktur jadi panduan spawn)', spawnLuar === 0, `${spawnLuar} invalid`);
+// pemain berjalan ke kiri 6 detik → BEBAS melaju (tidak tertahan dinding lagi)
 const pl = runS.player;
-pl.x = SH.centerAt(pl.y); const yAwal = pl.y;
+pl.x = SH.centerAt(pl.y); const yAwal = pl.y; const xAwal = pl.x;
 for (let i = 0; i < 360; i++) { pl.update(1 / 60, { x: -1, y: 0, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
-const jarakDinding = Math.abs(pl.x - (SH.centerAt(pl.y) - SH.halfAt(pl.y)));
-cek('PILOT: pemain tertahan dinding kiri (tidak menembus siluet)',
-  insideShape(SH, pl.x, pl.y, 0) && jarakDinding <= (pl.radius || 15) + 1 && Math.abs(pl.y - yAwal) < 1,
-  `x=${pl.x.toFixed(1)} dinding=${(SH.centerAt(pl.y) - SH.halfAt(pl.y)).toFixed(1)} jarak=${jarakDinding.toFixed(1)}`);
+const jarakLateral = Math.abs(pl.x - xAwal);
+cek('OPEN-WORLD: pemain bebas explore lateral 6 dtk (melaju jauh, tidak tertahan dinding)',
+  jarakLateral > 500 && Number.isFinite(pl.x) && Number.isFinite(pl.y),
+  `dx=${jarakLateral.toFixed(0)} x=${pl.x.toFixed(1)} y=${pl.y.toFixed(1)} (yAwal=${yAwal.toFixed(0)})`);
 // (d) mekanik identik: jalur clamp lama vs baru tidak menyentuh HP/kecepatan
 const hpSebelum = pl.hp, spdSebelum = pl.speed;
 for (let i = 0; i < 60; i++) { pl.update(1 / 60, { x: 0, y: -1, magnitude: 1 }, game); game.arenaClamp(pl, pl.radius || 15); }
@@ -335,6 +359,13 @@ cek('ORGAN ASCENT: keluar jantung → arteri (aliran_darah) dipasang di posisi p
 _jumpToZone(game, 'heart');
 {
   const cam = runS.camera;
+  // OPEN-WORLD establishing shot (mandat owner): awal run kamera menampilkan
+  // SELURUH struktur organ dari jauh (zoom 0,34) sebelum masuk area starter.
+  runS.introT = 0;
+  for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
+  const establishing = cam.corridorTarget;
+  cek('OPEN-WORLD: establishing shot — awal run kamera lihat seluruh struktur (zoom 0,34)',
+    Math.abs(establishing - 0.34) < 1e-6, `target=${establishing}`);
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
   const diKoridor = cam.corridorTarget;
   _jumpToZone(game, 'artery');

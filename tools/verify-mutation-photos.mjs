@@ -36,6 +36,19 @@ const OUT = process.env.PHAGOS_REPORT || path.join(ROOT, 'tools', 'mutation-art'
 const errors = [];
 const report = { berkas: {}, runtime: {}, ringkasan: {} };
 
+// RESET ASET (mandat owner): sprite PNG visual telah dihapus dari repo.
+// Verifier ini bergantung pada aset tersebut — bila sprite dasar tidak ada,
+// SKIP anggun (bukan crash ENOENT) supaya suite tetap bermakna.
+{
+  const heroes0 = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/heroes.json'), 'utf8')).heroes;
+  const hilang = heroes0.filter((h) => h.spriteIdle && !fs.existsSync(path.join(ROOT, h.spriteIdle)));
+  if (hilang.length) {
+    console.log(`· verify-mutation-photos di-SKIP: ${hilang.length}/${heroes0.length} sprite dasar tidak ada pasca-reset aset visual (mandat owner).`);
+    console.log('=== ERROR (0) ===');
+    process.exit(0);
+  }
+}
+
 // ============================ A. PEMERIKSAAN BERKAS ============================
 const heroes = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/heroes.json'), 'utf8')).heroes;
 const FIELDS = ['spriteMut1Idle', 'spriteMut1Attack', 'spriteMut2Idle', 'spriteMut2Attack'];

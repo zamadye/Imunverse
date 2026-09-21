@@ -853,7 +853,19 @@ export const game = {
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
     run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
     // PILOT Organ Ascent: sedikit menjauh saat di koridor organ (dari data shape.cameraZoom)
-    try { run.camera.setCorridorZoom(run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1); } catch { /* abaikan */ }
+    // OPEN-WORLD establishing shot (mandat owner): ~1,4 dtk pertama run menampilkan
+    // SELURUH struktur organ dari jauh (zoom 0,34), lalu kamera meluncur masuk ke
+    // area starter (shape.cameraZoom). Sekali per run — ganti zona tidak mengulang.
+    try {
+      const targetZoom = run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1;
+      run.introT = (run.introT == null ? 0 : run.introT) + dt;
+      if (run.arenaShape && run.introT < 1.4) {
+        if (run.introT <= dt + 1e-9) run.camera.corridorScale = 0.34; // snap frame pertama
+        run.camera.setCorridorZoom(0.34);
+      } else {
+        run.camera.setCorridorZoom(targetZoom);
+      }
+    } catch { /* abaikan */ }
 
     // Tutorial langkah "bergerak": akumulasi jarak pemain
     const mv = this.input.getMoveVector();

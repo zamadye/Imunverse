@@ -1,6 +1,11 @@
 # Vision Snapshot — arah UI/UX baru (video referensi)
 
-**Diambil ulang:** 2026-09-21 · Chromium headless 960×540 (swiftshader) · `?dev=1`
+**Diambil ulang:** 2026-09-21 (pass OPEN-WORLD) · Chromium headless 960×540 (swiftshader) · `?dev=1`
+**Pass OPEN-WORLD:** batas arena dihapus (clamp no-op → persimpangan cabang bisa
+dilewati, pemain bebas explore), struktur organ dibuat PENUH (tinggi 6,0–7,6 rb,
+bercabang/berkelok), zona warna kreatif per organ (`shape.wall.zones`), dan kamera
+membuka run dengan establishing shot seluruh struktur (zoom 0,34) sebelum masuk
+area starter. Pasangan before/after di bawah mencerminkan pass ini.
 **Pass ini menyertakan ZOOM-OUT kamera** (`shape.cameraZoom` 0,84–0,95 → 0,62–0,70)
 sesuai referensi owner `ARENA_ZOOM_OUT_REFERENCE_.png` (commit `8acc8c5`): arena harus
 terbaca sebagai STRUKTUR ORGAN yang utuh (siluet chamber + cincin scute + jaringan sisik),

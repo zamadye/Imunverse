@@ -49,6 +49,44 @@ function deep(base, over) {
   return out;
 }
 
+/**
+ * ZONA WARNA ORGAN (mandat owner: "sekreatif mungkin warna & bentuk tiap organ").
+ * `shape.def.wall.zones` = [{t0,t1, interior:{...}, tissue:{...}, scutes:{...}, ...}]
+ * dengan t = 0 di dasar organ s/d 1 di puncak. Zona menimpa vocabulary default
+ * sebagian saja (deep-merge), sehingga satu arena bisa berganti karakter warna
+ * sepanjang tubuhnya (mis. jantung: bilik crimson -> katup emas -> serambi ungu).
+ */
+function zoneAt(cfg, t) {
+  const zs = cfg.zones;
+  if (!zs || !zs.length) return cfg;
+  for (const z of zs) {
+    if (t >= (z.t0 ?? 0) && t < (z.t1 ?? 1)) {
+      const { t0, t1, ...over } = z; void t0; void t1;
+      return deep(cfg, over);
+    }
+  }
+  return cfg;
+}
+function tOf(shape, y) {
+  if (!shape || !shape.height) return 0.5;
+  return Math.max(0, Math.min(1, (shape.bottomY - y) / shape.height));
+}
+
+/**
+ * OPEN-WORLD: apakah titik dinding (x,y) milik lajur L sebenarnya adalah PINTU
+ * ke lajur lain? Bila ya, dinding TIDAK digambar di situ sehingga persimpangan
+ * terbaca (dan terasa) sebagai bukaan yang bisa dilewati, bukan buntu.
+ */
+function isJunctionOpening(shape, L, x, y) {
+  if (!shape || !shape.lanes) return false;
+  for (const O of shape.lanes) {
+    if (O === L) continue;
+    if (y <= O.topY + 8 || y >= O.bottomY - 8) continue;
+    if (Math.abs(x - O.centerAt(y)) <= O.halfAt(y) - 10) return true;
+  }
+  return false;
+}
+
 let _off = null;
 function offscreen(w, h) {
   if (typeof document === 'undefined') return null;
@@ -62,15 +100,14 @@ function offscreen(w, h) {
  * Sel digambar sebagai blob membulat bertumpuk dengan jitter warna deterministik
  * supaya terbaca seperti sisik/heksagonal organik, bukan pola kotak.
  */
-function drawScaleTissue(g, w, h, cfg, cam, pr) {
+function drawScaleTissue(g, w, h, cfg, cam, pr, shape) {
   const tile = cfg.tissue.scale || 46;
   const a = pr(cam.x, cam.y), b = pr(cam.x + tile, cam.y), c = pr(cam.x, cam.y + tile);
   const sx = (b.x - a.x) / tile, sy = (c.y - a.y) / tile;
   if (!(sx > 0) || !(sy > 0)) return;
   const ox = a.x - cam.x * sx, oy = a.y - cam.y * sy;
   const pw = tile * sx, ph = tile * sy;
-  const [cr, cg, cb] = cfg.tissue.cell.split(',').map(Number);
-  const [lr, lg, lb] = cfg.tissue.cellLight.split(',').map(Number);
+  const [lr0, lg0, lb0] = cfg.tissue.cellLight.split(',').map(Number);
   const x0 = Math.floor((-ox) / pw) - 1, y0 = Math.floor((-oy) / ph) - 1;
   const nx = Math.ceil(w / pw) + 2, ny = Math.ceil(h / ph) + 2;
   for (let j = y0; j < y0 + ny; j++) {
@@ -79,17 +116,23 @@ function drawScaleTissue(g, w, h, cfg, cam, pr) {
       const jx = (j % 2) ? 0.5 : 0;
       const hsh = hash1(i * 3.7 + j * 9.1);
       const hsh2 = hash1(i * 1.3 - j * 5.9);
+      const cx = ox + (i + jx) * pw + pw * 0.5 + (hsh2 - 0.5) * pw * 0.3;
+      const cy = oy + j * ph + ph * 0.5 + (hsh - 0.5) * ph * 0.3;
+      // warna sel mengikuti ZONA organ pada tinggi dunia baris sel ini
+      const worldY = cam.y + (cy - a.y) / sy;
+      const zc = zoneAt(cfg, tOf(shape, worldY));
+      const [cr, cg, cb] = zc.tissue.cell.split(',').map(Number);
+      const [lr, lg, lb] = (zc.tissue.cellLight || cfg.tissue.cellLight).split(',').map(Number);
       const t = 0.35 + hsh * 0.65; // campur cellDark..cellLight
       const mix = (u, v, k) => Math.round(u + (v - u) * k);
       const dr = mix(cr * 0.42, lr, t * 0.8), dg = mix(cg * 0.42, lg, t * 0.8), db = mix(cb * 0.42, lb, t * 0.8);
-      const cx = ox + (i + jx) * pw + pw * 0.5 + (hsh2 - 0.5) * pw * 0.3;
-      const cy = oy + j * ph + ph * 0.5 + (hsh - 0.5) * ph * 0.3;
       const rx = pw * (0.62 + hsh2 * 0.2), ry = ph * (0.5 + hsh * 0.22);
       g.fillStyle = `rgb(${dr},${dg},${db})`;
       g.beginPath(); g.ellipse(cx, cy, rx, ry, (hsh - 0.5) * 0.8, 0, TAU); g.fill();
       // kilau tipis di sisi atas sel (cahaya datang dari dalam rongga)
       g.fillStyle = `rgba(${lr},${lg},${lb},${0.10 + hsh * 0.16})`;
       g.beginPath(); g.ellipse(cx, cy - ry * 0.32, rx * 0.62, ry * 0.34, (hsh - 0.5) * 0.8, 0, TAU); g.fill();
+      void lr0; void lg0; void lb0;
     }
   }
 }
@@ -98,7 +141,7 @@ function drawScaleTissue(g, w, h, cfg, cam, pr) {
  * INTERIOR BACKLIT: gradasi amber menyala mengisi rongga lajur. Terang di
  * tengah/atas, menghangat & menggelap mendekati dinding — persis video.
  */
-function drawBacklitInterior(ctx, cfg, lanes, beat) {
+function drawBacklitInterior(ctx, cfg, lanes, beat, tAtY) {
   const it = cfg.interior;
   for (const e of lanes) {
     const q = e.Lp[Math.floor(e.Lp.length / 2)], r = e.Rp[Math.floor(e.Rp.length / 2)];
@@ -126,6 +169,21 @@ function drawBacklitInterior(ctx, cfg, lanes, beat) {
     for (let i = 0; i < e.Lp.length; i++) ctx.lineTo(e.Lp[i].x, e.Lp[i].y);
     for (let i = e.Rp.length - 1; i >= 0; i--) ctx.lineTo(e.Rp[i].x, e.Rp[i].y);
     ctx.closePath(); ctx.fill();
+    // ZONA ORGAN: pita warna vertikal (t layar -> t organ) supaya satu arena
+    // bisa berganti karakter warna sepanjang tubuhnya (kreativitas per organ).
+    if (tAtY && cfg.zones && cfg.zones.length) {
+      const N = 14;
+      const zg = ctx.createLinearGradient(0, top, 0, bot);
+      for (let k = 0; k <= N; k++) {
+        const zc = zoneAt(cfg, tAtY(top + (bot - top) * (k / N)));
+        zg.addColorStop(k / N, `rgba(${zc.interior.glow},0.30)`);
+      }
+      ctx.fillStyle = zg;
+      ctx.beginPath();
+      for (let i = 0; i < e.Lp.length; i++) ctx.lineTo(e.Lp[i].x, e.Lp[i].y);
+      for (let i = e.Rp.length - 1; i >= 0; i--) ctx.lineTo(e.Rp[i].x, e.Rp[i].y);
+      ctx.closePath(); ctx.fill();
+    }
     void cx; void halfW;
   }
 }
@@ -203,40 +261,66 @@ function drawChordae(ctx, cfg, L, pr, y0, y1, time) {
  * Dinding per sisi: pita membran licin + deret scute merah + kelenjar emas +
  * frill duri. Digambar DI ATAS interior, mengikuti kontur collision persis.
  */
-function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid) {
-  const rb = cfg.ribbon, sc = cfg.scutes;
+function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid, shape, tAtY) {
   const pts = side.map(([x, y]) => pr(x, y));
   if (pts.length < 2) return;
+  const zcAt = (yy) => zoneAt(cfg, tAtY ? tAtY(pr(L.centerAt(yy), yy).y) : 0.5);
 
-  // --- 1. PITA MEMBRAN: stroke tebal licin mengikuti kontur ---
-  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  ctx.strokeStyle = `rgba(${rb.dark},1)`;
-  ctx.lineWidth = Math.max(2, (rb.width + 10) * sMid);
-  ctx.beginPath();
-  for (let i = 0; i < pts.length; i++) (i ? ctx.lineTo(pts[i].x, pts[i].y) : ctx.moveTo(pts[i].x, pts[i].y));
-  ctx.stroke();
-  ctx.strokeStyle = `rgba(${rb.color},1)`;
-  ctx.lineWidth = Math.max(1.5, rb.width * sMid);
-  ctx.beginPath();
-  for (let i = 0; i < pts.length; i++) (i ? ctx.lineTo(pts[i].x, pts[i].y) : ctx.moveTo(pts[i].x, pts[i].y));
-  ctx.stroke();
-  // kilau tipis di sisi dalam pita (cahaya interior memantul)
-  ctx.strokeStyle = `rgba(255,214,150,${0.22 + beat * 0.1})`;
-  ctx.lineWidth = Math.max(1, 3 * sMid);
-  ctx.beginPath();
-  for (let i = 0; i < pts.length; i++) {
-    const q = pr(side[i][0] - dir * rb.width * 0.42, side[i][1]);
-    (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y));
+  // --- OPEN-WORLD: pecah kontur jadi run-run; titik yang sebenarnya PINTU ke
+  //     lajur lain DILUBANGI supaya persimpangan terbaca & terasa bisa dilewati.
+  const runs = [];
+  let cur = [];
+  for (let i = 0; i < side.length; i++) {
+    if (isJunctionOpening(shape, L, side[i][0], side[i][1])) {
+      if (cur.length > 1) runs.push(cur);
+      cur = [];
+    } else cur.push(i);
   }
-  ctx.stroke();
+  if (cur.length > 1) runs.push(cur);
 
-  // --- 2. SCUTE: deret pelat merah menancap di tepi dalam ---
-  const every = Math.max(18, sc.every);
+  const strokeIdx = (idxs, style, wPx, inset) => {
+    if (idxs.length < 2) return;
+    ctx.strokeStyle = style; ctx.lineWidth = Math.max(1, wPx);
+    ctx.beginPath();
+    for (let k = 0; k < idxs.length; k++) {
+      const i = idxs[k];
+      const q = inset ? pr(side[i][0] - dir * inset, side[i][1]) : pts[i];
+      if (k === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    }
+    ctx.stroke();
+  };
+
+  // --- 1. PITA MEMBRAN per run (licin mengikuti kontur) ---
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  for (const run of runs) {
+    const zc = zcAt(side[run[0]][1]);
+    const rb = zc.ribbon;
+    strokeIdx(run, `rgba(${rb.dark},1)`, (rb.width + 10) * sMid, 0);
+    strokeIdx(run, `rgba(${rb.color},1)`, rb.width * sMid, 0);
+    // kilau tipis di sisi dalam pita (cahaya interior memantul)
+    strokeIdx(run, `rgba(255,214,150,${0.22 + beat * 0.1})`, 3 * sMid, rb.width * 0.42);
+    // bibir pintu: tepian run yang bersebelahan lubang diberi kilau lembut
+    // supaya bukaan persimpangan terbaca sebagai portal, bukan patahan.
+    for (const i of [run[0], run[run.length - 1]]) {
+      const p = pts[i];
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 26 * sMid);
+      g.addColorStop(0, `rgba(255,226,168,${0.30 + beat * 0.12})`);
+      g.addColorStop(1, 'rgba(255,226,168,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 26 * sMid, 0, TAU); ctx.fill();
+    }
+  }
+
+  // --- 2. SCUTE: deret pelat menancap di tepi dalam (warna per zona) ---
+  const sc0 = cfg.scutes;
+  const every = Math.max(18, sc0.every);
   const yStart = Math.floor((Math.max(L.topY, y0) - 40) / every) * every;
   for (let y = yStart; y <= Math.min(L.bottomY, y1) + 40; y += every) {
     const yy = Math.max(L.topY, Math.min(L.bottomY, y));
     const c = L.centerAt(yy), hw = L.halfAt(yy);
     const x = c - dir * hw; // tepat di garis collision
+    if (isJunctionOpening(shape, L, x, yy)) continue; // pintu: tanpa scute
+    const sc = zcAt(yy).scutes;
     const p = pr(x, yy);
     const sz = (sc.size * (0.8 + hash1(y * 0.17 + dir) * 0.5)) * p.s;
     const rot = Math.atan2(
@@ -254,7 +338,7 @@ function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid) {
     ctx.restore();
   }
 
-  // --- 3. KELENJAR EMAS: titik menyala tertanam, sesekali ---
+  // --- 3. KELENJAR: titik menyala tertanam, sesekali (warna per zona) ---
   const ge = Math.max(60, cfg.glands.every);
   const gy = Math.floor((Math.max(L.topY, y0) - 60) / ge) * ge;
   for (let y = gy; y <= Math.min(L.bottomY, y1) + 60; y += ge) {
@@ -262,19 +346,21 @@ function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid) {
     if (hsh < 0.4) continue;
     const yy = Math.max(L.topY, Math.min(L.bottomY, y + (hsh - 0.5) * ge * 0.5));
     const c = L.centerAt(yy), hw = L.halfAt(yy);
+    if (isJunctionOpening(shape, L, c - dir * (hw - 4), yy)) continue;
+    const gl = zcAt(yy).glands;
     const p = pr(c - dir * (hw - 4), yy);
-    const sz = (cfg.glands.size * (0.7 + hsh * 0.8)) * p.s;
+    const sz = (gl.size * (0.7 + hsh * 0.8)) * p.s;
     const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz * 2.4);
-    g.addColorStop(0, `rgba(${cfg.glands.glow},${0.85 + beat * 0.1})`);
-    g.addColorStop(0.35, `rgba(${cfg.glands.color},0.6)`);
-    g.addColorStop(1, `rgba(${cfg.glands.color},0)`);
+    g.addColorStop(0, `rgba(${gl.glow},${0.85 + beat * 0.1})`);
+    g.addColorStop(0.35, `rgba(${gl.color},0.6)`);
+    g.addColorStop(1, `rgba(${gl.color},0)`);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(p.x, p.y, sz * 2.4, 0, TAU); ctx.fill();
-    ctx.fillStyle = `rgba(${cfg.glands.glow},0.95)`;
+    ctx.fillStyle = `rgba(${gl.glow},0.95)`;
     ctx.beginPath(); ctx.ellipse(p.x, p.y, sz * 0.62, sz * 0.5, 0, 0, TAU); ctx.fill();
   }
 
-  // --- 4. FRILL: cluster duri merah sesekali ---
+  // --- 4. FRILL: cluster duri sesekali (warna per zona) ---
   const fe = Math.max(60, cfg.frills.every);
   const fy = Math.floor((Math.max(L.topY, y0) - 60) / fe) * fe;
   for (let y = fy; y <= Math.min(L.bottomY, y1) + 60; y += fe) {
@@ -282,12 +368,14 @@ function drawWallBand(ctx, cfg, L, side, dir, pr, y0, y1, beat, sMid) {
     if (hsh < 0.55) continue;
     const yy = Math.max(L.topY, Math.min(L.bottomY, y));
     const c = L.centerAt(yy), hw = L.halfAt(yy);
+    if (isJunctionOpening(shape, L, c - dir * hw, yy)) continue;
+    const fr = zcAt(yy).frills;
     const base = pr(c - dir * hw, yy);
-    ctx.strokeStyle = `rgba(${cfg.frills.color},0.9)`;
+    ctx.strokeStyle = `rgba(${fr.color},0.9)`;
     ctx.lineWidth = Math.max(1, 2.2 * sMid);
     for (let k = 0; k < 4; k++) {
       const ang = (k - 1.5) * 0.34 + (hsh - 0.5);
-      const len = cfg.frills.len * (0.7 + hash1(y + k) * 0.6) * base.s;
+      const len = fr.len * (0.7 + hash1(y + k) * 0.6) * base.s;
       ctx.beginPath();
       ctx.moveTo(base.x, base.y);
       ctx.lineTo(base.x - dir * Math.cos(ang) * len * 0.4, base.y + Math.sin(ang) * len);
@@ -341,6 +429,11 @@ export function drawOrganCorridor(ctx, P, run, time) {
   const step = 36;
   const pr = (x, y) => P.project(x, y);
   const sMid = pr(shape.centerAt((y0 + y1) / 2), (y0 + y1) / 2).s;
+  // peta y-layar -> t organ (0 dasar .. 1 puncak) untuk pewarnaan zona
+  const a0 = pr(cam.x, cam.y);
+  const aC = pr(cam.x, cam.y + 100);
+  const syEff = Math.max(1e-6, (aC.y - a0.y) / 100);
+  const tAtY = (sy) => tOf(shape, cam.y + (sy - a0.y) / syEff);
   const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
   const lanes = shape.lanes.map((L) => {
@@ -370,7 +463,7 @@ export function drawOrganCorridor(ctx, P, run, time) {
     const [dr, dg, db] = cfg.tissue.cellDark.split(',').map(Number);
     g.fillStyle = `rgb(${dr},${dg},${db})`;
     g.fillRect(0, 0, w, h);
-    drawScaleTissue(g, w, h, cfg, cam, pr);
+    drawScaleTissue(g, w, h, cfg, cam, pr, shape);
     // pembuluh tertanam di jaringan (di luar rongga)
     g.save();
     for (const e of lanes) for (const [side, dir] of [[e.poly.left, 1], [e.poly.right, -1]]) {
@@ -410,7 +503,7 @@ export function drawOrganCorridor(ctx, P, run, time) {
     ctx.closePath();
   }
   ctx.clip();
-  drawBacklitInterior(ctx, cfg, lanes, beat);
+  drawBacklitInterior(ctx, cfg, lanes, beat, tAtY);
   for (const e of lanes) drawOrganMasses(ctx, cfg, e.L, pr, y0, y1, time);
   for (const e of lanes) drawChordae(ctx, cfg, e.L, pr, y0, y1, time);
   ctx.restore();
@@ -418,7 +511,7 @@ export function drawOrganCorridor(ctx, P, run, time) {
   // ---------- 3. DINDING: membran + scute + kelenjar + frill ----------
   for (const e of lanes) {
     for (const [side, dir] of [[e.poly.left, 1], [e.poly.right, -1]]) {
-      drawWallBand(ctx, cfg, e.L, side, dir, pr, y0, y1, beat, sMid);
+      drawWallBand(ctx, cfg, e.L, side, dir, pr, y0, y1, beat, sMid, shape, tAtY);
     }
   }
 
