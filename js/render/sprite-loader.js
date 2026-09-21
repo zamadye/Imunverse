@@ -42,6 +42,15 @@ export function collectSpritePaths(data) {
     record(e.spriteIdle, e.color, e.name);
     record(e.spriteAttack, e.color, e.name);
   }
+  // PILOT PX: lantai bertekstur per organ (data/arenas.json → shape.wall.floor)
+  if (data.arenas && Array.isArray(data.arenas.arenas)) {
+    for (const a of data.arenas.arenas) {
+      const f = a.shape && a.shape.wall && a.shape.wall.floor;
+      record(f, '#3a0c12', a.name);
+      record(a.shape && a.shape.wall && a.shape.wall.wallTex, '#3a0c12', a.name);
+      for (const cp of (a.shape && a.shape.wall && a.shape.wall.cordProps) || []) record(cp, '#3a0c12', a.name);
+    }
+  }
   for (const n of data.nutrients.nutrients) {
     record(n.sprite, n.color, n.name);
   }

@@ -125,3 +125,43 @@ Uji: 7 kombinasi penanda **semuanya berbeda** (bukan Mako diwarnai ulang), tanpa
 ### Yang masih terbuka
 - 4 hero tanpa rig (tcd4, treg, bcell, nkcell): perlu dipanggang lewat `npm run bake:creature` (Godot) sebelum bisa ikut — di luar kemampuan sandbox ini.
 - Elemen anatomi masih visual; arus/otot fungsional (mendorong/menghalangi) tetap menunggu keputusan terpisah.
+
+---
+
+## 8. REVISI OWNER — "masih jauh dari standar industri": pilot PIXEL-ART (jantung + Mako + 3 musuh)
+
+Kritik owner: karakter bulat tanpa bentuk, arena "HTML5 polos". Riset referensi
+(Brotato, Death Must Die, Halls of Torment, Hades) → pola industri: **lantai gelap
+bertekstur rendah kontras, sprite terang dengan outline gelap dan siluet
+beranggota (lengan/senjata/kaki), prop bervolume dengan bayangan, FX terang di
+atasnya.** Owner memilih: sprite sheet dibuat di sandbox · gaya pixel-art gelap ·
+pilot ulang 1 arena + Mako + 3 musuh.
+
+### Yang berubah (visual saja — radius/HP/collision/kecepatan tidak disentuh)
+| Elemen | Sebelum | Sesudah |
+|---|---|---|
+| Mako | rig vektor bulat | sprite pixel-art `px/hero_macrophage_{idle,attack}.png` (badan amoeboid berzirah, lengan-rahang fagosit, lengan-perisai membran, 3 kaki; tanpa wajah) |
+| bakteri / virus / parasit | foto kartun bermata | sprite pixel-art (grub berduri berflagela · ikosahedron berkaki injektor · cacing lintah bermulut pengisap); `spriteScale` 1.35 visual saja |
+| lantai jantung | gradasi merah muda terang | tile otot gelap `px/floor_jantung.png` (ruang dunia, ikut kamera) + vignette lateral |
+| dinding | jaringan flat + pita salmon | tile `px/wall_jantung.png` + bayangan 110 unit jatuh ke lantai; pita otot jadi overlay redup |
+| pembuluh | garis neon di atas lantai | selubung gelap + inti redup (terlihat tertanam) |
+| korda | garis tipis | prop bervolume `px/prop_trabecula.png` / `px/prop_clot.png` dengan bayangan, ditempatkan dekat dinding (tengah jalur tetap lega) |
+| medan membran | cakram susu menutupi sprite | cincin tanah bercahaya (isi 0,28×), radius sama |
+| bayangan entitas | 0,13–0,16 kehijauan | 0,28–0,34 hampir hitam |
+
+Semua data-driven: `shape.wall.{floor,floorTile,wallTex,wallTile,cordProps,cordSize}` di
+`data/arenas.json`; organ lain tanpa field ini → tampilan sebelumnya. Pipeline:
+`generate_image` → `tools/key-sprites.mjs` (chroma-key + crop + downscale di Chromium).
+
+![](pilot-jantung/px-arena-wide.png)
+![](pilot-jantung/px-arena-wall.png)
+
+### Verifikasi
+esbuild OK; `animasi / crawl / prototype / world` = **ERROR (0)** (asersi "Mako = makhluk vektor"
+diganti "Mako = sprite px + 3 musuh px + data lantai/dinding/prop jantung"). e2e
+`TAG=px ZONE=heart COMBAT=1`: 0 error browser.
+
+### Belum / berikutnya bila disetujui
+- 8 arah / animasi jalan (saat ini idle+attack + flip, condong, squash — sama seperti sistem lama).
+- Sprite px untuk 10 hero lain + 9 musuh lain, dan tile lantai/dinding 6 organ lain.
+- Kepadatan HUD (bukan bagian pilot ini).

@@ -5,9 +5,9 @@
       "id": "bakteri",
       "name": "Bakteri",
       "description": "Patogen dasar pengejar. Bergerak lurus menuju sel imun terdekat.",
-      "sprite": "assets/sprites/enemy_bakteri.png",
-      "spriteIdle": "assets/sprites/enemy_bakteri.png",
-      "spriteAttack": "assets/sprites/enemy_bakteri.png",
+      "sprite": "assets/sprites/px/enemy_bakteri.png",
+      "spriteIdle": "assets/sprites/px/enemy_bakteri.png",
+      "spriteAttack": "assets/sprites/px/enemy_bakteri.png",
       "color": "#ff6b6b",
       "behavior": "chase_direct",
       "baseHP": 20,
@@ -23,7 +23,8 @@
       "mutationVisualRef": "character-designs.pathogens.enemyMap.bakteri",
       "archetype": "swarm",
       "archetypeSecondary": null,
-      "archetypeReason": "HP 20, lambat, jumlah banyak"
+      "archetypeReason": "HP 20, lambat, jumlah banyak",
+      "spriteScale": 1.35
     },
     {
       "id": "bakteri_gp",
@@ -53,9 +54,9 @@
       "id": "virus",
       "name": "Virus Replikasi",
       "description": "Virus berduri yang menginfeksi lalu pecah — membelah diri jadi 2 virion kecil saat hancur.",
-      "sprite": "assets/sprites/enemy_virus.png",
-      "spriteIdle": "assets/sprites/enemy_virus.png",
-      "spriteAttack": "assets/sprites/enemy_virus.png",
+      "sprite": "assets/sprites/px/enemy_virus.png",
+      "spriteIdle": "assets/sprites/px/enemy_virus.png",
+      "spriteAttack": "assets/sprites/px/enemy_virus.png",
       "color": "#9be15d",
       "behavior": "splitter",
       "splitOnDeath": {
@@ -78,7 +79,8 @@
       "mutationVisualRef": "character-designs.pathogens.enemyMap.virus",
       "archetype": "splitter",
       "archetypeSecondary": null,
-      "archetypeReason": "splitOnDeath → virion"
+      "archetypeReason": "splitOnDeath → virion",
+      "spriteScale": 1.35
     },
     {
       "id": "virion",
@@ -109,9 +111,9 @@
       "id": "parasit",
       "name": "Parasit",
       "description": "Parasit berumbai yang bergerak zig-zag menyeberangi aliran darah.",
-      "sprite": "assets/sprites/enemy_parasit.png",
-      "spriteIdle": "assets/sprites/enemy_parasit.png",
-      "spriteAttack": "assets/sprites/enemy_parasit.png",
+      "sprite": "assets/sprites/px/enemy_parasit.png",
+      "spriteIdle": "assets/sprites/px/enemy_parasit.png",
+      "spriteAttack": "assets/sprites/px/enemy_parasit.png",
       "color": "#e15fd0",
       "behavior": "chase_weave",
       "weaveParams": {
@@ -132,7 +134,8 @@
       "mutationVisualRef": "character-designs.pathogens.enemyMap.parasit",
       "archetype": "fast",
       "archetypeSecondary": null,
-      "archetypeReason": "speed 100 tertinggi di kelas reguler"
+      "archetypeReason": "speed 100 tertinggi di kelas reguler",
+      "spriteScale": 1.35
     },
     {
       "id": "spora",

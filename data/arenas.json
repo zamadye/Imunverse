@@ -988,22 +988,34 @@
           }
         ],
         "wall": {
-          "tissue": "96,22,30",
-          "tissueFar": "58,10,16",
-          "muscle": "178,56,66",
-          "muscleLight": "222,120,120",
-          "vessel": "64,88,190",
-          "vesselArt": "232,74,84",
+          "tissue": "38,8,12",
+          "tissueFar": "18,4,8",
+          "muscle": "96,26,34",
+          "muscleLight": "150,60,66",
+          "vessel": "60,70,140",
+          "vesselArt": "170,50,60",
           "flow": "255,190,180",
-          "rim": "255,170,160",
+          "rim": "170,70,70",
           "fiberSpacing": 46,
           "vesselCount": 3,
-          "cordEvery": 260
+          "cordEvery": 230,
+          "floor": "assets/sprites/px/floor_jantung.png",
+          "floorTile": 640,
+          "floorAlpha": 1,
+          "wallTex": "assets/sprites/px/wall_jantung.png",
+          "wallTile": 560,
+          "wallAlpha": 0.92,
+          "cordProps": [
+            "assets/sprites/px/prop_trabecula.png",
+            "assets/sprites/px/prop_clot.png",
+            "assets/sprites/px/prop_clot.png"
+          ],
+          "cordSize": 96
         }
       },
       "palette": {
-        "hex": "#efc2b6",
-        "vignette": "rgba(70,12,18,0.32)",
+        "hex": "#2a0a0e",
+        "vignette": "rgba(0,0,0,0.55)",
         "props": [
           "prop_cell.png",
           "prop_dots.png"
@@ -1011,7 +1023,7 @@
         "cornerWeed": "assets/sprites/deco_weed_big.png",
         "cornerReef": "assets/sprites/deco_reef_big.png",
         "ground": {
-          "shade": "120,45,50",
+          "shade": "30,8,10",
           "features": [
             {
               "type": "blotch",
@@ -1020,7 +1032,7 @@
               "spacing": 380,
               "density": 0.6,
               "size": 70,
-              "alpha": 0.5
+              "alpha": 0.12
             },
             {
               "type": "fold",
@@ -1045,7 +1057,8 @@
               "density": 0.3,
               "size": 60,
               "bubbles": false,
-              "danger": true
+              "danger": true,
+              "alpha": 0.12
             },
             {
               "type": "thread",
@@ -1053,7 +1066,8 @@
               "spacing": 480,
               "density": 0.5,
               "len": 400,
-              "width": 3
+              "width": 3,
+              "alpha": 0.12
             },
             {
               "type": "flowcell",
@@ -1064,7 +1078,7 @@
               "dy": -1,
               "speed": 90,
               "span": 800,
-              "alpha": 0.85
+              "alpha": 0.35
             },
             {
               "type": "flowcell",
@@ -1075,7 +1089,7 @@
               "dy": -1,
               "speed": 90,
               "span": 800,
-              "alpha": 0.8
+              "alpha": 0.35
             },
             {
               "type": "mist",
@@ -1093,7 +1107,7 @@
               "density": 0.5,
               "size": 90,
               "dot": 3,
-              "alpha": 0.5
+              "alpha": 0.12
             }
           ]
         },
@@ -1102,7 +1116,7 @@
           "spacing": 230,
           "size": 26,
           "drift": 10,
-          "opacity": 0.17,
+          "opacity": 0.06,
           "parallax": 0.08,
           "tint": "255,200,190",
           "shade": "140,40,45"

@@ -147,6 +147,22 @@ const metrics2 = await page.evaluate(() => {
 });
 await page.screenshot({ path: out('arena-wall.png') });
 
+// COMBAT: tarik musuh ke pemain lalu Pulse beberapa kali → bukti hit-flash,
+// angka damage, telegraph. (Hanya memindahkan posisi musuh — bukan mekanik baru.)
+if (process.env.COMBAT === '1') {
+  try {
+    await page.evaluate(() => {
+      const r = window.__IMUNVERSE.game.run; const p = r.player; let k = 0;
+      for (const e of r.enemies) { if (!e.alive) continue; const a = (k++ / 8) * Math.PI * 2; e.x = p.x + Math.cos(a) * 70; e.y = p.y + Math.sin(a) * 70; if (k >= 8) break; }
+    });
+    for (let i = 0; i < 3; i++) { await page.keyboard.press('Space'); await page.waitForTimeout(350); }
+    await page.waitForTimeout(120);
+    await page.screenshot({ path: out('arena-combat.png') });
+    const cb = await page.evaluate(() => { const v = window.__IMUNVERSE.game.run.player; return { x: v.x, y: v.y }; });
+    await page.screenshot({ path: out('arena-combat-crop.png'), clip: { x: Math.max(0, VIEW.width / 2 - 220), y: Math.max(0, VIEW.height * 0.62 - 200), width: 440, height: 340 } });
+  } catch (e) { errors.push('combat: ' + e.message); }
+}
+
 // Lab prototipe (3 mode berdampingan) — bukti bentuk hero.
 let labOk = false;
 try {

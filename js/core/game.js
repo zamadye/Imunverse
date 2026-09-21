@@ -2419,7 +2419,7 @@ applyChapterTier(enemy, run) {
     const dropShadow = (x, y, r, alpha = 0.12) => {
       ground(x, y);
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = '#0a3530';
+      ctx.fillStyle = '#05080c';
       ctx.beginPath();
       ctx.ellipse(x, y, r, r, 0, 0, Math.PI * 2); // squash Y via transform ground
       ctx.fill();
@@ -2498,10 +2498,10 @@ applyChapterTier(enemy, run) {
       }
     }
     // Bayangan semua entitas (volume: badan "berdiri" di atas bayangan)
-    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.stealth && !e.stealthExposed ? 0.05 : 0.13);
+    for (const e of run.enemies) if (e.alive) dropShadow(e.x, e.y + e.radius * 0.92, e.radius * 0.85, e.stealth && !e.stealthExposed ? 0.05 : 0.28);
     for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.9, a.radius * 0.8, 0.11);
     if (player.alive) {
-      dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.16);
+      dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.34);
       // Ring tim ala MOBA di bawah hero (warna peran) + aura lembut
       ground(player.x, player.y + player.radius * 0.92);
       ctx.strokeStyle = run.heroDef.roleColor || run.heroDef.color;
@@ -2697,7 +2697,7 @@ applyChapterTier(enemy, run) {
           sqX = 1 + k;
           sqY = Math.max(0.5, 1 - k * 0.85);
         }
-        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667, e.def.orientToMovement ? e.rotation : 0, {
+        drawSprite(ctx, path, e.x, e.y, e.radius * 2.667 * (e.def.spriteScale || 1), e.def.orientToMovement ? e.rotation : 0, {
           // V2 Phase 5: boss enrage = tint merah konstan (drama fase akhir)
           // P6: durasi flash mengikuti TINGKAT dampak (bukan 0.12 rata).
           flash: e.hitFlash > 0 ? Math.min(1, e.hitFlash / (e.flashDur || 0.12)) : (e.enraged ? 0.3 : 0),
@@ -3340,12 +3340,18 @@ applyChapterTier(enemy, run) {
       }
       ctx.closePath();
     };
+    // PILOT PX: medan = CINCIN TANAH (isi nyaris transparan + tepi bercahaya),
+    // bukan cakram susu yang menutupi sprite. Radius/bentuk tidak berubah.
     const fillAndStroke = (lineW) => {
-      ctx.globalAlpha = alpha;
+      ctx.globalAlpha = alpha * 0.28;
       ctx.fill();
-      ctx.globalAlpha = Math.min(1, alpha + 0.25);
-      ctx.lineWidth = lineW;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = Math.min(1, alpha + 0.15);
+      ctx.lineWidth = lineW * 1.6;
+      ctx.shadowColor = color; ctx.shadowBlur = 14;
       ctx.stroke();
+      ctx.restore();
       ctx.globalAlpha = 1;
     };
     const shape = mem.shape;
