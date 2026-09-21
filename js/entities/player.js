@@ -144,6 +144,35 @@ export class Player {
       if (this.facing > Math.PI) this.facing -= Math.PI * 2;
       if (this.facing < -Math.PI) this.facing += Math.PI * 2;
       this.facingVel = dt > 0 ? step / dt : 0;
+      // PILOT PX: arah BADAN (visual) mengejar arah mekanik dengan batas laju
+      // yang sama — mouse-aim boleh memutar `facing` seketika untuk serangan,
+      // tetapi sprite berputar melingkar (arc turn), bukan patah/mirror.
+      if (typeof this.visFacing !== 'number') this.visFacing = this.facing;
+      let dv = this.facing - this.visFacing;
+      while (dv > Math.PI) dv -= Math.PI * 2;
+      while (dv < -Math.PI) dv += Math.PI * 2;
+      const stepV = Math.max(-rate * dt, Math.min(rate * dt, dv));
+      this.visFacing += stepV;
+      if (this.visFacing > Math.PI) this.visFacing -= Math.PI * 2;
+      if (this.visFacing < -Math.PI) this.visFacing += Math.PI * 2;
+      this.visFacingVel = dt > 0 ? stepV / dt : 0;
+      // ---- Secondary lag: rantai pegas 3 segmen di belakang badan ----
+      // (padanan "bone chain jubah": tertahan saat belok, mengepak saat berhenti)
+      if (!this._tail) this._tail = [0, 1, 2].map((i) => ({ x: this.x, y: this.y, vx: 0, vy: 0, i }));
+      {
+        const seg = Math.max(6, this.radius * 0.42);
+        let px = this.x, py = this.y, pa = this.visFacing;
+        for (const t of this._tail) {
+          const tx = px - Math.cos(pa) * seg, ty = py - Math.sin(pa) * seg;
+          const k = 140 - t.i * 25, c = 18; // kekakuan menurun ke ujung → cambukan (lag 2–3 frame, bukan meluncur)
+          t.vx += ((tx - t.x) * k - t.vx * c) * dt;
+          t.vy += ((ty - t.y) * k - t.vy * c) * dt;
+          t.x += t.vx * dt; t.y += t.vy * dt;
+          const dd = Math.hypot(t.x - px, t.y - py), maxD = seg * 1.6;
+          if (dd > maxD) { t.x = px + (t.x - px) * maxD / dd; t.y = py + (t.y - py) * maxD / dd; }
+          pa = Math.atan2(py - t.y, px - t.x); px = t.x; py = t.y;
+        }
+      }
       const targetTurnLean = Math.max(-1, Math.min(1, this.facingVel / rate)) * (turn.leanMax || 0.087);
       const kLean = 1 - Math.exp(-(turn.leanRate || 9) * dt);
       this.turnLean += (targetTurnLean - this.turnLean) * kLean;

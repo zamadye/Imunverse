@@ -14,7 +14,11 @@ import { drawBossIndicator } from './shape-renderer.js';
  * K dinaikkan untuk "behind-the-shoulder look": gradien ukuran depth lebih
  * terasa (obat rasa kaku top-down; referensi user: Raft / Subnautica).
  */
-export const PERSP = { F: 1450, K: 1.7, YS: 0.5, MIN: 0.55, MAX: 2.1 };
+// PILOT PX (brief owner "Last Asylum"): pitch kamera 58° dari horizontal →
+// YS = sin(58°) ≈ 0.85 (dulu 0.5 ≈ 30°, terlalu landai: lantai gepeng, badan
+// terlihat "berbaring"). K diturunkan 1.7 → 1.0 = FOV sempit/telefoto:
+// dinding lorong tidak melengkung di tepi layar, kedalaman tetap terasa.
+export const PERSP = { F: 1450, K: 1.0, YS: 0.85, MIN: 0.62, MAX: 1.7 };
 
 /**
  * THIRD_PERSON — anchor player di 62% tinggi layar (camera "di belakang &

@@ -165,3 +165,22 @@ diganti "Mako = sprite px + 3 musuh px + data lantai/dinding/prop jantung"). e2e
 - 8 arah / animasi jalan (saat ini idle+attack + flip, condong, squash — sama seperti sistem lama).
 - Sprite px untuk 10 hero lain + 9 musuh lain, dan tile lantai/dinding 6 organ lain.
 - Kepadatan HUD (bukan bagian pilot ini).
+
+## 9. Brief owner "Last Asylum: Plague" → kamera 58°, arc-turn, secondary lag
+
+Pemetaan brief 3D ke pipeline Canvas 2.5D kita (mekanik tidak berubah):
+
+| Brief | Implementasi | Nilai |
+|---|---|---|
+| Pitch 58° | `PERSP.YS = sin(58°)` (dulu 0,5 ≈ 30°) | 0,85 |
+| FOV 26–30° telefoto | `PERSP.K` 1,7 → 1,0, klem persp 0,62–1,7 (garis dinding lurus di tepi, kedalaman tetap) | — |
+| SmoothDamp 0,18 s + look-ahead | sudah ada: `FOLLOW_RATE 5.2` (τ≈0,19 s), `LOOK_MAX 120` arah gerak | dipertahankan |
+| Turn speed 720°/s, arc-turn | sudah ada untuk input (`turn.rate` 13 rad/s ≈ 745°/s); **baru**: `visFacing` — badan sprite mengejar `facing` mekanik dengan batas laju sama, sehingga mouse-aim instan (untuk serangan) tidak lagi membuat sprite mirror seketika | 13 rad/s |
+| Stride sync anti-skate | sudah ada: `walkPhase` terkunci jarak (`stride`) | — |
+| Pelvis bob 2× per siklus | bob ±0,14·radius dari `walkPhase·2`, hanya untuk hero sprite px | — |
+| Bone chain jubah (spring) | `player._tail`: 3 segmen pegas (k 140/115/90, c 18, klem 1,6·seg) di lantai di belakang badan; tertahan saat belok, menyusul ~2–3 frame | ukur: jarak ujung 30→7→30 px saat putar balik |
+| Blob shadow | ada (0,34 hampir hitam, tidak ikut rotasi) | — |
+
+**Tidak diimplementasikan (sengaja):** penalti kecepatan 60 % saat belok tajam — itu mengubah mekanik gerak; menunggu persetujuan eksplisit seperti bias spawn.
+
+![](pilot-jantung/cam58-arena.png)

@@ -2502,6 +2502,20 @@ applyChapterTier(enemy, run) {
     for (const a of run.allies) dropShadow(a.x, a.y + a.radius * 0.9, a.radius * 0.8, 0.11);
     if (player.alive) {
       dropShadow(player.x, player.y + player.radius * 0.92, player.radius * 0.9, 0.34);
+      // PILOT PX: ekor sitoplasma berpegas (secondary motion) — di LANTAI, di bawah sprite
+      if (player._tail && player._tail.length) {
+        ground(player.x, player.y);
+        const tl = player._tail;
+        for (let i = tl.length - 1; i >= 0; i--) {
+          const t = tl[i]; const r = player.radius * (0.46 - i * 0.11);
+          ctx.globalAlpha = 0.55 - i * 0.12; ctx.fillStyle = '#0b2f33';
+          ctx.beginPath(); ctx.ellipse(t.x, t.y + player.radius * 0.7, r * 1.15, r * 0.75, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 0.85 - i * 0.2; ctx.fillStyle = i === 0 ? '#2fa69a' : '#1e7c74';
+          ctx.beginPath(); ctx.ellipse(t.x, t.y + player.radius * 0.66, r * 0.8, r * 0.52, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
       // Ring tim ala MOBA di bawah hero (warna peran) + aura lembut
       ground(player.x, player.y + player.radius * 0.92);
       ctx.strokeStyle = run.heroDef.roleColor || run.heroDef.color;
@@ -2539,7 +2553,10 @@ applyChapterTier(enemy, run) {
     // atau rumus cadangannya. game.js hanya MEMAKAI nilai itu supaya tidak
     // pernah ada dua rumus yang tidak sinkron antara update dan render.
     const pAnim = player.anim || { bob: 0, tilt: 0, sx: 1, sy: 1 };
-    const pBob = pAnim.bob || 0;
+    // PILOT PX: sprite berkaki → bob pelvis kecil, 2 puncak per siklus langkah
+    // (rig crawl memaksa bob=0 karena sel tanpa kaki; sprite px punya kaki).
+    const _pxHero = typeof player.heroDef?.spriteIdle === 'string' && player.heroDef.spriteIdle.includes('/px/');
+    const pBob = (pAnim.bob || 0) + (_pxHero ? (player.moveAmt || 0) * ((1 - Math.cos((player.walkPhase || 0) * 2)) / 2) * player.radius * 0.14 : 0);
     bobOf.player = pBob;
     const pLunge = player.attackFlash > 0 ? (player.attackFlash / 0.18) * 7 : (player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 12 : 0);
     const pSwingTilt = player.swing > 0 ? Math.sin((1 - player.swing / 0.22) * Math.PI) * 0.3 : 0;
@@ -2798,7 +2815,7 @@ applyChapterTier(enemy, run) {
           //  · ayunan halus saat berjalan + tebasan saat Pulse.
           //  · gerak vertikal (atas/bawah) jadi squash-stretch halus (sx/sy),
           //    jadi mendekat terasa "membesar" dan menjauh "mengecil".
-          const _rawFlip = typeof player.animFlip === 'number' ? player.animFlip : (Math.cos(player.facing) < 0 ? -1 : 1);
+          const _rawFlip = typeof player.animFlip === 'number' ? player.animFlip : (Math.cos(player.visFacing ?? player.facing) < 0 ? -1 : 1);
           const _sgn = _rawFlip < 0 ? -1 : 1;
           const flip = _sgn * Math.max(0.14, Math.abs(_rawFlip)); // jangan pernah 0 (sprite hilang)
           const _flipAbs = Math.max(0.14, Math.abs(_rawFlip));
