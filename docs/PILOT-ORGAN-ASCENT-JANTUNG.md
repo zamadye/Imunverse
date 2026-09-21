@@ -184,3 +184,13 @@ Pemetaan brief 3D ke pipeline Canvas 2.5D kita (mekanik tidak berubah):
 **Tidak diimplementasikan (sengaja):** penalti kecepatan 60 % saat belok tajam — itu mengubah mekanik gerak; menunggu persetujuan eksplisit seperti bias spawn.
 
 ![](pilot-jantung/cam58-arena.png)
+
+## 10. Animasi jalan Mako (strip 4 frame, terkunci jarak)
+
+- `assets/sprites/px/hero_macrophage_walk.png`: strip 4 frame (kontak–lewat–kontak–lewat), garis bawah disejajarkan oleh `tools/key-sprites.mjs` (`grid:[2,2]`).
+- `drawSprite` kini menerima `{frames, frame}` (crop strip horizontal). Frame = `floor(walkPhase/2π · 4)` — `walkPhase` sudah terkunci ke jarak tempuh (stride), jadi **1 siklus = 2 langkah = 2·stride px**; kaki tidak selip, dan berhenti mendadak = frame membeku (bukan lanjut mengayun).
+- Data: `spriteWalk`, `spriteWalkFrames` di `data/heroes.json` (hero tanpa field ini → perilaku lama).
+- Bukti: montase 6 tangkapan saat berlari ke kanan — frame 0→2→3 mengikuti x 12→151→205, lalu membeku saat tertahan dinding.
+
+![](pilot-jantung/px-walk-strip.png)
+![](pilot-jantung/px-walk-montage.png)

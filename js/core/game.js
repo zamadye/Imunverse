@@ -2847,7 +2847,18 @@ applyChapterTier(enemy, run) {
             billboard(pBody.x, pBody.y, { lift: _lift, flip, tilt, sx, sy, shear });
             // P2: overlay equity lama DICABUT — bentuk evolusi adalah FOTO
             // karakter sendiri (path dipilih dari tahap pohon evolusi di atas).
-            drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+            // PILOT PX: strip jalan (spriteWalk, spriteWalkFrames) — frame dipilih dari
+            // walkPhase TERKUNCI JARAK (1 siklus = 2π = 2 langkah) → kaki tidak selip.
+            const _wk = player.heroDef.spriteWalk;
+            const _wkN = player.heroDef.spriteWalkFrames || 4;
+            const _moving = (player.moveAmt || 0) > 0.35;
+            if (!_attacking && _wk && _moving && hasSprite(_wk)) {
+              const ph = ((player.walkPhase || 0) / (Math.PI * 2)) % 1;
+              const fi = Math.floor(((ph + 1) % 1) * _wkN) % _wkN;
+              drawSprite(ctx, _wk, pBody.x, pBody.y, bodySize, 0, { frames: _wkN, frame: fi });
+            } else {
+              drawSprite(ctx, path, pBody.x, pBody.y, bodySize, 0, {});
+            }
             ctx.restore();
             // mode hibrida: anggota gerak digambar SETELAH foto supaya
             // pseudopodia tampak di sekeliling badan, bukan tertutup foto.

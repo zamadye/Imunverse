@@ -29,6 +29,7 @@ export function collectSpritePaths(data) {
     record(h.sprite, h.color, h.name);
     record(h.spriteIdle, h.color, h.name);
     record(h.spriteAttack, h.color, h.name);
+    record(h.spriteWalk, h.color, h.name); // PILOT PX: strip jalan
     record(h.spritePortrait, h.color, h.name);
     // UI-REBUILD P8: foto bentuk MUTASI per hero (pengganti overlay mut_*.png)
     // mut1 = MUTASI DASAR (tier 1) · mut2 = MUTASI LANJUT (tier 2-3)
@@ -173,9 +174,13 @@ export function getSprite(path) {
 export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   const entry = getSprite(path);
   const img = entry.image;
-  const scale = size / Math.max(entry.width, entry.height);
-  const w = entry.width * scale;
-  const h = entry.height * scale;
+  // PILOT PX: strip horizontal — opts.frames = jumlah frame, opts.frame = indeks.
+  const nF = opts.frames > 1 ? (opts.frames | 0) : 1;
+  const fw = entry.width / nF, fh = entry.height;
+  const fi = nF > 1 ? Math.max(0, Math.min(nF - 1, opts.frame | 0)) : 0;
+  const scale = size / Math.max(fw, fh);
+  const w = fw * scale;
+  const h = fh * scale;
 
   ctx.save();
   ctx.translate(x, y);
@@ -187,7 +192,8 @@ export function drawSprite(ctx, path, x, y, size, rotation = 0, opts = {}) {
   }
   if (opts.alpha !== undefined) ctx.globalAlpha = opts.alpha;
   // sprite dibuat dengan margin — gambar sesuai rasio aslinya
-  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  if (nF > 1) ctx.drawImage(img, fi * fw, 0, fw, fh, -w / 2, -h / 2, w, h);
+  else ctx.drawImage(img, -w / 2, -h / 2, w, h);
 
   // Flash saat kena hit (overlay lingkaran lembut; V2 Phase 5: warna bisa
   // dioverride — merah utk boss enrage)

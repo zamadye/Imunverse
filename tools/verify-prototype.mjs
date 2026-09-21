@@ -48,6 +48,8 @@ cek('6 hero ber-rig bawaan = makhluk abstrak; macrophage + 4 hero tanpa rig = sp
 {
   const mk = API.getData().heroes.heroes.find((h) => h.id === 'macrophage') || {};
   const px = (p) => typeof p === 'string' && p.startsWith('assets/sprites/px/');
+  cek('macrophage: strip jalan px (spriteWalk, 4 frame) terdata',
+    px(mk.spriteWalk) && mk.spriteWalkFrames === 4, `${mk.spriteWalk} ×${mk.spriteWalkFrames}`);
   cek('macrophage: spriteIdle/spriteAttack menunjuk ke sprite pixel-art px/ (bukan foto lama)',
     px(mk.spriteIdle) && px(mk.spriteAttack) && mk.spriteIdle !== mk.spriteAttack, `${mk.spriteIdle} | ${mk.spriteAttack}`);
   const ens = API.getData().enemies.enemies;

@@ -10,6 +10,8 @@
       "sprite": "assets/sprites/px/hero_macrophage_idle.png",
       "spriteIdle": "assets/sprites/px/hero_macrophage_idle.png",
       "spriteAttack": "assets/sprites/px/hero_macrophage_attack.png",
+      "spriteWalk": "assets/sprites/px/hero_macrophage_walk.png",
+      "spriteWalkFrames": 4,
       "color": "#4a7c59",
       "roleColor": "#2ecc71",
       "attackPattern": "ranged_pierce",
