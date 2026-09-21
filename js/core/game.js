@@ -106,6 +106,7 @@ import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
 import { buildCorridorShape, clampToShape, outsideDistance, shapeDefOf } from '../systems/arena-shape.js';
 import { buildBodyWorld } from '../systems/body-world.js';
 import { drawBodyMicro } from '../render/body-micro.js';
+import { BodyGL } from '../render/body-gl.js';
 import { drawOrganCorridor } from '../render/organ-corridor.js';
 import { drawWorldMap } from '../render/world-map.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
@@ -2480,7 +2481,19 @@ applyChapterTier(enemy, run) {
           ctx.restore();
         }
       } catch { /* abaikan */ }
-    } else if (run.bodyWorld) { try { drawBodyMicro(ctx, P, run.bodyWorld, time); } catch (err) { console.warn('[phagos] bodyMicro:', err); } }
+    } else if (run.bodyWorld) {
+      // WEBGL2 SDF dulu (visual production); fallback Canvas 2D bila tak tersedia
+      let gl = this._bodyGL;
+      if (gl === undefined) {
+        try { gl = new BodyGL(); if (gl.ok && !gl.setData(run.bodyWorld)) gl.ok = false; } catch (e) { gl = null; }
+        this._bodyGL = gl;
+        run.glActive = !!(gl && gl.ok);
+      }
+      let drew = false;
+      if (gl && gl.ok) { try { drew = gl.render(run, P, time); } catch { drew = false; gl.ok = false; } }
+      if (drew) ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
+      else { try { drawBodyMicro(ctx, P, run.bodyWorld, time); } catch (err) { console.warn('[phagos] bodyMicro:', err); } }
+    }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
