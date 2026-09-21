@@ -5,66 +5,9 @@
   "wavesArePacing": true,
   "route": [
     {
-      "id": "lung",
-      "name": "Paru",
-      "order": 1,
-      "arenaId": "paru",
-      "mechanic": "oxygenMucus",
-      "landmark": "Alveolar cluster",
-      "wavesPerZone": 3,
-      "transitionSec": 28,
-      "params": {
-        "oxygenEverySec": 18,
-        "oxygenHeal": 6,
-        "mucusEverySec": 22,
-        "mucusRadius": 95,
-        "mucusDps": 3,
-        "mucusSlow": 0.65
-      },
-      "enemies": [
-        "virus",
-        "bakteri"
-      ]
-    },
-    {
-      "id": "bronchiole",
-      "name": "Bronkiolus",
-      "order": 2,
-      "arenaId": "paru",
-      "mechanic": "narrowPath",
-      "landmark": "Bronchial branch",
-      "wavesPerZone": 3,
-      "transitionSec": 24,
-      "params": {
-        "arenaRadius": 640
-      },
-      "enemies": [
-        "bakteri",
-        "spora"
-      ]
-    },
-    {
-      "id": "alveoli",
-      "name": "Alveoli",
-      "order": 3,
-      "arenaId": "paru",
-      "mechanic": "gasExchange",
-      "landmark": "Alveolar sac field",
-      "wavesPerZone": 3,
-      "transitionSec": 32,
-      "params": {
-        "healEverySec": 20,
-        "healAmount": 5
-      },
-      "enemies": [
-        "spora",
-        "virus"
-      ]
-    },
-    {
       "id": "capillary",
       "name": "Kapiler",
-      "order": 4,
+      "order": 1,
       "arenaId": "kapiler",
       "mechanic": "narrowMovement",
       "landmark": "Capillary mesh",
@@ -75,12 +18,19 @@
       },
       "enemies": [
         "bakteri"
-      ]
+      ],
+      "anchor": {
+        "x": 0.38,
+        "y": 0.1
+      },
+      "homeR": 0.1,
+      "zoom": 0.68,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
     },
     {
       "id": "bloodstream",
       "name": "Aliran Darah",
-      "order": 5,
+      "order": 2,
       "arenaId": "aliran_darah",
       "mechanic": "bloodCurrent",
       "landmark": "Massive blood-cell flow",
@@ -93,51 +43,19 @@
       "enemies": [
         "bakteri",
         "sel_abnormal"
-      ]
-    },
-    {
-      "id": "heart",
-      "name": "Jantung",
-      "order": 6,
-      "arenaId": "jantung",
-      "mechanic": "heartbeatPulse",
-      "landmark": "Heart wall / valve",
-      "wavesPerZone": 3,
-      "transitionSec": 30,
-      "params": {
-        "intervalSec": 3.2,
-        "pushForce": 265,
-        "shake": 0.85,
-        "ringRadius": 240
-      },
-      "enemies": [
-        "sel_abnormal"
       ],
-      "heartEntry": true
-    },
-    {
-      "id": "artery",
-      "name": "Arteri",
-      "order": 7,
-      "arenaId": "aliran_darah",
-      "mechanic": "pressureWave",
-      "landmark": "Arterial pressure gate",
-      "wavesPerZone": 3,
-      "transitionSec": 28,
-      "params": {
-        "intervalSec": 6.5,
-        "pushForce": 300,
-        "ringRadius": 280
+      "anchor": {
+        "x": 0.57,
+        "y": 0.14
       },
-      "enemies": [
-        "sel_abnormal"
-      ],
-      "phase": "P5"
+      "homeR": 0.07,
+      "zoom": 0.7,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
     },
     {
       "id": "tissue",
-      "name": "Jaringan",
-      "order": 8,
+      "name": "Usus Besar",
+      "order": 3,
       "arenaId": "lambung",
       "mechanic": "obstacles",
       "landmark": "Dense cellular structure",
@@ -151,52 +69,19 @@
         "sel_abnormal",
         "parasit"
       ],
-      "phase": "P5"
-    },
-    {
-      "id": "lymphatic",
-      "name": "Saluran Limfe",
-      "order": 9,
-      "arenaId": "limfe",
-      "mechanic": "immuneSignal",
-      "landmark": "Immune signal node",
-      "wavesPerZone": 3,
-      "transitionSec": 26,
-      "params": {
-        "signalEverySec": 18,
-        "buffSec": 8,
-        "riskMult": 1.25
+      "phase": "P5",
+      "anchor": {
+        "x": 0.78,
+        "y": 0.16
       },
-      "enemies": [
-        "prion"
-      ],
-      "riskReward": true,
-      "phase": "P5"
-    },
-    {
-      "id": "lymphNode",
-      "name": "Nodus Limfa",
-      "order": 10,
-      "arenaId": "limfe",
-      "mechanic": "immuneSignal",
-      "landmark": "Lymph node fortress",
-      "wavesPerZone": 3,
-      "transitionSec": 26,
-      "params": {
-        "signalEverySec": 16,
-        "buffSec": 10,
-        "riskMult": 1.3
-      },
-      "enemies": [
-        "prion",
-        "parasit"
-      ],
-      "phase": "P5"
+      "homeR": 0.11,
+      "zoom": 0.64,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
     },
     {
       "id": "infectedTissue",
-      "name": "Jaringan Terinfeksi",
-      "order": 11,
+      "name": "Ginjal",
+      "order": 4,
       "arenaId": "lambung",
       "mechanic": "corruptionField",
       "landmark": "Corrupted tissue bed",
@@ -211,12 +96,19 @@
         "parasit",
         "toksin"
       ],
-      "phase": "P5"
+      "phase": "P5",
+      "anchor": {
+        "x": 0.62,
+        "y": 0.42
+      },
+      "homeR": 0.09,
+      "zoom": 0.66,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
     },
     {
       "id": "tumor",
-      "name": "Tumor",
-      "order": 12,
+      "name": "Pankreas",
+      "order": 5,
       "arenaId": "saraf",
       "mechanic": "growthNodes",
       "landmark": "Massive tumor growth",
@@ -233,7 +125,199 @@
         "toksin"
       ],
       "boss": true,
-      "phase": "P5"
+      "phase": "P5",
+      "anchor": {
+        "x": 0.42,
+        "y": 0.52
+      },
+      "homeR": 0.09,
+      "zoom": 0.66,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "lung",
+      "name": "Paru",
+      "order": 6,
+      "arenaId": "paru",
+      "mechanic": "oxygenMucus",
+      "landmark": "Alveolar cluster",
+      "wavesPerZone": 3,
+      "transitionSec": 28,
+      "params": {
+        "oxygenEverySec": 18,
+        "oxygenHeal": 6,
+        "mucusEverySec": 22,
+        "mucusRadius": 95,
+        "mucusDps": 3,
+        "mucusSlow": 0.65
+      },
+      "enemies": [
+        "virus",
+        "bakteri"
+      ],
+      "anchor": {
+        "x": 0.26,
+        "y": 0.8
+      },
+      "homeR": 0.09,
+      "zoom": 0.62,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "bronchiole",
+      "name": "Bronkiolus",
+      "order": 7,
+      "arenaId": "paru",
+      "mechanic": "narrowPath",
+      "landmark": "Bronchial branch",
+      "wavesPerZone": 3,
+      "transitionSec": 24,
+      "params": {
+        "arenaRadius": 640
+      },
+      "enemies": [
+        "bakteri",
+        "spora"
+      ],
+      "anchor": {
+        "x": 0.26,
+        "y": 0.86
+      },
+      "homeR": 0.08,
+      "zoom": 0.62,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "alveoli",
+      "name": "Alveoli",
+      "order": 8,
+      "arenaId": "paru",
+      "mechanic": "gasExchange",
+      "landmark": "Alveolar sac field",
+      "wavesPerZone": 3,
+      "transitionSec": 32,
+      "params": {
+        "healEverySec": 20,
+        "healAmount": 5
+      },
+      "enemies": [
+        "spora",
+        "virus"
+      ],
+      "anchor": {
+        "x": 0.24,
+        "y": 0.92
+      },
+      "homeR": 0.08,
+      "zoom": 0.62,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "heart",
+      "name": "Jantung",
+      "order": 9,
+      "arenaId": "jantung",
+      "mechanic": "heartbeatPulse",
+      "landmark": "Heart wall / valve",
+      "wavesPerZone": 3,
+      "transitionSec": 30,
+      "params": {
+        "intervalSec": 3.2,
+        "pushForce": 265,
+        "shake": 0.85,
+        "ringRadius": 240
+      },
+      "enemies": [
+        "sel_abnormal"
+      ],
+      "heartEntry": true,
+      "anchor": {
+        "x": 0.55,
+        "y": 0.88
+      },
+      "homeR": 0.09,
+      "zoom": 0.6,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "artery",
+      "name": "Arteri",
+      "order": 10,
+      "arenaId": "aliran_darah",
+      "mechanic": "pressureWave",
+      "landmark": "Arterial pressure gate",
+      "wavesPerZone": 3,
+      "transitionSec": 28,
+      "params": {
+        "intervalSec": 6.5,
+        "pushForce": 300,
+        "ringRadius": 280
+      },
+      "enemies": [
+        "sel_abnormal"
+      ],
+      "phase": "P5",
+      "anchor": {
+        "x": 0.68,
+        "y": 0.92
+      },
+      "homeR": 0.06,
+      "zoom": 0.7,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "lymphatic",
+      "name": "Saluran Limfe",
+      "order": 11,
+      "arenaId": "limfe",
+      "mechanic": "immuneSignal",
+      "landmark": "Immune signal node",
+      "wavesPerZone": 3,
+      "transitionSec": 26,
+      "params": {
+        "signalEverySec": 18,
+        "buffSec": 8,
+        "riskMult": 1.25
+      },
+      "enemies": [
+        "prion"
+      ],
+      "riskReward": true,
+      "phase": "P5",
+      "anchor": {
+        "x": 0.75,
+        "y": 0.91
+      },
+      "homeR": 0.06,
+      "zoom": 0.68,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
+    },
+    {
+      "id": "lymphNode",
+      "name": "Kelenjar Limfa",
+      "order": 12,
+      "arenaId": "limfe",
+      "mechanic": "immuneSignal",
+      "landmark": "Lymph node fortress",
+      "wavesPerZone": 3,
+      "transitionSec": 26,
+      "params": {
+        "signalEverySec": 16,
+        "buffSec": 10,
+        "riskMult": 1.3
+      },
+      "enemies": [
+        "prion",
+        "parasit"
+      ],
+      "phase": "P5",
+      "anchor": {
+        "x": 0.82,
+        "y": 0.9
+      },
+      "homeR": 0.08,
+      "zoom": 0.58,
+      "doc": "MIGRASI DUNIA KONTINU: zona = POSISI pemain di anchor peta tubuh ini."
     }
   ],
   "hudProgress": {

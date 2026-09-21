@@ -36,3 +36,28 @@ rute teal START→GOAL, latar daging ber-vignette, denyut ~68 BPM.
 START→GOAL kontinu, render macro tanpa error/NaN, target macro < 0,12.
 Bukti visual: `docs/vision-snapshot/after-*-macro.jpg`, `after-macro-hold.jpg`,
 dan `compare-macro-vs-reference.jpg` (macro game vs referensi owner).
+
+## MIGRASI DUNIA KONTINU (2026-09-21) — SELESAI
+
+Gameplay mikro tidak lagi koridor per-zona: seluruh run hidup DI DALAM peta
+tubuh sebagai SATU dunia kontinu.
+
+- `js/systems/body-world.js`: geometri union (chamber elips + pembuluh kapsul)
+  + spatial hash; `insideLumen/sdf/reflect/chamberAt/spawnRing/zoneAnchorPx/
+  reachabilityGrid`. Konvensi koordinat sama dengan renderer peta.
+- `js/render/body-micro.js`: renderer gameplay dunia (daging bersel, pembuluh
+  berlapis, chamber backlit berlobus, mulut persimpangan terbuka, vignette).
+- `js/core/game.js`: startRun menempatkan pemain di anchor START; arenaClamp =
+  pantul elastis lumen; proyektil mati di daging; spawn = ring dalam lumen;
+  kamera mikro = `zone.zoom` zona aktif; macro B/intro tetap peta penuh.
+- `js/systems/world-journey.js`: gerbang maju zona = POSISI pemain tiba di
+  anchor zona berikutnya (pace wave & `forceNext` jadi jalur lab/dev).
+- `data/zones.json`: rute disusun ulang menjadi jalur fisik START→GOAL
+  (capillary→…→lymphNode) + `anchor/homeR/zoom/order` per zona.
+- `data/body-map.json`: + chamber KAPILER & SARAF + pembuluh penghubungnya
+  (11 chamber, 12 pembuluh) + `zoom` per organ.
+- Guard `tools/verify-world.mjs`: invariant dunia (BFS satu komponen, pantul
+  elastis 300 titik, zona-posisi, spawn lumen, proyektil daging, mekanik inti
+  tak berubah) — ERROR (0); suite lain hijau.
+- Bukti visual: `docs/vision-snapshot/compare-world-*.jpg` (kiri = koridor
+  per-zona era f483f55, kanan = dunia kontinu) + `after-*-wide.jpg` baru.

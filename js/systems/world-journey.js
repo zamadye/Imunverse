@@ -227,7 +227,16 @@ export function updateJourney(game, dt) {
   const cur = zoneAt(j.index);
   const perZone = num(cur && cur.wavesPerZone, 3);
   if (j.phase === 'combat') {
-    if (j.waveInZone > perZone && j.index < list.length - 1) {
+    // MIGRASI DUNIA KONTINU: zona = POSISI. Gerbang maju = pemain tiba di
+    // anchor zona berikutnya di peta tubuh (pacings wave jadi fallback tanpa
+    // dunia). Tanpa dunia: pacing wave lama tetap berlaku.
+    let posGate = j.waveInZone > perZone || !!j.forceNext;
+    if (run.bodyWorld && !j.forceNext) {
+      const nxtZ = zoneAt(j.index + 1);
+      const ap = nxtZ && run.bodyWorld.zoneAnchorPx(nxtZ);
+      posGate = !!ap && Math.hypot(run.player.x - ap.x, run.player.y - ap.y) <= ap.r;
+    }
+    if (posGate && j.index < list.length - 1) {
       j.phase = 'transition';
       j.t = 0;
       j.blend = 0;
@@ -250,6 +259,7 @@ export function updateJourney(game, dt) {
     if (j.t >= dur) {
       // Komit ke zona baru — landmark muncul, lingkungan berganti penuh.
       j.index = j.nextIndex;
+      j.forceNext = false; // gerbang paksa terpakai sekali
       j.phase = 'combat';
       j.t = 0;
       j.blend = 0;
@@ -446,6 +456,7 @@ export function _forceAdvance(run) {
   const j = run && run.journey;
   if (!j) return null;
   j.waveInZone = num(zoneAt(j.index) && zoneAt(j.index).wavesPerZone, 3) + 1;
+  j.forceNext = true; // gerbang posisi dunia kontinu tetap bisa dipaksa (lab/dev)
   return j;
 }
 

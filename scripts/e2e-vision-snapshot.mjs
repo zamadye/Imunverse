@@ -75,7 +75,14 @@ const setup = (ZONE) => page.evaluate((ZONE) => {
   game.startRun('macrophage');
   const p = game.run.player;
   p.maxHP = 99999; p.hp = 99999; p.iframes = 99999;
-  try { app.world._jumpToZone(game, ZONE); } catch { /* zona awal */ }
+  // MIGRASI DUNIA KONTINU: zona = POSISI organ → potret zona = teleport pemain
+  // ke anchor zona tsb di peta tubuh (kamera & zona mengikuti posisi).
+  try {
+    const zdef = (app.getData().zones.route || []).find((z) => z.id === ZONE);
+    const bw = game.run.bodyWorld;
+    const ap = zdef && bw && bw.zoneAnchorPx(zdef);
+    if (ap) { game.run.player.x = ap.x; game.run.player.y = ap.y; game.run.player.vx = 0; game.run.player.vy = 0; }
+  } catch { /* zona awal */ }
   document.getElementById('tutorial-layer')?.classList.add('hidden');
   // JANGAN remove #hud-hint: resetHUD() masih menulis innerHTML-nya saat runstart.
   // Cukup sembunyikan supaya tidak menutupi arena di snapshot.

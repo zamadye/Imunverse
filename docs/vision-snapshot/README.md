@@ -53,3 +53,7 @@ BASE_URL=http://127.0.0.1:8000/ OUT_DIR=docs/vision-snapshot TAG=after node scri
 - Musuh masih tampil sebagai placeholder ber-inisial (mode dev) karena seluruh sprite
   sengaja dicabut pada reset aset; itu bukan regresi.
 - Pair before/after disimpan sebagai JPG (~1,1 MB total) supaya repo tetap ramping.
+**Pass MIGRASI DUNIA KONTINU (2026-09-21):** gameplay mikro hidup di dalam peta
+tubuh (satu dunia kontinu; zona = posisi organ). `compare-world-*.jpg` = kiri
+koridor per-zona (era f483f55) vs kanan dunia kontinu; `after-*-wide.jpg`
+direkam ulang dari dunia baru lewat teleport anchor zona.

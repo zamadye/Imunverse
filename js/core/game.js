@@ -104,6 +104,8 @@ import { getTodayMutator, mergeMutatorMods, recordLeaderboardEntry } from '../sy
 
 import { Camera, PERSP, ZONE_ZOOM } from '../render/camera.js';
 import { buildCorridorShape, clampToShape, outsideDistance, shapeDefOf } from '../systems/arena-shape.js';
+import { buildBodyWorld } from '../systems/body-world.js';
+import { drawBodyMicro } from '../render/body-micro.js';
 import { drawOrganCorridor } from '../render/organ-corridor.js';
 import { drawWorldMap } from '../render/world-map.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
@@ -333,6 +335,20 @@ export const game = {
     // P4: perjalanan dunia dimulai di zona pertama — lingkungan & musuh
     // mengikuti ZONA, bukan pilihan stage (§21).
     try { initJourney(this.run); } catch (err) { if (isDevMode()) console.warn('[phagos] initJourney:', err); }
+    // MIGRASI DUNIA KONTINU (mandat owner): satu dunia tubuh tunggal; pemain
+    // mulai dari anchor START; koridor per-zona pensiun (arenaShape=null).
+    try {
+      const bwDef = getData().bodyMap || null;
+      this.run.bodyWorld = bwDef ? buildBodyWorld(bwDef) : null;
+      if (this.run.bodyWorld) {
+        const st = this.run.bodyWorld.anchorPx('start');
+        if (st && this.run.player) {
+          this.run.player.x = st.x; this.run.player.y = st.y;
+          this.run.player.vx = 0; this.run.player.vy = 0;
+        }
+        this.run.arenaShape = null; this.run.arenaBounds = null;
+      }
+    } catch (err) { if (isDevMode()) console.warn('[phagos] bodyWorld:', err); }
     try { this.syncArenaShape(); } catch (err) { if (isDevMode()) console.warn('[phagos] syncArenaShape:', err); }
     // P6: batas getar kamera dari data — rentetan dampak boss tetap nyaman.
     try { this.run.camera.setTraumaCap((getGameFeel().camera || {}).traumaCap ?? 1); } catch { /* abaikan */ }
@@ -746,9 +762,9 @@ export const game = {
       for (const h of run.hazards) this.arenaClamp(h, 0);
       const B = run.arenaBounds;
       const SH = run.arenaShape;
-      if (SH) {
-        for (const p of run.projectiles) if (p.alive && outsideDistance(SH, p.x, p.y) > 60) p.alive = false;
-        for (const b of run.ebullets) if (b.alive && outsideDistance(SH, b.x, b.y) > 60) b.alive = false;
+      if (SH || run.bodyWorld) {
+        for (const p of run.projectiles) if (p.alive && (run.bodyWorld ? !run.bodyWorld.insideLumen(p.x, p.y) : outsideDistance(SH, p.x, p.y) > 60)) p.alive = false;
+        for (const b of run.ebullets) if (b.alive && (run.bodyWorld ? !run.bodyWorld.insideLumen(b.x, b.y) : outsideDistance(SH, b.x, b.y) > 60)) b.alive = false;
       } else if (B) {
         for (const p of run.projectiles) {
           if (p.alive && Math.hypot(p.x - B.x, p.y - B.y) > B.r + 60) p.alive = false;
@@ -849,7 +865,7 @@ export const game = {
     const lookX = spd > 4 ? (player.vx / (spd || 1)) : 0;
     const lookY = spd > 4 ? (player.vy / (spd || 1)) : 0;
     // saat SNAP MACRO aktif, kamera milik peta (pusat tubuh) — bukan follow pemain
-    const macroActiveNow = !!run.arenaShape
+    const macroActiveNow = !!(run.arenaShape || run.bodyWorld)
       && (!!(this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
     if (!macroActiveNow) run.camera.follow(player.x, player.y, dt, false, lookX, lookY);
     run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
@@ -861,13 +877,15 @@ export const game = {
     // SELURUH struktur organ dari jauh (zoom 0,34), lalu kamera meluncur masuk ke
     // area starter (shape.cameraZoom). Sekali per run — ganti zona tidak mengulang.
     try {
-      const targetZoom = run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1;
+      const targetZoom = run.bodyWorld
+        ? (((() => { try { return (currentZone(run) || {}).zoom; } catch { return null; } })()) || 0.66)
+        : (run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1);
       run.introT = (run.introT == null ? 0 : run.introT) + dt;
       // SNAP MACRO (bukti "arena full"): auto-fit SELURUH struktur organ ke layar.
       // Otomatis ~1,15 dtk pertama run; kapan pun bisa ditahan lewat tombol M.
       const macroHold = !!(this.input && this.input.keys && this.input.keys.has('map'));
       if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
-      const macroOn = !!run.arenaShape && (macroHold || run.introT < 1.7);
+      const macroOn = !!(run.arenaShape || run.bodyWorld) && (macroHold || run.introT < 1.7);
       if (macroOn) {
         // SNAP MACRO ke PETA TUBUH penuh (bila ada) — bukan hanya koridor zona
         let fit, cxm, cym;
@@ -1780,6 +1798,11 @@ applyChapterTier(enemy, run) {
    */
   organSpawnPosition() {
     const run = this.run;
+    // MIGRASI: spawn HARUS di dalam lumen dunia kontinu (ring sekitar pemain,
+    // bias bawah dipertahankan lewat spawnRing preferBelow).
+    if (run.bodyWorld) {
+      return run.bodyWorld.spawnRing(run.player.x, run.player.y, 260, 620, true);
+    }
     const pos = run.spawnSys.getSpawnPosition(run.player.x, run.player.y, this.viewW, this.viewH);
     const SH = run.arenaShape;
     const bias = SH && SH.def ? Number(SH.def.spawnBias) || 0 : 0;
@@ -1805,6 +1828,8 @@ applyChapterTier(enemy, run) {
   syncArenaShape(arenaId) {
     const run = this.run;
     if (!run) return null;
+    // MIGRASI: dunia kontinu aktif → tidak ada koridor per-zona lagi.
+    if (run.bodyWorld) { run.arenaShape = null; return null; }
     let id = arenaId;
     if (!id) {
       try { const z = currentZone(run); id = (z && z.arenaId) || null; } catch { id = null; }
@@ -1847,6 +1872,8 @@ applyChapterTier(enemy, run) {
    */
   arenaClamp(ent, margin = 0) {
     if (!this.run || !ent) return;
+    // MIGRASI DUNIA KONTINU: pantul elastis di daging; lumen bebas penuh.
+    if (this.run.bodyWorld) { this.run.bodyWorld.reflect(ent, margin || ent.radius || 14); return; }
     // PILOT Organ Ascent: koridor organ menggantikan lingkaran bila aktif.
     if (this.run.arenaShape) { clampToShape(this.run.arenaShape, ent, margin || 0); return; }
     const B = this.run.arenaBounds;
@@ -2453,7 +2480,8 @@ applyChapterTier(enemy, run) {
           ctx.restore();
         }
       } catch { /* abaikan */ }
-    } else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
+    } else if (run.bodyWorld) { try { drawBodyMicro(ctx, P, run.bodyWorld, time); } catch (err) { console.warn('[phagos] bodyMicro:', err); } }
+    else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
     // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
     // melewati gugus alveoli itu"), bukan nomor stage.
     try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
