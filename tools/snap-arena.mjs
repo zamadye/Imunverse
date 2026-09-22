@@ -282,10 +282,23 @@ G.game.input.keys.delete('map');
 // 6. lompat zona: heart, lung, capillary (sudut lebar)
 try {
   const { _jumpToZone } = await import(pathToFileURL(path.join(ROOT, 'js/systems/world-journey.js')).href);
+  const NODE_FOR_ZONE = { heart: 'jantung', lung: 'paru', capillary: 'kapiler' };
   for (const [zid, nm] of [['heart', 'heart'], ['lung', 'lung'], ['capillary', 'capillary']]) {
     _jumpToZone(G.game, zid);
+    // _jumpToZone hanya membalik flag journey — pindahkan juga pemain ke room
+    // labirin yang cocok supaya activeId + kamera mengikuti (verifikasi F2).
+    try {
+      const lab = chamber();
+      const n = lab && lab.nodes && lab.nodes.get(NODE_FOR_ZONE[zid]);
+      const pl = G.game.run.player;
+      if (n && pl) {
+        pl.x = n.x; pl.y = n.y;
+        if (pl.vx != null) { pl.vx = 0; pl.vy = 0; }
+        if (pl.tx != null) { pl.tx = n.x; pl.ty = n.y; }
+      }
+    } catch { /* abaikan */ }
     await frames(120);
-    console.log('[info] zona =', zid, 'chamber =', st(), '| journey =', jst());
+    console.log('[info] zona =', zid, 'chamber =', st(), '| active =', chamber() && chamber().activeId, '| journey =', jst());
     shot(`snap-08-zone-${nm}.png`);
   }
 } catch (e) { console.log('[info] jump zona gagal:', e.message); }
