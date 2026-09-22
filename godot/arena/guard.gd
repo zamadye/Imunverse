@@ -99,5 +99,60 @@ func _initialize() -> void:
 	if not star_ok:
 		fails += 1
 	probe.free()
+	# 7) PARITY LABIRIN: route kontinu, koridor tertutup, segel menahan, junction aman
+	var LS: Script = load("res://labyrinth_sim.gd")
+	var ls: RefCounted = LS.new()
+	var putus := 0
+	var samp := 0
+	for rid in ls.route:
+		var nd: Dictionary = ls.nodes[rid]
+		if ls.sdf(nd.x, nd.y, false) > -20.0:
+			putus += 1
+		samp += 1
+	for sg in ls.segs:
+		for tt in [0.3, 0.6]:
+			var sx: float = sg.x0 + (sg.x1 - sg.x0) * tt
+			var sy: float = sg.y0 + (sg.y1 - sg.y0) * tt
+			if ls.sdf(sx, sy, false) > -12.0:
+				putus += 1
+			samp += 1
+	print("GUARD PARITY LABIRIN: route+koridor kontinu tak putus (%d/%d sampel): %s" % [putus, samp, "OK" if putus == 0 else "FAIL"])
+	if putus != 0:
+		fails += 1
+	# koridor tertutup: dari tengah koridor, dinding <= 460 di 8 arah
+	var s0: Dictionary = ls.segs[2]
+	var mx: float = (s0.x0 + s0.x1) / 2.0
+	var my: float = (s0.y0 + s0.y1) / 2.0
+	var jauh := 0
+	for k in range(8):
+		var ak: float = float(k) * TAU / 8.0
+		var hit := 1e9
+		var rr := 10.0
+		while rr < 700.0:
+			if ls.sdf(mx + cos(ak) * rr, my + sin(ak) * rr) > 0.0:
+				hit = rr
+				break
+			rr += 10.0
+		if hit > 460.0:
+			jauh += 1
+	print("GUARD PARITY LABIRIN: koridor TERTUTUP (8 arah <= 460): %s (jauh=%d)" % ["OK" if jauh == 0 else "FAIL", jauh])
+	if jauh != 0:
+		fails += 1
+	# segel katup menahan saat lockdown (titik segel di luar lumen playable)
+	var sls: Array = ls.seals()
+	var seal_ok := sls.size() > 0
+	for sl in sls:
+		if ls.sdf(sl.x, sl.y) <= 0.0:
+			seal_ok = false
+	print("GUARD PARITY LABIRIN: SEGEL katup lockdown menutup mulut koridor (%d segel): %s" % [sls.size(), "OK" if seal_ok else "FAIL"])
+	if not seal_ok:
+		fails += 1
+	# junction aman: masuk junction tak memicu lockdown
+	ls.enter_room("j2")
+	var jn_ok: bool = (ls.nodes["j2"].state == "open")
+	print("GUARD PARITY LABIRIN: junction AMAN (state open): %s" % ["OK" if jn_ok else "FAIL"])
+	if not jn_ok:
+		fails += 1
+	ls.free()
 	print("GUARD_TOTAL_FAIL=%d" % fails)
 	quit(1 if fails > 0 else 0)

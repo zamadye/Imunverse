@@ -32,6 +32,14 @@ func _ready() -> void:
 		"stretch": [1.5, 0.6, 1.0],
 		"pillars": [{"a": 1.57, "d": 0.20, "len": 380, "wid": 100, "bend": 0.3}],
 	}
+	# MODE LAB (parity labirin lumen JS, increment a): slice visual labirin
+	if LAB_MODE:
+		glow_tex = _radial_texture()
+		_lab_build()
+		_build_post()
+		_lab_camera()
+		_build_label()
+		return
 	sim = SimScript.new(640.0, 5, 74.0, 10.0, shape)
 	glow_tex = _radial_texture()
 	_build_parallax()
@@ -228,7 +236,165 @@ func _build_label() -> void:
 	cl.add_child(state_label)
 	add_child(cl)
 
+# ================= MODE LAB: parity labirin lumen (JS) =================
+const LAB_MODE := true
+const LabData = preload("res://lab_data.gd")
+const LabSim = preload("res://labyrinth_sim.gd")
+
+var ls: RefCounted = null
+var lab_root: Node2D = null
+var lab_cam: Camera2D = null
+var lab_player: Node2D = null
+var lab_light: PointLight2D = null
+var lab_enemies: Array = []
+var lab_seals: Array = []
+var lab_route_i := 0
+var lab_eat_t := 0.0
+var lab_wait := 0.0
+
+func _lab_build() -> void:
+	ls = LabSim.new()
+	lab_root = Node2D.new()
+	add_child(lab_root)
+	# koridor: rim menyala di belakang lumen gelap (edge glow)
+	for e in LabData.EDGES:
+		var pts: Array = e.pts
+		var rim := Line2D.new()
+		rim.points = pts
+		rim.width = float(e.w) * 2.0 + 14.0
+		rim.default_color = Color(1.0, 0.55, 0.45, 0.85)
+		var m1 := CanvasItemMaterial.new()
+		m1.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		rim.material = m1
+		lab_root.add_child(rim)
+		var lum := Line2D.new()
+		lum.points = pts
+		lum.width = float(e.w) * 2.0
+		lum.default_color = Color(0.30, 0.07, 0.09, 1.0)
+		lab_root.add_child(lum)
+	# chamber: rim + isi gelap
+	for n in LabData.NODES:
+		var rimS := Sprite2D.new()
+		rimS.texture = glow_tex
+		rimS.modulate = Color(1.0, 0.5, 0.42, 0.9)
+		var sc1: float = (float(n.r) + 9.0) * 2.0 / 64.0
+		rimS.scale = Vector2(sc1, sc1)
+		rimS.position = Vector2(n.x, n.y)
+		var m2 := CanvasItemMaterial.new()
+		m2.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		rimS.material = m2
+		lab_root.add_child(rimS)
+		var inS := Sprite2D.new()
+		inS.texture = glow_tex
+		inS.modulate = Color(0.30, 0.06, 0.08, 1.0)
+		var sc2: float = float(n.r) * 2.0 / 64.0
+		inS.scale = Vector2(sc2, sc2)
+		inS.position = Vector2(n.x, n.y)
+		lab_root.add_child(inS)
+	# pemain demo + cahaya
+	lab_player = Node2D.new()
+	var n0: Dictionary = ls.nodes[ls.route[0]]
+	lab_player.position = Vector2(n0.x, n0.y)
+	var pg := Sprite2D.new()
+	pg.texture = glow_tex
+	pg.modulate = Color(0.4, 1.0, 0.85, 1.0)
+	pg.scale = Vector2(0.6, 0.6)
+	lab_player.add_child(pg)
+	add_child(lab_player)
+	lab_light = PointLight2D.new()
+	lab_light.texture = glow_tex
+	lab_light.color = Color(1.0, 0.8, 0.55)
+	lab_light.energy = 1.1
+	lab_light.texture_scale = 6.0
+	add_child(lab_light)
+
+func _lab_camera() -> void:
+	lab_cam = Camera2D.new()
+	lab_cam.zoom = Vector2(0.8, 0.8)
+	add_child(lab_cam)
+	lab_cam.make_current()
+
+func _lab_spawn_enemies() -> void:
+	lab_enemies = []
+	var n: Dictionary = ls.active()
+	var quota: int = int(n.enemies)
+	for i in range(quota):
+		var h := Node2D.new()
+		var ok := false
+		for _try in range(16):
+			var a := randf_range(0, TAU)
+			var rr := randf_range(0.1, 0.62) * float(n.r)
+			var px: float = n.x + cos(a) * rr
+			var py: float = n.y + sin(a) * rr
+			if ls.sdf(px, py) < -16.0:
+				h.position = Vector2(px, py)
+				ok = true
+				break
+		if not ok:
+			h.position = Vector2(n.x, n.y)
+		var fi: int = i % FAM_SPIKES.size()
+		var spike := Polygon2D.new()
+		spike.polygon = _star_points(int(FAM_SPIKES[fi]), 20.0, 29.0)
+		spike.color = FAM_COL[fi].darkened(0.45)
+		h.add_child(spike)
+		_add_glow(h, FAM_COL[fi].lightened(0.3), 0.85)
+		add_child(h)
+		lab_enemies.append(h)
+
+func _lab_process(dt: float) -> void:
+	elapsed += dt
+	# gerak demo sepanjang route; tunggu room OPEN sebelum lanjut
+	var alive := 0
+	for e in lab_enemies:
+		if is_instance_valid(e) and e.visible:
+			alive += 1
+	ls.step(dt, alive)
+	if ls.state == "swarm" and lab_enemies.size() == 0:
+		_lab_spawn_enemies()
+		alive = lab_enemies.size()
+	if ls.state == "swarm":
+		lab_eat_t += dt
+		if lab_eat_t > 1.6:
+			lab_eat_t = 0.0
+			for e in lab_enemies:
+				if is_instance_valid(e) and e.visible:
+					e.visible = false
+					break
+	if ls.state != "swarm":
+		lab_enemies = []
+	# segel katup
+	for sl in lab_seals:
+		if is_instance_valid(sl):
+			sl.queue_free()
+	lab_seals = []
+	for sl in ls.seals():
+		var sp := Sprite2D.new()
+		sp.texture = glow_tex
+		sp.modulate = Color(0.2, 0.8, 0.75, 0.95)
+		sp.scale = Vector2(1.1, 1.1)
+		sp.position = Vector2(sl.x, sl.y)
+		add_child(sp)
+		lab_seals.append(sp)
+	# traversal route
+	var can_move: bool = ls.state == "open" or ls.active().junction
+	if can_move and lab_route_i < ls.route.size() - 1:
+		var tgt: Dictionary = ls.nodes[ls.route[lab_route_i + 1]]
+		var tv := Vector2(tgt.x, tgt.y)
+		var d := tv - lab_player.position
+		if d.length() < 10.0:
+			lab_route_i += 1
+			ls.enter_room(ls.route[lab_route_i])
+		else:
+			lab_player.position += d.normalized() * 90.0 * dt
+	lab_light.position = lab_player.position
+	if lab_cam:
+		lab_cam.position = lab_player.position
+	state_label.text = "LABIRIN: %s  room=%s  patogen %d" % [String(ls.state).to_upper(), String(ls.active_id), alive]
+
 func _process(dt: float) -> void:
+	if LAB_MODE:
+		_lab_process(dt)
+		return
 	elapsed += dt
 	var alive := 0
 	for e in enemies:
