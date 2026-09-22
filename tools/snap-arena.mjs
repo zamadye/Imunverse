@@ -176,11 +176,33 @@ globalThis.Image = FakeImage;
 
 // ---------------------------------------------------------- boot game --
 let spriteFallbacks = 0;
+let chamberCanvasErrors = 0;
 const origWarn = console.warn;
 console.warn = (...a) => {
-  if (String(a[0]).includes('sprite-loader')) spriteFallbacks++;
-  origWarn(...a);
+  const s = String(a[0]);
+  if (s.includes('sprite-loader')) spriteFallbacks++;
+  if (s.includes('[phagos] chamberCanvas')) chamberCanvasErrors++;
+  else origWarn(...a);
 };
+
+// Guard P0: statistik piksel (mean/sd) dari sampling kasar.
+function frameStats() {
+  const cv = backing(canvasEl);
+  const g = cv.getContext('2d');
+  const d = g.getImageData(0, 0, cv.width, cv.height).data;
+  let n = 0, mean = 0, m2 = 0;
+  for (let i = 0; i < d.length; i += 64) {
+    const v = (d[i] + d[i + 1] + d[i + 2]) / 3;
+    n++; const delta = v - mean; mean += delta / n; m2 += delta * (v - mean);
+  }
+  return { mean, sd: Math.sqrt(m2 / Math.max(1, n)) };
+}
+const p0stats = {};
+function shotP0(name, key) {
+  shot(name);
+  p0stats[key] = frameStats();
+  console.log(`[p0] ${key}: mean=${p0stats[key].mean.toFixed(1)} sd=${p0stats[key].sd.toFixed(1)}`);
+}
 
 await import(pathToFileURL(path.join(ROOT, 'js/main.js')).href);
 const t0 = Date.now();
@@ -217,7 +239,7 @@ G.STATE.screen = 'gameplay';
 G.game.run.introT = 10;
 await frames(150);
 console.log('[info] chamber =', st(), '| journey =', jst());
-shot('snap-01-lockdown.png');
+shotP0('snap-01-lockdown.png', 'lockdown');
 
 // 2. tunggu swarm + deret gerak 4 frame
 {
@@ -227,7 +249,7 @@ shot('snap-01-lockdown.png');
 await frames(240);
 console.log('[info] chamber =', st(), '| enemies =', (G.game.run.enemies || []).length, '| journey =', jst());
 try { const e0 = (G.game.run.enemies || [])[0]; console.log('[info] enemy0 =', e0 ? JSON.stringify({ fam: e0.family, kind: e0.kind, stealth: e0.stealth, r: e0.r, hp: e0.hp }) : 'none'); } catch (e) {}
-shot('snap-02-swarm.png');
+shotP0('snap-02-swarm.png', 'swarm');
 for (let i = 0; i < 4; i++) { await frames(6); shot(`snap-03-motion-${i}.png`); }
 
 // 3. close-up patogen (beku + zoom)
@@ -243,13 +265,13 @@ if (G.game._origUpdate) { G.game.update = G.game._origUpdate; delete G.game._ori
 for (const e of G.game.run.enemies) if (e.takeDamage) e.takeDamage(99999);
 await frames(55);
 console.log('[info] chamber =', st(), '| journey =', jst());
-shot('snap-05-purified.png');
+shotP0('snap-05-purified.png', 'purified');
 {
   const t1 = Date.now();
   while (((chamber() || {}).state !== 'open' && (chamber() || {}).openAmt < 0.5) && Date.now() - t1 < 30000) await frames(10);
 }
 await frames(35);
-shot('snap-06-open-door.png');
+shotP0('snap-06-open-door.png', 'open');
 
 // 5. denah map (tahan 'map')
 G.game.input.keys.add('map');
@@ -278,6 +300,20 @@ try {
   hud.__run = { enemies: (G.game.run.enemies || []).length, wave: G.game.run.wave, zone: G.game.run.zone, hp: G.game.run.player && G.game.run.player.hp };
   fs.writeFileSync(path.join(OUT, 'hud-dom.json'), JSON.stringify(hud, null, 1));
   console.log('[dump] hud-dom.json');
+}
+// Guard P0 (roadmap Fase A): nol crash chamber + antar-state BERBEDA.
+{
+  const errs = [];
+  if (chamberCanvasErrors > 0) errs.push(`chamberCanvas crash x${chamberCanvasErrors}`);
+  const ks = ['lockdown', 'swarm', 'purified', 'open'];
+  for (const k of ks) if ((p0stats[k] || {}).sd < 12) errs.push(`${k} nyaris-flat (sd<12)`);
+  for (let i = 0; i < ks.length - 1; i++) {
+    const d = Math.abs(p0stats[ks[i]].mean - p0stats[ks[i + 1]].mean);
+    if (d < 0.4) errs.push(`${ks[i]}~${ks[i + 1]} identik (dMean<0.4)`);
+  }
+  console.log('[p0] chamberCanvasErrors =', chamberCanvasErrors);
+  console.log(`P0_GUARD=${errs.length === 0 ? 'PASS' : 'FAIL'}` + (errs.length ? ' :: ' + errs.join(' | ') : ''));
+  if (errs.length) process.exitCode = 1;
 }
 console.log('[done] snapshot di', OUT);
 process.exit(0);
