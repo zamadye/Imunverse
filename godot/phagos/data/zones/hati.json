@@ -1,0 +1,1039 @@
+{
+ "id": "hati",
+ "name": "Hati",
+ "difficulty": 4,
+ "rooms": [
+  {
+   "id": "ht_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/hati/rooms/ht_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "ht_combat_02"
+   ],
+   "seed": 514124,
+   "wall_style": "smooth",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     276,
+     149
+    ],
+    [
+     124,
+     414
+    ],
+    [
+     854,
+     708
+    ],
+    [
+     530,
+     525
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "toxin_fog",
+     "mode": "fog",
+     "rect": [
+      133,
+      198,
+      377,
+      300
+     ],
+     "params": {
+      "dps": 4.0,
+      "slow": 0.15,
+      "clear_sec": 3.0,
+      "color": "#9AA12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "kupffer_cell",
+     "mode": "kupffer",
+     "rect": [
+      390,
+      450,
+      60,
+      60
+     ],
+     "params": {
+      "patrol": [
+       [
+        420,
+        480
+       ],
+       [
+        640,
+        330
+       ],
+       [
+        860,
+        480
+       ],
+       [
+        640,
+        630
+       ]
+      ],
+      "speed": 90.0,
+      "dps": 15.0,
+      "radius": 70.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "bile_channel",
+     "mode": "slippery",
+     "rect": [
+      110,
+      410,
+      1060,
+      140
+     ],
+     "params": {
+      "friction": 0.08,
+      "color": "#D4AC0D"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1027,
+      573
+     ],
+     "r": 62
+    },
+    {
+     "pos": [
+      333,
+      791
+     ],
+     "r": 66
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      861,
+      502
+     ],
+     "hp": 1,
+     "drop": 3
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      331,
+      536
+     ],
+     "hp": 2,
+     "drop": 5
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "ht_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "ht_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/hati/rooms/ht_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "ht_hazard_01",
+    "ht_reward_01"
+   ],
+   "seed": 538788,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     172,
+     872
+    ],
+    [
+     359,
+     1241
+    ],
+    [
+     463,
+     480
+    ],
+    [
+     1059,
+     363
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "toxin_fog",
+     "mode": "fog",
+     "rect": [
+      966,
+      577,
+      416,
+      328
+     ],
+     "params": {
+      "dps": 4.0,
+      "slow": 0.15,
+      "clear_sec": 3.0,
+      "color": "#9AA12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "kupffer_cell",
+     "mode": "kupffer",
+     "rect": [
+      710,
+      674,
+      60,
+      60
+     ],
+     "params": {
+      "patrol": [
+       [
+        740,
+        704
+       ],
+       [
+        960,
+        554
+       ],
+       [
+        1180,
+        704
+       ],
+       [
+        960,
+        854
+       ]
+      ],
+      "speed": 90.0,
+      "dps": 15.0,
+      "radius": 70.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "bile_channel",
+     "mode": "slippery",
+     "rect": [
+      110,
+      634,
+      1700,
+      140
+     ],
+     "params": {
+      "friction": 0.08,
+      "color": "#D4AC0D"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1715,
+      342
+     ],
+     "r": 50
+    },
+    {
+     "pos": [
+      1452,
+      468
+     ],
+     "r": 56
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1467,
+      1117
+     ],
+     "hp": 2,
+     "drop": 7
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      685,
+      1000
+     ],
+     "hp": 2,
+     "drop": 3
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "ht_hazard_01"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1888,
+      644
+     ],
+     "target": "ht_reward_01"
+    }
+   ]
+  },
+  {
+   "id": "ht_hazard_01",
+   "type": "hazard",
+   "scene": "res://scenes/zones/hati/rooms/ht_hazard_01.tscn",
+   "size_tiles": [
+    24,
+    18
+   ],
+   "connections": [
+    "ht_combat_03"
+   ],
+   "seed": 530025,
+   "wall_style": "ridged",
+   "hero_entry": [
+    768,
+    970
+   ],
+   "spawns": [
+    [
+     1177,
+     933
+    ],
+    [
+     525,
+     612
+    ],
+    [
+     1183,
+     297
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "toxin_fog",
+     "mode": "fog",
+     "rect": [
+      195,
+      651,
+      348,
+      317
+     ],
+     "params": {
+      "dps": 4.0,
+      "slow": 0.15,
+      "clear_sec": 3.0,
+      "color": "#9AA12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "kupffer_cell",
+     "mode": "kupffer",
+     "rect": [
+      518,
+      546,
+      60,
+      60
+     ],
+     "params": {
+      "patrol": [
+       [
+        548,
+        576
+       ],
+       [
+        768,
+        426
+       ],
+       [
+        988,
+        576
+       ],
+       [
+        768,
+        726
+       ]
+      ],
+      "speed": 90.0,
+      "dps": 15.0,
+      "radius": 70.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1118,
+      237
+     ],
+     "r": 55
+    },
+    {
+     "pos": [
+      558,
+      565
+     ],
+     "r": 65
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      152,
+      631
+     ],
+     "hp": 1,
+     "drop": 5
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1186,
+      592
+     ],
+     "hp": 2,
+     "drop": 3
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      842,
+      687
+     ],
+     "hp": 1,
+     "drop": 5
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    768,
+    576
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     768,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      768,
+      1120
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      608,
+      32
+     ],
+     "target": "ht_combat_03"
+    }
+   ]
+  },
+  {
+   "id": "ht_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/hati/rooms/ht_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "ht_boss"
+   ],
+   "seed": 616529,
+   "wall_style": "smooth",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     666,
+     1268
+    ],
+    [
+     185,
+     472
+    ],
+    [
+     419,
+     232
+    ],
+    [
+     797,
+     951
+    ],
+    [
+     1573,
+     1131
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "toxin_fog",
+     "mode": "fog",
+     "rect": [
+      171,
+      801,
+      290,
+      309
+     ],
+     "params": {
+      "dps": 4.0,
+      "slow": 0.15,
+      "clear_sec": 3.0,
+      "color": "#9AA12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "kupffer_cell",
+     "mode": "kupffer",
+     "rect": [
+      710,
+      674,
+      60,
+      60
+     ],
+     "params": {
+      "patrol": [
+       [
+        740,
+        704
+       ],
+       [
+        960,
+        554
+       ],
+       [
+        1180,
+        704
+       ],
+       [
+        960,
+        854
+       ]
+      ],
+      "speed": 90.0,
+      "dps": 15.0,
+      "radius": 70.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "bile_channel",
+     "mode": "slippery",
+     "rect": [
+      110,
+      634,
+      1700,
+      140
+     ],
+     "params": {
+      "friction": 0.08,
+      "color": "#D4AC0D"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1290,
+      287
+     ],
+     "r": 78
+    },
+    {
+     "pos": [
+      274,
+      1000
+     ],
+     "r": 67
+    },
+    {
+     "pos": [
+      666,
+      724
+     ],
+     "r": 80
+    },
+    {
+     "pos": [
+      1249,
+      753
+     ],
+     "r": 58
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1654,
+      1120
+     ],
+     "hp": 1,
+     "drop": 8
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1637,
+      718
+     ],
+     "amount": 2
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "ht_boss"
+    }
+   ]
+  },
+  {
+   "id": "ht_reward_01",
+   "type": "reward",
+   "scene": "res://scenes/zones/hati/rooms/ht_reward_01.tscn",
+   "size_tiles": [
+    16,
+    12
+   ],
+   "connections": [],
+   "seed": 104701,
+   "wall_style": "fold",
+   "hero_entry": [
+    512,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "chest",
+     "pos": [
+      512,
+      384
+     ],
+     "amount": 25
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      711,
+      269
+     ],
+     "amount": 8
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      280,
+      212
+     ],
+     "amount": 5
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      485,
+      196
+     ],
+     "amount": 3
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      319,
+      512
+     ],
+     "amount": 7
+    }
+   ],
+   "drop_zone": [
+    512,
+    384
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     512,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      512,
+      736
+     ],
+     "target": "@prev"
+    }
+   ]
+  },
+  {
+   "id": "ht_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/hati/rooms/ht_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 652519,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     229,
+     1139
+    ],
+    [
+     1785,
+     1371
+    ],
+    [
+     1536,
+     599
+    ],
+    [
+     1532,
+     122
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "toxin_fog",
+     "mode": "fog",
+     "rect": [
+      1419,
+      908,
+      345,
+      326
+     ],
+     "params": {
+      "dps": 4.0,
+      "slow": 0.15,
+      "clear_sec": 3.0,
+      "color": "#9AA12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "kupffer_cell",
+     "mode": "kupffer",
+     "rect": [
+      870,
+      866,
+      60,
+      60
+     ],
+     "params": {
+      "patrol": [
+       [
+        900,
+        896
+       ],
+       [
+        1120,
+        746
+       ],
+       [
+        1340,
+        896
+       ],
+       [
+        1120,
+        1046
+       ]
+      ],
+      "speed": 90.0,
+      "dps": 15.0,
+      "radius": 70.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "bile_channel",
+     "mode": "slippery",
+     "rect": [
+      110,
+      826,
+      2020,
+      140
+     ],
+     "params": {
+      "friction": 0.08,
+      "color": "#D4AC0D"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      154,
+      1682
+     ],
+     "r": 61
+    },
+    {
+     "pos": [
+      714,
+      1111
+     ],
+     "r": 59
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1008,
+      933
+     ],
+     "hp": 1,
+     "drop": 3
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1966,
+      187
+     ],
+     "hp": 3,
+     "drop": 2
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      199,
+      1682
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "kupffer_patrol",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "ht_combat_01",
+ "boss_id": "cirrhosis",
+ "hazards": [
+  "toxin_fog",
+  "kupffer_cells",
+  "bile_channel"
+ ],
+ "enemies": [
+  "toksin",
+  "virus_hepatitis"
+ ],
+ "ambient_color": "#6B2D2D",
+ "music_key": "hati",
+ "palette": {
+  "main": "#6B2D2D",
+  "accent": "#D4AC0D",
+  "floor": "#522222",
+  "wall": "#331414",
+  "deep": "#180808",
+  "glow": "#F2D24B",
+  "particle": "#E8D27A",
+  "fog": "#2A1410"
+ }
+}

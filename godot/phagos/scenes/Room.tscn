@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+; Room generik — seluruh isi dibangun SAAT RUNTIME dari JSON oleh RoomBuilder.
+; 46 stub di scenes/zones/<zona>/rooms/ meng-instance scene ini + override
+; zone_id/room_id. Struktur runtime: Floor/Walls/Deco/Foreground +
+; WallBodies + HazardAreas + SpawnPoints + Doors + Destructibles +
+; Collectibles + Lights + FX + Feature.
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1"]
+
+[node name="Room" type="Node2D"]
+script = ExtResource("1")
+zone_id = ""
+room_id = ""

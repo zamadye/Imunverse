@@ -1,0 +1,156 @@
+{
+ "schema": 1,
+ "canvas": [
+  1600,
+  2000
+ ],
+ "doc": "START = Usus Besar ATAU Usus Halus. Gate = requires harus clear. GOAL Jantung = 6 dari 7 zona lain clear. Fast travel = zona cleared.",
+ "start_ids": [
+  "usus_besar",
+  "usus_halus"
+ ],
+ "goal_id": "jantung",
+ "goal_requires_cleared": 6,
+ "nodes": [
+  {
+   "id": "usus_besar",
+   "label": "USUS BESAR",
+   "pos": [
+    1050,
+    1560
+   ],
+   "requires": []
+  },
+  {
+   "id": "usus_halus",
+   "label": "USUS HALUS",
+   "pos": [
+    550,
+    1500
+   ],
+   "requires": []
+  },
+  {
+   "id": "ginjal",
+   "label": "GINJAL",
+   "pos": [
+    1080,
+    1120
+   ],
+   "requires": [
+    "usus_besar"
+   ]
+  },
+  {
+   "id": "lambung",
+   "label": "LAMBUNG",
+   "pos": [
+    520,
+    1060
+   ],
+   "requires": [
+    "usus_halus"
+   ]
+  },
+  {
+   "id": "pankreas",
+   "label": "PANKREAS",
+   "pos": [
+    800,
+    880
+   ],
+   "requires": [
+    "ginjal",
+    "lambung"
+   ]
+  },
+  {
+   "id": "hati",
+   "label": "HATI",
+   "pos": [
+    1080,
+    600
+   ],
+   "requires": [
+    "pankreas"
+   ]
+  },
+  {
+   "id": "paru",
+   "label": "PARU-PARU",
+   "pos": [
+    520,
+    560
+   ],
+   "requires": [
+    "pankreas"
+   ]
+  },
+  {
+   "id": "jantung",
+   "label": "JANTUNG (GOAL)",
+   "pos": [
+    800,
+    160
+   ],
+   "requires": [],
+   "goal": true
+  }
+ ],
+ "edges": [
+  {
+   "a": "usus_besar",
+   "b": "usus_halus",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "usus_besar",
+   "b": "ginjal",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "usus_halus",
+   "b": "lambung",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "ginjal",
+   "b": "pankreas",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "lambung",
+   "b": "pankreas",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "pankreas",
+   "b": "hati",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "pankreas",
+   "b": "paru",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "hati",
+   "b": "jantung",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  },
+  {
+   "a": "paru",
+   "b": "jantung",
+   "corridor_tiles": 26,
+   "scene": "res://scenes/Corridor.tscn"
+  }
+ ]
+}

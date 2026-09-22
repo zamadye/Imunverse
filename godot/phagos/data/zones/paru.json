@@ -1,0 +1,1149 @@
+{
+ "id": "paru",
+ "name": "Paru-paru",
+ "difficulty": 4,
+ "rooms": [
+  {
+   "id": "pr_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/paru/rooms/pr_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "pr_combat_02",
+    "pr_shortcut_01"
+   ],
+   "seed": 729539,
+   "wall_style": "fold",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     696,
+     361
+    ],
+    [
+     1007,
+     274
+    ],
+    [
+     262,
+     271
+    ],
+    [
+     431,
+     643
+    ],
+    [
+     899,
+     719
+    ],
+    [
+     216,
+     780
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      1060,
+      740
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      218,
+      381,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      753,
+      52,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "airshift",
+    "params": {
+     "flip_sec": 5.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      332,
+      232
+     ],
+     "r": 69
+    },
+    {
+     "pos": [
+      502,
+      471
+     ],
+     "r": 59
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      284,
+      815
+     ],
+     "hp": 1,
+     "drop": 2
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      175,
+      231
+     ],
+     "hp": 1,
+     "drop": 3
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      535,
+      264
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "pr_combat_02"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1248,
+      420
+     ],
+     "target": "pr_shortcut_01"
+    }
+   ]
+  },
+  {
+   "id": "pr_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/paru/rooms/pr_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "pr_combat_03",
+    "pr_reward_01"
+   ],
+   "seed": 308919,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1602,
+     824
+    ],
+    [
+     1400,
+     281
+    ],
+    [
+     1759,
+     1034
+    ],
+    [
+     937,
+     964
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      647,
+      943,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      348,
+      78,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "airshift",
+    "params": {
+     "flip_sec": 5.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1500,
+      1113
+     ],
+     "r": 79
+    },
+    {
+     "pos": [
+      264,
+      1260
+     ],
+     "r": 52
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      556,
+      434
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      1418,
+      956
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "pr_combat_03"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1888,
+      644
+     ],
+     "target": "pr_reward_01"
+    }
+   ]
+  },
+  {
+   "id": "pr_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/paru/rooms/pr_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "pr_combat_04"
+   ],
+   "seed": 677215,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     315,
+     1121
+    ],
+    [
+     1307,
+     827
+    ],
+    [
+     1335,
+     157
+    ],
+    [
+     1406,
+     553
+    ],
+    [
+     1809,
+     1108
+    ],
+    [
+     485,
+     802
+    ],
+    [
+     181,
+     604
+    ],
+    [
+     1598,
+     618
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      612,
+      459,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "airshift",
+    "params": {
+     "flip_sec": 5.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      219,
+      1105
+     ],
+     "r": 55
+    },
+    {
+     "pos": [
+      792,
+      939
+     ],
+     "r": 73
+    },
+    {
+     "pos": [
+      370,
+      333
+     ],
+     "r": 74
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1433,
+      194
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      886,
+      1011
+     ],
+     "amount": 3
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "pr_combat_04"
+    }
+   ]
+  },
+  {
+   "id": "pr_combat_04",
+   "type": "combat",
+   "scene": "res://scenes/zones/paru/rooms/pr_combat_04.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "pr_boss"
+   ],
+   "seed": 696935,
+   "wall_style": "smooth",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1406,
+     1066
+    ],
+    [
+     1714,
+     1175
+    ],
+    [
+     1093,
+     495
+    ],
+    [
+     388,
+     316
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      977,
+      64,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      1449,
+      904,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "airshift",
+    "params": {
+     "flip_sec": 5.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      458,
+      123
+     ],
+     "r": 49
+    },
+    {
+     "pos": [
+      1197,
+      899
+     ],
+     "r": 51
+    },
+    {
+     "pos": [
+      295,
+      988
+     ],
+     "r": 74
+    },
+    {
+     "pos": [
+      994,
+      396
+     ],
+     "r": 73
+    },
+    {
+     "pos": [
+      510,
+      382
+     ],
+     "r": 76
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1653,
+      1259
+     ],
+     "hp": 3,
+     "drop": 2
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      615,
+      1265
+     ],
+     "hp": 3,
+     "drop": 3
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "pr_boss"
+    }
+   ]
+  },
+  {
+   "id": "pr_shortcut_01",
+   "type": "shortcut",
+   "scene": "res://scenes/zones/paru/rooms/pr_shortcut_01.tscn",
+   "size_tiles": [
+    12,
+    20
+   ],
+   "connections": [
+    "pr_combat_03"
+   ],
+   "seed": 315901,
+   "wall_style": "fold",
+   "hero_entry": [
+    384,
+    1098
+   ],
+   "spawns": [],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      548,
+      1060
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      212,
+      274,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      415,
+      722,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "fragile_wall",
+     "mode": "fragile",
+     "rect": [
+      324,
+      64,
+      120,
+      90
+     ],
+     "params": {
+      "hp": 2,
+      "color": "#F5D7D7"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      169,
+      468
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    384,
+    640
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     384,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      384,
+      1248
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      224,
+      32
+     ],
+     "target": "pr_combat_03"
+    }
+   ]
+  },
+  {
+   "id": "pr_reward_01",
+   "type": "reward",
+   "scene": "res://scenes/zones/paru/rooms/pr_reward_01.tscn",
+   "size_tiles": [
+    16,
+    12
+   ],
+   "connections": [],
+   "seed": 520121,
+   "wall_style": "ridged",
+   "hero_entry": [
+    512,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "chest",
+     "pos": [
+      512,
+      384
+     ],
+     "amount": 25
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      620,
+      378
+     ],
+     "amount": 7
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      794,
+      271
+     ],
+     "amount": 7
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      479,
+      219
+     ],
+     "amount": 6
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      195,
+      258
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    512,
+    384
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     512,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      512,
+      736
+     ],
+     "target": "@prev"
+    }
+   ]
+  },
+  {
+   "id": "pr_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/paru/rooms/pr_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 374785,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     1671,
+     1465
+    ],
+    [
+     147,
+     981
+    ],
+    [
+     419,
+     1615
+    ],
+    [
+     1856,
+     1059
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "air_flow",
+     "mode": "air",
+     "rect": [
+      110,
+      110,
+      2020,
+      1572
+     ],
+     "params": {
+      "strength": 220.0,
+      "flip_sec": 5.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_buildup",
+     "mode": "buildup",
+     "rect": [
+      676,
+      55,
+      180,
+      180
+     ],
+     "params": {
+      "max_slow": 0.6,
+      "rate": 0.25,
+      "color": "#C9A9A9"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "airshift",
+    "params": {
+     "flip_sec": 5.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      217,
+      336
+     ],
+     "r": 67
+    },
+    {
+     "pos": [
+      816,
+      966
+     ],
+     "r": 73
+    },
+    {
+     "pos": [
+      1630,
+      748
+     ],
+     "r": 77
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1391,
+      504
+     ],
+     "hp": 3,
+     "drop": 5
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      613,
+      414
+     ],
+     "hp": 2,
+     "drop": 6
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      438,
+      161
+     ],
+     "hp": 2,
+     "drop": 8
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1292,
+      1134
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "alveolar_window",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "pr_combat_01",
+ "boss_id": "pneumonia",
+ "hazards": [
+  "air_flow",
+  "mucus_buildup",
+  "fragile_wall"
+ ],
+ "enemies": [
+  "virus_influenza",
+  "bakteri_tb"
+ ],
+ "ambient_color": "#F5B7B1",
+ "music_key": "paru",
+ "palette": {
+  "main": "#F5B7B1",
+  "accent": "#85C1E9",
+  "floor": "#C08A86",
+  "wall": "#7E4E4C",
+  "deep": "#3A2020",
+  "glow": "#D6ECFF",
+  "particle": "#E4F2FF",
+  "fog": "#4A2A2A"
+ }
+}

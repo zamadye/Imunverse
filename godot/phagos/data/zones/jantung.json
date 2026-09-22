@@ -1,0 +1,1127 @@
+{
+ "id": "jantung",
+ "name": "Jantung",
+ "difficulty": 5,
+ "rooms": [
+  {
+   "id": "jn_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/jantung/rooms/jn_combat_01.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "jn_corridor_01"
+   ],
+   "seed": 188254,
+   "wall_style": "fold",
+   "hero_entry": [
+    960,
+    1208
+   ],
+   "spawns": [
+    [
+     379,
+     541
+    ],
+    [
+     1491,
+     797
+    ],
+    [
+     1218,
+     1126
+    ],
+    [
+     1527,
+     1213
+    ],
+    [
+     679,
+     938
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "heartbeat_wave",
+     "mode": "beat_push",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "period": 1.0,
+      "push": 180.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      548,
+      1187
+     ],
+     "r": 54
+    },
+    {
+     "pos": [
+      449,
+      588
+     ],
+     "r": 59
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      331,
+      315
+     ],
+     "amount": 3
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "jn_corridor_01"
+    }
+   ]
+  },
+  {
+   "id": "jn_corridor_01",
+   "type": "corridor",
+   "scene": "res://scenes/zones/jantung/rooms/jn_corridor_01.tscn",
+   "size_tiles": [
+    8,
+    30
+   ],
+   "connections": [
+    "jn_combat_02"
+   ],
+   "seed": 335331,
+   "wall_style": "ridged",
+   "hero_entry": [
+    256,
+    1738
+   ],
+   "spawns": [],
+   "hazards": [
+    {
+     "type": "blood_current",
+     "mode": "current",
+     "rect": [
+      110,
+      110,
+      292,
+      1700
+     ],
+     "params": {
+      "dir": [
+       0,
+       -1
+      ],
+      "strength": 420.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "valve_gate",
+     "mode": "valve",
+     "rect": [
+      110,
+      934,
+      292,
+      52
+     ],
+     "params": {
+      "period": 4.0,
+      "open_sec": 2.2
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "fragment",
+     "pos": [
+      152,
+      282
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "fragment",
+     "pos": [
+      133,
+      1157
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "fragment",
+     "pos": [
+      288,
+      1427
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    256,
+    960
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     256,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      256,
+      1888
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      96,
+      32
+     ],
+     "target": "jn_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "jn_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/jantung/rooms/jn_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "jn_combat_03"
+   ],
+   "seed": 265857,
+   "wall_style": "fold",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     531,
+     683
+    ],
+    [
+     1443,
+     1274
+    ],
+    [
+     1664,
+     1109
+    ],
+    [
+     506,
+     245
+    ],
+    [
+     822,
+     927
+    ],
+    [
+     865,
+     411
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "heartbeat_wave",
+     "mode": "beat_push",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "period": 1.0,
+      "push": 180.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "blood_current",
+     "mode": "current",
+     "rect": [
+      110,
+      644,
+      1700,
+      120
+     ],
+     "params": {
+      "dir": [
+       1,
+       0
+      ],
+      "strength": 300.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      343,
+      145
+     ],
+     "r": 51
+    },
+    {
+     "pos": [
+      1180,
+      289
+     ],
+     "r": 76
+    },
+    {
+     "pos": [
+      648,
+      544
+     ],
+     "r": 45
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "jn_combat_03"
+    }
+   ]
+  },
+  {
+   "id": "jn_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/jantung/rooms/jn_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "jn_corridor_02"
+   ],
+   "seed": 701286,
+   "wall_style": "fold",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     156,
+     1241
+    ],
+    [
+     305,
+     981
+    ],
+    [
+     1311,
+     797
+    ],
+    [
+     440,
+     512
+    ],
+    [
+     936,
+     314
+    ],
+    [
+     776,
+     529
+    ],
+    [
+     1635,
+     133
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "heartbeat_wave",
+     "mode": "beat_push",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "period": 1.0,
+      "push": 180.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "blood_current",
+     "mode": "current",
+     "rect": [
+      110,
+      644,
+      1700,
+      120
+     ],
+     "params": {
+      "dir": [
+       1,
+       0
+      ],
+      "strength": 300.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      163,
+      518
+     ],
+     "r": 78
+    },
+    {
+     "pos": [
+      797,
+      289
+     ],
+     "r": 54
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      821,
+      600
+     ],
+     "hp": 2,
+     "drop": 6
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      149,
+      1215
+     ],
+     "hp": 2,
+     "drop": 6
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1116,
+      954
+     ],
+     "hp": 3,
+     "drop": 7
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      333,
+      1128
+     ],
+     "amount": 2
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      875,
+      333
+     ],
+     "amount": 2
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "jn_corridor_02"
+    }
+   ]
+  },
+  {
+   "id": "jn_corridor_02",
+   "type": "corridor",
+   "scene": "res://scenes/zones/jantung/rooms/jn_corridor_02.tscn",
+   "size_tiles": [
+    8,
+    30
+   ],
+   "connections": [
+    "jn_combat_04"
+   ],
+   "seed": 564079,
+   "wall_style": "fold",
+   "hero_entry": [
+    256,
+    1738
+   ],
+   "spawns": [],
+   "hazards": [
+    {
+     "type": "blood_current",
+     "mode": "current",
+     "rect": [
+      110,
+      110,
+      292,
+      1700
+     ],
+     "params": {
+      "dir": [
+       0,
+       -1
+      ],
+      "strength": 420.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "valve_gate",
+     "mode": "valve",
+     "rect": [
+      110,
+      934,
+      292,
+      52
+     ],
+     "params": {
+      "period": 4.0,
+      "open_sec": 2.2
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "fragment",
+     "pos": [
+      191,
+      1425
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "fragment",
+     "pos": [
+      241,
+      1189
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "fragment",
+     "pos": [
+      216,
+      372
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    256,
+    960
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     256,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      256,
+      1888
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      96,
+      32
+     ],
+     "target": "jn_combat_04"
+    }
+   ]
+  },
+  {
+   "id": "jn_combat_04",
+   "type": "combat",
+   "scene": "res://scenes/zones/jantung/rooms/jn_combat_04.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "jn_preboss_01"
+   ],
+   "seed": 65514,
+   "wall_style": "fold",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1461,
+     224
+    ],
+    [
+     277,
+     301
+    ],
+    [
+     1363,
+     976
+    ],
+    [
+     503,
+     910
+    ],
+    [
+     1017,
+     795
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "heartbeat_wave",
+     "mode": "beat_push",
+     "rect": [
+      110,
+      110,
+      1700,
+      1188
+     ],
+     "params": {
+      "period": 1.0,
+      "push": 180.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "blood_current",
+     "mode": "current",
+     "rect": [
+      110,
+      644,
+      1700,
+      120
+     ],
+     "params": {
+      "dir": [
+       1,
+       0
+      ],
+      "strength": 300.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1383,
+      970
+     ],
+     "r": 52
+    },
+    {
+     "pos": [
+      1127,
+      554
+     ],
+     "r": 46
+    },
+    {
+     "pos": [
+      279,
+      713
+     ],
+     "r": 62
+    },
+    {
+     "pos": [
+      1677,
+      701
+     ],
+     "r": 48
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1546,
+      1019
+     ],
+     "amount": 2
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      919,
+      678
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "jn_preboss_01"
+    }
+   ]
+  },
+  {
+   "id": "jn_preboss_01",
+   "type": "preboss",
+   "scene": "res://scenes/zones/jantung/rooms/jn_preboss_01.tscn",
+   "size_tiles": [
+    18,
+    14
+   ],
+   "connections": [
+    "jn_boss"
+   ],
+   "seed": 122805,
+   "wall_style": "ridged",
+   "hero_entry": [
+    576,
+    714
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      821,
+      685
+     ],
+     "amount": 2
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      242,
+      640
+     ],
+     "amount": 2
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      312,
+      261
+     ],
+     "amount": 2
+    }
+   ],
+   "drop_zone": [
+    576,
+    448
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     576,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      576,
+      864
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      416,
+      32
+     ],
+     "target": "jn_boss"
+    }
+   ]
+  },
+  {
+   "id": "jn_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/jantung/rooms/jn_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 764412,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     126,
+     1282
+    ],
+    [
+     407,
+     1098
+    ],
+    [
+     1547,
+     1050
+    ],
+    [
+     1835,
+     372
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "heartbeat_wave",
+     "mode": "beat_push",
+     "rect": [
+      110,
+      110,
+      2020,
+      1572
+     ],
+     "params": {
+      "period": 1.0,
+      "push": 180.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "heartbeat",
+    "params": {
+     "period": 1.0,
+     "shake": 3.0
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1794,
+      1495
+     ],
+     "r": 60
+    },
+    {
+     "pos": [
+      1340,
+      536
+     ],
+     "r": 61
+    },
+    {
+     "pos": [
+      274,
+      217
+     ],
+     "r": 47
+    },
+    {
+     "pos": [
+      1565,
+      1176
+     ],
+     "r": 59
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      572,
+      455
+     ],
+     "hp": 3,
+     "drop": 3
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "great_valve",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "jn_combat_01",
+ "boss_id": "endocarditis",
+ "hazards": [
+  "heartbeat",
+  "blood_current",
+  "valve_gate"
+ ],
+ "enemies": [
+  "semua",
+  "sel_kanker"
+ ],
+ "ambient_color": "#E74C3C",
+ "music_key": "jantung",
+ "palette": {
+  "main": "#E74C3C",
+  "accent": "#2E86C1",
+  "floor": "#A93226",
+  "wall": "#641E16",
+  "deep": "#2E0B08",
+  "glow": "#FFB3A7",
+  "particle": "#FFC4B8",
+  "fog": "#3A0F0C"
+ }
+}

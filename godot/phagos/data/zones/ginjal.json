@@ -1,0 +1,837 @@
+{
+ "id": "ginjal",
+ "name": "Ginjal",
+ "difficulty": 2,
+ "rooms": [
+  {
+   "id": "gj_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/ginjal/rooms/gj_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "gj_combat_02"
+   ],
+   "seed": 727840,
+   "wall_style": "ridged",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     138,
+     267
+    ],
+    [
+     383,
+     678
+    ],
+    [
+     657,
+     442
+    ],
+    [
+     913,
+     492
+    ],
+    [
+     880,
+     789
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "filtration_current",
+     "mode": "current",
+     "rect": [
+      110,
+      400,
+      1060,
+      120
+     ],
+     "params": {
+      "dir": [
+       -1,
+       0
+      ],
+      "strength": 340.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      858,
+      694,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      840,
+      422,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      500,
+      400,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "ph_zone",
+     "mode": "ph_cycle",
+     "rect": [
+      160,
+      583,
+      291,
+      186
+     ],
+     "params": {
+      "period": 6.0,
+      "acid_dps": 10.0,
+      "base_heal": 6.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1021,
+      565
+     ],
+     "r": 56
+    },
+    {
+     "pos": [
+      1115,
+      799
+     ],
+     "r": 64
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "crystal",
+     "pos": [
+      340,
+      290
+     ],
+     "hp": 1,
+     "drop": 6
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      120,
+      748
+     ],
+     "amount": 1
+    }
+   ],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "crystal_cavern",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "gj_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "gj_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/ginjal/rooms/gj_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "gj_shop_01"
+   ],
+   "seed": 298524,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     761,
+     1150
+    ],
+    [
+     1766,
+     545
+    ],
+    [
+     760,
+     794
+    ],
+    [
+     1122,
+     129
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "filtration_current",
+     "mode": "current",
+     "rect": [
+      277,
+      110,
+      120,
+      1188
+     ],
+     "params": {
+      "dir": [
+       0,
+       -1
+      ],
+      "strength": 340.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      760,
+      537,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "ph_zone",
+     "mode": "ph_cycle",
+     "rect": [
+      330,
+      214,
+      290,
+      160
+     ],
+     "params": {
+      "period": 6.0,
+      "acid_dps": 10.0,
+      "base_heal": 6.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1487,
+      795
+     ],
+     "r": 78
+    },
+    {
+     "pos": [
+      277,
+      1234
+     ],
+     "r": 45
+    },
+    {
+     "pos": [
+      199,
+      931
+     ],
+     "r": 54
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "crystal",
+     "pos": [
+      430,
+      818
+     ],
+     "hp": 1,
+     "drop": 3
+    },
+    {
+     "kind": "crystal",
+     "pos": [
+      616,
+      1216
+     ],
+     "hp": 2,
+     "drop": 5
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "crystal_cavern",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "gj_shop_01"
+    }
+   ]
+  },
+  {
+   "id": "gj_shop_01",
+   "type": "shop",
+   "scene": "res://scenes/zones/ginjal/rooms/gj_shop_01.tscn",
+   "size_tiles": [
+    15,
+    12
+   ],
+   "connections": [
+    "gj_combat_03"
+   ],
+   "seed": 545728,
+   "wall_style": "fold",
+   "hero_entry": [
+    480,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      424,
+      288
+     ],
+     "amount": 3
+    }
+   ],
+   "vendor": {
+    "pos": [
+     480,
+     324
+    ]
+   },
+   "drop_zone": [
+    480,
+    384
+   ],
+   "wow": {
+    "kind": "crystal_cavern",
+    "pos": [
+     480,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      480,
+      736
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      320,
+      32
+     ],
+     "target": "gj_combat_03"
+    }
+   ]
+  },
+  {
+   "id": "gj_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/ginjal/rooms/gj_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "gj_boss"
+   ],
+   "seed": 502882,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     956,
+     883
+    ],
+    [
+     1635,
+     1123
+    ],
+    [
+     847,
+     631
+    ],
+    [
+     737,
+     1245
+    ],
+    [
+     1342,
+     1178
+    ],
+    [
+     276,
+     938
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "filtration_current",
+     "mode": "current",
+     "rect": [
+      690,
+      110,
+      120,
+      1188
+     ],
+     "params": {
+      "dir": [
+       0,
+       -1
+      ],
+      "strength": 340.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      400,
+      977,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1583,
+      488
+     ],
+     "r": 59
+    },
+    {
+     "pos": [
+      1319,
+      506
+     ],
+     "r": 56
+    },
+    {
+     "pos": [
+      613,
+      385
+     ],
+     "r": 52
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "crystal",
+     "pos": [
+      1377,
+      633
+     ],
+     "hp": 1,
+     "drop": 6
+    },
+    {
+     "kind": "crystal",
+     "pos": [
+      123,
+      1139
+     ],
+     "hp": 3,
+     "drop": 2
+    },
+    {
+     "kind": "crystal",
+     "pos": [
+      1177,
+      371
+     ],
+     "hp": 2,
+     "drop": 2
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1747,
+      514
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      606,
+      1010
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "crystal_cavern",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "gj_boss"
+    }
+   ]
+  },
+  {
+   "id": "gj_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/ginjal/rooms/gj_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 458497,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     685,
+     114
+    ],
+    [
+     1160,
+     463
+    ],
+    [
+     713,
+     1093
+    ],
+    [
+     931,
+     218
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "filtration_current",
+     "mode": "current",
+     "rect": [
+      1802,
+      110,
+      120,
+      1572
+     ],
+     "params": {
+      "dir": [
+       0,
+       -1
+      ],
+      "strength": 340.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "sharp_crystal",
+     "mode": "crystal",
+     "rect": [
+      1725,
+      665,
+      80,
+      80
+     ],
+     "params": {
+      "dps": 12.0,
+      "hp": 3,
+      "drop": 5,
+      "color": "#E8E8F0"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "ph_zone",
+     "mode": "ph_cycle",
+     "rect": [
+      1747,
+      220,
+      262,
+      185
+     ],
+     "params": {
+      "period": 6.0,
+      "acid_dps": 10.0,
+      "base_heal": 6.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      677,
+      176
+     ],
+     "r": 54
+    },
+    {
+     "pos": [
+      517,
+      419
+     ],
+     "r": 55
+    },
+    {
+     "pos": [
+      1431,
+      1467
+     ],
+     "r": 55
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "crystal",
+     "pos": [
+      395,
+      228
+     ],
+     "hp": 2,
+     "drop": 2
+    },
+    {
+     "kind": "crystal",
+     "pos": [
+      1709,
+      1564
+     ],
+     "hp": 3,
+     "drop": 6
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "crystal_cavern",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "gj_combat_01",
+ "boss_id": "kidney_stone",
+ "hazards": [
+  "filtration_current",
+  "sharp_crystal",
+  "ph_zone"
+ ],
+ "enemies": [
+  "toksin",
+  "bakteri_tanky"
+ ],
+ "ambient_color": "#4A90D9",
+ "music_key": "ginjal",
+ "palette": {
+  "main": "#4A90D9",
+  "accent": "#E8E8F0",
+  "floor": "#2E5E8E",
+  "wall": "#1B3A5E",
+  "deep": "#0B1A30",
+  "glow": "#BFE3FF",
+  "particle": "#CFEAFF",
+  "fog": "#14283E"
+ }
+}

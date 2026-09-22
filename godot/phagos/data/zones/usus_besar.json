@@ -1,0 +1,646 @@
+{
+ "id": "usus_besar",
+ "name": "Usus Besar",
+ "difficulty": 1,
+ "rooms": [
+  {
+   "id": "ub_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/usus_besar/rooms/ub_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "ub_combat_02"
+   ],
+   "seed": 660071,
+   "wall_style": "ridged",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     1141,
+     777
+    ],
+    [
+     793,
+     297
+    ],
+    [
+     286,
+     471
+    ],
+    [
+     1042,
+     181
+    ],
+    [
+     156,
+     124
+    ],
+    [
+     230,
+     846
+    ],
+    [
+     886,
+     784
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "mucus_pool",
+     "mode": "slow",
+     "rect": [
+      268,
+      588,
+      250,
+      148
+     ],
+     "params": {
+      "slow": 0.4,
+      "color": "#7CB68E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_pool",
+     "mode": "slow",
+     "rect": [
+      603,
+      259,
+      205,
+      242
+     ],
+     "params": {
+      "slow": 0.4,
+      "color": "#7CB68E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "peristaltic",
+    "params": {
+     "period": 8.0,
+     "strength": 300.0,
+     "dir": [
+      0,
+      -1
+     ]
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      332,
+      671
+     ],
+     "r": 73
+    },
+    {
+     "pos": [
+      1055,
+      612
+     ],
+     "r": 60
+    },
+    {
+     "pos": [
+      816,
+      158
+     ],
+     "r": 72
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      388,
+      274
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "peristaltic_tunnel",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "ub_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "ub_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/usus_besar/rooms/ub_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "ub_reward_01",
+    "ub_boss"
+   ],
+   "seed": 777163,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1351,
+     1228
+    ],
+    [
+     906,
+     903
+    ],
+    [
+     207,
+     552
+    ],
+    [
+     1258,
+     681
+    ],
+    [
+     1650,
+     562
+    ],
+    [
+     1788,
+     345
+    ],
+    [
+     366,
+     789
+    ],
+    [
+     993,
+     156
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "mucus_pool",
+     "mode": "slow",
+     "rect": [
+      1058,
+      920,
+      251,
+      175
+     ],
+     "params": {
+      "slow": 0.4,
+      "color": "#7CB68E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "mucus_pool",
+     "mode": "slow",
+     "rect": [
+      588,
+      665,
+      225,
+      152
+     ],
+     "params": {
+      "slow": 0.4,
+      "color": "#7CB68E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "peristaltic",
+    "params": {
+     "period": 8.0,
+     "strength": 300.0,
+     "dir": [
+      0,
+      -1
+     ]
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1206,
+      647
+     ],
+     "r": 47
+    },
+    {
+     "pos": [
+      819,
+      501
+     ],
+     "r": 60
+    },
+    {
+     "pos": [
+      1093,
+      297
+     ],
+     "r": 46
+    },
+    {
+     "pos": [
+      792,
+      816
+     ],
+     "r": 68
+    },
+    {
+     "pos": [
+      240,
+      952
+     ],
+     "r": 70
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      968,
+      809
+     ],
+     "hp": 3,
+     "drop": 3
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1223,
+      958
+     ],
+     "hp": 1,
+     "drop": 5
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      827,
+      508
+     ],
+     "hp": 1,
+     "drop": 2
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1080,
+      435
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      193,
+      1047
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "peristaltic_tunnel",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "ub_reward_01"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1888,
+      644
+     ],
+     "target": "ub_boss"
+    }
+   ]
+  },
+  {
+   "id": "ub_reward_01",
+   "type": "reward",
+   "scene": "res://scenes/zones/usus_besar/rooms/ub_reward_01.tscn",
+   "size_tiles": [
+    16,
+    12
+   ],
+   "connections": [],
+   "seed": 899966,
+   "wall_style": "smooth",
+   "hero_entry": [
+    512,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "chest",
+     "pos": [
+      512,
+      384
+     ],
+     "amount": 25
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      238,
+      131
+     ],
+     "amount": 5
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      881,
+      511
+     ],
+     "amount": 8
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      650,
+      391
+     ],
+     "amount": 5
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      799,
+      200
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    512,
+    384
+   ],
+   "wow": {
+    "kind": "peristaltic_tunnel",
+    "pos": [
+     512,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      512,
+      736
+     ],
+     "target": "@prev"
+    }
+   ]
+  },
+  {
+   "id": "ub_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/usus_besar/rooms/ub_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 22800,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     466,
+     1300
+    ],
+    [
+     1957,
+     277
+    ],
+    [
+     644,
+     659
+    ],
+    [
+     1538,
+     838
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "mucus_pool",
+     "mode": "slow",
+     "rect": [
+      1258,
+      563,
+      162,
+      187
+     ],
+     "params": {
+      "slow": 0.4,
+      "color": "#7CB68E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "peristaltic",
+    "params": {
+     "period": 8.0,
+     "strength": 300.0,
+     "dir": [
+      0,
+      -1
+     ]
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1184,
+      1138
+     ],
+     "r": 69
+    },
+    {
+     "pos": [
+      1911,
+      140
+     ],
+     "r": 73
+    },
+    {
+     "pos": [
+      1654,
+      1633
+     ],
+     "r": 76
+    },
+    {
+     "pos": [
+      1494,
+      280
+     ],
+     "r": 57
+    },
+    {
+     "pos": [
+      782,
+      1346
+     ],
+     "r": 62
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1743,
+      608
+     ],
+     "hp": 3,
+     "drop": 6
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      526,
+      1092
+     ],
+     "hp": 1,
+     "drop": 3
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "peristaltic_tunnel",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "ub_combat_01",
+ "boss_id": "biofilm_colony",
+ "hazards": [
+  "peristaltic_wave",
+  "mucus_pool"
+ ],
+ "enemies": [
+  "bakteri",
+  "spora"
+ ],
+ "ambient_color": "#8B4557",
+ "music_key": "usus_besar",
+ "palette": {
+  "main": "#8B4557",
+  "accent": "#7CB68E",
+  "floor": "#6E3547",
+  "wall": "#4A2030",
+  "deep": "#2A0F1A",
+  "glow": "#9FE8B8",
+  "particle": "#B8E6C4",
+  "fog": "#3A1A24"
+ }
+}

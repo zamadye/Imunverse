@@ -1,0 +1,821 @@
+{
+ "id": "pankreas",
+ "name": "Pankreas",
+ "difficulty": 3,
+ "rooms": [
+  {
+   "id": "pk_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/pankreas/rooms/pk_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "pk_puzzle_01"
+   ],
+   "seed": 274733,
+   "wall_style": "fold",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     901,
+     212
+    ],
+    [
+     500,
+     506
+    ],
+    [
+     1074,
+     611
+    ],
+    [
+     217,
+     648
+    ],
+    [
+     816,
+     514
+    ],
+    [
+     291,
+     839
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "enzyme_pool",
+     "mode": "damage",
+     "rect": [
+      503,
+      299,
+      140,
+      140
+     ],
+     "params": {
+      "dps": 22.0,
+      "color": "#BFEFFF"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      769,
+      175,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      289,
+      220,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      517,
+      484
+     ],
+     "r": 46
+    },
+    {
+     "pos": [
+      1066,
+      278
+     ],
+     "r": 75
+    },
+    {
+     "pos": [
+      773,
+      497
+     ],
+     "r": 72
+    },
+    {
+     "pos": [
+      626,
+      235
+     ],
+     "r": 49
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "islet_constellation",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "pk_puzzle_01"
+    }
+   ]
+  },
+  {
+   "id": "pk_puzzle_01",
+   "type": "hazard",
+   "scene": "res://scenes/zones/pankreas/rooms/pk_puzzle_01.tscn",
+   "size_tiles": [
+    24,
+    18
+   ],
+   "connections": [
+    "pk_combat_02"
+   ],
+   "seed": 794809,
+   "wall_style": "smooth",
+   "hero_entry": [
+    768,
+    970
+   ],
+   "spawns": [
+    [
+     833,
+     197
+    ],
+    [
+     1113,
+     654
+    ],
+    [
+     1013,
+     394
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "enzyme_pool",
+     "mode": "damage",
+     "rect": [
+      457,
+      47,
+      140,
+      140
+     ],
+     "params": {
+      "dps": 22.0,
+      "color": "#BFEFFF"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      262,
+      877,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      265,
+      404,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      514,
+      793
+     ],
+     "r": 70
+    },
+    {
+     "pos": [
+      377,
+      378
+     ],
+     "r": 46
+    },
+    {
+     "pos": [
+      182,
+      661
+     ],
+     "r": 50
+    },
+    {
+     "pos": [
+      334,
+      140
+     ],
+     "r": 77
+    },
+    {
+     "pos": [
+      747,
+      552
+     ],
+     "r": 63
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1128,
+      996
+     ],
+     "hp": 2,
+     "drop": 4
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      334,
+      852
+     ],
+     "hp": 2,
+     "drop": 2
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      662,
+      627
+     ],
+     "hp": 1,
+     "drop": 7
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1171,
+      953
+     ],
+     "amount": 3
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      454,
+      214
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    768,
+    576
+   ],
+   "wow": {
+    "kind": "islet_constellation",
+    "pos": [
+     768,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      768,
+      1120
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      608,
+      32
+     ],
+     "target": "pk_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "pk_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/pankreas/rooms/pk_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "pk_shop_01"
+   ],
+   "seed": 327562,
+   "wall_style": "fold",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     538,
+     1231
+    ],
+    [
+     1433,
+     288
+    ],
+    [
+     1118,
+     1081
+    ],
+    [
+     1758,
+     744
+    ],
+    [
+     337,
+     639
+    ],
+    [
+     581,
+     304
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "enzyme_pool",
+     "mode": "damage",
+     "rect": [
+      694,
+      748,
+      140,
+      140
+     ],
+     "params": {
+      "dps": 22.0,
+      "color": "#BFEFFF"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      457,
+      616,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      238,
+      1191,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      359,
+      928
+     ],
+     "r": 45
+    },
+    {
+     "pos": [
+      179,
+      717
+     ],
+     "r": 54
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1764,
+      858
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "islet_constellation",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "pk_shop_01"
+    }
+   ]
+  },
+  {
+   "id": "pk_shop_01",
+   "type": "shop",
+   "scene": "res://scenes/zones/pankreas/rooms/pk_shop_01.tscn",
+   "size_tiles": [
+    15,
+    12
+   ],
+   "connections": [
+    "pk_boss"
+   ],
+   "seed": 902002,
+   "wall_style": "fold",
+   "hero_entry": [
+    480,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [],
+   "vendor": {
+    "pos": [
+     480,
+     324
+    ]
+   },
+   "drop_zone": [
+    480,
+    384
+   ],
+   "wow": {
+    "kind": "islet_constellation",
+    "pos": [
+     480,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      480,
+      736
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      320,
+      32
+     ],
+     "target": "pk_boss"
+    }
+   ]
+  },
+  {
+   "id": "pk_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/pankreas/rooms/pk_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 466250,
+   "wall_style": "ridged",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     1663,
+     1658
+    ],
+    [
+     1782,
+     1185
+    ],
+    [
+     1066,
+     398
+    ],
+    [
+     999,
+     904
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "enzyme_pool",
+     "mode": "damage",
+     "rect": [
+      992,
+      669,
+      140,
+      140
+     ],
+     "params": {
+      "dps": 22.0,
+      "color": "#BFEFFF"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      867,
+      1176,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "islet_cell",
+     "mode": "islet",
+     "rect": [
+      1225,
+      1068,
+      68,
+      68
+     ],
+     "params": {
+      "hp": 4,
+      "slow": 0.6,
+      "duration": 3.0,
+      "radius": 260.0,
+      "color": "#5DADE2"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      325,
+      159
+     ],
+     "r": 72
+    },
+    {
+     "pos": [
+      1111,
+      724
+     ],
+     "r": 59
+    },
+    {
+     "pos": [
+      163,
+      576
+     ],
+     "r": 59
+    },
+    {
+     "pos": [
+      2051,
+      937
+     ],
+     "r": 57
+    },
+    {
+     "pos": [
+      705,
+      937
+     ],
+     "r": 56
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      589,
+      989
+     ],
+     "hp": 3,
+     "drop": 4
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1922,
+      1097
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      508,
+      1086
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "islet_constellation",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "pk_combat_01",
+ "boss_id": "pancreatitis",
+ "hazards": [
+  "enzyme_pool",
+  "narrow_channel",
+  "islet_cells"
+ ],
+ "enemies": [
+  "virus",
+  "sel_abnormal"
+ ],
+ "ambient_color": "#D4B896",
+ "music_key": "pankreas",
+ "palette": {
+  "main": "#D4B896",
+  "accent": "#5DADE2",
+  "floor": "#9A7E58",
+  "wall": "#5E4A30",
+  "deep": "#2E2415",
+  "glow": "#AEE3FF",
+  "particle": "#C9ECFF",
+  "fog": "#3A2E1C"
+ }
+}

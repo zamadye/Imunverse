@@ -1,0 +1,876 @@
+{
+ "id": "usus_halus",
+ "name": "Usus Halus",
+ "difficulty": 1,
+ "rooms": [
+  {
+   "id": "uh_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/usus_halus/rooms/uh_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "uh_combat_02"
+   ],
+   "seed": 123576,
+   "wall_style": "smooth",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     1030,
+     467
+    ],
+    [
+     706,
+     350
+    ],
+    [
+     179,
+     749
+    ],
+    [
+     966,
+     752
+    ],
+    [
+     182,
+     300
+    ],
+    [
+     620,
+     537
+    ],
+    [
+     392,
+     248
+    ],
+    [
+     1154,
+     153
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      219,
+      136,
+      203,
+      222
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      482,
+      313,
+      211,
+      210
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "chyme_current",
+     "mode": "current",
+     "rect": [
+      110,
+      190,
+      1060,
+      150
+     ],
+     "params": {
+      "dir": [
+       1,
+       0
+      ],
+      "strength": 260.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1090,
+      613
+     ],
+     "r": 71
+    },
+    {
+     "pos": [
+      383,
+      514
+     ],
+     "r": 50
+    },
+    {
+     "pos": [
+      824,
+      389
+     ],
+     "r": 65
+    },
+    {
+     "pos": [
+      1097,
+      251
+     ],
+     "r": 76
+    },
+    {
+     "pos": [
+      246,
+      842
+     ],
+     "r": 76
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      892,
+      475
+     ],
+     "hp": 1,
+     "drop": 4
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      325,
+      534
+     ],
+     "hp": 1,
+     "drop": 4
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1156,
+      277
+     ],
+     "hp": 2,
+     "drop": 2
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      506,
+      521
+     ],
+     "amount": 3
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      155,
+      587
+     ],
+     "amount": 3
+    }
+   ],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "nutrient_rain",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "uh_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "uh_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/usus_halus/rooms/uh_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "uh_combat_03",
+    "uh_reward_01"
+   ],
+   "seed": 239275,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1129,
+     339
+    ],
+    [
+     295,
+     176
+    ],
+    [
+     1292,
+     461
+    ],
+    [
+     1423,
+     162
+    ],
+    [
+     313,
+     455
+    ],
+    [
+     595,
+     1050
+    ],
+    [
+     1594,
+     831
+    ],
+    [
+     1681,
+     237
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      1541,
+      128,
+      205,
+      156
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "chyme_current",
+     "mode": "current",
+     "rect": [
+      1324,
+      110,
+      150,
+      1188
+     ],
+     "params": {
+      "dir": [
+       0,
+       1
+      ],
+      "strength": 260.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      1135,
+      1042
+     ],
+     "r": 74
+    },
+    {
+     "pos": [
+      1472,
+      1223
+     ],
+     "r": 60
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      674,
+      687
+     ],
+     "hp": 1,
+     "drop": 2
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      963,
+      400
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "nutrient_rain",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "uh_combat_03"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1888,
+      644
+     ],
+     "target": "uh_reward_01"
+    }
+   ]
+  },
+  {
+   "id": "uh_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/usus_halus/rooms/uh_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "uh_boss"
+   ],
+   "seed": 951972,
+   "wall_style": "smooth",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     263,
+     770
+    ],
+    [
+     1428,
+     889
+    ],
+    [
+     1193,
+     400
+    ],
+    [
+     1148,
+     1295
+    ],
+    [
+     1705,
+     563
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      808,
+      855,
+      254,
+      259
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      1594,
+      507,
+      164,
+      250
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "chyme_current",
+     "mode": "current",
+     "rect": [
+      1221,
+      110,
+      150,
+      1188
+     ],
+     "params": {
+      "dir": [
+       0,
+       1
+      ],
+      "strength": 260.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      294,
+      928
+     ],
+     "r": 56
+    },
+    {
+     "pos": [
+      1157,
+      1060
+     ],
+     "r": 76
+    },
+    {
+     "pos": [
+      1273,
+      548
+     ],
+     "r": 69
+    },
+    {
+     "pos": [
+      1640,
+      230
+     ],
+     "r": 54
+    },
+    {
+     "pos": [
+      471,
+      512
+     ],
+     "r": 77
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      763,
+      294
+     ],
+     "hp": 1,
+     "drop": 6
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1545,
+      1065
+     ],
+     "hp": 3,
+     "drop": 2
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "nutrient_rain",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "uh_boss"
+    }
+   ]
+  },
+  {
+   "id": "uh_reward_01",
+   "type": "reward",
+   "scene": "res://scenes/zones/usus_halus/rooms/uh_reward_01.tscn",
+   "size_tiles": [
+    16,
+    12
+   ],
+   "connections": [],
+   "seed": 688941,
+   "wall_style": "fold",
+   "hero_entry": [
+    512,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "chest",
+     "pos": [
+      512,
+      384
+     ],
+     "amount": 25
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      811,
+      424
+     ],
+     "amount": 6
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      531,
+      307
+     ],
+     "amount": 8
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      133,
+      241
+     ],
+     "amount": 3
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      342,
+      430
+     ],
+     "amount": 8
+    }
+   ],
+   "drop_zone": [
+    512,
+    384
+   ],
+   "wow": {
+    "kind": "nutrient_rain",
+    "pos": [
+     512,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      512,
+      736
+     ],
+     "target": "@prev"
+    }
+   ]
+  },
+  {
+   "id": "uh_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/usus_halus/rooms/uh_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 193661,
+   "wall_style": "fold",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     719,
+     405
+    ],
+    [
+     1340,
+     263
+    ],
+    [
+     736,
+     786
+    ],
+    [
+     402,
+     478
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      169,
+      1299,
+      198,
+      151
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "villi_drain",
+     "mode": "drain_pct",
+     "rect": [
+      575,
+      833,
+      241,
+      228
+     ],
+     "params": {
+      "pct": 0.03,
+      "color": "#F5C64F"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "chyme_current",
+     "mode": "current",
+     "rect": [
+      110,
+      935,
+      2020,
+      150
+     ],
+     "params": {
+      "dir": [
+       1,
+       0
+      ],
+      "strength": 260.0
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": null,
+   "covers": [
+    {
+     "pos": [
+      2012,
+      716
+     ],
+     "r": 66
+    },
+    {
+     "pos": [
+      131,
+      1223
+     ],
+     "r": 64
+    },
+    {
+     "pos": [
+      1171,
+      1124
+     ],
+     "r": 74
+    },
+    {
+     "pos": [
+      832,
+      515
+     ],
+     "r": 68
+    },
+    {
+     "pos": [
+      1823,
+      903
+     ],
+     "r": 71
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      716,
+      1094
+     ],
+     "hp": 3,
+     "drop": 8
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      1346,
+      493
+     ],
+     "hp": 2,
+     "drop": 8
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "nutrient_rain",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "uh_combat_01",
+ "boss_id": "tapeworm_giant",
+ "hazards": [
+  "villi_drain",
+  "chyme_current"
+ ],
+ "enemies": [
+  "parasit",
+  "bakteri_cepat"
+ ],
+ "ambient_color": "#E8889E",
+ "music_key": "usus_halus",
+ "palette": {
+  "main": "#E8889E",
+  "accent": "#F5C64F",
+  "floor": "#B85F74",
+  "wall": "#7A3049",
+  "deep": "#3A1220",
+  "glow": "#FFE08A",
+  "particle": "#FFD98A",
+  "fog": "#4A1E2C"
+ }
+}

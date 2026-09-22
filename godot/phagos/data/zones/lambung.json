@@ -1,0 +1,927 @@
+{
+ "id": "lambung",
+ "name": "Lambung",
+ "difficulty": 2,
+ "rooms": [
+  {
+   "id": "lb_combat_01",
+   "type": "combat",
+   "scene": "res://scenes/zones/lambung/rooms/lb_combat_01.tscn",
+   "size_tiles": [
+    20,
+    15
+   ],
+   "connections": [
+    "lb_combat_02"
+   ],
+   "seed": 155061,
+   "wall_style": "smooth",
+   "hero_entry": [
+    640,
+    760
+   ],
+   "spawns": [
+    [
+     1009,
+     125
+    ],
+    [
+     187,
+     290
+    ],
+    [
+     668,
+     462
+    ],
+    [
+     1130,
+     287
+    ],
+    [
+     466,
+     384
+    ],
+    [
+     1157,
+     740
+    ],
+    [
+     830,
+     614
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "acid_pool",
+     "mode": "tide",
+     "rect": [
+      110,
+      528,
+      1060,
+      322
+     ],
+     "params": {
+      "dps": 14.0,
+      "period": 9.0,
+      "rise": 0.55,
+      "color": "#A6B12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      479,
+      110,
+      90,
+      740
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      308,
+      110,
+      90,
+      740
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "contraction",
+    "params": {
+     "period": 12.0,
+     "squeeze": 0.25,
+     "hold": 2.5
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1015,
+      625
+     ],
+     "r": 66
+    },
+    {
+     "pos": [
+      730,
+      213
+     ],
+     "r": 48
+    },
+    {
+     "pos": [
+      175,
+      288
+     ],
+     "r": 49
+    },
+    {
+     "pos": [
+      172,
+      548
+     ],
+     "r": 72
+    },
+    {
+     "pos": [
+      756,
+      475
+     ],
+     "r": 67
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      196,
+      123
+     ],
+     "hp": 3,
+     "drop": 5
+    },
+    {
+     "kind": "tissue",
+     "pos": [
+      296,
+      480
+     ],
+     "hp": 1,
+     "drop": 3
+    }
+   ],
+   "collectibles": [],
+   "drop_zone": [
+    640,
+    480
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     640,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      480,
+      32
+     ],
+     "target": "lb_combat_02"
+    }
+   ]
+  },
+  {
+   "id": "lb_combat_02",
+   "type": "combat",
+   "scene": "res://scenes/zones/lambung/rooms/lb_combat_02.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "lb_reward_01",
+    "lb_shop_01"
+   ],
+   "seed": 461577,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1306,
+     675
+    ],
+    [
+     167,
+     310
+    ],
+    [
+     1600,
+     866
+    ],
+    [
+     503,
+     1228
+    ],
+    [
+     1504,
+     1191
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "acid_pool",
+     "mode": "tide",
+     "rect": [
+      110,
+      810,
+      1700,
+      488
+     ],
+     "params": {
+      "dps": 14.0,
+      "period": 9.0,
+      "rise": 0.55,
+      "color": "#A6B12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      830,
+      110,
+      90,
+      1188
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      156,
+      110,
+      90,
+      1188
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "contraction",
+    "params": {
+     "period": 12.0,
+     "squeeze": 0.25,
+     "hold": 2.5
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      696,
+      488
+     ],
+     "r": 54
+    },
+    {
+     "pos": [
+      1332,
+      896
+     ],
+     "r": 64
+    },
+    {
+     "pos": [
+      1327,
+      353
+     ],
+     "r": 61
+    },
+    {
+     "pos": [
+      618,
+      860
+     ],
+     "r": 51
+    },
+    {
+     "pos": [
+      1809,
+      304
+     ],
+     "r": 71
+    }
+   ],
+   "destructibles": [
+    {
+     "kind": "tissue",
+     "pos": [
+      1279,
+      1225
+     ],
+     "hp": 1,
+     "drop": 8
+    }
+   ],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      1547,
+      1148
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      986,
+      481
+     ],
+     "amount": 3
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "lb_reward_01"
+    },
+    {
+     "id": "door_1",
+     "dir": "E",
+     "pos": [
+      1888,
+      644
+     ],
+     "target": "lb_shop_01"
+    }
+   ]
+  },
+  {
+   "id": "lb_reward_01",
+   "type": "reward",
+   "scene": "res://scenes/zones/lambung/rooms/lb_reward_01.tscn",
+   "size_tiles": [
+    16,
+    12
+   ],
+   "connections": [],
+   "seed": 501360,
+   "wall_style": "fold",
+   "hero_entry": [
+    512,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "chest",
+     "pos": [
+      512,
+      384
+     ],
+     "amount": 25
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      324,
+      408
+     ],
+     "amount": 4
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      796,
+      587
+     ],
+     "amount": 3
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      291,
+      192
+     ],
+     "amount": 5
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      146,
+      590
+     ],
+     "amount": 7
+    }
+   ],
+   "drop_zone": [
+    512,
+    384
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     512,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      512,
+      736
+     ],
+     "target": "@prev"
+    }
+   ]
+  },
+  {
+   "id": "lb_shop_01",
+   "type": "shop",
+   "scene": "res://scenes/zones/lambung/rooms/lb_shop_01.tscn",
+   "size_tiles": [
+    15,
+    12
+   ],
+   "connections": [
+    "lb_combat_03"
+   ],
+   "seed": 508228,
+   "wall_style": "smooth",
+   "hero_entry": [
+    480,
+    586
+   ],
+   "spawns": [],
+   "hazards": [],
+   "feature": null,
+   "covers": [],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      262,
+      368
+     ],
+     "amount": 4
+    }
+   ],
+   "vendor": {
+    "pos": [
+     480,
+     324
+    ]
+   },
+   "drop_zone": [
+    480,
+    384
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     480,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      480,
+      736
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      320,
+      32
+     ],
+     "target": "lb_combat_03"
+    }
+   ]
+  },
+  {
+   "id": "lb_combat_03",
+   "type": "combat",
+   "scene": "res://scenes/zones/lambung/rooms/lb_combat_03.tscn",
+   "size_tiles": [
+    30,
+    22
+   ],
+   "connections": [
+    "lb_boss"
+   ],
+   "seed": 155017,
+   "wall_style": "ridged",
+   "hero_entry": [
+    960,
+    1226
+   ],
+   "spawns": [
+    [
+     1219,
+     347
+    ],
+    [
+     1339,
+     644
+    ],
+    [
+     307,
+     615
+    ],
+    [
+     1527,
+     818
+    ],
+    [
+     1701,
+     628
+    ],
+    [
+     589,
+     1142
+    ],
+    [
+     1278,
+     146
+    ]
+   ],
+   "hazards": [
+    {
+     "type": "acid_pool",
+     "mode": "tide",
+     "rect": [
+      110,
+      793,
+      1700,
+      505
+     ],
+     "params": {
+      "dps": 14.0,
+      "period": 9.0,
+      "rise": 0.55,
+      "color": "#A6B12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      564,
+      110,
+      90,
+      1188
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      196,
+      110,
+      90,
+      1188
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "contraction",
+    "params": {
+     "period": 12.0,
+     "squeeze": 0.25,
+     "hold": 2.5
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1202,
+      170
+     ],
+     "r": 63
+    },
+    {
+     "pos": [
+      1797,
+      1204
+     ],
+     "r": 71
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      248,
+      214
+     ],
+     "amount": 2
+    }
+   ],
+   "drop_zone": [
+    960,
+    704
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     960,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      960,
+      1376
+     ],
+     "target": "@prev"
+    },
+    {
+     "id": "door_0",
+     "dir": "N",
+     "pos": [
+      800,
+      32
+     ],
+     "target": "lb_boss"
+    }
+   ]
+  },
+  {
+   "id": "lb_boss",
+   "type": "boss",
+   "scene": "res://scenes/zones/lambung/rooms/lb_boss.tscn",
+   "size_tiles": [
+    35,
+    28
+   ],
+   "connections": [],
+   "seed": 827362,
+   "wall_style": "smooth",
+   "hero_entry": [
+    1120,
+    1610
+   ],
+   "spawns": [
+    [
+     1967,
+     1460
+    ],
+    [
+     823,
+     1067
+    ],
+    [
+     1844,
+     880
+    ],
+    [
+     1555,
+     953
+    ]
+   ],
+   "boss_spawn": [
+    1120,
+    260
+   ],
+   "hazards": [
+    {
+     "type": "acid_pool",
+     "mode": "tide",
+     "rect": [
+      110,
+      1222,
+      2020,
+      460
+     ],
+     "params": {
+      "dps": 14.0,
+      "period": 9.0,
+      "rise": 0.55,
+      "color": "#A6B12E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    },
+    {
+     "type": "acid_vapor",
+     "mode": "vapor",
+     "rect": [
+      630,
+      110,
+      90,
+      1572
+     ],
+     "params": {
+      "dps": 8.0,
+      "color": "#C6D42E"
+     },
+     "affects": [
+      "hero",
+      "enemy"
+     ]
+    }
+   ],
+   "feature": {
+    "type": "contraction",
+    "params": {
+     "period": 12.0,
+     "squeeze": 0.25,
+     "hold": 2.5
+    }
+   },
+   "covers": [
+    {
+     "pos": [
+      1805,
+      799
+     ],
+     "r": 57
+    },
+    {
+     "pos": [
+      638,
+      1658
+     ],
+     "r": 70
+    },
+    {
+     "pos": [
+      622,
+      1096
+     ],
+     "r": 48
+    },
+    {
+     "pos": [
+      331,
+      848
+     ],
+     "r": 70
+    }
+   ],
+   "destructibles": [],
+   "collectibles": [
+    {
+     "kind": "biokredit",
+     "pos": [
+      704,
+      1272
+     ],
+     "amount": 1
+    },
+    {
+     "kind": "biokredit",
+     "pos": [
+      812,
+      1023
+     ],
+     "amount": 4
+    }
+   ],
+   "drop_zone": [
+    1120,
+    896
+   ],
+   "wow": {
+    "kind": "acid_tide",
+    "pos": [
+     1120,
+     150
+    ],
+    "scale": 1.0
+   },
+   "doors": [
+    {
+     "id": "door_in",
+     "dir": "S",
+     "pos": [
+      1120,
+      1760
+     ],
+     "target": "@prev"
+    }
+   ]
+  }
+ ],
+ "entry_room": "lb_combat_01",
+ "boss_id": "ulcer_living",
+ "hazards": [
+  "acid_pool",
+  "acid_vapor",
+  "contraction"
+ ],
+ "enemies": [
+  "parasit",
+  "hpylori"
+ ],
+ "ambient_color": "#A6B12E",
+ "music_key": "lambung",
+ "palette": {
+  "main": "#A6B12E",
+  "accent": "#C0392B",
+  "floor": "#6E7520",
+  "wall": "#454A14",
+  "deep": "#20230A",
+  "glow": "#D8F34E",
+  "particle": "#E2F47A",
+  "fog": "#2E3312"
+ }
+}

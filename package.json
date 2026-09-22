@@ -29,7 +29,9 @@
   "verify:crawl": "node tools/verify-crawl.mjs",
   "bake:creature": "node tools/godot/bake-creature.mjs",
   "verify:prototype": "node tools/verify-prototype.mjs",
-  "verify:visual": "node tools/verify-visual.mjs"
+  "verify:visual": "node tools/verify-visual.mjs",
+  "verify:phagos-world": "node tools/verify-phagos-world.mjs",
+  "gen:phagos-world": "python3 godot/phagos/tools/gen_world.py"
  },
  "dependencies": {
   "@rive-app/canvas": "^2.42.2"
