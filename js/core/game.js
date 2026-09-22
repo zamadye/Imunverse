@@ -2686,7 +2686,23 @@ applyChapterTier(enemy, run) {
       }
       let drew = false;
       if (gl && gl.ok && run.chamber) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
-      if (drew) ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
+      if (drew) {
+        ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
+        // BLOOM ADDITIVE (increment c): rim membran, segel katup, dan glow
+        // patogen menyala lewat dua pass blur 'lighter' (kelas engine-grade,
+        // bukan manual canvas blur pada objek).
+        try {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = 0.26;
+          ctx.filter = 'blur(8px)';
+          ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
+          ctx.globalAlpha = 0.10;
+          ctx.filter = 'blur(20px)';
+          ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
+          ctx.restore();
+        } catch { /* filter tak didukung: fallback tanpa bloom */ }
+      }
       else { try { drawChamberCanvas(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] chamberCanvas:', err); } }
     }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
