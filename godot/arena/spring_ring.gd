@@ -44,7 +44,7 @@ func _process(_dt: float) -> void:
 		var pos := center + Vector2(cos(a), sin(a)) * r
 		# panjang segmen LOKAL (jarak ke tetangga) — rapat di pinch, renggang di kantung
 		var q: Dictionary = sim.pts[(i + 1) % sim.N]
-		var pos2 := center + Vector2(cos(q.a), sin(q.a)) * q.r
+		var pos2: Vector2 = center + Vector2(cos(float(q.a)), sin(float(q.a))) * float(q.r)
 		var seg_len: float = pos.distance_to(pos2) * 1.45
 		var s: Sprite2D = segs[i]
 		s.position = pos

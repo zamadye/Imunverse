@@ -85,5 +85,19 @@ func _initialize() -> void:
 	print("GUARD pilar MENOLAK entitas: %s" % ["OK" if pill_ok else "FAIL"])
 	if not pill_ok:
 		fails += 1
+	# 6) PARITY SILUET: bintang duri Godot == grammar js/render/pathogen-attire.js
+	var ascr: Script = load("res://arena.gd")
+	var probe: Node2D = ascr.new()
+	var star: PackedVector2Array = probe._star_points(9, 10.0, 14.0)
+	var smax := 0.0
+	var smin := 1e9
+	for q in star:
+		smax = maxf(smax, q.length())
+		smin = minf(smin, q.length())
+	var star_ok: bool = star.size() == 18 and smax / smin > 1.2 and probe.FAM_SPIKES.size() == 6
+	print("GUARD PARITY SILUET duri Godot==JS (titik=%d rasio=%.2f keluarga=%d): %s" % [star.size(), smax / smin, probe.FAM_SPIKES.size(), "OK" if star_ok else "FAIL"])
+	if not star_ok:
+		fails += 1
+	probe.free()
 	print("GUARD_TOTAL_FAIL=%d" % fails)
 	quit(1 if fails > 0 else 0)

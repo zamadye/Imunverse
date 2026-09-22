@@ -281,14 +281,33 @@ func _process(dt: float) -> void:
 	if state_label:
 		state_label.text = "ARENA: %s   patogen %d   pintu %.2f" % [sim.state.to_upper(), alive, sim.open_amt]
 
+# PARITY SILUET (js/render/pathogen-attire.js): keluarga patogen = bintang duri
+# + badan bercahaya; jumlah duri & warna per keluarga sama dengan sisi JS.
+const FAM_SPIKES: Array = [12, 9, 5, 16, 7, 22]
+const FAM_COL: Array = [
+	Color(0.59, 0.33, 0.75), Color(0.77, 0.33, 0.28), Color(0.77, 0.33, 0.51),
+	Color(0.63, 0.59, 0.35), Color(0.59, 0.27, 0.47), Color(0.43, 0.63, 0.43),
+]
+
+func _star_points(n: int, r_in: float, r_out: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in range(n * 2):
+		var a := float(i) * TAU / float(n * 2)
+		var rr := r_out if i % 2 == 0 else r_in
+		pts.append(Vector2(cos(a), sin(a)) * rr)
+	return pts
+
 func _spawn_enemies() -> void:
 	for i in 6:
-		var e := Sprite2D.new()
-		e.texture = glow_tex
-		e.modulate = Color(0.95, 0.35, 0.3, 1.0)
-		e.scale = Vector2(0.5, 0.5)
+		var fi: int = i % FAM_SPIKES.size()
+		var h := Node2D.new()
+		var spike := Polygon2D.new()
+		spike.polygon = _star_points(int(FAM_SPIKES[fi]), 20.0, 29.0)
+		spike.color = FAM_COL[fi].darkened(0.45)
+		h.add_child(spike)
+		_add_glow(h, FAM_COL[fi].lightened(0.3), 0.85)  # badan bercahaya (additive)
 		var aa := randf_range(0, TAU)
 		var rr := float(sim.radius_at(aa)) * randf_range(0.35, 0.72)
-		e.position = center + Vector2(cos(aa), sin(aa)) * rr
-		add_child(e)
-		enemies.append(e)
+		h.position = center + Vector2(cos(aa), sin(aa)) * rr
+		add_child(h)
+		enemies.append(h)
