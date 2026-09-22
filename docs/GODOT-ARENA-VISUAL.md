@@ -58,11 +58,36 @@ mulut pintu OPEN meloloskan entitas. Hasil terakhir: **GUARD_TOTAL_FAIL=0**.
 1. Port gameplay inti ke GDScript data-driven: baca `data/*.json` (arenas,
    zones, upgrades, skills) — engine core JS tetap referensi perilaku.
 2. HUD 5 elemen spec owner sebagai Control Godot (canvas HUD JS jadi rujukan layout).
-3. Sprite patogen berduri per keluarga musuh (generate_image + key-alpha).
+3. ~~Sprite patogen berduri per keluarga musuh~~ SELESAI tanpa aset foto: siluet
+   prosedural (vektor JS `js/render/pathogen-attire.js` + Polygon2D Godot
+   `FAM_SPIKES/FAM_COL` di `godot/arena/arena.gd`), parity dijaga guard
+   `SILUET PATOGEN` (JS) & check-6 (Godot). Reset aset owner = tanpa sprite foto.
 4. Export Web rilis (`phagos.space`): template web = build wasm yang sama;
    bundling pck + serve COOP/COEP-free (nothreads).
 5. Jembatan save/meta: ekspor-impor JSON save lama agar progres pemain bertahan.
 
 Bukti: `docs/vision-snapshot/godot-arena-1.jpg` (LOCKDOWN: katup terkunci,
-cahaya pemain, dinding utuh) & `godot-arena-2.jpg` (SWARM: patogen menyala,
-eritrosit hanyut, bioluminesensi di membran).
+cahaya pemain, dinding utuh) & `godot-arena-2.jpg` (SWARM: patogen berduri
+menyala per keluarga, eritrosit hanyut, bioluminesensi di membran).
+
+## 6. DESIGN ULANG selaras Pathogenic (increment JS, 2026-09-22)
+
+Tiga lapis redraw tanpa menyentuh engine core / ekonomi / mutasi:
+
+1. **Motif dinding per-organ** — `js/render/body-gl.js` uniform `u_motif`:
+   0 cobblestone voronoi (kapiler/aliran darah), 1 fringe silia berayun (paru),
+   2 striasi otot (jantung), 3 rugae (lambung), 4 pita mielin (saraf),
+   5 nodul folikel (limfe). Dipetakan di `setPalette` per zona.
+2. **Badan + siluet berduri patogen** — `js/render/pathogen-attire.js`:
+   membran blob berdenyut (gradient inti/organel/gloss) bila sprite foto
+   pensiun, plus duri per keluarga (knob corona virus, thorn bakteri, hook
+   parasit, needle spora, lump kanker, cilia+flagellum protozoa, 3 thorn
+   toksin). Stealth tetap menyembunyikan attire.
+3. **Room-graph di denah** — `js/render/world-map.js` extra `{route,journey}`:
+   node blob asimetris per ruang (cleared/active/locked) + konektor dashed
+   teal mengalir, grammar minimap Pathogenic (lihat analisis bentuk §refs).
+
+Bukti JS: `after-pathogen-closeup.jpg` (badan+duri terbaca pada zoom koridor),
+`after-map-denah-states.jpg` (room-graph 3 state), 4 shot chamber lainnya.
+Guard: `verify-world` SILUET PATOGEN + 3 SPEC BENTUK + SNAP MACRO (fix reset
+flag edge `run.macroWasOn`); 4 suite JS ERROR(0); Godot guard TOTAL_FAIL=0.
