@@ -120,3 +120,22 @@ npm run snap                       # → shots/*.png + hud-dom.json (±65 dtk)
 
 Perbandingan GL-browser tetap memakai `tools/shoot-arena.mjs` (butuh
 Chromium + lib sistem — tidak tersedia di sandbox ini).
+
+## 5. Status eksekusi (2026-09-23)
+
+- [x] **Fase A+B [P0] SELESAI** (`18826a9`): `drawLabyrinthCanvas` 2D
+      (koridor, rongga per-pal/motif, hazard, segel/vents/shock/pintu),
+      palet arena data-driven (`data/arenas.json`), refresh palet GL per
+      room. Guard: `P0_GUARD=PASS`, `chamberCanvasErrors = 0`.
+- [x] **Harness F2** (`65d4772`): lompat zona teleport pemain ke room
+      labirin — frame heart/lung/capillary kini benar-benar berpindah.
+- [x] **Boot-hardening loading** (komit ini): sprite preload worker pool
+      (12) + timeout 15 dtk anti-stack, fetch JSON timeout 20 dtk, 55×
+      `modulepreload` pangkas waterfall impor (~105 modul/1,2 MB).
+- [x] **CI snapshot Chromium** (komit ini):
+      `.github/workflows/shoot-arena.yml` — Actions →
+      "shoot-arena (Chromium nyata)" → Run workflow → unduh artefak
+      `arena-browser-shots`. Sandbox dev tidak bisa menjalankan Chromium
+      (`libnspr4.so` hilang, tanpa root, CDN Debian diblokir) — CI adalah
+      jalur resmi bukti browser.
+- [ ] Fase C/D/E — berikutnya sesuai mandat (P1 → P2 → P3).

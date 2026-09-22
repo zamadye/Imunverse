@@ -113,38 +113,57 @@ const EXTRA_PRELOAD = [
  * Resolve (bukan reject) bila sebagian gagal — yang gagal digantikan
  * placeholder development supaya game tetap bisa dites.
  */
+// BOOT-HARDENING (loading berat/stack): jangan tembak 149 request gambar
+// SERENTAK — antrean HTTP/1.1 di hosting murah macet dan progress bar
+// tampak diam. Worker pool kecil menjaga unduhan mengalir stabil.
+const SPRITE_CONCURRENCY = 12;
+// Request yang MENGGANTUNG (server diam tanpa respons → bukan error, bukan
+// load) dulu menahan Promise.all SELAMANYA = stack di loading. Timeout →
+// fallback placeholder agar boot selalu selesai.
+const SPRITE_TIMEOUT_MS = 15000;
+
 export function loadAllSprites(data, onProgress) {
   const paths = [...new Set([...collectSpritePaths(data), ...EXTRA_PRELOAD])];
   let done = 0;
   let fallback = 0;
 
-  const jobs = paths.map(
-    (path) =>
-      new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          cache.set(path, { image: img, isPlaceholder: false, width: img.naturalWidth, height: img.naturalHeight });
-          done++;
-          onProgress?.(done, paths.length, path, false);
-          resolve();
-        };
-        img.onerror = () => {
-          // FALLBACK: file sprite belum ada → placeholder LOUD di dev,
-          // netral di production (#19 — jangan tampilkan '?' ke pemain).
-          const meta = metaByPath.get(path) || { color: '#35d0ba', label: '?' };
-          const canvas = isDevMode() ? generatePlaceholderSprite(meta.color, meta.label) : generateNeutralSprite();
-          cache.set(path, { image: canvas, isPlaceholder: true, width: canvas.width, height: canvas.height });
-          fallback++;
-          done++;
-          console.warn(`[sprite-loader] sprite tidak ditemukan, memakai placeholder: ${path}`);
-          onProgress?.(done, paths.length, path, true);
-          resolve();
-        };
-        img.src = `${path}?v=${BUILD}`; // cache-busting (kunci cache tetap path)
-      })
-  );
+  const loadOne = (path) => new Promise((resolve) => {
+    let settled = false;
+    const finish = (isFallback, img) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (isFallback) {
+        // FALLBACK: file sprite belum ada → placeholder LOUD di dev,
+        // netral di production (#19 — jangan tampilkan '?' ke pemain).
+        const meta = metaByPath.get(path) || { color: '#35d0ba', label: '?' };
+        const canvas = isDevMode() ? generatePlaceholderSprite(meta.color, meta.label) : generateNeutralSprite();
+        cache.set(path, { image: canvas, isPlaceholder: true, width: canvas.width, height: canvas.height });
+        fallback++;
+        console.warn(`[sprite-loader] sprite tidak ditemukan, memakai placeholder: ${path}`);
+      } else {
+        cache.set(path, { image: img, isPlaceholder: false, width: img.naturalWidth, height: img.naturalHeight });
+      }
+      done++;
+      onProgress?.(done, paths.length, path, isFallback);
+      resolve();
+    };
+    const img = new Image();
+    img.onload = () => finish(false, img);
+    img.onerror = () => finish(true);
+    const timer = setTimeout(() => finish(true), SPRITE_TIMEOUT_MS);
+    img.src = `${path}?v=${BUILD}`; // cache-busting (kunci cache tetap path)
+  });
 
-  return Promise.all(jobs).then(() => ({ loaded: paths.length, fallback }));
+  const workers = Math.min(SPRITE_CONCURRENCY, Math.max(paths.length, 1));
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < paths.length) {
+      const i = cursor++;
+      await loadOne(paths[i]);
+    }
+  };
+  return Promise.all(Array.from({ length: workers }, worker)).then(() => ({ loaded: paths.length, fallback }));
 }
 
 const warnedPaths = new Set(); // #19: peringatan fallback sekali per path

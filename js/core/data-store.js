@@ -51,6 +51,18 @@ const store = {
 import { BUILD } from './version.js';
 
 /** Muat semua file JSON game secara paralel. */
+// BOOT-HARDENING: fetch tanpa timeout + server menggantung = stack di loading
+// (4–12%) selamanya. Abort tiap request yang diam > 20 dtk agar retry/error
+// path selalu tercapai.
+async function fetchWithTimeout(url, ms = 20000) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => { try { ctl.abort(); } catch { /* abaikan */ } }, ms);
+  try {
+    return await fetch(url, { signal: ctl.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
 export async function loadAllData() {
   const files = {
     heroes: 'data/heroes.json',
