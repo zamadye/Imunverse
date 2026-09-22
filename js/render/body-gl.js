@@ -41,6 +41,8 @@ uniform float u_door;     // sudut pintu
 uniform float u_open;     // 0..1
 uniform float u_vents[8];
 uniform int u_nVents;
+uniform vec3 u_pill[12];   // pilar internal xy+radius (massa gelap non-konveks)
+uniform int u_nPill;
 out vec4 frag;
 
 float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
@@ -81,6 +83,14 @@ void main() {
   // sektor pintu terbuka = mulut keluar (dinding menghilang, glow teal)
   float da = abs(mod(a - u_door + 3.14159265, 6.2831853) - 3.14159265);
   float doorMask = u_open * smoothstep(0.34, 0.10, da);
+
+  // PILAR internal: SDF komplemen — ruang main = dalam dinding DI LUAR pilar
+  float dP = 1e9;
+  for (int i = 0; i < 12; i++) {
+    if (i >= u_nPill) break;
+    dP = min(dP, length(w - u_pill[i].xy) - u_pill[i].z);
+  }
+  if (u_nPill > 0) d = max(d, -dP);
 
   // ---- INTERIOR ----
   // PILAR 3 SPEC: DISTORSI UV PERLIN BERDENYUT — jaringan interior "bernapas"
@@ -154,6 +164,14 @@ void main() {
   col = mix(col, colOut, smoothstep(W - 2.0, W + 2.0, d));
   col = mix(col, vec3(0.25, 0.85, 0.80) * (0.7 + 0.3 * u_beat), doorMask * smoothstep(W + 4.0, -W - 4.0, -abs(d)) * 0.9);
 
+  // massa pilar: gelap ber-rim menyala (cover bullet-hell ala chamber jantung)
+  if (u_nPill > 0) {
+    vec3 pc = mix(vec3(0.12, 0.04, 0.08), vec3(0.32, 0.08, 0.14), smoothstep(-60.0, 0.0, dP));
+    pc += exp(-pow(dP / 12.0, 2.0)) * vec3(1.0, 0.45, 0.38) * 0.55;
+    pc += 0.10 * fbm(w * 0.02);
+    col = mix(col, pc, step(dP, 0.0));
+  }
+
   vec2 qn = px / u_res;
   col *= 0.22 + 0.78 * pow(clamp(16.0 * qn.x * qn.y * (1.0 - qn.x) * (1.0 - qn.y), 0.0, 1.0), 0.30);
   col += (hash(px + fract(u_time) * 61.7) - 0.5) * 0.035;
@@ -183,7 +201,7 @@ export class BodyGL {
       this.prog = prog;
       gl.useProgram(prog);
       this.u = {};
-      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_center', 'u_radii', 'u_glow', 'u_glowHot', 'u_fill', 'u_deep', 'u_state', 'u_shock', 'u_door', 'u_open', 'u_vents', 'u_nVents']) {
+      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_center', 'u_radii', 'u_glow', 'u_glowHot', 'u_fill', 'u_deep', 'u_state', 'u_shock', 'u_door', 'u_open', 'u_vents', 'u_nVents', 'u_pill', 'u_nPill']) {
         this.u[n] = gl.getUniformLocation(prog, n);
       }
       this.radii = new Float32Array(CHAMBER_POINTS);
@@ -233,6 +251,14 @@ export class BodyGL {
     gl.uniform1f(this.u.u_shock, chamber.shock || 0);
     gl.uniform1f(this.u.u_door, chamber.doorAngle);
     gl.uniform1f(this.u.u_open, chamber.openAmt || 0);
+    const pills = new Float32Array(36);
+    const np = Math.min(12, (chamber.pillars || []).length);
+    for (let i = 0; i < np; i++) {
+      const pl = chamber.pillars[i];
+      pills[i * 3] = pl.x; pills[i * 3 + 1] = pl.y; pills[i * 3 + 2] = pl.r;
+    }
+    gl.uniform3fv(this.u.u_pill, pills);
+    gl.uniform1i(this.u.u_nPill, np);
     for (let i = 0; i < 8; i++) this.vents[i] = i < chamber.vents.length ? chamber.vents[i].a : 0;
     gl.uniform1fv(this.u.u_vents, this.vents);
     gl.uniform1i(this.u.u_nVents, Math.min(8, chamber.vents.length));

@@ -366,7 +366,42 @@
         "bpm": 64,
         "amp": 8,
         "vents": 6,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              3,
+              0.26,
+              0.4
+            ],
+            [
+              5,
+              0.14,
+              2.8
+            ]
+          ],
+          "stretch": [
+            0.9,
+            1.2,
+            0.2
+          ],
+          "pillars": [
+            {
+              "a": 1.2,
+              "d": 0.35,
+              "len": 200,
+              "wid": 90,
+              "bend": 0.9
+            },
+            {
+              "a": 4.0,
+              "d": 0.38,
+              "len": 220,
+              "wid": 80,
+              "bend": -0.7
+            }
+          ]
+        }
       }
     },
     {
@@ -721,7 +756,40 @@
         "bpm": 66,
         "amp": 9,
         "vents": 5,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              2,
+              0.3,
+              2.6
+            ],
+            [
+              3,
+              0.16,
+              1.1
+            ],
+            [
+              5,
+              0.08,
+              3.3
+            ]
+          ],
+          "stretch": [
+            1.3,
+            0.75,
+            1.2
+          ],
+          "pillars": [
+            {
+              "a": 3.4,
+              "d": 0.3,
+              "len": 240,
+              "wid": 120,
+              "bend": 0.8
+            }
+          ]
+        }
       }
     },
     {
@@ -1083,7 +1151,40 @@
         "bpm": 74,
         "amp": 10,
         "vents": 5,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              2,
+              0.26,
+              0.7
+            ],
+            [
+              3,
+              0.2,
+              2.1
+            ],
+            [
+              6,
+              0.1,
+              4.2
+            ]
+          ],
+          "stretch": [
+            1.25,
+            0.85,
+            0.4
+          ],
+          "pillars": [
+            {
+              "a": 2.2,
+              "d": 0.35,
+              "len": 300,
+              "wid": 110,
+              "bend": 0.6
+            }
+          ]
+        }
       }
     },
     {
@@ -1440,7 +1541,42 @@
         "bpm": 70,
         "amp": 9,
         "vents": 6,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              2,
+              0.34,
+              1.9
+            ],
+            [
+              4,
+              0.12,
+              0.6
+            ]
+          ],
+          "stretch": [
+            1.6,
+            0.62,
+            0.5
+          ],
+          "pillars": [
+            {
+              "a": 1.57,
+              "d": 0.25,
+              "len": 420,
+              "wid": 110,
+              "bend": 0.4
+            },
+            {
+              "a": 4.7,
+              "d": 0.3,
+              "len": 300,
+              "wid": 90,
+              "bend": -0.5
+            }
+          ]
+        }
       }
     },
     {
@@ -1795,7 +1931,49 @@
         "bpm": 82,
         "amp": 12,
         "vents": 4,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              2,
+              0.22,
+              1.2
+            ],
+            [
+              4,
+              0.14,
+              0.3
+            ]
+          ],
+          "stretch": [
+            1.15,
+            0.9,
+            0.9
+          ],
+          "pillars": [
+            {
+              "a": 0.6,
+              "d": 0.42,
+              "len": 300,
+              "wid": 100,
+              "bend": 0.7
+            },
+            {
+              "a": 2.6,
+              "d": 0.4,
+              "len": 260,
+              "wid": 90,
+              "bend": -0.6
+            },
+            {
+              "a": 4.4,
+              "d": 0.45,
+              "len": 220,
+              "wid": 80,
+              "bend": 0.5
+            }
+          ]
+        }
       }
     },
     {
@@ -2079,7 +2257,40 @@
         "bpm": 86,
         "amp": 10,
         "vents": 6,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              2,
+              0.38,
+              0.2
+            ],
+            [
+              3,
+              0.18,
+              3.6
+            ],
+            [
+              6,
+              0.08,
+              1.4
+            ]
+          ],
+          "stretch": [
+            1.5,
+            0.6,
+            1.0
+          ],
+          "pillars": [
+            {
+              "a": 1.57,
+              "d": 0.2,
+              "len": 380,
+              "wid": 100,
+              "bend": 0.3
+            }
+          ]
+        }
       }
     },
     {
@@ -2345,7 +2556,42 @@
         "bpm": 78,
         "amp": 11,
         "vents": 4,
-        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map."
+        "doc": "ARENA TERTUTUP spec owner: bio-chamber soft-body; MAP tetap denah body-map.",
+        "shape": {
+          "harmonics": [
+            [
+              1,
+              0.3,
+              2.4
+            ],
+            [
+              3,
+              0.2,
+              0.8
+            ]
+          ],
+          "stretch": [
+            1.4,
+            0.7,
+            0.8
+          ],
+          "pillars": [
+            {
+              "a": 2.4,
+              "d": 0.45,
+              "len": 340,
+              "wid": 120,
+              "bend": 0.8
+            },
+            {
+              "a": 5.5,
+              "d": 0.4,
+              "len": 260,
+              "wid": 90,
+              "bend": 0.6
+            }
+          ]
+        }
       }
     }
   ]

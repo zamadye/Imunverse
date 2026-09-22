@@ -258,6 +258,16 @@ export function drawChamberCanvas(ctx, P, chamber, time) {
   g.addColorStop(0.55, 'rgba(255,176,96,0.9)');
   g.addColorStop(1, 'rgba(186,84,52,0.95)');
   ctx.fillStyle = g; path(1); ctx.fill();
+  // PILAR internal: massa gelap ber-rim (ruang non-konveks)
+  for (const pi of chamber.pillars || []) {
+    const q = pr(pi.x, pi.y);
+    const g2 = ctx.createRadialGradient(q.x, q.y, 1, q.x, q.y, pi.r * q.s * 1.25);
+    g2.addColorStop(0, 'rgba(24,7,14,0.95)');
+    g2.addColorStop(0.8, 'rgba(48,12,22,0.95)');
+    g2.addColorStop(1, 'rgba(255,110,95,0.30)');
+    ctx.fillStyle = g2;
+    ctx.beginPath(); ctx.arc(q.x, q.y, pi.r * q.s * 1.15, 0, TAU); ctx.fill();
+  }
   // pita membran glossy + bayangan punggung
   ctx.lineJoin = 'round';
   ctx.strokeStyle = 'rgba(28,6,14,0.65)'; ctx.lineWidth = Math.max(6, 34 * c0.s); path(1.04); ctx.stroke();

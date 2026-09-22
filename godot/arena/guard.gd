@@ -60,5 +60,30 @@ func _initialize() -> void:
 	print("GUARD mulut pintu OPEN meloloskan entitas keluar rute: %s" % ["OK" if (out - far).length() < 1.0 else "FAIL"])
 	if (out - far).length() >= 1.0:
 		fails += 1
+	# 5) bentuk asimetris + pilar non-konveks (analisis Pathogenic)
+	var shape := {
+		"harmonics": [[2, 0.38, 0.2], [3, 0.18, 3.6]],
+		"stretch": [1.5, 0.6, 1.0],
+		"pillars": [{"a": 1.57, "d": 0.20, "len": 380, "wid": 100, "bend": 0.3}],
+	}
+	var sim5: ChamberSim = Sim.new(640.0, 5, 74.0, 10.0, shape)
+	var rmax := 0.0
+	var rmin := 1e9
+	for p5 in sim5.pts:
+		rmax = maxf(rmax, p5.base)
+		rmin = minf(rmin, p5.base)
+	var asym_ok := rmax / rmin > 1.5
+	print("GUARD bentuk ASIMETRIS (ratio=%.2f): %s" % [rmax / rmin, "OK" if asym_ok else "FAIL"])
+	if not asym_ok:
+		fails += 1
+	var pill_ok := sim5.pillars.size() > 0
+	if pill_ok:
+		var p0: Dictionary = sim5.pillars[0]
+		var pos5: Vector2 = Vector2(p0.x, p0.y)
+		pos5 = sim5.collide(pos5, Vector2.ZERO, 15.0)
+		pill_ok = (pos5 - Vector2(p0.x, p0.y)).length() >= float(p0.r)
+	print("GUARD pilar MENOLAK entitas: %s" % ["OK" if pill_ok else "FAIL"])
+	if not pill_ok:
+		fails += 1
 	print("GUARD_TOTAL_FAIL=%d" % fails)
 	quit(1 if fails > 0 else 0)

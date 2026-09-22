@@ -37,12 +37,15 @@ func _tex(path: String) -> ImageTexture:
 func _process(_dt: float) -> void:
 	if sim == null:
 		return
-	var seg_len: float = TAU * float(sim.R) / float(sim.N) * 1.28
 	for i in sim.N:
 		var p: Dictionary = sim.pts[i]
 		var a: float = p.a
 		var r: float = p.r
 		var pos := center + Vector2(cos(a), sin(a)) * r
+		# panjang segmen LOKAL (jarak ke tetangga) — rapat di pinch, renggang di kantung
+		var q: Dictionary = sim.pts[(i + 1) % sim.N]
+		var pos2 := center + Vector2(cos(q.a), sin(q.a)) * q.r
+		var seg_len: float = pos.distance_to(pos2) * 1.45
 		var s: Sprite2D = segs[i]
 		s.position = pos
 		s.rotation = a + PI / 2.0   # rim terang tile menghadap OUT (dinding)

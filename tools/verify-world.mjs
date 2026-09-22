@@ -447,6 +447,28 @@ _jumpToZone(game, 'heart');
   runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
 }
 
+// ---------- BENTUK ARENA (analisis Pathogenic): asimetris + pilar non-konveks ----------
+{
+  const ch = runS.chamber;
+  const rs = ch.points.map((p) => p.base);
+  const rmax = Math.max(...rs), rmin = Math.min(...rs);
+  cek('SPEC BENTUK: siluet arena ASIMETRIS organ-like (rasio base max/min > 1,5 — bukan cincin bulat)',
+    rmax / rmin > 1.5, `ratio=${(rmax / rmin).toFixed(2)} harmonik=${JSON.stringify(ch.harmonics)} stretch=${JSON.stringify(ch.stretch)}`);
+  if (ch.pillars.length) {
+    const pl = runS.player; const p0 = ch.pillars[0];
+    pl.x = p0.x; pl.y = p0.y; pl.vx = 0; pl.vy = 0;
+    ch.collide(pl, 15);
+    const inside = ch.insidePillar(pl.x, pl.y, 0);
+    cek('SPEC BENTUK: pilar internal MENOLAK entitas (ruang non-konveks ala chamber jantung)',
+      !inside, `jarak=${Math.hypot(pl.x - p0.x, pl.y - p0.y).toFixed(0)} r=${p0.r} nPillar=${ch.pillars.length}`);
+    let bad = 0;
+    for (let k = 0; k < 40; k++) { const q = game.organSpawnPosition(); if (ch.insidePillar(q.x, q.y, 0)) bad++; }
+    cek('SPEC BENTUK: 40 spawn patogen semuanya bebas pilar', bad === 0, `${bad}/40 di dalam pilar`);
+  } else {
+    cek('SPEC BENTUK: pilar internal MENOLAK entitas', true, 'arena ini sah tanpa pilar');
+  }
+}
+
 // ---------- PILAR 4 SPEC: eritrosit fluid-drag di dalam chamber ----------
 {
   const er = runS.erythro;

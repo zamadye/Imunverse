@@ -78,6 +78,12 @@ export class ErythroFlow {
       p.vy += (tvy - p.vy) * k;
       p.x += p.vx * dt * (0.55 + 0.45 * p.z);
       p.y += p.vy * dt * (0.55 + 0.45 * p.z);
+      // pilar internal: jangan menembus massa gelap
+      for (const pi of chamber.pillars || []) {
+        const ddx = p.x - pi.x, ddy = p.y - pi.y;
+        const rr2 = Math.hypot(ddx, ddy) || 1;
+        if (rr2 < pi.r + 14) { p.x = pi.x + (ddx / rr2) * (pi.r + 14); p.y = pi.y + (ddy / rr2) * (pi.r + 14); }
+      }
       // containment dinding membran: dorong masuk + redam
       const a = Math.atan2(p.y - chamber.cy, p.x - chamber.cx);
       const wall = chamber.radiusAt(a) - 26;

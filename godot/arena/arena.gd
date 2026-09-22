@@ -26,7 +26,13 @@ var elapsed := 0.0
 var state_label: Label = null
 
 func _ready() -> void:
-	sim = SimScript.new(640.0, 5, 74.0, 10.0)
+	# bentuk organ-like asimetris + pilar (port data shape arenas.json kapiler)
+	var shape := {
+		"harmonics": [[2, 0.38, 0.2], [3, 0.18, 3.6], [6, 0.08, 1.4]],
+		"stretch": [1.5, 0.6, 1.0],
+		"pillars": [{"a": 1.57, "d": 0.20, "len": 380, "wid": 100, "bend": 0.3}],
+	}
+	sim = SimScript.new(640.0, 5, 74.0, 10.0, shape)
 	glow_tex = _radial_texture()
 	_build_parallax()
 	_build_floor()
@@ -35,6 +41,7 @@ func _ready() -> void:
 	add_child(ring)
 	ring.setup(sim, center)
 	_build_particles()
+	_build_pillars()
 	_build_lights()
 	_build_bullets()
 	_build_post()
@@ -127,6 +134,26 @@ func _build_particles() -> void:
 	gp.process_material = m
 	gp.position = center
 	add_child(gp)
+
+func _build_pillars() -> void:
+	# massa gelap internal (cover non-konveks) + rim menyala tipis
+	for pi in sim.pillars:
+		var b := Sprite2D.new()
+		b.texture = glow_tex
+		b.modulate = Color(0.10, 0.03, 0.06, 0.96)
+		var sc: float = float(pi.r) * 3.4 / 64.0
+		b.scale = Vector2(sc, sc)
+		b.position = center + Vector2(pi.x, pi.y)
+		add_child(b)
+		var rim := Sprite2D.new()
+		rim.texture = glow_tex
+		rim.modulate = Color(1.0, 0.45, 0.38, 0.30)
+		rim.scale = Vector2(sc * 1.18, sc * 1.18)
+		rim.position = b.position
+		var m := CanvasItemMaterial.new()
+		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		rim.material = m
+		add_child(rim)
 
 func _build_lights() -> void:
 	player_light = PointLight2D.new()
@@ -261,7 +288,7 @@ func _spawn_enemies() -> void:
 		e.modulate = Color(0.95, 0.35, 0.3, 1.0)
 		e.scale = Vector2(0.5, 0.5)
 		var aa := randf_range(0, TAU)
-		var rr := sim.R * randf_range(0.45, 0.8)
+		var rr := float(sim.radius_at(aa)) * randf_range(0.35, 0.72)
 		e.position = center + Vector2(cos(aa), sin(aa)) * rr
 		add_child(e)
 		enemies.append(e)

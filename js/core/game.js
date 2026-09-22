@@ -1847,7 +1847,7 @@ applyChapterTier(enemy, run) {
       if (ch.swarm) { const v = ch.ventPosition(Math.floor(Math.random() * ch.vents.length)); return { x: v.x, y: v.y }; }
       const a = Math.PI * (0.17 + Math.random() * 0.66); // bias bawah
       const rr = ch.R * (0.45 + Math.random() * 0.35);
-      return { x: ch.cx + Math.cos(a) * rr, y: ch.cy + Math.sin(a) * rr };
+      return ch.freeSpot(ch.cx + Math.cos(a) * rr, ch.cy + Math.sin(a) * rr);
     }
     if (run.bodyWorld) {
       return run.bodyWorld.spawnRing(run.player.x, run.player.y, 260, 620, true);

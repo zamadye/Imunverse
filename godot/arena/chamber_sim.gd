@@ -22,15 +22,49 @@ var time := 0.0
 var pts: Array = []   # [{a, base, r, v}]
 var events: Array = []  # event state-machine frame ini
 
-func _init(radius: float = 640.0, lobes_n: int = 5, bpm_n: float = 74.0, amp_n: float = 10.0) -> void:
+var harmonics: Array = []
+var stretch := Vector3(1.0, 1.0, 0.0)   # sx, sy, rot
+var pillars: Array = []                 # [{x,y,r}]
+
+func _init(radius: float = 640.0, lobes_n: int = 5, bpm_n: float = 74.0, amp_n: float = 10.0, shape: Dictionary = {}) -> void:
 	R = radius
 	lobes = lobes_n
 	bpm = bpm_n
 	amp = amp_n
+	if shape.has("harmonics") and not shape.harmonics.is_empty():
+		harmonics = shape.harmonics
+	else:
+		harmonics = [[lobes_n, 0.10, 0.7], [lobes_n * 2 + 1, 0.05, 2.1]]
+	if shape.has("stretch"):
+		stretch = Vector3(shape.stretch[0], shape.stretch[1], shape.stretch[2])
 	for i in N:
 		var a := float(i) / float(N) * TAU
-		var base := R * (1.0 + (amp / R) * sin(a * float(lobes)))
+		var harm := 1.0
+		for h in harmonics:
+			harm += float(h[1]) * sin(float(h[0]) * a + float(h[2]))
+		harm = maxf(0.35, harm)
+		var b := a - stretch.z
+		var ell := 1.0 / sqrt(pow(cos(b) / stretch.x, 2.0) + pow(sin(b) / stretch.y, 2.0))
+		var base := R * harm * ell
 		pts.append({"a": a, "base": base, "r": base, "v": 0.0})
+	# pilar internal (massa gelap non-konveks)
+	for pl in shape.get("pillars", []):
+		var dist: float = float(pl.get("d", 0.4)) * R
+		var ax: float = float(pl.get("a", 0.0))
+		var c0 := Vector2(cos(ax), sin(ax)) * dist
+		var dir := ax + PI / 2.0
+		var plen: float = float(pl.get("len", 240))
+		var wid: float = float(pl.get("wid", 90))
+		var bend: float = float(pl.get("bend", 0.0))
+		for k2 in 3:
+			var t2: float = (float(k2) / 2.0 - 0.5) * plen
+			var bow: float = bend * plen * 0.22 * sin(PI * (float(k2) / 2.0))
+			var pos := c0 + Vector2(cos(dir), sin(dir)) * t2 + Vector2(-sin(dir), cos(dir)) * bow
+			var pa := atan2(pos.y, pos.x)
+			var wr: float = radius_at(pa) - wid * 0.5 - 24.0
+			if pos.length() > wr and pos.length() > 1e-6:
+				pos *= wr / pos.length()
+			pillars.append({"x": pos.x, "y": pos.y, "r": wid * 0.5})
 
 func beat() -> float:
 	# denyut jantung: sistol tajam + rileks (sin(t*2.5) dasar spec owner)
@@ -73,6 +107,17 @@ func collide(pos: Vector2, center: Vector2, margin: float) -> Vector2:
 	var q := pos - center
 	var r := q.length()
 	var a := atan2(q.y, q.x)
+	# pilar internal menolak entitas
+	for pi in pillars:
+		var pd := pos - Vector2(pi.x, pi.y)
+		var pr := pd.length()
+		if pr < 1e-4:
+			pd = Vector2(pi.x, pi.y).normalized()
+			if pd.length() < 0.5:
+				pd = Vector2(1, 0)
+			pr = 1.0
+		if pr < float(pi.r) + margin:
+			return Vector2(pi.x, pi.y) + pd.normalized() * (float(pi.r) + margin)
 	var wall := radius_at(a) - margin
 	if open_amt > 0.4:
 		var da := absf(fmod(a - door_angle + 3.0 * PI, TAU) - PI)
