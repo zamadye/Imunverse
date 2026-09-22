@@ -73,3 +73,25 @@ Implementasi:
 Bukti: `docs/vision-snapshot/after-chamber-swarm-hud.jpg` (labirin terhubung +
 segel katup di room aktif), `after-chamber-open-door.jpg` (katup terbuka,
 eritrosit mengalir antar-room), `after-pathogen-closeup.jpg`.
+
+## 6. KOHERENSI MAKRO-MIKRO (increment "next", 2026-09-22)
+
+Spec owner (commit `8acc8c5`): zoom macro→micro SEAMLESS — peta macro adalah
+dunia yang sama, bukan papan terpisah. Implementasi:
+
+- `tools/sync-bodymap.mjs` — `data/body-map.json` DIREGENERASI dari
+  `data/lumen-labyrinth.json` (satu sumber kebenaran): world bbox, organ xy
+  (flip-Y agar orientasi = foto referensi: START bawah, GOAL atas), vessels =
+  edge koridor berkelok, anchors START/GOAL. Denah tak boleh edit manual.
+- Layout labirin v2 mengikuti tata letak foto referensi: usus bawah,
+  ginjal-lambung kanan-tengah, hati kiri, pankreas pusat, paru-jantung atas,
+  GOAL kanan-atas; 19 node / 24 koridor; palet & motif per-organ di data.
+- Status denah (cleared/active/locked) + overlay room-graph kini mengikuti
+  ROOM FISIK labirin (`extra.lab`), bukan journey zona lama.
+- `macroView` memakai flag `camera.macroFlat` (fit labirin ≈ 0.39 > ambang
+  lama 0.25); guard SNAP MACRO disesuaikan (< 0.6).
+- Dinding labirin berdenyut fisik (sistole/diastole) — guard beat baru.
+
+Bukti: `after-map-denah-states.jpg` (denah = proyeksi labirin, route teal
+menanjak START→GOAL, node status fisik), `after-chamber-swarm-hud.jpg`
+(micro), keduanya satu koordinat dunia.
