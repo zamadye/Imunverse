@@ -95,3 +95,28 @@ dunia yang sama, bukan papan terpisah. Implementasi:
 Bukti: `after-map-denah-states.jpg` (denah = proyeksi labirin, route teal
 menanjak START→GOAL, node status fisik), `after-chamber-swarm-hud.jpg`
 (micro), keduanya satu koordinat dunia.
+
+## 7. INCREMENT a/b/c (2026-09-22, arahan owner "a»b»c")
+
+(b) GAMEPLAY PER-ROOM — `a6a2ff3`
+- Kuota musuh simultan per node (data `enemies`); junction = pass-through aman.
+- Wave spawnSys PAUSE kecuali room aktif SWARM dan alive < kuota (musuh tak
+  bocor antar-room).
+- Hazard Layer C spec owner: lambung = acid DoT (2 HP/0.5 dtk), usus halus &
+  usus besar = mucus (speed x0.6 via `mucusSlow` player), hati = bile (dorong
+ 沿 arus x2.2). Guard: junction, hazard, pause-lockdown, mucus.
+
+(c) BLOOM ADDITIVE — `a0424be`
+- Dua pass blur 'lighter' (8px a0.26 + 20px a0.10) pada frame GL: rim membran,
+  segel katup, glow patogen menyala kelas engine; black level dijaga.
+
+(a) PARITY GODOT LABIRIN — `926fef5`
+- `tools/godot/gen-lab-gd.mjs` -> `godot/arena/lab_data.gd` (SATU SUMBER json).
+- `godot/arena/labyrinth_sim.gd`: SDF union(chamber,kapsul)-segel, state
+  per-room, junction aman — mirror JS.
+- guard.gd check-7: kontinuitas route (0/153 putus), koridor tertutup 8 arah,
+  segel menahan saat lockdown, junction open. TOTAL_FAIL=0.
+- arena.gd MODE LAB: slice visual labirin (koridor Line2D ber-rim additive,
+  chamber, segel teal, patogen bintang berduri, traversal route + kamera
+  follow). Bukti `godot-arena-1.jpg` (SWARM room kapiler + segel) &
+  `godot-arena-2.jpg` (traversal OPEN).
