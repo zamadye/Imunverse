@@ -381,18 +381,46 @@ _jumpToZone(game, 'heart');
   game.input.keys.delete('map');
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
   const zoomLepas = cam.corridorTarget;
-  // DESIGN ULANG 2026-09-22: framing chamber tertutup (diorama) — saat combat
-  // SELURUH membran harus masuk bingkai; bukti bukan klaim.
+  // DESIGN ULANG 2026-09-22 v3: LABIRIN LUMEN — koridor sempit tertutup:
+  // dari pemain, dinding terjangkau pandangan (8 arah <= 460 world) KECUALI
+  // chamber organ besar; dan route START->GOAL kontinu tak putus (sdf<0).
   {
-    const camF = runS.camera, chF = runS.chamber;
-    let luarF = 0; const vwF = camF.viewW || 960, vhF = camF.viewH || 540;
-    for (let i = 0; i < 48; i++) {
-      const aF = (i / 48) * Math.PI * 2; const rrF = chF.radiusAt(aF);
-      const pF = camF.project(chF.cx + Math.cos(aF) * rrF, chF.cy + Math.sin(aF) * rrF);
-      if (pF.x < 2 || pF.x > vwF - 2 || pF.y < 2 || pF.y > vhF - 2) luarF++;
+    const chL = runS.chamber;
+    if (chL && chL.isLabyrinth) {
+      const plL = runS.player;
+      let jauh = 0;
+      const bigRoom = chL.active().r >= 200;
+      if (!bigRoom) {
+        for (let k = 0; k < 8; k++) {
+          const aK = (k / 8) * Math.PI * 2;
+          let hit = 1e9;
+          for (let r = 10; r < 700; r += 10) {
+            if (chL.sdf(plL.x + Math.cos(aK) * r, plL.y + Math.sin(aK) * r) > 0) { hit = r; break; }
+          }
+          if (hit > 460) jauh++;
+        }
+      }
+      cek('LABIRIN: koridor TERTUTUP — dinding terlihat di sekeliling pemain (8 arah <= 460)',
+        jauh === 0, `${jauh}/8 arah terlalu lapang (room=${chL.activeId} r=${chL.active().r})`);
+      let putus = 0, samp = 0;
+      const esL = chL.edgeSegs;
+      for (const id of chL.route) {
+        const n = chL.node(id);
+        if (chL.sdf(n.x, n.y, false) > -20) putus++;
+        samp++;
+      }
+      for (const es of esL) for (const sg of es.segs) {
+        for (let t = 0.2; t < 0.9; t += 0.2) {
+          const x = sg.x0 + (sg.x1 - sg.x0) * t, y = sg.y0 + (sg.y1 - sg.y0) * t;
+          if (chL.sdf(x, y, false) > -12) putus++;
+          samp++;
+        }
+      }
+      cek('LABIRIN: SATU KESATUAN — route START->GOAL + semua koridor kontinu tak putus',
+        putus === 0, `${putus}/${samp} sampel di luar lumen`);
+    } else {
+      cek('LABIRIN: mode labirin aktif', false, 'run.chamber bukan LumenLabyrinth');
     }
-    cek('DESAIN ULANG: framing combat — SELURUH membran chamber masuk bingkai (diorama tertutup)',
-      luarF === 0, `${luarF}/48 titik membran di luar layar; zoom=${camF.corridorTarget.toFixed(3)}`);
   }
   cek('OPEN-WORLD: tahan M = SNAP MACRO kapan pun; lepas → kembali zoom starter',
     zoomM < 0.2 && Math.abs(zoomM - fitM) < 1e-6 && zoomStarter >= 0.55 && zoomLepas >= 0.55,

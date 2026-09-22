@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "doc": "LABIRIN LUMEN SATU KESATUAN (ref ARENA_ZOOM_OUT_REFERENCE_.png): koridor lumen berkelok menyambungkan semua chamber organ — bukan arena putus per zona. Koridor sempit; hanya organ besar (jantung) yang lapang. Route START->GOAL = rantai room; cabang silang = loop labirin.",
+  "corridorWidth": 68,
+  "nodes": [
+    { "id": "start",     "x": 620,  "y": 1500, "r": 95,  "organ": "kapiler",      "motif": 0, "label": "Muara Kapiler (START)" },
+    { "id": "j1",        "x": 700,  "y": 1240, "r": 62,  "organ": "kapiler",      "motif": 0, "junction": true },
+    { "id": "lambung",   "x": 980,  "y": 1150, "r": 150, "organ": "lambung",      "motif": 3, "label": "Rongga Lambung" },
+    { "id": "j2",        "x": 760,  "y": 980,  "r": 60,  "organ": "kapiler",      "motif": 0, "junction": true },
+    { "id": "limfe",     "x": 430,  "y": 1000, "r": 140, "organ": "limfe",        "motif": 5, "label": "Sinus Limfe" },
+    { "id": "j3",        "x": 640,  "y": 760,  "r": 60,  "organ": "saraf",        "motif": 4, "junction": true },
+    { "id": "saraf",     "x": 350,  "y": 620,  "r": 130, "organ": "saraf",        "motif": 4, "label": "Kanalis Saraf" },
+    { "id": "j4",        "x": 720,  "y": 560,  "r": 60,  "organ": "paru",         "motif": 1, "junction": true },
+    { "id": "paru",      "x": 480,  "y": 330,  "r": 160, "organ": "paru",         "motif": 1, "label": "Alveolus Paru" },
+    { "id": "j5",        "x": 860,  "y": 420,  "r": 60,  "organ": "aliran_darah", "motif": 0, "junction": true },
+    { "id": "aliran",    "x": 1020, "y": 640,  "r": 140, "organ": "aliran_darah", "motif": 0, "label": "Arteri Utama" },
+    { "id": "j6",        "x": 980,  "y": 250,  "r": 62,  "organ": "jantung",      "motif": 2, "junction": true },
+    { "id": "jantung",   "x": 820,  "y": 120,  "r": 230, "organ": "jantung",      "motif": 2, "big": true, "label": "Bilik Jantung (GOAL)" }
+  ],
+  "edges": [
+    { "a": "start",   "b": "j1",      "bend":  70 },
+    { "a": "j1",      "b": "lambung", "bend": -60 },
+    { "a": "j1",      "b": "j2",      "bend":  55 },
+    { "a": "j2",      "b": "limfe",   "bend": -70 },
+    { "a": "j2",      "b": "j3",      "bend":  50 },
+    { "a": "j3",      "b": "saraf",   "bend": -55 },
+    { "a": "j3",      "b": "j4",      "bend":  60 },
+    { "a": "j4",      "b": "paru",    "bend": -65 },
+    { "a": "j4",      "b": "j5",      "bend":  55 },
+    { "a": "j5",      "b": "aliran",  "bend": -60 },
+    { "a": "j5",      "b": "j6",      "bend":  65 },
+    { "a": "j6",      "b": "jantung", "bend": -40 },
+    { "a": "lambung", "b": "j5",      "bend":  90, "cross": true },
+    { "a": "limfe",   "b": "saraf",   "bend": -80, "cross": true },
+    { "a": "paru",    "b": "j6",      "bend":  85, "cross": true }
+  ],
+  "route": ["start", "j1", "lambung", "j2", "limfe", "j3", "saraf", "j4", "paru", "j5", "aliran", "j6", "jantung"]
+}

@@ -93,6 +93,7 @@ import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve
 import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
 import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _forceAdvance } from '../systems/world-journey.js';
 import { BioChamber } from '../systems/bio-chamber.js';
+import { LumenLabyrinth } from '../systems/lumen-labyrinth.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
 import { drawArenaHud } from '../ui/hud-arena.js';
 import { drawPathogenSpikes, drawPathogenBody } from '../render/pathogen-attire.js';
@@ -934,7 +935,10 @@ export const game = {
       }
     }
     if (!macroActiveNow) {
-      if (run.chamber) {
+      if (run.chamber && run.chamber.isLabyrinth) {
+        // LABIRIN: kamera follow penuh — pemain menjelajah koridor kontinu
+        run.camera.follow(player.x + nudgeX, player.y + nudgeY, dt, false, lookX, lookY);
+      } else if (run.chamber) {
         // DIORAMA: chamber terkunci di bingkai; kamera hanya digeser ringan
         // mengikuti pemain (opsi design-ulang: ruang tertutup selalu terbaca)
         chamberFitZoom(run);
@@ -956,9 +960,11 @@ export const game = {
     // area starter (shape.cameraZoom). Sekali per run — ganti zona tidak mengulang.
     try {
       // ARENA TERTUTUP: zoom arena dari zone.zoom (rujukan ARENA_ZOOM_OUT_REFERENCE)
-      const targetZoom = run.chamber
-        ? chamberFitZoom(run)   // DESIGN ULANG: seluruh membran masuk bingkai
-        : (run.bodyWorld
+      const targetZoom = run.chamber && run.chamber.isLabyrinth
+        ? 0.85   // LABIRIN: koridor sempit terbaca, dinding selalu dekat
+        : run.chamber
+          ? chamberFitZoom(run)   // DESIGN ULANG: seluruh membran masuk bingkai
+          : (run.bodyWorld
           ? (((() => { try { return (currentZone(run) || {}).zoom; } catch { return null; } })()) || 0.66)
           : (run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1));
       run.introT = (run.introT == null ? 0 : run.introT) + dt;
@@ -1976,6 +1982,19 @@ applyChapterTier(enemy, run) {
     const def = list.find((a) => a.id === ((zdef && zdef.arenaId) || '')) || list[0];
     const px = (runC.player && runC.player.x) || 0;
     const py = (runC.player && runC.player.y) || 0;
+    const labDef = getData().lumenLabyrinth;
+    if (labDef) {
+      // ARENA SATU KESATUAN: labirin lumen kontinu lintas zona — dibuat SATU
+      // kali per run; ganti zona TIDAK memutus ruang (mandat owner 2026-09-22).
+      if (runC.chamber && runC.chamber.isLabyrinth) { runC.chamber.zoneId = zid; return; }
+      runC.chamber = new LumenLabyrinth(labDef, def, null, null);
+      runC.chamber.zoneId = zid;
+      runC.chamber.enter();
+      try { runC.erythro = new ErythroFlow(); runC.erythro.seed(runC.chamber); } catch { runC.erythro = null; }
+      if (runC.player) { const s0 = runC.chamber.active(); runC.player.x = s0.x; runC.player.y = s0.y; runC.player.vx = 0; runC.player.vy = 0; }
+      if (this._bodyGL && this._bodyGL.setPalette) { try { this._bodyGL.setPalette(runC.chamber.def); } catch { /* abaikan */ } }
+      return;
+    }
     runC.chamber = new BioChamber(def, px, py);
     runC.chamber.zoneId = zid;
     runC.chamber.enter();
