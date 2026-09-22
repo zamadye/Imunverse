@@ -2006,9 +2006,10 @@ applyChapterTier(enemy, run) {
     if (labDef) {
       // ARENA SATU KESATUAN: labirin lumen kontinu lintas zona — dibuat SATU
       // kali per run; ganti zona TIDAK memutus ruang (mandat owner 2026-09-22).
-      if (runC.chamber && runC.chamber.isLabyrinth) { runC.chamber.zoneId = zid; return; }
+      if (runC.chamber && runC.chamber.isLabyrinth) { runC.chamber.zoneId = zid; runC.chamber.zoneDef = def; return; }
       runC.chamber = new LumenLabyrinth(labDef, def, null, null);
       runC.chamber.zoneId = zid;
+      runC.chamber.zoneDef = def;
       runC.chamber.enter();
       try { runC.erythro = new ErythroFlow(); runC.erythro.seed(runC.chamber); } catch { runC.erythro = null; }
       if (runC.player) { const s0 = runC.chamber.active(); runC.player.x = s0.x; runC.player.y = s0.y; runC.player.vx = 0; runC.player.vy = 0; }
@@ -2685,6 +2686,14 @@ applyChapterTier(enemy, run) {
         run.glActive = !!(gl && gl.ok);
       }
       let drew = false;
+      // FASE B: palet GL mengikuti room aktif labirin (_syncActive membangun
+      // ulang chamber.def tiap pindah room) — refresh hanya saat room berganti.
+      if (gl && gl.ok && run.chamber && run.chamber.isLabyrinth && gl.setPalette) {
+        try {
+          const ar = run.chamber.active(); const pk = ar ? ar.id : '';
+          if (pk !== this._palKey) { this._palKey = pk; gl.setPalette(run.chamber.def); }
+        } catch { /* abaikan */ }
+      }
       if (gl && gl.ok && run.chamber) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
       if (drew) {
         ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);

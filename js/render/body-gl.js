@@ -241,7 +241,9 @@ export class BodyGL {
     const MOTIF = { kapiler: 0, aliran_darah: 0, paru: 1, jantung: 2, lambung: 3, saraf: 4, limfe: 5, usus_halus: 3, usus_besar: 0, ginjal: 5, pankreas: 5, hati: 0, goal: 1 };
     this.motif = MOTIF[(def && def.id) || ''] != null ? MOTIF[(def && def.id) || ''] : 0;
     if (!this.ok) return;
-    const wall = (def && def.wall) || {};
+    // FASE B: data arena menyimpan palet di shape.wall.interior (def labirin
+    // per-room memakai def.wall.interior) — dukung kedua path.
+    const wall = (def && ((def.shape && def.shape.wall) || def.wall)) || {};
     const it = wall.interior || {};
     const rgb = (s, d) => (s || d).split(',').map((v) => Number(v) / 255);
     const gl = this.gl;
