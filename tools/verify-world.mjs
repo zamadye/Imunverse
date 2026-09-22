@@ -356,7 +356,7 @@ _jumpToZone(game, 'heart');
   const cam = runS.camera;
   // SNAP MACRO (mandat owner, bukti "arena full"): awal run kamera auto-fit
   // SELURUH struktur organ ke layar; target harus == macroFitZoom(shape) & kecil.
-  runS.introT = 0; runS.macroSnapped = false;
+  runS.introT = 0; runS.macroWasOn = false; // edge SNAP MACRO: reset flag edge-trigger game.js
   for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
   const establishing = cam.corridorTarget;
   // macro kini mem-fit PETA TUBUH bila body-map.json ada (fallback: koridor zona)
@@ -440,11 +440,27 @@ _jumpToZone(game, 'heart');
     drawWorldMap(ctx2, P2, def, 1.23);
   } catch (e) { err = e.message; }
   cek('WORLD MAP: render macro berjalan tanpa error & tanpa NaN', !err && nan === 0 && ops > 0, err || `ops=${ops} nan=${nan}`);
-  runS.worldMapDef = def; runS.introT = 0; runS.macroSnapped = false;
+  runS.worldMapDef = def; runS.introT = 0; runS.macroWasOn = false; // edge SNAP MACRO: reset flag edge-trigger game.js
   for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
   const tMap = runS.camera.corridorTarget;
   cek('WORLD MAP: SNAP MACRO auto-fit SELURUH tubuh (target < 0,12)', tMap < 0.12, `target=${tMap.toFixed(4)}`);
   runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
+}
+
+// ---------- SILUET PATOGEN BERDURI (attire per keluarga) ----------
+{
+  let nan = 0, ops = 0, err = null;
+  const grad = { addColorStop() {} };
+  const base = { canvas: { width: 400, height: 300 }, createLinearGradient: () => grad, createRadialGradient: () => grad, measureText: () => ({ width: 40 }) };
+  const ctxS = new Proxy(base, { get(t, p) { if (p in t) return t[p]; if (typeof p !== 'string') return undefined; if (/Style$|^font$|^line(Width|Cap|Join|DashOffset)$|^global|^text|^filter$|^shadow|^imageSmoothing|^miterLimit$|^direction$/.test(p)) return ''; return (t[p] = (...a) => { ops++; for (const v of a) if (typeof v === 'number' && !Number.isFinite(v)) nan++; }); }, set(t, p, v) { t[p] = v; return true; } });
+  try {
+    const { drawPathogenSpikes } = await import('../js/render/pathogen-attire.js');
+    for (const id of ['virus', 'bakteri', 'parasit', 'spora', 'sel_kanker', 'protozoa', 'toksin', 'aneh_baru']) {
+      drawPathogenSpikes(ctxS, { radius: 16, weavePhase: 0.7, def: { id } }, 2.5);
+    }
+  } catch (e) { err = e.message; }
+  cek('SILUET PATOGEN: attire berduri 7 keluarga + fallback tergambar tanpa NaN',
+    !err && nan === 0 && ops > 200, err || `ops=${ops} nan=${nan}`);
 }
 
 // ---------- BENTUK ARENA (analisis Pathogenic): asimetris + pilar non-konveks ----------

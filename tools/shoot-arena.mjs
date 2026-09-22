@@ -71,6 +71,21 @@ await page.waitForFunction('window.__IMUNVERSE.game.run.chamber && window.__IMUN
 await page.waitForTimeout(4000);
 await shot('after-chamber-swarm-hud.jpg');
 
+// CLOSE-UP siluet berduri: bekukan update, paksa zoom dekat, potret, pulihkan
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  g._origUpdate = g.update;
+  g.update = () => {};
+  g.run.camera.setCorridorZoom(1.0);
+  g.run.camera.corridorScale = g.run.camera.corridorTarget;
+});
+await page.waitForTimeout(800);
+await shot('after-pathogen-closeup.jpg');
+await page.evaluate(() => {
+  const g = window.__IMUNVERSE.game;
+  if (g._origUpdate) { g.update = g._origUpdate; delete g._origUpdate; }
+});
+
 // PURIFIED/OPEN: basmi semua patogen (jalan sah — mekanisme kill nyata)
 await page.evaluate(() => {
   const run = window.__IMUNVERSE.game.run;

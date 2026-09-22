@@ -95,6 +95,7 @@ import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _for
 import { BioChamber } from '../systems/bio-chamber.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
 import { drawArenaHud } from '../ui/hud-arena.js';
+import { drawPathogenSpikes, drawPathogenBody } from '../render/pathogen-attire.js';
 import { ErythroFlow } from '../render/erythrocytes.js';
 // P6 (§20): sutradara dampak — tangga normal→boss + pengendali keramaian
 import { updateGameFeel, numberAllowed, labelAllowed, playSfx, addImpactShake, applyHitImpact, applyDeathImpact, particleBudget, deathPopFor, gfTier, tierForEvent } from '../systems/game-feel.js';
@@ -2557,7 +2558,7 @@ applyChapterTier(enemy, run) {
           }
         }
       } catch { mapStates = null; }
-      try { drawWorldMap(ctx, P, run.worldMapDef, time, mapStates); } catch (err) { console.warn('[phagos] worldMap:', err); }
+      try { drawWorldMap(ctx, P, run.worldMapDef, time, mapStates, { route: (getData().zones && getData().zones.route) || [], journey: run.journey }); } catch (err) { console.warn('[phagos] worldMap:', err); }
       // HINT on-screen saat macro aktif supaya zoom-out seluruh tubuh TIDAK terlewatkan
       try {
         const macroNow = !!run.arenaShape && ((this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);
@@ -2929,6 +2930,12 @@ applyChapterTier(enemy, run) {
           scaleX: sqX,
           scaleY: sqY,
         });
+        // BADAN vektor + SILUET BERDURI per keluarga (analisis Pathogenic);
+        // stealth tetap tak terlihat (attire ikut sembunyi)
+        if (!hidden) {
+          if (!hasSprite(path)) { try { drawPathogenBody(ctx, e, time / 1000); } catch { /* abaikan */ } }
+          try { drawPathogenSpikes(ctx, e, time / 1000); } catch { /* abaikan */ }
+        }
         drawPathogenMutation(ctx, e, e.visualTier ?? pathogenVisualTier(run.spawnSys?.wave || 1, e), time);
         ctx.globalAlpha = 1;
         // HP bar mini di atas kepala (tanpa bob — anchor stabil)

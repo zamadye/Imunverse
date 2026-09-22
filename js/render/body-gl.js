@@ -43,6 +43,7 @@ uniform float u_vents[8];
 uniform int u_nVents;
 uniform vec3 u_pill[12];   // pilar internal xy+radius (massa gelap non-konveks)
 uniform int u_nPill;
+uniform float u_motif;     // 0 cobble 1 fringe paru 2 striasi jantung 3 rugae 4 mielin 5 folikel
 out vec4 frag;
 
 float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
@@ -148,6 +149,31 @@ void main() {
   colBand = mix(colBand, vec3(0.74, 0.26, 0.19), smoothstep(0.44, 0.76, fr) * smoothstep(0.35, 1.0, t));
   colBand = mix(colBand, colBand * vec3(1.2, 0.6, 0.4), (1.0 - step(0.5, u_state)) * 0.4); // infeksi
 
+  // ---- MOTIF DINDING PER-ORGAN (analisis Pathogenic: dinding bermotif organ) ----
+  float arc = a * 340.0;
+  if (u_motif < 0.5) {           // 0: cobblestone endotel (pembuluh/kapiler)
+    vec3 vv = vor(vec2(arc * 0.06, d * 0.06));
+    colBand = mix(colBand, colBand * (0.75 + 0.5 * smoothstep(0.0, 0.25, vv.x)), 0.7);
+    colBand += (1.0 - smoothstep(0.02, 0.10, vv.x)) * vec3(0.35, 0.10, 0.10) * 0.5;
+  } else if (u_motif < 1.5) {    // 1: fringe silia berayun (paru)
+    float fr2 = sin(arc * 0.9 + sin(u_time * 3.0 + arc * 0.13) * 2.0);
+    float fringe = smoothstep(0.2, 0.9, fr2) * smoothstep(-W - 30.0, -W - 4.0, d) * step(d, -W + 8.0);
+    colBand += fringe * vec3(1.0, 0.45, 0.55) * 0.55;
+    colIn += fringe * vec3(1.0, 0.40, 0.55) * 0.35;
+  } else if (u_motif < 2.5) {    // 2: striasi serat otot (jantung)
+    float st2 = sin(arc * 0.35) * 0.5 + 0.5;
+    colBand *= 0.80 + 0.35 * st2;
+  } else if (u_motif < 3.5) {    // 3: lipatan rugae (lambung)
+    float rg = sin(arc * 0.12 + sin(d * 0.05) * 2.0);
+    colBand *= 0.82 + 0.30 * smoothstep(0.3, 0.9, rg);
+  } else if (u_motif < 4.5) {    // 4: pita mielin (saraf)
+    float my = step(0.5, fract(arc * 0.045));
+    colBand = mix(colBand, colBand * vec3(1.25, 1.15, 0.95), my * 0.5);
+  } else {                       // 5: nodul folikel (limfe)
+    float nd = sin(arc * 0.22) * sin(d * 0.22);
+    colBand += smoothstep(0.55, 0.95, nd) * vec3(0.45, 0.35, 0.15) * 0.5;
+  }
+
   // ---- TISSUE LUAR ----
   vec3 v3 = vor(w * 0.046 + 0.45 * vec2(sin(w.y * 0.017), cos(w.x * 0.017)));
   vec3 c1 = vec3(0.15, 0.31, 0.62), c2 = vec3(0.09, 0.48, 0.53), c3 = vec3(0.70, 0.19, 0.22);
@@ -201,7 +227,7 @@ export class BodyGL {
       this.prog = prog;
       gl.useProgram(prog);
       this.u = {};
-      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_center', 'u_radii', 'u_glow', 'u_glowHot', 'u_fill', 'u_deep', 'u_state', 'u_shock', 'u_door', 'u_open', 'u_vents', 'u_nVents', 'u_pill', 'u_nPill']) {
+      for (const n of ['u_res', 'u_cam', 'u_scale', 'u_time', 'u_beat', 'u_center', 'u_radii', 'u_glow', 'u_glowHot', 'u_fill', 'u_deep', 'u_state', 'u_shock', 'u_door', 'u_open', 'u_vents', 'u_nVents', 'u_pill', 'u_nPill', 'u_motif']) {
         this.u[n] = gl.getUniformLocation(prog, n);
       }
       this.radii = new Float32Array(CHAMBER_POINTS);
@@ -215,6 +241,8 @@ export class BodyGL {
 
   /** Palet chamber dari definisi arena (data-driven). */
   setPalette(def) {
+    const MOTIF = { kapiler: 0, aliran_darah: 0, paru: 1, jantung: 2, lambung: 3, saraf: 4, limfe: 5 };
+    this.motif = MOTIF[(def && def.id) || ''] != null ? MOTIF[(def && def.id) || ''] : 0;
     if (!this.ok) return;
     const wall = (def && def.wall) || {};
     const it = wall.interior || {};
@@ -259,6 +287,7 @@ export class BodyGL {
     }
     gl.uniform3fv(this.u.u_pill, pills);
     gl.uniform1i(this.u.u_nPill, np);
+    gl.uniform1f(this.u.u_motif, this.motif || 0);
     for (let i = 0; i < 8; i++) this.vents[i] = i < chamber.vents.length ? chamber.vents[i].a : 0;
     gl.uniform1fv(this.u.u_vents, this.vents);
     gl.uniform1i(this.u.u_nVents, Math.min(8, chamber.vents.length));

@@ -49,7 +49,7 @@ function chamberPath(ctx, o, xy, beat, pr) {
  * @param {object} def isi data/body-map.json
  * @param {number} time detik
  */
-export function drawWorldMap(ctx, P, def, time, states = null) {
+export function drawWorldMap(ctx, P, def, time, states = null, extra = null) {
   if (!def) return;
   const xy = makeXY(def);
   const pr = (x, y) => P.project(x, y);
@@ -218,6 +218,57 @@ export function drawWorldMap(ctx, P, def, time, states = null) {
     ctx.textAlign = 'center';
     ctx.fillText(a.label, q.x, q.y + r * 0.35);
     ctx.textAlign = 'left';
+  }
+
+  // ---- 5. GRAF RUANG ala minimap Pathogenic: node blob per zona + connector ----
+  if (extra && extra.route && extra.journey) {
+    const jn = extra.journey;
+    const xy2 = makeXY(def);
+    const posOf = [];
+    const seen = {};
+    for (let i = 0; i < extra.route.length; i++) {
+      const z = extra.route[i];
+      const org = (def.organs || []).find((o) => o.id === z.arenaId);
+      const bx = org ? org.x : 0.5, by = org ? org.y : 0.5;
+      const k = seen[z.arenaId] = (seen[z.arenaId] || 0) + 1;
+      const tot = extra.route.filter((r) => r.arenaId === z.arenaId).length;
+      const off = (k - (tot + 1) / 2) * 0.055;
+      posOf.push(xy2(bx + off, by - off * 0.6));
+    }
+    // connector tipis berarus
+    ctx.save();
+    ctx.strokeStyle = 'rgba(120,240,230,0.5)';
+    ctx.lineWidth = Math.max(1.5, 26 * s0);
+    ctx.setLineDash([60 * s0, 90 * s0]);
+    ctx.lineDashOffset = -time * 70 * s0;
+    ctx.beginPath();
+    for (let i = 0; i < posOf.length; i++) {
+      const q = pr(posOf[i].x, posOf[i].y);
+      if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // node blob asimetris per zona
+    for (let i = 0; i < posOf.length; i++) {
+      const q = pr(posOf[i].x, posOf[i].y);
+      const st = i < jn.index ? 'cleared' : i === jn.index ? 'active' : 'locked';
+      const rn = Math.max(5, (st === 'active' ? 300 : 230) * s0);
+      ctx.beginPath();
+      for (let k2 = 0; k2 <= 22; k2++) {
+        const a2 = (k2 / 22) * TAU;
+        const lb = 1 + Math.sin(a2 * 3 + i * 1.7) * 0.22 + Math.sin(a2 * 5 - i) * 0.10;
+        const px2 = q.x + Math.cos(a2) * rn * lb, py2 = q.y + Math.sin(a2) * rn * lb * 0.82;
+        if (k2 === 0) ctx.moveTo(px2, py2); else ctx.lineTo(px2, py2);
+      }
+      ctx.closePath();
+      if (st === 'cleared') { ctx.fillStyle = 'rgba(90,235,170,0.85)'; ctx.fill(); }
+      else if (st === 'active') {
+        ctx.fillStyle = 'rgba(40,180,170,0.9)'; ctx.fill();
+        ctx.strokeStyle = `rgba(160,255,240,${0.6 + 0.4 * Math.sin(time * 5)})`;
+        ctx.lineWidth = Math.max(1.5, 40 * s0); ctx.stroke();
+      } else { ctx.fillStyle = 'rgba(70,16,28,0.85)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,110,100,0.5)'; ctx.lineWidth = Math.max(1, 20 * s0); ctx.stroke(); }
+    }
+    ctx.restore();
   }
 
   // vignette makro
