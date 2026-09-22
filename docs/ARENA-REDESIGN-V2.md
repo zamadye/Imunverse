@@ -104,7 +104,7 @@ menanjak START→GOAL, node status fisik), `after-chamber-swarm-hud.jpg`
   bocor antar-room).
 - Hazard Layer C spec owner: lambung = acid DoT (2 HP/0.5 dtk), usus halus &
   usus besar = mucus (speed x0.6 via `mucusSlow` player), hati = bile (dorong
- 沿 arus x2.2). Guard: junction, hazard, pause-lockdown, mucus.
+ mengikuti arus x2.2). Guard: junction, hazard, pause-lockdown, mucus.
 
 (c) BLOOM ADDITIVE — `a0424be`
 - Dua pass blur 'lighter' (8px a0.26 + 20px a0.10) pada frame GL: rim membran,
