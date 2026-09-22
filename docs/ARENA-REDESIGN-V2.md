@@ -42,3 +42,34 @@ perombakan total beserta buktinya.
 Engine core (loop, collision, spawn, save), ekonomi, mutasi, HUD 5 elemen,
 state machine LOCKDOWN→SWARM→PURIFIED→OPEN, spore vents, shockwave, mulut
 pintu teal — semua mekanik tetap; hanya presentasi & skala ruang yang ulang.
+
+## 5. INCREMENT LABIRIN SATU KESATUAN (2026-09-22, mandat owner lanjutan)
+
+Owner: arena jangan luas & jangan putus per zona — satu kesatuan labirin
+koridor saling terhubung; hanya organ besar (jantung) yang lapang. Referensi
+denah: `docs/reference-pathogenic/ARENA_ZOOM_OUT_REFERENCE_.png` (commit
+owner `8acc8c5`): lumen pembuluh teal berkelok START→GOAL menyambungkan semua
+chamber organ; spec owner: navigasi HANYA di dalam lumen + chamber, collision
+mask, arus hemodinamik.
+
+Implementasi:
+- `data/lumen-labyrinth.json` — graf 13 node (7 chamber organ + junction) &
+  15 edge koridor berkelok (bend), lebar 68; route START→GOAL + 3 cabang
+  silang (loop labirin). Chamber `big` hanya jantung (r 230).
+- `js/systems/lumen-labyrinth.js` — SDF union(chamber, kapsul koridor) minus
+  obstacle (pilar + SEGEL katup saat lockdown/swarm); state machine PER-ROOM
+  (masuk room belum bersih → LOCKDOWN → SWARM → PURIFIED → OPEN = segel
+  lepas); `currentAt()` arus hemodinamik; interface kompatibel BioChamber
+  sehingga engine core tak berubah.
+- `js/render/body-gl.js` FRAG v3 — SDF segmen (u_ch/u_seg/u_segw/u_obs),
+  motif per-chamber terdekat, segel katup = cakram teal menyala, art
+  direction DARK WET CHAMBER dipertahankan.
+- `js/core/game.js` — labirin dibuat SATU kali per run (ganti zona tidak
+  memutus ruang); kamera follow penuh zoom 0.85 (koridor sempit terbaca).
+- Guard baru `verify-world`: (a) koridor TERTUTUP — dinding ≤ 460 world di
+  8 arah sekeliling pemain kecuali chamber big; (b) SATU KESATUAN — seluruh
+  route + koridor kontinu (sampel SDF < 0). 4 suite JS ERROR(0).
+
+Bukti: `docs/vision-snapshot/after-chamber-swarm-hud.jpg` (labirin terhubung +
+segel katup di room aktif), `after-chamber-open-door.jpg` (katup terbuka,
+eritrosit mengalir antar-room), `after-pathogen-closeup.jpg`.
