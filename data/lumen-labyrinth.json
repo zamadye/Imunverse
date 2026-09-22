@@ -3,57 +3,487 @@
   "doc": "LABIRIN LUMEN SATU KESATUAN v2 — tata letak node MENGIKUTI denah foto ARENA_ZOOM_OUT_REFERENCE_.png (START bawah-tengah, usus bawah, ginjal-lambung kanan-tengah, hati-kiri, paru-jantung atas, GOAL kanan-atas). Koridor berkelok sempit; hanya jantung yang lapang. Route = jalur teal foto; cabang = loop labirin.",
   "corridorWidth": 68,
   "nodes": [
-    { "id": "kapiler",     "x": 640,  "y": 1560, "r": 88,  "organ": "kapiler",     "motif": 0, "label": "Muara Kapiler (START)", "pal": { "fill": "132,20,24",  "deep": "58,8,10",   "glow": "255,96,70",   "glowHot": "255,220,190" } },
-    { "id": "j1",          "x": 640,  "y": 1330, "r": 60,  "organ": "kapiler",     "motif": 0, "junction": true, "pal": { "fill": "132,20,24", "deep": "58,8,10", "glow": "255,96,70", "glowHot": "255,220,190" } },
-    { "id": "usus_halus",  "x": 400,  "y": 1240, "r": 160, "organ": "usus_halus",  "motif": 3, "label": "Belitan Usus Halus", "pal": { "fill": "150,60,70",  "deep": "70,20,30",  "glow": "255,140,120", "glowHot": "255,225,200" } },
-    { "id": "usus_besar",  "x": 1060, "y": 1360, "r": 150, "organ": "usus_besar",  "motif": 0, "label": "Usus Besar", "pal": { "fill": "140,50,80",  "deep": "66,18,36",  "glow": "255,130,150", "glowHot": "255,220,210" } },
-    { "id": "j2",          "x": 800,  "y": 1150, "r": 60,  "organ": "usus_besar",  "motif": 0, "junction": true, "pal": { "fill": "140,50,80", "deep": "66,18,36", "glow": "255,130,150", "glowHot": "255,220,210" } },
-    { "id": "ginjal",      "x": 900,  "y": 1000, "r": 140, "organ": "ginjal",      "motif": 5, "label": "Pelvis Ginjal", "pal": { "fill": "130,40,50",  "deep": "60,14,20",  "glow": "255,120,100", "glowHot": "255,220,190" } },
-    { "id": "j3",          "x": 520,  "y": 1040, "r": 60,  "organ": "usus_halus",  "motif": 3, "junction": true, "pal": { "fill": "150,60,70", "deep": "70,20,30", "glow": "255,140,120", "glowHot": "255,225,200" } },
-    { "id": "pankreas",    "x": 620,  "y": 890,  "r": 120, "organ": "pankreas",    "motif": 5, "label": "Pankreas", "pal": { "fill": "150,90,40",  "deep": "70,40,14",  "glow": "255,190,110", "glowHot": "255,235,200" } },
-    { "id": "hati",        "x": 330,  "y": 760,  "r": 150, "organ": "hati",        "motif": 0, "label": "Lobus Hati", "pal": { "fill": "120,30,26",  "deep": "54,10,10",  "glow": "255,110,80",  "glowHot": "255,220,190" } },
-    { "id": "aliran_darah","x": 1180, "y": 860,  "r": 120, "organ": "aliran_darah","motif": 0, "label": "Arteri Utama", "pal": { "fill": "138,24,28",  "deep": "62,10,12",  "glow": "255,100,72",  "glowHot": "255,222,192" } },
-    { "id": "j4",          "x": 860,  "y": 780,  "r": 60,  "organ": "ginjal",      "motif": 5, "junction": true, "pal": { "fill": "130,40,50", "deep": "60,14,20", "glow": "255,120,100", "glowHot": "255,220,190" } },
-    { "id": "lambung",     "x": 1020, "y": 620,  "r": 150, "organ": "lambung",     "motif": 3, "label": "Rongga Lambung", "pal": { "fill": "128,64,26",  "deep": "60,26,10",  "glow": "255,150,80",  "glowHot": "255,230,190" } },
-    { "id": "j5",          "x": 560,  "y": 640,  "r": 60,  "organ": "hati",        "motif": 0, "junction": true, "pal": { "fill": "120,30,26", "deep": "54,10,10", "glow": "255,110,80", "glowHot": "255,220,190" } },
-    { "id": "limfe",       "x": 700,  "y": 470,  "r": 110, "organ": "limfe",       "motif": 5, "label": "Sinus Limfe", "pal": { "fill": "86,96,40",   "deep": "34,42,16",  "glow": "190,255,140", "glowHot": "240,255,210" } },
-    { "id": "saraf",       "x": 250,  "y": 430,  "r": 110, "organ": "saraf",       "motif": 4, "label": "Kanalis Saraf", "pal": { "fill": "84,44,110",  "deep": "34,16,52",  "glow": "190,140,255", "glowHot": "240,225,255" } },
-    { "id": "paru",        "x": 430,  "y": 240,  "r": 160, "organ": "paru",        "motif": 1, "label": "Alveolus Paru", "pal": { "fill": "122,26,38",  "deep": "58,10,20",  "glow": "255,110,90",  "glowHot": "255,220,190" } },
-    { "id": "j6",          "x": 640,  "y": 320,  "r": 62,  "organ": "jantung",     "motif": 2, "junction": true, "pal": { "fill": "140,16,26", "deep": "64,6,12", "glow": "255,90,70", "glowHot": "255,225,200" } },
-    { "id": "jantung",     "x": 800,  "y": 180,  "r": 210, "organ": "jantung",     "motif": 2, "big": true, "label": "Bilik Jantung", "pal": { "fill": "140,16,26",  "deep": "64,6,12",   "glow": "255,90,70",   "glowHot": "255,225,200" } },
-    { "id": "goal",        "x": 1090, "y": 140,  "r": 82,  "organ": "goal",        "motif": 1, "label": "Muara GOAL", "pal": { "fill": "40,120,110", "deep": "14,50,46",  "glow": "120,255,230", "glowHot": "230,255,250" } }
+    {
+      "id": "kapiler",
+      "x": 640,
+      "y": 1560,
+      "r": 88,
+      "organ": "kapiler",
+      "motif": 0,
+      "label": "Muara Kapiler (START)",
+      "pal": {
+        "fill": "132,20,24",
+        "deep": "58,8,10",
+        "glow": "255,96,70",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 4
+    },
+    {
+      "id": "j1",
+      "x": 640,
+      "y": 1330,
+      "r": 60,
+      "organ": "kapiler",
+      "motif": 0,
+      "junction": true,
+      "pal": {
+        "fill": "132,20,24",
+        "deep": "58,8,10",
+        "glow": "255,96,70",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "usus_halus",
+      "x": 400,
+      "y": 1240,
+      "r": 160,
+      "organ": "usus_halus",
+      "motif": 3,
+      "label": "Belitan Usus Halus",
+      "pal": {
+        "fill": "150,60,70",
+        "deep": "70,20,30",
+        "glow": "255,140,120",
+        "glowHot": "255,225,200"
+      },
+      "enemies": 6,
+      "hazard": {
+        "type": "mucus",
+        "slow": 0.6
+      }
+    },
+    {
+      "id": "usus_besar",
+      "x": 1060,
+      "y": 1360,
+      "r": 150,
+      "organ": "usus_besar",
+      "motif": 0,
+      "label": "Usus Besar",
+      "pal": {
+        "fill": "140,50,80",
+        "deep": "66,18,36",
+        "glow": "255,130,150",
+        "glowHot": "255,220,210"
+      },
+      "enemies": 6,
+      "hazard": {
+        "type": "mucus",
+        "slow": 0.6
+      }
+    },
+    {
+      "id": "j2",
+      "x": 800,
+      "y": 1150,
+      "r": 60,
+      "organ": "usus_besar",
+      "motif": 0,
+      "junction": true,
+      "pal": {
+        "fill": "140,50,80",
+        "deep": "66,18,36",
+        "glow": "255,130,150",
+        "glowHot": "255,220,210"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "ginjal",
+      "x": 900,
+      "y": 1000,
+      "r": 140,
+      "organ": "ginjal",
+      "motif": 5,
+      "label": "Pelvis Ginjal",
+      "pal": {
+        "fill": "130,40,50",
+        "deep": "60,14,20",
+        "glow": "255,120,100",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 6
+    },
+    {
+      "id": "j3",
+      "x": 520,
+      "y": 1040,
+      "r": 60,
+      "organ": "usus_halus",
+      "motif": 3,
+      "junction": true,
+      "pal": {
+        "fill": "150,60,70",
+        "deep": "70,20,30",
+        "glow": "255,140,120",
+        "glowHot": "255,225,200"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "pankreas",
+      "x": 620,
+      "y": 890,
+      "r": 120,
+      "organ": "pankreas",
+      "motif": 5,
+      "label": "Pankreas",
+      "pal": {
+        "fill": "150,90,40",
+        "deep": "70,40,14",
+        "glow": "255,190,110",
+        "glowHot": "255,235,200"
+      },
+      "enemies": 5
+    },
+    {
+      "id": "hati",
+      "x": 330,
+      "y": 760,
+      "r": 150,
+      "organ": "hati",
+      "motif": 0,
+      "label": "Lobus Hati",
+      "pal": {
+        "fill": "120,30,26",
+        "deep": "54,10,10",
+        "glow": "255,110,80",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 7,
+      "hazard": {
+        "type": "bile",
+        "push": 2.2
+      }
+    },
+    {
+      "id": "aliran_darah",
+      "x": 1180,
+      "y": 860,
+      "r": 120,
+      "organ": "aliran_darah",
+      "motif": 0,
+      "label": "Arteri Utama",
+      "pal": {
+        "fill": "138,24,28",
+        "deep": "62,10,12",
+        "glow": "255,100,72",
+        "glowHot": "255,222,192"
+      },
+      "enemies": 6
+    },
+    {
+      "id": "j4",
+      "x": 860,
+      "y": 780,
+      "r": 60,
+      "organ": "ginjal",
+      "motif": 5,
+      "junction": true,
+      "pal": {
+        "fill": "130,40,50",
+        "deep": "60,14,20",
+        "glow": "255,120,100",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "lambung",
+      "x": 1020,
+      "y": 620,
+      "r": 150,
+      "organ": "lambung",
+      "motif": 3,
+      "label": "Rongga Lambung",
+      "pal": {
+        "fill": "128,64,26",
+        "deep": "60,26,10",
+        "glow": "255,150,80",
+        "glowHot": "255,230,190"
+      },
+      "enemies": 7,
+      "hazard": {
+        "type": "acid",
+        "dps": 4
+      }
+    },
+    {
+      "id": "j5",
+      "x": 560,
+      "y": 640,
+      "r": 60,
+      "organ": "hati",
+      "motif": 0,
+      "junction": true,
+      "pal": {
+        "fill": "120,30,26",
+        "deep": "54,10,10",
+        "glow": "255,110,80",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "limfe",
+      "x": 700,
+      "y": 470,
+      "r": 110,
+      "organ": "limfe",
+      "motif": 5,
+      "label": "Sinus Limfe",
+      "pal": {
+        "fill": "86,96,40",
+        "deep": "34,42,16",
+        "glow": "190,255,140",
+        "glowHot": "240,255,210"
+      },
+      "enemies": 5
+    },
+    {
+      "id": "saraf",
+      "x": 250,
+      "y": 430,
+      "r": 110,
+      "organ": "saraf",
+      "motif": 4,
+      "label": "Kanalis Saraf",
+      "pal": {
+        "fill": "84,44,110",
+        "deep": "34,16,52",
+        "glow": "190,140,255",
+        "glowHot": "240,225,255"
+      },
+      "enemies": 6
+    },
+    {
+      "id": "paru",
+      "x": 430,
+      "y": 240,
+      "r": 160,
+      "organ": "paru",
+      "motif": 1,
+      "label": "Alveolus Paru",
+      "pal": {
+        "fill": "122,26,38",
+        "deep": "58,10,20",
+        "glow": "255,110,90",
+        "glowHot": "255,220,190"
+      },
+      "enemies": 7
+    },
+    {
+      "id": "j6",
+      "x": 640,
+      "y": 320,
+      "r": 62,
+      "organ": "jantung",
+      "motif": 2,
+      "junction": true,
+      "pal": {
+        "fill": "140,16,26",
+        "deep": "64,6,12",
+        "glow": "255,90,70",
+        "glowHot": "255,225,200"
+      },
+      "enemies": 0
+    },
+    {
+      "id": "jantung",
+      "x": 800,
+      "y": 180,
+      "r": 210,
+      "organ": "jantung",
+      "motif": 2,
+      "big": true,
+      "label": "Bilik Jantung",
+      "pal": {
+        "fill": "140,16,26",
+        "deep": "64,6,12",
+        "glow": "255,90,70",
+        "glowHot": "255,225,200"
+      },
+      "enemies": 10
+    },
+    {
+      "id": "goal",
+      "x": 1090,
+      "y": 140,
+      "r": 82,
+      "organ": "goal",
+      "motif": 1,
+      "label": "Muara GOAL",
+      "pal": {
+        "fill": "40,120,110",
+        "deep": "14,50,46",
+        "glow": "120,255,230",
+        "glowHot": "230,255,250"
+      },
+      "enemies": 0
+    }
   ],
   "edges": [
-    { "a": "kapiler",    "b": "j1",          "bend":  60 },
-    { "a": "j1",         "b": "usus_halus",  "bend": -70 },
-    { "a": "j1",         "b": "usus_besar",  "bend":  70 },
-    { "a": "usus_halus", "b": "j3",          "bend": -60 },
-    { "a": "usus_besar", "b": "j2",          "bend":  60 },
-    { "a": "j2",         "b": "ginjal",      "bend": -55 },
-    { "a": "j2",         "b": "j3",          "bend":  50 },
-    { "a": "j3",         "b": "pankreas",    "bend": -60 },
-    { "a": "pankreas",   "b": "j5",          "bend":  55 },
-    { "a": "j5",         "b": "hati",        "bend": -65 },
-    { "a": "hati",       "b": "saraf",       "bend": -50 },
-    { "a": "saraf",      "b": "paru",        "bend":  55 },
-    { "a": "paru",       "b": "j6",          "bend": -60 },
-    { "a": "j5",         "b": "limfe",       "bend":  45 },
-    { "a": "limfe",      "b": "j6",          "bend": -45 },
-    { "a": "ginjal",     "b": "j4",          "bend":  50 },
-    { "a": "j4",         "b": "lambung",     "bend": -55 },
-    { "a": "lambung",    "b": "j6",          "bend":  60 },
-    { "a": "j6",         "b": "jantung",     "bend": -40 },
-    { "a": "jantung",    "b": "goal",        "bend":  50 },
-    { "a": "ginjal",     "b": "aliran_darah","bend":  45 },
-    { "a": "aliran_darah","b": "lambung",    "bend": -50 },
-    { "a": "usus_besar", "b": "goal",        "bend":  90, "cross": true },
-    { "a": "ginjal",     "b": "lambung",     "bend":  80, "cross": true }
+    {
+      "a": "kapiler",
+      "b": "j1",
+      "bend": 60
+    },
+    {
+      "a": "j1",
+      "b": "usus_halus",
+      "bend": -70
+    },
+    {
+      "a": "j1",
+      "b": "usus_besar",
+      "bend": 70
+    },
+    {
+      "a": "usus_halus",
+      "b": "j3",
+      "bend": -60
+    },
+    {
+      "a": "usus_besar",
+      "b": "j2",
+      "bend": 60
+    },
+    {
+      "a": "j2",
+      "b": "ginjal",
+      "bend": -55
+    },
+    {
+      "a": "j2",
+      "b": "j3",
+      "bend": 50
+    },
+    {
+      "a": "j3",
+      "b": "pankreas",
+      "bend": -60
+    },
+    {
+      "a": "pankreas",
+      "b": "j5",
+      "bend": 55
+    },
+    {
+      "a": "j5",
+      "b": "hati",
+      "bend": -65
+    },
+    {
+      "a": "hati",
+      "b": "saraf",
+      "bend": -50
+    },
+    {
+      "a": "saraf",
+      "b": "paru",
+      "bend": 55
+    },
+    {
+      "a": "paru",
+      "b": "j6",
+      "bend": -60
+    },
+    {
+      "a": "j5",
+      "b": "limfe",
+      "bend": 45
+    },
+    {
+      "a": "limfe",
+      "b": "j6",
+      "bend": -45
+    },
+    {
+      "a": "ginjal",
+      "b": "j4",
+      "bend": 50
+    },
+    {
+      "a": "j4",
+      "b": "lambung",
+      "bend": -55
+    },
+    {
+      "a": "lambung",
+      "b": "j6",
+      "bend": 60
+    },
+    {
+      "a": "j6",
+      "b": "jantung",
+      "bend": -40
+    },
+    {
+      "a": "jantung",
+      "b": "goal",
+      "bend": 50
+    },
+    {
+      "a": "ginjal",
+      "b": "aliran_darah",
+      "bend": 45
+    },
+    {
+      "a": "aliran_darah",
+      "b": "lambung",
+      "bend": -50
+    },
+    {
+      "a": "usus_besar",
+      "b": "goal",
+      "bend": 90,
+      "cross": true
+    },
+    {
+      "a": "ginjal",
+      "b": "lambung",
+      "bend": 80,
+      "cross": true
+    }
   ],
-  "route": ["kapiler", "j1", "j2", "ginjal", "j4", "lambung", "j6", "jantung", "goal"],
+  "route": [
+    "kapiler",
+    "j1",
+    "j2",
+    "ginjal",
+    "j4",
+    "lambung",
+    "j6",
+    "jantung",
+    "goal"
+  ],
   "pillars": [
-    { "room": "jantung", "dx": -70, "dy": 40, "r": 52 },
-    { "room": "jantung", "dx": 80, "dy": -30, "r": 46 },
-    { "room": "paru", "dx": 45, "dy": 55, "r": 40 },
-    { "room": "usus_halus", "dx": -40, "dy": 40, "r": 42 }
+    {
+      "room": "jantung",
+      "dx": -70,
+      "dy": 40,
+      "r": 52
+    },
+    {
+      "room": "jantung",
+      "dx": 80,
+      "dy": -30,
+      "r": 46
+    },
+    {
+      "room": "paru",
+      "dx": 45,
+      "dy": 55,
+      "r": 40
+    },
+    {
+      "room": "usus_halus",
+      "dx": -40,
+      "dy": 40,
+      "r": 42
+    }
   ]
 }

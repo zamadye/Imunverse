@@ -88,7 +88,7 @@ export class Player {
       // R7 Modul E: buff jejak kemotaksis — pengali langsung per frame
       // (tanpa recompute stats; 1 bila flag OFF / tidak menyentuh jejak)
       const chemoMult = (game && game.run && game.run.chemoSpeedMult) || 1;
-      const speed = this.stats.speed * chemoMult * Math.min(1, move.magnitude);
+      const speed = this.stats.speed * chemoMult * (this.mucusSlow ?? 1) * Math.min(1, move.magnitude);
       tvx = move.x * speed;
       tvy = move.y * speed;
     }

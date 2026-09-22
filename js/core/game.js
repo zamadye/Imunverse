@@ -730,9 +730,29 @@ export const game = {
 
     // PHAGOS: jepit player di dalam cawan petri (dash/knockback tak bisa kabur)
     try { this.arenaClamp(player, player.radius || 15); } catch { /* abaikan */ }
+    // LAYER C spec owner: hazard per room labirin (acid DoT / mucus slow / bile)
+    if (run.chamber && run.chamber.isLabyrinth && player) {
+      const hz = run.chamber.hazardAt(player.x, player.y);
+      player.mucusSlow = hz && hz.type === 'mucus' ? (hz.slow || 0.6) : 1;
+      if (hz && hz.type === 'acid') {
+        run._acidT = (run._acidT || 0) + dt;
+        if (run._acidT >= 0.5) { run._acidT = 0; player.hp = Math.max(1, player.hp - 2); }
+      } else run._acidT = 0;
+      if (hz && hz.type === 'bile') {
+        const c = run.chamber.currentAt(player.x, player.y);
+        player.x += c.x * (hz.push || 2.2) * dt; player.y += c.y * (hz.push || 2.2) * dt;
+      }
+    }
 
-    // 2. Wave & spawn
-    const events = run.spawnSys.update(dt, this);
+    // 2. Wave & spawn — LABIRIN: wave dipause kecuali room aktif SWARM dan
+    // musuh hidup masih di bawah kuota node (data-driven per room).
+    let events = [];
+    {
+      const labGate = !!(run.chamber && run.chamber.isLabyrinth);
+      const aliveN = labGate ? run.enemies.filter((e) => e.alive).length : 0;
+      const gateOpen = !labGate || (run.chamber.state === 'swarm' && aliveN < run.chamber.quota());
+      if (gateOpen) events = run.spawnSys.update(dt, this);
+    }
     // P4: perjalanan dunia (zona & transisi) — SETELAH spawn supaya kenaikan
     // wave terbaca di frame yang sama (§27: wave = pacing, bukan arena).
     try { updateJourney(this, dt); } catch (err) { if (isDevMode()) console.warn('[phagos] updateJourney:', err); }

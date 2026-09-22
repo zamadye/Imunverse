@@ -163,6 +163,15 @@ export class LumenLabyrinth {
     return { x: n.x, y: n.y };
   }
 
+  /** hazard Layer C spec owner: acid DoT / mucus slow / bile current per room. */
+  hazardAt(x, y) {
+    const n = this.roomAt(x, y);
+    return (n && n.hazard) || null;
+  }
+
+  /** kuota musuh simultan room aktif (data-driven per node). */
+  quota() { const n = this.active(); return n.enemies || 6; }
+
   /** arus hemodinamik: dorong entitas sepanjang koridor (spec Layer B). */
   currentAt(x, y) {
     for (const es of this.edgeSegs) {
@@ -228,7 +237,11 @@ export class LumenLabyrinth {
       const room = this.roomAt(pl.x, pl.y);
       if (room && room.id !== this.activeId) {
         this.activeId = room.id;
-        if (room.state === 'idle') { room.state = 'lockdown'; room.t = 0; this.spawned = 0; }
+        if (room.state === 'idle') {
+          // junction = persimpangan koridor: AMAN dilintasi (tanpa encounter)
+          if (room.junction) { room.state = 'open'; room.cleared = true; }
+          else { room.state = 'lockdown'; room.t = 0; this.spawned = 0; this.roomSpawn = 0; }
+        }
         this._syncActive();
       }
     }

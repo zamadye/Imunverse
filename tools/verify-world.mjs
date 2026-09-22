@@ -426,6 +426,33 @@ _jumpToZone(game, 'heart');
       }
       cek('LABIRIN: SATU KESATUAN — route START->GOAL + semua koridor kontinu tak putus',
         putus === 0, `${putus}/${samp} sampel di luar lumen`);
+      // junction = persimpangan AMAN (tanpa encounter lockdown)
+      const jn = chL.node('j2');
+      const stJ0 = jn.state;
+      runS.player.x = jn.x; runS.player.y = jn.y;
+      for (let i = 0; i < 5; i++) chL.update(1 / 60, runS);
+      cek('LABIRIN: junction koridor AMAN dilintasi (tanpa lockdown/encounter)',
+        chL.node('j2').state === 'open' || stJ0 === 'open', `state=${chL.node('j2').state}`);
+      // hazard Layer C: acid lambung, mucus usus, bile hati
+      const nL = chL.node('lambung'), nU = chL.node('usus_halus'), nH = chL.node('hati');
+      cek('LABIRIN: hazard Layer C per room (acid lambung, mucus usus, bile hati)',
+        (chL.hazardAt(nL.x, nL.y) || {}).type === 'acid'
+        && (chL.hazardAt(nU.x, nU.y) || {}).type === 'mucus'
+        && (chL.hazardAt(nH.x, nH.y) || {}).type === 'bile',
+        `${(chL.hazardAt(nL.x, nL.y) || {}).type}/${(chL.hazardAt(nU.x, nU.y) || {}).type}/${(chL.hazardAt(nH.x, nH.y) || {}).type}`);
+      // wave spawn dipause saat lockdown (musuh tak bocor ke room terkunci)
+      const nE0 = runS.enemies.filter((e) => e.alive).length;
+      const stK = chL.node('kapiler');
+      stK.state = 'lockdown'; stK.t = 0; chL.activeId = 'kapiler'; chL._syncActive();
+      runS.player.x = chL.node('kapiler').x; runS.player.y = chL.node('kapiler').y;
+      for (let i = 0; i < 90; i++) game.update(1 / 60);
+      const nE1 = runS.enemies.filter((e) => e.alive).length;
+      cek('LABIRIN: wave spawn PAUSE saat LOCKDOWN (tak ada musuh bocor)', nE1 <= nE0, `alive ${nE0}->${nE1}`);
+      // mucus memperlambat pemain (speed mult 0.6)
+      runS.player.x = nU.x; runS.player.y = nU.y;
+      for (let i = 0; i < 5; i++) game.update(1 / 60);
+      cek('LABIRIN: mucus usus memperlambat pemain (mucusSlow=0.6)',
+        runS.player.mucusSlow === 0.6, `mucusSlow=${runS.player.mucusSlow}`);
     } else {
       cek('LABIRIN: mode labirin aktif', false, 'run.chamber bukan LumenLabyrinth');
     }
