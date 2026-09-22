@@ -361,7 +361,7 @@
         }
       },
       "chamber": {
-        "radius": 690,
+        "radius": 330,
         "lobes": 5,
         "bpm": 64,
         "amp": 8,
@@ -381,26 +381,35 @@
             ]
           ],
           "stretch": [
-            0.9,
-            1.2,
-            0.2
+            1.1,
+            1.0,
+            0.15
           ],
           "pillars": [
             {
               "a": 1.2,
               "d": 0.35,
-              "len": 200,
-              "wid": 90,
+              "len": 100,
+              "wid": 54,
               "bend": 0.9
             },
             {
               "a": 4.0,
               "d": 0.38,
-              "len": 220,
-              "wid": 80,
+              "len": 110,
+              "wid": 48,
               "bend": -0.7
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "190,255,140",
+            "glowHot": "240,255,210",
+            "edge": "86,96,40",
+            "mottle": "34,42,16"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -751,7 +760,7 @@
         }
       },
       "chamber": {
-        "radius": 700,
+        "radius": 340,
         "lobes": 4,
         "bpm": 66,
         "amp": 9,
@@ -776,19 +785,28 @@
             ]
           ],
           "stretch": [
-            1.3,
-            0.75,
-            1.2
+            1.24,
+            0.9,
+            0.35
           ],
           "pillars": [
             {
               "a": 3.4,
               "d": 0.3,
-              "len": 240,
-              "wid": 120,
+              "len": 120,
+              "wid": 72,
               "bend": 0.8
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "255,150,80",
+            "glowHot": "255,230,190",
+            "edge": "128,64,26",
+            "mottle": "60,26,10"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -1146,7 +1164,7 @@
         }
       },
       "chamber": {
-        "radius": 680,
+        "radius": 330,
         "lobes": 5,
         "bpm": 74,
         "amp": 10,
@@ -1171,19 +1189,28 @@
             ]
           ],
           "stretch": [
-            1.25,
-            0.85,
-            0.4
+            1.22,
+            0.92,
+            0.2
           ],
           "pillars": [
             {
               "a": 2.2,
               "d": 0.35,
-              "len": 300,
-              "wid": 110,
+              "len": 150,
+              "wid": 66,
               "bend": 0.6
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "255,110,90",
+            "glowHot": "255,220,190",
+            "edge": "122,26,38",
+            "mottle": "58,10,20"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -1536,7 +1563,7 @@
         }
       },
       "chamber": {
-        "radius": 650,
+        "radius": 320,
         "lobes": 6,
         "bpm": 70,
         "amp": 9,
@@ -1556,26 +1583,35 @@
             ]
           ],
           "stretch": [
-            1.6,
-            0.62,
-            0.5
+            1.3,
+            0.85,
+            0.2
           ],
           "pillars": [
             {
               "a": 1.57,
               "d": 0.25,
-              "len": 420,
-              "wid": 110,
+              "len": 210,
+              "wid": 66,
               "bend": 0.4
             },
             {
               "a": 4.7,
               "d": 0.3,
-              "len": 300,
-              "wid": 90,
+              "len": 150,
+              "wid": 54,
               "bend": -0.5
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "190,140,255",
+            "glowHot": "240,225,255",
+            "edge": "84,44,110",
+            "mottle": "34,16,52"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -1926,7 +1962,7 @@
         }
       },
       "chamber": {
-        "radius": 640,
+        "radius": 310,
         "lobes": 4,
         "bpm": 82,
         "amp": 12,
@@ -1946,33 +1982,42 @@
             ]
           ],
           "stretch": [
-            1.15,
-            0.9,
-            0.9
+            1.18,
+            0.95,
+            0.3
           ],
           "pillars": [
             {
               "a": 0.6,
               "d": 0.42,
-              "len": 300,
-              "wid": 100,
+              "len": 150,
+              "wid": 60,
               "bend": 0.7
             },
             {
               "a": 2.6,
               "d": 0.4,
-              "len": 260,
-              "wid": 90,
+              "len": 130,
+              "wid": 54,
               "bend": -0.6
             },
             {
               "a": 4.4,
               "d": 0.45,
-              "len": 220,
-              "wid": 80,
+              "len": 110,
+              "wid": 48,
               "bend": 0.5
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "255,90,70",
+            "glowHot": "255,225,200",
+            "edge": "140,16,26",
+            "mottle": "64,6,12"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -2252,7 +2297,7 @@
         }
       },
       "chamber": {
-        "radius": 620,
+        "radius": 300,
         "lobes": 4,
         "bpm": 86,
         "amp": 10,
@@ -2277,19 +2322,28 @@
             ]
           ],
           "stretch": [
-            1.5,
-            0.6,
-            1.0
+            1.28,
+            0.88,
+            0.15
           ],
           "pillars": [
             {
               "a": 1.57,
               "d": 0.2,
-              "len": 380,
-              "wid": 100,
+              "len": 190,
+              "wid": 60,
               "bend": 0.3
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "255,96,70",
+            "glowHot": "255,220,190",
+            "edge": "132,20,24",
+            "mottle": "58,8,10"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     },
@@ -2551,7 +2605,7 @@
         }
       },
       "chamber": {
-        "radius": 660,
+        "radius": 320,
         "lobes": 3,
         "bpm": 78,
         "amp": 11,
@@ -2571,26 +2625,35 @@
             ]
           ],
           "stretch": [
-            1.4,
-            0.7,
-            0.8
+            1.25,
+            0.9,
+            0.1
           ],
           "pillars": [
             {
               "a": 2.4,
               "d": 0.45,
-              "len": 340,
-              "wid": 120,
+              "len": 170,
+              "wid": 72,
               "bend": 0.8
             },
             {
               "a": 5.5,
               "d": 0.4,
-              "len": 260,
-              "wid": 90,
+              "len": 130,
+              "wid": 54,
               "bend": 0.6
             }
           ]
+        },
+        "wall": {
+          "interior": {
+            "glow": "255,100,72",
+            "glowHot": "255,222,192",
+            "edge": "138,24,28",
+            "mottle": "62,10,12"
+          },
+          "doc": "DESIGN ULANG 2026-09-22: art direction chamber gelap basah; rim menyala, luar near-black."
         }
       }
     }

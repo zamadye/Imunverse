@@ -381,6 +381,19 @@ _jumpToZone(game, 'heart');
   game.input.keys.delete('map');
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
   const zoomLepas = cam.corridorTarget;
+  // DESIGN ULANG 2026-09-22: framing chamber tertutup (diorama) — saat combat
+  // SELURUH membran harus masuk bingkai; bukti bukan klaim.
+  {
+    const camF = runS.camera, chF = runS.chamber;
+    let luarF = 0; const vwF = camF.viewW || 960, vhF = camF.viewH || 540;
+    for (let i = 0; i < 48; i++) {
+      const aF = (i / 48) * Math.PI * 2; const rrF = chF.radiusAt(aF);
+      const pF = camF.project(chF.cx + Math.cos(aF) * rrF, chF.cy + Math.sin(aF) * rrF);
+      if (pF.x < 2 || pF.x > vwF - 2 || pF.y < 2 || pF.y > vhF - 2) luarF++;
+    }
+    cek('DESAIN ULANG: framing combat — SELURUH membran chamber masuk bingkai (diorama tertutup)',
+      luarF === 0, `${luarF}/48 titik membran di luar layar; zoom=${camF.corridorTarget.toFixed(3)}`);
+  }
   cek('OPEN-WORLD: tahan M = SNAP MACRO kapan pun; lepas → kembali zoom starter',
     zoomM < 0.2 && Math.abs(zoomM - fitM) < 1e-6 && zoomStarter >= 0.55 && zoomLepas >= 0.55,
     `starter=${zoomStarter} M=${zoomM.toFixed(4)} fitM=${fitM.toFixed(4)} lepas=${zoomLepas}`);

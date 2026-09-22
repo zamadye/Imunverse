@@ -126,6 +126,31 @@ import { drawPathogenMutation, pathogenVisualTier } from '../render/character-vi
 import { updateHUD, getMinimapContext, showAnnounce } from '../ui/screens/hud-screen.js';
 import { updateAttack, updateSummons, drawAttack } from '../systems/attack-archetype.js';
 
+// DESIGN ULANG 2026-09-22 — FRAMING CHAMBER TERTUTUP: zoom combat memuat
+// SELURUH membran di layar (diorama ruang tertutup ala Pathogenic), bukan
+// field terbuka. bbox diambil dari radiusAt (satu sumber dgn collision).
+function chamberFitZoom(run) {
+  const ch = run.chamber, cam = run.camera;
+  const vw = cam.viewW || 960, vh = cam.viewH || 540;
+  const key = ((ch.def && ch.def.id) || '?') + '|' + vw + 'x' + vh;
+  if (run._chFitKey === key) return run._chFit;
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2;
+    const rr = ch.radiusAt(a);
+    const x = ch.cx + Math.cos(a) * rr, y = ch.cy + Math.sin(a) * rr;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  const W = Math.max(200, maxX - minX), H = Math.max(200, maxY - minY);
+  const scl = Math.min(vh / (H * 1.06), vw / (W * 1.06));
+  const base = cam.zoom * (cam.speedScale || 1) * (cam.punchScale || 1) * (cam.zoneScale || 1);
+  run._chFit = Math.max(0.25, Math.min(1.0, scl / Math.max(1e-6, base)));
+  run._chFitKey = key;
+  run._chBox = { minX, maxX, minY, maxY };
+  return run._chFit;
+}
+
 export const game = {
   canvas: null,
   ctx: null,
@@ -908,20 +933,34 @@ export const game = {
         nudgeY = Math.sin(run.chamber.doorAngle) * 120 * k;
       }
     }
-    if (!macroActiveNow) run.camera.follow(player.x + nudgeX, player.y + nudgeY, dt, false, lookX, lookY);
-    run.camera.setSpeedZoom(macroActiveNow ? 0 : spd01);
+    if (!macroActiveNow) {
+      if (run.chamber) {
+        // DIORAMA: chamber terkunci di bingkai; kamera hanya digeser ringan
+        // mengikuti pemain (opsi design-ulang: ruang tertutup selalu terbaca)
+        chamberFitZoom(run);
+        const b = run._chBox || { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+        const cxm = (b.minX + b.maxX) / 2, cym = (b.minY + b.maxY) / 2;
+        const k = 0.35;
+        run.camera.follow(cxm + (player.x - cxm) * k + nudgeX, cym + (player.y - cym) * k + nudgeY, dt, false, lookX * k, lookY * k);
+      } else {
+        run.camera.follow(player.x + nudgeX, player.y + nudgeY, dt, false, lookX, lookY);
+      }
+    }
+    run.camera.setSpeedZoom(macroActiveNow || run.chamber ? 0 : spd01);
     run.camera.update(dt);
     // 11b. MAP: epic zoom zona — boss dekat / berdiri di zona bahaya
-    run.camera.setZoneZoom(this.computeZoneZoomTarget(run, player));
+    run.camera.setZoneZoom(run.chamber ? 1 : this.computeZoneZoomTarget(run, player)); // DESIGN ULANG: chamber = diorama, tanpa epic-zoom map
     // PILOT Organ Ascent: sedikit menjauh saat di koridor organ (dari data shape.cameraZoom)
     // OPEN-WORLD establishing shot (mandat owner): ~1,4 dtk pertama run menampilkan
     // SELURUH struktur organ dari jauh (zoom 0,34), lalu kamera meluncur masuk ke
     // area starter (shape.cameraZoom). Sekali per run — ganti zona tidak mengulang.
     try {
       // ARENA TERTUTUP: zoom arena dari zone.zoom (rujukan ARENA_ZOOM_OUT_REFERENCE)
-      const targetZoom = (run.chamber || run.bodyWorld)
-        ? (((() => { try { return (currentZone(run) || {}).zoom; } catch { return null; } })()) || 0.66)
-        : (run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1);
+      const targetZoom = run.chamber
+        ? chamberFitZoom(run)   // DESIGN ULANG: seluruh membran masuk bingkai
+        : (run.bodyWorld
+          ? (((() => { try { return (currentZone(run) || {}).zoom; } catch { return null; } })()) || 0.66)
+          : (run.arenaShape ? ((run.arenaShape.def && run.arenaShape.def.cameraZoom) || 0.88) : 1));
       run.introT = (run.introT == null ? 0 : run.introT) + dt;
       // SNAP MACRO (bukti "arena full"): auto-fit SELURUH struktur organ ke layar.
       // Otomatis ~1,15 dtk pertama run; kapan pun bisa ditahan lewat tombol M.
