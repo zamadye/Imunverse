@@ -305,12 +305,20 @@ cek('SPEC ARENA: state machine LOCKDOWN -> SWARM (katup terkunci lalu patogen ke
 // dinding soft-body: impact membuat simpul penyok
 {
   const ch = runS.chamber;
+  if (ch.isLabyrinth) {
+    // dinding labirin = jaringan HIDUP: radius bernapas mengikuti beat jantung
+    const r0 = ch.radiusAt(0.7);
+    ch._beat = 1; const r1 = ch.radiusAt(0.7); ch._beat = 0;
+    cek('SPEC ARENA: dinding labirin BERDENYUT (sistole/diastole) — radius berubah mengikuti beat',
+      r1 > r0 + 0.5, `r diastole=${r0.toFixed(1)} r sistole=${r1.toFixed(1)}`);
+  } else {
   const dev0 = Math.max(...ch.points.map((p) => Math.abs(p.r - p.base)));
   ch.applyImpact(0.7, 20);
   for (let i = 0; i < 10; i++) ch.update(1 / 60, runS, {});
   const dev1 = Math.max(...ch.points.map((p) => Math.abs(p.r - p.base)));
   cek('SPEC ARENA: dinding soft-body — impact membuat simpul PENYOK lalu membal (jiggle)',
     dev1 > dev0 + 1, `dev ${dev0.toFixed(1)} -> ${dev1.toFixed(1)}`);
+  }
 }
 // purified -> open: basmi semua musuh
 {
@@ -364,8 +372,8 @@ _jumpToZone(game, 'heart');
   const fitHarap = bmDef
     ? cam.macroFitZoom({ height: bmDef.world.h, lanes: [{ topY: 0, bottomY: bmDef.world.h, centerAt: () => bmDef.world.w / 2, halfAt: () => bmDef.world.w / 2 }] })
     : cam.macroFitZoom(runS.arenaShape);
-  cek('OPEN-WORLD: SNAP MACRO — awal run kamera auto-fit SELURUH struktur/peta (target == macroFitZoom, < 0,2)',
-    Math.abs(establishing - fitHarap) < 1e-6 && establishing < 0.2,
+  cek('OPEN-WORLD: SNAP MACRO — awal run kamera auto-fit SELURUH struktur/peta (target == macroFitZoom, < 0,6)',
+    Math.abs(establishing - fitHarap) < 1e-6 && establishing < 0.6,
     `target=${establishing.toFixed(4)} fit=${fitHarap.toFixed(4)} sumber=${bmDef ? 'body-map' : 'koridor'}`);
   // tombol M: tahan kapan pun → macro lagi, lepas → kembali zoom starter
   runS.introT = 10;
@@ -423,7 +431,7 @@ _jumpToZone(game, 'heart');
     }
   }
   cek('OPEN-WORLD: tahan M = SNAP MACRO kapan pun; lepas → kembali zoom starter',
-    zoomM < 0.2 && Math.abs(zoomM - fitM) < 1e-6 && zoomStarter >= 0.55 && zoomLepas >= 0.55,
+    zoomM < 0.6 && Math.abs(zoomM - fitM) < 1e-6 && zoomStarter >= 0.55 && zoomLepas >= 0.55,
     `starter=${zoomStarter} M=${zoomM.toFixed(4)} fitM=${fitM.toFixed(4)} lepas=${zoomLepas}`);
   for (let i = 0; i < 120; i++) { game.update && game.update(1 / 60); }
   const diKoridor = cam.corridorTarget;
@@ -484,7 +492,7 @@ _jumpToZone(game, 'heart');
   runS.worldMapDef = def; runS.introT = 0; runS.macroWasOn = false; // edge SNAP MACRO: reset flag edge-trigger game.js
   for (let i = 0; i < 10; i++) { game.update && game.update(1 / 60); }
   const tMap = runS.camera.corridorTarget;
-  cek('WORLD MAP: SNAP MACRO auto-fit SELURUH tubuh (target < 0,12)', tMap < 0.12, `target=${tMap.toFixed(4)}`);
+  cek('WORLD MAP: SNAP MACRO auto-fit SELURUH labirin (target < 0,6)', tMap < 0.6, `target=${tMap.toFixed(4)}`);
   runS.introT = 10; runS.worldMapDef = undefined; runS.macroSnapped = false;
 }
 

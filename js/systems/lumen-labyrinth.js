@@ -22,6 +22,7 @@ export class LumenLabyrinth {
     this.bpm = 72;
     this.shock = 0;
     this.time = 0;
+    this._beat = 0;
     this.nodes = new Map();
     for (const n of lab.nodes) this.nodes.set(n.id, { ...n, state: 'idle', cleared: false, t: 0 });
     // polyline koridor berkelok: a -> mid(bend) -> b
@@ -199,7 +200,11 @@ export class LumenLabyrinth {
     this.cx = n.x; this.cy = n.y;
     this.state = n.state;
     this.openAmt = n.state === 'open' ? 1 : 0;
-    this.def = { id: n.organ, name: n.label || n.organ };
+    const pal = n.pal || {};
+    this.def = {
+      id: n.organ, name: n.label || n.organ,
+      wall: { interior: { glow: pal.glow, glowHot: pal.glowHot, edge: pal.fill, mottle: pal.deep } },
+    };
     // vents = mulut koridor (sudut dari pusat room) untuk glow SWARM
     this.vents = [];
     for (const es of this.edgeSegs) {

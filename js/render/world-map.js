@@ -225,15 +225,27 @@ export function drawWorldMap(ctx, P, def, time, states = null, extra = null) {
     const jn = extra.journey;
     const xy2 = makeXY(def);
     const posOf = [];
-    const seen = {};
-    for (let i = 0; i < extra.route.length; i++) {
-      const z = extra.route[i];
-      const org = (def.organs || []).find((o) => o.id === z.arenaId);
-      const bx = org ? org.x : 0.5, by = org ? org.y : 0.5;
-      const k = seen[z.arenaId] = (seen[z.arenaId] || 0) + 1;
-      const tot = extra.route.filter((r) => r.arenaId === z.arenaId).length;
-      const off = (k - (tot + 1) / 2) * 0.055;
-      posOf.push(xy2(bx + off, by - off * 0.6));
+    const stateOf = [];
+    if (extra.lab && extra.lab.routeIds) {
+      // LABIRIN: node route fisik = sumber kebenaran denah
+      for (const id of extra.lab.routeIds) {
+        const org = (def.organs || []).find((o) => o.id === id);
+        if (!org) continue;
+        posOf.push(xy2(org.x, org.y));
+        stateOf.push((extra.lab.states || {})[id] || 'locked');
+      }
+    } else {
+      const seen = {};
+      for (let i = 0; i < extra.route.length; i++) {
+        const z = extra.route[i];
+        const org = (def.organs || []).find((o) => o.id === z.arenaId);
+        const bx = org ? org.x : 0.5, by = org ? org.y : 0.5;
+        const k = seen[z.arenaId] = (seen[z.arenaId] || 0) + 1;
+        const tot = extra.route.filter((r) => r.arenaId === z.arenaId).length;
+        const off = (k - (tot + 1) / 2) * 0.055;
+        posOf.push(xy2(bx + off, by - off * 0.6));
+        stateOf.push(i < jn.index ? 'cleared' : i === jn.index ? 'active' : 'locked');
+      }
     }
     // connector tipis berarus
     ctx.save();
@@ -251,7 +263,7 @@ export function drawWorldMap(ctx, P, def, time, states = null, extra = null) {
     // node blob asimetris per zona
     for (let i = 0; i < posOf.length; i++) {
       const q = pr(posOf[i].x, posOf[i].y);
-      const st = i < jn.index ? 'cleared' : i === jn.index ? 'active' : 'locked';
+      const st = stateOf[i];
       const rn = Math.max(5, (st === 'active' ? 300 : 230) * s0);
       ctx.beginPath();
       for (let k2 = 0; k2 <= 22; k2++) {

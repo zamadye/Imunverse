@@ -1,457 +1,794 @@
 {
-  "doc": "PETA TUBUH MAKRO — rekonstruksi spek world-map (commit paralel f1de6fc yang gagal push) di atas HEAD ter-push. Koordinat dunia unit (x kanan, y BAWAH-ke-atas seperti referensi owner ARENA_ZOOM_OUT_REFERENCE_.png: START bawah, GOAL atas). Chamber = organ berlobus; vessels = pembuluh berkelok penghubung; route = rute teal START→GOAL. Dipakai lapisan SNAP MACRO (js/render/world-map.js) dan jadi fondasi migrasi gameplay ke chamber.",
+  "doc": "Denah SNAP MACRO = proyeksi labirin lumen (SATU SUMBER: data/lumen-labyrinth.json). Diregenerasi oleh tools/sync-bodymap.mjs — jangan edit manual.",
   "world": {
-    "w": 2600,
-    "h": 3600
+    "w": 1250,
+    "h": 1740
   },
   "anchors": {
     "start": {
-      "x": 0.5,
-      "y": 0.04,
+      "x": 0.44,
+      "y": 0.092,
       "label": "START"
     },
     "goal": {
-      "x": 0.82,
-      "y": 0.95,
+      "x": 0.8,
+      "y": 0.908,
       "label": "GOAL"
     }
   },
   "organs": [
     {
-      "id": "usus_besar",
-      "label": "USUS BESAR",
-      "x": 0.78,
-      "y": 0.16,
-      "rx": 0.16,
-      "ry": 0.1,
-      "coil": 3,
-      "hue": "rose",
+      "id": "kapiler",
+      "label": "MUARA KAPILER (START)",
+      "x": 0.44,
+      "y": 0.092,
+      "rx": 0.07,
+      "ry": 0.051,
+      "coil": 1,
+      "hue": "kapiler",
       "palette": {
-        "fill": "214,84,120",
-        "rim": "255,150,170",
-        "deep": "140,40,74"
+        "fill": "132,20,24",
+        "rim": "255,220,190",
+        "deep": "58,8,10"
       },
-      "zoom": 0.64
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "usus_halus",
-      "label": "USUS HALUS",
-      "x": 0.3,
-      "y": 0.3,
-      "rx": 0.17,
-      "ry": 0.11,
-      "coil": 4,
-      "hue": "coral",
+      "label": "BELITAN USUS HALUS",
+      "x": 0.248,
+      "y": 0.2759,
+      "rx": 0.128,
+      "ry": 0.092,
+      "coil": 3,
+      "hue": "usus_halus",
       "palette": {
-        "fill": "226,110,96",
-        "rim": "255,170,150",
-        "deep": "150,58,52"
+        "fill": "150,60,70",
+        "rim": "255,225,200",
+        "deep": "70,20,30"
       },
-      "zoom": 0.64
+      "zoom": 0.66,
+      "big": false
+    },
+    {
+      "id": "usus_besar",
+      "label": "USUS BESAR",
+      "x": 0.776,
+      "y": 0.2069,
+      "rx": 0.12,
+      "ry": 0.086,
+      "coil": 3,
+      "hue": "usus_besar",
+      "palette": {
+        "fill": "140,50,80",
+        "rim": "255,220,210",
+        "deep": "66,18,36"
+      },
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "ginjal",
-      "label": "GINJAL",
-      "x": 0.62,
-      "y": 0.42,
-      "rx": 0.13,
+      "label": "PELVIS GINJAL",
+      "x": 0.648,
+      "y": 0.4138,
+      "rx": 0.112,
       "ry": 0.08,
-      "coil": 2,
-      "hue": "bean",
+      "coil": 1,
+      "hue": "ginjal",
       "palette": {
-        "fill": "186,74,96",
-        "rim": "240,140,150",
-        "deep": "120,40,60"
+        "fill": "130,40,50",
+        "rim": "255,220,190",
+        "deep": "60,14,20"
       },
-      "zoom": 0.66
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "pankreas",
       "label": "PANKREAS",
-      "x": 0.42,
-      "y": 0.52,
-      "rx": 0.14,
-      "ry": 0.06,
+      "x": 0.424,
+      "y": 0.477,
+      "rx": 0.096,
+      "ry": 0.069,
       "coil": 1,
-      "hue": "amber",
+      "hue": "pankreas",
       "palette": {
-        "fill": "226,164,84",
-        "rim": "255,214,140",
-        "deep": "150,100,44"
+        "fill": "150,90,40",
+        "rim": "255,235,200",
+        "deep": "70,40,14"
       },
-      "zoom": 0.66
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "hati",
-      "label": "HATI",
-      "x": 0.24,
-      "y": 0.66,
-      "rx": 0.17,
-      "ry": 0.1,
-      "coil": 2,
-      "hue": "maroon",
+      "label": "LOBUS HATI",
+      "x": 0.192,
+      "y": 0.5517,
+      "rx": 0.12,
+      "ry": 0.086,
+      "coil": 1,
+      "hue": "hati",
       "palette": {
-        "fill": "160,58,64",
-        "rim": "226,120,110",
-        "deep": "100,32,40"
+        "fill": "120,30,26",
+        "rim": "255,220,190",
+        "deep": "54,10,10"
       },
-      "zoom": 0.62
+      "zoom": 0.66,
+      "big": false
+    },
+    {
+      "id": "aliran_darah",
+      "label": "ARTERI UTAMA",
+      "x": 0.872,
+      "y": 0.4943,
+      "rx": 0.096,
+      "ry": 0.069,
+      "coil": 1,
+      "hue": "aliran_darah",
+      "palette": {
+        "fill": "138,24,28",
+        "rim": "255,222,192",
+        "deep": "62,10,12"
+      },
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "lambung",
-      "label": "LAMBUNG",
-      "x": 0.66,
-      "y": 0.66,
-      "rx": 0.14,
-      "ry": 0.09,
-      "coil": 2,
-      "hue": "orange",
-      "palette": {
-        "fill": "232,124,72",
-        "rim": "255,180,120",
-        "deep": "150,70,40"
-      },
-      "zoom": 0.62
-    },
-    {
-      "id": "paru",
-      "label": "PARU-PARU",
-      "x": 0.26,
-      "y": 0.86,
-      "rx": 0.16,
-      "ry": 0.1,
-      "coil": 2,
-      "hue": "magenta",
-      "palette": {
-        "fill": "206,84,160",
-        "rim": "255,150,210",
-        "deep": "130,44,100"
-      },
-      "zoom": 0.62
-    },
-    {
-      "id": "jantung",
-      "label": "JANTUNG",
-      "x": 0.55,
-      "y": 0.88,
-      "rx": 0.11,
-      "ry": 0.09,
+      "label": "RONGGA LAMBUNG",
+      "x": 0.744,
+      "y": 0.6322,
+      "rx": 0.12,
+      "ry": 0.086,
       "coil": 1,
-      "hue": "crimson",
+      "hue": "lambung",
       "palette": {
-        "fill": "206,44,64",
-        "rim": "255,110,110",
-        "deep": "130,24,40"
+        "fill": "128,64,26",
+        "rim": "255,230,190",
+        "deep": "60,26,10"
       },
-      "zoom": 0.6
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "limfe",
-      "label": "KELENJAR LIMFE",
-      "x": 0.82,
-      "y": 0.9,
-      "rx": 0.1,
-      "ry": 0.07,
-      "coil": 2,
-      "hue": "emerald",
+      "label": "SINUS LIMFE",
+      "x": 0.488,
+      "y": 0.7184,
+      "rx": 0.088,
+      "ry": 0.063,
+      "coil": 1,
+      "hue": "limfe",
       "palette": {
-        "fill": "74,190,140",
-        "rim": "160,255,200",
-        "deep": "34,120,84"
+        "fill": "86,96,40",
+        "rim": "240,255,210",
+        "deep": "34,42,16"
       },
-      "zoom": 0.58
-    },
-    {
-      "id": "kapiler",
-      "label": "KAPILER",
-      "x": 0.38,
-      "y": 0.1,
-      "rx": 0.12,
-      "ry": 0.07,
-      "coil": 2,
-      "hue": "coral",
-      "palette": {
-        "fill": "224,110,92",
-        "rim": "255,170,150",
-        "deep": "150,52,44"
-      },
-      "zoom": 0.68
+      "zoom": 0.66,
+      "big": false
     },
     {
       "id": "saraf",
-      "label": "SARAF",
-      "x": 0.12,
-      "y": 0.5,
-      "rx": 0.07,
-      "ry": 0.16,
-      "coil": 4,
-      "hue": "violet",
+      "label": "KANALIS SARAF",
+      "x": 0.128,
+      "y": 0.7414,
+      "rx": 0.088,
+      "ry": 0.063,
+      "coil": 1,
+      "hue": "saraf",
       "palette": {
-        "fill": "150,110,214",
-        "rim": "206,170,255",
-        "deep": "92,52,150"
+        "fill": "84,44,110",
+        "rim": "240,225,255",
+        "deep": "34,16,52"
       },
-      "zoom": 0.66
+      "zoom": 0.66,
+      "big": false
+    },
+    {
+      "id": "paru",
+      "label": "ALVEOLUS PARU",
+      "x": 0.272,
+      "y": 0.8506,
+      "rx": 0.128,
+      "ry": 0.092,
+      "coil": 1,
+      "hue": "paru",
+      "palette": {
+        "fill": "122,26,38",
+        "rim": "255,220,190",
+        "deep": "58,10,20"
+      },
+      "zoom": 0.66,
+      "big": false
+    },
+    {
+      "id": "jantung",
+      "label": "BILIK JANTUNG",
+      "x": 0.568,
+      "y": 0.8851,
+      "rx": 0.168,
+      "ry": 0.121,
+      "coil": 0,
+      "hue": "jantung",
+      "palette": {
+        "fill": "140,16,26",
+        "rim": "255,225,200",
+        "deep": "64,6,12"
+      },
+      "zoom": 0.8,
+      "big": true
+    },
+    {
+      "id": "goal",
+      "label": "MUARA GOAL",
+      "x": 0.8,
+      "y": 0.908,
+      "rx": 0.066,
+      "ry": 0.047,
+      "coil": 1,
+      "hue": "goal",
+      "palette": {
+        "fill": "40,120,110",
+        "rim": "230,255,250",
+        "deep": "14,50,46"
+      },
+      "zoom": 0.66,
+      "big": false
     }
   ],
   "vessels": [
     {
-      "id": "aorta_bawah",
+      "id": "lumen_kapiler_j1",
       "kind": "artery",
-      "r": 46,
-      "points": [
-        [
-          0.5,
-          0.04
-        ],
-        [
-          0.52,
-          0.12
-        ],
-        [
-          0.62,
-          0.16
-        ],
-        [
-          0.7,
-          0.14
-        ]
-      ]
-    },
-    {
-      "id": "cabang_usus",
-      "kind": "vein",
-      "r": 40,
-      "points": [
-        [
-          0.62,
-          0.16
-        ],
-        [
-          0.52,
-          0.24
-        ],
-        [
-          0.4,
-          0.26
-        ],
-        [
-          0.3,
-          0.3
-        ]
-      ]
-    },
-    {
-      "id": "renaal",
-      "kind": "vein",
-      "r": 36,
-      "points": [
-        [
-          0.4,
-          0.26
-        ],
-        [
-          0.5,
-          0.36
-        ],
-        [
-          0.62,
-          0.42
-        ]
-      ]
-    },
-    {
-      "id": "pankreatika",
-      "kind": "lymph",
       "r": 34,
       "points": [
         [
-          0.5,
-          0.36
+          0.44,
+          0.092
         ],
         [
-          0.46,
-          0.46
+          0.464,
+          0.158
         ],
         [
-          0.42,
-          0.52
+          0.488,
+          0.158
+        ],
+        [
+          0.44,
+          0.2241
         ]
       ]
     },
     {
-      "id": "hepatika",
+      "id": "lumen_j1_usus_halus",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.44,
+          0.2241
+        ],
+        [
+          0.3342,
+          0.2312
+        ],
+        [
+          0.3243,
+          0.2123
+        ],
+        [
+          0.248,
+          0.2759
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j1_usus_besar",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.44,
+          0.2241
+        ],
+        [
+          0.606,
+          0.1955
+        ],
+        [
+          0.604,
+          0.1754
+        ],
+        [
+          0.776,
+          0.2069
+        ]
+      ]
+    },
+    {
+      "id": "lumen_usus_halus_j3",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.248,
+          0.2759
+        ],
+        [
+          0.2754,
+          0.3422
+        ],
+        [
+          0.2548,
+          0.3511
+        ],
+        [
+          0.344,
+          0.3908
+        ]
+      ]
+    },
+    {
+      "id": "lumen_usus_besar_j2",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.776,
+          0.2069
+        ],
+        [
+          0.6871,
+          0.2807
+        ],
+        [
+          0.7022,
+          0.2941
+        ],
+        [
+          0.568,
+          0.3276
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j2_ginjal",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.568,
+          0.3276
+        ],
+        [
+          0.5897,
+          0.3795
+        ],
+        [
+          0.5714,
+          0.3882
+        ],
+        [
+          0.648,
+          0.4138
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j2_j3",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.568,
+          0.3276
+        ],
+        [
+          0.4633,
+          0.3726
+        ],
+        [
+          0.4706,
+          0.3859
+        ],
+        [
+          0.344,
+          0.3908
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j3_pankreas",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.344,
+          0.3908
+        ],
+        [
+          0.364,
+          0.4435
+        ],
+        [
+          0.3441,
+          0.453
+        ],
+        [
+          0.424,
+          0.477
+        ]
+      ]
+    },
+    {
+      "id": "lumen_pankreas_j5",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.424,
+          0.477
+        ],
+        [
+          0.4214,
+          0.5525
+        ],
+        [
+          0.4428,
+          0.5562
+        ],
+        [
+          0.376,
+          0.6207
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j5_hati",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.376,
+          0.6207
+        ],
+        [
+          0.296,
+          0.5696
+        ],
+        [
+          0.3081,
+          0.5531
+        ],
+        [
+          0.192,
+          0.5517
+        ]
+      ]
+    },
+    {
+      "id": "lumen_hati_saraf",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.192,
+          0.5517
+        ],
+        [
+          0.1406,
+          0.6432
+        ],
+        [
+          0.1211,
+          0.6398
+        ],
+        [
+          0.128,
+          0.7414
+        ]
+      ]
+    },
+    {
+      "id": "lumen_saraf_paru",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.128,
+          0.7414
+        ],
+        [
+          0.216,
+          0.7851
+        ],
+        [
+          0.2319,
+          0.7742
+        ],
+        [
+          0.272,
+          0.8506
+        ]
+      ]
+    },
+    {
+      "id": "lumen_paru_j6",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.272,
+          0.8506
+        ],
+        [
+          0.3645,
+          0.8437
+        ],
+        [
+          0.3731,
+          0.8598
+        ],
+        [
+          0.44,
+          0.8046
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j5_limfe",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.376,
+          0.6207
+        ],
+        [
+          0.4459,
+          0.6613
+        ],
+        [
+          0.4598,
+          0.6531
+        ],
+        [
+          0.488,
+          0.7184
+        ]
+      ]
+    },
+    {
+      "id": "lumen_limfe_j6",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.488,
+          0.7184
+        ],
+        [
+          0.4473,
+          0.7567
+        ],
+        [
+          0.4306,
+          0.7519
+        ],
+        [
+          0.44,
+          0.8046
+        ]
+      ]
+    },
+    {
+      "id": "lumen_ginjal_j4",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.648,
+          0.4138
+        ],
+        [
+          0.6517,
+          0.4796
+        ],
+        [
+          0.6714,
+          0.4822
+        ],
+        [
+          0.616,
+          0.5402
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j4_lambung",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.616,
+          0.5402
+        ],
+        [
+          0.6644,
+          0.5974
+        ],
+        [
+          0.6489,
+          0.6086
+        ],
+        [
+          0.744,
+          0.6322
+        ]
+      ]
+    },
+    {
+      "id": "lumen_lambung_j6",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.744,
+          0.6322
+        ],
+        [
+          0.6069,
+          0.7319
+        ],
+        [
+          0.6217,
+          0.7455
+        ],
+        [
+          0.44,
+          0.8046
+        ]
+      ]
+    },
+    {
+      "id": "lumen_j6_jantung",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.44,
+          0.8046
+        ],
+        [
+          0.4935,
+          0.8535
+        ],
+        [
+          0.4829,
+          0.8621
+        ],
+        [
+          0.568,
+          0.8851
+        ]
+      ]
+    },
+    {
+      "id": "lumen_jantung_goal",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.568,
+          0.8851
+        ],
+        [
+          0.6867,
+          0.8823
+        ],
+        [
+          0.6895,
+          0.8681
+        ],
+        [
+          0.8,
+          0.908
+        ]
+      ]
+    },
+    {
+      "id": "lumen_ginjal_aliran_darah",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.648,
+          0.4138
+        ],
+        [
+          0.768,
+          0.4425
+        ],
+        [
+          0.7761,
+          0.4309
+        ],
+        [
+          0.872,
+          0.4943
+        ]
+      ]
+    },
+    {
+      "id": "lumen_aliran_darah_lambung",
+      "kind": "artery",
+      "r": 34,
+      "points": [
+        [
+          0.872,
+          0.4943
+        ],
+        [
+          0.7914,
+          0.5552
+        ],
+        [
+          0.7747,
+          0.5473
+        ],
+        [
+          0.744,
+          0.6322
+        ]
+      ]
+    },
+    {
+      "id": "lumen_usus_besar_goal",
       "kind": "vein",
-      "r": 40,
+      "r": 34,
       "points": [
         [
-          0.42,
-          0.52
+          0.776,
+          0.2069
         ],
         [
-          0.32,
-          0.58
+          0.824,
+          0.5568
         ],
         [
-          0.24,
-          0.66
+          0.86,
+          0.5562
+        ],
+        [
+          0.8,
+          0.908
         ]
       ]
     },
     {
-      "id": "gastrika",
-      "kind": "artery",
-      "r": 40,
-      "points": [
-        [
-          0.42,
-          0.52
-        ],
-        [
-          0.54,
-          0.6
-        ],
-        [
-          0.66,
-          0.66
-        ]
-      ]
-    },
-    {
-      "id": "pulmonal",
-      "kind": "artery",
-      "r": 44,
-      "points": [
-        [
-          0.24,
-          0.66
-        ],
-        [
-          0.22,
-          0.76
-        ],
-        [
-          0.26,
-          0.86
-        ]
-      ]
-    },
-    {
-      "id": "koroner",
-      "kind": "artery",
-      "r": 40,
-      "points": [
-        [
-          0.66,
-          0.66
-        ],
-        [
-          0.6,
-          0.78
-        ],
-        [
-          0.55,
-          0.88
-        ]
-      ]
-    },
-    {
-      "id": "duktus_limfe",
-      "kind": "lymph",
-      "r": 38,
-      "points": [
-        [
-          0.55,
-          0.88
-        ],
-        [
-          0.68,
-          0.92
-        ],
-        [
-          0.82,
-          0.9
-        ]
-      ]
-    },
-    {
-      "id": "route_start",
-      "kind": "route",
-      "r": 30,
-      "points": [
-        [
-          0.5,
-          0.04
-        ],
-        [
-          0.52,
-          0.12
-        ],
-        [
-          0.5,
-          0.24
-        ],
-        [
-          0.46,
-          0.36
-        ],
-        [
-          0.42,
-          0.52
-        ],
-        [
-          0.48,
-          0.66
-        ],
-        [
-          0.55,
-          0.88
-        ],
-        [
-          0.68,
-          0.92
-        ],
-        [
-          0.82,
-          0.95
-        ]
-      ]
-    },
-    {
-      "id": "anyaman_kapiler",
+      "id": "lumen_ginjal_lambung",
       "kind": "vein",
-      "r": 30,
+      "r": 34,
       "points": [
         [
-          0.38,
-          0.1
+          0.648,
+          0.4138
         ],
         [
-          0.46,
-          0.16
+          0.7265,
+          0.5161
         ],
         [
-          0.56,
-          0.2
-        ]
-      ]
-    },
-    {
-      "id": "trunkus_saraf",
-      "kind": "lymph",
-      "r": 30,
-      "points": [
-        [
-          0.12,
-          0.5
+          0.757,
+          0.5091
         ],
         [
-          0.24,
-          0.52
-        ],
-        [
-          0.42,
-          0.52
+          0.744,
+          0.6322
         ]
       ]
     }

@@ -2596,7 +2596,7 @@ applyChapterTier(enemy, run) {
     // PILOT Organ Ascent: dinding organ + serat otot + pembuluh (di atas
     // tekstur tanah, di bawah entitas). Hanya bila arena berbentuk koridor.
     if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;
-    const macroView = !!run.worldMapDef && run.camera.corridorScale < 0.25;
+    const macroView = !!run.worldMapDef && (run.camera.macroFlat === true || run.camera.corridorScale < 0.25);
     if (macroView) {
       // SNAP MACRO: tampilkan PETA TUBUH seluruh organ (referensi owner 8acc8c5)
       // MAP = denah navigasi: penanda status per organ (cleared/active/locked)
@@ -2614,9 +2614,28 @@ applyChapterTier(enemy, run) {
             else if (visitedArena.has(org.id)) mapStates[org.id] = 'cleared';
             else mapStates[org.id] = 'locked';
           }
+          // LABIRIN: status denah mengikuti ROOM FISIK (bukan journey zona lama)
+          if (run.chamber && run.chamber.isLabyrinth) {
+            const rank = { locked: 0, cleared: 1, active: 2 };
+            for (const n of run.chamber.nodes.values()) {
+              if (n.junction) continue;
+              const stN = n.id === run.chamber.activeId ? 'active' : (n.cleared ? 'cleared' : 'locked');
+              const cur = mapStates[n.id];
+              if (!cur || rank[stN] > rank[cur]) mapStates[n.id] = stN;
+            }
+          }
         }
       } catch { mapStates = null; }
-      try { drawWorldMap(ctx, P, run.worldMapDef, time, mapStates, { route: (getData().zones && getData().zones.route) || [], journey: run.journey }); } catch (err) { console.warn('[phagos] worldMap:', err); }
+      try {
+        let labExtra = null;
+        if (run.chamber && run.chamber.isLabyrinth) {
+          labExtra = {
+            routeIds: run.chamber.route.filter((id) => !run.chamber.node(id).junction),
+            states: mapStates || {},
+          };
+        }
+        drawWorldMap(ctx, P, run.worldMapDef, time, mapStates, { route: (getData().zones && getData().zones.route) || [], journey: run.journey, lab: labExtra });
+      } catch (err) { console.warn('[phagos] worldMap:', err); }
       // HINT on-screen saat macro aktif supaya zoom-out seluruh tubuh TIDAK terlewatkan
       try {
         const macroNow = !!run.arenaShape && ((this.input && this.input.keys && this.input.keys.has('map')) || (run.introT || 0) < 1.7);

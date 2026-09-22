@@ -123,7 +123,7 @@ void main() {
   colIn *= mix(0.50, 1.0, smoothstep(-150.0, -26.0, d));
   float spec = pow(noise(vec2(w.x * 0.09, w.y * 0.03 - u_time * 0.5)), 16.0);
   colIn += spec * (0.22 + 0.55 * pool) * vec3(1.0, 0.55, 0.45);
-  colIn *= 0.55 + 0.75 * pool;
+  colIn *= 0.62 + 0.70 * pool;
   colIn += u_glow * 0.16 * pool;
   for (int i = 0; i < 3; i++) {
     float fi = float(i);
@@ -238,7 +238,7 @@ export class BodyGL {
 
   /** Palet chamber dari definisi arena (data-driven). */
   setPalette(def) {
-    const MOTIF = { kapiler: 0, aliran_darah: 0, paru: 1, jantung: 2, lambung: 3, saraf: 4, limfe: 5 };
+    const MOTIF = { kapiler: 0, aliran_darah: 0, paru: 1, jantung: 2, lambung: 3, saraf: 4, limfe: 5, usus_halus: 3, usus_besar: 0, ginjal: 5, pankreas: 5, hati: 0, goal: 1 };
     this.motif = MOTIF[(def && def.id) || ''] != null ? MOTIF[(def && def.id) || ''] : 0;
     if (!this.ok) return;
     const wall = (def && def.wall) || {};
