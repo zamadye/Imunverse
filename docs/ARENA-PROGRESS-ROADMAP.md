@@ -139,3 +139,16 @@ Chromium + lib sistem — tidak tersedia di sandbox ini).
       (`libnspr4.so` hilang, tanpa root, CDN Debian diblokir) — CI adalah
       jalur resmi bukti browser.
 - [ ] Fase C/D/E — berikutnya sesuai mandat (P1 → P2 → P3).
+
+## 6. Mandat rebuild dari nol (2026-09-23, owner — CATAT BAIK-BAIK)
+
+**Arena dibangun ULANG DARI NOL — BUKAN tambal (patch) implementasi yang ada.**
+
+- `js/systems/lumen-labyrinth.js`, jalur render arena di
+  `js/render/body-micro.js` / `js/render/body-gl.js`, dan P0 Fase A+B
+  (komit `18826a9`) adalah **referensi perilaku + jaring pengaman visual**,
+  bukan fondasi. Dilarang menumpuk patch di atasnya untuk fitur arena baru.
+- Kode arena baru ditulis bersih di lokasi baru, dengan kontrak integrasi
+  yang disepakati (lihat jawaban konfirmasi di bawah) sebelum cutover.
+- Detail scope (cakupan rebuild, nasib kode lama, target visual) diisi
+  setelah konfirmasi owner — bagian ini mengikat sejak ditulis.
