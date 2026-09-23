@@ -234,6 +234,7 @@ await frames(60);
 shot('snap-00-dashboard.png');
 
 // 1. mulai run → lockdown
+if (process.env.ARENA_V2 === '1') { window.__ARENA_V2 = true; console.log('[info] ARENA V2 aktif'); }
 G.game.startRun('macrophage');
 G.STATE.screen = 'gameplay';
 G.game.run.introT = 10;

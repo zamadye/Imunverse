@@ -152,3 +152,10 @@ Chromium + lib sistem — tidak tersedia di sandbox ini).
   yang disepakati (lihat jawaban konfirmasi di bawah) sebelum cutover.
 - Detail scope (cakupan rebuild, nasib kode lama, target visual) diisi
   setelah konfirmasi owner — bagian ini mengikat sejak ditulis.
+- **Keputusan build (2026-09-23, berjalan):** kode baru di `js/arena/`
+  (`arena.js` = model + state machine, `render2d.js` = renderer 2D);
+  file lama TAK disentuh kecuali 3 baris dispatch di `game.js`;
+  API chamber dipertahankan penuh (agen combat/enemy/HUD aman);
+  baca JSON lama; aktif via `?arena=v2` / `ARENA_V2=1`.
+  Slice 1 terverifikasi: seluruh state + teleport zona jalan,
+  `P0_GUARD=PASS`, 0 error (`shots/v2/`).

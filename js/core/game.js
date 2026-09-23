@@ -94,6 +94,8 @@ import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } f
 import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _forceAdvance } from '../systems/world-journey.js';
 import { BioChamber } from '../systems/bio-chamber.js';
 import { LumenLabyrinth } from '../systems/lumen-labyrinth.js';
+import { Arena, arenaV2Enabled } from '../arena/arena.js';
+import { drawArena2D } from '../arena/render2d.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
 import { drawArenaHud } from '../ui/hud-arena.js';
 import { drawPathogenSpikes, drawPathogenBody } from '../render/pathogen-attire.js';
@@ -2007,7 +2009,9 @@ applyChapterTier(enemy, run) {
       // ARENA SATU KESATUAN: labirin lumen kontinu lintas zona — dibuat SATU
       // kali per run; ganti zona TIDAK memutus ruang (mandat owner 2026-09-22).
       if (runC.chamber && runC.chamber.isLabyrinth) { runC.chamber.zoneId = zid; runC.chamber.zoneDef = def; return; }
-      runC.chamber = new LumenLabyrinth(labDef, def, null, null);
+      // ARENA V2 (rebuild dari nol §6): ?arena=v2 memakai implementasi baru,
+      // default tetap jalur lama. Dispatch 1 baris — logika lama tak diubah.
+      runC.chamber = arenaV2Enabled() ? new Arena(labDef, def, null, null) : new LumenLabyrinth(labDef, def, null, null);
       runC.chamber.zoneId = zid;
       runC.chamber.zoneDef = def;
       runC.chamber.enter();
@@ -2712,6 +2716,7 @@ applyChapterTier(enemy, run) {
           ctx.restore();
         } catch { /* filter tak didukung: fallback tanpa bloom */ }
       }
+      else if (run.chamber.isArenaV2) { try { drawArena2D(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] arenaV2:', err); } }
       else { try { drawChamberCanvas(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] chamberCanvas:', err); } }
     }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
