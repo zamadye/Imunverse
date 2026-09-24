@@ -2702,7 +2702,7 @@ applyChapterTier(enemy, run) {
           if (pk !== this._palKey) { this._palKey = pk; gl.setPalette(run.chamber.def); }
         } catch { /* abaikan */ }
       }
-      if (gl && gl.ok && run.chamber) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
+      if (gl && gl.ok && run.chamber && !run.chamber.isArenaV2) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
       if (drew) {
         ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
         // BLOOM ADDITIVE (increment c): rim membran, segel katup, dan glow

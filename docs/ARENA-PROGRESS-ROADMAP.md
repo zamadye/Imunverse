@@ -221,3 +221,16 @@ kapiler+aliran_darah, `coil` usus_besar+lambung, `alveoli` goal —
 total 13 room berbentuk, 6 junction tetap `cavity`. Semua kombinasi
 blob (SDF + render otomatis, tanpa cabang baru). V1 abaikan `shape`.
 Verifikasi: `P0_GUARD=PASS`, 0 error.
+
+## 10. Cutover V2 = default + peta aset (2026-09-24)
+
+User membuka browser fresh (tanpa flag) sehingga V2 tak terlihat —
+semua klaim tampak "fake". Betulkan: V2 kini DEFAULT, V1 via
+`?arena=v1` (rollback instan). V2 selalu renderer 2D (bypass GL —
+collision berbentuk butuh visual 2D; GL lingkaran = mismatch).
+Harness: default = V2, `ARENA_V1=1` = V1.
+- Peta aset: `node tools/map-assets.mjs` → `docs/ASSET-MAP.md`.
+  Jujur-final: 146 ada (107 JS + 33 audio + 6 web/lain), 189 hilang
+  (186 gambar: 152 sprites + 19 icons + 6 chapters + 4 ui + 5 props;
+  2 font; 1 riv). Art visual tak pernah diproduksi — perlu pipeline
+  art (bukan scope kode arena). V2 prosedural = imun terhadap ini.

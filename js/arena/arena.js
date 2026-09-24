@@ -13,13 +13,19 @@
  */
 
 export function arenaV2Enabled() {
+  // CUTOVER: V2 = default. V1 legacy hanya via ?arena=v1 eksplisit.
   try {
-    if (typeof window !== 'undefined' && window.__ARENA_V2 === true) return true;
+    if (typeof window !== 'undefined') {
+      if (window.__ARENA_V1 === true) return false;
+      if (window.__ARENA_V2 === true) return true;
+    }
     if (typeof location !== 'undefined' && location.search) {
-      return new URLSearchParams(location.search).get('arena') === 'v2';
+      const a = new URLSearchParams(location.search).get('arena');
+      if (a === 'v1') return false;
+      if (a === 'v2') return true;
     }
   } catch { /* abaikan */ }
-  return false;
+  return true;
 }
 
 const TAU = Math.PI * 2;
