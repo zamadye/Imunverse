@@ -91,7 +91,7 @@ import { antibodyForKill, antibodyForEngulf, earnAntibody, mutationCost, economy
 // P5: Reserve (bantuan eksternal) + provider pembelian MOCK (IAP §14-§21, §34)
 import { reserveBalance, reserveAssistFor, useReserve } from '../systems/reserve-system.js';
 import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } from '../systems/purchase-provider.js';
-import { initJourney, updateJourney, journeyHud, drawLandmark, currentZone, _forceAdvance } from '../systems/world-journey.js';
+import { initJourney, updateJourney, journeyHud, currentZone, _forceAdvance } from '../systems/world-journey.js';
 import { BioChamber } from '../systems/bio-chamber.js';
 import { LumenLabyrinth } from '../systems/lumen-labyrinth.js';
 import { Arena, arenaV2Enabled } from '../arena/arena.js';
@@ -118,9 +118,8 @@ import { drawOrganCorridor } from '../render/organ-corridor.js';
 import { drawWorldMap } from '../render/world-map.js';
 import { drawBackground, drawArena3D, setArenaPalette } from '../render/background.js';
 import { drawNestHint,
-  drawProjectile, drawParticle, drawPulseGlow, drawHealthBar, drawSwipeArc,
-  drawBlastRing, drawTelegraph, drawJoystick, drawMinimap, drawDamageNumber, drawHitSpark,
-  drawImpactPulse, drawAbilityCharge, drawAbilityPayoff, drawKillFx,
+  drawProjectile, drawPulseGlow, drawHealthBar,
+  drawTelegraph, drawJoystick, drawMinimap,
 } from '../render/shape-renderer.js';
 import { drawSprite, hasSprite } from '../render/sprite-loader.js';
 // P7-PROTOTIPE: tiga cara menggambar hero yang bisa dibandingkan
@@ -2728,9 +2727,7 @@ applyChapterTier(enemy, run) {
     if (run.erythro && run.chamber && !macroView) {
       try { run.erythro.draw(ctx, P, run.chamber); } catch { /* abaikan */ }
     }
-    // P4 §47: landmark zona — struktur yang DIINGAT pemain ("saya sudah
-    // melewati gugus alveoli itu"), bukan nomor stage.
-    try { drawLandmark(ctx, run, (wx, wy) => P.project(wx, wy)); } catch { /* abaikan */ }
+    // OWNER: landmark wireframe dihapus (visual tidak tepat).
 
     /** Billboard: sprite "berdiri" di ground — skala per-kedalaman, tanpa squash. */
     const billboard = (x, y, { lift = 0, flip = 1, tilt = 0, sx = 1, sy = 1, shear = 0 } = {}) => {
@@ -3250,22 +3247,7 @@ applyChapterTier(enemy, run) {
           }
           ctx.restore();
 
-          // NAMEPLATE ala MOBA: nama hero + level di atas kepala
-          billboard(player.x, player.y, { lift: player.radius * 0.62 });
-          const nw = 86, nh = 16, nx = player.x - nw / 2, ny = player.y - player.radius - 30;
-          ctx.fillStyle = 'rgba(2,8,14,0.58)';
-          ctx.strokeStyle = player.heroDef.color;
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          if (ctx.roundRect) ctx.roundRect(nx, ny, nw, nh, 8);
-          else ctx.rect(nx, ny, nw, nh);
-          ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#fff';
-          ctx.font = '900 9.5px system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(`${player.heroDef.name} · Lv ${run.level}`, player.x, ny + nh / 2 + 0.5);
-          ctx.restore();
+          // OWNER: nameplate hero dihapus (visual tidak tepat).
 
           // Indikator arah aim (chevron) — sudut dunia sudah dikompensasi squash
           const aim = this.input.getAimInfo(cam.getPlayerScreen()?.x ?? w / 2, cam.getPlayerScreen()?.y ?? h / 2);
@@ -3330,31 +3312,9 @@ applyChapterTier(enemy, run) {
 
     // ===== LAPISAN EFEK (billboard ringan, mengikuti kedalaman) =====
     const drawImageAt = (path, x, y, size, rotation = 0, opts = {}) => drawSprite(ctx, path, x, y, size, rotation, opts);
-    for (const fx of run.effects.effects) {
-      billboard(fx.x, fx.y, { lift: 4 });
-      if (fx.type === 'swipe') drawSwipeArc(ctx, fx);
-      else if (fx.type === 'blast') drawBlastRing(ctx, fx);
-      else if (fx.type === 'spark') drawHitSpark(ctx, fx, drawImageAt);
-      else if (fx.type === 'impact') drawImpactPulse(ctx, fx);
-      else if (fx.type === 'abilityCharge') drawAbilityCharge(ctx, fx, time);
-      else if (fx.type === 'abilityPayoff') drawAbilityPayoff(ctx, fx, time);
-      else if (fx.type === 'killfx') drawKillFx(ctx, fx, time);
-      else if (fx.type === 'killpop') {
-        // V2 Phase 1 death pop: sprite musuh membesar 1→scaleTo lalu memudar
-        const kt = 1 - fx.life / fx.maxLife; // 0..1
-        const scale = 1 + (fx.scaleTo - 1) * kt;
-        ctx.globalAlpha = Math.max(0, 1 - kt);
-        drawSprite(ctx, fx.sprite, fx.x, fx.y, fx.radius * 2.667 * scale, 0, {});
-        ctx.globalAlpha = 1;
-      }
-      ctx.restore();
-    }
-    for (const pt of run.effects.particles) {
-      billboard(pt.x, pt.y, { lift: 2 });
-      drawParticle(ctx, pt);
-      ctx.restore();
-    }
-    // ---- ATMO-KEDALAMAN third-person (referensi user: Raft) ----
+// OWNER: lapisan efek combat — dihapus (visual tidak tepat).
+    // OWNER: partikel confetti — dihapus (visual tidak tepat).
+        // ---- ATMO-KEDALAMAN third-person (referensi user: Raft) ----
     // 3 lapis: kabut jauh di ATAS (horizon), bayangan FETCH bawah (foreground),
     // vignette sudut — menjual foreground/midground/background pada bola mata.
     {
@@ -3381,13 +3341,8 @@ applyChapterTier(enemy, run) {
       ctx.fillRect(0, 0, w, h);
     }
 
-    for (const n of run.effects.numbers) {
-      billboard(n.x, n.y, { lift: 10 });
-      drawDamageNumber(ctx, n, time);
-      ctx.restore();
-    }
-
-    // ---- Screen-space overlays ----
+// OWNER: angka damage & label melayang — dihapus (visual tidak tepat).
+        // ---- Screen-space overlays ----
     // PHAGOS: flash merah saat patogen bermutasi (sinyal anti-curang)
     if (run._mutationFlashT > 0) {
       ctx.fillStyle = `rgba(214,38,61,${Math.min(0.28, run._mutationFlashT * 0.25)})`;
