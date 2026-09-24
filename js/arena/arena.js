@@ -268,9 +268,10 @@ export class Arena {
     this.doorAngle = N ? Math.atan2(N.y - n.y, N.x - n.x) : 0;
   }
 
-  _fire(opts, name) {
-    try { if (opts && typeof opts[name] === 'function') opts[name](); } catch { /* abaikan */ }
-  }
+  // NOTE scope-arena-murni: V1 (lumen-labyrinth) TIDAK PERNAH memanggil
+  // callback efek (onSwarmStart/onPurified/onOpen) — V2 menyamai persis.
+  // Label efek adalah domain effects-system; arena tak memicu UI luar
+  // arena (mencegah label baru bertumpuk dengan UI lama). opts diabaikan.
 
   update(dt, run, opts) {
     this.time += dt;
@@ -291,19 +292,16 @@ export class Arena {
     n.t += dt;
     if (n.state === 'lockdown' && n.t > 1.1) {
       n.state = 'swarm'; n.t = 0;
-      this._fire(opts, 'onSwarmStart');
     } else if (n.state === 'swarm') {
       const alive = run ? (run.enemies || []).filter((e) => e.alive).length : 1;
       if (alive === 0 && n.t > 0.6) {
         n.state = 'purified'; n.t = 0; this.shock = 0.001; n.cleared = true;
-        this._fire(opts, 'onPurified');
       }
     } else if (n.state === 'purified') {
       this.shock = Math.min(1, this.shock + dt * 0.9);
       if (this.shock >= 1) {
         n.state = 'open'; n.t = 0; this.shock = 0;
         this._syncActive();
-        this._fire(opts, 'onOpen');
       }
     }
     this.state = n.state;

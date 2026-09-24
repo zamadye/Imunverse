@@ -159,3 +159,27 @@ Chromium + lib sistem — tidak tersedia di sandbox ini).
   baca JSON lama; aktif via `?arena=v2` / `ARENA_V2=1`.
   Slice 1 terverifikasi: seluruh state + teleport zona jalan,
   `P0_GUARD=PASS`, 0 error (`shots/v2/`).
+
+## 7. Temuan user 2026-09-24: buram + UI + gap referensi pathogenic
+
+Perbandingan `docs/reference-pathogenic/ARENA_ZOOM_OUT_REFERENCE_.png`
+vs arena kini: user benar — masih SANGAT jauh (referensi = anatomi
+painterly per organ + koridor vaskular bercahaya + portal START/GOAL;
+kini = rongga lingkaran prosedural). Peta jalan penutup gap = V2 slice
+berikutnya (siluet organ per room, koridor luminous, portal START/GOAL).
+
+- [x] **BUG buram #1 (utama, gameplay):** kanvas GL dirender di CSS-px
+      lalu di-upscale ke backing DPR = seluruh lapisan arena GL buram
+      di semua HP DPR>1. Fix: GL se-resolusi backing (dpr clamp 1.5,
+      `u_scale` ikut — framing identik). Hanya `body-gl.js`.
+- [x] **BUG buram #2 (tersembunyi):** lapisan latar legacy
+      (`drawBackground`/`drawArena3D`: prop 128px di-upscale 2–3×)
+      digambar di bawah labirin yang opaque. Fix: skip saat
+      `isLabyrinth` (tak terlihat + hemat fill-rate). Dashboard tanpa
+      chamber TIDAK diubah (scope UI-agent).
+- [x] **Scope UI murni:** V1 tak pernah memanggil callback efek; V2
+      sempat memicu label baru (SPASME/...) = tumpukan UI baru. Fix:
+      V2 samakan V1 (abaikan opts). Sisa tumpukan (angka damage,
+      +ANTIBODI, nameplate) = domain combat/effects — TIDAK disentuh.
+- [ ] Verifikasi GL tajam butuh browser Nyata (jsdom tak ada WebGL):
+      user/CI `shoot-arena`.

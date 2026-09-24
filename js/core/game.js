@@ -2611,13 +2611,17 @@ applyChapterTier(enemy, run) {
     const cam = run.camera;
     const player = run.player;
 
-    // Latar prosedural (screen-space, parallax internal)
-    drawBackground(ctx, cam.x, cam.y, w, h, time);
+    // Labirin menutup layar penuh sendiri (GL/2D opaque) → lapisan latar
+    // legacy (drawBackground + drawArena3D) diskip: tak terlihat, hemat
+    // fill-rate, dan sprite prop 128px-nya tak lagi menumpuk buram di
+    // bawah arena. Non-labirin (dashboard/diorama) tidak berubah.
+    const labMode = !!(run.chamber && run.chamber.isLabyrinth);
+    if (!labMode) drawBackground(ctx, cam.x, cam.y, w, h, time);
 
     // ---- DUNIA PSEUDO-3D (Fase 12b): kamera miring, yang jauh lebih kecil ----
     const P = cam.makeProjector(w, h);
     cam.setPlayerScreen(P.project(player.x, player.y));
-    drawArena3D(ctx, P, time);
+    if (!labMode) drawArena3D(ctx, P, time);
     // PILOT Organ Ascent: dinding organ + serat otot + pembuluh (di atas
     // tekstur tanah, di bawah entitas). Hanya bila arena berbentuk koridor.
     if (run.worldMapDef === undefined) run.worldMapDef = getData().bodyMap || null;

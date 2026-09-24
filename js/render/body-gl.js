@@ -257,13 +257,17 @@ export class BodyGL {
   render(run, P, time, chamber) {
     if (!this.ok || !chamber) return false;
     const gl = this.gl;
-    const w = Math.max(2, Math.round(P.w)), h = Math.max(2, Math.round(P.h));
+    // BLUR-FIX (bug nyata: arena buram di DPR>1): kanvas GL se-resolusi
+    // backing store (dpr clamp 1.5 — jaga 60fps), u_scale ikut diskala agar
+    // framing identik. Dulu CSS-px lalu di-upscale = buram + bloom ganda.
+    const dprG = Math.max(1, Math.min(1.5, (run && run.dpr) || (typeof window !== 'undefined' && window.devicePixelRatio) || 1));
+    const w = Math.max(2, Math.round(P.w * dprG)), h = Math.max(2, Math.round(P.h * dprG));
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w; this.canvas.height = h;
       gl.viewport(0, 0, w, h);
     }
     const cam = cameraOf(P);
-    const s = P.project(cam.x, cam.y).s;
+    const s = P.project(cam.x, cam.y).s * dprG;
     gl.useProgram(this.prog);
     gl.uniform2f(this.u.u_res, w, h);
     gl.uniform2f(this.u.u_cam, cam.x, cam.y);
