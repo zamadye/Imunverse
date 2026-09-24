@@ -37,7 +37,9 @@ export function lobeMod(theta, seed) {
 
 /** Precompute geometri bentuk room dari data `shape`:
  *  cavity = 1 blob · alveoli = 1 + 6 kantung · dual = 2 bilik ·
- *  coil = tabung sinusoidal (17 segmen kapsul). */
+ *  coil = tabung sinusoidal (18 segmen kapsul) · tri = 3 lobus ·
+ *  pair = 2 kacang · leaf = daun 3 blob · nodes = 1 + 4 nodul ·
+ *  axon = bintang 1 + 4 · vessel = 2 segmen pembuluh. */
 function buildRoomShape(room) {
   const seed = roomSeed(room);
   room.shape = room.shape || 'cavity';
@@ -73,6 +75,62 @@ function buildRoomShape(room) {
       const cy = room.y + Math.sin(t * waves * TAU + seed * 5) * A;
       room.coilSegs.push({ x0: px, y0: py, x1: cx, y1: cy, w: room.coilR });
       px = cx; py = cy;
+    }
+  } else if (room.shape === 'tri') { // hati: 3 lobus
+    room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.60, seed });
+    const ax3 = seed * TAU;
+    for (const sgn of [-1, 1]) {
+      room.blobs.push({
+        x: room.x + sgn * Math.cos(ax3) * room.r * 0.48,
+        y: room.y + sgn * Math.sin(ax3) * room.r * 0.48,
+        r: room.r * 0.40, seed: seed + (sgn > 0 ? 5.2 : 2.6),
+      });
+    }
+  } else if (room.shape === 'pair') { // ginjal: 2 kacang vertikal
+    for (const sgn of [-1, 1]) {
+      room.blobs.push({
+        x: room.x, y: room.y + sgn * room.r * 0.40,
+        r: room.r * 0.52, seed: seed + (sgn > 0 ? 4.4 : 1.1),
+      });
+    }
+  } else if (room.shape === 'leaf') { // pankreas: daun memanjang
+    const axL = seed * TAU;
+    room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.50, seed });
+    for (const sgn of [-1, 1]) {
+      room.blobs.push({
+        x: room.x + sgn * Math.cos(axL) * room.r * 0.52,
+        y: room.y + sgn * Math.sin(axL) * room.r * 0.52,
+        r: room.r * 0.38, seed: seed + (sgn > 0 ? 6.6 : 3.3),
+      });
+    }
+  } else if (room.shape === 'nodes') { // limfe: gugus nodul mini
+    room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.40, seed });
+    for (let k = 0; k < 4; k++) {
+      const a = seed * TAU + (k / 4) * TAU;
+      room.blobs.push({
+        x: room.x + Math.cos(a) * room.r * 0.55,
+        y: room.y + Math.sin(a) * room.r * 0.55,
+        r: room.r * 0.27, seed: seed + k * 3.3 + 2.2,
+      });
+    }
+  } else if (room.shape === 'axon') { // saraf: bintang 4 lengan
+    room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.48, seed });
+    for (let k = 0; k < 4; k++) {
+      const a = seed * TAU + (k / 4) * TAU;
+      room.blobs.push({
+        x: room.x + Math.cos(a) * room.r * 0.52,
+        y: room.y + Math.sin(a) * room.r * 0.52,
+        r: room.r * 0.30, seed: seed + k * 5.1 + 0.7,
+      });
+    }
+  } else if (room.shape === 'vessel') { // kapiler/darah: segmen pembuluh
+    const axV = seed * TAU;
+    for (const sgn of [-1, 1]) {
+      room.blobs.push({
+        x: room.x + sgn * Math.cos(axV) * room.r * 0.44,
+        y: room.y + sgn * Math.sin(axV) * room.r * 0.44,
+        r: room.r * 0.60, seed: seed + (sgn > 0 ? 7.9 : 1.9),
+      });
     }
   } else {
     room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });

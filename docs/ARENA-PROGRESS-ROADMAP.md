@@ -212,3 +212,12 @@ Status tutup-gap (semua SELESAI + terverifikasi visual `shots/v2/`):
    field baru (aman).
 Batas jujur: detail painterly AAA butuh aset art/shader berat; Canvas 2D
 hanya aproksimasi via noise strokes berlapis (GL `body-gl` sudah fbm).
+
+## 9. V2 slice 4: bentuk 10 organ marjinal (2026-09-24)
+
+Melengkapi slice 3 (paru/jantung/usus_halus): `tri` hati, `pair`
+ginjal, `leaf` pankreas, `nodes` limfe, `axon` saraf, `vessel`
+kapiler+aliran_darah, `coil` usus_besar+lambung, `alveoli` goal —
+total 13 room berbentuk, 6 junction tetap `cavity`. Semua kombinasi
+blob (SDF + render otomatis, tanpa cabang baru). V1 abaikan `shape`.
+Verifikasi: `P0_GUARD=PASS`, 0 error.
