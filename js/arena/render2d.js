@@ -384,6 +384,56 @@ function paintTri(g, pr, t, R0, pal, beat) {
   trace(0.84); g.strokeStyle = `rgba(${pal.hot},${0.4 + beat * 0.2})`; g.lineWidth = 2; g.stroke();
   g.restore();
 }
+function paintHex(g, pr, n, R0, pal, beat) {
+  // Ruang heksagon lobulus (S7c): tepi + isi + 3 pintu sudut. Cermin sdfHex.
+  const h = n.hex, v = [];
+  for (let k = 0; k < 6; k++) {
+    const a = h.rot + Math.PI / 2 + (k / 6) * TAU;
+    v.push(pr(h.x + Math.cos(a) * h.R, h.y + Math.sin(a) * h.R));
+  }
+  const cx = v.reduce((s, p) => s + p.x, 0) / 6, cy = v.reduce((s, p) => s + p.y, 0) / 6;
+  const trace = (k) => {
+    g.beginPath();
+    v.forEach((p, i) => (i === 0
+      ? g.moveTo(cx + (p.x - cx) * k, cy + (p.y - cy) * k)
+      : g.lineTo(cx + (p.x - cx) * k, cy + (p.y - cy) * k)));
+    g.closePath();
+  };
+  g.save(); g.lineJoin = 'round';
+  trace(1.0); g.strokeStyle = 'rgba(18,3,7,0.92)'; g.lineWidth = Math.max(3, R0 * 0.035); g.stroke();
+  trace(1.0); g.fillStyle = `rgba(${pal.deep},0.96)`; g.fill();
+  trace(0.88); g.fillStyle = `rgba(${pal.fill},0.85)`; g.fill();
+  trace(0.88); g.strokeStyle = `rgba(${pal.hot},${0.4 + beat * 0.2})`; g.lineWidth = 2; g.stroke();
+  g.strokeStyle = `rgba(${pal.hot},0.8)`; g.lineWidth = 3;
+  for (const k of [0, 2, 4]) {
+    g.beginPath(); g.arc(v[k].x, v[k].y, Math.max(6, R0 * 0.06), 0, TAU); g.stroke();
+  }
+  g.restore();
+}
+function paintDrain(g, pr, dr, pal, time) {
+  // Tirisan vena sentral (S7c): lubang + spiral putar. Lantai (arus).
+  const q = pr(dr.x, dr.y), R = dr.R * q.s;
+  if (R < 3) return;
+  g.save();
+  const pit = g.createRadialGradient(q.x, q.y, 1, q.x, q.y, R);
+  pit.addColorStop(0, 'rgba(8,1,3,0.95)');
+  pit.addColorStop(0.55, `rgba(${pal.deep},0.9)`);
+  pit.addColorStop(1, `rgba(${pal.deep},0)`);
+  g.fillStyle = pit;
+  g.beginPath(); g.arc(q.x, q.y, R, 0, TAU); g.fill();
+  g.strokeStyle = `rgba(${pal.glow},0.55)`; g.lineWidth = Math.max(1.5, R * 0.05);
+  for (let a = 0; a < 3; a++) {
+    const a0 = time * 1.4 + (a / 3) * TAU;
+    g.beginPath();
+    for (let s = 0; s <= 10; s++) {
+      const rr = R * (0.15 + 0.75 * (s / 10)), aa = a0 + (s / 10) * 2.2;
+      const X = q.x + Math.cos(aa) * rr, Y = q.y + Math.sin(aa) * rr;
+      if (s === 0) g.moveTo(X, Y); else g.lineTo(X, Y);
+    }
+    g.stroke();
+  }
+  g.restore();
+}
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -483,6 +533,8 @@ export function drawArena2D(ctx, P, arena, time) {
       paintCoil(ctx, pr, n, pal, time, seed, beat, br);
     } else {
       if (n.tris) for (const t of n.tris) paintTri(ctx, pr, t, R, pal, beat);
+      if (n.hex) paintHex(ctx, pr, n, R, pal, beat);
+      if (n.drain) paintDrain(ctx, pr, n.drain, pal, time);
       for (const b of n.blobs) {
         paintBlob(ctx, pr, b, b.r * br, pal, n.motif, time, b.seed, { beat, dim, junction: !!n.junction });
       }

@@ -163,7 +163,7 @@
         "type": "bile",
         "push": 2.2
       },
-      "shape": "tri"
+      "shape": "hexdrain"
     },
     {
       "id": "aliran_darah",

@@ -305,7 +305,7 @@ try {
   }
 } catch (e) { console.log('[info] jump zona gagal:', e.message); }
 // 6b. teleport verifikasi bentuk: goal (slice 5) + lambung (S7a)
-for (const [nid, nm] of [['goal', 'snap-09-goal-portal.png'], ['lambung', 'snap-10-lambung-sac.png'], ['usus_besar', 'snap-11-usus-besar-haustra.png']]) {
+for (const [nid, nm] of [['goal', 'snap-09-goal-portal.png'], ['lambung', 'snap-10-lambung-sac.png'], ['usus_besar', 'snap-11-usus-besar-haustra.png'], ['hati', 'snap-12-hati-hexdrain.png']]) {
   try {
     const lab = chamber();
     const n = lab && lab.nodes && lab.nodes.get(nid);

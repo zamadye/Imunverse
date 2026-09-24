@@ -251,6 +251,22 @@ function buildRoomShape(room) {
       x: room.x + dx * d + px * dOff, y: room.y + dy * d + py * dOff,
       r: dR, seed: seed + 17.7,
     });
+  } else if (room.shape === 'hexdrain') { // hati (S7c): heksagon + jeruji + tirisan
+    const axX = seed * TAU;
+    room.hex = { x: room.x, y: room.y, R: room.r * 0.95, rot: axX };
+    // 6 sirip radial ke arah verteks (saluran sinusoid lebar di antaranya).
+    room.ridges = room.ridges || [];
+    const fW = Math.max(6, room.r * 0.045);
+    for (let k = 0; k < 6; k++) {
+      const a = axX + Math.PI / 2 + (k / 6) * TAU;
+      room.ridges.push({
+        x0: room.x + Math.cos(a) * room.r * 0.30, y0: room.y + Math.sin(a) * room.r * 0.30,
+        x1: room.x + Math.cos(a) * room.r * 0.55, y1: room.y + Math.sin(a) * room.r * 0.55,
+        w: fW,
+      });
+    }
+    // Tirisan vena sentral: arus menarik masuk (lantai, bukan dinding).
+    room.drain = { x: room.x, y: room.y, R: room.r * 0.30, pull: 34 };
   } else {
     room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });
   }
@@ -286,6 +302,18 @@ function sdfTri(x, y, t) {
   // terdekat. Di luar dekat verteks, cross tepi-terdekat bisa positif.
   const dd = Math.min(d0, d1, d2), zz = Math.min(z0, z1, z2);
   return -Math.sqrt(dd) * Math.sign(zz);
+}
+/** SDF heksagon beraturan (circumradius R, rotasi rot) — port iq sdHexagon. */
+function sdfHex(x, y, h) {
+  const c = Math.cos(-h.rot), s = Math.sin(-h.rot);
+  let px = (x - h.x) * c - (y - h.y) * s;
+  let py = (x - h.x) * s + (y - h.y) * c;
+  px = Math.abs(px); py = Math.abs(py);
+  const kx = -0.866025404, ky = 0.5, kz = 0.577350269;
+  const m = 2 * Math.min(kx * px + ky * py, 0);
+  px -= m * kx; py -= m * ky;
+  px -= Math.min(Math.max(px, -kz * h.R), kz * h.R); py -= h.R;
+  return Math.hypot(px, py) * Math.sign(py);
 }
 export class Arena {
   constructor(lab, arenaDef, px, py) {
@@ -393,6 +421,8 @@ export class Arena {
     }
     // Ruang segitiga haustra (S7b) — cermin render paintTri.
     if (n.tris) for (const t of n.tris) d = Math.min(d, sdfTri(x, y, t));
+    // Ruang heksagon lobulus (S7c) — cermin render paintHex.
+    if (n.hex) d = Math.min(d, sdfHex(x, y, n.hex));
     // Rabung interior (S7a): rintangan kapsul — cermin render paintRidges.
     if (n.ridges) for (const g of n.ridges) d = Math.max(d, -(segDist(x, y, g) - g.w));
     return d;
@@ -479,6 +509,17 @@ export class Arena {
 
   /** Arus hemodinamik di dalam koridor (vektor px/dtk). */
   currentAt(x, y) {
+    // Tirisan vena (S7c) DIDAHULUKAN: di pusat room, banyak segmen koridor
+    // bertemu sehingga arah koridor arbitrer; tirisan deterministik (masuk).
+    for (const n of this.rooms.values()) {
+      const dr = n.drain;
+      if (!dr) continue;
+      const dx = dr.x - x, dy = dr.y - y, L = Math.hypot(dx, dy);
+      if (L < dr.R && L > 1) {
+        const k = dr.pull * (1 - L / dr.R);
+        return { x: (dx / L) * k, y: (dy / L) * k };
+      }
+    }
     for (const s of this.segs) {
       if (segDist(x, y, s) < s.w * 0.9) {
         const dx = s.x1 - s.x0, dy = s.y1 - s.y0;
