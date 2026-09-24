@@ -72,13 +72,17 @@ function buildRoomShape(room) {
     }
   } else if (room.shape === 'coil') {
     const A = room.r * 0.40, waves = 2.5, N = 18;
-    room.coilR = Math.min(46, room.r * 0.30);
+    // Fase selaras audit-prod: zero-crossing TEPAT di tengah room (t=0.5)
+    // → pusat selalu clearance penuh selebar tabung; variasi antar-room
+    // cukup balik fasa (sinus tetap organik, SDF+render tetap satu sumber).
+    const phase = -Math.PI / 2 + (seed > 0.5 ? Math.PI : 0);
+    room.coilR = Math.min(50, room.r * 0.32);
     room.coilSegs = [];
     let px = room.x - room.r * 0.78, py = room.y;
     for (let i = 1; i <= N; i++) {
       const t = i / N;
       const cx = room.x - room.r * 0.78 + t * room.r * 1.56;
-      const cy = room.y + Math.sin(t * waves * TAU + seed * 5) * A;
+      const cy = room.y + Math.sin(t * waves * TAU + phase) * A;
       room.coilSegs.push({ x0: px, y0: py, x1: cx, y1: cy, w: room.coilR });
       px = cx; py = cy;
     }
