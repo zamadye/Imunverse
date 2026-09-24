@@ -366,6 +366,24 @@ function paintRidges(g, pr, n, pal, beat) {
   }
   g.restore();
 }
+function paintTri(g, pr, t, R0, pal, beat) {
+  // Ruang segitiga haustra (S7b): tepi gelap + isi + rim. Cermin sdfTri.
+  const A = pr(t.ax, t.ay), Bp = pr(t.bx, t.by), C = pr(t.cx, t.cy);
+  const gx = (A.x + Bp.x + C.x) / 3, gy = (A.y + Bp.y + C.y) / 3;
+  const trace = (k) => {
+    g.beginPath();
+    g.moveTo(gx + (A.x - gx) * k, gy + (A.y - gy) * k);
+    g.lineTo(gx + (Bp.x - gx) * k, gy + (Bp.y - gy) * k);
+    g.lineTo(gx + (C.x - gx) * k, gy + (C.y - gy) * k);
+    g.closePath();
+  };
+  g.save(); g.lineJoin = 'round';
+  trace(1.0); g.strokeStyle = 'rgba(18,3,7,0.92)'; g.lineWidth = Math.max(3, R0 * 0.035); g.stroke();
+  trace(1.0); g.fillStyle = `rgba(${pal.deep},0.96)`; g.fill();
+  trace(0.84); g.fillStyle = `rgba(${pal.fill},0.85)`; g.fill();
+  trace(0.84); g.strokeStyle = `rgba(${pal.hot},${0.4 + beat * 0.2})`; g.lineWidth = 2; g.stroke();
+  g.restore();
+}
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -464,6 +482,7 @@ export function drawArena2D(ctx, P, arena, time) {
     if (n.shape === 'coil') {
       paintCoil(ctx, pr, n, pal, time, seed, beat, br);
     } else {
+      if (n.tris) for (const t of n.tris) paintTri(ctx, pr, t, R, pal, beat);
       for (const b of n.blobs) {
         paintBlob(ctx, pr, b, b.r * br, pal, n.motif, time, b.seed, { beat, dim, junction: !!n.junction });
       }

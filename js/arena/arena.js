@@ -200,6 +200,57 @@ function buildRoomShape(room) {
       }
       room.ridges.push(ridgeAt(t, s));
     }
+  } else if (room.shape === 'haustra') { // usus besar (S7b): rantai segitiga + baffle + ceruk
+    const axH = seed * TAU;
+    const dx = Math.cos(axH), dy = Math.sin(axH), px = -dy, py = dx;
+    const d = room.r * 0.40, Rt = room.r * 0.66;
+    room.tris = [];
+    const triAt = (cx, cy) => {
+      room.tris.push({
+        ax: cx + dx * Rt, ay: cy + dy * Rt,
+        bx: cx - dx * Rt * 0.5 + px * Rt * 0.866, by: cy - dy * Rt * 0.5 + py * Rt * 0.866,
+        cx: cx - dx * Rt * 0.5 - px * Rt * 0.866, cy: cy - dy * Rt * 0.5 - py * Rt * 0.866,
+      });
+    };
+    triAt(room.x - dx * d, room.y - dy * d);
+    triAt(room.x, room.y);
+    triAt(room.x + dx * d, room.y + dy * d);
+    // Bafl sabit: 2 segmen busur dangkal di tiap gerbang, celah bergantian.
+    // Mesin ridges (SDF + render cermin) — liput 45% agar celah muat hero.
+    room.ridges = room.ridges || [];
+    const bW = Math.max(8, room.r * 0.06);
+    const halfW = (Rt - d * 0.5) * 0.577;
+    for (const sgn of [-1, 1]) {
+      const side = sgn; // sisi dinding pangkal (celah di lawan, bergantian)
+      let gx = room.x + dx * d * 0.5 * sgn, gy = room.y + dy * d * 0.5 * sgn;
+      const segsAt = (qx, qy) => {
+        const Ax = qx + px * side * halfW, Ay = qy + py * side * halfW;
+        const Mx = qx + px * side * halfW * 0.55 + dx * sgn * 7;
+        const My = qy + py * side * halfW * 0.55 + dy * sgn * 7;
+        const Ex = qx + px * side * halfW * 0.1, Ey = qy + py * side * halfW * 0.1;
+        return [
+          { x0: Ax, y0: Ay, x1: Mx, y1: My, w: bW },
+          { x0: Mx, y0: My, x1: Ex, y1: Ey, w: bW },
+        ];
+      };
+      // INVARIAN pusat-terbuka: geser gerbang keluar sampai ≥18px dari pusat.
+      for (let j = 0; j < 4; j++) {
+        const [s1, s2] = segsAt(gx, gy);
+        if (Math.min(segDist(room.x, room.y, s1), segDist(room.x, room.y, s2)) - bW > 18) break;
+        gx += dx * sgn * 6; gy += dy * sgn * 6;
+      }
+      room.ridges.push(...segsAt(gx, gy));
+    }
+    // Ceruk divertikula: 2 kantung samping selang-seling (ceruk rahasia).
+    const dR = room.r * 0.24, dOff = Rt * 0.8;
+    room.blobs.push({
+      x: room.x - dx * d - px * dOff, y: room.y - dy * d - py * dOff,
+      r: dR, seed: seed + 11.3,
+    });
+    room.blobs.push({
+      x: room.x + dx * d + px * dOff, y: room.y + dy * d + py * dOff,
+      r: dR, seed: seed + 17.7,
+    });
   } else {
     room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });
   }
@@ -213,6 +264,29 @@ function segDist(x, y, s) {
   return Math.hypot(x - (s.x0 + dx * t), y - (s.y0 + dy * t));
 }
 
+/** SDF segitiga bertanda, negatif di dalam — port iq sdTriangle. */
+function sdfTri(x, y, t) {
+  const ex0 = t.bx - t.ax, ey0 = t.by - t.ay;
+  const ex1 = t.cx - t.bx, ey1 = t.cy - t.by;
+  const ex2 = t.ax - t.cx, ey2 = t.ay - t.cy;
+  const v0x = x - t.ax, v0y = y - t.ay;
+  const v1x = x - t.bx, v1y = y - t.by;
+  const v2x = x - t.cx, v2y = y - t.cy;
+  const c0 = Math.min(1, Math.max(0, (v0x * ex0 + v0y * ey0) / (ex0 * ex0 + ey0 * ey0)));
+  const c1 = Math.min(1, Math.max(0, (v1x * ex1 + v1y * ey1) / (ex1 * ex1 + ey1 * ey1)));
+  const c2 = Math.min(1, Math.max(0, (v2x * ex2 + v2y * ey2) / (ex2 * ex2 + ey2 * ey2)));
+  const q0x = v0x - ex0 * c0, q0y = v0y - ey0 * c0;
+  const q1x = v1x - ex1 * c1, q1y = v1y - ey1 * c1;
+  const q2x = v2x - ex2 * c2, q2y = v2y - ey2 * c2;
+  const s = Math.sign(ex0 * ey2 - ey0 * ex2) || 1;
+  const d0 = q0x * q0x + q0y * q0y, z0 = s * (v0x * ey0 - v0y * ex0);
+  const d1 = q1x * q1x + q1y * q1y, z1 = s * (v1x * ey1 - v1y * ex1);
+  const d2 = q2x * q2x + q2y * q2y, z2 = s * (v2x * ey2 - v2y * ex2);
+  // iq: min KOMPONEN-WISE (jarak min, cross min) — BUKAN pasangan tepi
+  // terdekat. Di luar dekat verteks, cross tepi-terdekat bisa positif.
+  const dd = Math.min(d0, d1, d2), zz = Math.min(z0, z1, z2);
+  return -Math.sqrt(dd) * Math.sign(zz);
+}
 export class Arena {
   constructor(lab, arenaDef, px, py) {
     if (!lab || !Array.isArray(lab.nodes)) throw new Error('[arena-v2] labDef tanpa nodes');
@@ -317,6 +391,8 @@ export class Arena {
       const dx = x - b.x, dy = y - b.y;
       d = Math.min(d, Math.hypot(dx, dy) - (b.r + beat) * lobeMod(Math.atan2(dy, dx), b.seed));
     }
+    // Ruang segitiga haustra (S7b) — cermin render paintTri.
+    if (n.tris) for (const t of n.tris) d = Math.min(d, sdfTri(x, y, t));
     // Rabung interior (S7a): rintangan kapsul — cermin render paintRidges.
     if (n.ridges) for (const g of n.ridges) d = Math.max(d, -(segDist(x, y, g) - g.w));
     return d;
