@@ -87,7 +87,7 @@ try {
   const files = ['snap-08-zone-heart.png', 'snap-08-zone-lung.png', 'snap-08-zone-capillary.png', 'snap-08-zone-usus.png'];
   const means = [];
   for (const f of files) {
-    const img = await loadImage(path.join(ROOT, 'shots/v2', f));
+    const img = await loadImage(readFileSync(path.join(ROOT, 'shots/v2', f)));
     const cv = createCanvas(64, 64), g = cv.getContext('2d');
     g.drawImage(img, 0, 0, 64, 64);
     const d = g.getImageData(0, 0, 64, 64).data;

@@ -142,6 +142,64 @@ function buildRoomShape(room) {
         r: room.r * 0.60, seed: seed + (sgn > 0 ? 7.9 : 1.9),
       });
     }
+  } else if (room.shape === 'sac') { // lambung (S7a): kantung-J + rabung rugae
+    // Sumbu seed (preseden dual/leaf/vessel); mulut ±sumbu, fundus menonjol.
+    const axS = seed * TAU;
+    const dx = Math.cos(axS), dy = Math.sin(axS);
+    // Kurva kuadratik P0(mulut A) → P1(kontrol tonjolan) → P2(mulut B)
+    const P0 = { x: room.x - dx * room.r * 0.55, y: room.y - dy * room.r * 0.55 };
+    const P2 = { x: room.x + dx * room.r * 0.55, y: room.y + dy * room.r * 0.55 };
+    const P1 = { x: room.x - dy * room.r * 0.45, y: room.y + dx * room.r * 0.45 };
+    const B = (t) => {
+      const u = 1 - t;
+      return {
+        x: u * u * P0.x + 2 * u * t * P1.x + t * t * P2.x,
+        y: u * u * P0.y + 2 * u * t * P1.y + t * t * P2.y,
+      };
+    };
+    const T = (t) => {
+      const u = 1 - t;
+      const tx = 2 * u * (P1.x - P0.x) + 2 * t * (P2.x - P1.x);
+      const ty = 2 * u * (P1.y - P0.y) + 2 * t * (P2.y - P1.y);
+      const L = Math.hypot(tx, ty) || 1;
+      return { x: tx / L, y: ty / L };
+    };
+    const prof = (t) => room.r * (0.30 + 0.10 * Math.sin(Math.PI * t));
+    for (let i = 0; i < 8; i++) {
+      const p = B((i + 0.5) / 8);
+      room.blobs.push({ x: p.x, y: p.y, r: prof((i + 0.5) / 8), seed: seed + i * 1.7 });
+    }
+    const mid = B(0.5), tm = T(0.5); // kubah fundus di sisi luar lengkung
+    room.blobs.push({
+      x: mid.x - tm.y * room.r * 0.30, y: mid.y + tm.x * room.r * 0.30,
+      r: room.r * 0.38, seed: seed + 9.4,
+    });
+    // Rabung melintang parsial (sisi celah bergantian = labirin; antrum lega)
+    const nR = room.ridges > 0 ? room.ridges : 3;
+    room.ridges = [];
+    const rW = Math.max(8, room.r * 0.075);
+    const ridgeAt = (t, s) => {
+      const p = B(t), tn = T(t), wloc = prof(t) * 0.92;
+      return {
+        x0: p.x + -tn.y * s * wloc * 0.95, y0: p.y + tn.x * s * wloc * 0.95,
+        x1: p.x - -tn.y * s * wloc * 0.15, y1: p.y - tn.x * s * wloc * 0.15,
+        w: rW,
+      };
+    };
+    for (let k = 0; k < nR; k++) {
+      // INVARIAN: pusat room = lantai terbuka (koridor + spawn + teleport
+      // bertemu di tengah). Geser t menjauhi 0.5 sampai segmen ≥18px dari
+      // pusat (deterministik, maks 8 coba — bukan tebakan manual).
+      let t = 0.32 + (nR > 1 ? (k / (nR - 1)) * 0.36 : 0.18);
+      const s = k % 2 === 0 ? 1 : -1;
+      for (let j = 0; j < 8; j++) {
+        const cand = ridgeAt(t, s);
+        if (segDist(room.x, room.y, cand) - rW > 18) break;
+        t += 0.035 * (t >= 0.5 ? 1 : -1);
+        t = Math.min(0.74, Math.max(0.26, t));
+      }
+      room.ridges.push(ridgeAt(t, s));
+    }
   } else {
     room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });
   }
@@ -166,7 +224,7 @@ export class Arena {
         organ: n.organ || n.id, motif: n.motif | 0,
         pal: n.pal || null, label: n.label || null,
         enemies: n.enemies || 0, hazard: n.hazard || null,
-        junction: !!n.junction, shape: n.shape || 'cavity',
+        junction: !!n.junction, shape: n.shape || 'cavity', ridges: n.ridges | 0,
         state: 'idle', t: 0, cleared: false,
       };
       buildRoomShape(room);
@@ -259,6 +317,8 @@ export class Arena {
       const dx = x - b.x, dy = y - b.y;
       d = Math.min(d, Math.hypot(dx, dy) - (b.r + beat) * lobeMod(Math.atan2(dy, dx), b.seed));
     }
+    // Rabung interior (S7a): rintangan kapsul — cermin render paintRidges.
+    if (n.ridges) for (const g of n.ridges) d = Math.max(d, -(segDist(x, y, g) - g.w));
     return d;
   }
 

@@ -217,7 +217,8 @@
         "type": "acid",
         "dps": 4
       },
-      "shape": "coil"
+      "shape": "sac",
+      "ridges": 3
     },
     {
       "id": "j5",
@@ -493,10 +494,10 @@
       "r": 40
     },
     {
-  "room": "usus_halus",
-  "dx": -44,
-  "dy": 44,
-  "r": 42
+      "room": "usus_halus",
+      "dx": -44,
+      "dy": 44,
+      "r": 42
     }
   ]
 }

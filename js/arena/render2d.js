@@ -352,6 +352,20 @@ function portal(g, q, R, t, rgb, big, tag) {
     g.fillRect(q.x - R * 0.22, q.y - R * 5.5, R * 0.44, R * 5.5);
   }
 }
+function paintRidges(g, pr, n, pal, beat) {
+  // Rabung rugae (S7a): dinding kapsul tebal + sorot tepi. Cermin SDF.
+  g.save(); g.lineCap = 'round';
+  for (const r of n.ridges) {
+    const a = pr(r.x0, r.y0), b = pr(r.x1, r.y1);
+    const s = (a.s + b.s) / 2, w = Math.max(2, r.w * 2 * s);
+    const trace = () => { g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); };
+    g.strokeStyle = 'rgba(18,3,7,0.92)'; g.lineWidth = w * 1.18; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.deep},0.95)`; g.lineWidth = w; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.fill},0.9)`; g.lineWidth = w * 0.60; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.hot},${0.55 + beat * 0.25})`; g.lineWidth = Math.max(2, w * 0.16); trace(); g.stroke();
+  }
+  g.restore();
+}
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -460,6 +474,7 @@ export function drawArena2D(ctx, P, arena, time) {
         ctx.setLineDash([]);
       }
     }
+    if (n.ridges) paintRidges(ctx, pr, n, pal, beat);
     if (n.junction) {
       // penunjuk rute: segitiga di tepi junction ke arah room route-berikutnya
       const nxRoom = arena.node && arena.node(routeNextId(arena, n.id));

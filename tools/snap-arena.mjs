@@ -304,20 +304,22 @@ try {
     shot(`snap-08-zone-${nm}.png`);
   }
 } catch (e) { console.log('[info] jump zona gagal:', e.message); }
-// 6b. portal GOAL: teleport pemain ke room goal (verifikasi slice 5)
-try {
-  const lab = chamber();
-  const n = lab && lab.nodes && lab.nodes.get('goal');
-  const pl = G.game.run.player;
-  if (n && pl) {
-    pl.x = n.x; pl.y = n.y;
-    if (pl.vx != null) { pl.vx = 0; pl.vy = 0; }
-    if (pl.tx != null) { pl.tx = n.x; pl.ty = n.y; }
-  }
-  await frames(120);
-  console.log('[info] goal =', chamber() && chamber().activeId);
-  shot('snap-09-goal-portal.png');
-} catch (e) { console.log('[info] goal snap gagal:', e.message); }
+// 6b. teleport verifikasi bentuk: goal (slice 5) + lambung (S7a)
+for (const [nid, nm] of [['goal', 'snap-09-goal-portal.png'], ['lambung', 'snap-10-lambung-sac.png']]) {
+  try {
+    const lab = chamber();
+    const n = lab && lab.nodes && lab.nodes.get(nid);
+    const pl = G.game.run.player;
+    if (n && pl) {
+      pl.x = n.x; pl.y = n.y;
+      if (pl.vx != null) { pl.vx = 0; pl.vy = 0; }
+      if (pl.tx != null) { pl.tx = n.x; pl.ty = n.y; }
+    }
+    await frames(120);
+    console.log('[info] teleport =', nid, chamber() && chamber().activeId);
+    shot(nm);
+  } catch (e) { console.log('[info] snap', nid, 'gagal:', e.message); }
+}
 
 // 7. dump status HUD DOM (tidak ter-render di canvas → analisis terpisah)
 {
