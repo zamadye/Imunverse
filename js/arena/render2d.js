@@ -309,6 +309,49 @@ function moteLayer(g, w, h, t, trip) {
   }
 }
 
+function portal(g, q, R, t, rgb, big, tag) {
+  // Portal START/GOAL (slice 5): pendar + inti + 3 cincin (1 berputar) +
+  // label dunia statis + sorot vertikal (goal). Murni visual.
+  const pul = 0.5 + 0.5 * Math.sin(t * 2.2);
+  const glow = g.createRadialGradient(q.x, q.y, R * 0.2, q.x, q.y, R * 1.9);
+  glow.addColorStop(0, `rgba(${rgb},${0.30 + pul * 0.14})`);
+  glow.addColorStop(1, `rgba(${rgb},0)`);
+  g.fillStyle = glow;
+  g.beginPath(); g.arc(q.x, q.y, R * 1.9, 0, TAU); g.fill();
+  const core = g.createRadialGradient(q.x, q.y, 1, q.x, q.y, R * 0.55);
+  core.addColorStop(0, 'rgba(255,255,255,0.95)');
+  core.addColorStop(0.5, `rgba(${rgb},0.75)`);
+  core.addColorStop(1, `rgba(${rgb},0.08)`);
+  g.fillStyle = core;
+  g.beginPath(); g.arc(q.x, q.y, R * 0.55, 0, TAU); g.fill();
+  g.strokeStyle = `rgba(${rgb},${0.55 + pul * 0.25})`;
+  g.lineWidth = Math.max(2, R * 0.06);
+  g.beginPath(); g.arc(q.x, q.y, R, 0, TAU); g.stroke();
+  g.strokeStyle = `rgba(${rgb},0.35)`;
+  g.lineWidth = Math.max(1, R * 0.03);
+  g.beginPath(); g.arc(q.x, q.y, R * 1.25, 0, TAU); g.stroke();
+  g.strokeStyle = `rgba(255,255,255,${0.5 + pul * 0.3})`;
+  g.lineWidth = Math.max(1.5, R * 0.045);
+  g.setLineDash([R * 0.35, R * 0.28]);
+  g.lineDashOffset = -t * (20 + R * 0.2);
+  g.beginPath(); g.arc(q.x, q.y, R * 0.78, 0, TAU); g.stroke();
+  g.setLineDash([]);
+  if (tag && R > 14) {
+    g.font = '700 11px system-ui,sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'top';
+    g.lineWidth = 3; g.strokeStyle = 'rgba(10,2,5,0.85)';
+    g.strokeText(tag, q.x, q.y + R * 1.35);
+    g.fillStyle = '#fff';
+    g.fillText(tag, q.x, q.y + R * 1.35);
+  }
+  if (big) {
+    const bg2 = g.createLinearGradient(q.x, q.y - R * 5.5, q.x, q.y);
+    bg2.addColorStop(0, `rgba(${rgb},0)`);
+    bg2.addColorStop(1, `rgba(${rgb},${0.22 + pul * 0.16})`);
+    g.fillStyle = bg2;
+    g.fillRect(q.x - R * 0.22, q.y - R * 5.5, R * 0.44, R * 5.5);
+  }
+}
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -514,18 +557,16 @@ export function drawArena2D(ctx, P, arena, time) {
       ctx.fillText(n.label, q.x, ly);
     }
   }
-  // suar goal
-  const goal = rooms[rooms.length - 1];
-  if (goal && inBox(goal.x, goal.y, goal.r + 200)) {
-    const q = pr(goal.x, goal.y), R = goal.r * q.s;
-    if (R > 4) {
-      const pul = 0.5 + 0.5 * Math.sin(time * 2.5);
-      const bg2 = ctx.createLinearGradient(q.x, q.y - R * 2.6, q.x, q.y);
-      bg2.addColorStop(0, 'rgba(255,240,200,0)');
-      bg2.addColorStop(1, `rgba(255,240,200,${0.25 + pul * 0.2})`);
-      ctx.fillStyle = bg2;
-      ctx.fillRect(q.x - R * 0.1, q.y - R * 2.6, R * 0.2, R * 2.6);
-    }
+  // portal START/GOAL di ujung route (slice 5, ganti suar goal)
+  const ends = [
+    { id: route[0], rgb: '80,230,200', k: 0.30, tag: 'START', big: false },
+    { id: route[route.length - 1], rgb: '255,205,120', k: 0.40, tag: 'GOAL', big: true },
+  ];
+  for (const e of ends) {
+    const n = e.id != null && arena.rooms.get(e.id);
+    if (!n || !inBox(n.x, n.y, n.r + 200)) continue;
+    const q = pr(n.x, n.y), R = n.r * q.s * e.k;
+    if (R > 4) portal(ctx, q, R, time, e.rgb, e.big, e.tag);
   }
   // foreground depth: sulur tepi + mote (di atas room, di bawah vignette)
   foreTendrils(ctx, w, h, time);

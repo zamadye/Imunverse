@@ -234,3 +234,12 @@ Harness: default = V2, `ARENA_V1=1` = V1.
   (186 gambar: 152 sprites + 19 icons + 6 chapters + 4 ui + 5 props;
   2 font; 1 riv). Art visual tak pernah diproduksi — perlu pipeline
   art (bukan scope kode arena). V2 prosedural = imun terhadap ini.
+
+## 11. V2 slice 5: portal START/GOAL (2026-09-24)
+
+Menutup janji §7 (paritas referensi pathogenic): portal prosedural di
+ujung route — START teal di `route[0]`, GOAL emas + sorot vertikal di
+`route[last]` (pendar + inti + 3 cincin, 1 berputar + label dunia).
+Murni visual (nol sentuhan collision/SDF). Harness: `snap-09-goal-portal`
+(teleport ke room goal). Verifikasi: `P0_GUARD=PASS`, 0 error; kedua
+portal terlihat di frame (snap-01 + snap-09).
