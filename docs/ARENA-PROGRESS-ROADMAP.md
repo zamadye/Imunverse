@@ -183,3 +183,30 @@ berikutnya (siluet organ per room, koridor luminous, portal START/GOAL).
       +ANTIBODI, nameplate) = domain combat/effects — TIDAK disentuh.
 - [ ] Verifikasi GL tajam butuh browser Nyata (jsdom tak ada WebGL):
       user/CI `shoot-arena`.
+
+## 8. Benchmark vs game Pathogenic (2026-09-24)
+
+Game pembanding: **Pathogenic** (Aberrant Labs / Slug Disco, rilis
+1.0 Juli 2026) — 2D roguelike twin-stick di dalam tubuh manusia,
+7 pathogen, 6 organ biome. Arena gameplay-nya (2 biome teramati:
+gua amber/merah + gua ungu/cyan) vs Arena V2 kita:
+
+| Aspek | Pathogenic | V2 kini | Gap |
+|---|---|---|---|
+| Bentuk ruang | Gua organik tak-beraturan (blobby) | Lingkaran sempurna | BESAR |
+| Dinding | Sel bertekstur rapat + rim membran tebal | Gradien datar + cincin tipis | BESAR |
+| Cahaya/kedalaman | Arah cahaya, god-ray, DOF depan/belakang | Datar, tanpa lapisan depth | BESAR |
+| Identitas biome | Flip palet total per organ (<1 dtk) | Tint palet + atmosfer (ok, <3 dtk) | KECIL |
+| Arsitektur | Pembuluh luminous sebagai sungai cahaya | Lumen koridor redup | SEDANG |
+| Partikel depth | Mote melayang + foreground blur | Gelembung hazard saja | SEDANG |
+| UI | Minimal (1 bar + angka kecil) | Panel DOM + floats ramai | (agen lain) |
+
+Rencana tutup-gap (scope arena, kode-prosedural, tanpa aset):
+1. Siluet room lobed/blobby (radius modulasi noise sudut) — bukan lingkaran.
+2. Dinding berlapis: pita sel + serat sepanjang busur + rim membran tebal.
+3. Depth murah: sulur foreground gelap di tepi + mote + berkas cahaya atas.
+4. Koridor = sungai cahaya (inti terang + pulsa berjalan).
+5. Bentuk room per organ (paru = gugus alveoli, jantung = bilik ganda,
+   usus = koil) — butuh SDF per-shape, data-driven via `room.shape`.
+Batas jujur: detail painterly AAA butuh aset art/shader berat; Canvas 2D
+hanya aproksimasi via noise strokes berlapis (GL `body-gl` sudah fbm).
