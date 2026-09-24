@@ -212,8 +212,11 @@ function paintBlob(g, pr, b, R0, pal, m, t, seed, opts) {
   if (R < 3) return;
   const dim = opts.dim == null ? 1 : opts.dim;
   const beat = opts.beat || 0;
-  g.fillStyle = `rgba(${pal.glow},${(0.09 + beat * 0.06) * dim})`;
-  g.beginPath(); g.arc(q.x, q.y, R * 1.22, 0, TAU); g.fill();
+  g.fillStyle = `rgba(${pal.glow},${(0.07 + beat * 0.05) * dim})`;
+  g.beginPath(); g.arc(q.x, q.y, R * 1.10, 0, TAU); g.fill();
+  // Pemisah antar-room (RAPI): garis gelap agar overlap terbaca sebagai lapis.
+  lobePath(g, q.x, q.y, R, seed, 1.045);
+  g.fillStyle = `rgba(12,2,5,${0.9 * dim})`; g.fill();
   lobePath(g, q.x, q.y, R, seed, 1.0);
   g.fillStyle = `rgba(${pal.deep},${0.94 * dim})`; g.fill();
   lobePath(g, q.x, q.y, R, seed, 0.965);
@@ -512,11 +515,13 @@ export function drawArena2D(ctx, P, arena, time) {
     ctx.beginPath(); ctx.arc(q.x, q.y, R * 0.96, 0, TAU); ctx.stroke();
   }
   // ---- rooms ----
-  const rooms = [...arena.rooms.values()];
+  // RAPI: pelukis berlapis (y) + room aktif paling atas.
+  const rooms = [...arena.rooms.values()].sort((a, b) => a.y - b.y);
+  const ai = rooms.findIndex((n) => n.id === arena.activeId);
+  if (ai >= 0) rooms.push(...rooms.splice(ai, 1));
   const route = arena.route || [];
-  const rIdx = route.indexOf(arena.activeId);
-  const labelOk = new Set([arena.activeId, route[0], route[route.length - 1]]);
-  if (rIdx >= 0 && route[rIdx + 1]) labelOk.add(route[rIdx + 1]);
+  // RAPI: hanya room aktif berlabel (START/GOAL sudah diwakili portal).
+  const labelOk = new Set([arena.activeId]);
   const state = arena.state || 'lockdown';
   const shock = arena.shock || 0;
   for (const n of rooms) {
@@ -538,12 +543,7 @@ export function drawArena2D(ctx, P, arena, time) {
       for (const b of n.blobs) {
         paintBlob(ctx, pr, b, b.r * br, pal, n.motif, time, b.seed, { beat, dim, junction: !!n.junction });
       }
-      if (n.shape !== 'cavity') {
-        ctx.strokeStyle = `rgba(${pal.hot},0.28)`;
-        ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 1.03, 0, TAU); ctx.stroke();
-        ctx.setLineDash([]);
-      }
+
     }
     if (n.ridges) paintRidges(ctx, pr, n, pal, beat);
     if (n.junction) {
@@ -635,12 +635,16 @@ export function drawArena2D(ctx, P, arena, time) {
     }
     if (n.label && labelOk.has(n.id) && R > 26) {
       ctx.font = '600 12px system-ui,sans-serif';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-      const ly = q.y - Rb * 1.06 - 4;
-      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,2,5,0.85)';
-      ctx.strokeText(n.label, q.x, ly);
-      ctx.fillStyle = isActive ? '#ffe6c8' : '#d8b8a8';
-      ctx.fillText(n.label, q.x, ly);
+      const tw = ctx.measureText(n.label).width, pw = tw / 2 + 10;
+      const py = q.y - Rb * 1.06 - 26;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(q.x - pw, py, pw * 2, 20, 9);
+      else ctx.rect(q.x - pw, py, pw * 2, 20);
+      ctx.fillStyle = 'rgba(8,2,5,0.78)'; ctx.fill();
+      ctx.strokeStyle = `rgba(${pal.hot},0.5)`; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffe6c8';
+      ctx.fillText(n.label, q.x, py + 10);
     }
   }
   // portal START/GOAL di ujung route (slice 5, ganti suar goal)
