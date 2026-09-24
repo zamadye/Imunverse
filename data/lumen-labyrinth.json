@@ -272,7 +272,7 @@
     },
     {
       "id": "paru",
-      "shape": "alveoli",
+      "shape": "cluster",
       "x": 430,
       "y": 240,
       "r": 160,

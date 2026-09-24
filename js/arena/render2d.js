@@ -437,6 +437,20 @@ function paintDrain(g, pr, dr, pal, time) {
   }
   g.restore();
 }
+function paintDucts(g, pr, n, pal, beat) {
+  // Duktus (S7d): tabung lantai — cermin SDF ducts (paru + pankreas).
+  g.save(); g.lineCap = 'round';
+  for (const s of n.ducts) {
+    const a = pr(s.x0, s.y0), b = pr(s.x1, s.y1);
+    const sm = (a.s + b.s) / 2, w = Math.max(2, s.w * 2 * sm);
+    const trace = () => { g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); };
+    g.strokeStyle = 'rgba(18,3,7,0.92)'; g.lineWidth = w * 1.12; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.deep},0.95)`; g.lineWidth = w * 0.92; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.fill},0.8)`; g.lineWidth = w * 0.55; trace(); g.stroke();
+    g.strokeStyle = `rgba(${pal.hot},${0.35 + beat * 0.15})`; g.lineWidth = Math.max(1.5, w * 0.16); trace(); g.stroke();
+  }
+  g.restore();
+}
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -543,6 +557,7 @@ export function drawArena2D(ctx, P, arena, time) {
       for (const b of n.blobs) {
         paintBlob(ctx, pr, b, b.r * br, pal, n.motif, time, b.seed, { beat, dim, junction: !!n.junction });
       }
+      if (n.ducts) paintDucts(ctx, pr, n, pal, beat);
 
     }
     if (n.ridges) paintRidges(ctx, pr, n, pal, beat);

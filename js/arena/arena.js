@@ -113,6 +113,20 @@ function buildRoomShape(room) {
         r: room.r * 0.38, seed: seed + (sgn > 0 ? 6.6 : 3.3),
       });
     }
+    // Duktus pankreas + kantung asini (S7d): sumbu daun yang sama.
+    room.ducts = room.ducts || [];
+    room.ducts.push({
+      x0: room.x - Math.cos(axL) * room.r * 0.50, y0: room.y - Math.sin(axL) * room.r * 0.50,
+      x1: room.x + Math.cos(axL) * room.r * 0.50, y1: room.y + Math.sin(axL) * room.r * 0.50,
+      w: room.r * 0.14,
+    });
+    for (const sgn2 of [-1, 1]) for (const tt of [-0.30, 0, 0.30]) {
+      room.blobs.push({
+        x: room.x + Math.cos(axL) * room.r * tt - Math.sin(axL) * sgn2 * room.r * 0.42,
+        y: room.y + Math.sin(axL) * room.r * tt + Math.cos(axL) * sgn2 * room.r * 0.42,
+        r: room.r * 0.12, seed: seed + sgn2 * 3.7 + tt * 11,
+      });
+    }
   } else if (room.shape === 'nodes') { // limfe: gugus nodul mini
     room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.40, seed });
     for (let k = 0; k < 4; k++) {
@@ -267,6 +281,37 @@ function buildRoomShape(room) {
     }
     // Tirisan vena sentral: arus menarik masuk (lantai, bukan dinding).
     room.drain = { x: room.x, y: room.y, R: room.r * 0.30, pull: 34 };
+  } else if (room.shape === 'cluster') { // paru (S7d): duktus-Y + tandan alveoli
+    const axC = seed * TAU;
+    const dx = Math.cos(axC), dy = Math.sin(axC);
+    room.ducts = [];
+    const duct = (x0, y0, x1, y1, w) => room.ducts.push({ x0, y0, x1, y1, w });
+    const wD = room.r * 0.16;
+    const J = { x: room.x + dx * room.r * 0.10, y: room.y + dy * room.r * 0.10 };
+    const S = { x: room.x - dx * room.r * 0.55, y: room.y - dy * room.r * 0.55 };
+    const c45 = Math.SQRT1_2;
+    const d1x = dx * c45 - dy * c45, d1y = dx * c45 + dy * c45;
+    const d2x = dx * c45 + dy * c45, d2y = -dx * c45 + dy * c45;
+    const B1 = { x: J.x + d1x * room.r * 0.50, y: J.y + d1y * room.r * 0.50 };
+    const B2 = { x: J.x + d2x * room.r * 0.50, y: J.y + d2y * room.r * 0.50 };
+    duct(S.x, S.y, J.x, J.y, wD);
+    duct(J.x, J.y, B1.x, B1.y, wD * 0.85);
+    duct(J.x, J.y, B2.x, B2.y, wD * 0.85);
+    // Tandan: 5 cangkir busur-C membuka ke mulut duktus (plaza atrium lega).
+    const cups = (ex, ey, vx, vy, sd) => {
+      const base = Math.atan2(vy, vx);
+      for (let k = 0; k < 5; k++) {
+        const a = base + (k / 4 - 0.5) * TAU * 0.72;
+        room.blobs.push({
+          x: ex + vx * room.r * 0.30 + Math.cos(a) * room.r * 0.24,
+          y: ey + vy * room.r * 0.30 + Math.sin(a) * room.r * 0.24,
+          r: room.r * 0.125, seed: sd + k * 2.3,
+        });
+      }
+    };
+    cups(S.x, S.y, -dx, -dy, seed + 1.1);
+    cups(B1.x, B1.y, d1x, d1y, seed + 5.9);
+    cups(B2.x, B2.y, d2x, d2y, seed + 9.7);
   } else {
     room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });
   }
@@ -423,6 +468,8 @@ export class Arena {
     if (n.tris) for (const t of n.tris) d = Math.min(d, sdfTri(x, y, t));
     // Ruang heksagon lobulus (S7c) — cermin render paintHex.
     if (n.hex) d = Math.min(d, sdfHex(x, y, n.hex));
+    // Duktus lantai (S7d) — cermin render paintDucts.
+    if (n.ducts) for (const s of n.ducts) d = Math.min(d, segDist(x, y, s) - s.w);
     // Rabung interior (S7a): rintangan kapsul — cermin render paintRidges.
     if (n.ridges) for (const g of n.ridges) d = Math.max(d, -(segDist(x, y, g) - g.w));
     return d;
