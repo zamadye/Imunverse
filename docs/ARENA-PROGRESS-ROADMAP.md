@@ -201,12 +201,14 @@ gua amber/merah + gua ungu/cyan) vs Arena V2 kita:
 | Partikel depth | Mote melayang + foreground blur | Gelembung hazard saja | SEDANG |
 | UI | Minimal (1 bar + angka kecil) | Panel DOM + floats ramai | (agen lain) |
 
-Rencana tutup-gap (scope arena, kode-prosedural, tanpa aset):
-1. Siluet room lobed/blobby (radius modulasi noise sudut) — bukan lingkaran.
-2. Dinding berlapis: pita sel + serat sepanjang busur + rim membran tebal.
-3. Depth murah: sulur foreground gelap di tepi + mote + berkas cahaya atas.
-4. Koridor = sungai cahaya (inti terang + pulsa berjalan).
-5. Bentuk room per organ (paru = gugus alveoli, jantung = bilik ganda,
-   usus = koil) — butuh SDF per-shape, data-driven via `room.shape`.
+Status tutup-gap (semua SELESAI + terverifikasi visual `shots/v2/`):
+1. [x] Siluet lobed/blobby — `lobeMod` dipakai SAMA oleh SDF & renderer.
+2. [x] Dinding berlapis: pita sel + serat busur + rim membran 3-garis.
+3. [x] Depth: sulur foreground + mote + berkas cahaya diagonal.
+4. [x] Koridor = sungai cahaya (inti terang + pulsa berjalan).
+5. [x] Bentuk per organ data-driven (`shape` di `lumen-labyrinth.json`):
+   paru = alveoli 1+6, jantung = bilik ganda, usus_halus = koil
+   sinusoidal (SDF per-shape + guard seed eritrosit). V1 abaikan
+   field baru (aman).
 Batas jujur: detail painterly AAA butuh aset art/shader berat; Canvas 2D
 hanya aproksimasi via noise strokes berlapis (GL `body-gl` sudah fbm).

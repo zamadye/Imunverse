@@ -5,7 +5,7 @@
  * lockdown/swarm/purified/open. Palet selalu dari data room (pal.*).
  */
 import { heartbeat, cameraOf, worldViewBox } from '../render/background.js';
-import { roomSeed } from './arena.js';
+import { roomSeed, lobeMod } from './arena.js';
 
 const TAU = Math.PI * 2;
 const HAZ = { acid: '150,255,90', mucus: '255,207,110', bile: '205,220,90' };
@@ -151,6 +151,164 @@ function atmosphere(g, w, h, organ, pal, t, beat) {
   }
 }
 
+/** Path dinding lobed (radius = lobeMod) — identik dengan SDF. */
+function lobePath(g, qx, qy, R, seed, scale = 1, N = 56) {
+  g.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const a = (i / N) * TAU;
+    const rr = R * scale * lobeMod(a, seed);
+    const px = qx + Math.cos(a) * rr, py = qy + Math.sin(a) * rr;
+    if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+  }
+  g.closePath();
+}
+
+/** Pita sel: bintik tekstur sepanjang busur dinding. */
+function cellBand(g, qx, qy, R, seed, trip, n = 42) {
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * TAU + seed;
+    const rr = R * (0.90 + hash1(seed * 131 + k * 1.7) * 0.08) * lobeMod(a, seed);
+    g.fillStyle = `rgba(${trip},${(0.25 + hash1(seed * 77 + k * 3.3) * 0.4).toFixed(2)})`;
+    g.beginPath();
+    g.arc(qx + Math.cos(a) * rr, qy + Math.sin(a) * rr, Math.max(1, R * (0.012 + hash1(k * 9.1 + seed) * 0.02)), 0, TAU);
+    g.fill();
+  }
+}
+
+/** Serat busur di luar dinding (lapis jaringan). */
+function fiberArcs(g, qx, qy, R, seed, trip) {
+  g.save(); g.lineCap = 'round';
+  for (let k = 0; k < 7; k++) {
+    const a0 = seed * 7 + (k / 7) * TAU;
+    g.strokeStyle = `rgba(${trip},0.20)`;
+    g.lineWidth = Math.max(1, R * 0.012);
+    g.beginPath();
+    for (let i = 0; i <= 12; i++) {
+      const a = a0 + (i / 12) * 0.9;
+      const rr = R * 1.05 * lobeMod(a, seed);
+      const px = qx + Math.cos(a) * rr, py = qy + Math.sin(a) * rr;
+      if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.stroke();
+  }
+  g.restore();
+}
+
+/** Rim membran tebal: garis gelap + glow + garis panas. */
+function membraneRim(g, qx, qy, R, seed, pal) {
+  g.save(); g.lineJoin = 'round';
+  lobePath(g, qx, qy, R, seed, 1.0);
+  g.strokeStyle = `rgba(${pal.deep},0.9)`; g.lineWidth = Math.max(3, R * 0.075); g.stroke();
+  lobePath(g, qx, qy, R, seed, 0.985);
+  g.strokeStyle = `rgba(${pal.glow},0.5)`; g.lineWidth = Math.max(1.5, R * 0.028); g.stroke();
+  lobePath(g, qx, qy, R, seed, 0.94);
+  g.strokeStyle = `rgba(${pal.hot},0.55)`; g.lineWidth = Math.max(1, R * 0.012); g.stroke();
+  g.restore();
+}
+
+/** Satu kantung rongga: bloom + dinding lobed + interior + pita + motif + rim. */
+function paintBlob(g, pr, b, R0, pal, m, t, seed, opts) {
+  const q = pr(b.x, b.y), R = R0 * q.s;
+  if (R < 3) return;
+  const dim = opts.dim == null ? 1 : opts.dim;
+  const beat = opts.beat || 0;
+  g.fillStyle = `rgba(${pal.glow},${(0.09 + beat * 0.06) * dim})`;
+  g.beginPath(); g.arc(q.x, q.y, R * 1.22, 0, TAU); g.fill();
+  lobePath(g, q.x, q.y, R, seed, 1.0);
+  g.fillStyle = `rgba(${pal.deep},${0.94 * dim})`; g.fill();
+  lobePath(g, q.x, q.y, R, seed, 0.965);
+  g.fillStyle = `rgba(${pal.fill},${0.6 * dim})`; g.fill();
+  lobePath(g, q.x, q.y, R, seed, 0.88);
+  const gIn = g.createRadialGradient(q.x, q.y, 1, q.x, q.y, R * 0.88);
+  gIn.addColorStop(0, `rgba(${pal.hot},${0.55 * dim})`);
+  gIn.addColorStop(0.45, `rgba(${pal.fill},${0.5 * dim})`);
+  gIn.addColorStop(1, `rgba(${pal.deep},${0.95 * dim})`);
+  g.fillStyle = gIn; g.fill();
+  cellBand(g, q.x, q.y, R, seed, pal.fill);
+  fiberArcs(g, q.x, q.y, R, seed, pal.glow);
+  if (!opts.junction) motifRing(g, q, R, m, pal, t, seed);
+  membraneRim(g, q.x, q.y, R, seed, pal);
+}
+
+/** Room koil (usus): tabung sinusoidal + rugae tegak lurus. */
+function paintCoil(g, pr, n, pal, t, seed, beat, br) {
+  const qc = pr(n.x, n.y);
+  const wR = n.coilR * br * qc.s;
+  if (wR < 2 || !n.coilSegs) return;
+  const pts = n.coilSegs.map((sg) => pr(sg.x0, sg.y0));
+  const last = n.coilSegs[n.coilSegs.length - 1];
+  pts.push(pr(last.x1, last.y1));
+  const trace = () => {
+    g.beginPath();
+    pts.forEach((p, i) => (i === 0 ? g.moveTo(p.x, p.y) : g.lineTo(p.x, p.y)));
+  };
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  g.strokeStyle = `rgba(${pal.glow},${0.10 + beat * 0.06})`; g.lineWidth = wR * 2.6; trace(); g.stroke();
+  g.strokeStyle = `rgba(${pal.deep},0.94)`; g.lineWidth = wR * 2.1; trace(); g.stroke();
+  g.strokeStyle = `rgba(${pal.fill},0.75)`; g.lineWidth = wR * 1.7; trace(); g.stroke();
+  g.strokeStyle = `rgba(${pal.hot},${0.35 + beat * 0.2})`; g.lineWidth = wR * 0.8; trace(); g.stroke();
+  g.strokeStyle = `rgba(${pal.glow},0.4)`; g.lineWidth = Math.max(1.5, wR * 0.1);
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1];
+    const L = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L;
+    let d = 34 - (acc % 34);
+    while (d < L) {
+      const px = a.x + (b.x - a.x) * (d / L), py = a.y + (b.y - a.y) * (d / L);
+      g.beginPath();
+      g.moveTo(px - nx * wR * 0.8, py - ny * wR * 0.8);
+      g.lineTo(px + nx * wR * 0.8, py + ny * wR * 0.8);
+      g.stroke();
+      d += 34;
+    }
+    acc += L;
+  }
+  g.restore();
+}
+
+/** Berkas cahaya diagonal dari atas (depth). */
+function lightShaft(g, w, h, pal, t) {
+  const sway = Math.sin(t * 0.4) * w * 0.03;
+  const g2 = g.createLinearGradient(w * 0.3 + sway, 0, w * 0.55 + sway, h);
+  g2.addColorStop(0, `rgba(${pal.hot},0.10)`);
+  g2.addColorStop(1, `rgba(${pal.hot},0)`);
+  g.fillStyle = g2;
+  g.beginPath();
+  g.moveTo(w * 0.30 + sway, 0); g.lineTo(w * 0.52 + sway, 0);
+  g.lineTo(w * 0.72 + sway, h); g.lineTo(w * 0.42 + sway, h);
+  g.closePath(); g.fill();
+}
+
+/** Sulur foreground gelap di tepi layar (blur-palsu 3 pass). */
+function foreTendrils(g, w, h, t) {
+  const arms = [
+    { x: -w * 0.05, y: h * 1.05, r: w * 0.35, a0: -1.2 },
+    { x: w * 1.05, y: h * 1.02, r: w * 0.30, a0: -1.9 },
+    { x: w * 1.02, y: -h * 0.05, r: w * 0.26, a0: 1.6 },
+  ];
+  g.save(); g.lineCap = 'round';
+  arms.forEach((arm, k) => {
+    const wob = Math.sin(t * 0.6 + k * 2.1) * 0.08;
+    for (const [lw, al] of [[64, 0.10], [44, 0.16], [26, 0.28]]) {
+      g.strokeStyle = `rgba(8,2,5,${al})`;
+      g.lineWidth = lw;
+      g.beginPath(); g.arc(arm.x, arm.y, arm.r, arm.a0 + wob, arm.a0 + wob + 1.1); g.stroke();
+    }
+  });
+  g.restore();
+}
+
+/** Mote melayang (partikel depth). */
+function moteLayer(g, w, h, t, trip) {
+  for (let k = 0; k < 22; k++) {
+    const xx = ((hash1(k * 3.3) * (w + 40) + t * (8 + hash1(k) * 14)) % (w + 40)) - 20;
+    const yy = ((hash1(k * 7.9) * (h + 40) - t * (5 + hash1(k * 2) * 9)) % (h + 40) + h + 40) % (h + 40) - 20;
+    g.fillStyle = `rgba(${trip},${(0.10 + hash1(k * 5.1) * 0.16).toFixed(2)})`;
+    g.beginPath(); g.arc(xx, yy, 1 + hash1(k * 1.7) * 2.4, 0, TAU); g.fill();
+  }
+}
+
 export function drawArena2D(ctx, P, arena, time) {
   const w = P.w, h = P.h;
   const pr = (x, y) => P.project(x, y);
@@ -169,6 +327,7 @@ export function drawArena2D(ctx, P, arena, time) {
   bg.addColorStop(1, '#070204');
   ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
   atmosphere(ctx, w, h, forgan, fpal, time, beat);
+  lightShaft(ctx, w, h, fpal, time);
   // ---- koridor: tabung 3 lapis ----
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const passes = [
@@ -193,6 +352,26 @@ export function drawArena2D(ctx, P, arena, time) {
   for (const s of arena.segs) {
     if (!inBox((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, s.w * 2 + 40)) continue;
     const a = pr(s.x0, s.y0), b = pr(s.x1, s.y1);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // ---- sungai cahaya: inti terang + pulsa berjalan ----
+  for (const s of arena.segs) {
+    if (!inBox((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, s.w * 2 + 40)) continue;
+    const a = pr(s.x0, s.y0), b = pr(s.x1, s.y1);
+    const sm = (a.s + b.s) / 2;
+    ctx.strokeStyle = `rgba(255,214,170,${0.30 + beat * 0.15})`;
+    ctx.lineWidth = Math.max(1, s.w * 0.5 * sm);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,240,210,0.55)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([26, 110]);
+  ctx.lineDashOffset = -time * 95;
+  for (const s of arena.segs) {
+    if (!inBox((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, s.w * 2 + 40)) continue;
+    const a = pr(s.x0, s.y0), b = pr(s.x1, s.y1);
+    ctx.lineWidth = Math.max(1.5, s.w * 0.34 * ((a.s + b.s) / 2));
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   }
   ctx.setLineDash([]);
@@ -224,18 +403,21 @@ export function drawArena2D(ctx, P, arena, time) {
     const isActive = n.id === arena.activeId;
     const Rb = R * (1 + 0.022 * Math.sin(time * (arena.bpm || 72) / 60 * TAU + seed * 6));
     const dim = n.junction ? 0.55 : 1;
-    ctx.fillStyle = `rgba(${pal.glow},${(0.09 + beat * 0.06) * dim})`;
-    ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 1.22, 0, TAU); ctx.fill();
-    ctx.fillStyle = `rgba(${pal.deep},${0.94 * dim})`;
-    ctx.beginPath(); ctx.arc(q.x, q.y, Rb, 0, TAU); ctx.fill();
-    ctx.fillStyle = `rgba(${pal.fill},${0.6 * dim})`;
-    ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 0.985, 0, TAU); ctx.fill();
-    if (!n.junction) motifRing(ctx, q, Rb, n.motif, pal, time, seed);
-    else {
-      ctx.strokeStyle = `rgba(${pal.glow},0.35)`;
-      ctx.setLineDash([6, 7]); ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 0.9, 0, TAU); ctx.stroke();
-      ctx.setLineDash([]);
+    const br = Rb / R; // faktor napas (seragam semua blob)
+    if (n.shape === 'coil') {
+      paintCoil(ctx, pr, n, pal, time, seed, beat, br);
+    } else {
+      for (const b of n.blobs) {
+        paintBlob(ctx, pr, b, b.r * br, pal, n.motif, time, b.seed, { beat, dim, junction: !!n.junction });
+      }
+      if (n.shape !== 'cavity') {
+        ctx.strokeStyle = `rgba(${pal.hot},0.28)`;
+        ctx.setLineDash([10, 12]); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 1.03, 0, TAU); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+    if (n.junction) {
       // penunjuk rute: segitiga di tepi junction ke arah room route-berikutnya
       const nxRoom = arena.node && arena.node(routeNextId(arena, n.id));
       if (nxRoom) {
@@ -250,21 +432,20 @@ export function drawArena2D(ctx, P, arena, time) {
         ctx.closePath(); ctx.fill();
       }
     }
-    ctx.strokeStyle = `rgba(${pal.hot},${(0.5 + beat * 0.25) * dim})`;
-    ctx.lineWidth = Math.max(1.5, R * 0.014);
-    ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 0.78, 0, TAU); ctx.stroke();
-    const gIn = ctx.createRadialGradient(q.x, q.y, 1, q.x, q.y, Rb * 0.78);
-    gIn.addColorStop(0, `rgba(${pal.hot},${0.55 * dim})`);
-    gIn.addColorStop(0.45, `rgba(${pal.fill},${0.5 * dim})`);
-    gIn.addColorStop(1, `rgba(${pal.deep},${0.95 * dim})`);
-    ctx.fillStyle = gIn;
-    ctx.beginPath(); ctx.arc(q.x, q.y, Rb * 0.78, 0, TAU); ctx.fill();
-    // kolam hazard
+    // kolam hazard (di blob pertama / tengah koil — selalu di dalam lumen)
     if (n.hazard && HAZ[n.hazard.type]) {
       const hc = HAZ[n.hazard.type];
       const ha = seed * TAU + 0.7;
-      const hx = q.x + Math.cos(ha) * Rb * 0.3, hy = q.y + Math.sin(ha) * Rb * 0.3;
-      const hR = Rb * 0.42 * (1 + 0.08 * Math.sin(time * 2.2 + seed * 9));
+      let hb = q, hbR = Rb;
+      if (n.shape === 'coil' && n.coilSegs) {
+        const ms = n.coilSegs[n.coilSegs.length >> 1];
+        hb = pr((ms.x0 + ms.x1) / 2, (ms.y0 + ms.y1) / 2); hbR = n.coilR * 2 * hb.s;
+      } else if (n.blobs && n.blobs[0]) {
+        const b0 = n.blobs[0];
+        hb = pr(b0.x, b0.y); hbR = b0.r * br * hb.s;
+      }
+      const hx = hb.x + Math.cos(ha) * hbR * 0.3, hy = hb.y + Math.sin(ha) * hbR * 0.3;
+      const hR = hbR * 0.42 * (1 + 0.08 * Math.sin(time * 2.2 + seed * 9));
       ctx.fillStyle = `rgba(${hc},0.32)`;
       ctx.beginPath(); ctx.arc(hx, hy, hR, 0, TAU); ctx.fill();
       ctx.strokeStyle = `rgba(${hc},0.6)`;
@@ -346,6 +527,9 @@ export function drawArena2D(ctx, P, arena, time) {
       ctx.fillRect(q.x - R * 0.1, q.y - R * 2.6, R * 0.2, R * 2.6);
     }
   }
+  // foreground depth: sulur tepi + mote (di atas room, di bawah vignette)
+  foreTendrils(ctx, w, h, time);
+  moteLayer(ctx, w, h, time, fpal.glow);
   // vignette state
   if (state === 'swarm') {
     const fl = 0.5 + 0.5 * Math.sin(time * 9);

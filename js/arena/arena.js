@@ -29,6 +29,56 @@ function hash01(n) {
   return x - Math.floor(x);
 }
 
+/** Modulasi radius dinding lobed/blobby — dipakai SAMA oleh SDF & renderer
+ *  agar visual selalu cocok collision (tidak ada clipping dinding). */
+export function lobeMod(theta, seed) {
+  return 1 + 0.07 * Math.sin(3 * theta + seed * 9) + 0.045 * Math.sin(5 * theta + seed * 17);
+}
+
+/** Precompute geometri bentuk room dari data `shape`:
+ *  cavity = 1 blob · alveoli = 1 + 6 kantung · dual = 2 bilik ·
+ *  coil = tabung sinusoidal (17 segmen kapsul). */
+function buildRoomShape(room) {
+  const seed = roomSeed(room);
+  room.shape = room.shape || 'cavity';
+  room.blobs = [];
+  room.coilSegs = null; room.coilR = 0;
+  if (room.shape === 'alveoli') {
+    room.blobs.push({ x: room.x, y: room.y, r: room.r * 0.52, seed });
+    for (let k = 0; k < 6; k++) {
+      const a = seed * TAU + (k / 6) * TAU;
+      room.blobs.push({
+        x: room.x + Math.cos(a) * room.r * 0.58,
+        y: room.y + Math.sin(a) * room.r * 0.58,
+        r: room.r * 0.30, seed: seed + k * 7.7 + 1.3,
+      });
+    }
+  } else if (room.shape === 'dual') {
+    const ax = seed * TAU;
+    for (const sgn of [-1, 1]) {
+      room.blobs.push({
+        x: room.x + sgn * Math.cos(ax) * room.r * 0.34,
+        y: room.y + sgn * Math.sin(ax) * room.r * 0.34,
+        r: room.r * 0.66, seed: seed + (sgn > 0 ? 3.1 : 0),
+      });
+    }
+  } else if (room.shape === 'coil') {
+    const A = room.r * 0.40, waves = 2.5, N = 18;
+    room.coilR = Math.min(46, room.r * 0.30);
+    room.coilSegs = [];
+    let px = room.x - room.r * 0.78, py = room.y;
+    for (let i = 1; i <= N; i++) {
+      const t = i / N;
+      const cx = room.x - room.r * 0.78 + t * room.r * 1.56;
+      const cy = room.y + Math.sin(t * waves * TAU + seed * 5) * A;
+      room.coilSegs.push({ x0: px, y0: py, x1: cx, y1: cy, w: room.coilR });
+      px = cx; py = cy;
+    }
+  } else {
+    room.blobs.push({ x: room.x, y: room.y, r: room.r, seed });
+  }
+}
+
 /** Jarak titik ke segmen kapsul. */
 function segDist(x, y, s) {
   const dx = s.x1 - s.x0, dy = s.y1 - s.y0;
@@ -43,14 +93,16 @@ export class Arena {
     // ---- rooms ----
     this.rooms = new Map();
     for (const n of lab.nodes) {
-      this.rooms.set(n.id, {
+      const room = {
         id: n.id, x: n.x, y: n.y, r: n.r,
         organ: n.organ || n.id, motif: n.motif | 0,
         pal: n.pal || null, label: n.label || null,
         enemies: n.enemies || 0, hazard: n.hazard || null,
-        junction: !!n.junction,
+        junction: !!n.junction, shape: n.shape || 'cavity',
         state: 'idle', t: 0, cleared: false,
-      });
+      };
+      buildRoomShape(room);
+      this.rooms.set(n.id, room);
     }
     // Kompat: game.js + peta membaca chamber.nodes (Map) & chamber.node(id).
     this.nodes = this.rooms;
@@ -126,10 +178,26 @@ export class Arena {
     return out;
   }
 
+  /** SDF satu room mengikuti bentuknya (lobed/blob/coil). */
+  sdfRoom(n, x, y) {
+    if (n.shape === 'coil' && n.coilSegs) {
+      let d = 1e9;
+      for (const s of n.coilSegs) d = Math.min(d, segDist(x, y, s) - s.w);
+      return d;
+    }
+    const beat = 2.0 * this._beat;
+    let d = 1e9;
+    for (const b of n.blobs) {
+      const dx = x - b.x, dy = y - b.y;
+      d = Math.min(d, Math.hypot(dx, dy) - (b.r + beat) * lobeMod(Math.atan2(dy, dx), b.seed));
+    }
+    return d;
+  }
+
   /** Room yang memuat titik (x,y), else null. */
   roomAt(x, y) {
     for (const n of this.rooms.values()) {
-      if (Math.hypot(x - n.x, y - n.y) < n.r * 0.92) return n;
+      if (this.sdfRoom(n, x, y) < -5) return n;
     }
     return null;
   }
@@ -138,7 +206,7 @@ export class Arena {
   sdf(x, y, sealed = true) {
     let d = 1e9;
     for (const n of this.rooms.values()) {
-      d = Math.min(d, Math.hypot(x - n.x, y - n.y) - (n.r + 2.0 * this._beat));
+      d = Math.min(d, this.sdfRoom(n, x, y));
     }
     for (const s of this.segs) d = Math.min(d, segDist(x, y, s) - s.w);
     for (const p of this.pillars) d = Math.max(d, -(Math.hypot(x - p.x, y - p.y) - p.r));

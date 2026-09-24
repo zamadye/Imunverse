@@ -39,12 +39,20 @@ export class ErythroFlow {
     if (!chamber) return;
     this.zoneKey = chamber.zoneId || null;
     this.ps = [];
+    // Bentuk room non-lingkaran (alveoli/dual/koil): tolak sampel di dinding.
+    const hasSdf = typeof chamber.sdf === 'function';
     for (let i = 0; i < this.count; i++) {
-      const a = hash2(i, 1.7) * TAU;
-      const rr = chamber.R * (0.18 + 0.74 * hash2(i, 9.2));
+      let px = chamber.cx, py = chamber.cy;
+      for (let tries = 0; tries < 8; tries++) {
+        const a = hash2(i, 1.7 + tries * 13.1) * TAU;
+        const rr = chamber.R * (0.18 + 0.74 * hash2(i, 9.2 + tries * 7.7));
+        px = chamber.cx + Math.cos(a) * rr;
+        py = chamber.cy + Math.sin(a) * rr;
+        if (!hasSdf || chamber.sdf(px, py) < -6) break;
+      }
       this.ps.push({
-        x: chamber.cx + Math.cos(a) * rr,
-        y: chamber.cy + Math.sin(a) * rr,
+        x: px,
+        y: py,
         vx: 0, vy: 0,
         z: 0.45 + 0.55 * hash2(i, 4.4),   // kedalaman: paralax & alpha
         spin: hash2(i, 7.9) * TAU,

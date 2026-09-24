@@ -283,8 +283,8 @@ G.game.input.keys.delete('map');
 // 6. lompat zona: heart, lung, capillary (sudut lebar)
 try {
   const { _jumpToZone } = await import(pathToFileURL(path.join(ROOT, 'js/systems/world-journey.js')).href);
-  const NODE_FOR_ZONE = { heart: 'jantung', lung: 'paru', capillary: 'kapiler' };
-  for (const [zid, nm] of [['heart', 'heart'], ['lung', 'lung'], ['capillary', 'capillary']]) {
+  const NODE_FOR_ZONE = { heart: 'jantung', lung: 'paru', capillary: 'kapiler', usus_halus: 'usus_halus' };
+  for (const [zid, nm] of [['heart', 'heart'], ['lung', 'lung'], ['capillary', 'capillary'], ['usus_halus', 'usus']]) {
     _jumpToZone(G.game, zid);
     // _jumpToZone hanya membalik flag journey — pindahkan juga pemain ke room
     // labirin yang cocok supaya activeId + kamera mengikuti (verifikasi F2).
