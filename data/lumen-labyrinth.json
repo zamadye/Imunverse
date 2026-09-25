@@ -17,8 +17,7 @@
         "glow": "255,96,70",
         "glowHot": "255,220,190"
       },
-      "enemies": 4,
-      "shape": "vessel"
+      "enemies": 4
     },
     {
       "id": "j1",
@@ -38,7 +37,6 @@
     },
     {
       "id": "usus_halus",
-      "shape": "coil",
       "x": 400,
       "y": 1240,
       "r": 160,
@@ -75,8 +73,7 @@
       "hazard": {
         "type": "mucus",
         "slow": 0.6
-      },
-      "shape": "haustra"
+      }
     },
     {
       "id": "j2",
@@ -108,8 +105,7 @@
         "glow": "255,120,100",
         "glowHot": "255,220,190"
       },
-      "enemies": 6,
-      "shape": "pair"
+      "enemies": 6
     },
     {
       "id": "j3",
@@ -141,8 +137,7 @@
         "glow": "255,190,110",
         "glowHot": "255,235,200"
       },
-      "enemies": 5,
-      "shape": "leaf"
+      "enemies": 5
     },
     {
       "id": "hati",
@@ -162,8 +157,7 @@
       "hazard": {
         "type": "bile",
         "push": 2.2
-      },
-      "shape": "hexdrain"
+      }
     },
     {
       "id": "aliran_darah",
@@ -179,8 +173,7 @@
         "glow": "255,100,72",
         "glowHot": "255,222,192"
       },
-      "enemies": 6,
-      "shape": "vessel"
+      "enemies": 6
     },
     {
       "id": "j4",
@@ -216,9 +209,7 @@
       "hazard": {
         "type": "acid",
         "dps": 4
-      },
-      "shape": "sac",
-      "ridges": 3
+      }
     },
     {
       "id": "j5",
@@ -250,8 +241,7 @@
         "glow": "190,255,140",
         "glowHot": "240,255,210"
       },
-      "enemies": 5,
-      "shape": "nodes"
+      "enemies": 5
     },
     {
       "id": "saraf",
@@ -267,12 +257,10 @@
         "glow": "190,140,255",
         "glowHot": "240,225,255"
       },
-      "enemies": 6,
-      "shape": "axon"
+      "enemies": 6
     },
     {
       "id": "paru",
-      "shape": "cluster",
       "x": 430,
       "y": 240,
       "r": 160,
@@ -280,14 +268,12 @@
       "motif": 1,
       "label": "Alveolus Paru",
       "pal": {
-        "fill": "205,105,120",
-        "deep": "110,40,55",
-        "glow": "255,150,170",
-        "glowHot": "255,228,232",
-        "wall": "139,109,180"
+        "fill": "122,26,38",
+        "deep": "58,10,20",
+        "glow": "255,110,90",
+        "glowHot": "255,220,190"
       },
-      "enemies": 7,
-      "rings": true
+      "enemies": 7
     },
     {
       "id": "j6",
@@ -307,7 +293,6 @@
     },
     {
       "id": "jantung",
-      "shape": "dual",
       "x": 800,
       "y": 180,
       "r": 210,
@@ -337,8 +322,7 @@
         "glow": "120,255,230",
         "glowHot": "230,255,250"
       },
-      "enemies": 0,
-      "shape": "alveoli"
+      "enemies": 0
     }
   ],
   "edges": [
@@ -497,8 +481,8 @@
     },
     {
       "room": "usus_halus",
-      "dx": -44,
-      "dy": 44,
+      "dx": -40,
+      "dy": 40,
       "r": 42
     }
   ]

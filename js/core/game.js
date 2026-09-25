@@ -94,8 +94,6 @@ import { buyReservePack as buyPack, iapEnabled, iapPacks, maxIapOffersPerRun } f
 import { initJourney, updateJourney, journeyHud, currentZone, _forceAdvance } from '../systems/world-journey.js';
 import { BioChamber } from '../systems/bio-chamber.js';
 import { LumenLabyrinth } from '../systems/lumen-labyrinth.js';
-import { Arena, arenaV2Enabled } from '../arena/arena.js';
-import { drawArena2D } from '../arena/render2d.js';
 import { drawChamberCanvas } from '../render/body-micro.js';
 import { drawArenaHud } from '../ui/hud-arena.js';
 import { drawPathogenSpikes, drawPathogenBody } from '../render/pathogen-attire.js';
@@ -2010,7 +2008,7 @@ applyChapterTier(enemy, run) {
       if (runC.chamber && runC.chamber.isLabyrinth) { runC.chamber.zoneId = zid; runC.chamber.zoneDef = def; return; }
       // ARENA V2 (rebuild dari nol §6): ?arena=v2 memakai implementasi baru,
       // default tetap jalur lama. Dispatch 1 baris — logika lama tak diubah.
-      runC.chamber = arenaV2Enabled() ? new Arena(labDef, def, null, null) : new LumenLabyrinth(labDef, def, null, null);
+      runC.chamber = new LumenLabyrinth(labDef, def, null, null); // V2 dihapus total (owner) — V1 saja.
       runC.chamber.zoneId = zid;
       runC.chamber.zoneDef = def;
       runC.chamber.enter();
@@ -2701,7 +2699,7 @@ applyChapterTier(enemy, run) {
           if (pk !== this._palKey) { this._palKey = pk; gl.setPalette(run.chamber.def); }
         } catch { /* abaikan */ }
       }
-      if (gl && gl.ok && run.chamber && !run.chamber.isArenaV2) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
+      if (gl && gl.ok && run.chamber) { try { drew = gl.render(run, P, time, run.chamber); } catch { drew = false; gl.ok = false; } }
       if (drew) {
         ctx.drawImage(gl.canvas, 0, 0, P.w, P.h);
         // BLOOM ADDITIVE (increment c): rim membran, segel katup, dan glow
@@ -2719,7 +2717,7 @@ applyChapterTier(enemy, run) {
           ctx.restore();
         } catch { /* filter tak didukung: fallback tanpa bloom */ }
       }
-      else if (run.chamber.isArenaV2) { try { drawArena2D(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] arenaV2:', err); } }
+      
       else { try { drawChamberCanvas(ctx, P, run.chamber, time); } catch (err) { console.warn('[phagos] chamberCanvas:', err); } }
     }
     else if (run.arenaShape) { try { drawOrganCorridor(ctx, P, run, time); } catch (err) { console.warn('[phagos] organCorridor:', err); } }
