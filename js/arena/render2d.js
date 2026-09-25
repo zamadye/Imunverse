@@ -12,11 +12,13 @@ const HAZ = { acid: '150,255,90', mucus: '255,207,110', bile: '205,220,90' };
 
 function palOf(room) {
   const p = (room && room.pal) || {};
+  const fill = p.fill || '132,20,24';
   return {
-    fill: p.fill || '132,20,24',
+    fill,
     deep: p.deep || '58,8,10',
     glow: p.glow || '255,96,70',
     hot: p.glowHot || '255,220,190',
+    wall: p.wall || shade(fill, 0.55),
   };
 }
 
@@ -206,6 +208,60 @@ function membraneRim(g, qx, qy, R, seed, pal) {
   g.restore();
 }
 
+/** Bintik lantai: tekstur jaringan (Pathogenic), bukan vektor mulus. */
+function floorSpeckle(g, qx, qy, R, seed, pal, dim) {
+  if (R < 25) return;
+  const n = Math.min(46, Math.floor(R / 4));
+  for (let k = 0; k < n; k++) {
+    const h1 = hash1(seed * 313 + k * 7.7), h2 = hash1(seed * 171 + k * 3.1), h3 = hash1(seed * 57 + k * 13.3);
+    const a = h1 * TAU, rr = Math.sqrt(h2) * R * 0.72;
+    const dark = h3 < 0.62;
+    g.fillStyle = dark ? `rgba(10,2,4,${((0.16 + h2 * 0.22) * dim).toFixed(2)})` : `rgba(${pal.hot},${((0.10 + h2 * 0.16) * dim).toFixed(2)})`;
+    g.beginPath();
+    g.arc(qx + Math.cos(a) * rr, qy + Math.sin(a) * rr, Math.max(0.8, R * (0.008 + h3 * 0.02)), 0, TAU);
+    g.fill();
+  }
+}
+
+/** Sel endotel dinding: kubah + celah + specular (tanda tangan Pathogenic). */
+function endoCobbles(g, qx, qy, R, seed, pal, dim) {
+  if (R < 18) { cellBand(g, qx, qy, R, seed, pal.fill); return; } // jauh: bintik lama
+  const n = Math.max(10, Math.min(38, Math.floor(R / 7)));
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * TAU + seed * 3;
+    const wob = lobeMod(a, seed);
+    const rr = R * (0.88 + hash1(seed * 131 + k * 1.7) * 0.09) * wob;
+    const cx = qx + Math.cos(a) * rr, cy = qy + Math.sin(a) * rr;
+    const s = R * (0.038 + hash1(k * 9.1 + seed) * 0.026);
+    if (s < 1.2) continue;
+    g.fillStyle = `rgba(12,2,5,${(0.85 * dim).toFixed(2)})`; // celah antar-sel
+    g.beginPath(); g.arc(cx, cy, s * 1.25, 0, TAU); g.fill();
+    g.fillStyle = `rgba(${pal.wall},${(0.95 * dim).toFixed(2)})`; // kubah sel
+    g.beginPath(); g.arc(cx, cy, s, 0, TAU); g.fill();
+    if (R > 30) { // specular kiri-atas: volume tiap sel
+      g.fillStyle = `rgba(${pal.hot},${(0.5 * dim).toFixed(2)})`;
+      g.beginPath(); g.arc(cx - s * 0.3, cy - s * 0.35, Math.max(0.7, s * 0.34), 0, TAU); g.fill();
+    }
+  }
+}
+
+/** Rim searah cahaya: gelap keliling + panas hanya kiri-atas. */
+function rimLight(g, qx, qy, R, seed, pal, dim) {
+  g.save(); g.lineJoin = 'round'; g.lineCap = 'round';
+  lobePath(g, qx, qy, R, seed, 1.0);
+  g.strokeStyle = `rgba(${pal.deep},${(0.9 * dim).toFixed(2)})`; g.lineWidth = Math.max(3, R * 0.07); g.stroke();
+  g.strokeStyle = `rgba(${pal.hot},${(0.5 * dim).toFixed(2)})`; g.lineWidth = Math.max(1, R * 0.016);
+  g.beginPath();
+  for (let i = 0; i <= 20; i++) { // busur panas kiri-atas mengikuti lobe
+    const a = Math.PI * (0.75 + (i / 20) * 0.85);
+    const rr = R * 0.965 * lobeMod(a, seed);
+    const px = qx + Math.cos(a) * rr, py = qy + Math.sin(a) * rr;
+    if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+  }
+  g.stroke();
+  g.restore();
+}
+
 /** Satu kantung rongga: bloom + dinding lobed + interior + pita + motif + rim. */
 function paintBlob(g, pr, b, R0, pal, m, t, seed, opts) {
   const q = pr(b.x, b.y), R = R0 * q.s;
@@ -214,23 +270,29 @@ function paintBlob(g, pr, b, R0, pal, m, t, seed, opts) {
   const beat = opts.beat || 0;
   g.fillStyle = `rgba(${pal.glow},${(0.07 + beat * 0.05) * dim})`;
   g.beginPath(); g.arc(q.x, q.y, R * 1.10, 0, TAU); g.fill();
-  // Pemisah antar-room (RAPI): garis gelap agar overlap terbaca sebagai lapis.
+  // Pemisah antar-room: garis gelap agar overlap terbaca sebagai lapis.
   lobePath(g, q.x, q.y, R, seed, 1.045);
   g.fillStyle = `rgba(12,2,5,${0.9 * dim})`; g.fill();
   lobePath(g, q.x, q.y, R, seed, 1.0);
   g.fillStyle = `rgba(${pal.deep},${0.94 * dim})`; g.fill();
-  lobePath(g, q.x, q.y, R, seed, 0.965);
-  g.fillStyle = `rgba(${pal.fill},${0.6 * dim})`; g.fill();
-  lobePath(g, q.x, q.y, R, seed, 0.88);
-  const gIn = g.createRadialGradient(q.x, q.y, 1, q.x, q.y, R * 0.88);
-  gIn.addColorStop(0, `rgba(${pal.hot},${0.55 * dim})`);
-  gIn.addColorStop(0.45, `rgba(${pal.fill},${0.5 * dim})`);
+  // Interior: cahaya dari kiri-atas (Pathogenic), BUKAN gloss tengah CSS.
+  const lx = q.x - R * 0.38, ly = q.y - R * 0.42;
+  lobePath(g, q.x, q.y, R, seed, 0.97);
+  const gIn = g.createRadialGradient(lx, ly, 1, lx, ly, R * 1.15);
+  gIn.addColorStop(0, `rgba(${pal.hot},${0.5 * dim})`);
+  gIn.addColorStop(0.35, `rgba(${pal.fill},${0.55 * dim})`);
   gIn.addColorStop(1, `rgba(${pal.deep},${0.95 * dim})`);
   g.fillStyle = gIn; g.fill();
-  cellBand(g, q.x, q.y, R, seed, pal.fill);
+  // Relung gelap kanan-bawah: volume instan.
+  g.save(); g.lineCap = 'round';
+  g.strokeStyle = `rgba(10,2,4,${0.5 * dim})`; g.lineWidth = R * 0.17;
+  g.beginPath(); g.arc(q.x, q.y, R * 0.80, 0.5, 1.9); g.stroke();
+  g.restore();
+  floorSpeckle(g, q.x, q.y, R, seed, pal, dim);
+  endoCobbles(g, q.x, q.y, R, seed, pal, dim);
   fiberArcs(g, q.x, q.y, R, seed, pal.glow);
   if (!opts.junction) motifRing(g, q, R, m, pal, t, seed);
-  membraneRim(g, q.x, q.y, R, seed, pal);
+  rimLight(g, q.x, q.y, R, seed, pal, dim);
 }
 
 /** Room koil (usus): tabung sinusoidal + rugae tegak lurus. */
