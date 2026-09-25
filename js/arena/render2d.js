@@ -449,6 +449,21 @@ function paintDucts(g, pr, n, pal, beat) {
     g.strokeStyle = `rgba(${pal.fill},0.8)`; g.lineWidth = w * 0.55; trace(); g.stroke();
     g.strokeStyle = `rgba(${pal.hot},${0.35 + beat * 0.15})`; g.lineWidth = Math.max(1.5, w * 0.16); trace(); g.stroke();
   }
+  if (n.rings) for (const s of n.ducts) {
+    // Cincin kartilago bronkus (visual saja): pita tegak lurus berkala.
+    const a = pr(s.x0, s.y0), b = pr(s.x1, s.y1);
+    const sm = (a.s + b.s) / 2, w = Math.max(2, s.w * 2 * sm);
+    const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+    const steps = Math.max(2, Math.floor(L / (w * 0.85)));
+    g.strokeStyle = `rgba(${pal.deep},0.85)`; g.lineWidth = Math.max(1.5, w * 0.14);
+    g.beginPath();
+    for (let i = 1; i < steps; i++) {
+      const t = i / steps, cx = a.x + dx * t, cy = a.y + dy * t;
+      g.moveTo(cx - (-dy / L) * w * 0.42, cy - (dx / L) * w * 0.42);
+      g.lineTo(cx + (-dy / L) * w * 0.42, cy + (dx / L) * w * 0.42);
+    }
+    g.stroke();
+  }
   g.restore();
 }
 export function drawArena2D(ctx, P, arena, time) {

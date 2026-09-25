@@ -280,12 +280,13 @@
       "motif": 1,
       "label": "Alveolus Paru",
       "pal": {
-        "fill": "122,26,38",
-        "deep": "58,10,20",
-        "glow": "255,110,90",
-        "glowHot": "255,220,190"
+        "fill": "205,105,120",
+        "deep": "110,40,55",
+        "glow": "255,150,170",
+        "glowHot": "255,228,232"
       },
-      "enemies": 7
+      "enemies": 7,
+      "rings": true
     },
     {
       "id": "j6",

@@ -201,7 +201,8 @@ const p0stats = {};
 function shotP0(name, key) {
   shot(name);
   p0stats[key] = frameStats();
-  console.log(`[p0] ${key}: mean=${p0stats[key].mean.toFixed(1)} sd=${p0stats[key].sd.toFixed(1)}`);
+  p0stats[key].foes = (window.__IMUNVERSE.game.run.enemies || []).length;
+  console.log(`[p0] ${key}: mean=${p0stats[key].mean.toFixed(1)} sd=${p0stats[key].sd.toFixed(1)} foes=${p0stats[key].foes}`);
 }
 
 await import(pathToFileURL(path.join(ROOT, 'js/main.js')).href);
@@ -340,7 +341,9 @@ for (const [nid, nm] of [['goal', 'snap-09-goal-portal.png'], ['lambung', 'snap-
   for (const k of ks) if ((p0stats[k] || {}).sd < 12) errs.push(`${k} nyaris-flat (sd<12)`);
   for (let i = 0; i < ks.length - 1; i++) {
     const d = Math.abs(p0stats[ks[i]].mean - p0stats[ks[i + 1]].mean);
-    if (d < 0.4) errs.push(`${ks[i]}~${ks[i + 1]} identik (dMean<0.4)`);
+    const df = Math.abs((p0stats[ks[i]].foes || 0) - (p0stats[ks[i + 1]].foes || 0));
+    // Pasca-HAPUS owner: beda piksel boleh nol bila jumlah musuh beda (bukti state sim).
+    if (d < 0.4 && df === 0) errs.push(`${ks[i]}~${ks[i + 1]} identik (dMean<0.4, musuh sama)`);
   }
   console.log('[p0] chamberCanvasErrors =', chamberCanvasErrors);
   console.log(`P0_GUARD=${errs.length === 0 ? 'PASS' : 'FAIL'}` + (errs.length ? ' :: ' + errs.join(' | ') : ''));

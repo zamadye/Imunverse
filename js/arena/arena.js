@@ -286,7 +286,7 @@ function buildRoomShape(room) {
     const dx = Math.cos(axC), dy = Math.sin(axC);
     room.ducts = [];
     const duct = (x0, y0, x1, y1, w) => room.ducts.push({ x0, y0, x1, y1, w });
-    const wD = room.r * 0.16;
+    const wD = room.r * 0.17;
     const J = { x: room.x + dx * room.r * 0.10, y: room.y + dy * room.r * 0.10 };
     const S = { x: room.x - dx * room.r * 0.55, y: room.y - dy * room.r * 0.55 };
     const c45 = Math.SQRT1_2;
@@ -305,7 +305,7 @@ function buildRoomShape(room) {
         room.blobs.push({
           x: ex + vx * room.r * 0.30 + Math.cos(a) * room.r * 0.24,
           y: ey + vy * room.r * 0.30 + Math.sin(a) * room.r * 0.24,
-          r: room.r * 0.125, seed: sd + k * 2.3,
+          r: room.r * 0.14, seed: sd + k * 2.3,
         });
       }
     };
